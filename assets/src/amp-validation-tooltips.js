@@ -7,7 +7,7 @@ import domReady from '@wordpress/dom-ready';
 function sourcesPointer() {
 	jQuery( document ).on( 'click', '.tooltip-button', function() {
 		jQuery( this ).pointer( {
-			content: jQuery( this ).next( '.tooltip' ).html(),
+			content: jQuery( this ).next( '.tooltip' ).attr( 'data-content' ),
 			position: {
 				edge: 'top',
 				align: 'left'

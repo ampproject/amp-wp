@@ -154,6 +154,18 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 
 		// Post list screen hooks.
+		add_filter( 'view_mode_post_types', function( $post_types ) {
+			return array_diff( $post_types, array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		} );
+		add_action( 'load-edit.php', function() {
+			if ( 'edit-amp_invalid_url' !== get_current_screen()->id ) {
+				return;
+			}
+			add_action( 'admin_head-edit.php', function() {
+				global $mode;
+				$mode = 'list'; // WPCS: override ok. Hackily prevent excerpts from being displayed for post type.
+			} );
+		} );
 		add_action( 'admin_notices', array( __CLASS__, 'render_link_to_error_index_screen' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
@@ -770,10 +782,12 @@ class AMP_Invalid_URL_Post_Type {
 			$columns,
 			array(
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Status', 'amp' ),
-					__( 'Status', 'amp' ),
-					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						__( 'Status', 'amp' ),
+						__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
@@ -810,16 +824,20 @@ class AMP_Invalid_URL_Post_Type {
 			'cb'                          => '<input type="checkbox" />',
 			'error'                       => __( 'Error', 'amp' ),
 			'status'                      => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Status', 'amp' ),
-				esc_html__( 'Status', 'amp' ),
-				esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				) )
 			),
 			'details'                     => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Details', 'amp' ),
-				esc_html__( 'Details', 'amp' ),
-				esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'error_type'                  => __( 'Error Type', 'amp' ),
@@ -877,7 +895,7 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
-				self::render_sources_column( $error_summary );
+				self::render_sources_column( $error_summary, $post_id );
 				break;
 		}
 	}
@@ -886,17 +904,23 @@ class AMP_Invalid_URL_Post_Type {
 	 * Renders the sources column on the the single error URL page and the 'Invalid URLs' page.
 	 *
 	 * @param array $error_summary The summary of errors.
+	 * @param int   $post_id       The ID of the amp_invalid_url post.
 	 */
-	public static function render_sources_column( $error_summary ) {
+	public static function render_sources_column( $error_summary, $post_id ) {
 		if ( ! isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
 			return;
+		}
+
+		$active_theme          = null;
+		$validated_environment = get_post_meta( $post_id, '_amp_validated_environment', true );
+		if ( isset( $validated_environment['theme'] ) ) {
+			$active_theme = $validated_environment['theme'];
 		}
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 		$output  = array();
 
 		if ( isset( $sources['plugin'] ) ) {
-			$output[]     = '<details class="source">';
 			$plugin_names = array();
 			$plugin_slugs = array_unique( $sources['plugin'] );
 			$plugins      = get_plugins();
@@ -910,29 +934,17 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				$plugin_names[] = $name;
 			}
-			$count = count( $plugin_slugs );
+			$count = count( $plugin_names );
 			if ( 1 === $count ) {
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s</strong>', esc_html( $plugin_names[0] ) );
 			} else {
+				$output[] = '<details class="source">';
 				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
+				$output[] = '<div>';
+				$output[] = implode( '<br/>', array_unique( $plugin_names ) );
+				$output[] = '</div>';
+				$output[] = '</details>';
 			}
-			$output[] = '<div>';
-			$output[] = implode( '<br/>', array_unique( $plugin_names ) );
-			$output[] = '</div>';
-			$output[] = '</details>';
-		}
-		if ( isset( $sources['core'] ) ) {
-			$output[] = '<details class="source">';
-			$count    = count( array_unique( $sources['core'] ) );
-			if ( 1 === $count ) {
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
-			} else {
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
-			}
-			$output[] = '<div>';
-			$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
-			$output[] = '</div>';
-			$output[] = '</details>';
 		}
 		if ( isset( $sources['theme'] ) ) {
 			$output[] = '<div class="source">';
@@ -945,10 +957,39 @@ class AMP_Invalid_URL_Post_Type {
 				} else {
 					$theme_name = $theme_slug;
 				}
-				$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
+				$output[] = sprintf( '<strong>%s</strong>', esc_html( $theme_name ) );
 			}
 			$output[] = '</div>';
 		}
+		if ( isset( $sources['core'] ) ) {
+			$core_sources = array_unique( $sources['core'] );
+			$count        = count( $core_sources );
+			if ( 1 === $count ) {
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $core_sources[0] ) );
+			} else {
+				$output[] = '<details class="source">';
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = '<div>';
+				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+				$output[] = '</div>';
+				$output[] = '</details>';
+			}
+		}
+
+		if ( empty( $sources ) && $active_theme ) {
+			$theme_obj = wp_get_theme( $active_theme );
+			if ( ! $theme_obj->errors() ) {
+				$theme_name = $theme_obj->get( 'Name' );
+			} else {
+				$theme_name = $active_theme;
+			}
+			$output[] = '<div class="source">';
+			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
+			/* translators: %s is the guessed theme as the source for the error */
+			$output[] = esc_html( sprintf( __( '%s (?)', 'amp' ), $theme_name ) );
+			$output[] = '</div>';
+		}
+
 		echo implode( '', $output ); // WPCS: XSS ok.
 	}
 
@@ -1158,31 +1199,20 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			// @todo Update this to use the method which will be developed in PR #1429 AMP_Validation_Error_Taxonomy::get_term_error() .
-			$description  = json_decode( $error->description, true );
-			$sanitization = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
-			$status_text  = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
-			$error_code   = isset( $description['code'] ) ? $description['code'] : 'error';
-			$error_title  = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
+			$description      = json_decode( $error->description, true );
+			$sanitization     = \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $description );
+			$status_text      = \AMP_Validation_Error_Taxonomy::get_status_text_with_icon( $sanitization );
+			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
+			$error_title      = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
+			$validation_error = json_decode( $error->description, true );
+			?>
+			<div class="notice">
+				<ul>
+					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
+				</ul>
+			</div>
 
-			$output = '';
-			foreach ( $description as $desc_name => $desc_info ) {
-				if ( ! is_array( $desc_info ) ) {
-					$output .= sprintf( '<li><span class="details-attributes__title">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $desc_name, $desc_info );
-				} else {
-					$output .= sprintf( '<ul class="secondary-details-array"><span class="details-attributes__title">%s:</span><br/>', $desc_name );
-					foreach ( $desc_info as $sec_desc_info_name => $sec_desc_info ) {
-						$output .= sprintf( '<li><span class="details-attributes__attr">%s:</span><br/><span class="details-attributes__value">%s</span></li>', $sec_desc_info_name, $sec_desc_info );
-					}
-					$output .= '</ul>';
-				}
-			}
-
-			printf(
-				'<div class="notice"><details class="single-error-detail" open><summary class="single-error-detail-summary"><strong>%s</strong></summary><ul>%s</ul></details></div>',
-				esc_html( $error_title ),
-				wp_kses_post( $output )
-			);
-
+			<?php
 			$accept_all_url = wp_nonce_url(
 				add_query_arg(
 					array(
@@ -1703,6 +1733,20 @@ class AMP_Invalid_URL_Post_Type {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
 		}
 
+		/**
+		 * Set the order of the terms in the order of occurrence.
+		 *
+		 * Note that this function will call \AMP_Validation_Error_Taxonomy::get_term() repeatedly, and the
+		 * object cache will be pre-populated with terms due to the term query in the term list table.
+		 *
+		 * @return WP_Term[]
+		 */
+		$override_terms_in_occurrence_order = function() use ( $post ) {
+			return wp_list_pluck( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $post ), 'term' );
+		};
+
+		add_filter( 'get_terms', $override_terms_in_occurrence_order );
+
 		$wp_list_table = _get_list_table( 'WP_Terms_List_Table' );
 		get_current_screen()->set_screen_reader_content( array(
 			'heading_pagination' => $taxonomy_object->labels->items_list_navigation,
@@ -1731,6 +1775,7 @@ class AMP_Invalid_URL_Post_Type {
 		<?php $wp_list_table->display(); ?>
 
 		<?php
+		remove_filter( 'get_terms', $override_terms_in_occurrence_order );
 	}
 
 	/**

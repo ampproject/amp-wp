@@ -778,20 +778,25 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Override the columns displayed for the validation error terms.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
+
 			return array(
 				'cb'               => $old_columns['cb'],
 				'error'            => esc_html__( 'Error', 'amp' ),
 				'status'           => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Status', 'amp' ),
-					esc_html__( 'Status', 'amp' ),
-					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Status', 'amp' ),
+						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				'details'          => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Details', 'amp' ),
-					esc_html__( 'Details', 'amp' ),
-					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Details', 'amp' ),
+						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				'error_type'       => esc_html__( 'Type', 'amp' ),
 				'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
@@ -1772,10 +1777,10 @@ class AMP_Validation_Error_Taxonomy {
 					$attributes         = array();
 					$attributes_heading = '';
 					if ( ! empty( $validation_error['node_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Element attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Element attributes:', 'amp' ) );
 						$attributes         = $validation_error['node_attributes'];
 					} elseif ( ! empty( $validation_error['element_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Other attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Other attributes:', 'amp' ) );
 						$attributes         = $validation_error['element_attributes'];
 					}
 
@@ -1810,9 +1815,13 @@ class AMP_Validation_Error_Taxonomy {
 				if ( ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) { // WPCS: CSRF OK.
 					break;
 				}
-				$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
+				$url_post_id       = intval( $_GET['post'] ); // WPCS: CSRF OK.
+				$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
+				$validation_errors = array_filter( $validation_errors, function( $error ) use ( $term ) {
+					return $error['term']->term_id === $term->term_id;
+				} );
 				$error_summary     = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
-				AMP_Invalid_URL_Post_Type::render_sources_column( $error_summary );
+				AMP_Invalid_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
 
 				break;
 			case 'error_type':
@@ -1873,38 +1882,60 @@ class AMP_Validation_Error_Taxonomy {
 			<?php if ( self::INVALID_ELEMENT_CODE === $validation_error['code'] && isset( $validation_error['node_attributes'] ) ) : ?>
 				<li>
 					<details open>
-						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
 						<div class="detailed">
+							<mark>
 							<?php
-							foreach ( $validation_error['node_attributes'] as $key => $value ) {
-								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+							echo '&lt;' . esc_html( $validation_error['node_name'] );
+							if ( count( $validation_error['node_attributes'] ) > 0 ) {
+								echo ' &hellip; ';
 							}
+							echo '&gt;';
 							?>
+							</mark>
 						<div>
 					</details>
 				</li>
 			<?php elseif ( self::INVALID_ATTRIBUTE_CODE === $validation_error['code'] && isset( $validation_error['element_attributes'] ) ) : ?>
 				<li>
 					<details open>
-						<summary><code><?php esc_html_e( 'Removed:', 'amp' ); ?></code></summary>
+						<summary><code><?php esc_html_e( 'Invalid markup:', 'amp' ); ?></code></summary>
 							<div class="detailed">
 							<?php
-							foreach ( $validation_error['element_attributes'] as $key => $value ) {
-								printf( ' %s="%s"', esc_html( $key ), esc_html( $value ) );
+							echo '&lt;' . esc_html( $validation_error['parent_name'] );
+							if ( count( $validation_error['element_attributes'] ) > 1 ) {
+								echo ' &hellip;';
 							}
+							echo '<mark>';
+							printf( ' %s="%s"', esc_html( $validation_error['node_name'] ), esc_html( $validation_error['element_attributes'][ $validation_error['node_name'] ] ) );
+							echo '</mark>';
+							if ( count( $validation_error['element_attributes'] ) > 1 ) {
+								echo ' &hellip;';
+							}
+							echo '&gt;';
 							?>
 					</details>
 				</li>
 			<?php endif; ?>
 			<?php foreach ( $validation_error as $key => $value ) : ?>
 				<li>
-					<details>
+					<details <?php echo esc_attr( 'sources' === $key ? '' : 'open' ); ?>>
 						<summary><code><?php echo esc_html( $key ); ?></code></summary>
 						<div class="detailed">
 							<?php if ( is_string( $value ) ) : ?>
 								<?php echo esc_html( $value ); ?>
-							<?php else : ?>
+							<?php elseif ( 'sources' === $key ) : ?>
 								<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
+							<?php elseif ( is_array( $value ) ) : ?>
+								<?php foreach ( $value as $key => $attr ) : ?>
+									<?php
+									printf( '<strong>%s</strong>', esc_html( $key ) );
+									if ( ! empty( $attr ) ) :
+										printf( ': %s', esc_html( $attr ) );
+									endif;
+									?>
+									<br />
+								<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
 					</details>
@@ -1915,7 +1946,7 @@ class AMP_Validation_Error_Taxonomy {
 		<?php
 
 		return sprintf(
-			'<details class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
+			'<details open class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
 			self::get_details_summary_label( $validation_error ),
 			ob_get_clean()
 		);
