@@ -65,6 +65,7 @@ table.striped > tbody > tr.even {
 
 .details div.detailed {
 	padding-left: 30px;
+	font-family: Consolas, Monaco, monospace;
 }
 
 .details .detailed details {

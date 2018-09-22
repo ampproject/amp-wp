@@ -1898,7 +1898,7 @@ class AMP_Validation_Error_Taxonomy {
 			<?php endif; ?>
 			<?php foreach ( $validation_error as $key => $value ) : ?>
 				<li>
-					<details>
+					<details <?php echo esc_attr( 'sources' === $key ? '' : 'open' ); ?>>
 						<summary><code><?php echo esc_html( $key ); ?></code></summary>
 						<div class="detailed">
 							<?php if ( is_string( $value ) ) : ?>
@@ -1911,6 +1911,7 @@ class AMP_Validation_Error_Taxonomy {
 										printf( ': %s', esc_html( $attr ) );
 									endif;
 									?>
+									<br />
 								<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
@@ -1922,7 +1923,7 @@ class AMP_Validation_Error_Taxonomy {
 		<?php
 
 		return sprintf(
-			'<details class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
+			'<details open class="details-attributes"><summary class="details-attributes__summary">%s</summary>%s</details>',
 			self::get_details_summary_label( $validation_error ),
 			ob_get_clean()
 		);

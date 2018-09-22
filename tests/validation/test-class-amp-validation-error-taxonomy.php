@@ -1122,7 +1122,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertContains( '<details class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
+		$this->assertContains( '<details open class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
 
 		// Test the 'error_type' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );
@@ -1169,7 +1169,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$term                     = $this->factory()->term->create_and_get( array( 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
 		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
 		$this->assertContains( '<details open>', $html );
-		$this->assertContains( '<details>', $html );
 	}
 
 	/**
