@@ -154,6 +154,18 @@ class AMP_Invalid_URL_Post_Type {
 		add_action( 'edit_form_top', array( __CLASS__, 'print_url_as_title' ) );
 
 		// Post list screen hooks.
+		add_filter( 'view_mode_post_types', function( $post_types ) {
+			return array_diff( $post_types, array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		} );
+		add_action( 'load-edit.php', function() {
+			if ( 'edit-amp_invalid_url' !== get_current_screen()->id ) {
+				return;
+			}
+			add_action( 'admin_head-edit.php', function() {
+				global $mode;
+				$mode = 'list'; // WPCS: override ok. Hackily prevent excerpts from being displayed for post type.
+			} );
+		} );
 		add_action( 'admin_notices', array( __CLASS__, 'render_link_to_error_index_screen' ) );
 		add_filter( 'the_title', array( __CLASS__, 'filter_the_title_in_post_list_table' ), 10, 2 );
 		add_action( 'restrict_manage_posts', array( __CLASS__, 'render_post_filters' ), 10, 2 );
