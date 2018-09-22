@@ -1201,7 +1201,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		add_filter( 'pre_http_request', $filter );
 		$r = AMP_Validation_Manager::validate_url( home_url( '/' ) );
 		$this->assertInstanceOf( 'WP_Error', $r );
-		$this->assertEquals( 'response_comment_absent', $r->get_error_code() );
+		$this->assertEquals( 'white_screen_of_death', $r->get_error_code() );
 		remove_filter( 'pre_http_request', $filter );
 
 		// Test success.

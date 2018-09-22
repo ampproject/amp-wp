@@ -1387,7 +1387,13 @@ class AMP_Validation_Manager {
 		}
 		$backtrace = debug_backtrace( $arg ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Only way to find out if we are in a buffering display handler.
 		foreach ( $backtrace as $call_stack ) {
-			$called_functions[] = '{closure}' === $call_stack['function'] ? 'Closure::__invoke' : $call_stack['function'];
+			if ( '{closure}' === $call_stack['function'] ) {
+				$called_functions[] = 'Closure::__invoke';
+			} elseif ( isset( $call_stack['class'] ) ) {
+				$called_functions[] = sprintf( '%s::%s', $call_stack['class'], $call_stack['function'] );
+			} else {
+				$called_functions[] = $call_stack['function'];
+			}
 		}
 		return 0 === count( array_intersect( ob_list_handlers(), $called_functions ) );
 	}
@@ -1783,18 +1789,50 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
+		if ( strlen( trim( $response ) ) === 0 ) {
+			$error_code = 'white_screen_of_death';
+			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
+		}
 		if ( ! preg_match( '#</body>.*?<!--\s*AMP_VALIDATION\s*:\s*(\{.*?\})\s*-->#s', $response, $matches ) ) {
-			return new WP_Error( 'response_comment_absent' );
+			$error_code = 'response_comment_absent';
+			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
 		$validation = json_decode( $matches[1], true );
 		if ( json_last_error() || ! isset( $validation['results'] ) || ! is_array( $validation['results'] ) ) {
-			return new WP_Error( 'malformed_json_validation_errors' );
+			$error_code = 'malformed_json_validation_errors';
+			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
 
 		return array_merge(
 			$validation,
 			compact( 'url' )
 		);
+	}
+
+	/**
+	 * Get error message for a validate URL failure.
+	 *
+	 * @param string $error_code Error code.
+	 * @return string Error message.
+	 */
+	public static function get_validate_url_error_message( $error_code ) {
+		switch ( $error_code ) {
+			case 'http_request_failed':
+				return __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
+			case 'white_screen_of_death':
+				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error. Please check your server\'s PHP error logs.', 'amp' );
+			case '404':
+				return __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+			case '500':
+				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' );
+			case 'response_comment_absent':
+				return __( 'URL validation failed to due to the absence of the expected JSON-containing AMP_VALIDATION comment after the body.', 'amp' );
+			case 'malformed_json_validation_errors':
+				return __( 'URL validation failed to due to unexpected JSON in the AMP_VALIDATION comment after the body.', 'amp' );
+			default:
+				/* translators: %s is error code */
+				return sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+		};
 	}
 
 	/**
