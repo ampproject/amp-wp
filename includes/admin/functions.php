@@ -38,7 +38,7 @@ function amp_init_customizer() {
 /**
  * Get permalink for the first AMP-eligible post.
  *
- * @return string|null
+ * @return string|null URL on success, null if none found.
  */
 function amp_admin_get_preview_permalink() {
 	/**
@@ -48,16 +48,32 @@ function amp_admin_get_preview_permalink() {
 	 */
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
-	if ( ! post_type_supports( $post_type, amp_get_slug() ) ) {
+	// Make sure the desired post type is actually supported, and if so, prefer it.
+	$supported_post_types = get_post_types_by_support( amp_get_slug() );
+	if ( in_array( $post_type, $supported_post_types, true ) ) {
+		$supported_post_types = array_unique( array_merge( array( $post_type ), $supported_post_types ) );
+	}
+
+	// Bail if there are no supported post types.
+	if ( empty( $supported_post_types ) ) {
 		return null;
+	}
+
+	// If theme support is present, then bail if the singular template is not supported.
+	if ( current_theme_supports( 'amp' ) ) {
+		$supported_templates = AMP_Theme_Support::get_supportable_templates();
+		if ( empty( $supported_templates['is_singular']['supported'] ) ) {
+			return null;
+		}
 	}
 
 	$post_ids = get_posts( array(
 		'post_status'    => 'publish',
 		'post_password'  => '',
-		'post_type'      => $post_type,
+		'post_type'      => $supported_post_types,
 		'posts_per_page' => 1,
 		'fields'         => 'ids',
+		// @todo This should eventually do a meta_query to make sure there are none that have AMP_Post_Meta_Box::STATUS_POST_META_KEY = DISABLED_STATUS.
 	) );
 
 	if ( empty( $post_ids ) ) {
