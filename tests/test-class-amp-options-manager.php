@@ -418,4 +418,155 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}
+
+	/**
+	 * Test handle_updated_theme_support_option for classic.
+	 *
+	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
+	 * @covers \amp_admin_get_preview_permalink()
+	 */
+	public function test_handle_updated_theme_support_option_disabled() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		AMP_Validation_Manager::init();
+
+		$page_id = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'page' ) );
+		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::handle_updated_theme_support_option();
+		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
+		$new_error           = end( $amp_settings_errors );
+		$this->assertStringStartsWith( 'Classic mode activated!', $new_error['message'] );
+		$this->assertContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
+		$this->assertCount( 0, get_posts( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) ) );
+	}
+
+	/**
+	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 *
+	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
+	 * @covers \amp_admin_get_preview_permalink()
+	 */
+	public function test_handle_updated_theme_support_option_native_success_but_error() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
+
+		$filter = function() {
+			$validation = array(
+				'results' => array(
+					array(
+						'error'     => array( 'code' => 'example' ),
+						'sanitized' => false,
+					),
+				),
+			);
+			return array(
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION:' . wp_json_encode( $validation )
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+		AMP_Options_Manager::handle_updated_theme_support_option();
+		remove_filter( 'pre_http_request', $filter );
+		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
+		$new_error           = end( $amp_settings_errors );
+		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$invalid_url_posts = get_posts( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'fields'    => 'ids',
+		) );
+		$this->assertEquals( 'updated', $new_error['type'] );
+		$this->assertCount( 1, $invalid_url_posts );
+		$this->assertContains( 'review 1 issue', $new_error['message'] );
+		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+	}
+
+	/**
+	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 *
+	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
+	 * @covers \amp_admin_get_preview_permalink()
+	 */
+	public function test_handle_updated_theme_support_option_native_validate_error() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$this->factory()->post->create( array( 'post_type' => 'post' ) );
+
+		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
+
+		$filter = function() {
+			return array(
+				'body' => '<html amp><head></head><body></body>',
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+		AMP_Options_Manager::handle_updated_theme_support_option();
+		remove_filter( 'pre_http_request', $filter );
+
+		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
+		$new_error           = end( $amp_settings_errors );
+		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$invalid_url_posts = get_posts( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'fields'    => 'ids',
+		) );
+		$this->assertCount( 0, $invalid_url_posts );
+		$this->assertContains( 'response_comment_absent', $new_error['message'] );
+		$this->assertEquals( 'error', $new_error['type'] );
+	}
+
+	/**
+	 * Test handle_updated_theme_support_option for classic.
+	 *
+	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
+	 * @covers \amp_admin_get_preview_permalink()
+	 */
+	public function test_handle_updated_theme_support_option_paired() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
+		AMP_Options_Manager::update_option( 'theme_support', 'paired' );
+		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
+
+		$filter = function() {
+			$validation = array(
+				'results' => array(
+					array(
+						'error'     => array( 'code' => 'foo' ),
+						'sanitized' => false,
+					),
+					array(
+						'error'     => array( 'code' => 'bar' ),
+						'sanitized' => false,
+					),
+				),
+			);
+			return array(
+				'body' => sprintf(
+					'<html amp><head></head><body></body><!--%s--></html>',
+					'AMP_VALIDATION:' . wp_json_encode( $validation )
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+		AMP_Options_Manager::handle_updated_theme_support_option();
+		remove_filter( 'pre_http_request', $filter );
+		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
+		$new_error           = end( $amp_settings_errors );
+		$this->assertStringStartsWith( 'Paired mode activated!', $new_error['message'] );
+		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
+		$invalid_url_posts = get_posts( array(
+			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'fields'    => 'ids',
+		) );
+		$this->assertEquals( 'updated', $new_error['type'] );
+		$this->assertCount( 1, $invalid_url_posts );
+		$this->assertContains( 'review 2 issues', $new_error['message'] );
+		$this->assertContains( esc_url( get_edit_post_link( $invalid_url_posts[0], 'raw' ) ), $new_error['message'], 'Expect edit post link for the invalid URL post to be present.' );
+	}
 }

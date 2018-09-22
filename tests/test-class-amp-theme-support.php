@@ -560,6 +560,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 'is_special', $availability['template'] );
 		$this->assertFalse( $availability['immutable'] );
 
+		remove_post_type_support( 'page', 'amp' );
 		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertFalse( $availability['supported'] );
 		$this->assertEquals( array( 'post-type-support' ), $availability['errors'] );

@@ -1097,7 +1097,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
 		$inline_script = end( $after_script );
 		$this->assertContains(
-			sprintf( 'Errors For %s', $post->post_title ),
+			sprintf( 'Errors for: %s', $post->post_title ),
 			$inline_script
 		);
 		$this->assertContains( 'Show all', $inline_script );
@@ -1451,7 +1451,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals(
-			sprintf( 'Errors For %s', $post->post_title ),
+			sprintf( 'Errors for: %s', $post->post_title ),
 			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 		);
 
@@ -1466,7 +1466,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals(
-			sprintf( 'Errors For %s', $term->name ),
+			sprintf( 'Errors for: %s', $term->name ),
 			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 		);
 
@@ -1481,7 +1481,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals(
-			sprintf( 'Errors For %s', $user->display_name ),
+			sprintf( 'Errors for: %s', $user->display_name ),
 			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 		);
 	}
