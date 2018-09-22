@@ -70,6 +70,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 	font-family: Consolas, Monaco, monospace;
 }
 
+.details-attributes__title code,
 .notice .detailed summary code {
 	display: inline-block;
 	min-width: 240px;
@@ -77,23 +78,23 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 	font-weight: 600;
 }
 
-.details-attributes__title,
-.details-attributes__attr {
-	color: #dc3232;
+.details-attributes__title code {
+	margin-left: 0;
 }
 
 .details-attributes__list {
 	margin-top: 0;
-	padding-left: 45px;
-	list-style-type: disc;
+	padding-left: 0;
+	list-style: none;
+	font-family: Consolas, Monaco, monospace;
 }
 
 .details-attributes__list li {
 	word-break: break-all;
 }
 
-.details-attributes__value {
-	color: #00a0d2;
+.details-attributes__attr {
+	font-weight: 600;
 }
 
 .column-sources_with_invalid_output details[open] .details-attributes__summary {

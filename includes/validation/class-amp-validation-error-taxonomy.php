@@ -1777,10 +1777,10 @@ class AMP_Validation_Error_Taxonomy {
 					$attributes         = array();
 					$attributes_heading = '';
 					if ( ! empty( $validation_error['node_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Element attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Element attributes:', 'amp' ) );
 						$attributes         = $validation_error['node_attributes'];
 					} elseif ( ! empty( $validation_error['element_attributes'] ) ) {
-						$attributes_heading = sprintf( '<div class="details-attributes__title">%s</div>', esc_html__( 'Other attributes:', 'amp' ) );
+						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Other attributes:', 'amp' ) );
 						$attributes         = $validation_error['element_attributes'];
 					}
 
