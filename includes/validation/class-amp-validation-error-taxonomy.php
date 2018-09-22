@@ -1810,12 +1810,13 @@ class AMP_Validation_Error_Taxonomy {
 				if ( ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) { // WPCS: CSRF OK.
 					break;
 				}
-				$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
+				$url_post_id       = intval( $_GET['post'] ); // WPCS: CSRF OK.
+				$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
 				$validation_errors = array_filter( $validation_errors, function( $error ) use ( $term ) {
 					return $error['term']->term_id === $term->term_id;
 				} );
 				$error_summary     = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
-				AMP_Invalid_URL_Post_Type::render_sources_column( $error_summary );
+				AMP_Invalid_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
 
 				break;
 			case 'error_type':

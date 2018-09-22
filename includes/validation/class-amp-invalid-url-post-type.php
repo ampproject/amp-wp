@@ -877,7 +877,7 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				break;
 			case AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT:
-				self::render_sources_column( $error_summary );
+				self::render_sources_column( $error_summary, $post_id );
 				break;
 		}
 	}
@@ -886,10 +886,17 @@ class AMP_Invalid_URL_Post_Type {
 	 * Renders the sources column on the the single error URL page and the 'Invalid URLs' page.
 	 *
 	 * @param array $error_summary The summary of errors.
+	 * @param int   $post_id       The ID of the amp_invalid_url post.
 	 */
-	public static function render_sources_column( $error_summary ) {
+	public static function render_sources_column( $error_summary, $post_id ) {
 		if ( ! isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
 			return;
+		}
+
+		$active_theme          = null;
+		$validated_environment = get_post_meta( $post_id, '_amp_validated_environment', true );
+		if ( isset( $validated_environment['theme'] ) ) {
+			$active_theme = $validated_environment['theme'];
 		}
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
@@ -911,26 +918,12 @@ class AMP_Invalid_URL_Post_Type {
 			}
 			$count = count( $plugin_names );
 			if ( 1 === $count ) {
-				$output[] = sprintf( '<span class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></span>', esc_html( $plugin_names[0] ) );
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s</strong>', esc_html( $plugin_names[0] ) );
 			} else {
 				$output[] = '<details class="source">';
 				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
 				$output[] = '<div>';
 				$output[] = implode( '<br/>', array_unique( $plugin_names ) );
-				$output[] = '</div>';
-				$output[] = '</details>';
-			}
-		}
-		if ( isset( $sources['core'] ) ) {
-			$core_sources = array_unique( $sources['core'] );
-			$count        = count( $core_sources );
-			if ( 1 === $count ) {
-				$output[] = sprintf( '<span class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></span>', esc_html( $core_sources[0] ) );
-			} else {
-				$output[] = '<details class="source">';
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
-				$output[] = '<div>';
-				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
 				$output[] = '</div>';
 				$output[] = '</details>';
 			}
@@ -946,10 +939,39 @@ class AMP_Invalid_URL_Post_Type {
 				} else {
 					$theme_name = $theme_slug;
 				}
-				$output[] = sprintf( '<strong>%s</strong><br/>', esc_html( $theme_name ) );
+				$output[] = sprintf( '<strong>%s</strong>', esc_html( $theme_name ) );
 			}
 			$output[] = '</div>';
 		}
+		if ( isset( $sources['core'] ) ) {
+			$core_sources = array_unique( $sources['core'] );
+			$count        = count( $core_sources );
+			if ( 1 === $count ) {
+				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $core_sources[0] ) );
+			} else {
+				$output[] = '<details class="source">';
+				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = '<div>';
+				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+				$output[] = '</div>';
+				$output[] = '</details>';
+			}
+		}
+
+		if ( empty( $sources ) && $active_theme ) {
+			$theme_obj = wp_get_theme( $active_theme );
+			if ( ! $theme_obj->errors() ) {
+				$theme_name = $theme_obj->get( 'Name' );
+			} else {
+				$theme_name = $active_theme;
+			}
+			$output[] = '<div class="source">';
+			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
+			/* translators: %s is the guessed theme as the source for the error */
+			$output[] = esc_html( sprintf( __( '%s (?)', 'amp' ), $theme_name ) );
+			$output[] = '</div>';
+		}
+
 		echo implode( '', $output ); // WPCS: XSS ok.
 	}
 
