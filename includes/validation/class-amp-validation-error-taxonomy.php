@@ -778,20 +778,25 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Override the columns displayed for the validation error terms.
 		add_filter( 'manage_edit-' . self::TAXONOMY_SLUG . '_columns', function( $old_columns ) {
+
 			return array(
 				'cb'               => $old_columns['cb'],
 				'error'            => esc_html__( 'Error', 'amp' ),
 				'status'           => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Status', 'amp' ),
-					esc_html__( 'Status', 'amp' ),
-					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Status', 'amp' ),
+						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				'details'          => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Details', 'amp' ),
-					esc_html__( 'Details', 'amp' ),
-					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						esc_html__( 'Details', 'amp' ),
+						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				'error_type'       => esc_html__( 'Type', 'amp' ),
 				'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),

@@ -782,10 +782,12 @@ class AMP_Invalid_URL_Post_Type {
 			$columns,
 			array(
 				AMP_Validation_Error_Taxonomy::ERROR_STATUS => sprintf(
-					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Status', 'amp' ),
-					__( 'Status', 'amp' ),
-					__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+						__( 'Status', 'amp' ),
+						__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					) )
 				),
 				AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => esc_html__( 'Invalid', 'amp' ),
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => esc_html__( 'Sources', 'amp' ),
@@ -822,16 +824,20 @@ class AMP_Invalid_URL_Post_Type {
 			'cb'                          => '<input type="checkbox" />',
 			'error'                       => __( 'Error', 'amp' ),
 			'status'                      => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Status', 'amp' ),
-				esc_html__( 'Status', 'amp' ),
-				esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+					esc_html__( 'Status', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				) )
 			),
 			'details'                     => sprintf(
-				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden><h3>%s</h3><p>%s</p></div>',
+				'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 				esc_html__( 'Details', 'amp' ),
-				esc_html__( 'Details', 'amp' ),
-				esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+					esc_html__( 'Details', 'amp' ),
+					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
 			'error_type'                  => __( 'Error Type', 'amp' ),
