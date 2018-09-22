@@ -1090,23 +1090,9 @@ class AMP_Invalid_URL_Post_Type {
 		if ( isset( $_GET['amp_validate_error'] ) ) { // WPCS: CSRF OK.
 			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // WPCS: CSRF OK.
 			foreach ( $error_codes as $error_code ) {
-				switch ( $error_code ) {
-					case 'http_request_failed':
-						$message = __( 'Failed to fetch URL(s) to validate. This may be due to a request timeout.', 'amp' );
-						break;
-					case '404':
-						$message = __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
-						break;
-					case '500':
-						$message = __( 'An internal server error occurred when fetching the URL.', 'amp' );
-						break;
-					default:
-						/* translators: %s is error code */
-						$message = sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-				}
 				printf(
 					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
-					esc_html( $message ),
+					esc_html( AMP_Validation_Manager::get_validate_url_error_message( $error_code ) ),
 					esc_html__( 'Dismiss this notice.', 'amp' )
 				);
 			}

@@ -463,11 +463,18 @@ class AMP_Options_Manager {
 			if ( is_wp_error( $validation ) ) {
 				$review_messages[] = esc_html( sprintf(
 					/* translators: %1$s is the error message, %2$s is the error code */
-					__( 'However, there was an error when checking the AMP validity for your site: %1$s (code: %2$s) ', 'amp' ),
+					__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
 					$validation->get_error_message(),
 					$validation->get_error_code()
 				) );
 
+				$error_message = $validation->get_error_message();
+				if ( $error_message ) {
+					$review_messages[] = $error_message;
+				} else {
+					/* translators: %s is the error code */
+					$review_messages[] = esc_html( sprintf( __( 'Error code: %s.', 'amp' ), $validation->get_error_code() ) );
+				}
 				$notice_type = 'error';
 			} elseif ( is_array( $validation ) ) {
 				$new_errors      = 0;

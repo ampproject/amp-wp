@@ -516,7 +516,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 			'fields'    => 'ids',
 		) );
 		$this->assertCount( 0, $invalid_url_posts );
-		$this->assertContains( 'response_comment_absent', $new_error['message'] );
 		$this->assertEquals( 'error', $new_error['type'] );
 	}
 
