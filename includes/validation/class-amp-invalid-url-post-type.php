@@ -896,7 +896,6 @@ class AMP_Invalid_URL_Post_Type {
 		$output  = array();
 
 		if ( isset( $sources['plugin'] ) ) {
-			$output[]     = '<details class="source">';
 			$plugin_names = array();
 			$plugin_slugs = array_unique( $sources['plugin'] );
 			$plugins      = get_plugins();
@@ -910,29 +909,31 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				$plugin_names[] = $name;
 			}
-			$count = count( $plugin_slugs );
+			$count = count( $plugin_names );
 			if ( 1 === $count ) {
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></summary>', esc_html__( 'Plugin', 'amp' ) );
+				$output[] = sprintf( '<span class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s</strong></span>', esc_html( $plugin_names[0] ) );
 			} else {
+				$output[] = '<details class="source">';
 				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
+				$output[] = '<div>';
+				$output[] = implode( '<br/>', array_unique( $plugin_names ) );
+				$output[] = '</div>';
+				$output[] = '</details>';
 			}
-			$output[] = '<div>';
-			$output[] = implode( '<br/>', array_unique( $plugin_names ) );
-			$output[] = '</div>';
-			$output[] = '</details>';
 		}
 		if ( isset( $sources['core'] ) ) {
-			$output[] = '<details class="source">';
-			$count    = count( array_unique( $sources['core'] ) );
+			$core_sources = array_unique( $sources['core'] );
+			$count        = count( $core_sources );
 			if ( 1 === $count ) {
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></summary>', esc_html__( 'Other', 'amp' ) );
+				$output[] = sprintf( '<span class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s</strong></span>', esc_html( $core_sources[0] ) );
 			} else {
+				$output[] = '<details class="source">';
 				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-wordpress-alt"></span>%s (%d)</strong></summary>', esc_html__( 'Other', 'amp' ), $count );
+				$output[] = '<div>';
+				$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
+				$output[] = '</div>';
+				$output[] = '</details>';
 			}
-			$output[] = '<div>';
-			$output[] = implode( '<br/>', array_unique( $sources['core'] ) );
-			$output[] = '</div>';
-			$output[] = '</details>';
 		}
 		if ( isset( $sources['theme'] ) ) {
 			$output[] = '<div class="source">';

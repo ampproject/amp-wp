@@ -583,7 +583,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		return array(
 			'invalid_element'       => array(
 				AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT,
-				'<details class="source"><summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>Plugin</strong></summary><div>AMP</div></details>',
+				'<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>AMP</strong>',
 				$errors,
 			),
 			'removed_attributes'    => array(
