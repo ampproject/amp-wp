@@ -1692,6 +1692,20 @@ class AMP_Invalid_URL_Post_Type {
 			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
 		}
 
+		/**
+		 * Set the order of the terms in the order of occurrence.
+		 *
+		 * Note that this function will call \AMP_Validation_Error_Taxonomy::get_term() repeatedly, and the
+		 * object cache will be pre-populated with terms due to the term query in the term list table.
+		 *
+		 * @return WP_Term[]
+		 */
+		$override_terms_in_occurrence_order = function() use ( $post ) {
+			return wp_list_pluck( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $post ), 'term' );
+		};
+
+		add_filter( 'get_terms', $override_terms_in_occurrence_order );
+
 		$wp_list_table = _get_list_table( 'WP_Terms_List_Table' );
 		get_current_screen()->set_screen_reader_content( array(
 			'heading_pagination' => $taxonomy_object->labels->items_list_navigation,
@@ -1720,6 +1734,7 @@ class AMP_Invalid_URL_Post_Type {
 		<?php $wp_list_table->display(); ?>
 
 		<?php
+		remove_filter( 'get_terms', $override_terms_in_occurrence_order );
 	}
 
 	/**
@@ -1910,7 +1925,7 @@ class AMP_Invalid_URL_Post_Type {
 
 	/**
 	 * Gets the heading for the single URL page at /wp-admin/post.php.
-	 * This will be in the format of 'Errors For <page title>'.
+	 * This will be in the format of 'Errors for: <page title>'.
 	 *
 	 * @return string|null The page heading, or null.
 	 */
@@ -1942,7 +1957,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		/* translators: %s is the name of the page with the the validation error(s) */
-		return esc_html( sprintf( __( 'Errors For %s', 'amp' ), $name ) );
+		return esc_html( sprintf( __( 'Errors for: %s', 'amp' ), $name ) );
 	}
 
 	/**

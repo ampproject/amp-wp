@@ -1903,6 +1903,8 @@ class AMP_Validation_Error_Taxonomy {
 						<div class="detailed">
 							<?php if ( is_string( $value ) ) : ?>
 								<?php echo esc_html( $value ); ?>
+							<?php elseif ( 'sources' === $key ) : ?>
+								<pre><?php echo esc_html( wp_json_encode( $value, 128 /* JSON_PRETTY_PRINT */ | 64 /* JSON_UNESCAPED_SLASHES */ ) ); ?></pre>
 							<?php elseif ( is_array( $value ) ) : ?>
 								<?php foreach ( $value as $key => $attr ) : ?>
 									<?php
