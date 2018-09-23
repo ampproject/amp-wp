@@ -8,26 +8,15 @@
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
- * This function always returns 'amp' when 'amp' theme support is present. Otherwise,
- * the return value can be overridden by previously defining a AMP_QUERY_VAR
+ * The return value can be overridden by previously defining a AMP_QUERY_VAR
  * constant or by adding a 'amp_query_var' filter, but *warning* this ability
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
- * @since 1.0 The return value is always 'amp' when 'amp' theme support is present, and the 'amp_query_var' filter no longer applies.
  *
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
-	if ( current_theme_supports( 'amp' ) ) {
-		if ( ! defined( 'AMP_QUERY_VAR' ) ) {
-			define( 'AMP_QUERY_VAR', 'amp' );
-		} elseif ( 'amp' !== AMP_QUERY_VAR ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'The AMP_QUERY_VAR constant should only be defined as "amp" when "amp" theme support is present.', 'amp' ), '1.0' );
-		}
-		return 'amp';
-	}
-
 	if ( defined( 'AMP_QUERY_VAR' ) ) {
 		return AMP_QUERY_VAR;
 	}
@@ -38,7 +27,6 @@ function amp_get_slug() {
 	 * Warning: This filter may become deprecated.
 	 *
 	 * @since 0.3.2
-	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
@@ -73,10 +61,8 @@ function amp_get_current_url() {
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
- * @since 1.0 The query var 'amp' is always used exclusively when 'amp' theme support is present; the 'amp_pre_get_permalink' and 'amp_get_permalink' filters do not apply.
  *
  * @param int $post_id Post ID.
- *
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
@@ -85,7 +71,7 @@ function amp_get_permalink( $post_id ) {
 	if ( current_theme_supports( 'amp' ) ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( 'amp', '', $permalink );
+			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
 	}
