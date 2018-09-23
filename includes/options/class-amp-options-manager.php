@@ -451,6 +451,8 @@ class AMP_Options_Manager {
 			}
 			$theme_support['paired'] = 'paired' === $template_mode;
 			add_theme_support( 'amp', $theme_support );
+		} else {
+			remove_theme_support( 'amp' ); // So that the amp_get_permalink() will work for classic URL.
 		}
 
 		$url = amp_admin_get_preview_permalink();
