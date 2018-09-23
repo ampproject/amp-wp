@@ -127,7 +127,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
 
 		// This is not in AMP 'canonical mode' but rather classic paired mode.
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		$this->instance->render_status( $post );
 		$output = ob_get_clean();
@@ -135,7 +135,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// This is in AMP native mode with a template that can be rendered.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		$this->instance->render_status( $post );
 		$output = ob_get_clean();
@@ -190,7 +190,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// In Native AMP, there also shouldn't be errors.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertEquals(
 			$expected_status_and_errors,
 			$this->instance->get_status_and_errors( $post )

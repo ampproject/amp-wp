@@ -21,7 +21,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
 		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
@@ -81,7 +81,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 
@@ -117,7 +117,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
 
 		// Now check with theme support added (in paired mode).
-		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
@@ -176,7 +176,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
 
 		// Now check with theme support added (in paired mode).
-		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
@@ -197,7 +197,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_permalink_with_theme_support() {
 		global $wp_rewrite;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
 		$wp_rewrite->use_trailing_slashes = true;
@@ -207,7 +207,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$post_id = $this->factory()->post->create();
 		$this->assertEquals( get_permalink( $post_id ), amp_get_permalink( $post_id ) );
 
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'template_dir' => 'amp',
 		) );
 	}
@@ -294,7 +294,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$assert_amphtml_link_present();
 
 		// Make sure that the link is not provided when there are validation errors associated with the URL.
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'template_dir' => './',
 		) );
 		AMP_Theme_Support::init();
@@ -328,15 +328,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Paired theme support.
-		add_theme_support( 'amp', array( 'template_dir' => './' ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$_GET['amp'] = '';
 		$this->assertTrue( is_amp_endpoint() );
 		unset( $_GET['amp'] );
 		$this->assertFalse( is_amp_endpoint() );
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 
 		// Native theme support.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 
 		// Special core pages.
@@ -451,7 +451,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_content_embed_handlers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_embed_handlers();
 		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
@@ -459,7 +459,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $this->last_filter_call['args'][1] );
 
 		$this->last_filter_call = null;
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_embed_handlers( $post );
 		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
@@ -475,7 +475,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_content_embed_handlers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_embed_handlers' );
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_embed_handlers( $post );
 	}
 
@@ -489,7 +489,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_content_sanitizers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers();
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
@@ -499,7 +499,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', end( $handler_classes ) );
 
 		$this->last_filter_call = null;
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers( $post );
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
@@ -525,7 +525,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_content_sanitizers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_sanitizers' );
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_sanitizers( $post );
 	}
 

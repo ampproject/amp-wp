@@ -207,7 +207,7 @@ function amp_force_query_var_value( $query_vars ) {
 function amp_maybe_add_actions() {
 
 	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return;
 	}
 
@@ -283,26 +283,26 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 /**
  * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`:
+ * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- *      add_theme_support( 'amp' );
+ *      add_theme_support( AMP_Theme_Support::SLUG );
  *
  * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
  * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired' => true,
  *      ) );
  *
  * Paired mode is also implied if you define a template_dir:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'template_dir' => 'amp',
  *      ) );
  *
  * If you want to have AMP-specific templates in addition to serving native AMP, do:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired'       => false,
  *          'template_dir' => 'amp',
  *      ) );
@@ -310,7 +310,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
  * for example to always serve the Category template in AMP:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'templates_supported' => array(
  *              'is_category' => true,
  *          ),
@@ -318,7 +318,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  * Or if you want to force AMP to be used on all templates:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'templates_supported' => 'all',
  *      ) );
  *
@@ -326,7 +326,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
-	if ( ! current_theme_supports( 'amp' ) ) {
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return false;
 	}
 
@@ -457,7 +457,7 @@ function amp_render_post( $post ) {
  * Uses the priority of 12 for the 'after_setup_theme' action.
  * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
  * And that function's documentation suggests adding it to that action.
- * So this enables themes to `add_theme_support( 'amp' )`.
+ * So this enables themes to `add_theme_support( AMP_Theme_Support::SLUG )`.
  * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
  *
  * @since 0.4
@@ -481,7 +481,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );

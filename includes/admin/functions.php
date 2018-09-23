@@ -60,7 +60,7 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	// If theme support is present, then bail if the singular template is not supported.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$supported_templates = AMP_Theme_Support::get_supportable_templates();
 		if ( empty( $supported_templates['is_singular']['supported'] ) ) {
 			return null;
@@ -90,7 +90,7 @@ function amp_admin_get_preview_permalink() {
  */
 function amp_add_customizer_link() {
 	/** This filter is documented in includes/settings/class-amp-customizer-design-settings.php */
-	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( 'amp' ) ) {
+	if ( ! apply_filters( 'amp_customizer_is_enabled', true ) || current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return;
 	}
 

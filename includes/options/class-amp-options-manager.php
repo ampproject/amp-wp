@@ -445,14 +445,14 @@ class AMP_Options_Manager {
 		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
 		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
 		if ( $has_theme_support ) {
-			$theme_support = current_theme_supports( 'amp' );
+			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
 				$theme_support = array();
 			}
 			$theme_support['paired'] = 'paired' === $template_mode;
-			add_theme_support( 'amp', $theme_support );
+			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
 		} else {
-			remove_theme_support( 'amp' ); // So that the amp_get_permalink() will work for classic URL.
+			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for classic URL.
 		}
 
 		$url = amp_admin_get_preview_permalink();

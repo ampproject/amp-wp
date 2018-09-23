@@ -223,7 +223,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	public function test_check_supported_post_type_update_errors() {
 		global $wp_settings_errors;
 		$wp_settings_errors = array(); // clear any errors before starting.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		register_post_type( 'foo', array(
 			'public' => true,
 			'label'  => 'Foo',

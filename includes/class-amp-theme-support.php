@@ -13,6 +13,13 @@
 class AMP_Theme_Support {
 
 	/**
+	 * Theme support slug.
+	 *
+	 * @var string
+	 */
+	const SLUG = 'amp';
+
+	/**
 	 * Replaced with the necessary scripts depending on components used in output.
 	 *
 	 * @var string
@@ -124,7 +131,7 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		self::read_theme_support();
-		if ( ! current_theme_supports( 'amp' ) ) {
+		if ( ! current_theme_supports( self::SLUG ) ) {
 			return;
 		}
 
@@ -164,7 +171,7 @@ class AMP_Theme_Support {
 	 */
 	public static function read_theme_support() {
 		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
@@ -184,12 +191,12 @@ class AMP_Theme_Support {
 			}
 			self::$support_added_via_option = false;
 		} elseif ( 'disabled' !== $theme_support_option ) {
-			add_theme_support( 'amp', array(
+			add_theme_support( self::SLUG, array(
 				'paired' => ( 'paired' === $theme_support_option ),
 			) );
 			self::$support_added_via_option = true;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
-			add_theme_support( 'amp' );
+			add_theme_support( self::SLUG );
 		}
 	}
 
@@ -203,10 +210,10 @@ class AMP_Theme_Support {
 	 * @return array|false Theme support args, or false if theme support is not present.
 	 */
 	public static function get_theme_support_args() {
-		if ( ! current_theme_supports( 'amp' ) ) {
+		if ( ! current_theme_supports( self::SLUG ) ) {
 			return false;
 		}
-		$support = get_theme_support( 'amp' );
+		$support = get_theme_support( self::SLUG );
 		if ( true === $support ) {
 			return array(
 				'paired' => false,
@@ -342,7 +349,7 @@ class AMP_Theme_Support {
 	 * @return bool Whether available.
 	 */
 	public static function is_paired_available() {
-		if ( ! current_theme_supports( 'amp' ) ) {
+		if ( ! current_theme_supports( self::SLUG ) ) {
 			return false;
 		}
 
