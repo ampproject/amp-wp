@@ -34,7 +34,7 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 		parent::setUp();
 		wp_maybe_load_widgets();
 		$this->widget = new $class();
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -44,7 +44,7 @@ class Test_AMP_Widget_Media_Video extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		parent::tearDown();
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 	}
 
 	/**

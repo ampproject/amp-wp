@@ -232,7 +232,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $key ) {
 			$analytics[ $key ]['type'] = 'test';
 			return $analytics;

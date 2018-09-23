@@ -31,7 +31,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$_REQUEST = array();
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		remove_all_filters( 'terms_clauses' );
@@ -46,7 +46,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_register() {
 		global $wp_taxonomies;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
 		AMP_Validation_Error_Taxonomy::register();
 		$taxonomy_object = $wp_taxonomies[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ];
@@ -89,10 +89,10 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_should_show_in_menu() {
 		global $pagenow;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
 		$pagenow          = 'edit-tags.php'; // WPCS: override ok.
@@ -288,7 +288,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		);
 
 		// New accepted, since canonical.
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'paired' => false,
 		) );
 		$this->assertTrue( amp_is_canonical() );
@@ -543,7 +543,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Error_Taxonomy::register();
 
 		// add_group_terms_clauses_filter() needs the screen to be set.

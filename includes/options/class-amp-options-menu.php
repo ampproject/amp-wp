@@ -143,7 +143,7 @@ class AMP_Options_Menu {
 		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. Your canonical URLs are AMP. AMP-specific blocks are available for inserting into content. Any AMP validation errors are automatically sanitized.', 'amp' );
 		$builtin_support    = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
 		?>
-		<?php if ( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_support_added_via_option() ) : ?>
+		<?php if ( current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::is_support_added_via_option() ) : ?>
 			<div class="notice notice-info notice-alt inline">
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
@@ -191,7 +191,7 @@ class AMP_Options_Menu {
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 
-						<?php if ( ! current_theme_supports( 'amp' ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
 								<p>
 									<?php
@@ -403,7 +403,7 @@ class AMP_Options_Menu {
 						id="<?php echo esc_attr( $element_id ); ?>"
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+						<?php checked( post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG ) ); ?>
 						>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
@@ -441,7 +441,7 @@ class AMP_Options_Menu {
 					templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
 					themeSupportDisabledInput = $( '#theme_support_disabled' );
 					allTemplatesSupportedInput = $( '#all_templates_supported' );
-					supportForced = <?php echo wp_json_encode( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_support_added_via_option() ); ?>;
+					supportForced = <?php echo wp_json_encode( current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::is_support_added_via_option() ); ?>;
 
 					function isThemeSupportDisabled() {
 						return ! supportForced && themeSupportDisabledInput.prop( 'checked' );

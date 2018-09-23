@@ -184,7 +184,7 @@ class AMP_Template_Customizer {
 			true
 		);
 
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability = AMP_Theme_Support::get_template_availability();
 			$available    = $availability['supported'];
 		} elseif ( is_singular() || $wp_query->is_posts_page ) {

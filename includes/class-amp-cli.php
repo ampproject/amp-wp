@@ -169,14 +169,14 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
-		if ( ! current_theme_supports( 'amp' ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			if ( self::$force_crawl_urls ) {
 				/*
 				 * There is no theme support added programmatically or via options.
 				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
 				 * will use a canonical URL as the basis for obtaining validation results.
 				 */
-				add_theme_support( 'amp' );
+				add_theme_support( AMP_Theme_Support::SLUG );
 			} else {
 				WP_CLI::error(
 					sprintf(

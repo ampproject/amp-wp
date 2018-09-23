@@ -130,7 +130,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function should_show_in_menu() {
 		global $pagenow;
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
 		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // WPCS: CSRF OK.
@@ -1141,7 +1141,7 @@ class AMP_Invalid_URL_Post_Type {
 			// Display admin notice according to the AMP mode.
 			if ( amp_is_canonical() ) {
 				$template_mode = 'native';
-			} elseif ( current_theme_supports( 'amp' ) ) {
+			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 				$template_mode = 'paired';
 			} else {
 				$template_mode = 'classic';

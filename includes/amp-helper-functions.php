@@ -68,7 +68,7 @@ function amp_get_current_url() {
 function amp_get_permalink( $post_id ) {
 
 	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
@@ -177,7 +177,7 @@ function amp_add_amphtml_link() {
 	$current_url = amp_get_current_url();
 
 	$amp_url = null;
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
@@ -195,7 +195,7 @@ function amp_add_amphtml_link() {
 	}
 
 	// Check to see if there are known unaccepted validation errors for this URL.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
@@ -264,7 +264,7 @@ function is_amp_endpoint() {
 		false !== get_query_var( amp_get_slug(), false )
 	);
 
-	if ( ! current_theme_supports( 'amp' ) ) {
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return $has_amp_query_var;
 	}
 
@@ -563,7 +563,7 @@ function amp_print_analytics( $analytics ) {
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
-	if ( current_theme_supports( 'amp' ) && $post ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
 	}
@@ -614,7 +614,7 @@ function amp_get_content_embed_handlers( $post = null ) {
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
-	if ( current_theme_supports( 'amp' ) && $post ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
 	}
@@ -646,7 +646,7 @@ function amp_get_content_sanitizers( $post = null ) {
 				'add_placeholder' => true,
 			),
 			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-				'carousel_required' => ! current_theme_supports( 'amp' ), // For back-compat.
+				'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
 			),
 			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Script_Sanitizer'            => array(),

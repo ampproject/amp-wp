@@ -244,7 +244,7 @@ class AMP_Options_Manager {
 				continue;
 			}
 
-			$post_type_supported = post_type_supports( $post_type->name, amp_get_slug() );
+			$post_type_supported = post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG );
 			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
 
 			$error = null;
@@ -438,21 +438,21 @@ class AMP_Options_Manager {
 
 		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, amp_get_slug() );
+			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 		}
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
 		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
 		if ( $has_theme_support ) {
-			$theme_support = current_theme_supports( 'amp' );
+			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
 				$theme_support = array();
 			}
 			$theme_support['paired'] = 'paired' === $template_mode;
-			add_theme_support( 'amp', $theme_support );
+			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
 		} else {
-			remove_theme_support( 'amp' ); // So that the amp_get_permalink() will work for classic URL.
+			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for classic URL.
 		}
 
 		$url = amp_admin_get_preview_permalink();
