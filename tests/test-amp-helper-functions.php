@@ -535,7 +535,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
-		add_post_type_support( 'page', amp_get_slug() );
+		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
@@ -556,7 +556,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( post_supports_amp( $post ) );
 
 		// Reset.
-		remove_post_type_support( 'page', amp_get_slug() );
+		remove_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 	}
 
 	/**

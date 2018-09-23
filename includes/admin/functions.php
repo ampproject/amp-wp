@@ -49,7 +49,7 @@ function amp_admin_get_preview_permalink() {
 	$post_type = (string) apply_filters( 'amp_customizer_post_type', 'post' );
 
 	// Make sure the desired post type is actually supported, and if so, prefer it.
-	$supported_post_types = get_post_types_by_support( amp_get_slug() );
+	$supported_post_types = get_post_types_by_support( AMP_Post_Type_Support::SLUG );
 	if ( in_array( $post_type, $supported_post_types, true ) ) {
 		$supported_post_types = array_unique( array_merge( array( $post_type ), $supported_post_types ) );
 	}

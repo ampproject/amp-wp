@@ -242,7 +242,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( get_post_types() as $post_type ) {
 			if ( 'foo' !== $post_type ) {
-				remove_post_type_support( $post_type, amp_get_slug() );
+				remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 			}
 		}
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
@@ -250,7 +250,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEmpty( get_settings_errors() );
 
 		// Test when 'all_templates_supported' is not selected, and theme support is also disabled.
-		add_post_type_support( 'post', amp_get_slug() );
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
@@ -261,8 +261,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals( 'foo_deactivation_error', $settings_errors[0]['code'] );
 
 		// Activation error.
-		remove_post_type_support( 'post', amp_get_slug() );
-		remove_post_type_support( 'foo', amp_get_slug() );
+		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
+		remove_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
 		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
@@ -274,7 +274,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Deactivation error.
 		AMP_Options_Manager::update_option( 'supported_post_types', array() );
-		add_post_type_support( 'foo', amp_get_slug() );
+		add_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$errors = get_settings_errors();
 		$this->assertCount( 1, $errors );

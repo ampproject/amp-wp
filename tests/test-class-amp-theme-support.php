@@ -560,12 +560,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 'is_special', $availability['template'] );
 		$this->assertFalse( $availability['immutable'] );
 
-		remove_post_type_support( 'page', 'amp' );
+		remove_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertFalse( $availability['supported'] );
 		$this->assertEquals( array( 'post-type-support' ), $availability['errors'] );
 		$this->assertEquals( 'is_page', $availability['template'] );
-		add_post_type_support( 'page', 'amp' );
+		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertTrue( $availability['supported'] );
 

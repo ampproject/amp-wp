@@ -122,7 +122,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'administrator',
 		) ) );
-		add_post_type_support( 'post', amp_get_slug() );
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
 
@@ -143,13 +143,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
-		remove_post_type_support( 'post', amp_get_slug() );
+		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		ob_start();
 		$this->instance->render_status( $post );
 		$output = ob_get_clean();
 		$this->assertContains( 'post type does not support it', $output );
 		$this->assertNotContains( $checkbox_enabled, $output );
-		add_post_type_support( 'post', amp_get_slug() );
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
@@ -161,7 +161,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
-		add_post_type_support( 'post', amp_get_slug() );
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		wp_set_current_user( $this->factory()->user->create( array(
 			'role' => 'subscriber',
 		) ) );
@@ -197,7 +197,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// If post type doesn't support AMP, this method should return AMP as being disabled.
-		remove_post_type_support( 'post', amp_get_slug() );
+		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$this->assertEquals(
 			array(
 				'status' => 'disabled',
@@ -205,7 +205,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			),
 			$this->instance->get_status_and_errors( $post )
 		);
-		add_post_type_support( 'post', amp_get_slug() );
+		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 
 		// There's no template to render this post, so this method should also return AMP as disabled.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );

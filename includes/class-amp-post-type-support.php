@@ -12,6 +12,13 @@
 class AMP_Post_Type_Support {
 
 	/**
+	 * Post type support slug.
+	 *
+	 * @var string
+	 */
+	const SLUG = 'amp';
+
+	/**
 	 * Get post types that plugin supports out of the box (which cannot be disabled).
 	 *
 	 * @deprecated
@@ -52,7 +59,7 @@ class AMP_Post_Type_Support {
 			$post_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
 		}
 		foreach ( $post_types as $post_type ) {
-			add_post_type_support( $post_type, amp_get_slug() );
+			add_post_type_support( $post_type, self::SLUG );
 		}
 	}
 
@@ -70,7 +77,7 @@ class AMP_Post_Type_Support {
 		}
 		$errors = array();
 
-		if ( ! post_type_supports( $post->post_type, amp_get_slug() ) ) {
+		if ( ! post_type_supports( $post->post_type, self::SLUG ) ) {
 			$errors[] = 'post-type-support';
 		}
 

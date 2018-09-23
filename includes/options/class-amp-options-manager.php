@@ -244,7 +244,7 @@ class AMP_Options_Manager {
 				continue;
 			}
 
-			$post_type_supported = post_type_supports( $post_type->name, amp_get_slug() );
+			$post_type_supported = post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG );
 			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
 
 			$error = null;
@@ -438,7 +438,7 @@ class AMP_Options_Manager {
 
 		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
-			remove_post_type_support( $post_type, amp_get_slug() );
+			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
 		}
 		AMP_Post_Type_Support::add_post_type_support();
 
