@@ -4,3 +4,7 @@ build
 node_modules
 wiki
 amp.zip
+**/*-compiled.js
+languages/*.pot
+languages/*.php
+built

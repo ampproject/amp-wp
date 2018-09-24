@@ -94,7 +94,13 @@ class AMP_Post_Template {
 		} else {
 			$this->post = get_post( $post );
 		}
-		$this->ID = $this->post->ID;
+
+		// Make sure we have a post, or bail if not.
+		if ( is_a( $this->post, 'WP_Post' ) ) {
+			$this->ID = $this->post->ID;
+		} else {
+			return;
+		}
 
 		$content_max_width = self::CONTENT_MAX_WIDTH;
 		if ( isset( $GLOBALS['content_width'] ) && $GLOBALS['content_width'] > 0 ) {
@@ -107,7 +113,7 @@ class AMP_Post_Template {
 
 			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
 			'canonical_url'         => get_permalink( $this->ID ),
-			'home_url'              => home_url(),
+			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
 			'html_tag_attributes'   => array(),
@@ -129,19 +135,10 @@ class AMP_Post_Template {
 				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
 			),
 
-			'post_amp_styles'       => array(),
+			'post_amp_stylesheets'  => array(),
+			'post_amp_styles'       => array(), // Deprecated.
 
-			/**
-			 * Add amp-analytics tags.
-			 *
-			 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-			 *
-			 * @since 0.4
-			 *
-			 * @param array   $analytics An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
-			 * @param WP_Post $post      The current post.
-			 */
-			'amp_analytics'         => apply_filters( 'amp_post_template_analytics', array(), $this->post ),
+			'amp_analytics'         => amp_add_custom_analytics(),
 		);
 
 		$this->build_post_content();
@@ -281,42 +278,6 @@ class AMP_Post_Template {
 			)
 		);
 
-		$metadata = array(
-			'@context'         => 'http://schema.org',
-			'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
-			'mainEntityOfPage' => $this->get( 'canonical_url' ),
-			'publisher'        => array(
-				'@type' => 'Organization',
-				'name'  => $this->get( 'blog_name' ),
-			),
-			'headline'         => $post_title,
-			'datePublished'    => date( 'c', $post_publish_timestamp ),
-			'dateModified'     => date( 'c', $post_modified_timestamp ),
-		);
-		if ( $post_author ) {
-			$metadata['author'] = array(
-				'@type' => 'Person',
-				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
-			);
-		}
-
-		$site_icon_url = $this->get( 'site_icon_url' );
-		if ( $site_icon_url ) {
-			$metadata['publisher']['logo'] = array(
-				'@type'  => 'ImageObject',
-				'url'    => $site_icon_url,
-				'height' => self::SITE_ICON_SIZE,
-				'width'  => self::SITE_ICON_SIZE,
-			);
-		}
-
-		$image_metadata = $this->get_post_image_metadata();
-		if ( $image_metadata ) {
-			$metadata['image'] = $image_metadata;
-		}
-
-		$this->add_data_by_key( 'metadata', apply_filters( 'amp_post_template_metadata', $metadata, $this->post ) );
-
 		$this->build_post_featured_image();
 		$this->build_post_commments_data();
 	}
@@ -365,7 +326,7 @@ class AMP_Post_Template {
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
 		$this->merge_data_for_key( 'amp_component_scripts', $amp_content->get_amp_scripts() );
-		$this->merge_data_for_key( 'post_amp_styles', $amp_content->get_amp_styles() );
+		$this->add_data_by_key( 'post_amp_stylesheets', $amp_content->get_amp_stylesheets() );
 	}
 
 	/**
@@ -393,13 +354,16 @@ class AMP_Post_Template {
 
 		$featured_image = get_post( $featured_id );
 
-		list( $sanitized_html, $featured_scripts, $featured_styles ) = AMP_Content_Sanitizer::sanitize(
-			$featured_html,
-			array( 'AMP_Img_Sanitizer' => array() ),
+		$dom    = AMP_DOM_Utils::get_dom_from_content( $featured_html );
+		$assets = AMP_Content_Sanitizer::sanitize_document(
+			$dom,
+			amp_get_content_sanitizers( $this->post ),
 			array(
 				'content_max_width' => $this->get( 'content_max_width' ),
 			)
 		);
+
+		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
 			'featured_image', array(
@@ -408,12 +372,12 @@ class AMP_Post_Template {
 			)
 		);
 
-		if ( $featured_scripts ) {
-			$this->merge_data_for_key( 'amp_component_scripts', $featured_scripts );
+		if ( $assets['scripts'] ) {
+			$this->merge_data_for_key( 'amp_component_scripts', $assets['scripts'] );
 		}
 
-		if ( $featured_styles ) {
-			$this->merge_data_for_key( 'post_amp_styles', $featured_styles );
+		if ( $assets['stylesheets'] ) {
+			$this->merge_data_for_key( 'post_amp_stylesheets', $assets['stylesheets'] );
 		}
 	}
 
@@ -438,54 +402,6 @@ class AMP_Post_Template {
 		 * @param WP_Post $post     Current post object.
 		 */
 		$this->add_data_by_key( 'customizer_settings', apply_filters( 'amp_post_template_customizer_settings', $settings, $this->post ) );
-	}
-
-	/**
-	 * Grabs featured image or the first attached image for the post
-	 *
-	 * TODO: move to a utils class?
-	 */
-	private function get_post_image_metadata() {
-		$post_image_meta = null;
-		$post_image_id   = false;
-
-		if ( has_post_thumbnail( $this->ID ) ) {
-			$post_image_id = get_post_thumbnail_id( $this->ID );
-		} else {
-			$attached_image_ids = get_posts(
-				array(
-					'post_parent'      => $this->ID,
-					'post_type'        => 'attachment',
-					'post_mime_type'   => 'image',
-					'posts_per_page'   => 1,
-					'orderby'          => 'menu_order',
-					'order'            => 'ASC',
-					'fields'           => 'ids',
-					'suppress_filters' => false,
-				)
-			);
-
-			if ( ! empty( $attached_image_ids ) ) {
-				$post_image_id = array_shift( $attached_image_ids );
-			}
-		}
-
-		if ( ! $post_image_id ) {
-			return false;
-		}
-
-		$post_image_src = wp_get_attachment_image_src( $post_image_id, 'full' );
-
-		if ( is_array( $post_image_src ) ) {
-			$post_image_meta = array(
-				'@type'  => 'ImageObject',
-				'url'    => $post_image_src[0],
-				'width'  => $post_image_src[1],
-				'height' => $post_image_src[2],
-			);
-		}
-
-		return $post_image_meta;
 	}
 
 	/**
@@ -520,7 +436,7 @@ class AMP_Post_Template {
 
 		$file = apply_filters( 'amp_post_template_file', $file, $template_type, $this->post );
 		if ( ! $this->is_valid_template( $file ) ) {
-			/* translators: %1$s is template file, %2$s is 'WP_CONTENT_DIR' string. */
+			/* translators: 1: the template file, 2: WP_CONTENT_DIR. */
 			_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Path validation for template (%1$s) failed. Path cannot traverse and must be located in `%2$s`.', 'amp' ), esc_html( $file ), 'WP_CONTENT_DIR' ), '0.1' );
 			return;
 		}

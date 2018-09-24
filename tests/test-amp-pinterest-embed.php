@@ -37,7 +37,7 @@ class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
-				array( 'amp-pinterest' => 'https://cdn.ampproject.org/v0/amp-pinterest-latest.js' ),
+				array( 'amp-pinterest' => true ),
 			),
 		);
 	}

@@ -1,5 +1,7 @@
 <?php
 
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	public function get_data() {
 		return array(
@@ -10,7 +12,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'simple_video' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
 			'video_without_dimensions' => array(
@@ -20,32 +22,32 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'autoplay_attribute' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" autoplay="" layout="responsive"></amp-video>',
 			),
 
 			'autoplay_attribute__false' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" autoplay="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
 			'video_with_whitelisted_attributes__enabled' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls loop="true" muted="muted"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" controls="" loop="" muted="" layout="responsive"></amp-video>',
 			),
 
 			'video_with_whitelisted_attributes__disabled' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" controls="false" loop="false" muted="false"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
 			'video_with_blacklisted_attribute' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4" style="border-color: red;"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
 			'video_with_sizes_attribute_is_overridden' => array(
-				'<video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 100px) 200px, 90vw"></video>',
-				'<amp-video width="300" height="200" src="https://example.com/file.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<video width="300" height="200" src="https://example.com/file.mp4"></video>',
+				'<amp-video width="300" height="200" src="https://example.com/file.mp4" layout="responsive"></amp-video>',
 			),
 
 			'video_with_children' => array(
@@ -53,27 +55,58 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	<source src="https://example.com/video.mp4" type="video/mp4">
 	<source src="https://example.com/video.ogv" type="video/ogg">
 </video>',
-				'<amp-video width="480" height="300" poster="https://example.com/video-image.gif" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+				'<amp-video width="480" height="300" poster="https://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+			),
+
+			'video_with_layout_from_editor_fill' => array(
+				'<figure data-amp-layout="fill"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure data-amp-layout="fill" style="position:relative; width: 100%; height: 100px;"><amp-video src="https://example.com/file.mp4" layout="fill"></amp-video></figure>',
+			),
+
+			'video_with_layout_from_editor_fixed' => array(
+				'<figure data-amp-layout="fixed"><video src="https://example.com/file.mp4" width="100"></video></figure>',
+				'<figure data-amp-layout="fixed"><amp-video src="https://example.com/file.mp4" width="100" layout="fixed" height="400"></amp-video></figure>',
+			),
+
+			'video_with_noloading_from_editor' => array(
+				'<figure data-amp-noloading="true"><video src="https://example.com/file.mp4" height="100" width="100"></video></figure>',
+				'<figure data-amp-noloading="true"><amp-video src="https://example.com/file.mp4" height="100" width="100" noloading="" layout="responsive"></amp-video></figure>',
 			),
 
 			'multiple_same_video' => array(
-				'<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>',
-				'<amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				implode( '', array(
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+				) ),
+				'<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video>',
 			),
 
 			'multiple_different_videos' => array(
-				'<video src="https://example.com/video1.mp4" width="480" height="300"></video>
-<video src="https://example.com/video2.ogv" width="300" height="480"></video>
-<video src="https://example.com/video3.webm" height="100" width="200"></video>',
-				'<amp-video src="https://example.com/video1.mp4" width="480" height="300" sizes="(min-width: 480px) 480px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video2.ogv" width="300" height="480" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video><amp-video src="https://example.com/video3.webm" height="100" width="200" sizes="(min-width: 200px) 200px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				implode( '', array(
+					'<video src="https://example.com/video1.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video2.ogv" width="300" height="480"></video>',
+					'<video src="https://example.com/video3.webm" height="100" width="200"></video>',
+				) ),
+				implode( '', array(
+					'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+				) ),
 			),
 
 			'https_not_required' => array(
 				'<video width="300" height="300" src="http://example.com/video.mp4"></video>',
-				'<amp-video width="300" height="300" src="http://example.com/video.mp4" sizes="(min-width: 300px) 300px, 100vw" class="amp-wp-enforced-sizes"></amp-video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
+			),
+
+			'http_video_with_children' => array(
+				'<video width="480" height="300" poster="http://example.com/video-image.gif">
+	<source src="http://example.com/video.mp4" type="video/mp4">
+	<source src="http://example.com/video.ogv" type="video/ogg">
+</video>',
+				'<amp-video width="480" height="300" poster="http://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
 			),
 		);
 	}
@@ -123,7 +156,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	public function test_get_scripts__did_convert() {
 		$source = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
-		$expected = array( 'amp-video' => 'https://cdn.ampproject.org/v0/amp-video-latest.js' );
+		$expected = array( 'amp-video' => true );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );

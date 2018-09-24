@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
 /**
  * Class AMP_Audio_Converter_Test
  *
@@ -55,6 +57,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	<source src="https://example.com/foo.wav" type="audio/wav">
 </audio>',
 				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio>',
+			),
+
+			'audio_with_layout_from_editor_fixed_height' => array(
+				'<figure data-amp-layout="fixed-height"><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio></figure>',
+				'<figure data-amp-layout="fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"></amp-audio></figure>',
 			),
 
 			'multiple_same_audio' => array(
@@ -134,7 +141,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 	public function test_get_scripts__did_convert() {
 		$source = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
-		$expected = array( 'amp-audio' => 'https://cdn.ampproject.org/v0/amp-audio-latest.js' );
+		$expected = array( 'amp-audio' => true );
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );

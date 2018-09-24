@@ -2,33 +2,24 @@
 /**
  * Callbacks for adding AMP-related things to the main theme.
  *
+ * @deprecated Function in this file has been moved to amp-helper-functions.php.
  * @package AMP
  */
 
-add_action( 'wp_head', 'amp_frontend_add_canonical' );
+_deprecated_file( __FILE__, '1.0', null, esc_html__( 'Use amp_add_amphtml_link() function which is already included from amp-helper-functions.php', 'amp' ) );
 
 /**
  * Add amphtml link to frontend.
  *
+ * @deprecated
+ *
  * @since 0.2
+ * @since 1.0 Deprecated
+ * @see amp_add_amphtml_link()
  */
 function amp_frontend_add_canonical() {
-
-	// Prevent showing amphtml link if theme supports AMP but paired mode is not available.
-	if ( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_paired_available() ) {
-		return;
-	}
-
-	/**
-	 * Filters whether to show the amphtml link on the frontend.
-	 *
-	 * @since 0.2
-	 */
-	if ( false === apply_filters( 'amp_frontend_show_canonical', true ) ) {
-		return;
-	}
-
-	printf( '<link rel="amphtml" href="%s">', esc_url( amp_get_permalink( get_queried_object_id() ) ) );
+	_deprecated_function( __FUNCTION__, '1.0', 'amp_add_amphtml_link' );
+	amp_add_amphtml_link();
 }
 
 /**

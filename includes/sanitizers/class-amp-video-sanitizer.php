@@ -33,9 +33,21 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'video' => array( 'amp-video', 'amp-youtube' ),
+		);
+	}
+
+	/**
 	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Set the filtered child node's src attribute.
 	 */
 	public function sanitize() {
 		$nodes     = $this->dom->getElementsByTagName( self::$tag );
@@ -46,12 +58,18 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node           = $nodes->item( $i );
+			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
 			$new_attributes = $this->filter_attributes( $old_attributes );
-
-			$new_attributes = $this->enforce_fixed_height( $new_attributes );
-			$new_attributes = $this->enforce_sizes_attribute( $new_attributes );
+			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
+			$new_attributes = $this->filter_video_dimensions( $new_attributes );
+			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
+			$new_attributes = $this->set_layout( $new_attributes );
+			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
+				$new_attributes['layout'] = 'responsive';
+			}
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 
@@ -78,11 +96,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
+				$this->update_src( $new_child_node, $new_child_attributes['src'], $old_child_attributes['src'] );
+
 				/**
 				 * Only append source tags with a valid src attribute
 				 */
 				$new_node->appendChild( $new_child_node );
-
 			}
 
 			/*
@@ -93,7 +112,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
-				$node->parentNode->removeChild( $node );
+				$this->remove_invalid_child( $node );
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 			}
@@ -104,22 +123,59 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Filter video dimensions, try to get width and height from original file if missing.
+	 *
+	 * @param array $new_attributes Attributes.
+	 *
+	 * @return array Modified attributes.
+	 */
+	protected function filter_video_dimensions( $new_attributes ) {
+		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
+
+			// Get the width and height from the file.
+			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
+			$name = wp_basename( $new_attributes['src'], ".$ext" );
+			$args = array(
+				'name'        => $name,
+				'post_type'   => 'attachment',
+				'post_status' => 'inherit',
+				'numberposts' => 1,
+			);
+
+			$attachment = get_posts( $args );
+
+			if ( ! empty( $attachment ) ) {
+				$meta_data = wp_get_attachment_metadata( $attachment[0]->ID );
+				if ( empty( $new_attributes['width'] ) && ! empty( $meta_data['width'] ) ) {
+					$new_attributes['width'] = $meta_data['width'];
+				}
+				if ( empty( $new_attributes['height'] ) && ! empty( $meta_data['height'] ) ) {
+					$new_attributes['height'] = $meta_data['height'];
+				}
+			}
+		}
+
+		return $new_attributes;
+	}
+
+	/**
 	 * "Filter" HTML attributes for <amp-audio> elements.
 	 *
 	 * @since 0.2
+	 * @since 1.0 Force HTTPS for the src attribute.
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
 	 *
-	 *      @type string $src Video URL - Empty if HTTPS required per $this->args['require_https_src']
-	 *      @type int $width <video> attribute - Set to numeric value if px or %
-	 *      @type int $height <video> attribute - Set to numeric value if px or %
-	 *      @type string $poster <video> attribute - Pass along if found
-	 *      @type string $class <video> attribute - Pass along if found
-	 *      @type bool $controls <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $loop <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $muted <video> attribute - Convert 'false' to empty string ''
-	 *      @type bool $autoplay <video> attribute - Convert 'false' to empty string ''
+	 *      @type string    $src        Video URL - Empty if HTTPS required per $this->args['require_https_src']
+	 *      @type int       $width      <video> attribute - Set to numeric value if px or %
+	 *      @type int       $height     <video> attribute - Set to numeric value if px or %
+	 *      @type string    $poster     <video> attribute - Pass along if found
+	 *      @type string    $class      <video> attribute - Pass along if found
+	 *      @type bool      $controls   <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $loop       <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $muted      <video> attribute - Convert 'false' to empty string ''
+	 *      @type bool      $autoplay   <video> attribute - Convert 'false' to empty string ''
 	 * }
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
@@ -129,7 +185,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->maybe_enforce_https_src( $value );
+					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
 
 				case 'width':
@@ -152,11 +208,33 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				case 'data-amp-layout':
+					$out['layout'] = $value;
+					break;
+
+				case 'data-amp-noloading':
+					$out['noloading'] = $value;
+					break;
+
 				default:
 					break;
 			}
 		}
 
 		return $out;
+	}
+
+	/**
+	 * Update the node's src attribute if it is different from the old src attribute.
+	 *
+	 * @param DOMNode $node    The given DOMNode.
+	 * @param string  $new_src The new src attribute.
+	 * @param string  $old_src The old src attribute.
+	 */
+	protected function update_src( &$node, $new_src, $old_src ) {
+		if ( $old_src === $new_src ) {
+			return;
+		}
+		$node->setAttribute( 'src', $new_src );
 	}
 }

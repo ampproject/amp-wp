@@ -17,6 +17,7 @@ class AMP_Content_Sanitizer {
 	 *
 	 * @since 0.4.1
 	 * @since 0.7 Passing return_styles=false in $global_args causes stylesheets to be returned instead of styles.
+	 * @deprecated Since 1.0
 	 *
 	 * @param string   $content HTML content string or DOM document.
 	 * @param string[] $sanitizer_classes Sanitizer classes.
@@ -62,6 +63,15 @@ class AMP_Content_Sanitizer {
 
 		$return_styles = ! empty( $args['return_styles'] );
 		unset( $args['return_styles'] );
+
+		/**
+		 * Sanitizers.
+		 *
+		 * @var AMP_Base_Sanitizer[] $sanitizers
+		 */
+		$sanitizers = array();
+
+		// Instantiate the sanitizers.
 		foreach ( $sanitizer_classes as $sanitizer_class => $sanitizer_args ) {
 			if ( ! class_exists( $sanitizer_class ) ) {
 				/* translators: %s is sanitizer class */
@@ -82,6 +92,18 @@ class AMP_Content_Sanitizer {
 				continue;
 			}
 
+			$sanitizers[ $sanitizer_class ] = $sanitizer;
+		}
+
+		// Let the sanitizers know about each other prior to sanitizing.
+		foreach ( $sanitizers as $sanitizer ) {
+			$sanitizer->init( $sanitizers );
+		}
+
+		// Sanitize.
+		foreach ( $sanitizers as $sanitizer_class => $sanitizer ) {
+			$sanitize_class_start = microtime( true );
+
 			$sanitizer->sanitize();
 
 			$scripts = array_merge( $scripts, $sanitizer->get_scripts() );
@@ -90,6 +112,8 @@ class AMP_Content_Sanitizer {
 			} else {
 				$stylesheets = array_merge( $stylesheets, $sanitizer->get_stylesheets() );
 			}
+
+			AMP_HTTP::send_server_timing( 'amp_sanitize', -$sanitize_class_start, $sanitizer_class );
 		}
 
 		return compact( 'scripts', 'styles', 'stylesheets' );
