@@ -115,6 +115,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 	flex-direction: column;
 	height: 14px;
 	padding: 0;
+	margin-top: 4px;
 	background: none;
 	border: none;
 	cursor: pointer;

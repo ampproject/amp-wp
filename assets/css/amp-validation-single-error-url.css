@@ -65,6 +65,7 @@ table.striped > tbody > tr.even {
 
 .details div.detailed {
 	padding-left: 30px;
+	margin-top: 10px;
 	font-family: Consolas, Monaco, monospace;
 }
 
@@ -118,4 +119,15 @@ table.striped > tbody > tr.even {
 
 .wp-list-table th.column-status {
 	width: 20%;
+}
+
+/** Add space between list table and the filter and search box above it. */
+#post-body-content button.action,
+#post-body-content #url-post-filter,
+#post-body-content .search-box {
+	margin-bottom: 4px;
+}
+
+#post-body-content button.reject {
+	margin-left: 4px;
 }
