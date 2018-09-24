@@ -360,6 +360,11 @@ class AMP_Validation_Error_Taxonomy {
 	public static function sanitize_term_status( $status, $options = array() ) {
 		$multiple = ! empty( $options['multiple'] );
 
+		// Catch case where an empty string is supplied. Prevent casting to 0.
+		if ( ! is_numeric( $status ) && empty( $status ) ) {
+			return $multiple ? array() : null;
+		}
+
 		if ( is_string( $status ) ) {
 			$statuses = wp_parse_id_list( $status );
 		} else {
@@ -940,6 +945,8 @@ class AMP_Validation_Error_Taxonomy {
 				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => $groups ),
 				$url
 			);
+		} else {
+			$url = remove_query_arg( self::VALIDATION_ERROR_STATUS_QUERY_VAR, $url );
 		}
 
 		return $url;

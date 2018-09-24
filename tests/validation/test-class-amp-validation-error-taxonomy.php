@@ -176,11 +176,16 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::sanitize_term_status()
 	 */
 	public function test_sanitize_term_status() {
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( '' ) );
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( false ) );
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( null ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( '0' ) );
+		$this->assertSame( array(), AMP_Validation_Error_Taxonomy::sanitize_term_status( '', array( 'multiple' => true ) ) );
 		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( '100' ) );
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS ) );
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ) );
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ) );
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, array( 'multiple' => false ) ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, array( 'multiple' => false ) ) );
 
 		$this->assertEquals(
 			array(
