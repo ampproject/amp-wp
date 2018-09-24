@@ -20,6 +20,7 @@
 	justify-content: center;
 	width: 12px;
 	height: 18px;
+	margin-top: 5px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: contain;
 	background-repeat: no-repeat;
@@ -119,6 +120,10 @@ table.striped > tbody > tr.even {
 
 .wp-list-table th.column-status {
 	width: 20%;
+}
+
+.wp-list-table th.column-error {
+	width: 30%;
 }
 
 /** Add space between list table and the filter and search box above it. */
