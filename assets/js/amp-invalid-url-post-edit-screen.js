@@ -287,14 +287,32 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * And sets this as the src of the status icon <img>.
 	 */
 	component.handleStatusChange = function handleStatusChange() {
-		const onChange = function( event ) {
-			if ( event.target.matches( 'select' ) ) {
-				component.updateSelectIcon( event.target );
+		const setRowStatusClass = function( { row, select } ) {
+			const statusText = select.options[ select.selectedIndex ].innerText.trim();
+
+			if ( statusText ) {
+				row.classList.toggle( 'new', 'New Rejected' === statusText || 'New Accepted' === statusText );
+				row.classList.toggle( 'accepted', 'Accepted' === statusText );
+				row.classList.toggle( 'rejected', 'Rejected' === statusText );
 			}
 		};
 
-		document.querySelectorAll( '.amp-validation-error-status' ).forEach( function( element ) {
-			element.addEventListener( 'change', onChange );
+		const onChange = function( { event, row, select } ) {
+			if ( event.target.matches( 'select' ) ) {
+				component.updateSelectIcon( event.target );
+				setRowStatusClass( { row, select } );
+			}
+		};
+
+		document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( function( row ) {
+			const select = row.querySelector( '.amp-validation-error-status' );
+
+			if ( select ) {
+				setRowStatusClass( { row, select } );
+				select.addEventListener( 'change', function( event ) {
+					onChange( { event, row, select } );
+				} );
+			}
 		} );
 	};
 
