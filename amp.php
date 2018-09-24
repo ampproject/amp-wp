@@ -356,6 +356,7 @@ function amp_load_classes() {
  */
 function amp_add_frontend_actions() {
 	add_action( 'wp_head', 'amp_add_amphtml_link' );
+	add_action( 'embed_footer', 'amp_add_post_embed_js' );
 }
 
 /**

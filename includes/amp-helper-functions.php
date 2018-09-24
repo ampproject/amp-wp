@@ -889,3 +889,23 @@ function amp_wp_kses_mustache( $markup ) {
 	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
 }
+
+/**
+ * Add JS required for iframe to resize itself in AMP.
+ *
+ * @todo This should be incorporated into core.
+ * @since ?.?
+ */
+function amp_add_post_embed_js() {
+	?>
+	<script>
+	if ( /amp=1/.test( location.hash ) ) {
+		window.parent.postMessage({
+			sentinel: 'amp',
+			type: 'embed-size',
+			height: document.body.scrollHeight
+		}, '*');
+	}
+	</script>
+	<?php
+}

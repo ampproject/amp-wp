@@ -21,24 +21,3 @@ function amp_frontend_add_canonical() {
 	_deprecated_function( __FUNCTION__, '1.0', 'amp_add_amphtml_link' );
 	amp_add_amphtml_link();
 }
-
-/**
- * Add JS required for iframe to resize itself in AMP.
- *
- * @todo This should be incorporated into core.
- * @since ?.?
- */
-function amp_add_post_embed_js() {
-	?>
-	<script>
-	if ( /amp=1/.test( location.hash ) ) {
-		window.parent.postMessage({
-			sentinel: 'amp',
-			type: 'embed-size',
-			height: document.body.scrollHeight
-		}, '*');
-	}
-	</script>
-	<?php
-}
-add_action( 'embed_footer', 'amp_add_post_embed_js' );
