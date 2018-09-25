@@ -343,23 +343,19 @@ function amp_register_default_scripts( $wp_scripts ) {
 
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
-	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tags() as $allowed_tag ) {
-		foreach ( $allowed_tag as $rule_spec ) {
-			if ( ! empty( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension'] ) ) {
-				$extensions = array_merge(
-					$extensions,
-					$rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension']
-				);
-			}
+	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
+		if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'], $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'] ) ) {
+			$versions = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'];
+			array_pop( $versions );
+			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
 		}
 	}
-	$extensions = array_unique( $extensions );
 
-	foreach ( $extensions as $extension ) {
+	foreach ( $extensions as $extension => $version ) {
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension,
-			'latest'
+			$version
 		);
 
 		$wp_scripts->add(
