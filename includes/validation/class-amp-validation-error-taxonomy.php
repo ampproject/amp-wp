@@ -698,14 +698,15 @@ class AMP_Validation_Error_Taxonomy {
 				foreach ( $validation_error['sources'] as $source ) {
 					if ( isset( $source['hook'] ) ) {
 						$invalid_sources['hook'] = $source['hook'];
-						break;
+					}
+					if ( isset( $source['type'], $source['name'] ) ) {
+						$invalid_sources[ $source['type'] ][] = $source['name'];
 					}
 				}
 
-				$source = array_shift( $validation_error['sources'] );
-
-				if ( isset( $source['type'], $source['name'] ) ) {
-					$invalid_sources[ $source['type'] ][] = $source['name'];
+				// Remove core if there is a plugin or theme.
+				if ( isset( $invalid_sources['core'] ) && ( isset( $invalid_sources['theme'] ) || isset( $invalid_sources['plugin'] ) ) ) {
+					unset( $invalid_sources['core'] );
 				}
 			}
 		}
