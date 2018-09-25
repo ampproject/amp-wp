@@ -17,6 +17,10 @@ th.column-error_type {
 	width: 15%;
 }
 
+td.column-error .error-code {
+	font-family: Consolas, Monaco, monospace;
+}
+
 th.column-status {
 	width: 15%;
 }
