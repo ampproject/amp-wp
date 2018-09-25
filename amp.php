@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-beta3
+ * Version: 1.0-beta4
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -49,7 +49,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-beta3' );
+define( 'AMP__VERSION', '1.0-beta4' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();

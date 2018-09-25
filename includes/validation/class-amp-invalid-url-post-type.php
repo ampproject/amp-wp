@@ -1975,7 +1975,7 @@ class AMP_Invalid_URL_Post_Type {
 		$name           = __( 'Single URL', 'amp' ); // Default.
 		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-				$name = get_the_title( $queried_object['id'] );
+				$name = html_entity_decode( get_the_title( $queried_object['id'], ENT_QUOTES ) );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
 				$name = get_term( $queried_object['id'] )->name;
 			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
