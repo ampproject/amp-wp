@@ -311,6 +311,15 @@ function amp_get_boilerplate_code() {
 }
 
 /**
+ * Add generator metadata.
+ *
+ * @since 6.0
+ */
+function amp_add_generator_metadata() {
+	printf( '<meta name="generator" content="%s" />', esc_attr( 'AMP Plugin v' . AMP__VERSION ) );
+}
+
+/**
  * Register default scripts for AMP components.
  *
  * @param WP_Scripts $wp_scripts Scripts.
