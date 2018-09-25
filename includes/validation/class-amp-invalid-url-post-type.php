@@ -919,27 +919,34 @@ class AMP_Invalid_URL_Post_Type {
 
 		$sources = $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ];
 		$output  = array();
-
-		if ( isset( $sources['plugin'] ) ) {
+		$plugins = get_plugins();
+		foreach ( wp_array_slice_assoc( $sources, array( 'plugin', 'mu-plugin' ) ) as $type => $slugs ) {
 			$plugin_names = array();
-			$plugin_slugs = array_unique( $sources['plugin'] );
-			$plugins      = get_plugins();
+			$plugin_slugs = array_unique( $slugs );
 			foreach ( $plugin_slugs as $plugin_slug ) {
-				$name = $plugin_slug;
-				foreach ( $plugins as $plugin_file => $plugin_data ) {
-					if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
-						$name = $plugin_data['Name'];
-						break;
+				if ( 'mu-plugin' === $type ) {
+					$plugin_names[] = $plugin_slug;
+				} else {
+					$name = $plugin_slug;
+					foreach ( $plugins as $plugin_file => $plugin_data ) {
+						if ( strtok( $plugin_file, '/' ) === $plugin_slug ) {
+							$name = $plugin_data['Name'];
+							break;
+						}
 					}
+					$plugin_names[] = $name;
 				}
-				$plugin_names[] = $name;
 			}
 			$count = count( $plugin_names );
 			if ( 1 === $count ) {
 				$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>%s</strong>', esc_html( $plugin_names[0] ) );
 			} else {
 				$output[] = '<details class="source">';
-				$output[] = sprintf( '<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>', esc_html__( 'Plugins', 'amp' ), $count );
+				$output[] = sprintf(
+					'<summary class="details-attributes__summary"><strong><span class="dashicons dashicons-admin-plugins"></span>%s (%d)</strong></summary>',
+					'mu-plugin' === $type ? esc_html__( 'Must-Use Plugins', 'amp' ) : esc_html__( 'Plugins', 'amp' ),
+					$count
+				);
 				$output[] = '<div>';
 				$output[] = implode( '<br/>', array_unique( $plugin_names ) );
 				$output[] = '</div>';
