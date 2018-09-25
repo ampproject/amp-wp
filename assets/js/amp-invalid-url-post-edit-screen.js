@@ -1,9 +1,7 @@
 /* exported ampInvalidUrlPostEditScreen */
 
-var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
-	var component;
-
-	component = {
+const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
+	let component = {
 		data: {
 			l10n: {
 				unsaved_changes: '',
@@ -288,13 +286,13 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 */
 	component.handleStatusChange = function handleStatusChange() {
 		const setRowStatusClass = function( { row, select } ) {
-			const statusText = select.options[ select.selectedIndex ].innerText.trim();
+			const acceptedValue = 3,
+				rejectedValue = 2;
+			let status = parseInt( select.options[ select.selectedIndex ].value );
 
-			if ( statusText ) {
-				row.classList.toggle( 'new', 'New Rejected' === statusText || 'New Accepted' === statusText );
-				row.classList.toggle( 'accepted', 'Accepted' === statusText );
-				row.classList.toggle( 'rejected', 'Rejected' === statusText );
-			}
+			row.classList.toggle( 'new', isNaN( status ) );
+			row.classList.toggle( 'accepted', acceptedValue === status );
+			row.classList.toggle( 'rejected', rejectedValue === status );
 		};
 
 		const onChange = function( { event, row, select } ) {
