@@ -899,13 +899,15 @@ function amp_wp_kses_mustache( $markup ) {
 function amp_add_post_embed_js() {
 	?>
 	<script>
-	if ( /amp=1/.test( location.hash ) ) {
-		window.parent.postMessage({
-			sentinel: 'amp',
-			type: 'embed-size',
-			height: document.body.scrollHeight
-		}, '*');
-	}
+	window.addEventListener( 'load', function() {
+		if ( /amp=1/.test( location.hash ) ) {
+			window.parent.postMessage({
+				sentinel: 'amp',
+				type: 'embed-size',
+				height: document.body.scrollHeight
+			}, '*');
+		}
+	} );
 	</script>
 	<?php
 }

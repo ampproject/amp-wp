@@ -52,6 +52,11 @@ class AMP_Post_Embed_Handler extends AMP_Base_Embed_Handler {
 			return $cache;
 		}
 
+		$iframe->removeAttribute( 'style' );
+
+		// @todo Top-navigation doesn't work because linkClickHandler() prevents it. See <https://github.com/WordPress/wordpress-develop/blob/4.9.2/src/wp-includes/js/wp-embed-template.js#L149-L170>.
+		$iframe->setAttribute( 'sandbox', strval( $iframe->getAttribute( 'sandbox' ) ) . ' allow-scripts allow-same-origin allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation' );
+
 		// Note we have to exclude the blockquote because wpautop() does not like it.
 		$link = $dom->getElementsByTagName( 'a' )->item( 0 );
 		$link->setAttribute( 'placeholder', '' );
@@ -62,7 +67,9 @@ class AMP_Post_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		unset( $attributes['data-secret'] );
 
-		return AMP_HTML_Utils::build_tag(
+		// @todo Try srcdoc
+		$amp_iframe = AMP_DOM_Utils::create_node(
+			$dom,
 			'amp-iframe',
 			array_merge(
 				$attributes,
@@ -70,12 +77,21 @@ class AMP_Post_Embed_Handler extends AMP_Base_Embed_Handler {
 					'src'       => strtok( $attributes['src'], '#' ), // So that `#amp=1` can be added.
 					'layout'    => 'responsive',
 					'resizable' => '',
-					'sandbox'   => 'allow-scripts allow-top-navigation-by-user-activation', // @todo Top-navigation doesn't work because linkClickHandler() prevents it. See <https://github.com/WordPress/wordpress-develop/blob/4.9.2/src/wp-includes/js/wp-embed-template.js#L149-L170>.
-
 				)
-			),
-			$dom->saveHTML( $link ) . ' <span overflow role="button" tabindex="0">' . esc_html__( 'Read more', 'amp' ) . '</span>'
+			)
 		);
+
+		$link->setAttribute( 'fallback', '' );
+		$amp_iframe->appendChild( $link->parentNode->removeChild( $link ) );
+
+		$overflow = $dom->createElement( 'span' );
+		$overflow->setAttribute( 'role', 'button' );
+		$overflow->setAttribute( 'tabindex', '0' );
+		$overflow->appendChild( $dom->createTextNode( 'More' ) );
+		$overflow->setAttribute( 'overflow', '' );
+		$amp_iframe->appendChild( $overflow );
+
+		return $dom->saveHTML( $amp_iframe );
 	}
 }
 
