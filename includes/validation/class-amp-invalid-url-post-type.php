@@ -209,6 +209,21 @@ class AMP_Invalid_URL_Post_Type {
 	public static function enqueue_post_list_screen_scripts() {
 		$screen = get_current_screen();
 
+		if ( 'edit-amp_invalid_url' === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
+			wp_enqueue_script(
+				'amp-invalid-urls-index',
+				amp_get_asset_url( 'js/amp-invalid-urls-index.js' ),
+				array(),
+				AMP__VERSION,
+				true
+			);
+			wp_add_inline_script(
+				'amp-invalid-urls-index',
+				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlsIndex.boot(); } );' ),
+				'after'
+			);
+		}
+
 		// Enqueue this on both the 'Invalid URLs' page and the single URL page.
 		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
