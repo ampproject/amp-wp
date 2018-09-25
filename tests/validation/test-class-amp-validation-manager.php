@@ -253,7 +253,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
-		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
 
 		// Test overrides.
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array( 'test' => 1 ) );

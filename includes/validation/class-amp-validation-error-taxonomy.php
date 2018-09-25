@@ -701,6 +701,8 @@ class AMP_Validation_Error_Taxonomy {
 					}
 					if ( isset( $source['type'], $source['name'] ) ) {
 						$invalid_sources[ $source['type'] ][] = $source['name'];
+					} elseif ( isset( $source['embed'] ) ) {
+						$invalid_sources['embed'] = true;
 					}
 				}
 

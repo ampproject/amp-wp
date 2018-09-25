@@ -475,7 +475,8 @@ class AMP_Validation_Manager {
 			add_filter( $wrapped_filter, array( __CLASS__, 'decorate_filter_source' ), PHP_INT_MAX );
 		}
 
-		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), -1, 2 );
+		add_filter( 'do_shortcode_tag', array( __CLASS__, 'decorate_shortcode_source' ), PHP_INT_MAX, 2 );
+		add_filter( 'embed_oembed_html', array( __CLASS__, 'decorate_embed_source' ), PHP_INT_MAX, 3 );
 
 		$do_blocks_priority  = has_filter( 'the_content', 'do_blocks' );
 		$is_gutenberg_active = (
@@ -1235,6 +1236,28 @@ class AMP_Validation_Manager {
 			self::get_source_comment( $source, false ),
 		) );
 		return $output;
+	}
+
+	/**
+	 * Filters the output created by embeds.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $output Embed output.
+	 * @param string $url    URL.
+	 * @param array  $attr   Attributes.
+	 * @return string Output.
+	 */
+	public static function decorate_embed_source( $output, $url, $attr ) {
+		$source = array(
+			'embed' => $url,
+			'attr'  => $attr,
+		);
+		return implode( '', array(
+			self::get_source_comment( $source, true ),
+			trim( $output ),
+			self::get_source_comment( $source, false ),
+		) );
 	}
 
 	/**
