@@ -1237,8 +1237,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Invalid_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
 		$output = ob_get_clean();
 		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
-		$this->assertContains( '<button type="button" class="hidden button action accept">', $output );
-		$this->assertContains( '<button type="button" class="hidden button action reject">', $output );
+		$this->assertContains( '<div id="accept-reject-buttons" class="hidden">', $output );
+		$this->assertContains( '<button type="button" class="button action accept">', $output );
+		$this->assertContains( '<button type="button" class="button action reject">', $output );
 	}
 
 	/**

@@ -140,3 +140,16 @@ table.striped > tbody > tr.even {
 #post-body-content button.reject {
 	margin-left: 4px;
 }
+
+#accept-reject-buttons:not(.hidden) {
+	display: inline-block;
+}
+
+#vertical-divider {
+	display: inline-block;
+	vertical-align: middle;
+	width: 15px;
+	margin-right: 15px;
+	height: 30px;
+	border-right: 1px solid #a0a5aa;
+}
