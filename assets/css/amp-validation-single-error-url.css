@@ -59,6 +59,10 @@ table.striped > tbody > tr.even {
 }
 
 /** Details row styles. */
+.details details.details-attributes:hover {
+	cursor: pointer;
+}
+
 .details ul.detailed {
 	padding: 0 32px;
 	margin-top: 0;
