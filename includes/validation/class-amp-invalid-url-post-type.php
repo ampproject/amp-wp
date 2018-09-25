@@ -976,6 +976,10 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
+		if ( empty( $output ) && ! empty( $sources['hook'] ) ) {
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $sources['hook'] ) );
+		}
+
 		if ( empty( $sources ) && $active_theme ) {
 			$theme_obj = wp_get_theme( $active_theme );
 			if ( ! $theme_obj->errors() ) {
