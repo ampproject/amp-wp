@@ -389,6 +389,34 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_add_generator_metadata.
+	 *
+	 * @covers \amp_add_generator_metadata()
+	 */
+	public function test_amp_add_generator_metadata() {
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=classic', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=paired', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=native', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+	}
+
+	/**
 	 * Test script registering.
 	 *
 	 * @covers \amp_register_default_scripts()
