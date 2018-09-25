@@ -792,15 +792,21 @@ class AMP_Theme_Support {
 		 *
 		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
 		 */
-		add_action( 'wp_head', function() {
+		$add_custom_style = function() {
 			echo '<style amp-custom></style>';
-		}, 0 );
-		add_action( 'wp_head', function() {
+		};
+		add_action( 'wp_head', $add_custom_style, 0 );
+		add_action( 'embed_head', $add_custom_style, 0 );
+		$print_amp_boilerplate_code = function() {
 			echo amp_get_boilerplate_code(); // WPCS: xss ok.
-		}, PHP_INT_MAX );
+		};
+		add_action( 'wp_head', $print_amp_boilerplate_code, PHP_INT_MAX );
+		add_action( 'embed_head', $print_amp_boilerplate_code, PHP_INT_MAX );
 
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
+		add_action( 'embed_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
+		add_action( 'enqueue_embed_scripts', array( __CLASS__, 'enqueue_assets' ) );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
