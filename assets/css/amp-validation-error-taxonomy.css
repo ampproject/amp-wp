@@ -143,6 +143,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 .status-text {
 	display: flex;
 	align-items: center;
+	padding-bottom: 0.6rem;
 }
 
 .status-text::before {

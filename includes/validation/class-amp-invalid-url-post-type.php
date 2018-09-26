@@ -460,7 +460,7 @@ class AMP_Invalid_URL_Post_Type {
 			</span>
 			<?php
 		}
-		echo implode( '<br>', $result ); // WPCS: xss ok.
+		echo implode( '', $result ); // WPCS: xss ok.
 	}
 
 	/**
