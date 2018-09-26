@@ -339,7 +339,6 @@ class AMP_Options_Manager {
 	 *
 	 * Uses the user meta values for the dismissed WP pointers.
 	 * So once the user dismisses this notice, it will never appear again.
-	 *
 	 */
 	public static function render_welcome_notice() {
 		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
