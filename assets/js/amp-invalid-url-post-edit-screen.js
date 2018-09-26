@@ -286,9 +286,9 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 	 */
 	component.handleStatusChange = function handleStatusChange() {
 		const setRowStatusClass = function( { row, select } ) {
-			const acceptedValue = 3,
-				rejectedValue = 2;
-			let status = parseInt( select.options[ select.selectedIndex ].value );
+			const acceptedValue = 3;
+			const rejectedValue = 2;
+			const status = parseInt( select.options[ select.selectedIndex ].value );
 
 			row.classList.toggle( 'new', isNaN( status ) );
 			row.classList.toggle( 'accepted', acceptedValue === status );

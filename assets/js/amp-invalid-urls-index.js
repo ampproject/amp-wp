@@ -24,10 +24,8 @@ const ampInvalidUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
 	 */
 	component.highlightRowsWithNewStatus = function highlightRowsWithNewStatus() {
 		document.querySelectorAll( 'tr[id^="post-"]' ).forEach( function( row ) {
-			let newStatus = row.querySelector( 'span.status-text.' + component.classes.new );
-
-			if ( newStatus ) {
-				row.classList.toggle( 'new' );
+			if ( row.querySelector( 'span.status-text.' + component.classes.new ) ) {
+				row.classList.add( 'new' );
 			}
 		} );
 	};
