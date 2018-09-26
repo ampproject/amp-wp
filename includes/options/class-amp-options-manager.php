@@ -51,6 +51,7 @@ class AMP_Options_Manager {
 		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_settings_screen_scripts' ) );
 	}
 
 	/**
@@ -339,7 +340,6 @@ class AMP_Options_Manager {
 	 * Uses the user meta values for the dismissed WP pointers.
 	 * So once the user dismisses this notice, it will never appear again.
 	 *
-	 * @todo: Add the full copy for this notice when it is decided.
 	 */
 	public static function render_welcome_notice() {
 		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
@@ -353,12 +353,15 @@ class AMP_Options_Manager {
 		}
 
 		?>
-		<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
-			<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>" alt="AMP" width="40" height="40" style="float: left; margin: 5px;">
-			<h1><?php esc_html_e( 'Welcome to the AMP for WordPress plugin v1.0', 'amp' ); ?></h1>
-			<p><?php esc_html_e( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
-			<h2><?php esc_html_e( 'What&#8217;s New', 'amp' ); ?></h2>
-			<p><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this v1.0 release makes it easier than ever to bring a rich, performant experience to your WordPress site via AMP HTML.', 'amp' ); ?></p>
+		<div class="amp-welcome-notice notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
+			<div class="notice-dismiss"></div>
+			<div class="amp-welcome-icon-holder">
+				<span class="amp-welcome-icon"></span>
+			</div>
+			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
+			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
+			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
+			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary">Learn More</a>
 		</div>
 
 		<script>
@@ -587,5 +590,21 @@ class AMP_Options_Manager {
 		if ( isset( $message ) ) {
 			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, $notice_type );
 		}
+	}
+
+	/**
+	 * Enqueue Settings Screen Scripts
+	 */
+	public static function enqueue_settings_screen_scripts() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		wp_enqueue_style(
+			'amp-settings',
+			amp_get_asset_url( 'css/amp-settings.css' ),
+			false,
+			AMP__VERSION
+		);
 	}
 }
