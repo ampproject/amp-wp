@@ -14,7 +14,7 @@ const OPEN_CLASS = 'is-open';
  * Adds detail toggle buttons to the header and footer rows of the validation error "details" column.
  * The buttons are added via JS because there's no easy way to append them to the heading of a sortable
  * table column via backend code.
- * 
+ *
  * @param {string} containerSelector Selector for elements that will have the button added.
  * @param {string} ariaLabel Screen reader label for the button.
  * @return {Array} Array of added buttons.
@@ -61,6 +61,24 @@ function addToggleAllListener( { btn, toggleAllButtonSelector = null, targetDeta
 	btn.addEventListener( 'click', onButtonClick );
 }
 
+/**
+ * Adds classes to the rows for the amp_validation_error term list table.
+ *
+ * This is needed because \WP_Terms_List_Table::single_row() does not allow for additional
+ * attributes to be added to the <tr> element.
+ */
+function addTermListTableRowClasses() {
+	const rows = [ ...document.querySelectorAll( '#the-list tr' ) ];
+	rows.forEach( ( row ) => {
+		const statusText = row.querySelector( '.column-status > .status-text' );
+		if ( statusText ) {
+			row.classList.toggle( 'new', statusText.classList.contains( 'new' ) );
+			row.classList.toggle( 'accepted', statusText.classList.contains( 'accepted' ) );
+			row.classList.toggle( 'rejected', statusText.classList.contains( 'rejected' ) );
+		}
+	} );
+}
+
 domReady( () => {
 	addToggleButtons( 'th.column-details.manage-column', detailToggleBtnAriaLabel )
 		.forEach( ( btn ) => {
@@ -79,4 +97,6 @@ domReady( () => {
 				targetDetailsSelector: 'details.source'
 			} );
 		} );
+
+	addTermListTableRowClasses();
 } );

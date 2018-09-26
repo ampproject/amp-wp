@@ -1,9 +1,7 @@
 /* exported ampInvalidUrlPostEditScreen */
 
-var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
-	var component;
-
-	component = {
+const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
+	let component = {
 		data: {
 			l10n: {
 				unsaved_changes: '',
@@ -287,14 +285,32 @@ var ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unuse
 	 * And sets this as the src of the status icon <img>.
 	 */
 	component.handleStatusChange = function handleStatusChange() {
-		const onChange = function( event ) {
+		const setRowStatusClass = function( { row, select } ) {
+			const acceptedValue = 3;
+			const rejectedValue = 2;
+			const status = parseInt( select.options[ select.selectedIndex ].value );
+
+			row.classList.toggle( 'new', isNaN( status ) );
+			row.classList.toggle( 'accepted', acceptedValue === status );
+			row.classList.toggle( 'rejected', rejectedValue === status );
+		};
+
+		const onChange = function( { event, row, select } ) {
 			if ( event.target.matches( 'select' ) ) {
 				component.updateSelectIcon( event.target );
+				setRowStatusClass( { row, select } );
 			}
 		};
 
-		document.querySelectorAll( '.amp-validation-error-status' ).forEach( function( element ) {
-			element.addEventListener( 'change', onChange );
+		document.querySelectorAll( 'tr[id^="tag-"]' ).forEach( function( row ) {
+			const select = row.querySelector( '.amp-validation-error-status' );
+
+			if ( select ) {
+				setRowStatusClass( { row, select } );
+				select.addEventListener( 'change', function( event ) {
+					onChange( { event, row, select } );
+				} );
+			}
 		} );
 	};
 
