@@ -1696,14 +1696,16 @@ class AMP_Validation_Error_Taxonomy {
 
 					switch ( $term->term_group ) {
 						case self::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+							$img_src = 'baseline-error-red';
+							break;
 						case self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-							$img_src = 'baseline-error';
+							$img_src = 'baseline-error-green';
 							break;
 						case self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
 							$img_src = 'baseline-check-circle-green';
 							break;
 						case self::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-							$img_src = 'baseline-error-blue';
+							$img_src = 'error-rejected';
 							break;
 					}
 
@@ -1719,10 +1721,12 @@ class AMP_Validation_Error_Taxonomy {
 					</label>
 					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
 						<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
-							<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error.svg' ) ); ?>">
+
 								<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group ) : ?>
+								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-green.svg' ) ); ?>">
 									<?php esc_html_e( 'New Accepted', 'amp' ); ?>
 								<?php else : ?>
+								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-red.svg' ) ); ?>">
 									<?php esc_html_e( 'New Rejected', 'amp' ); ?>
 								<?php endif; ?>
 							</option>
@@ -1730,7 +1734,7 @@ class AMP_Validation_Error_Taxonomy {
 						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
 							<?php esc_html_e( 'Accepted', 'amp' ); ?>
 						</option>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-blue.svg' ) ); ?>">
+						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
 							<?php esc_html_e( 'Rejected', 'amp' ); ?>
 						</option>
 					</select>

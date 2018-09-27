@@ -429,7 +429,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['new_rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %1$s is the status, %2$s is the count */
-				'<span class="status-text new">%1$s: %2$s</span>',
+				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
 				esc_html__( 'New Rejected', 'amp' ),
 				number_format_i18n( $counts['new_rejected'] )
 			);
@@ -437,7 +437,7 @@ class AMP_Invalid_URL_Post_Type {
 		if ( $counts['new_accepted'] ) {
 			$result[] = sprintf(
 				/* translators: %1$s is the status, %2$s is the count */
-				'<span class="status-text new">%1$s: %2$s</span>',
+				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
 				esc_html__( 'New Accepted', 'amp' ),
 				number_format_i18n( $counts['new_accepted'] )
 			);

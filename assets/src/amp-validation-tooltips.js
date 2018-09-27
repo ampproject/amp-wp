@@ -9,8 +9,8 @@ function sourcesPointer() {
 		jQuery( this ).pointer( {
 			content: jQuery( this ).next( '.tooltip' ).attr( 'data-content' ),
 			position: {
-				edge: 'top',
-				align: 'left'
+				edge: 'left',
+				align: 'center'
 			},
 			pointerClass: 'wp-pointer wp-pointer--tooltip'
 		} ).pointer( 'open' );
