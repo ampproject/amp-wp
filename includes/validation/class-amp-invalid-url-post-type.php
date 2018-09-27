@@ -396,34 +396,14 @@ class AMP_Invalid_URL_Post_Type {
 	 * }
 	 */
 	public static function display_invalid_url_validation_error_counts_summary( $post, $args = array() ) {
-		$args   = array_merge(
+		$args              = array_merge(
 			array(
 				'display_enabled_status' => false,
 			),
 			$args
 		);
-		$counts = array_fill_keys(
-			array( 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ),
-			0
-		);
-
 		$validation_errors = self::get_invalid_url_validation_errors( $post );
-		foreach ( $validation_errors as $error ) {
-			switch ( $error['term']->term_group ) {
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
-					$counts['new_rejected']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-					$counts['new_accepted']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-					$counts['ack_accepted']++;
-					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-					$counts['ack_rejected']++;
-					break;
-			}
-		}
+		$counts            = self::count_invalid_url_validation_errors( $validation_errors );
 
 		$result = array();
 		if ( $counts['new_rejected'] ) {
@@ -460,9 +440,8 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		if ( $args['display_enabled_status'] ) {
-			$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
-			$is_amp_enabled              = ! $are_there_unaccepted_errors;
-			$class                       = $is_amp_enabled ? 'sanitized' : 'new';
+			$is_amp_enabled = self::is_amp_enabled_on_post( $post );
+			$class          = $is_amp_enabled ? 'sanitized' : 'new';
 			?>
 			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
 				<?php
@@ -1543,11 +1522,13 @@ class AMP_Invalid_URL_Post_Type {
 			return;
 		}
 
+		$post = get_post();
 		$data = array(
 			'l10n' => array(
 				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
 				'page_heading'    => self::get_single_url_page_heading(),
 				'show_all'        => __( 'Show all', 'amp' ),
+				'amp_enabled'     => self::is_amp_enabled_on_post( $post ),
 			),
 		);
 
@@ -1993,7 +1974,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		// Mainly uses the same conditionals as print_status_meta_box().
-		$post           = get_post( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
+		$post           = get_post();
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
 		$name           = __( 'Single URL', 'amp' ); // Default.
 		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
@@ -2129,5 +2110,54 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		return $messages;
+	}
+
+	/**
+	 * Is AMP Enabled on Post
+	 *
+	 * @param WP_Post $post Post object to check.
+	 *
+	 * @return bool|void
+	 */
+	public static function is_amp_enabled_on_post( $post ) {
+		if ( empty( $post ) ) {
+			return;
+		}
+
+		$validation_errors           = self::get_invalid_url_validation_errors( $post );
+		$counts                      = self::count_invalid_url_validation_errors( $validation_errors );
+		$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
+		return ! $are_there_unaccepted_errors;
+	}
+
+	/**
+	 * Count Invalid URL Validation Errors
+	 *
+	 * @param array $validation_errors Validation errors.
+	 *
+	 * @return array
+	 */
+	protected static function count_invalid_url_validation_errors( $validation_errors ) {
+		$counts = array_fill_keys(
+			array( 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ),
+			0
+		);
+		foreach ( $validation_errors as $error ) {
+			switch ( $error['term']->term_group ) {
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+					$counts['new_rejected']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
+					$counts['new_accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
+					$counts['ack_accepted']++;
+					break;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
+					$counts['ack_rejected']++;
+					break;
+			}
+		}
+		return $counts;
 	}
 }

@@ -7,7 +7,8 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 				unsaved_changes: '',
 				showing_number_errors: '',
 				page_heading: '',
-				show_all: ''
+				show_all: '',
+				amp_enabled: false
 			}
 		}
 	};
@@ -41,6 +42,7 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 		component.handleBulkActions();
 		component.changeHeading();
 		component.watchForUnsavedChanges();
+		component.showAMPIconIfEnabled();
 	};
 
 	/**
@@ -388,6 +390,18 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 		if ( headingQuery[ 0 ] && component.data.l10n.page_heading ) {
 			headingQuery[ 0 ].innerText = component.data.l10n.page_heading;
 			document.title = component.data.l10n.page_heading + document.title;
+		}
+	};
+
+	/**
+	 * Adds the AMP icon to the page heading if AMP is enabled on this URL.
+	 */
+	component.showAMPIconIfEnabled = function() {
+		const heading = document.querySelector( 'h1.wp-heading-inline' );
+		if ( heading && true === component.data.l10n.amp_enabled ) {
+			const ampIcon = document.createElement( 'span' );
+			ampIcon.classList.add( 'status-text', 'sanitized' );
+			heading.appendChild( ampIcon );
 		}
 	};
 
