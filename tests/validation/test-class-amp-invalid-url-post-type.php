@@ -1061,7 +1061,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_add_edit_post_inline_script() {
 		global $pagenow;
 
-		$pagenow = 'post.php';
+		$pagenow              = 'post.php';
+		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$post                 = $this->factory()->post->create_and_get();
+		$_GET['post']         = $amp_invalid_url_post->ID;
 		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
 		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
@@ -1081,10 +1084,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( strval( $total_errors ), $inline_script );
 
 		// The 'page_heading' value should be present in the inline script.
-		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$post                 = $this->factory()->post->create_and_get();
-		$_GET['post']         = $amp_invalid_url_post->ID;
-		$_GET['action']       = 'edit';
+		$_GET['action'] = 'edit';
 		update_post_meta(
 			$amp_invalid_url_post->ID,
 			'_amp_queried_object',
