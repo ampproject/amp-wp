@@ -6,6 +6,11 @@
 	width: auto;
 }
 
+/* Move the 'All dates' filter to the right of the new status and type filters */
+#filter-by-date {
+	float: none;
+}
+
 /* Improve column widths */
 td.column-details pre,
 td.column-sources pre {
@@ -15,6 +20,10 @@ td.column-sources pre {
 th.column-created_date_gmt,
 th.column-error_type {
 	width: 15%;
+}
+
+td.column-error .error-code {
+	font-family: Consolas, Monaco, monospace;
 }
 
 th.column-status {
@@ -115,6 +124,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 	flex-direction: column;
 	height: 14px;
 	padding: 0;
+	margin-top: 4px;
 	background: none;
 	border: none;
 	cursor: pointer;
@@ -138,6 +148,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 .status-text {
 	display: flex;
 	align-items: center;
+	padding-bottom: 0.6rem;
 }
 
 .status-text::before {
@@ -217,6 +228,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 .notice.accept-reject-error {
 	display: flex;
+	margin-bottom: 0;
 }
 
 .notice.accept-reject-error > p {
@@ -239,10 +251,19 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	/* @todo Add red colors */
 }
 
+.notice.error-details {
+	margin-top: 1px;
+}
+
 .wp-heading-inline .status-text {
 	display: inline-flex;
 	margin-left: 10px;
 	vertical-align: middle;
+	padding-bottom: 0;
+}
+
+.wp-heading-inline code {
+	font-size: 1rem;
 }
 
 /** Details post action. */

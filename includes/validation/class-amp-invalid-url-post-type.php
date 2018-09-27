@@ -474,7 +474,7 @@ class AMP_Invalid_URL_Post_Type {
 			</span>
 			<?php
 		}
-		echo implode( '<br>', $result ); // WPCS: xss ok.
+		echo implode( '', $result ); // WPCS: xss ok.
 	}
 
 	/**
@@ -903,7 +903,8 @@ class AMP_Invalid_URL_Post_Type {
 					}
 				}
 				if ( ! empty( $items ) ) {
-					echo implode( ',<br/>', $items ); // WPCS: XSS OK.
+					$imploded_items = implode( ',</div><div>', $items );
+					echo sprintf( '<div>%s</div>', $imploded_items ); // WPCS: XSS OK.
 				} else {
 					esc_html_e( '--', 'amp' );
 				}
@@ -1209,15 +1210,7 @@ class AMP_Invalid_URL_Post_Type {
 			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
 			$error_title      = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 			$validation_error = json_decode( $error->description, true );
-			?>
-			<div class="notice">
-				<ul>
-					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
-				</ul>
-			</div>
-
-			<?php
-			$accept_all_url = wp_nonce_url(
+			$accept_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
@@ -1226,7 +1219,7 @@ class AMP_Invalid_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
 			);
-			$reject_all_url = wp_nonce_url(
+			$reject_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
@@ -1280,6 +1273,14 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				echo '</div>';
 			}
+
+			?>
+			<div class="notice error-details">
+				<ul>
+					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
+				</ul>
+			</div>
+			<?php
 
 			$heading = sprintf(
 				'%s: <code>%s</code>%s',
@@ -1773,8 +1774,11 @@ class AMP_Invalid_URL_Post_Type {
 			<?php $wp_list_table->search_box( esc_html__( 'Search Errors', 'amp' ), 'invalid-url-search' ); ?>
 		</form>
 
-		<button type="button" class="hidden button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-		<button type="button" class="hidden button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+		<div id="accept-reject-buttons" class="hidden">
+			<button type="button" class="button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
+			<button type="button" class="button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+			<div id="vertical-divider"></div>
+		</div>
 		<div id="url-post-filter" class="alignleft actions">
 			<?php AMP_Validation_Error_Taxonomy::render_error_type_filter(); ?>
 		</div>

@@ -20,6 +20,7 @@
 	justify-content: center;
 	width: 12px;
 	height: 18px;
+	margin-top: 5px;
 	background-image: url("../images/down-triangle.svg");
 	background-size: contain;
 	background-repeat: no-repeat;
@@ -58,6 +59,10 @@ table.striped > tbody > tr.even {
 }
 
 /** Details row styles. */
+.details details.details-attributes:hover {
+	cursor: pointer;
+}
+
 .details ul.detailed {
 	padding: 0 32px;
 	margin-top: 0;
@@ -65,6 +70,7 @@ table.striped > tbody > tr.even {
 
 .details div.detailed {
 	padding-left: 30px;
+	margin-top: 10px;
 	font-family: Consolas, Monaco, monospace;
 }
 
@@ -86,10 +92,6 @@ table.striped > tbody > tr.even {
 .column-status img {
 	width: 1.5rem;
 	margin-top: 0.2rem;
-}
-
-#amp_validation_status #amp-enabled-icon {
-	margin-bottom: 1.2rem;
 }
 
 #number-errors {
@@ -118,6 +120,34 @@ table.striped > tbody > tr.even {
 
 .wp-list-table th.column-status {
 	width: 20%;
+}
+
+.wp-list-table th.column-error {
+	width: 30%;
+}
+
+/** Add space between list table and the filter and search box above it. */
+#post-body-content button.action,
+#post-body-content #url-post-filter,
+#post-body-content .search-box {
+	margin-bottom: 4px;
+}
+
+#post-body-content button.reject {
+	margin-left: 4px;
+}
+
+#accept-reject-buttons:not(.hidden) {
+	display: inline-block;
+}
+
+#vertical-divider {
+	display: inline-block;
+	vertical-align: middle;
+	width: 15px;
+	margin-right: 15px;
+	height: 30px;
+	border-right: 1px solid #a0a5aa;
 }
 .amp-validation-error-status {
 	width: auto;

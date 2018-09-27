@@ -1662,7 +1662,7 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$content .= '<p>';
 					$content .= sprintf(
-						'<a href="%s"><code>%s</code></a>',
+						'<a href="%s" class="error-code">%s</a>',
 						admin_url( add_query_arg( array(
 							self::TAXONOMY_SLUG => $term->name,
 							'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,

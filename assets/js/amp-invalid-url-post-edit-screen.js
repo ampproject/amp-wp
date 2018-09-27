@@ -325,6 +325,7 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 	component.handleBulkActions = function handleBulkActions() {
 		const acceptButton = document.querySelector( 'button.action.accept' );
 		const rejectButton = document.querySelector( 'button.action.reject' );
+		const acceptAndRejectContainer = document.getElementById( 'accept-reject-buttons' );
 
 		const onChange = function( event ) {
 			let areThereCheckedBoxes;
@@ -335,8 +336,7 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 
 			if ( event.target.checked ) {
 				// This checkbox was checked, so ensure the buttons display.
-				acceptButton.classList.remove( 'hidden' );
-				rejectButton.classList.remove( 'hidden' );
+				acceptAndRejectContainer.classList.remove( 'hidden' );
 			} else {
 				/*
 				 * This checkbox was unchecked.
@@ -350,8 +350,7 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 					}
 				} );
 				if ( ! areThereCheckedBoxes ) {
-					acceptButton.classList.add( 'hidden' );
-					rejectButton.classList.add( 'hidden' );
+					acceptAndRejectContainer.classList.add( 'hidden' );
 				}
 			}
 		};
