@@ -1063,8 +1063,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 
 		$pagenow              = 'post.php';
 		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$post                 = $this->factory()->post->create_and_get();
-		$_GET['post']         = $amp_invalid_url_post->ID;
+		$test_post            = $this->factory()->post->create_and_get();
+
+		$post         = $amp_invalid_url_post;
+		$_GET['post'] = $amp_invalid_url_post->ID;
 		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
 		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
@@ -1090,14 +1092,14 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'_amp_queried_object',
 			array(
 				'type' => 'post',
-				'id'   => $post->ID,
+				'id'   => $test_post->ID,
 			)
 		);
 		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
 		$after_script  = wp_scripts()->registered[ AMP_Invalid_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
 		$inline_script = end( $after_script );
 		$this->assertContains(
-			sprintf( 'Errors for: %s', $post->post_title ),
+			sprintf( 'Errors for: %s', $test_post->post_title ),
 			$inline_script
 		);
 		$this->assertContains( 'Show all', $inline_script );
@@ -1455,7 +1457,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $post->post_title ),
+			sprintf( 'Errors for: %s', $amp_invalid_url_post->post_title ),
 			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 		);
 
