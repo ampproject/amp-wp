@@ -254,6 +254,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	display: inline-flex;
 	margin-left: 10px;
 	vertical-align: middle;
+	padding-bottom: 0;
 }
 
 .wp-heading-inline code {
