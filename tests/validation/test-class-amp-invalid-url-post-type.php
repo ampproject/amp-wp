@@ -1457,7 +1457,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			)
 		);
 		$this->assertEquals(
-			sprintf( 'Errors for: %s', $amp_invalid_url_post->post_title ),
+			sprintf( 'Errors for: %s', $test_post->post_title ),
 			AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 		);
 
