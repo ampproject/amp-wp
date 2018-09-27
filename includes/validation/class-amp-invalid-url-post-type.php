@@ -1537,7 +1537,7 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_edit_post_inline_script() {
 		$current_screen = get_current_screen();
-		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
+		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type || ! isset( $_GET['post'] ) ) { // WPCS: CSRF OK.
 			return;
 		}
 
