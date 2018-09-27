@@ -1212,11 +1212,6 @@ class AMP_Invalid_URL_Post_Type {
 			$error_title      = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 			$validation_error = json_decode( $error->description, true );
 			?>
-			<div class="notice">
-				<ul>
-					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
-				</ul>
-			</div>
 
 			<?php
 			$accept_all_url = wp_nonce_url(
@@ -1282,6 +1277,14 @@ class AMP_Invalid_URL_Post_Type {
 				}
 				echo '</div>';
 			}
+
+			?>
+			<div class="notice error-details">
+				<ul>
+					<?php echo AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $error ); // WPCS : XSS OK. ?>
+				</ul>
+			</div>
+			<?php
 
 			$heading = sprintf(
 				'%s: <code>%s</code>%s',

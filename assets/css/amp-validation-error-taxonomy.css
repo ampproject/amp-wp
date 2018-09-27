@@ -218,6 +218,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 
 .notice.accept-reject-error {
 	display: flex;
+	margin-bottom: 0;
 }
 
 .notice.accept-reject-error > p {
@@ -238,6 +239,10 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 }
 .notice.accept-reject-error > .button.reject {
 	/* @todo Add red colors */
+}
+
+.notice.error-details {
+	margin-top: 1px;
 }
 
 .wp-heading-inline .status-text {
