@@ -1211,10 +1211,7 @@ class AMP_Invalid_URL_Post_Type {
 			$error_code       = isset( $description['code'] ) ? $description['code'] : 'error';
 			$error_title      = \AMP_Validation_Error_Taxonomy::get_error_title_from_code( $error_code );
 			$validation_error = json_decode( $error->description, true );
-			?>
-
-			<?php
-			$accept_all_url = wp_nonce_url(
+			$accept_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
@@ -1223,7 +1220,7 @@ class AMP_Invalid_URL_Post_Type {
 				),
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
 			);
-			$reject_all_url = wp_nonce_url(
+			$reject_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
 						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,

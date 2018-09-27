@@ -251,6 +251,10 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	vertical-align: middle;
 }
 
+.wp-heading-inline code {
+	font-size: 1rem;
+}
+
 /** Details post action. */
 .details button {
 	display: inline-block;
