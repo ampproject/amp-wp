@@ -119,3 +119,7 @@ table.striped > tbody > tr.even {
 .wp-list-table th.column-status {
 	width: 20%;
 }
+.amp-validation-error-status {
+	width: auto;
+	float: none;
+}
