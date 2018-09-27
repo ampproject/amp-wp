@@ -904,7 +904,8 @@ class AMP_Invalid_URL_Post_Type {
 					}
 				}
 				if ( ! empty( $items ) ) {
-					echo implode( ',<br/>', $items ); // WPCS: XSS OK.
+					$imploded_items = implode( ',</div><div>', $items );
+					echo sprintf( '<div>%s</div>', $imploded_items ); // WPCS: XSS OK.
 				} else {
 					esc_html_e( '--', 'amp' );
 				}
