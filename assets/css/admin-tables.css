@@ -33,7 +33,10 @@
 	margin-left: 10px;
 }
 td.column-found_elements_and_attributes {
-	color: #c06e60;
+	color: #970010;
+}
+td.column-found_elements_and_attributes div {
+	margin-bottom: 0.6rem;
 }
 .column-error_status .dashicons-flag.new {
 	color: #d98501;
