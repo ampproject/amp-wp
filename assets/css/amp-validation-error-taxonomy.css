@@ -6,6 +6,11 @@
 	width: auto;
 }
 
+/* Move the 'All dates' filter to the right of the new status and type filters */
+#filter-by-date {
+	float: none;
+}
+
 /* Improve column widths */
 td.column-details pre,
 td.column-sources pre {
