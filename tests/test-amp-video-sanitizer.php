@@ -40,9 +40,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
-			'video_with_blacklisted_attribute' => array(
-				'<video width="300" height="300" src="https://example.com/video.mp4" style="border-color: red;"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
+			'video_with_custom_attribute' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"></amp-video>',
 			),
 
 			'video_with_sizes_attribute_is_overridden' => array(

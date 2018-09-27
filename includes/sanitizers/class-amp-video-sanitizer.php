@@ -62,46 +62,43 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
+			$sources_count  = 0;
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
-			$new_attributes = $this->filter_video_dimensions( $new_attributes );
+			if ( isset( $new_attributes['src'] ) ) {
+				$new_attributes = $this->filter_video_dimensions( $new_attributes, $new_attributes['src'] );
+				if ( $new_attributes['src'] ) {
+					$sources_count++;
+				}
+			}
+
+			// Gather all child nodes and supply empty video dimensions from sources.
+			$child_nodes = array();
+			while ( $node->firstChild ) {
+				$child_node = $node->removeChild( $node->firstChild );
+				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
+					$src = $this->maybe_enforce_https_src( $child_node->getAttribute( 'src' ), true );
+					if ( ! $src ) {
+						// @todo $this->remove_invalid_child( $child_node ), but this will require refactoring the while loop since it uses firstChild.
+						continue; // Skip adding source.
+					}
+					$sources_count++;
+					$child_node->setAttribute( 'src', $src );
+					$new_attributes = $this->filter_video_dimensions( $new_attributes, $src );
+				}
+				$child_nodes[] = $child_node;
+			}
+
 			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
-			$new_attributes = $this->set_layout( $new_attributes );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
 				$new_attributes['layout'] = 'responsive';
 			}
+			$new_attributes = $this->set_layout( $new_attributes );
 
+			// @todo Make sure poster and artwork attributes are HTTPS.
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
-
-			foreach ( $node->childNodes as $child_node ) {
-				/**
-				 * Child node.
-				 *
-				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
-				 *
-				 * @var DOMNode $child_node
-				 */
-				$new_child_node = $child_node->cloneNode( true );
-				if ( ! $new_child_node instanceof DOMElement ) {
-					continue;
-				}
-
-				$old_child_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $new_child_node );
-				$new_child_attributes = $this->filter_attributes( $old_child_attributes );
-
-				if ( empty( $new_child_attributes['src'] ) ) {
-					continue;
-				}
-				if ( 'source' !== $new_child_node->tagName ) {
-					continue;
-				}
-
-				$this->update_src( $new_child_node, $new_child_attributes['src'], $old_child_attributes['src'] );
-
-				/**
-				 * Only append source tags with a valid src attribute
-				 */
-				$new_node->appendChild( $new_child_node );
+			foreach ( $child_nodes as $child_node ) {
+				$new_node->appendChild( $child_node );
 			}
 
 			/*
@@ -111,7 +108,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 * TODO: Add a fallback handler.
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
+			if ( 0 === $sources_count ) {
 				$this->remove_invalid_child( $node );
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
@@ -125,16 +122,17 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Filter video dimensions, try to get width and height from original file if missing.
 	 *
-	 * @param array $new_attributes Attributes.
-	 *
+	 * @param array  $new_attributes Attributes.
+	 * @param string $src            Video URL.
 	 * @return array Modified attributes.
 	 */
-	protected function filter_video_dimensions( $new_attributes ) {
-		if ( isset( $new_attributes['src'] ) && ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) ) {
+	protected function filter_video_dimensions( $new_attributes, $src ) {
+		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
 
 			// Get the width and height from the file.
-			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
-			$name = wp_basename( $new_attributes['src'], ".$ext" );
+			$path = wp_parse_url( $src, PHP_URL_PATH );
+			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
+			$name = sanitize_title( wp_basename( $path, ".$ext" ) );
 			$args = array(
 				'name'        => $name,
 				'post_type'   => 'attachment',
@@ -193,9 +191,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $this->sanitize_dimension( $value, $name );
 					break;
 
+				// @todo Convert to HTTPS when is_ssl().
 				case 'poster':
-				case 'class':
-				case 'sizes':
+				case 'artwork':
 					$out[ $name ] = $value;
 					break;
 
@@ -217,24 +215,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
-					break;
+					$out[ $name ] = $value;
 			}
 		}
 
 		return $out;
-	}
-
-	/**
-	 * Update the node's src attribute if it is different from the old src attribute.
-	 *
-	 * @param DOMNode $node    The given DOMNode.
-	 * @param string  $new_src The new src attribute.
-	 * @param string  $old_src The old src attribute.
-	 */
-	protected function update_src( &$node, $new_src, $old_src ) {
-		if ( $old_src === $new_src ) {
-			return;
-		}
-		$node->setAttribute( 'src', $new_src );
 	}
 }
