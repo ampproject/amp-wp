@@ -1059,7 +1059,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::add_edit_post_inline_script()
 	 */
 	public function test_add_edit_post_inline_script() {
-		global $pagenow;
+		global $pagenow, $post;
 
 		$pagenow              = 'post.php';
 		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );

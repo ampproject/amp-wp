@@ -397,11 +397,11 @@ const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unu
 	 * Adds the AMP icon to the page heading if AMP is enabled on this URL.
 	 */
 	component.showAMPIconIfEnabled = function() {
-		const heading = document.getElementsByClassName( 'wp-heading-inline' );
-		if ( heading[ 0 ] && true === component.data.l10n.amp_enabled ) {
-			let ampIcon = document.createElement( 'span' );
+		const heading = document.querySelector( 'h1.wp-heading-inline' );
+		if ( heading && true === component.data.l10n.amp_enabled ) {
+			const ampIcon = document.createElement( 'span' );
 			ampIcon.classList.add( 'status-text', 'sanitized' );
-			heading[ 0 ].appendChild( ampIcon );
+			heading.appendChild( ampIcon );
 		}
 	};
 
