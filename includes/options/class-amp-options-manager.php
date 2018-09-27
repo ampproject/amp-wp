@@ -354,7 +354,7 @@ class AMP_Options_Manager {
 		<div class="amp-welcome-notice notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
 			<div class="notice-dismiss"></div>
 			<div class="amp-welcome-icon-holder">
-				<img class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" srcset="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" />
+				<img class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" alt="<?php esc_html_e( 'Illustration of WordPress running AMP plugin.', 'amp' ); ?>" />
 			</div>
 			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
