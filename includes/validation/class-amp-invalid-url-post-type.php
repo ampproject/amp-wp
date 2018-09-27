@@ -209,6 +209,21 @@ class AMP_Invalid_URL_Post_Type {
 	public static function enqueue_post_list_screen_scripts() {
 		$screen = get_current_screen();
 
+		if ( 'edit-amp_invalid_url' === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
+			wp_enqueue_script(
+				'amp-invalid-urls-index',
+				amp_get_asset_url( 'js/amp-invalid-urls-index.js' ),
+				array(),
+				AMP__VERSION,
+				true
+			);
+			wp_add_inline_script(
+				'amp-invalid-urls-index',
+				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlsIndex.boot(); } );' ),
+				'after'
+			);
+		}
+
 		// Enqueue this on both the 'Invalid URLs' page and the single URL page.
 		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
@@ -974,6 +989,10 @@ class AMP_Invalid_URL_Post_Type {
 				$output[] = '</div>';
 				$output[] = '</details>';
 			}
+		}
+
+		if ( empty( $output ) && ! empty( $sources['hook'] ) ) {
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $sources['hook'] ) );
 		}
 
 		if ( empty( $sources ) && $active_theme ) {
@@ -1978,7 +1997,7 @@ class AMP_Invalid_URL_Post_Type {
 		$name           = __( 'Single URL', 'amp' ); // Default.
 		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-				$name = get_the_title( $queried_object['id'] );
+				$name = html_entity_decode( get_the_title( $queried_object['id'], ENT_QUOTES ) );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
 				$name = get_term( $queried_object['id'] )->name;
 			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {
