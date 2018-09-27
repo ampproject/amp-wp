@@ -130,7 +130,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Modified attributes.
 	 */
 	protected function filter_video_dimensions( $new_attributes ) {
-		if ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) {
+		if ( isset( $new_attributes['src'] ) && ( empty( $new_attributes['width'] ) || empty( $new_attributes['height'] ) ) ) {
 
 			// Get the width and height from the file.
 			$ext  = pathinfo( $new_attributes['src'], PATHINFO_EXTENSION );
