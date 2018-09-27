@@ -51,7 +51,6 @@ class AMP_Options_Manager {
 		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
-		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_settings_screen_scripts' ) );
 	}
 
 	/**
@@ -355,12 +354,12 @@ class AMP_Options_Manager {
 		<div class="amp-welcome-notice notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
 			<div class="notice-dismiss"></div>
 			<div class="amp-welcome-icon-holder">
-				<span class="amp-welcome-icon"></span>
+				<img class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" srcset="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" />
 			</div>
 			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
-			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary">Learn More</a>
+			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
 		</div>
 
 		<script>
@@ -374,6 +373,30 @@ class AMP_Options_Manager {
 			} );
 		} );
 		</script>
+		<style type="text/css">
+			.amp-welcome-notice {
+				padding: 38px;
+			}
+			.amp-welcome-icon-holder {
+				width: 200px;
+				height: 200px;
+				float: left;
+				margin: 0 38px 38px 0;
+			}
+			.amp-welcome-icon {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+			.amp-welcome-notice h1 {
+				font-weight: bold;
+			}
+			.amp-welcome-notice h3 {
+				font-size: 16px;
+				font-weight: 500;
+			}
+
+		</style>
 		<?php
 	}
 
@@ -589,21 +612,5 @@ class AMP_Options_Manager {
 		if ( isset( $message ) ) {
 			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, $notice_type );
 		}
-	}
-
-	/**
-	 * Enqueue Settings Screen Scripts
-	 */
-	public static function enqueue_settings_screen_scripts() {
-		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
-			return;
-		}
-
-		wp_enqueue_style(
-			'amp-settings',
-			amp_get_asset_url( 'css/amp-settings.css' ),
-			false,
-			AMP__VERSION
-		);
 	}
 }
