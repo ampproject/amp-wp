@@ -1425,8 +1425,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Invalid_URL_Post_Type::get_single_url_page_heading()
 	 */
 	public function test_get_single_url_page_heading() {
+		global $post;
 		$meta_key             = '_amp_queried_object';
-		$post                 = $this->factory()->post->create_and_get();
+		$test_post            = $this->factory()->post->create_and_get();
 		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 
 		// If $pagenow is not post.php, this should not filter the labels.
@@ -1438,17 +1439,19 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
 
 		// Though $_GET['post'] and $_GET['action'] are now set, but the post type is 'post', so this should not filter the labels.
-		$_GET['post']   = $post->ID;
+		$post           = $test_post;
+		$_GET['post']   = $test_post->ID;
 		$_GET['action'] = 'edit';
 		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
 
 		$_GET['post'] = $amp_invalid_url_post->ID;
+		$post         = $amp_invalid_url_post;
 		update_post_meta(
 			$amp_invalid_url_post->ID,
 			$meta_key,
 			array(
 				'type' => 'post',
-				'id'   => $post->ID,
+				'id'   => $test_post->ID,
 			)
 		);
 		$this->assertEquals(
