@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 720;
+	private static $spec_file_revision = 734;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -832,6 +832,12 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'renderer' => array(
+						'value_casei' => array(
+							'svg',
+							'html',
+						),
+					),
 					'src' => array(
 						'mandatory' => true,
 						'value_url' => array(
@@ -1325,6 +1331,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'blocked' => array(),
+					'date' => array(),
 					'day-size' => array(
 						'value_regex' => '[0-9]+',
 					),
@@ -1409,6 +1416,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'blocked' => array(),
+					'date' => array(),
 					'day-size' => array(
 						'value_regex' => '[0-9]+',
 					),
@@ -1487,6 +1495,7 @@ class AMP_Allowed_Tags_Generated {
 					'day-size' => array(
 						'value_regex' => '[0-9]+',
 					),
+					'end-date' => array(),
 					'end-input-selector' => array(),
 					'first-day-of-week' => array(
 						'value_regex' => '[0-6]',
@@ -1538,6 +1547,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'start-date' => array(),
 					'start-input-selector' => array(),
 					'type' => array(
 						'mandatory' => true,
@@ -1576,6 +1586,7 @@ class AMP_Allowed_Tags_Generated {
 					'day-size' => array(
 						'value_regex' => '[0-9]+',
 					),
+					'end-date' => array(),
 					'end-input-selector' => array(),
 					'first-day-of-week' => array(
 						'value_regex' => '[0-6]',
@@ -1623,6 +1634,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'start-date' => array(),
 					'start-input-selector' => array(),
 					'type' => array(
 						'mandatory' => true,
@@ -2355,11 +2367,17 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'disable-hint-reappear' => array(),
+					'initial-slider-position' => array(
+						'value_regex' => '0(\\.[0-9]+)?|1(\\.0+)?',
+					),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
 							'',
 						),
+					),
+					'step-size' => array(
+						'value_regex' => '0(\\.[0-9]+)?|1(\\.0+)?',
 					),
 				),
 				'tag_spec' => array(
@@ -2681,6 +2699,11 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'[src]' => array(),
 					'[state]' => array(),
+					'auto-resize' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'binding' => array(
 						'value' => array(
 							'always',
@@ -2806,6 +2829,37 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'requires_extension' => array(
 						'amp-mathml',
+					),
+				),
+			),
+		),
+		'amp-mowplayer' => array(
+			array(
+				'attr_spec_list' => array(
+					'autoplay' => array(),
+					'data-mediaid' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-mowplayer',
 					),
 				),
 			),
@@ -3684,6 +3738,30 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-story-access' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'type' => array(
+						'value' => array(
+							'blocking',
+							'notification',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story',
+					'requires_extension' => array(
+						'amp-access',
+					),
+				),
+			),
+		),
 		'amp-story-auto-ads' => array(
 			array(
 				'attr_spec_list' => array(),
@@ -3851,6 +3929,25 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '\\d+',
 					),
 					'data-theme' => array(),
+					'data-timeline-id' => array(
+						'value_regex' => '\\d+',
+					),
+					'data-timeline-owner-screen-name' => array(),
+					'data-timeline-screen-name' => array(),
+					'data-timeline-slug' => array(),
+					'data-timeline-source-type' => array(),
+					'data-timeline-url' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'http',
+								'https',
+							),
+						),
+					),
+					'data-timeline-user-id' => array(
+						'value_regex' => '\\d+',
+					),
 					'data-tweetid' => array(),
 					'media' => array(),
 					'noloading' => array(
@@ -7174,7 +7271,7 @@ class AMP_Allowed_Tags_Generated {
 					'crossorigin' => array(),
 					'href' => array(
 						'mandatory' => true,
-						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/(all|brands|solid|regular|light|fontawesome)\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
+						'value_regex' => 'https://cdn\\.materialdesignicons\\.com/([0-9]+\\.?)+/css/materialdesignicons\\.min\\.css|https://cloud\\.typography\\.com/[0-9]*/[0-9]*/css/fonts\\.css|https://fast\\.fonts\\.net/.*|https://fonts\\.googleapis\\.com/css\\?.*|https://fonts\\.googleapis\\.com/icon\\?.*|https://fonts\\.googleapis\\.com/earlyaccess/.*\\.css|https://maxcdn\\.bootstrapcdn\\.com/font-awesome/([0-9]+\\.?)+/css/font-awesome\\.min\\.css(\\?.*)?|https://(use|pro)\\.fontawesome\\.com/releases/v([0-9]+\\.?)+/css/(all|brands|solid|regular|light|fontawesome)\\.css|https://(use|pro)\\.fontawesome\\.com/[0-9a-zA-Z]+\\.css|https://use\\.typekit\\.net/[\\w\\p{L}\\p{N}_]+\\.css',
 					),
 					'integrity' => array(),
 					'media' => array(),
@@ -10551,6 +10648,31 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'extension_spec' => array(
 						'name' => 'amp-mathml',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-mowplayer',
 						'version' => array(
 							'0.1',
 							'latest',
