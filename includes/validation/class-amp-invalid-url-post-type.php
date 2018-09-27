@@ -1518,11 +1518,11 @@ class AMP_Invalid_URL_Post_Type {
 	 */
 	public static function add_edit_post_inline_script() {
 		$current_screen = get_current_screen();
-		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type || ! isset( $_GET['post'] ) ) { // WPCS: CSRF OK.
+		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
 			return;
 		}
 
-		$post = get_post( intval( $_GET['post'] ) );  // WPCS: CSRF OK.
+		$post = get_post();
 		$data = array(
 			'l10n' => array(
 				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
