@@ -440,7 +440,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		if ( $args['display_enabled_status'] ) {
-			$is_amp_enabled = self::is_amp_enabled_on_post( $post, $validation_errors, $counts );
+			$is_amp_enabled = self::is_amp_enabled_on_post( $post );
 			$class          = $is_amp_enabled ? 'sanitized' : 'new';
 			?>
 			<span id="amp-enabled-icon" class="status-text <?php echo esc_attr( $class ); ?>">
