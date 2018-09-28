@@ -391,7 +391,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 			$expected = $source;
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom, array_merge( [ 'add_placeholder' => false ], $args ) );
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );

@@ -13,15 +13,16 @@
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @since 1.1
-	 *
-	 * @var array
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	protected $DEFAULT_ARGS = [
-		'comment_live_list' => false,
-	];
+	public static function get_default_args() {
+		return [
+			'comment_live_list' => false,
+		];
+	}
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.

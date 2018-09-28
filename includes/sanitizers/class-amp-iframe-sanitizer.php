@@ -32,9 +32,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'iframe';
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @var array {
+	 * @since 1.3
+	 * @return array {
 	 *     Default args.
 	 *
 	 *     @type bool   $add_placeholder       Whether to add a placeholder element.
@@ -43,12 +44,20 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string $alias_origin          An alternative origin which can be supplied which is used when encountering same-origin iframes.
 	 * }
 	 */
-	protected $DEFAULT_ARGS = [
-		'add_placeholder'       => false,
-		'add_noscript_fallback' => true,
-		'current_origin'        => null,
-		'alias_origin'          => null,
-	];
+	public static function get_default_args() {
+		$parsed_home_url = wp_parse_url( get_home_url() );
+		$current_origin  = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
+		if ( isset( $parsed_home_url['port'] ) ) {
+			$current_origin .= ':' . $parsed_home_url['port'];
+		}
+
+		return [
+			'add_placeholder'       => true, // @todo Or false as originally?
+			'add_noscript_fallback' => true,
+			'current_origin'        => $current_origin,
+			'alias_origin'          => null,
+		];
+	}
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.

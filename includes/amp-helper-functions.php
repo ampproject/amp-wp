@@ -841,50 +841,37 @@ function amp_get_content_sanitizers( $post = null ) {
 		$post = null;
 	}
 
-	$parsed_home_url = wp_parse_url( get_home_url() );
-	$current_origin  = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
-	if ( isset( $parsed_home_url['port'] ) ) {
-		$current_origin .= ':' . $parsed_home_url['port'];
-	}
-
-	$sanitizers = [
-		'AMP_Core_Theme_Sanitizer'        => [
-			'template'   => get_template(),
-			'stylesheet' => get_stylesheet(),
-		],
-		'AMP_Img_Sanitizer'               => [
-			'align_wide_support' => current_theme_supports( 'align-wide' ),
-		],
-		'AMP_Form_Sanitizer'              => [],
-		'AMP_Comments_Sanitizer'          => [
-			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
-		],
-		'AMP_Video_Sanitizer'             => [],
-		'AMP_O2_Player_Sanitizer'         => [],
-		'AMP_Audio_Sanitizer'             => [],
-		'AMP_Playbuzz_Sanitizer'          => [],
-		'AMP_Embed_Sanitizer'             => [],
-		'AMP_Iframe_Sanitizer'            => [
-			'add_placeholder' => true,
-			'current_origin'  => $current_origin,
-		],
-		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
-		],
-		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		'AMP_Script_Sanitizer'            => [],
-		'AMP_Style_Sanitizer'             => [
-			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
-		],
-		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+	$sanitizer_classes = [
+		'AMP_Core_Theme_Sanitizer',
+		'AMP_Img_Sanitizer',
+		'AMP_Form_Sanitizer',
+		'AMP_Comments_Sanitizer',
+		'AMP_Video_Sanitizer',
+		'AMP_O2_Player_Sanitizer',
+		'AMP_Audio_Sanitizer',
+		'AMP_Playbuzz_Sanitizer',
+		'AMP_Embed_Sanitizer',
+		'AMP_Iframe_Sanitizer',
+		'AMP_Gallery_Block_Sanitizer', // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+		'AMP_Block_Sanitizer', // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+		'AMP_Script_Sanitizer', // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+		'AMP_Style_Sanitizer', // Always penultimate.
+		'AMP_Tag_And_Attribute_Sanitizer', // Always ultimate.
 	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
+		$sanitizer_classes[] = 'AMP_Nav_Menu_Toggle_Sanitizer';
+	}
+	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
+		$sanitizer_classes[] = 'AMP_Nav_Menu_Dropdown_Sanitizer';
 	}
 
-	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
-		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
+	// @todo This doesn't help for classes that get added via amp_content_sanitizers. Does that matter?
+	$sanitizers = [];
+	foreach ( $sanitizer_classes as $sanitizer_class ) {
+		if ( method_exists( $sanitizer_class, 'get_default_args' ) ) {
+			$sanitizers[ $sanitizer_class ] = $sanitizer_class::get_default_args();
+		}
 	}
 
 	/**

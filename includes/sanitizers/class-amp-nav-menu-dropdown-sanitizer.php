@@ -15,32 +15,27 @@
 class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @since 1.1.0
-	 * @var array
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	protected $DEFAULT_ARGS = [
-		'sub_menu_button_class'        => '',
-		'sub_menu_button_toggle_class' => '',
-		'expand_text'                  => '',
-		'collapse_text'                => '',
-		'icon'                         => null, // Optional.
-		'sub_menu_item_state_id'       => 'navMenuItemExpanded',
-	];
+	public static function get_default_args() {
+		$args = [
+			'sub_menu_button_class'        => '',
+			'sub_menu_button_toggle_class' => '',
+			'expand_text'                  => __( 'expand child menu', 'amp' ),
+			'collapse_text'                => __( 'collapse child menu', 'amp' ),
+			'icon'                         => null, // Optional.
+			'sub_menu_item_state_id'       => 'navMenuItemExpanded',
+		];
 
-	/**
-	 * AMP_Nav_Menu_Dropdown_Sanitizer constructor.
-	 *
-	 * @since 1.1.0
-	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
-	 */
-	public function __construct( $dom, $args = [] ) {
-		parent::__construct( $dom, $args );
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+		if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
+			$args = array_merge( $args, $theme_support_args['nav_menu_dropdown'] );
+		}
 
-		$this->args = self::ensure_defaults( $this->args );
+		return $args;
 	}
 
 	/**
@@ -135,28 +130,5 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 		// Empty method body.
-	}
-
-	/**
-	 * Ensure that some defaults are always set as fallback.
-	 *
-	 * @param array $args Arguments to set the defaults in as necessary.
-	 * @return array Arguments with defaults filled.
-	 */
-	protected static function ensure_defaults( $args ) {
-		// Ensure accessibility labels are always set.
-		if ( empty( $args['expand_text'] ) ) {
-			$args['expand_text'] = __( 'expand child menu', 'amp' );
-		}
-		if ( empty( $args['collapse_text'] ) ) {
-			$args['collapse_text'] = __( 'collapse child menu', 'amp' );
-		}
-
-		// Ensure the state ID is always set.
-		if ( empty( $args['nav_menu_item_state_id'] ) ) {
-			$args['nav_menu_item_state_id'] = 'navMenuItemExpanded';
-		}
-
-		return $args;
 	}
 }

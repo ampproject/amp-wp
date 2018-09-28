@@ -32,7 +32,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Placeholder for default args, to be set in child classes.
 	 *
 	 * @since 0.2
-	 *
+	 * @deprecated See get_default_args() static method.
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [];
@@ -94,6 +94,16 @@ abstract class AMP_Base_Sanitizer {
 	private $should_not_removed_nodes = [];
 
 	/**
+	 * Get default args.
+	 *
+	 * @since 1.1
+	 * @return array Default args.
+	 */
+	public static function get_default_args() {
+		return [];
+	}
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.2
@@ -112,7 +122,7 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function __construct( $dom, $args = [] ) {
 		$this->dom  = $dom;
-		$this->args = array_merge( $this->DEFAULT_ARGS, $args );
+		$this->args = array_merge( $this->DEFAULT_ARGS, static::get_default_args(), $args );
 
 		if ( ! empty( $this->args['use_document_element'] ) ) {
 			$this->root_element = $this->dom->documentElement;

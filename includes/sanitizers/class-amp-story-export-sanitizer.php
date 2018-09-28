@@ -15,14 +15,17 @@
 class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @var array
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	protected $DEFAULT_ARGS = [
-		'base_url'      => '',
-		'canonical_url' => '',
-	];
+	public static function get_default_args() {
+		return [
+			'base_url'      => '',
+			'canonical_url' => '',
+		];
+	}
 
 	/**
 	 * Default assets.

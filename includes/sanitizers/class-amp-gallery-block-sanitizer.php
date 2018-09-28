@@ -59,13 +59,16 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	protected $args;
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @var array
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	protected $DEFAULT_ARGS = [
-		'carousel_required' => false,
-	];
+	public static function get_default_args() {
+		return [
+			'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
+		];
+	}
 
 	/**
 	 * Sanitize the gallery block contained by <ul> element where necessary.

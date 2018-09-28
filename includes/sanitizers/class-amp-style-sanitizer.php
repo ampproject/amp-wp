@@ -93,24 +93,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	protected $args;
 
 	/**
-	 * Default args.
-	 *
-	 * @var array
-	 */
-	protected $DEFAULT_ARGS = [
-		'dynamic_element_selectors' => [
-			'amp-list',
-			'amp-live-list',
-			'[submit-error]',
-			'[submit-success]',
-			'amp-script',
-		],
-		'should_locate_sources'     => false,
-		'parsed_cache_variant'      => null,
-		'include_manifest_comment'  => 'always',
-	];
-
-	/**
 	 * List of stylesheet parts prior to selector/rule removal (tree shaking).
 	 *
 	 * Keys are MD5 hashes of stylesheets.
@@ -298,6 +280,27 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'amp-wistia-player',
 		'amp-youtube',
 	];
+
+	/**
+	 * Get default args.
+	 *
+	 * @since 1.3
+	 * @return array Default args.
+	 */
+	public static function get_default_args() {
+		return [
+			'dynamic_element_selectors' => [
+				'amp-list',
+				'amp-live-list',
+				'[submit-error]',
+				'[submit-success]',
+				'amp-script',
+			],
+			'should_locate_sources'     => false,
+			'parsed_cache_variant'      => null,
+			'include_manifest_comment'  => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
+		];
+	}
 
 	/**
 	 * Get error codes that can be raised during parsing of CSS.

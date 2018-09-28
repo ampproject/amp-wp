@@ -15,22 +15,6 @@
 class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Default args.
-	 *
-	 * @since 1.1.0
-	 * @var array
-	 */
-	protected $DEFAULT_ARGS = [
-		'nav_container_id'           => '',
-		'nav_container_xpath'        => '', // Alternative for 'nav_container_id', if no ID available.
-		'menu_button_id'             => '',
-		'menu_button_xpath'          => '', // Alternative for 'menu_button_id', if no ID available.
-		'nav_container_toggle_class' => '',
-		'menu_button_toggle_class'   => '', // Optional.
-		'nav_menu_toggle_state_id'   => 'navMenuToggledOn',
-	];
-
-	/**
 	 * XPath.
 	 *
 	 * @since 1.1.0
@@ -39,20 +23,28 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	protected $xpath;
 
 	/**
-	 * AMP_Nav_Menu_Toggle_Sanitizer constructor.
+	 * Get default args.
 	 *
-	 * @since 1.1.0
-	 *
-	 * @param DOMDocument $dom  DOM.
-	 * @param array       $args Args.
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	public function __construct( $dom, $args = [] ) {
-		parent::__construct( $dom, $args );
+	public static function get_default_args() {
+		$args = [
+			'nav_container_id'           => '',
+			'nav_container_xpath'        => '', // Alternative for 'nav_container_id', if no ID available.
+			'menu_button_id'             => '',
+			'menu_button_xpath'          => '', // Alternative for 'menu_button_id', if no ID available.
+			'nav_container_toggle_class' => '',
+			'menu_button_toggle_class'   => '', // Optional.
+			'nav_menu_toggle_state_id'   => 'navMenuToggledOn',
+		];
 
-		// Ensure the state ID is always set.
-		if ( empty( $this->args['nav_menu_toggle_state_id'] ) ) {
-			$this->args['nav_menu_toggle_state_id'] = $this->DEFAULT_ARGS['nav_menu_toggle_state_id'];
+		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+		if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
+			$args = array_merge( $args, $theme_support_args['nav_menu_toggle'] );
 		}
+
+		return $args;
 	}
 
 	/**

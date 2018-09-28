@@ -71,7 +71,10 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Gallery_Block_Sanitizer(
 			$dom,
-			[ 'content_max_width' => 600 ]
+			[
+				'content_max_width' => 600,
+				'carousel_required' => false,
+			]
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );

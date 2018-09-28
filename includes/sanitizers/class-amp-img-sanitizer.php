@@ -41,13 +41,16 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'img';
 
 	/**
-	 * Default args.
+	 * Get default args.
 	 *
-	 * @var array
+	 * @since 1.3
+	 * @return array Default args.
 	 */
-	protected $DEFAULT_ARGS = [
-		'add_noscript_fallback' => true,
-	];
+	public static function get_default_args() {
+		return [
+			'add_noscript_fallback' => true,
+		];
+	}
 
 	/**
 	 * Animation extension.
