@@ -73,6 +73,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Gather all child nodes and supply empty video dimensions from sources.
+			$fallback    = null;
 			$child_nodes = array();
 			while ( $node->firstChild ) {
 				$child_node = $node->removeChild( $node->firstChild );
@@ -86,6 +87,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 					$child_node->setAttribute( 'src', $src );
 					$new_attributes = $this->filter_video_dimensions( $new_attributes, $src );
 				}
+
+				if ( ! $fallback && $child_node instanceof DOMElement && ! ( 'source' === $child_node->nodeName || 'track' === $child_node->nodeName ) ) {
+					$fallback = $child_node;
+					$fallback->setAttribute( 'fallback', '' );
+				}
+
 				$child_nodes[] = $child_node;
 			}
 

@@ -102,11 +102,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'http_video_with_children' => array(
-				'<video width="480" height="300" poster="http://example.com/video-image.gif">
-	<source src="http://example.com/video.mp4" type="video/mp4">
-	<source src="http://example.com/video.ogv" type="video/ogg">
-</video>',
-				'<amp-video width="480" height="300" poster="http://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+				'<video width="480" height="300" poster="https://example.com/poster.jpeg"><source src="http://example.com/video.mp4" type="video/mp4"><source src="http://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt" /><a href="http://example.com/video.mp4">http://example.com/video.mp4</a></video>',
+				'<amp-video width="480" height="300" poster="https://example.com/poster.jpeg" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt"><a href="http://example.com/video.mp4" fallback="">http://example.com/video.mp4</a></amp-video>',
 			),
 		);
 	}
@@ -118,6 +115,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
+
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
@@ -131,6 +132,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			'require_https_src' => true,
 		) );
 		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
