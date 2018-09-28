@@ -317,7 +317,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string URL which may have been updated with HTTPS, or may have been made empty.
 	 */
 	public function maybe_enforce_https_src( $src, $force_https = false ) {
-		$protocol = strtok( $src, ':' );
+		$protocol = strtok( $src, ':' ); // @todo What about relative URLs? This should use wp_parse_url( $src, PHP_URL_SCHEME )
 		if ( 'https' !== $protocol ) {
 			// Check if https is required.
 			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
