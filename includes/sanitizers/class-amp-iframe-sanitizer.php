@@ -103,18 +103,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$new_node->appendChild( $placeholder_node );
 			}
 
-			$parent_node = $node->parentNode;
-			if ( 'p' !== strtolower( $parent_node->tagName ) ) {
-				$parent_node->replaceChild( $new_node, $node );
-			} else {
-				// AMP does not like iframes in <p> tags.
-				$parent_node->removeChild( $node );
-				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
-
-				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
-				}
-			}
+			$node->parentNode->replaceChild( $new_node, $node );
 		}
 	}
 
@@ -182,6 +171,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Builds a DOMElement to use as a placeholder for an <iframe>.
 	 *
+	 * Important: The element returned must not be block-level (e.g. div) as the PHP DOM parser
+	 * will move it out from inside any containing paragraph. So this is why a span is used.
+	 *
 	 * @since 0.2
 	 *
 	 * @param string[] $parent_attributes {
@@ -193,7 +185,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMElement|false
 	 */
 	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
+		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'span', array(
 			'placeholder' => '',
 			'class'       => 'amp-wp-iframe-placeholder',
 		) );

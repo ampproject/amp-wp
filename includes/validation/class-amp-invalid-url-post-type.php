@@ -978,6 +978,10 @@ class AMP_Invalid_URL_Post_Type {
 			}
 		}
 
+		if ( empty( $output ) && ! empty( $sources['embed'] ) ) {
+			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( 'Embed' ) );
+		}
+
 		if ( empty( $output ) && ! empty( $sources['hook'] ) ) {
 			$output[] = sprintf( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>%s</strong>', esc_html( $sources['hook'] ) );
 		}
