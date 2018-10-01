@@ -1558,18 +1558,28 @@ class AMP_Theme_Support {
 			$args['enable_response_caching']                   = ! $disable_response_caching;
 		}
 
+		/*
+		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+		 * This is also used as the ETag.
+		 */
+		$response_cache_key = md5( wp_json_encode( array(
+			$args,
+			$response,
+			self::$sanitizer_classes,
+			self::$embed_handlers,
+			AMP__VERSION,
+		) ) );
+
+		// Handle responses that are cached by the browser.
+		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+			status_header( 304 );
+			return '';
+		}
+		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+
 		// Return cache if enabled and found.
 		$cache_response = null;
 		if ( true === $args['enable_response_caching'] ) {
-			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
-			$response_cache_key = md5( wp_json_encode( array(
-				$args,
-				$response,
-				self::$sanitizer_classes,
-				self::$embed_handlers,
-				AMP__VERSION,
-			) ) );
-
 			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
 			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
@@ -1589,6 +1599,17 @@ class AMP_Theme_Support {
 
 			// Short-circuit response with cached body.
 			if ( isset( $response_cache['body'] ) ) {
+
+				// Re-send the headers that were sent before when the response was first cached.
+				if ( isset( $response_cache['headers'] ) ) {
+					foreach ( $response_cache['headers'] as $header ) {
+						@header( // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+							sprintf( '%s: %s', $header['name'], $header['value'] ),
+							$header['replace'],
+							$header['status_code']
+						);
+					}
+				}
 
 				// Redirect to non-AMP version.
 				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
@@ -1611,7 +1632,11 @@ class AMP_Theme_Support {
 
 				return wp_cache_set(
 					$response_cache_key,
-					compact( 'body', 'validation_results' ),
+					array(
+						'headers'            => AMP_HTTP::$headers_sent,
+						'body'               => $body,
+						'validation_results' => $validation_results,
+					),
 					AMP_Theme_Support::RESPONSE_CACHE_GROUP,
 					MONTH_IN_SECONDS
 				);
