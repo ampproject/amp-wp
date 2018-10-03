@@ -1570,12 +1570,22 @@ class AMP_Theme_Support {
 			AMP__VERSION,
 		) ) );
 
+		/*
+		 * Per rfc7232:
+		 * "The server generating a 304 response MUST generate any of the
+		 * following header fields that would have been sent in a 200 (OK)
+		 * response to the same request: Cache-Control, Content-Location, Date,
+		 * ETag, Expires, and Vary." The only one of these headers which would
+		 * not have been set yet during the WordPress template generation is
+		 * the ETag. The AMP plugin sends a Vary header at amp_init.
+		 */
+		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+
 		// Handle responses that are cached by the browser.
 		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
 			status_header( 304 );
 			return '';
 		}
-		AMP_HTTP::send_header( 'ETag', $response_cache_key );
 
 		// Return cache if enabled and found.
 		$cache_response = null;
