@@ -54,7 +54,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::add_post_type_support()
 	 */
 	public function test_add_post_type_support() {
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		register_post_type( 'book', array(
 			'label'  => 'Book',
 			'public' => true,
@@ -66,9 +66,9 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'poem' ) );
 
 		AMP_Post_Type_Support::add_post_type_support();
-		$this->assertTrue( post_type_supports( 'post', amp_get_slug() ) );
-		$this->assertTrue( post_type_supports( 'poem', amp_get_slug() ) );
-		$this->assertFalse( post_type_supports( 'book', amp_get_slug() ) );
+		$this->assertTrue( post_type_supports( 'post', AMP_Post_Type_Support::SLUG ) );
+		$this->assertTrue( post_type_supports( 'poem', AMP_Post_Type_Support::SLUG ) );
+		$this->assertFalse( post_type_supports( 'book', AMP_Post_Type_Support::SLUG ) );
 	}
 
 	/**
@@ -77,7 +77,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::get_support_errors()
 	 */
 	public function test_get_support_error() {
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		register_post_type( 'book', array(
 			'label'  => 'Book',
 			'public' => true,
@@ -86,7 +86,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		// Post type support.
 		$book_id = $this->factory()->post->create( array( 'post_type' => 'book' ) );
 		$this->assertEquals( array( 'post-type-support' ), AMP_Post_Type_Support::get_support_errors( $book_id ) );
-		add_post_type_support( 'book', amp_get_slug() );
+		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
 		// Password-protected.

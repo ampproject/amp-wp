@@ -44,16 +44,21 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Changelog ==
 
+= 1.1 (unreleased) =
+
+...
+
 = 1.0 (unreleased) =
 
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 
-- Add runtime CSS minification, `!important` replacement, and tree shaking. See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142), [#1320](https://github.com/Automattic/amp-wp/pull/1320), [#1073](https://github.com/Automattic/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
-- Add ability to acknowledge and suppress/ignore specific validation errors. See [#1003](https://github.com/Automattic/amp-wp/issues/1003). Props westonruter.
-- Extend admin screen options to add `amp` theme support without any coding required. Toggle between classic, paired, and native. Includes options for whether sanitization should be done by default and whether tree shaking should always be allowed. See [#1199](https://github.com/Automattic/amp-wp/pull/1199), [#1291](https://github.com/Automattic/amp-wp/pull/1291), [#1264](https://github.com/Automattic/amp-wp/issues/1264). Props westonruter, AdelDima.
+- **Add runtime CSS minification, `!important` replacement, and tree shaking.** See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142), [#1320](https://github.com/Automattic/amp-wp/pull/1320), [#1073](https://github.com/Automattic/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
+- **Keep track of new validation errors and add ability to accept/reject in order to allow or block AMP for a given URL.** See [#1003](https://github.com/Automattic/amp-wp/issues/1003). Props westonruter.
+- **Redesign screens for Invalid URLs and Error Index.** See [#1394](https://github.com/Automattic/amp-wp/pull/1394), [#1361](https://github.com/Automattic/amp-wp/issues/1361), [#1444](https://github.com/Automattic/amp-wp/pull/1444), [#1448](https://github.com/Automattic/amp-wp/pull/1448), [#1452](https://github.com/Automattic/amp-wp/pull/1452), [#1397](https://github.com/Automattic/amp-wp/pull/1397), [#1446](https://github.com/Automattic/amp-wp/pull/1446), [#1364](https://github.com/Automattic/amp-wp/issues/1364), [#1449](https://github.com/Automattic/amp-wp/pull/1449), [#1418](https://github.com/Automattic/amp-wp/pull/1418), [#1451](https://github.com/Automattic/amp-wp/pull/1451), [#1429](https://github.com/Automattic/amp-wp/pull/1429), [#1408](https://github.com/Automattic/amp-wp/pull/1408), [#1414](https://github.com/Automattic/amp-wp/pull/1414), [#1409](https://github.com/Automattic/amp-wp/pull/1409). Props kienstra, johnwatkins0, miina, jacobschweitzer, westonruter.
+- **Extend admin screen options to add `amp` theme support without any coding required.** Toggle between classic, paired, and native. Includes options for whether sanitization should be done by default and whether tree shaking should always be allowed. See [#1199](https://github.com/Automattic/amp-wp/pull/1199), [#1291](https://github.com/Automattic/amp-wp/pull/1291), [#1264](https://github.com/Automattic/amp-wp/issues/1264). Props westonruter, AdelDima.
+- **Add support for allowing a site subset to be native AMP.** See [#1235](https://github.com/Automattic/amp-wp/pull/1235). Props westonruter.
 - Add an admin pointer for updated AMP settings screen for version 1.0. See [#1271](https://github.com/Automattic/amp-wp/pull/1271), [#1254](https://github.com/Automattic/amp-wp/issues/1254). Props kienstra.
 - Add support for three core themes (Twenty Fifteen, Twenty Sixteen, Twenty Seventeen) so that they can be used out of the box with AMP theme support added without needing to create a child theme. See [#1074](https://github.com/Automattic/amp-wp/pull/1074). Props westonruter, DavidCramer, kienstra, .
-- Add support for allowing a site subset to be native AMP. See [#1235](https://github.com/Automattic/amp-wp/pull/1235). Props westonruter.
 - Add AMP menu item to admin bar on frontend with indication of AMP validation status; accessing an AMP URL that has unaccepted validation errors will redirect to the non-AMP page and cause the AMP admin bar item to indicate the failure, along with a link to access the validation results. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
 - Add dynamic handling of validation errors. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1087](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
 - Add AMP validation of blocks. See [#1019](https://github.com/Automattic/amp-wp/pull/1019). Props westonruter.
@@ -140,10 +145,28 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Add embed support for Twitter timelines via new amp-twitter attributes. See [#1396](https://github.com/Automattic/amp-wp/issues/1396). Props felixarntz.
 - Add error type filters on validation error and invalid URL screens. See [#1373](https://github.com/Automattic/amp-wp/issues/1373). Props kienstra.
 - Default to auto sanitization and tree shaking being enabled. See [#1402](https://github.com/Automattic/amp-wp/issues/1402). Props westonruter.
+- Omit validation errors sanitized by filter or tree-shaking option; since sanitization is forced, there is no point to store. See (#1413)[https://github.com/Automattic/amp-wp/pull/1413]. Props westonruter.
+- Prevent URL validation from happening during bulk imports. See [#1424](https://github.com/Automattic/amp-wp/pull/1424), [#1404](https://github.com/Automattic/amp-wp/issues/1404). Props westonruter.
+- Normalize invalid URL stored for `amp_invalid_url` post type. See [#1436](https://github.com/Automattic/amp-wp/pull/1436). Props westonruter.
+- Expose and store queried object for validated URL; show edit link. See [#1426](https://github.com/Automattic/amp-wp/pull/1426), [#1428](https://github.com/Automattic/amp-wp/pull/1428), [#1433](https://github.com/Automattic/amp-wp/pull/1433). Props westonruter.
+- Re-validate the site when switching modes and show the results in a notice. See [#1443](https://github.com/Automattic/amp-wp/pull/1443). Props kienstra, westonruter.
+- Improve access to AMP admin screens for users who are not administrators. [#1437](https://github.com/Automattic/amp-wp/pull/1437). Props westonruter.
+- Display a welcome notice on the main 'AMP Settings' page. See [#1442](https://github.com/Automattic/amp-wp/pull/1442). Props kienstra.
+- Fix URL protocol validation and parsing attribute values with multiple URLs. See [#1411](https://github.com/Automattic/amp-wp/pull/1411), [#1410](https://github.com/Automattic/amp-wp/issues/1410). Props westonruter.
+- Restore ability to customize 'amp' query var when theme support added. [#1455](https://github.com/Automattic/amp-wp/pull/1455). Props westonruter.
+- Add slug constants for theme support and post type support. [#1456](https://github.com/Automattic/amp-wp/pull/1456). Props westonruter.
+- Fix ability to add AMP support for custom post types. See [#1441](https://github.com/Automattic/amp-wp/pull/1441). Props westonruter.
+- Fix stretched logo and header issues in Twenty Seventeen. [#1419](https://github.com/Automattic/amp-wp/pull/1419). Props westonruter.
+- Add caption support to all amp-instagram embeds. See [#1438](https://github.com/Automattic/amp-wp/pull/1438), [#822](https://github.com/Automattic/amp-wp/issues/822). Props chandrapatel.
+- Fix PHP warning generated by calls to `idn_to_utf8()`. See [#1440](https://github.com/Automattic/amp-wp/pull/1440), [#1439](https://github.com/Automattic/amp-wp/issues/1439). Props kraftbj.
+- Fix PHP fatal error during AMP validation when a plugin uses a class method as an output buffer callback. [#1453](https://github.com/Automattic/amp-wp/pull/1453). Props westonruter.
+- Update minimum PHP version from 5.3.2 to 5.3.6. See [#1407](https://github.com/Automattic/amp-wp/pull/1407), [#1406](https://github.com/Automattic/amp-wp/issues/1406). Props westonruter.
+- Improve `package.json` and `composer.json`. See [#1405](https://github.com/Automattic/amp-wp/pull/1405). Props swissspidy.
+- Ensure PHP file generated for use by translate.wordpress.org is free of syntax errors. See [#1427](https://github.com/Automattic/amp-wp/pull/1427), [#1416](https://github.com/Automattic/amp-wp/issues/1416). Props swissspidy, westonruter.
 
 For a full list of the closed issues and merged pull requests in this release, see the [1.0 milestone](https://github.com/Automattic/amp-wp/milestone/7?closed=1).
 
-Contributors in this release, including design, development, testing, and project management: Adel Tahri (AdelDima), Alberto Medina (amedina), Claudio Sossi, Daniel Walmsley (gravityrail), David Cramer (DavidCramer), Felix Arntz (felixarntz), Garrett Hyder (garrett-eclipse), Joshua Wold (jwold), Juan Chaur (juanchaur1), Kevin Coleman (kevincoleman), Leo Postovoit (postphotos), Lukas Hettwer (lukas9393), Mackenzie Hartung (MackenzieHartung), Matthew Denton (mdbitz), Miina Sikk (miina), Mohammad Jangda (mjangda), Oscar Sánchez (oscarssanchez), Paul Schreiber (paulschreiber), Ricardo Gonçalves (ricardobrg), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), Tonya Mork (hellofromtonya), Weston Ruter (westonruter).
+Contributors in this release, including design, development, testing, and project management: Adel Tahri (AdelDima), Alberto Medina (amedina), Brandon Kraft (kraftbj), Chandra Patel (chandrapatel), Claudio Sossi, Daniel Walmsley (gravityrail), David Cramer (DavidCramer), Felix Arntz (felixarntz), Garrett Hyder (garrett-eclipse), Jacob Schweitzer (jacobschweitzer),John Watkins0 (johnwatkins0),  Joshua Wold (jwold), Juan Chaur (juanchaur1), Kevin Coleman (kevincoleman), Leo Postovoit (postphotos), Lukas Hettwer (lukas9393), Mackenzie Hartung (MackenzieHartung), Matthew Denton (mdbitz), Miina Sikk (miina), Mohammad Jangda (mjangda), Pascal Birchler (swissspidy), Oscar Sánchez (oscarssanchez), Paul Schreiber (paulschreiber), Ricardo Gonçalves (ricardobrg), Ryan Kienstra (kienstra), Thierry Muller (ThierryA), Tonya Mork (hellofromtonya), Weston Ruter (westonruter).
 
 = 0.7.2 (2018-06-27) =
 

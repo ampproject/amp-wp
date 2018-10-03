@@ -331,7 +331,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_intercept_post_request_redirect() {
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -467,7 +467,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			return '__return_null';
 		} );
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$post    = $this->factory()->post->create_and_get();
 		$comment = $this->factory()->comment->create_and_get( array(
 			'comment_post_ID' => $post->ID,
@@ -482,7 +482,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		);
 
 		// Test with comments_live_list.
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'comments_live_list' => true,
 		) );
 		add_filter( 'amp_comment_posted_message', function( $message, WP_Comment $filter_comment ) {

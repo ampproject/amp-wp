@@ -153,7 +153,7 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION
 		);
 
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability   = AMP_Theme_Support::get_template_availability( $post );
 			$support_errors = $availability['errors'];
 		} else {
@@ -265,7 +265,7 @@ class AMP_Post_Meta_Box {
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
 		 * then we just check get_support_errors.
 		 */
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 			$errors       = array_diff( $availability['errors'], array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.

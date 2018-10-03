@@ -33,6 +33,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
 
 	/**
+	 * Error code for illegal at-rule.
+	 *
+	 * @var string
+	 */
+	const ILLEGAL_AT_RULE_ERROR_CODE = 'illegal_css_at_rule';
+
+	/**
 	 * Inline style selector's specificity multiplier, i.e. used to generate the number of ':not(#_)' placeholders.
 	 *
 	 * @var int
@@ -233,7 +240,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		return array(
 			'css_parse_error',
 			'excessive_css',
-			'illegal_css_at_rule',
+			self::ILLEGAL_AT_RULE_ERROR_CODE,
 			'illegal_css_important',
 			'illegal_css_property',
 			self::TREE_SHAKING_ERROR_CODE,
@@ -811,6 +818,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
 
+			/*
+			 * When an object cache is not available, we cache with an expiration to prevent the options table from
+			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
+			 * set an expiration because it should implement LRU cache expulsion policy.
+			 */
 			if ( wp_using_ext_object_cache() ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
@@ -1231,7 +1243,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleBlockList ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = array(
-						'code'    => 'illegal_css_at_rule',
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
@@ -1252,7 +1264,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof AtRuleSet ) {
 				if ( ! in_array( $css_item->atRuleName(), $options['allowed_at_rules'], true ) ) {
 					$error     = array(
-						'code'    => 'illegal_css_at_rule',
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
@@ -1269,7 +1281,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( $css_item instanceof KeyFrame ) {
 				if ( ! in_array( 'keyframes', $options['allowed_at_rules'], true ) ) {
 					$error     = array(
-						'code'    => 'illegal_css_at_rule',
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
 						'at_rule' => $css_item->atRuleName(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					);
@@ -1285,7 +1297,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			} elseif ( $css_item instanceof AtRule ) {
 				$error     = array(
-					'code'    => 'illegal_css_at_rule',
+					'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
 					'at_rule' => $css_item->atRuleName(),
 					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
