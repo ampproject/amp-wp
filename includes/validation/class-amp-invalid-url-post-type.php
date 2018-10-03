@@ -370,7 +370,7 @@ class AMP_Invalid_URL_Post_Type {
 			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
-			if ( $args['ignore_accepted'] && AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'] ) {
+			if ( $args['ignore_accepted'] && ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'] ) ) {
 				continue;
 			}
 
@@ -830,7 +830,7 @@ class AMP_Invalid_URL_Post_Type {
 				esc_html__( 'Details', 'amp' ),
 				esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
 					esc_html__( 'Details', 'amp' ),
-					esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+					esc_html__( 'The parent element of where the error occurred.', 'amp' )
 				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),

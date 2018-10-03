@@ -304,7 +304,7 @@ class AMP_Validation_Manager {
 				if ( $amp_invalid_url_post ) {
 					$error_count = 0;
 					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
-						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $error['term_status'] ) {
+						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term_status'] ) {
 							$error_count++;
 						}
 					}
@@ -322,7 +322,7 @@ class AMP_Validation_Manager {
 
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
-		} elseif ( $error_count > 0 && ! self::is_sanitization_auto_accepted() ) {
+		} elseif ( $error_count > 0 ) {
 			$icon = '&#x274C;'; // CROSS MARK.
 		} else {
 			$icon = '&#x1F517;'; // LINK SYMBOL.
@@ -362,7 +362,7 @@ class AMP_Validation_Manager {
 		$first_item_is_validate = (
 			amp_is_canonical()
 			||
-			( ! is_amp_endpoint() && $error_count > 0 && ! self::is_sanitization_auto_accepted() )
+			( ! is_amp_endpoint() && $error_count > 0 )
 		);
 		if ( $first_item_is_validate ) {
 			$title          = __( 'Validate AMP', 'amp' );
