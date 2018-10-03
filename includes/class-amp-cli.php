@@ -649,7 +649,11 @@ class AMP_CLI {
 			$validation_errors,
 			function( $error ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-				return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
+				return (
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
+					&&
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
+				);
 			}
 		) );
 
