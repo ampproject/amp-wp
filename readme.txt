@@ -107,6 +107,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Prevent erroneously tree-shaking keyframe selectors like `from`, `to`, and percentages. See [#1211](https://github.com/Automattic/amp-wp/pull/1211). Props westonruter.
 - Add caching of redirect to non-AMP URL when validation errors present. See [#1207](https://github.com/Automattic/amp-wp/pull/1207). Props westonruter.
 - Discontinue using 'latest' version of component scripts. See [#1464](https://github.com/Automattic/amp-wp/pull/1464). Props westonruter.
+- Ensure font stylesheets are requested in CORS mode in both AMP and non-AMP documents. See [#1486](https://github.com/Automattic/amp-wp/pull/1486). Props westonruter.
 - Move any content output during shutdown to be injected before closing body tag. See [#1102](https://github.com/Automattic/amp-wp/pull/1102). Props westonruter.
 - Fix obtaining source for widgets. See [#1212](https://github.com/Automattic/amp-wp/pull/1212). Props westonruter.
 - Construct schema.org meta script by appending text node. See [#1220](https://github.com/Automattic/amp-wp/pull/1220). Props westonruter.
