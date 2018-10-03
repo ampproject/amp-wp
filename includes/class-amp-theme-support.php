@@ -1515,6 +1515,7 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+		$prepare_response_start = microtime( true );
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -1613,13 +1614,14 @@ class AMP_Theme_Support {
 				// Re-send the headers that were sent before when the response was first cached.
 				if ( isset( $response_cache['headers'] ) ) {
 					foreach ( $response_cache['headers'] as $header ) {
-						@header( // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-							sprintf( '%s: %s', $header['name'], $header['value'] ),
-							$header['replace'],
-							$header['status_code']
-						);
+						if ( in_array( $header, AMP_HTTP::$headers_sent, true ) ) {
+							continue; // Skip sending headers that were already sent prior to post-processing.
+						}
+						AMP_HTTP::send_header( $header['name'], $header['value'], wp_array_slice_assoc( $header, array( 'replace', 'status_code' ) ) );
 					}
 				}
+
+				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
 				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
