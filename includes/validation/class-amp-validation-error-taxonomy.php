@@ -809,7 +809,7 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'Details', 'amp' ),
 					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
 						esc_html__( 'Details', 'amp' ),
-						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+						esc_html__( 'The parent element of where the error occurred.', 'amp' )
 					) )
 				),
 				'error_type'       => esc_html__( 'Type', 'amp' ),
