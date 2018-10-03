@@ -638,18 +638,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * Opt-in to CORS Mode for the stylesheet. This ensures that a service worker caching the external
-			 * stylesheet will not inflate the storage quota.
-			 *
-			 * See:
-			 * - https://developers.google.com/web/tools/workbox/guides/storage-quota#beware_of_opaque_responses
-			 * - https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests#cross-origin_requests_and_opaque_responses
-			 */
-			if ( ! $element->hasAttribute( 'crossorigin' ) ) {
-				$element->setAttribute( 'crossorigin', 'anonymous' );
-			}
-
-			/*
 			 * Make sure rel=preconnect link is present for Google Fonts stylesheet.
 			 * Note that core themes normally do this already, per <https://core.trac.wordpress.org/ticket/37171>.
 			 * But not always, per <https://core.trac.wordpress.org/ticket/44668>.
