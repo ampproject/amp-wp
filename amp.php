@@ -180,7 +180,7 @@ function amp_init() {
 
 	// Broadcast plugin updates.
 	$old_version = AMP_Options_Manager::get_option( 'version', '0.0' );
-	if ( version_compare( $old_version, AMP__VERSION ) ) {
+	if ( AMP__VERSION !== $old_version ) {
 		/**
 		 * Triggers when after amp_init when the plugin version has updated.
 		 *
