@@ -758,7 +758,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$output = ob_get_clean();
-		$this->assertContains( 'View Invalid URLs', $output );
+		$this->assertContains( 'View AMP Validated URLs', $output );
 		$this->assertContains(
 			add_query_arg(
 				'post_type',

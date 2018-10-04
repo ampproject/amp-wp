@@ -1095,7 +1095,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the 'Error Index' screen, renders a link to the 'Invalid URLs' page.
+	 * On the 'Error Index' screen, renders a link to the 'AMP Validated URLs' page.
 	 *
 	 * @see AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
 	 *
@@ -1121,7 +1121,7 @@ class AMP_Validation_Error_Taxonomy {
 				admin_url( 'edit.php' )
 			) ),
 			esc_attr( $id ),
-			esc_html__( 'View Invalid URLs', 'amp' )
+			esc_html__( 'View AMP Validated URLs', 'amp' )
 		);
 
 		?>
@@ -1494,7 +1494,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			/*
 			 * Hide deletion link since a validation error should only be removed once
-			 * it no longer has an occurrence on the site. When an invalid URL is re-checked
+			 * it no longer has an occurrence on the site. When a validated URL is re-checked
 			 * and it no longer has this validation error, then the count will be decremented.
 			 * When a validation error term no longer has a count, then it is hidden from the
 			 * list table. A cron job could periodically delete terms that have no counts.
@@ -1583,7 +1583,7 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		// Only set the query var if this is the invalid URL post type.
+		// Only set the query var if this is the validated URL post type.
 		$post_id = sanitize_key( $_GET['post'] );
 		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 			$wp_term_query->query_vars['object_ids'] = $post_id;
