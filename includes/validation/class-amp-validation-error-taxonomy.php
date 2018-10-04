@@ -311,7 +311,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Delete all amp_validation_error terms that have zero counts (no amp_invalid_url posts associated with them).
+	 * Delete all amp_validation_error terms that have zero counts (no amp_validated_url posts associated with them).
 	 *
 	 * @since 1.0
 	 *
@@ -599,7 +599,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Add support for querying posts by amp_validation_error_status and by error type.
 	 *
-	 * Add recognition of amp_validation_error_status query var for amp_invalid_url post queries.
+	 * Add recognition of amp_validation_error_status query var for amp_validated_url post queries.
 	 * Also, conditionally filter for error type, like js_error or css_error.
 	 *
 	 * @see WP_Tax_Query::get_sql_for_clause()
@@ -1571,9 +1571,9 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Parses the term query on post.php pages (single error URL).
 	 *
-	 * This post.php page for amp_invalid_url is more like an edit-tags.php page,
+	 * This post.php page for amp_validated_url is more like an edit-tags.php page,
 	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
-	 * So this needs to only show the terms (errors) associated with this amp_invalid_url post.
+	 * So this needs to only show the terms (errors) associated with this amp_validated_url post.
 	 *
 	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
 	 */
@@ -1862,7 +1862,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
+	 * Adds post columns to the /wp-admin/post.php page for amp_validated_url.
 	 *
 	 * @param array $sortable_columns The sortable columns.
 	 * @return array $sortable_columns The filtered sortable columns.

@@ -32,6 +32,7 @@ class AMP_Options_Manager {
 		'all_templates_supported'  => true,
 		'supported_templates'      => array( 'is_singular' ),
 		'enable_response_caching'  => true,
+		'version'                  => AMP__VERSION,
 	);
 
 	/**

@@ -143,7 +143,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			2 => array(
 				0 => 'Invalid Pages',
 				1 => 'edit_posts',
-				2 => 'edit.php?post_type=amp_invalid_url',
+				2 => 'edit.php?post_type=amp_validated_url',
 				3 => 'Invalid AMP Pages (URLs)',
 			),
 		);
@@ -823,7 +823,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
 		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_invalid_url&amp_validate_error=missing_url&amp_urls_tested=0',
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=missing_url&amp_urls_tested=0',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] );
@@ -834,7 +834,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
 		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_invalid_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=invalid_post&amp_urls_tested=0',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] );
@@ -845,7 +845,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
 		$this->assertStringEndsWith(
-			'/edit.php?post_type=amp_invalid_url&amp_validate_error=invalid_post&amp_urls_tested=0',
+			'/edit.php?post_type=amp_validated_url&amp_validate_error=invalid_post&amp_urls_tested=0',
 			$exception->getMessage()
 		);
 		unset( $_GET['post'] );
@@ -887,7 +887,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Exception', $exception );
 		$this->assertEquals( 302, $exception->getCode() );
 		$this->assertStringEndsWith(
-			'wp-admin/edit.php?post_type=amp_invalid_url&amp_validate_error=illegal_url&amp_urls_tested=0',
+			'wp-admin/edit.php?post_type=amp_validated_url&amp_validate_error=illegal_url&amp_urls_tested=0',
 			$exception->getMessage()
 		);
 	}
@@ -1061,12 +1061,12 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_add_edit_post_inline_script() {
 		global $pagenow, $post;
 
-		$pagenow              = 'post.php';
-		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$test_post            = $this->factory()->post->create_and_get();
+		$pagenow                = 'post.php';
+		$amp_validated_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$test_post              = $this->factory()->post->create_and_get();
 
-		$post         = $amp_invalid_url_post;
-		$_GET['post'] = $amp_invalid_url_post->ID;
+		$post         = $amp_validated_url_post;
+		$_GET['post'] = $amp_validated_url_post->ID;
 		set_current_screen( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
 		AMP_Invalid_URL_Post_Type::enqueue_edit_post_screen_scripts();
 		AMP_Invalid_URL_Post_Type::add_edit_post_inline_script();
@@ -1088,7 +1088,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		// The 'page_heading' value should be present in the inline script.
 		$_GET['action'] = 'edit';
 		update_post_meta(
-			$amp_invalid_url_post->ID,
+			$amp_validated_url_post->ID,
 			'_amp_queried_object',
 			array(
 				'type' => 'post',
@@ -1428,9 +1428,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_get_single_url_page_heading() {
 		global $post;
-		$meta_key             = '_amp_queried_object';
-		$test_post            = $this->factory()->post->create_and_get();
-		$amp_invalid_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$meta_key               = '_amp_queried_object';
+		$test_post              = $this->factory()->post->create_and_get();
+		$amp_validated_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 
 		// If $pagenow is not post.php, this should not filter the labels.
 		$GLOBALS['pagenow'] = 'edit.php'; // WPCS: Global override OK.
@@ -1446,10 +1446,10 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$_GET['action'] = 'edit';
 		$this->assertEmpty( AMP_Invalid_URL_Post_Type::get_single_url_page_heading() );
 
-		$_GET['post'] = $amp_invalid_url_post->ID;
-		$post         = $amp_invalid_url_post;
+		$_GET['post'] = $amp_validated_url_post->ID;
+		$post         = $amp_validated_url_post;
 		update_post_meta(
-			$amp_invalid_url_post->ID,
+			$amp_validated_url_post->ID,
 			$meta_key,
 			array(
 				'type' => 'post',
@@ -1464,7 +1464,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		// If the URL with validation error(s) is a term, this should return the term name.
 		$term = $this->factory()->term->create_and_get();
 		update_post_meta(
-			$amp_invalid_url_post->ID,
+			$amp_validated_url_post->ID,
 			$meta_key,
 			array(
 				'type' => 'term',
@@ -1479,7 +1479,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		// If the URL with validation error(s) is for a user (author), this should return the author's name.
 		$user = $this->factory()->user->create_and_get();
 		update_post_meta(
-			$amp_invalid_url_post->ID,
+			$amp_validated_url_post->ID,
 			$meta_key,
 			array(
 				'type' => 'user',

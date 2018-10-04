@@ -104,6 +104,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'all_templates_supported'  => true,
 				'supported_templates'      => array( 'is_singular' ),
 				'enable_response_caching'  => true,
+				'version'                  => AMP__VERSION,
 			),
 			AMP_Options_Manager::get_options()
 		);

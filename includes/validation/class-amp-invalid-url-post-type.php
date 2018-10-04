@@ -17,7 +17,7 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * @var string
 	 */
-	const POST_TYPE_SLUG = 'amp_invalid_url';
+	const POST_TYPE_SLUG = 'amp_validated_url';
 
 	/**
 	 * The action to recheck URLs for AMP validity.
@@ -95,6 +95,8 @@ class AMP_Invalid_URL_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
+		add_action( 'amp_plugin_update', array( __CLASS__, 'handle_plugin_update' ) );
+
 		$post_type = register_post_type(
 			self::POST_TYPE_SLUG,
 			array(
@@ -120,6 +122,32 @@ class AMP_Invalid_URL_Post_Type {
 
 		if ( is_admin() ) {
 			self::add_admin_hooks();
+		}
+	}
+
+	/**
+	 * Handle update to plugin.
+	 *
+	 * @param string $old_version Old version.
+	 */
+	public static function handle_plugin_update( $old_version ) {
+
+		// Update the old post type slug from amp_validated_url to amp_validated_url.
+		if ( '1.0-' === substr( $old_version, 0, 4 ) || version_compare( $old_version, '1.0', '<' ) ) {
+			global $wpdb;
+			$post_ids = get_posts( array(
+				'post_type'      => 'amp_invalid_url',
+				'fields'         => 'ids',
+				'posts_per_page' => -1,
+			) );
+			foreach ( $post_ids as $post_id ) {
+				$wpdb->update(
+					$wpdb->posts,
+					array( 'post_type' => self::POST_TYPE_SLUG ),
+					array( 'ID' => $post_id )
+				);
+				clean_post_cache( $post_id );
+			}
 		}
 	}
 
@@ -158,7 +186,7 @@ class AMP_Invalid_URL_Post_Type {
 			return array_diff( $post_types, array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		} );
 		add_action( 'load-edit.php', function() {
-			if ( 'edit-amp_invalid_url' !== get_current_screen()->id ) {
+			if ( 'edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_current_screen()->id ) {
 				return;
 			}
 			add_action( 'admin_head-edit.php', function() {
@@ -209,7 +237,7 @@ class AMP_Invalid_URL_Post_Type {
 	public static function enqueue_post_list_screen_scripts() {
 		$screen = get_current_screen();
 
-		if ( 'edit-amp_invalid_url' === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
+		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
 			wp_enqueue_script(
 				'amp-invalid-urls-index',
 				amp_get_asset_url( 'js/amp-invalid-urls-index.js' ),
@@ -225,7 +253,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		// Enqueue this on both the 'AMP Validated URLs' page and the single URL page.
-		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
+		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
 				'amp-admin-tables',
 				amp_get_asset_url( 'css/admin-tables.css' ),
@@ -234,7 +262,7 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		if ( 'edit-amp_invalid_url' !== $screen->id ) {
+		if ( 'edit-' . self::POST_TYPE_SLUG !== $screen->id ) {
 			return;
 		}
 
@@ -326,7 +354,7 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Gets validation errors for a given validated URL post.
 	 *
-	 * @param string|int|WP_Post $url Either the URL string or a post (ID or WP_Post) of amp_invalid_url type.
+	 * @param string|int|WP_Post $url Either the URL string or a post (ID or WP_Post) of amp_validated_url type.
 	 * @param array              $args {
 	 *     Args.
 	 *
@@ -342,7 +370,7 @@ class AMP_Invalid_URL_Post_Type {
 			$args
 		);
 
-		// Look up post by URL or ensure the amp_invalid_url object.
+		// Look up post by URL or ensure the amp_validated_url object.
 		if ( is_string( $url ) ) {
 			$post = self::get_invalid_url_post( $url );
 		} else {
@@ -388,7 +416,7 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Display summary of the validation error counts for a given post.
 	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @param int|WP_Post $post Post of amp_validated_url type.
 	 * @param array       $args {
 	 *     Arguments.
 	 *
@@ -497,7 +525,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Get the URL from a given amp_invalid_url post.
+	 * Get the URL from a given amp_validated_url post.
 	 *
 	 * The URL will be returned with the amp query var added to it if the site is not canonical. The post_title
 	 * is always stored using the canonical AMP-less URL.
@@ -566,7 +594,7 @@ class AMP_Invalid_URL_Post_Type {
 	/**
 	 * Stores the validation errors.
 	 *
-	 * If there are no validation errors provided, then any existing amp_invalid_url post is deleted.
+	 * If there are no validation errors provided, then any existing amp_validated_url post is deleted.
 	 *
 	 * @param array  $validation_errors Validation errors.
 	 * @param string $url               URL on which the validation errors occurred. Will be normalized to non-AMP version.
@@ -658,7 +686,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		$post_content = wp_json_encode( $stored_validation_errors );
-		$placeholder  = 'amp_invalid_url_content_placeholder' . wp_rand();
+		$placeholder  = 'amp_validated_url_content_placeholder' . wp_rand();
 
 		// Guard against Kses from corrupting content by adding post_content after content_save_pre filter applies.
 		$insert_post_content = function( $post_data ) use ( $placeholder, $post_content ) {
@@ -719,9 +747,9 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Get the differences between the current themes, plugins, and relevant options when amp_invalid_url post was last updated and now.
+	 * Get the differences between the current themes, plugins, and relevant options when amp_validated_url post was last updated and now.
 	 *
-	 * @param int|WP_Post $post Post of amp_invalid_url type.
+	 * @param int|WP_Post $post Post of amp_validated_url type.
 	 * @return array {
 	 *     Staleness of the validation results. An empty array if the results are fresh.
 	 *
@@ -809,7 +837,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
+	 * Adds post columns to the /wp-admin/post.php page for amp_validated_url.
 	 *
 	 * @return array The filtered post columns.
 	 */
@@ -899,7 +927,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * Renders the sources column on the the single error URL page and the 'AMP Validated URLs' page.
 	 *
 	 * @param array $error_summary The summary of errors.
-	 * @param int   $post_id       The ID of the amp_invalid_url post.
+	 * @param int   $post_id       The ID of the amp_validated_url post.
 	 */
 	public static function render_sources_column( $error_summary, $post_id ) {
 		if ( ! isset( $error_summary[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] ) ) {
@@ -1311,7 +1339,7 @@ class AMP_Invalid_URL_Post_Type {
 				if ( ! $url ) {
 					throw new Exception( 'illegal_url' );
 				}
-				// Don't let non-admins create new amp_invalid_url posts.
+				// Don't let non-admins create new amp_validated_url posts.
 				if ( ! current_user_can( 'manage_options' ) ) {
 					throw new Exception( 'unauthorized' );
 				}
@@ -1700,7 +1728,7 @@ class AMP_Invalid_URL_Post_Type {
 	 * Renders the single URL list table.
 	 *
 	 * Mainly copied from edit-tags.php.
-	 * This is output on the post.php page for amp_invalid_url,
+	 * This is output on the post.php page for amp_validated_url,
 	 * where the editor normally would be.
 	 * But it's really more similar to /wp-admin/edit-tags.php than a post.php page,
 	 * as this outputs a WP_Terms_List_Table of amp_validation_error terms.
@@ -1769,7 +1797,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Gets the number of amp_validation_error terms that should appear on the single amp_invalid_url /wp-admin/post.php page.
+	 * Gets the number of amp_validation_error terms that should appear on the single amp_validated_url /wp-admin/post.php page.
 	 *
 	 * @param int $terms_per_page The number of terms on a page.
 	 * @return int The number of terms on the page.

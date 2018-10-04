@@ -177,6 +177,18 @@ function amp_init() {
 
 	// Add actions for legacy post templates.
 	add_action( 'wp', 'amp_maybe_add_actions' );
+
+	// Broadcast plugin updates.
+	$old_version = AMP_Options_Manager::get_option( 'version', '0.0' );
+	if ( version_compare( $old_version, AMP__VERSION ) ) {
+		/**
+		 * Triggers when after amp_init when the plugin version has updated.
+		 *
+		 * @param string $old_version Old version.
+		 */
+		do_action( 'amp_plugin_update', $old_version );
+		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+	}
 }
 
 /**

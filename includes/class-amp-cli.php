@@ -266,7 +266,7 @@ class AMP_CLI {
 	/**
 	 * Reset all validation data on a site.
 	 *
-	 * This deletes all amp_invalid_url posts and all amp_validation_error terms.
+	 * This deletes all amp_validated_url posts and all amp_validation_error terms.
 	 *
 	 * ## OPTIONS
 	 *
@@ -285,7 +285,7 @@ class AMP_CLI {
 	public function reset_site_validation( $args, $assoc_args ) {
 		unset( $args );
 		global $wpdb;
-		WP_CLI::confirm( 'Are you sure you want to empty all amp_invalid_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
 		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
@@ -294,7 +294,7 @@ class AMP_CLI {
 
 		$progress = WP_CLI\Utils\make_progress_bar(
 			/* translators: %d is the number of posts */
-			sprintf( __( 'Deleting %d amp_invalid_url posts...', 'amp' ), $count ),
+			sprintf( __( 'Deleting %d amp_validated_url posts...', 'amp' ), $count ),
 			$count
 		);
 		while ( $posts->valid() ) {

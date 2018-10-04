@@ -268,7 +268,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$amp_invalid_url_post = null;
+		$amp_validated_url_post = null;
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
@@ -291,7 +291,7 @@ class AMP_Validation_Manager {
 
 		/*
 		 * If not an AMP response, then obtain the count of validation errors from either the query param supplied after redirecting from AMP
-		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_invalid_url post that already
+		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_validated_url post that already
 		 * is populated with the last-known validation errors. Otherwise, if it *is* an AMP response then the error count is obtained after
 		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
 		 */
@@ -300,10 +300,10 @@ class AMP_Validation_Manager {
 				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
 			}
 			if ( $error_count < 0 ) {
-				$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
-				if ( $amp_invalid_url_post ) {
+				$amp_validated_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
+				if ( $amp_validated_url_post ) {
 					$error_count = 0;
-					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
+					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_validated_url_post ) as $error ) {
 						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term_status'] ) {
 							$error_count++;
 						}
@@ -312,13 +312,13 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		$user_can_revalidate = $amp_invalid_url_post ? current_user_can( 'edit_post', $amp_invalid_url_post->ID ) : current_user_can( 'manage_options' );
+		$user_can_revalidate = $amp_validated_url_post ? current_user_can( 'edit_post', $amp_validated_url_post->ID ) : current_user_can( 'manage_options' );
 		if ( ! $user_can_revalidate ) {
 			return;
 		}
 
-		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
+		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
+		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
 
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
@@ -572,7 +572,7 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_invalid_url_post_id', true ) );
+				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
 
 				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
@@ -585,9 +585,9 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				// Remember the amp_invalid_url post so that when the slug changes the old amp_invalid_url post can be updated.
+				// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
 				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
-					update_post_meta( $post->ID, '_amp_invalid_url_post_id', $validation_posts[ $post->ID ] );
+					update_post_meta( $post->ID, '_amp_validated_url_post_id', $validation_posts[ $post->ID ] );
 				}
 			}
 		}

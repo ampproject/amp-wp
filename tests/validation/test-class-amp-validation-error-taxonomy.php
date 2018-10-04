@@ -1015,7 +1015,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$expected_submenu = array(
 			'Error Index',
 			'manage_categories',
-			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
+			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
 			'Error Index',
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
@@ -1041,7 +1041,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
 		$this->assertEmpty( $wp_term_query->query_vars );
 
-		// Though $_GET['post'] has a post ID, it's not for the amp_invalid_url post type.
+		// Though $_GET['post'] has a post ID, it's not for the amp_validated_url post type.
 		$post_id_wrong_type = $this->factory()->post->create();
 		$_GET['post']       = $post_id_wrong_type;
 		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
