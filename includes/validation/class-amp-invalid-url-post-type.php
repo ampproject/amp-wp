@@ -99,12 +99,12 @@ class AMP_Invalid_URL_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'Invalid URLs', 'post type general name', 'amp' ),
-					'menu_name'          => __( 'Invalid URLs', 'amp' ),
-					'singular_name'      => __( 'Invalid URL', 'amp' ),
-					'not_found'          => __( 'No invalid URLs found', 'amp' ),
-					'not_found_in_trash' => __( 'No forgotten invalid URLs', 'amp' ),
-					'search_items'       => __( 'Search invalid URLs', 'amp' ),
+					'name'               => _x( 'AMP Validated URLs', 'post type general name', 'amp' ),
+					'menu_name'          => __( 'Validated URLs', 'amp' ),
+					'singular_name'      => __( 'Validated URL', 'amp' ),
+					'not_found'          => __( 'No validated URLs found', 'amp' ),
+					'not_found_in_trash' => __( 'No forgotten validated URLs', 'amp' ),
+					'search_items'       => __( 'Search validated URLs', 'amp' ),
 					'edit_item'          => '', // Overwritten in JS, so this prevents the page header from appearing and changing.
 				),
 				'supports'     => false,
@@ -183,7 +183,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
 		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
 
-		// Hide irrelevant "published" label in the invalid URL post list.
+		// Hide irrelevant "published" label in the AMP Validated URLs post list.
 		add_filter( 'post_date_column_status', function ( $status, $post ) {
 			if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
 				$status = '';
@@ -224,7 +224,7 @@ class AMP_Invalid_URL_Post_Type {
 			);
 		}
 
-		// Enqueue this on both the 'Invalid URLs' page and the single URL page.
+		// Enqueue this on both the 'AMP Validated URLs' page and the single URL page.
 		if ( 'edit-amp_invalid_url' === $screen->id || self::POST_TYPE_SLUG === $screen->id ) {
 			wp_enqueue_style(
 				'amp-admin-tables',
@@ -260,7 +260,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * On the 'Invalid URLs' screen, renders a link to the 'Error Index' page.
+	 * On the 'AMP Validated URLs' screen, renders a link to the 'Error Index' page.
 	 *
 	 * @see AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
 	 */
@@ -324,7 +324,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Gets validation errors for a given invalid URL post.
+	 * Gets validation errors for a given validated URL post.
 	 *
 	 * @param string|int|WP_Post $url Either the URL string or a post (ID or WP_Post) of amp_invalid_url type.
 	 * @param array              $args {
@@ -896,7 +896,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Renders the sources column on the the single error URL page and the 'Invalid URLs' page.
+	 * Renders the sources column on the the single error URL page and the 'AMP Validated URLs' page.
 	 *
 	 * @param array $error_summary The summary of errors.
 	 * @param int   $post_id       The ID of the amp_invalid_url post.
@@ -1372,7 +1372,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Re-check invalid URL post for whether it has blocking validation errors.
+	 * Re-check validated URL post for whether it has blocking validation errors.
 	 *
 	 * @param int|WP_Post $post Post.
 	 * @return array|WP_Error List of blocking validation results, or a WP_Error in the case of failure.
@@ -1834,7 +1834,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Strip host name from AMP invalid URL being printed.
+	 * Strip host name from AMP validated URL being printed.
 	 *
 	 * @param string  $title Title.
 	 * @param WP_Post $post  Post.
@@ -1849,7 +1849,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Renders the filters on the invalid URL post type edit.php page.
+	 * Renders the filters on the validated URL post type edit.php page.
 	 *
 	 * @param string $post_type The slug of the post type.
 	 * @param string $which     The location for the markup, either 'top' or 'bottom'.
@@ -2086,22 +2086,22 @@ class AMP_Invalid_URL_Post_Type {
 				array(
 					/* translators: %s is the number of posts permanently forgotten */
 					'deleted'   => _n(
-						'%s invalid URL forgotten.',
-						'%s invalid URLs forgotten.',
+						'%s validated URL forgotten.',
+						'%s validated URLs forgotten.',
 						$bulk_counts['deleted'],
 						'amp'
 					),
 					/* translators: %s is the number of posts forgotten */
 					'trashed'   => _n(
-						'%s invalid URL forgotten.',
-						'%s invalid URLs forgotten.',
+						'%s validated URL forgotten.',
+						'%s validated URLs forgotten.',
 						$bulk_counts['trashed'],
 						'amp'
 					),
 					/* translators: %s is the number of posts restored from trash. */
 					'untrashed' => _n(
-						'%s invalid URL unforgotten.',
-						'%s invalid URLs unforgotten.',
+						'%s validated URL unforgotten.',
+						'%s validated URLs unforgotten.',
 						$bulk_counts['untrashed'],
 						'amp'
 					),
@@ -2131,7 +2131,7 @@ class AMP_Invalid_URL_Post_Type {
 	}
 
 	/**
-	 * Count Invalid URL Validation Errors
+	 * Count URL Validation Errors
 	 *
 	 * @param array $validation_errors Validation errors.
 	 *

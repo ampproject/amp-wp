@@ -41,7 +41,7 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, get_post_types(), true ) );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
-		$this->assertEquals( 'Invalid URLs', $amp_post_type->label );
+		$this->assertEquals( 'AMP Validated URLs', $amp_post_type->label );
 		$this->assertEquals( false, $amp_post_type->public );
 		$this->assertTrue( $amp_post_type->show_ui );
 		$this->assertEquals( AMP_Options_Manager::OPTION_NAME, $amp_post_type->show_in_menu );
@@ -1585,9 +1585,9 @@ class Test_AMP_Invalid_URL_Post_Type extends \WP_UnitTestCase {
 			'untrashed' => 99,
 		) );
 
-		$this->assertEquals( '%s invalid URL forgotten.', $filtered_messages['post']['deleted'] );
-		$this->assertEquals( '%s invalid URLs forgotten.', $filtered_messages['post']['trashed'] );
-		$this->assertEquals( '%s invalid URLs unforgotten.', $filtered_messages['post']['untrashed'] );
+		$this->assertEquals( '%s validated URL forgotten.', $filtered_messages['post']['deleted'] );
+		$this->assertEquals( '%s validated URLs forgotten.', $filtered_messages['post']['trashed'] );
+		$this->assertEquals( '%s validated URLs unforgotten.', $filtered_messages['post']['untrashed'] );
 	}
 
 
