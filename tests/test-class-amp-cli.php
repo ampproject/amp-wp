@@ -453,14 +453,14 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function get_validated_urls() {
 		$query = new WP_Query( array(
-			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page' => 100,
 			'fields'         => 'ids',
 		) );
 
 		return array_map(
 			function( $post ) {
-				return remove_query_arg( 'amp', AMP_Invalid_URL_Post_Type::get_url_from_post( $post ) );
+				return remove_query_arg( 'amp', AMP_Validated_URL_Post_Type::get_url_from_post( $post ) );
 			},
 			$query->posts
 		);

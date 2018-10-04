@@ -256,7 +256,7 @@ class AMP_CLI {
 
 		$url_more_details = add_query_arg(
 			'post_type',
-			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
 		);
 		/* translators: %s is the URL to the admin */
@@ -266,7 +266,7 @@ class AMP_CLI {
 	/**
 	 * Reset all validation data on a site.
 	 *
-	 * This deletes all amp_invalid_url posts and all amp_validation_error terms.
+	 * This deletes all amp_validated_url posts and all amp_validation_error terms.
 	 *
 	 * ## OPTIONS
 	 *
@@ -285,16 +285,16 @@ class AMP_CLI {
 	public function reset_site_validation( $args, $assoc_args ) {
 		unset( $args );
 		global $wpdb;
-		WP_CLI::confirm( 'Are you sure you want to empty all amp_invalid_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
 			/* translators: %d is the number of posts */
-			sprintf( __( 'Deleting %d amp_invalid_url posts...', 'amp' ), $count ),
+			sprintf( __( 'Deleting %d amp_validated_url posts...', 'amp' ), $count ),
 			$count
 		);
 		while ( $posts->valid() ) {
@@ -640,7 +640,7 @@ class AMP_CLI {
 		}
 
 		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		AMP_Invalid_URL_Post_Type::store_validation_errors(
+		AMP_Validated_URL_Post_Type::store_validation_errors(
 			$validation_errors,
 			$validity['url'],
 			wp_array_slice_assoc( $validity, array( 'queried_object' ) )

@@ -104,6 +104,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'all_templates_supported'  => true,
 				'supported_templates'      => array( 'is_singular' ),
 				'enable_response_caching'  => true,
+				'version'                  => AMP__VERSION,
 			),
 			AMP_Options_Manager::get_options()
 		);
@@ -437,7 +438,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Classic mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $page_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a page since it is the only post type supported.' );
-		$this->assertCount( 0, get_posts( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) ) );
+		$this->assertCount( 0, get_posts( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) ) );
 	}
 
 	/**
@@ -477,7 +478,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			'fields'    => 'ids',
 		) );
 		$this->assertEquals( 'updated', $new_error['type'] );
@@ -512,7 +513,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
 		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			'fields'    => 'ids',
 		) );
 		$this->assertCount( 0, $invalid_url_posts );
@@ -560,7 +561,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertStringStartsWith( 'Paired mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			'fields'    => 'ids',
 		) );
 		$this->assertEquals( 'updated', $new_error['type'] );

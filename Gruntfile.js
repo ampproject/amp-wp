@@ -110,7 +110,7 @@ module.exports = function( grunt ) {
 			var commitHash, lsOutput, versionAppend, paths;
 			commitHash = stdout.shift();
 			lsOutput = stdout.shift();
-			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
+			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
 				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*|languages\/README.*)/.test( file );
