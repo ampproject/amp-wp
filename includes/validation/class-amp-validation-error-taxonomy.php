@@ -1121,7 +1121,7 @@ class AMP_Validation_Error_Taxonomy {
 				admin_url( 'edit.php' )
 			) ),
 			esc_attr( $id ),
-			esc_html__( 'View AMP Validated URLs', 'amp' )
+			esc_html__( 'View Validated URLs', 'amp' )
 		);
 
 		?>
