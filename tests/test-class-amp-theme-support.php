@@ -1318,6 +1318,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$args          = array( 'enable_response_caching' => true );
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 		$this->reset_post_processor_cache_effectiveness();
+		AMP_Options_Manager::update_option( 'enable_response_caching', true );
 
 		// Test the response is not cached after exceeding the cache miss threshold.
 		for ( $num_calls = 1, $max = AMP_Theme_Support::CACHE_MISS_THRESHOLD + 2; $num_calls <= $max; $num_calls++ ) {

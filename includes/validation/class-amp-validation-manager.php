@@ -155,7 +155,7 @@ class AMP_Validation_Manager {
 
 		self::$should_locate_sources = $args['should_locate_sources'];
 
-		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
@@ -268,7 +268,7 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$amp_invalid_url_post = null;
+		$amp_validated_url_post = null;
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
@@ -291,7 +291,7 @@ class AMP_Validation_Manager {
 
 		/*
 		 * If not an AMP response, then obtain the count of validation errors from either the query param supplied after redirecting from AMP
-		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_invalid_url post that already
+		 * to non-AMP due to validation errors (see AMP_Theme_Support::prepare_response()), or if there is an amp_validated_url post that already
 		 * is populated with the last-known validation errors. Otherwise, if it *is* an AMP response then the error count is obtained after
 		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
 		 */
@@ -300,10 +300,10 @@ class AMP_Validation_Manager {
 				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
 			}
 			if ( $error_count < 0 ) {
-				$amp_invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( $amp_url );
-				if ( $amp_invalid_url_post ) {
+				$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
+				if ( $amp_validated_url_post ) {
 					$error_count = 0;
-					foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $amp_invalid_url_post ) as $error ) {
+					foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $amp_validated_url_post ) as $error ) {
 						if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['term_status'] ) {
 							$error_count++;
 						}
@@ -312,13 +312,13 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		$user_can_revalidate = $amp_invalid_url_post ? current_user_can( 'edit_post', $amp_invalid_url_post->ID ) : current_user_can( 'manage_options' );
+		$user_can_revalidate = $amp_validated_url_post ? current_user_can( 'edit_post', $amp_validated_url_post->ID ) : current_user_can( 'manage_options' );
 		if ( ! $user_can_revalidate ) {
 			return;
 		}
 
-		// @todo The amp_invalid_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$validate_url = AMP_Invalid_URL_Post_Type::get_recheck_url( $amp_invalid_url_post ? $amp_invalid_url_post : $amp_url );
+		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
+		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
 
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
@@ -556,7 +556,7 @@ class AMP_Validation_Manager {
 
 		/*
 		 * It is unlikely that there will be more than one post in the array.
-		 * For the bulk recheck action, see AMP_Invalid_URL_Post_Type::handle_bulk_action().
+		 * For the bulk recheck action, see AMP_Validated_URL_Post_Type::handle_bulk_action().
 		 */
 		foreach ( $posts as $post ) {
 			$url = amp_get_permalink( $post->ID );
@@ -572,9 +572,9 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_invalid_url_post_id', true ) );
+				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
 
-				$validation_posts[ $post->ID ] = AMP_Invalid_URL_Post_Type::store_validation_errors(
+				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
 					$validity['url'],
 					array_merge(
@@ -585,9 +585,9 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				// Remember the amp_invalid_url post so that when the slug changes the old amp_invalid_url post can be updated.
+				// Remember the amp_validated_url post so that when the slug changes the old amp_validated_url post can be updated.
 				if ( ! is_wp_error( $validation_posts[ $post->ID ] ) && $invalid_url_post_id !== $validation_posts[ $post->ID ] ) {
-					update_post_meta( $post->ID, '_amp_invalid_url_post_id', $validation_posts[ $post->ID ] );
+					update_post_meta( $post->ID, '_amp_validated_url_post_id', $validation_posts[ $post->ID ] );
 				}
 			}
 		}
@@ -655,7 +655,7 @@ class AMP_Validation_Manager {
 		}
 
 		if ( empty( $validation_status_post ) ) {
-			$validation_status_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( amp_get_permalink( $post->ID ) );
+			$validation_status_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( amp_get_permalink( $post->ID ) );
 		}
 
 		$field = array(
@@ -665,7 +665,7 @@ class AMP_Validation_Manager {
 
 		if ( $validation_status_post ) {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
-			foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
+			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
 					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
 					'error'       => $result['data'],
@@ -803,14 +803,14 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		$invalid_url_post = AMP_Invalid_URL_Post_Type::get_invalid_url_post( get_permalink( $post->ID ) );
+		$invalid_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( get_permalink( $post->ID ) );
 		if ( ! $invalid_url_post ) {
 			return;
 		}
 
 		// Show all validation errors which have not been explicitly acknowledged as accepted.
 		$validation_errors = array();
-		foreach ( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
+		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
 			$needs_moderation = (
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
@@ -1683,7 +1683,7 @@ class AMP_Validation_Manager {
 		}
 		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
 		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
-			AMP_Invalid_URL_Post_Type::store_validation_errors(
+			AMP_Validated_URL_Post_Type::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
 				wp_array_slice_assoc( $validity, array( 'queried_object_id', 'queried_object_type' ) )
@@ -1860,7 +1860,7 @@ class AMP_Validation_Manager {
 					'<a href="%s">%s</a>',
 					esc_url( add_query_arg(
 						'post_type',
-						AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+						AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 						admin_url( 'edit.php' )
 					) ),
 					__( 'More details', 'amp' )
