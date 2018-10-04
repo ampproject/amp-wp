@@ -1,16 +1,16 @@
 <?php
 /**
- * Class AMP_Invalid_URL_Post_Type
+ * Class AMP_Validated_URL_Post_Type
  *
  * @package AMP
  */
 
 /**
- * Class AMP_Invalid_URL_Post_Type
+ * Class AMP_Validated_URL_Post_Type
  *
  * @since 1.0
  */
-class AMP_Invalid_URL_Post_Type {
+class AMP_Validated_URL_Post_Type {
 
 	/**
 	 * The slug of the post type to store URLs that have AMP errors.
@@ -52,7 +52,7 @@ class AMP_Invalid_URL_Post_Type {
 	 *
 	 * @var string
 	 */
-	const EDIT_POST_SCRIPT_HANDLE = 'amp-invalid-url-post-edit-screen';
+	const EDIT_POST_SCRIPT_HANDLE = 'amp-validated-url-post-edit-screen';
 
 	/**
 	 * The query arg for the number of URLs tested.
@@ -183,10 +183,10 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Post list screen hooks.
 		add_filter( 'view_mode_post_types', function( $post_types ) {
-			return array_diff( $post_types, array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+			return array_diff( $post_types, array( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		} );
 		add_action( 'load-edit.php', function() {
-			if ( 'edit-' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_current_screen()->id ) {
+			if ( 'edit-' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== get_current_screen()->id ) {
 				return;
 			}
 			add_action( 'admin_head-edit.php', function() {
@@ -213,7 +213,7 @@ class AMP_Invalid_URL_Post_Type {
 
 		// Hide irrelevant "published" label in the AMP Validated URLs post list.
 		add_filter( 'post_date_column_status', function ( $status, $post ) {
-			if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
+			if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post ) ) {
 				$status = '';
 			}
 
@@ -224,7 +224,7 @@ class AMP_Invalid_URL_Post_Type {
 		add_filter( 'removable_query_args', function ( $query_vars ) {
 			$query_vars[] = 'amp_actioned';
 			$query_vars[] = 'amp_taxonomy_terms_updated';
-			$query_vars[] = AMP_Invalid_URL_Post_Type::REMAINING_ERRORS;
+			$query_vars[] = AMP_Validated_URL_Post_Type::REMAINING_ERRORS;
 			$query_vars[] = 'amp_urls_tested';
 			$query_vars[] = 'amp_validate_error';
 
@@ -239,14 +239,14 @@ class AMP_Invalid_URL_Post_Type {
 
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
 			wp_enqueue_script(
-				'amp-invalid-urls-index',
-				amp_get_asset_url( 'js/amp-invalid-urls-index.js' ),
+				'amp-validated-urls-index',
+				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
 				array(),
 				AMP__VERSION,
 				true
 			);
 			wp_add_inline_script(
-				'amp-invalid-urls-index',
+				'amp-validated-urls-index',
 				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlsIndex.boot(); } );' ),
 				'after'
 			);
@@ -695,7 +695,7 @@ class AMP_Invalid_URL_Post_Type {
 				&&
 				$placeholder === $post_data['post_content']
 				&&
-				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === $post_data['post_type']
+				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $post_data['post_type']
 			);
 			if ( $should_supply_post_content ) {
 				$post_data['post_content'] = wp_slash( $post_content );
@@ -1757,7 +1757,7 @@ class AMP_Invalid_URL_Post_Type {
 		 * @return WP_Term[]
 		 */
 		$override_terms_in_occurrence_order = function() use ( $post ) {
-			return wp_list_pluck( AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $post ), 'term' );
+			return wp_list_pluck( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $post ), 'term' );
 		};
 
 		add_filter( 'get_terms', $override_terms_in_occurrence_order );
@@ -1845,7 +1845,7 @@ class AMP_Invalid_URL_Post_Type {
 		}
 
 		?>
-		<h2 class="amp-invalid-url">
+		<h2 class="amp-validated-url">
 			<a href="<?php echo esc_url( $url ); ?>">
 				<?php
 				printf(

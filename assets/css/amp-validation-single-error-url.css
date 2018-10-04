@@ -110,7 +110,7 @@ table.striped > tbody > tr.even {
 	display: none;
 }
 
-.amp-invalid-url a {
+.amp-validated-url a {
 	text-decoration: none;
 }
 

@@ -196,7 +196,7 @@ function amp_add_amphtml_link() {
 
 	// Check to see if there are known unaccepted validation errors for this URL.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
 			echo "<!--\n";

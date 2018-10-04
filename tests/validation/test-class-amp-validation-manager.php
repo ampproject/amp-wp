@@ -116,7 +116,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
-		$this->assertTrue( post_type_exists( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertTrue( post_type_exists( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertTrue( taxonomy_exists( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
 
 		$this->assertEquals( 10, has_action( 'save_post', self::TESTED_CLASS . '::handle_save_post_prompting_validation' ) );
@@ -380,7 +380,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_get_amp_validity_rest_field() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
 		$id = $this->factory()->post->create();
@@ -547,7 +547,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_print_edit_form_validation_status() {
 		add_theme_support( AMP_Theme_Support::SLUG );
 
-		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
@@ -557,7 +557,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		AMP_Invalid_URL_Post_Type::store_validation_errors(
+		AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
 				array(
 					'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
@@ -1425,6 +1425,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			$url = home_url( '/' );
 		}
 
-		return AMP_Invalid_URL_Post_Type::store_validation_errors( $errors, $url );
+		return AMP_Validated_URL_Post_Type::store_validation_errors( $errors, $url );
 	}
 }

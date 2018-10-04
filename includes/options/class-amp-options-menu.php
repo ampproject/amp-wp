@@ -191,7 +191,7 @@ class AMP_Options_Menu {
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 
-						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
 								<p>
 									<?php
@@ -201,8 +201,8 @@ class AMP_Options_Menu {
 											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
-												esc_url( add_query_arg( 'post_type', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
-												esc_html( get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
+												esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
+												esc_html( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
 											),
 											sprintf(
 												'<a href="%s">%s</a>',
@@ -210,7 +210,7 @@ class AMP_Options_Menu {
 													add_query_arg(
 														array(
 															'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-															'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+															'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 														),
 														admin_url( 'edit-tags.php' )
 													)
@@ -280,7 +280,7 @@ class AMP_Options_Menu {
 									add_query_arg(
 										array(
 											'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-											'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+											'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 										),
 										admin_url( 'edit-tags.php' )
 									)

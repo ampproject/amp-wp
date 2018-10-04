@@ -298,7 +298,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'template_dir' => './',
 		) );
 		AMP_Theme_Support::init();
-		$invalid_url_post_id = AMP_Invalid_URL_Post_Type::store_validation_errors(
+		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
 				array( 'code' => 'foo' ),
 			),
