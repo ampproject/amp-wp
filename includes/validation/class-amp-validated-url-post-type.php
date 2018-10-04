@@ -247,7 +247,7 @@ class AMP_Validated_URL_Post_Type {
 			);
 			wp_add_inline_script(
 				'amp-validated-urls-index',
-				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlsIndex.boot(); } );' ),
+				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlsIndex.boot(); } );' ),
 				'after'
 			);
 		}
@@ -1569,7 +1569,7 @@ class AMP_Validated_URL_Post_Type {
 
 		wp_add_inline_script(
 			self::EDIT_POST_SCRIPT_HANDLE,
-			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampInvalidUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
+			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
 			'after'
 		);
 	}
