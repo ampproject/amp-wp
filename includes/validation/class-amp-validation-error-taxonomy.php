@@ -230,7 +230,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function register() {
 
-		register_taxonomy( self::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, array(
+		register_taxonomy( self::TAXONOMY_SLUG, AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, array(
 			'labels'             => array(
 				'name'                  => _x( 'AMP Validation Error Index', 'taxonomy general name', 'amp' ),
 				'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
@@ -256,7 +256,7 @@ class AMP_Validation_Error_Taxonomy {
 			'show_tagcloud'      => false,
 			'show_in_quick_edit' => false,
 			'hierarchical'       => false, // Or true? Code could be the parent term?
-			'show_in_menu'       => ( self::should_show_in_menu() || AMP_Invalid_URL_Post_Type::should_show_in_menu() ),
+			'show_in_menu'       => ( self::should_show_in_menu() || AMP_Validated_URL_Post_Type::should_show_in_menu() ),
 			'meta_box_cb'        => false,
 			'capabilities'       => array(
 				'assign_terms' => 'do_not_allow',
@@ -311,7 +311,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Delete all amp_validation_error terms that have zero counts (no amp_invalid_url posts associated with them).
+	 * Delete all amp_validation_error terms that have zero counts (no amp_validated_url posts associated with them).
 	 *
 	 * @since 1.0
 	 *
@@ -599,7 +599,7 @@ class AMP_Validation_Error_Taxonomy {
 	/**
 	 * Add support for querying posts by amp_validation_error_status and by error type.
 	 *
-	 * Add recognition of amp_validation_error_status query var for amp_invalid_url post queries.
+	 * Add recognition of amp_validation_error_status query var for amp_validated_url post queries.
 	 * Also, conditionally filter for error type, like js_error or css_error.
 	 *
 	 * @see WP_Tax_Query::get_sql_for_clause()
@@ -612,7 +612,7 @@ class AMP_Validation_Error_Taxonomy {
 		global $wpdb;
 
 		// If the post type is not correct, return the $where clause unchanged.
-		if ( ! in_array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true ) ) {
+		if ( ! in_array( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, (array) $query->get( 'post_type' ), true ) ) {
 			return $where;
 		}
 
@@ -750,7 +750,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 		add_action( 'parse_term_query', array( __CLASS__, 'parse_post_php_term_query' ) );
 		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_filter( 'manage_' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
+		add_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
 		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
 		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
 		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
@@ -924,7 +924,7 @@ class AMP_Validation_Error_Taxonomy {
 			||
 			! isset( $_POST['post_type'] ) // WPCS: CSRF OK.
 			||
-			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_POST['post_type'] // WPCS: CSRF OK.
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $_POST['post_type'] // WPCS: CSRF OK.
 		) {
 			return $url;
 		}
@@ -1097,9 +1097,9 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the 'Error Index' screen, renders a link to the 'Invalid URLs' page.
+	 * On the 'Error Index' screen, renders a link to the 'AMP Validated URLs' page.
 	 *
-	 * @see AMP_Invalid_URL_Post_Type::render_link_to_error_index_screen()
+	 * @see AMP_Validated_URL_Post_Type::render_link_to_error_index_screen()
 	 *
 	 * @param string $taxonomy_name The name of the taxonomy.
 	 */
@@ -1108,7 +1108,7 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$post_type_object = get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$post_type_object = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		if ( ! current_user_can( $post_type_object->cap->edit_posts ) ) {
 			return;
 		}
@@ -1119,11 +1119,11 @@ class AMP_Validation_Error_Taxonomy {
 			'<a href="%s" class="page-title-action" id="%s" hidden style="margin-left: 1rem;">%s</a>',
 			esc_url( add_query_arg(
 				'post_type',
-				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				admin_url( 'edit.php' )
 			) ),
 			esc_attr( $id ),
-			esc_html__( 'View Invalid URLs', 'amp' )
+			esc_html__( 'View Validated URLs', 'amp' )
 		);
 
 		?>
@@ -1158,7 +1158,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		} elseif ( 'edit' === $screen_base ) {
 			$args = array(
-				'post_type'              => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				'post_type'              => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
 			);
@@ -1421,7 +1421,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Show notices for changes to amp_validation_error terms.
 	 */
 	public static function add_admin_notices() {
-		if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) ) { // WPCS: CSRF ok.
+		if ( ! ( self::TAXONOMY_SLUG === get_current_screen()->taxonomy || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_current_screen()->post_type ) ) { // WPCS: CSRF ok.
 			return;
 		}
 
@@ -1496,7 +1496,7 @@ class AMP_Validation_Error_Taxonomy {
 
 			/*
 			 * Hide deletion link since a validation error should only be removed once
-			 * it no longer has an occurrence on the site. When an invalid URL is re-checked
+			 * it no longer has an occurrence on the site. When a validated URL is re-checked
 			 * and it no longer has this validation error, then the count will be decremented.
 			 * When a validation error term no longer has a count, then it is hidden from the
 			 * list table. A cron job could periodically delete terms that have no counts.
@@ -1514,7 +1514,7 @@ class AMP_Validation_Error_Taxonomy {
 					'<a href="%s">%s</a>',
 					admin_url( add_query_arg( array(
 						self::TAXONOMY_SLUG => $term->name,
-						'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+						'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 					), 'edit.php' ) ),
 					esc_html__( 'Details', 'amp' )
 				);
@@ -1566,16 +1566,16 @@ class AMP_Validation_Error_Taxonomy {
 			$menu_item_label,
 			$taxonomy_caps->manage_terms,
 			// The following esc_attr() is sadly needed due to <https://github.com/WordPress/wordpress-develop/blob/4.9.5/src/wp-admin/menu-header.php#L201>.
-			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )
+			esc_attr( 'edit-tags.php?taxonomy=' . self::TAXONOMY_SLUG . '&post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )
 		);
 	}
 
 	/**
 	 * Parses the term query on post.php pages (single error URL).
 	 *
-	 * This post.php page for amp_invalid_url is more like an edit-tags.php page,
+	 * This post.php page for amp_validated_url is more like an edit-tags.php page,
 	 * in that it has a WP_Terms_List_Table of terms (of type amp_validation_error).
-	 * So this needs to only show the terms (errors) associated with this amp_invalid_url post.
+	 * So this needs to only show the terms (errors) associated with this amp_validated_url post.
 	 *
 	 * @param WP_Term_Query $wp_term_query Instance of WP_Term_Query.
 	 */
@@ -1585,9 +1585,9 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		// Only set the query var if this is the invalid URL post type.
+		// Only set the query var if this is the validated URL post type.
 		$post_id = sanitize_key( $_GET['post'] );
-		if ( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
+		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 			$wp_term_query->query_vars['object_ids'] = $post_id;
 		}
 	}
@@ -1667,7 +1667,7 @@ class AMP_Validation_Error_Taxonomy {
 						'<a href="%s" class="error-code">%s</a>',
 						admin_url( add_query_arg( array(
 							self::TAXONOMY_SLUG => $term->name,
-							'post_type'         => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+							'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 						), 'edit.php' ) ),
 						esc_html( $validation_error['code'] )
 					);
@@ -1838,12 +1838,12 @@ class AMP_Validation_Error_Taxonomy {
 					break;
 				}
 				$url_post_id       = intval( $_GET['post'] ); // WPCS: CSRF OK.
-				$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
+				$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
 				$validation_errors = array_filter( $validation_errors, function( $error ) use ( $term ) {
 					return $error['term']->term_id === $term->term_id;
 				} );
 				$error_summary     = self::summarize_validation_errors( wp_list_pluck( $validation_errors, 'data' ) );
-				AMP_Invalid_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
+				AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $url_post_id );
 
 				break;
 			case 'error_type':
@@ -1864,7 +1864,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Adds post columns to the /wp-admin/post.php page for amp_invalid_url.
+	 * Adds post columns to the /wp-admin/post.php page for amp_validated_url.
 	 *
 	 * @param array $sortable_columns The sortable columns.
 	 * @return array $sortable_columns The filtered sortable columns.
@@ -1889,7 +1889,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function render_single_url_error_details( $validation_error, $term ) {
 		// Get the sources, if they exist.
 		if ( isset( $_GET['post'] ) ) {
-			$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // WPCS: CSRF OK.
 			foreach ( $validation_errors as $error ) {
 				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
 					$validation_error['sources'] = $error['data']['sources'];
@@ -2014,7 +2014,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// If we have a post_type check that it is the correct one.
-		if ( isset( $_GET['post_type'] ) && \AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // WPCS: CSRF ok.
+		if ( isset( $_GET['post_type'] ) && \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // WPCS: CSRF ok.
 			return;
 		}
 		$action = sanitize_key( $_GET['action'] ); // WPCS: CSRF ok.
@@ -2044,7 +2044,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @param int $post_id The ID of the post for which to apply the bulk action.
 	 */
 	public static function handle_single_url_page_bulk_and_inline_actions( $post_id ) {
-		if ( ! isset( $_REQUEST['action'] ) || AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {  // WPCS: CSRF OK.
+		if ( ! isset( $_REQUEST['action'] ) || AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {  // WPCS: CSRF OK.
 			return;
 		}
 
