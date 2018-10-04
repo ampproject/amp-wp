@@ -705,7 +705,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			add_query_arg(
 				array(
 					AMP_Validated_URL_Post_Type::URLS_TESTED => $urls_tested,
-					'amp_validate_error'                     => array( 'response_comment_absent' ),
+					'amp_validate_error' => array( 'response_comment_absent' ),
 				),
 				$initial_redirect
 			),
