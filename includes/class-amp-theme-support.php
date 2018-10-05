@@ -20,13 +20,6 @@ class AMP_Theme_Support {
 	const SLUG = 'amp';
 
 	/**
-	 * Replaced with the necessary scripts depending on components used in output.
-	 *
-	 * @var string
-	 */
-	const SCRIPTS_PLACEHOLDER = '<!-- AMP:SCRIPTS_PLACEHOLDER -->';
-
-	/**
 	 * Response cache group name.
 	 *
 	 * @var string
