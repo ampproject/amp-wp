@@ -408,7 +408,7 @@ function amp_get_analytics( $analytics = array() ) {
 		$analytics[ $entry_id ] = array(
 			'type'        => $entry['type'],
 			'attributes'  => array(),
-			'config_data' => json_decode( $entry['config'] ),
+			'config_data' => json_decode( $entry['config_data'] ),
 		);
 	}
 
