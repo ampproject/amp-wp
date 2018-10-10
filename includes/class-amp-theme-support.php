@@ -1497,6 +1497,132 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get the requested stream fragment.
+	 *
+	 * @since 1.1
+	 * @return string|null
+	 */
+	public static function get_requested_stream_fragment() {
+		// @todo Consider head/tail instead of header/body.
+		if ( isset( AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'] ) && in_array( AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'], array( 'header', 'body' ), true ) ) {
+			return AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'];
+		} else {
+			return null;
+		}
+	}
+
+	const STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID = 'amp-stream-fragment-boundary';
+
+	/**
+	 * Prepare stream fragment response.
+	 *
+	 * @param DOMDocument $dom           Document.
+	 * @param string      $fragment_name Fragment name.
+	 * @return string|WP_Error Response fragment string, or WP_Error.
+	 */
+	public static function prepare_stream_fragment_response( $dom, $fragment_name ) {
+		$boundary_element = $dom->getElementById( 'amp-stream-fragment-boundary' );
+		if ( ! $boundary_element ) {
+			return new WP_Error( 'no_fragment_boundary' );
+		}
+
+		$boundary_comment_text = 'AMP_STREAM_FRAGMENT_BOUNDARY';
+		$search                = "<!--$boundary_comment_text-->";
+
+		// Obtain header fragment.
+		if ( 'header' === $fragment_name ) {
+			$serialized = "<!DOCTYPE html>\n";
+			$comment    = $dom->createComment( $boundary_comment_text );
+			$boundary_element->parentNode->insertBefore( $comment, $boundary_element->nextSibling );
+			$serialized .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+			$token_pos   = strpos( $serialized, $search );
+			if ( false === $token_pos ) {
+				return new WP_Error( 'fragment_boundary_not_found' );
+			}
+			$response  = substr( $serialized, 0, $token_pos );
+			$response .= sprintf(
+				'<script id="amp-stream-combine-function">%s</script>',
+				file_get_contents( AMP__DIR__ . '/assets/js/amp-stream-combiner.js' ) // phpcs:ignore
+			);
+			return $response;
+		}
+
+		// Obtain body fragment.
+		$data = array(
+			'head_nodes'      => array(),
+			'body_attributes' => array(),
+		);
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $head ) {
+			return new WP_Error( 'no_head' );
+		}
+		$is_omitted_element = function ( DOMElement $element ) {
+			if ( 'style' === $element->nodeName && $element->hasAttribute( 'amp-boilerplate' ) ) {
+				return true;
+			}
+			if ( 'meta' === $element->nodeName && $element->hasAttribute( 'charset' ) ) {
+				return true;
+			}
+			if ( 'noscript' === $element->nodeName ) {
+				return true;
+			}
+			return false;
+		};
+		foreach ( $head->childNodes as $node ) {
+			if ( $node instanceof DOMElement ) {
+				if ( $is_omitted_element( $node ) ) {
+					continue;
+				}
+				$element = array(
+					$node->nodeName,
+					null,
+				);
+				if ( $node->hasAttributes() ) {
+					$element[1] = array();
+					foreach ( $node->attributes as $attribute ) {
+						$element[1][ $attribute->nodeName ] = $attribute->nodeValue;
+					}
+				}
+				if ( $node->firstChild instanceof DOMText ) {
+					$element[] = $node->firstChild->nodeValue;
+				}
+				$data['head_nodes'][] = $element;
+			} elseif ( $node instanceof DOMComment ) {
+				$data['head_nodes'][] = array(
+					'#comment',
+					$node->nodeValue,
+				);
+			}
+		}
+
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			return new WP_Error( 'no_body' );
+		}
+		foreach ( $body->attributes as $attribute ) {
+			$data['body_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+		}
+
+		// @todo Also obtain classes used in nav menus.
+		$boundary_element->parentNode->insertBefore( $dom->createComment( $boundary_comment_text ), $boundary_element );
+		$boundary_element->parentNode->removeChild( $boundary_element ); // Only relevant to serve in the header fragment.
+		$serialized = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$token_pos  = strpos( $serialized, $search );
+		if ( false === $token_pos ) {
+			return new WP_Error( 'fragment_boundary_not_found' );
+		}
+
+		$response = sprintf(
+			'<script id="amp-stream-combine-call">ampStreamCombine( %s );</script>',
+			wp_json_encode( $data, JSON_PRETTY_PRINT ) // phpcs:ignore PHPCompatibility.PHP.NewConstants.json_pretty_printFound -- Defined in core.
+		);
+
+		$response .= substr( $serialized, $token_pos + strlen( $search ) );
+
+		return $response;
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -1538,6 +1664,14 @@ class AMP_Theme_Support {
 					! is_customize_preview()
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
+				'stream_fragment'         => (
+					(
+						isset( AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'] )
+						&&
+						// @todo Consider head/tail instead of header/body.
+						in_array( AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'], array( 'header', 'body' ), true )
+					) ? AMP_HTTP::$purged_amp_query_vars['amp_stream_fragment'] : null
+				),
 			),
 			$args
 		);
@@ -1783,8 +1917,18 @@ class AMP_Theme_Support {
 			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 		) );
 
-		$response  = "<!DOCTYPE html>\n";
-		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response = null;
+		if ( $args['stream_fragment'] ) {
+			$response = self::prepare_stream_fragment_response( $dom, $args['stream_fragment'] );
+			if ( WP_DEBUG && is_wp_error( $response ) ) {
+				error_log( $response->get_error_code() ); // phpcs:ignore
+			}
+		}
+
+		if ( ! is_string( $response ) ) {
+			$response  = "<!DOCTYPE html>\n";
+			$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 

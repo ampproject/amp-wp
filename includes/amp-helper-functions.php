@@ -944,3 +944,31 @@ function amp_wp_kses_mustache( $markup ) {
 	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
 }
+
+/**
+ * Add loading indicator for responses streamed from the service worker.
+ *
+ * This this function should generally be called at the end of a theme's header.php template.
+ * A theme that uses this must also declare 'streaming' among the amp theme support.
+ * This element is also used to demarcate the header (head) from the body (tail).
+ *
+ * @since 1.1
+ * @todo Consider using progress element instead?
+ */
+function amp_stream_boundary() {
+	$stream_fragment = AMP_Theme_Support::get_requested_stream_fragment();
+	if ( ! is_amp_endpoint() || ! $stream_fragment ) {
+		return;
+	}
+
+	printf(
+		'<div id="%s">%s</div>',
+		esc_attr( AMP_Theme_Support::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID ),
+		esc_html__( 'Loading...', 'amp' )
+	);
+
+	// Short-circuit the response when requesting the header since there is nothing left to stream.
+	if ( 'header' === $stream_fragment ) {
+		exit;
+	}
+}
