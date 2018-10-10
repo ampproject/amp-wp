@@ -7,6 +7,10 @@ div[data-type="amp/amp-story-page"] {
 	margin: 60px auto 0;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
+	background: hsla( 0, 0%, 100%, 1 );
+}
+
 @media (min-width: 600px) {
 	div[data-type="amp/amp-story-page"] .editor-block-list__block {
 		margin: 0;
