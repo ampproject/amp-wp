@@ -2,7 +2,7 @@
 /**
  * Class AMP_WordAds_Sanitizer
  *
- *@package AMP
+ * @package AMP
  */
 
 /**
@@ -14,14 +14,13 @@
  */
 class AMP_WordAds_Sanitizer extends AMP_Base_Sanitizer {
 
-  /**
-   * Sanitize the WordAds elements from the HTML contained in this instance's DOMDocument.
-   *
-   * @since 0.9.97.19
+	/**
+	 * Sanitize the WordAds elements from the HTML contained in this instance's DOMDocument.
+	 *
+	 * @since 0.9.97.19
 	 */
 	public function sanitize() {
-    if ( defined('ADCONTROL_VERSION') ){
-
+		if ( defined('ADCONTROL_VERSION') ){
 			add_action( 'amp_post_template_css', array( $this, 'add_ad_styles' ) );
 
       foreach ( $this->dom->getElementsByTagName( 'div' ) as $div ) {
