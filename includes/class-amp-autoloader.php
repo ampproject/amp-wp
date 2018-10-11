@@ -83,6 +83,7 @@ class AMP_Autoloader {
 		'AMP_Form_Sanitizer'                          => 'includes/sanitizers/class-amp-form-sanitizer',
 		'AMP_O2_Player_Sanitizer'                     => 'includes/sanitizers/class-amp-o2-player-sanitizer',
 		'AMP_Playbuzz_Sanitizer'                      => 'includes/sanitizers/class-amp-playbuzz-sanitizer',
+		'AMP_WordAds_Sanitizer'	                      => 'includes/sanitizers/class-amp-wordads-sanitizer',
 		'AMP_Style_Sanitizer'                         => 'includes/sanitizers/class-amp-style-sanitizer',
 		'AMP_Script_Sanitizer'                        => 'includes/sanitizers/class-amp-script-sanitizer',
 		'AMP_Embed_Sanitizer'                         => 'includes/sanitizers/class-amp-embed-sanitizer',
