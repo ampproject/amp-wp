@@ -1,5 +1,5 @@
 import memoize from 'memize';
-import uuid from 'uuid';
+import uuid from 'uuid/v4';
 import BlockSelector from './block-selector';
 
 const { __ } = wp.i18n;
