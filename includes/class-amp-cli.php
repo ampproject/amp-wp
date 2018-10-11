@@ -169,14 +169,14 @@ class AMP_CLI {
 			self::$force_crawl_urls = true;
 		}
 
-		if ( ! current_theme_supports( 'amp' ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			if ( self::$force_crawl_urls ) {
 				/*
 				 * There is no theme support added programmatically or via options.
 				 * So make sure that theme support is present so that AMP_Validation_Manager::validate_url()
 				 * will use a canonical URL as the basis for obtaining validation results.
 				 */
-				add_theme_support( 'amp' );
+				add_theme_support( AMP_Theme_Support::SLUG );
 			} else {
 				WP_CLI::error(
 					sprintf(
@@ -256,11 +256,74 @@ class AMP_CLI {
 
 		$url_more_details = add_query_arg(
 			'post_type',
-			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
 		);
 		/* translators: %s is the URL to the admin */
 		WP_CLI::line( sprintf( __( 'For more details, please see: %s', 'amp' ), $url_more_details ) );
+	}
+
+	/**
+	 * Reset all validation data on a site.
+	 *
+	 * This deletes all amp_validated_url posts and all amp_validation_error terms.
+	 *
+	 * ## OPTIONS
+	 *
+	 * [--yes]
+	 * : Proceed to empty the site validation data without a confirmation prompt.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     wp amp reset-site-validation --yes
+	 *
+	 * @subcommand reset-site-validation
+	 * @param array $args       Positional args. Unused.
+	 * @param array $assoc_args Associative args.
+	 * @throws Exception If an error happens.
+	 */
+	public function reset_site_validation( $args, $assoc_args ) {
+		unset( $args );
+		global $wpdb;
+		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+
+		// Delete all posts.
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
+		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
+
+		$progress = WP_CLI\Utils\make_progress_bar(
+			/* translators: %d is the number of posts */
+			sprintf( __( 'Deleting %d amp_validated_url posts...', 'amp' ), $count ),
+			$count
+		);
+		while ( $posts->valid() ) {
+			$post_id = $posts->current()->ID;
+			$posts->next();
+			wp_delete_post( $post_id, true );
+			$progress->tick();
+		}
+		$progress->finish();
+
+		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT( * ) FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$query = $wpdb->prepare( "SELECT term_id FROM $wpdb->term_taxonomy WHERE taxonomy = %s", AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
+
+		$progress = WP_CLI\Utils\make_progress_bar(
+			/* translators: %d is the number of terms */
+			sprintf( __( 'Deleting %d amp_taxonomy_error terms...', 'amp' ), $count ),
+			$count
+		);
+		while ( $terms->valid() ) {
+			$term_id = $terms->current()->term_id;
+			$terms->next();
+			wp_delete_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+			$progress->tick();
+		}
+		$progress->finish();
+
+		WP_CLI::success( 'All AMP validation data has been removed.' );
 	}
 
 	/**
@@ -576,16 +639,25 @@ class AMP_CLI {
 			self::$wp_cli_progress->tick();
 		}
 
-		AMP_Invalid_URL_Post_Type::store_validation_errors( $validity['validation_errors'], $validity['url'] );
+		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			$validation_errors,
+			$validity['url'],
+			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+		);
 		$unaccepted_error_count = count( array_filter(
-			$validity['validation_errors'],
+			$validation_errors,
 			function( $error ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-				return AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS !== $validation_status['term_status'];
+				return (
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
+					&&
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
+				);
 			}
 		) );
 
-		if ( count( $validity['validation_errors'] ) > 0 ) {
+		if ( count( $validation_errors ) > 0 ) {
 			self::$total_errors++;
 		}
 		if ( $unaccepted_error_count > 0 ) {

@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-beta3
+ * Version: 1.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -49,7 +49,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-beta3' );
+define( 'AMP__VERSION', '1.1-alpha' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -102,6 +102,9 @@ add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
 // Ensure async and custom-element/custom-template attributes are present on script tags.
 add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
+// Ensure crossorigin=anonymous is added to font links.
+add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
+
 /**
  * Set up AMP.
  *
@@ -152,6 +155,7 @@ function amp_init() {
 	AMP_Validation_Manager::init();
 	AMP_Post_Type_Support::add_post_type_support();
 	AMP_Story_Post_Type::register();
+	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
 	if ( defined( 'WP_CLI' ) ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
@@ -175,6 +179,24 @@ function amp_init() {
 
 	// Add actions for legacy post templates.
 	add_action( 'wp', 'amp_maybe_add_actions' );
+
+	/*
+	 * Broadcast plugin updates.
+	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * version was new option added, and in that case default would never be used for a site
+	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
+	 */
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, array() );
+	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
+	if ( AMP__VERSION !== $old_version ) {
+		/**
+		 * Triggers when after amp_init when the plugin version has updated.
+		 *
+		 * @param string $old_version Old version.
+		 */
+		do_action( 'amp_plugin_update', $old_version );
+		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+	}
 }
 
 /**
@@ -208,7 +230,7 @@ function amp_force_query_var_value( $query_vars ) {
 function amp_maybe_add_actions() {
 
 	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return;
 	}
 
@@ -288,26 +310,26 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 /**
  * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`:
+ * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- *      add_theme_support( 'amp' );
+ *      add_theme_support( AMP_Theme_Support::SLUG );
  *
  * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
  * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired' => true,
  *      ) );
  *
  * Paired mode is also implied if you define a template_dir:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'template_dir' => 'amp',
  *      ) );
  *
  * If you want to have AMP-specific templates in addition to serving native AMP, do:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired'       => false,
  *          'template_dir' => 'amp',
  *      ) );
@@ -315,7 +337,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
  * for example to always serve the Category template in AMP:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'templates_supported' => array(
  *              'is_category' => true,
  *          ),
@@ -323,7 +345,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  * Or if you want to force AMP to be used on all templates:
  *
- *      add_theme_support( 'amp', array(
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'templates_supported' => 'all',
  *      ) );
  *
@@ -331,7 +353,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
-	if ( ! current_theme_supports( 'amp' ) ) {
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return false;
 	}
 
@@ -462,7 +484,7 @@ function amp_render_post( $post ) {
  * Uses the priority of 12 for the 'after_setup_theme' action.
  * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
  * And that function's documentation suggests adding it to that action.
- * So this enables themes to `add_theme_support( 'amp' )`.
+ * So this enables themes to `add_theme_support( AMP_Theme_Support::SLUG )`.
  * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
  *
  * @since 0.4
@@ -486,7 +508,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 function amp_redirect_old_slug_to_new_url( $link ) {
 
 	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );

@@ -55,7 +55,7 @@ class AMP_Options_Menu {
 		add_menu_page(
 			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
-			'manage_options',
+			'edit_posts',
 			AMP_Options_Manager::OPTION_NAME,
 			array( $this, 'render_screen' ),
 			self::ICON_BASE64_SVG
@@ -65,7 +65,7 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::OPTION_NAME,
 			__( 'AMP Settings', 'amp' ),
 			__( 'General', 'amp' ),
-			'manage_options',
+			'edit_posts',
 			AMP_Options_Manager::OPTION_NAME
 		);
 
@@ -143,7 +143,7 @@ class AMP_Options_Menu {
 		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. Your canonical URLs are AMP. AMP-specific blocks are available for inserting into content. Any AMP validation errors are automatically sanitized.', 'amp' );
 		$builtin_support    = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
 		?>
-		<?php if ( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_support_added_via_option() ) : ?>
+		<?php if ( current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::is_support_added_via_option() ) : ?>
 			<div class="notice notice-info notice-alt inline">
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
@@ -157,7 +157,7 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
-			<fieldset>
+			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
@@ -191,7 +191,7 @@ class AMP_Options_Menu {
 					<dd>
 						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
 
-						<?php if ( ! current_theme_supports( 'amp' ) && wp_count_posts( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
 								<p>
 									<?php
@@ -201,8 +201,8 @@ class AMP_Options_Menu {
 											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
-												esc_url( add_query_arg( 'post_type', AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
-												esc_html( get_post_type_object( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
+												esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
+												esc_html( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
 											),
 											sprintf(
 												'<a href="%s">%s</a>',
@@ -210,7 +210,7 @@ class AMP_Options_Menu {
 													add_query_arg(
 														array(
 															'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-															'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+															'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 														),
 														admin_url( 'edit-tags.php' )
 													)
@@ -239,7 +239,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_validation_handling() {
 		?>
-		<fieldset>
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php
 			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
 				'code' => 'non_existent',
@@ -257,20 +257,37 @@ class AMP_Options_Menu {
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'Your install is configured via a theme or plugin to automatically sanitize any AMP validation error that is encountered.', 'amp' ); ?></p>
 				</div>
-				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'force_sanitization' ) ? 'on' : ''; ?>">
+				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ? 'on' : ''; ?>">
 			<?php else : ?>
-				<div class="amp-force-sanitize-canonical notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'All validation errors are forcibly accepted when in native mode.', 'amp' ); ?></p>
+				<div class="amp-auto-accept-sanitize-canonical notice notice-info notice-alt inline">
+					<p><?php esc_html_e( 'All new validation errors are automatically accepted when in native mode.', 'amp' ); ?></p>
 				</div>
-				<div class="amp-force-sanitize">
+				<div class="amp-auto-accept-sanitize">
 					<p>
-						<label for="force_sanitization">
-							<input id="force_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[force_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'force_sanitization' ) ); ?>>
-							<?php esc_html_e( 'Automatically accept sanitization for any AMP validation error that is encountered.', 'amp' ); ?>
+						<label for="auto_accept_sanitization">
+							<input id="auto_accept_sanitization" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ); ?>>
+							<?php esc_html_e( 'Automatically accept sanitization for any newly encountered AMP validation errors.', 'amp' ); ?>
 						</label>
 					</p>
 					<p class="description">
 						<?php esc_html_e( 'This will ensure your responses are always valid AMP but some important content may get stripped out (e.g. scripts).', 'amp' ); ?>
+						<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: %s is URL to validation errors screen */
+								__( 'Existing validation errors which you have already rejected will not be modified (you may want to consider <a href="%s">bulk-accepting them</a>).', 'amp' ),
+								esc_url(
+									add_query_arg(
+										array(
+											'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+											'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+										),
+										admin_url( 'edit-tags.php' )
+									)
+								)
+							)
+						)
+						?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -302,20 +319,20 @@ class AMP_Options_Menu {
 				};
 
 				var updateTreeShakingHiddenClass = function() {
-					var checkbox = $( '#force_sanitization' );
+					var checkbox = $( '#auto_accept_sanitization' );
 					$( '.amp-tree-shaking' ).toggleClass( 'hidden', checkbox.prop( 'checked' ) && 'native' !== getThemeSupportMode() );
 				};
 
 				var updateHiddenClasses = function() {
 					var themeSupportMode = getThemeSupportMode();
-					$( '.amp-force-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
+					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
 					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
-					$( '.amp-force-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
+					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
 					updateTreeShakingHiddenClass();
 				};
 
 				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
-				$( '#force_sanitization' ).change( updateTreeShakingHiddenClass );
+				$( '#auto_accept_sanitization' ).change( updateTreeShakingHiddenClass );
 
 				updateHiddenClasses();
 			})( jQuery );
@@ -344,7 +361,7 @@ class AMP_Options_Menu {
 		?>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="all_templates_supported_fieldset">
+			<fieldset id="all_templates_supported_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
 					<div class="notice notice-info notice-alt inline">
 						<p>
@@ -371,7 +388,7 @@ class AMP_Options_Menu {
 			</div>
 		<?php endif; ?>
 
-		<fieldset id="supported_post_types_fieldset">
+		<fieldset id="supported_post_types_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
@@ -386,7 +403,7 @@ class AMP_Options_Menu {
 						id="<?php echo esc_attr( $element_id ); ?>"
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( post_type_supports( $post_type->name, amp_get_slug() ) ); ?>
+						<?php checked( post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG ) ); ?>
 						>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
@@ -397,7 +414,7 @@ class AMP_Options_Menu {
 		</fieldset>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="supported_templates_fieldset">
+			<fieldset id="supported_templates_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<style>
 					#supported_templates_fieldset ul ul {
 						margin-left: 40px;
@@ -424,7 +441,7 @@ class AMP_Options_Menu {
 					templateModeInputs = $( 'input[type=radio][name="amp-options[theme_support]"]' );
 					themeSupportDisabledInput = $( '#theme_support_disabled' );
 					allTemplatesSupportedInput = $( '#all_templates_supported' );
-					supportForced = <?php echo wp_json_encode( current_theme_supports( 'amp' ) && ! AMP_Theme_Support::is_support_added_via_option() ); ?>;
+					supportForced = <?php echo wp_json_encode( current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::is_support_added_via_option() ); ?>;
 
 					function isThemeSupportDisabled() {
 						return ! supportForced && themeSupportDisabledInput.prop( 'checked' );
@@ -464,7 +481,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_caching() {
 		?>
-		<fieldset>
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
@@ -553,14 +570,21 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>
+		<?php if ( ! current_user_can( 'manage_options' ) ) : ?>
+			<div class="notice notice-info">
+				<p><?php esc_html_e( 'You do not have permission to modify these settings. They are shown here for your reference. Please contact your administrator to make changes.', 'amp' ); ?></p>
+			</div>
+		<?php endif; ?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>
-			<form action="options.php" method="post">
+			<form id="amp-settings" action="options.php" method="post">
 				<?php
 				settings_fields( AMP_Options_Manager::OPTION_NAME );
 				do_settings_sections( AMP_Options_Manager::OPTION_NAME );
-				submit_button();
+				if ( current_user_can( 'manage_options' ) ) {
+					submit_button();
+				}
 				?>
 			</form>
 		</div>

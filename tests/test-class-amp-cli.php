@@ -117,11 +117,11 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		AMP_CLI::$force_crawl_urls = false;
 
 		// In Native AMP, the IDs should include all of the newly-created posts.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
 		// In Paired Mode, the IDs should also include all of the newly-created posts.
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'paired' => true,
 		) );
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
@@ -368,7 +368,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 *
 	 * @covers AMP_CLI::crawl_site()
 	 */
-	public function test_validate_site() {
+	public function test_crawl_site() {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
 		$posts           = array();
@@ -453,38 +453,41 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function get_validated_urls() {
 		$query = new WP_Query( array(
-			'post_type'      => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page' => 100,
 			'fields'         => 'ids',
 		) );
 
 		return array_map(
 			function( $post ) {
-				return remove_query_arg( 'amp', AMP_Invalid_URL_Post_Type::get_url_from_post( $post ) );
+				return remove_query_arg( 'amp', AMP_Validated_URL_Post_Type::get_url_from_post( $post ) );
 			},
 			$query->posts
 		);
 	}
 
 	/**
-	 * Adds the AMP_VALIDATION_RESULTS: comment to the <html> body.
+	 * Adds the AMP_VALIDATION: comment to the <html> body.
 	 *
 	 * @return array The response, with a comment in the body.
 	 */
 	public function add_comment() {
-		$mock_validation_results = array(
-			array(
-				'error'     => array(
-					'code' => 'foo',
+		$mock_validation = array(
+			'results' => array(
+				array(
+					'error'     => array(
+						'code' => 'foo',
+					),
+					'sanitized' => false,
 				),
-				'sanitized' => false,
 			),
+			'url'     => home_url( '/' ),
 		);
 
 		return array(
 			'body'     => sprintf(
 				'<html amp><head></head><body></body><!--%s--></html>',
-				'AMP_VALIDATION_RESULTS:' . wp_json_encode( $mock_validation_results )
+				'AMP_VALIDATION:' . wp_json_encode( $mock_validation )
 			),
 			'response' => array(
 				'code'    => 200,

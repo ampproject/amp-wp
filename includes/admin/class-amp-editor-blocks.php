@@ -151,7 +151,7 @@ class AMP_Editor_Blocks {
 		wp_add_inline_script(
 			'amp-editor-blocks',
 			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
-				'hasThemeSupport' => current_theme_supports( 'amp' ),
+				'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
 			) ) )
 		);
 
