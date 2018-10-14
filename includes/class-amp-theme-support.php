@@ -1526,7 +1526,7 @@ class AMP_Theme_Support {
 
 		// Dependencies on the PWA plugin.
 		$stream_fragment = null;
-		if ( function_exists( 'wp_prepare_stream_fragment_response' ) && class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) ) {
+		if ( function_exists( 'wp_prepare_stream_fragment_response' ) && class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
 			$stream_fragment = get_query_var( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_QUERY_VAR );
 			if ( ! in_array( $stream_fragment, array( 'header', 'body' ), true ) ) {
 				$stream_fragment = null;
