@@ -428,7 +428,7 @@ abstract class AMP_Base_Sanitizer {
 
 			$error['node_name'] = $node->nodeName;
 			if ( $node->parentNode ) {
-				$error['parent_name'] = $node->parentNode->nodeName;
+				$error['parent_name'] = property_exists( $node, 'originalParent' ) ? $node->originalParent : $node->parentNode->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
 			}
 		}
 

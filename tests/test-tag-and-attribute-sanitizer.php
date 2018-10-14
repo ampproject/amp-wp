@@ -214,6 +214,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-playbuzz' ),
 			),
 
+			'invalid_element_stripped' => array(
+				'<nonexistent><p>Foo text</p><nonexistent>',
+				'<p>Foo text</p>',
+				array(),
+			),
+
+			'nested_invalid_elements_stripped' => array(
+				'<details><summary><p>Example Summary</p></summary><p>Example expanded text</p></details>',
+				'<p>Example Summary</p><p>Example expanded text</p>',
+				array(),
+			),
+
 			// AMP-NEXT-PAGE > [separator].
 			'reference-point-amp-next-page-separator' => array(
 				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
@@ -1203,7 +1215,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$expected_errors[] = array(
 			'node_name'       => 'foo',
-			'parent_name'     => 'body',
+			'parent_name'     => 'divs',
 			'code'            => 'invalid_element',
 			'node_attributes' => array(),
 		);
@@ -1242,6 +1254,21 @@ EOB;
 		$expected_errors[] = array(
 			'node_name'       => 'lili',
 			'parent_name'     => 'ul',
+			'code'            => 'invalid_element',
+			'node_attributes' => array(),
+		);
+
+		// Both <details> and <summary> are invalid, so there should be errors for both.
+		$content[]         = '<div><details><summary><p>Example Summary</p></summary><p>Example expanded text</p></details><div>';
+		$expected_errors[] = array(
+			'node_name'       => 'details',
+			'parent_name'     => 'div',
+			'code'            => 'invalid_element',
+			'node_attributes' => array(),
+		);
+		$expected_errors[] = array(
+			'node_name'       => 'summary',
+			'parent_name'     => 'details',
 			'code'            => 'invalid_element',
 			'node_attributes' => array(),
 		);

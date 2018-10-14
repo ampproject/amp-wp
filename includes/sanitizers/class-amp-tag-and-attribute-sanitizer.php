@@ -1807,19 +1807,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		/*
-		 * If node has children, replace it with them and push children onto stack
-		 *
-		 * Create a DOM fragment to hold the children
-		 */
-		$fragment = $this->dom->createDocumentFragment();
-
 		// Add all children to fragment/stack.
-		$child = $node->firstChild;
-		while ( $child ) {
-			$fragment->appendChild( $child );
-			$this->stack[] = $child;
-			$child         = $node->firstChild;
+		$children = array();
+		foreach ( $node->childNodes as $child ) {
+			$child->originalParent = $node->nodeName; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.NotSnakeCaseMemberVar
+			$children[]            = $child;
+			$this->stack[]         = $child;
 		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
@@ -1830,6 +1823,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Replace node with fragment.
 		$should_replace = $this->should_sanitize_validation_error( array(), compact( 'node' ) );
 		if ( $should_replace ) {
+			/*
+			 * If node has children, replace it with them and push children onto stack.
+			 *
+			 * Create a DOM fragment to hold the children.
+			 */
+			$fragment = $this->dom->createDocumentFragment();
+
+			/*
+			 * Add the child nodes to the $fragment just-in-time, as this changes their ->parentNode.
+			 * It can prevent child elements from being validated if they're added to a $fragment in the else block below.
+			 */
+			array_map(
+				function( $child ) use ( $fragment ) {
+					$fragment->appendChild( $child );
+				},
+				$children
+			);
 			$node->parentNode->replaceChild( $fragment, $node );
 		} else {
 			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
