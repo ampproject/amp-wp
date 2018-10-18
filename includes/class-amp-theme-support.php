@@ -753,7 +753,7 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
-		// Let the AMP plugin manage fragment streaming for the PWA plugin.
+		// Let the AMP plugin manage service worker streaming in the PWA plugin.
 		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
 
 		// Remove core actions which are invalid AMP.
@@ -1527,7 +1527,7 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		// Dependencies on the PWA plugin.
+		// Dependencies on the PWA plugin for service worker streaming.
 		$stream_fragment = null;
 		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
 			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
@@ -1690,8 +1690,7 @@ class AMP_Theme_Support {
 				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
 				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
 			}
-		}
-		if ( 'body' === $stream_fragment ) {
+		} elseif ( 'body' === $stream_fragment ) {
 			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
 		}
 
@@ -1809,6 +1808,7 @@ class AMP_Theme_Support {
 			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 		) );
 
+		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
 		$truncate_after_comment  = null;
 		$truncate_before_comment = null;
 		if ( $stream_fragment ) {
@@ -1828,6 +1828,7 @@ class AMP_Theme_Support {
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
+		// For service worker streaming, make sure that the header response doesn't contain closing tags, and that the body fragment starts with the required script tag.
 		if ( $truncate_after_comment ) {
 			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
 			$position = strpos( $response, $search );
