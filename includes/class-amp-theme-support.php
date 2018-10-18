@@ -753,6 +753,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
+		// Let the AMP plugin manage fragment streaming for the PWA plugin.
+		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
+
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -1526,7 +1529,7 @@ class AMP_Theme_Support {
 
 		// Dependencies on the PWA plugin.
 		$stream_fragment = null;
-		if ( function_exists( 'wp_prepare_stream_fragment_response' ) && class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
+		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
 			$stream_fragment = get_query_var( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_QUERY_VAR );
 			if ( ! in_array( $stream_fragment, array( 'header', 'body' ), true ) ) {
 				$stream_fragment = null;
@@ -1679,6 +1682,22 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
+		// Remove scripts that are being added for PWA service worker streaming for restoration later.
+		$stream_combine_script_define_element     = null;
+		$stream_combine_script_define_placeholder = null;
+		$stream_combine_script_invoke_element     = null;
+		$stream_combine_script_invoke_placeholder = null;
+		if ( 'header' === $stream_fragment ) {
+			$stream_combine_script_define_element = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+			if ( $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
+			}
+		}
+		if ( 'body' === $stream_fragment ) {
+			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
+		}
+
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( $body ) {
@@ -1793,17 +1812,38 @@ class AMP_Theme_Support {
 			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 		) );
 
-		$response = null;
-		if ( $args['stream_fragment'] ) {
-			$response = wp_prepare_stream_fragment_response( $dom, $args['stream_fragment'] );
-			if ( WP_DEBUG && is_wp_error( $response ) ) {
-				error_log( $response->get_error_code() ); // phpcs:ignore
+		$truncate_after_comment  = null;
+		$truncate_before_comment = null;
+		if ( $stream_fragment ) {
+			if ( $stream_combine_script_define_placeholder && $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder->parentNode->replaceChild( $stream_combine_script_define_element, $stream_combine_script_define_placeholder );
+				$truncate_after_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_HEADER' );
+				$stream_combine_script_define_element->parentNode->insertBefore( $truncate_after_comment, $stream_combine_script_define_element->nextSibling );
+			}
+			if ( $stream_combine_script_invoke_placeholder ) {
+				$stream_combine_script_invoke_element = WP_Service_Worker_Navigation_Routing_Component::get_header_combine_invoke_script( $dom, false );
+				$stream_combine_script_invoke_placeholder->parentNode->replaceChild( $stream_combine_script_invoke_element, $stream_combine_script_invoke_placeholder );
+				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
+				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
 		}
 
-		if ( ! is_string( $response ) ) {
-			$response  = "<!DOCTYPE html>\n";
-			$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+		$response  = "<!DOCTYPE html>\n";
+		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+
+		if ( $truncate_after_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, 0, $position );
+			}
+		}
+		if ( $truncate_before_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_before_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, $position + strlen( $search ) );
+			}
 		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
