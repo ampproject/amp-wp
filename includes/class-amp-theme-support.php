@@ -55,6 +55,13 @@ class AMP_Theme_Support {
 	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
 
 	/**
+	 * Query var for requesting the inner or outer app shell.
+	 *
+	 * @var string
+	 */
+	const APP_SHELL_COMPONENT_QUERY_VAR = 'amp_app_shell_component';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -168,15 +175,20 @@ class AMP_Theme_Support {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback' );
+			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'app_shell' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
-				_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				_doing_it_wrong( 'add_theme_support', esc_html( sprintf( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 					/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
 					__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
 					join( ', ', $keys ),
 					join( ', ', array_keys( $args ) )
 				) ), '1.0' );
+			}
+
+			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['content_element_id'] ) ) {
+				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required content_element_id arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+				unset( $args['app_shell'] );
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
@@ -1500,6 +1512,22 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Get the requested app shell component (either inner or outer).
+	 *
+	 * @return string|null
+	 */
+	public static function get_requested_app_shell_component() {
+		if ( ! isset( AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ] ) ) {
+			return null;
+		}
+		$component = AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ];
+		if ( in_array( $component, array( 'inner', 'outer' ), true ) ) {
+			return $component;
+		}
+		return null;
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -1533,6 +1561,13 @@ class AMP_Theme_Support {
 			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
 		}
 
+		// Get request for shadow DOM.
+		$app_shell_component = null;
+		$theme_support_args  = self::get_theme_support_args();
+		if ( ! $stream_fragment && ! empty( $theme_support_args['app_shell'] ) ) {
+			$app_shell_component = self::get_requested_app_shell_component();
+		}
+
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
@@ -1548,6 +1583,7 @@ class AMP_Theme_Support {
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
 				'stream_fragment'         => $stream_fragment,
+				'app_shell_component'     => $app_shell_component,
 			),
 			$args
 		);
@@ -1676,8 +1712,9 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom  = AMP_DOM_Utils::get_dom( $response );
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$dom   = AMP_DOM_Utils::get_dom( $response );
+		$xpath = new DOMXPath( $dom );
+		$head  = $dom->getElementsByTagName( 'head' )->item( 0 );
 
 		// Remove scripts that are being added for PWA service worker streaming for restoration later.
 		$stream_combine_script_define_element     = null;
@@ -1692,6 +1729,38 @@ class AMP_Theme_Support {
 			}
 		} elseif ( 'body' === $stream_fragment ) {
 			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
+		}
+
+		// Remove the children of the content if requesting the outer app shell.
+		if ( $app_shell_component ) {
+			$content_xpath   = sprintf( '//div[@id="%s"]', $theme_support_args['app_shell']['content_element_id'] );
+			$content_element = $xpath->query( $content_xpath )->item( 0 );
+			if ( ! $content_element ) {
+				status_header( 500 );
+				return esc_html__( 'Unable to locate content_element_id.', 'amp' );
+			}
+			if ( 'outer' === $app_shell_component ) {
+				while ( $content_element->firstChild ) {
+					$content_element->removeChild( $content_element->firstChild );
+				}
+			} elseif ( 'inner' === $app_shell_component ) {
+				// @todo This should not be removing wpadminbar.
+				// @todo This should not be removing style elements.
+				$remove_siblings = function( DOMElement $node ) {
+					while ( $node->previousSibling ) {
+						$node->parentNode->removeChild( $node->previousSibling );
+					}
+					while ( $node->nextSibling ) {
+						$node->parentNode->removeChild( $node->nextSibling );
+					}
+				};
+
+				$node = $content_element;
+				do {
+					$remove_siblings( $node );
+					$node = $node->parentNode;
+				} while ( $node && 'body' !== $node->nodeName );
+			}
 		}
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
@@ -1712,7 +1781,6 @@ class AMP_Theme_Support {
 
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			$xpath = new DOMXPath( $dom );
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
 				$head->appendChild( $script->parentNode->removeChild( $script ) );
 			}

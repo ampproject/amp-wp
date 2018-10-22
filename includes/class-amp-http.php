@@ -118,6 +118,7 @@ class AMP_HTTP {
 			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
 			'amp_last_check_time',
+			AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
 		);
 
 		// Scrub input vars.
