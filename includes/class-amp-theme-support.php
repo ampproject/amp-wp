@@ -1528,6 +1528,54 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Prepare outer app shell.
+	 *
+	 * @param DOMElement $content_element Content element.
+	 */
+	protected function prepare_outer_app_shell_document( DOMElement $content_element ) {
+		while ( $content_element->firstChild ) {
+			$content_element->removeChild( $content_element->firstChild );
+		}
+	}
+
+	/**
+	 * Prepare inner app shell.
+	 *
+	 * @param DOMElement $content_element Content element.
+	 */
+	protected function prepare_inner_app_shell_document( DOMElement $content_element ) {
+		$dom  = $content_element->ownerDocument;
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+
+		$admin_bar = $dom->getElementById( 'wpadminbar' );
+		if ( $admin_bar ) {
+			$admin_bar->parentNode->removeChild( $admin_bar );
+		}
+
+		// @todo This should not be removing style elements.
+		$remove_siblings = function( DOMElement $node ) {
+			while ( $node->previousSibling ) {
+				$node->parentNode->removeChild( $node->previousSibling );
+			}
+			while ( $node->nextSibling ) {
+				$node->parentNode->removeChild( $node->nextSibling );
+			}
+		};
+
+		$node = $content_element;
+		do {
+			$remove_siblings( $node );
+			$node = $node->parentNode;
+		} while ( $node && $node !== $body );
+
+		// Restore admin bar element.
+		if ( $body && $admin_bar ) {
+			$body->appendChild( $admin_bar );
+		}
+	}
+
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -1740,26 +1788,9 @@ class AMP_Theme_Support {
 				return esc_html__( 'Unable to locate content_element_id.', 'amp' );
 			}
 			if ( 'outer' === $app_shell_component ) {
-				while ( $content_element->firstChild ) {
-					$content_element->removeChild( $content_element->firstChild );
-				}
+				self::prepare_outer_app_shell_document( $content_element );
 			} elseif ( 'inner' === $app_shell_component ) {
-				// @todo This should not be removing wpadminbar.
-				// @todo This should not be removing style elements.
-				$remove_siblings = function( DOMElement $node ) {
-					while ( $node->previousSibling ) {
-						$node->parentNode->removeChild( $node->previousSibling );
-					}
-					while ( $node->nextSibling ) {
-						$node->parentNode->removeChild( $node->nextSibling );
-					}
-				};
-
-				$node = $content_element;
-				do {
-					$remove_siblings( $node );
-					$node = $node->parentNode;
-				} while ( $node && 'body' !== $node->nodeName );
+				self::prepare_inner_app_shell_document( $content_element );
 			}
 		}
 
