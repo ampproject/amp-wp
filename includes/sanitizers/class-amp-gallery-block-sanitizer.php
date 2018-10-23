@@ -77,9 +77,10 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$attributes      = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$is_amp_lightbox = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
-			$is_amp_carousel = ! empty( $this->args['carousel_required'] ) || ( isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN ) );
+			$attributes           = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$is_amp_lightbox      = isset( $attributes['data-amp-lightbox'] ) && true === filter_var( $attributes['data-amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
+			$is_amp_carousel      = isset( $attributes['data-amp-carousel'] ) && true === filter_var( $attributes['data-amp-carousel'], FILTER_VALIDATE_BOOLEAN );
+			$is_carousel_required = isset( $this->args['carousel_required'] ) && true === filter_var( $this->args['carousel_required'], FILTER_VALIDATE_BOOLEAN );
 
 			// We are only looking for <ul> elements which have amp-carousel / amp-lightbox true.
 			if ( ! $is_amp_carousel && ! $is_amp_lightbox ) {
@@ -93,7 +94,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// If amp-carousel is not set, nothing else to do here.
-			if ( ! $is_amp_carousel ) {
+			if ( ! $is_amp_carousel && ! $is_carousel_required ) {
 				continue;
 			}
 
