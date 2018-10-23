@@ -931,23 +931,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
-		$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"}';
-		if ( has_filter( 'the_content', 'do_blocks' ) ) {
-			if ( function_exists( 'gutenberg_wpautop' ) ) {
-				$source_json .= ',{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"}';
-			}
-			$source_json .= ',{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"}';
-			$source_json .= sprintf(
-				',{"type":"%s","name":"%s","function":"do_blocks"}',
-				function_exists( 'gutenberg_wpautop' ) ? 'plugin' : 'core',
-				function_exists( 'gutenberg_wpautop' ) ? 'gutenberg' : 'wp-includes'
-			);
-		}
-		$source_json .= ',{"type":"core","name":"wp-includes","function":"wptexturize"}';
 		if ( ! function_exists( 'gutenberg_wpautop' ) ) {
-			$source_json .= ',{"type":"core","name":"wp-includes","function":"wpautop"}';
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"core","name":"wp-includes","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+		} else {
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		}
-		$source_json .= ',{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 
 		$expected_content = implode( '', array(
 			"<!--amp-source-stack $source_json-->",
