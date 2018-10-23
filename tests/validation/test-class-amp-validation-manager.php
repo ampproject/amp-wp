@@ -932,7 +932,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
 		$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"}';
-		if ( 9 === has_filter( 'the_content', 'do_blocks' ) ) {
+		if ( has_filter( 'the_content', 'do_blocks' ) ) {
 			if ( function_exists( 'gutenberg_wpautop' ) ) {
 				$source_json .= ',{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"}';
 			}
