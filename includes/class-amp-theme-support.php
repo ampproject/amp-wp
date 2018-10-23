@@ -1895,6 +1895,8 @@ class AMP_Theme_Support {
 		}
 		if ( 'outer' === $app_shell_component ) {
 			$amp_scripts['amp-shadow'] = true;
+			$dom->documentElement->removeAttribute( 'amp' );
+			$dom->documentElement->removeAttribute( '⚡️' );
 		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
@@ -1905,7 +1907,7 @@ class AMP_Theme_Support {
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() ) {
+			if ( amp_is_canonical() || 'outer' === $app_shell_component ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 				$dom->documentElement->removeAttribute( '⚡️' );
 
