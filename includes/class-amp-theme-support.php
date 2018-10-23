@@ -1294,8 +1294,8 @@ class AMP_Theme_Support {
 		$amp_scripts     = array();
 		$ordered_scripts = array();
 		$head_scripts    = array();
-		$runtime_src     = wp_scripts()->registered['amp-runtime']->src;
-		$shadow_src      = wp_scripts()->registered['amp-shadow']->src;
+		$base_handle     = 'outer' === self::get_requested_app_shell_component() ? 'amp-shadow' : 'amp-runtime';
+		$runtime_src     = wp_scripts()->registered[ $base_handle ]->src;
 		foreach ( $head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
@@ -1305,9 +1305,7 @@ class AMP_Theme_Support {
 				continue;
 			}
 			if ( $runtime_src === $src ) {
-				$amp_scripts['amp-runtime'] = $script;
-			} elseif ( $shadow_src === $src ) {
-				$amp_scripts['amp-shadow'] = $script;
+				$amp_scripts[ $base_handle ] = $script;
 			} elseif ( $script->hasAttribute( 'custom-element' ) ) {
 				$amp_scripts[ $script->getAttribute( 'custom-element' ) ] = $script;
 			} elseif ( $script->hasAttribute( 'custom-template' ) ) {
@@ -1353,13 +1351,6 @@ class AMP_Theme_Support {
 			'as'   => 'script',
 			'href' => $runtime_src,
 		) );
-		if ( 'outer' === self::get_requested_app_shell_component() ) {
-			$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
-				'rel'  => 'preload',
-				'as'   => 'script',
-				'href' => $shadow_src,
-			) );
-		}
 
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
@@ -1394,8 +1385,8 @@ class AMP_Theme_Support {
 		 * should not be preloaded because they might take away important bandwidth for the initial render."
 		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
-		if ( isset( $amp_scripts['amp-runtime'] ) ) {
-			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
+		if ( isset( $amp_scripts[ $base_handle ] ) ) {
+			$ordered_scripts[ $base_handle ] = $amp_scripts[ $base_handle ];
 		}
 		foreach ( $render_delaying_extensions as $extension ) {
 			if ( isset( $amp_scripts[ $extension ] ) ) {
@@ -1893,13 +1884,14 @@ class AMP_Theme_Support {
 				wp_scripts()->registered[ $handle ]->src = $src;
 			}
 		}
+
+		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
+
+		// When serving outer app shell document, prevent it from being read as a valid AMP document (since it isn't).
 		if ( 'outer' === $app_shell_component ) {
-			$amp_scripts['amp-shadow'] = true;
 			$dom->documentElement->removeAttribute( 'amp' );
 			$dom->documentElement->removeAttribute( '⚡️' );
 		}
-
-		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
@@ -2090,7 +2082,7 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		wp_enqueue_script( 'amp-runtime' );
+		wp_enqueue_script( 'outer' === self::get_requested_app_shell_component() ? 'amp-shadow' : 'amp-runtime' );
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
