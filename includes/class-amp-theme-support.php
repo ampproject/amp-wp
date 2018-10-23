@@ -1295,6 +1295,7 @@ class AMP_Theme_Support {
 		$ordered_scripts = array();
 		$head_scripts    = array();
 		$runtime_src     = wp_scripts()->registered['amp-runtime']->src;
+		$shadow_src      = wp_scripts()->registered['amp-shadow']->src;
 		foreach ( $head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
@@ -1305,6 +1306,8 @@ class AMP_Theme_Support {
 			}
 			if ( $runtime_src === $src ) {
 				$amp_scripts['amp-runtime'] = $script;
+			} elseif ( $shadow_src === $src ) {
+				$amp_scripts['amp-shadow'] = $script;
 			} elseif ( $script->hasAttribute( 'custom-element' ) ) {
 				$amp_scripts[ $script->getAttribute( 'custom-element' ) ] = $script;
 			} elseif ( $script->hasAttribute( 'custom-template' ) ) {
@@ -1350,6 +1353,13 @@ class AMP_Theme_Support {
 			'as'   => 'script',
 			'href' => $runtime_src,
 		) );
+		if ( 'outer' === self::get_requested_app_shell_component() ) {
+			$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
+				'rel'  => 'preload',
+				'as'   => 'script',
+				'href' => $shadow_src,
+			) );
+		}
 
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
@@ -1514,12 +1524,18 @@ class AMP_Theme_Support {
 	/**
 	 * Get the requested app shell component (either inner or outer).
 	 *
-	 * @return string|null
+	 * @return string|null App shell component.
 	 */
 	public static function get_requested_app_shell_component() {
 		if ( ! isset( AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ] ) ) {
 			return null;
 		}
+
+		$theme_support_args = self::get_theme_support_args();
+		if ( empty( $theme_support_args['app_shell'] ) ) {
+			return null;
+		}
+
 		$component = AMP_HTTP::$purged_amp_query_vars[ self::APP_SHELL_COMPONENT_QUERY_VAR ];
 		if ( in_array( $component, array( 'inner', 'outer' ), true ) ) {
 			return $component;
@@ -1634,11 +1650,7 @@ class AMP_Theme_Support {
 		}
 
 		// Get request for shadow DOM.
-		$app_shell_component = null;
-		$theme_support_args  = self::get_theme_support_args();
-		if ( ! $stream_fragment && ! empty( $theme_support_args['app_shell'] ) ) {
-			$app_shell_component = self::get_requested_app_shell_component();
-		}
+		$app_shell_component = self::get_requested_app_shell_component();
 
 		$args = array_merge(
 			array(
@@ -1805,7 +1817,8 @@ class AMP_Theme_Support {
 
 		// Remove the children of the content if requesting the outer app shell.
 		if ( $app_shell_component ) {
-			$content_xpath   = sprintf( '//div[@id="%s"]', $theme_support_args['app_shell']['content_element_id'] );
+			$support_args    = self::get_theme_support_args();
+			$content_xpath   = sprintf( '//div[@id="%s"]', $support_args['app_shell']['content_element_id'] );
 			$content_element = $xpath->query( $content_xpath )->item( 0 );
 			if ( ! $content_element ) {
 				status_header( 500 );
@@ -1880,6 +1893,9 @@ class AMP_Theme_Support {
 				wp_scripts()->registered[ $handle ]->src = $src;
 			}
 		}
+		if ( 'outer' === $app_shell_component ) {
+			$amp_scripts['amp-shadow'] = true;
+		}
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
@@ -1946,6 +1962,16 @@ class AMP_Theme_Support {
 				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
 				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
+		} elseif ( 'outer' === $app_shell_component ) {
+			$script = $dom->createElement( 'script' );
+			$script->appendChild( $dom->createTextNode(
+				'
+				(window.AMP = window.AMP || []).push(function(AMP) {
+					console.info( "Hello AMP! AMP.attachShadowDoc", AMP.attachShadowDoc );
+				});
+				'
+			) );
+			$head->appendChild( $script );
 		}
 
 		$response  = "<!DOCTYPE html>\n";
