@@ -1532,7 +1532,7 @@ class AMP_Theme_Support {
 	 *
 	 * @param DOMElement $content_element Content element.
 	 */
-	protected function prepare_outer_app_shell_document( DOMElement $content_element ) {
+	protected static function prepare_outer_app_shell_document( DOMElement $content_element ) {
 		while ( $content_element->firstChild ) {
 			$content_element->removeChild( $content_element->firstChild );
 		}
@@ -1543,16 +1543,35 @@ class AMP_Theme_Support {
 	 *
 	 * @param DOMElement $content_element Content element.
 	 */
-	protected function prepare_inner_app_shell_document( DOMElement $content_element ) {
+	protected static function prepare_inner_app_shell_document( DOMElement $content_element ) {
 		$dom  = $content_element->ownerDocument;
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			return;
+		}
+		$xpath = new DOMXPath( $dom );
 
+		// Preserve the admin bar.
 		$admin_bar = $dom->getElementById( 'wpadminbar' );
 		if ( $admin_bar ) {
 			$admin_bar->parentNode->removeChild( $admin_bar );
 		}
 
-		// @todo This should not be removing style elements.
+		// Extract all stylesheet elements before the body gets isolated.
+		$style_elements = array();
+		$lower_case     = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
+		$predicates     = array(
+			sprintf( '( self::style and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
+			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
+		);
+		foreach ( $xpath->query( './/*[ ' . implode( ' or ', $predicates ) . ' ]', $body ) as $element ) {
+			$style_elements[] = $element;
+		}
+		foreach ( $style_elements as $style_element ) {
+			$style_element->parentNode->removeChild( $style_element );
+		}
+
+		// Isolate the content element from the rest of the elements in the body.
 		$remove_siblings = function( DOMElement $node ) {
 			while ( $node->previousSibling ) {
 				$node->parentNode->removeChild( $node->previousSibling );
@@ -1571,6 +1590,11 @@ class AMP_Theme_Support {
 		// Restore admin bar element.
 		if ( $body && $admin_bar ) {
 			$body->appendChild( $admin_bar );
+		}
+
+		// Restore style elements.
+		foreach ( $style_elements as $style_element ) {
+			$body->appendChild( $style_element );
 		}
 	}
 
