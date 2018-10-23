@@ -29,24 +29,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	public $test_block = 'core/test';
 
 	/**
-	 * Setup.
-	 */
-	public function setUp() {
-		parent::setUp();
-
-		// Require gutenberg file to be able to run the tests.
-		if ( file_exists( AMP__DIR__ . '/../gutenberg/gutenberg.php' ) ) {
-			require_once AMP__DIR__ . '/../gutenberg/gutenberg.php';
-
-			if ( ! function_exists( 'register_block_type' ) ) {
-				require_once AMP__DIR__ . '/../gutenberg/lib/class-wp-block-type.php';
-				require_once AMP__DIR__ . '/../gutenberg/lib/class-wp-block-type-registry.php';
-				require_once AMP__DIR__ . '/../gutenberg/lib/blocks.php';
-			}
-		}
-	}
-
-	/**
 	 * Teardown.
 	 */
 	public function tearDown() {

@@ -40,7 +40,7 @@ class AMP_Editor_Blocks {
 	 * Init.
 	 */
 	public function init() {
-		if ( function_exists( 'gutenberg_init' ) ) {
+		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
