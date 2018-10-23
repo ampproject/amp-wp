@@ -1,5 +1,6 @@
 /* eslint-env node */
 /* jshint node:true */
+/* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
 	'use strict';
@@ -41,7 +42,16 @@ module.exports = function( grunt ) {
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php'
 			},
-			create_release_zip: {
+			webpack_production: {
+				command: 'cross-env BABEL_ENV=production webpack'
+			},
+			pot_to_php: {
+				command: 'npm run pot-to-php && php -l languages/amp-translations.php'
+			},
+			makepot: {
+				command: 'wp i18n make-pot . languages/amp-js.pot --include="*.js" --file-comment="*/null/*"' // The --file-comment is a temporary workaround for <https://github.com/Automattic/amp-wp/issues/1416>.
+			},
+			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
 		},
@@ -76,46 +86,103 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'build', function() {
-		var done = this.async();
+		var done, spawnQueue, stdout;
+		done = this.async();
+		spawnQueue = [];
+		stdout = [];
 
-		grunt.util.spawn(
+		grunt.task.run( 'shell:webpack_production' );
+		grunt.task.run( 'shell:makepot' );
+		grunt.task.run( 'shell:pot_to_php' );
+
+		spawnQueue.push(
+			{
+				cmd: 'git',
+				args: [ '--no-pager', 'log', '-1', '--format=%h', '--date=short' ]
+			},
 			{
 				cmd: 'git',
 				args: [ 'ls-files' ]
-			},
-			function( err, res ) {
-				if ( err ) {
-					throw new Error( err.message );
-				}
-
-				grunt.config.set( 'copy', {
-					build: {
-						src: res.stdout.trim().split( /\n/ ).filter( function( file ) {
-							return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
-						} ),
-						dest: 'build',
-						expand: true
-					}
-				} );
-				grunt.task.run( 'readme' );
-				grunt.task.run( 'copy' );
-				grunt.task.run( 'shell:create_release_zip' );
-				done();
 			}
 		);
+
+		function finalize() {
+			var commitHash, lsOutput, versionAppend, paths;
+			commitHash = stdout.shift();
+			lsOutput = stdout.shift();
+			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
+
+			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*|languages\/README.*)/.test( file );
+			} );
+			paths.push( 'vendor/autoload.php' );
+			paths.push( 'assets/js/*-compiled.js' );
+			paths.push( 'vendor/composer/**' );
+			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+			paths.push( 'languages/amp-translations.php' );
+
+			grunt.task.run( 'clean' );
+			grunt.config.set( 'copy', {
+				build: {
+					src: paths,
+					dest: 'build',
+					expand: true,
+					options: {
+						noProcess: [ '*/**', 'LICENSE', 'jetpack-helper.php', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
+						process: function( content, srcpath ) {
+							var matches, version, versionRegex;
+							if ( /amp\.php$/.test( srcpath ) ) {
+								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;
+
+								// If not a stable build (e.g. 0.7.0-beta), amend the version with the git commit and current timestamp.
+								matches = content.match( versionRegex );
+								if ( matches ) {
+									version = matches[ 2 ] + '-' + versionAppend;
+									console.log( 'Updating version in amp.php to ' + version );
+									content = content.replace( versionRegex, '$1' + version );
+									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
+								}
+							}
+							return content;
+						}
+					}
+				}
+			} );
+			grunt.task.run( 'readme' );
+			grunt.task.run( 'copy' );
+
+			done();
+		}
+
+		function doNext() {
+			var nextSpawnArgs = spawnQueue.shift();
+			if ( ! nextSpawnArgs ) {
+				finalize();
+			} else {
+				grunt.util.spawn(
+					nextSpawnArgs,
+					function( err, res ) {
+						if ( err ) {
+							throw new Error( err.message );
+						}
+						stdout.push( res.stdout );
+						doNext();
+					}
+				);
+			}
+		}
+
+		doNext();
 	} );
 
-	grunt.registerTask( 'create-release-zip', [
-		'build',
-		'shell:create_release_zip'
+	grunt.registerTask( 'create-build-zip', [
+		'shell:create_build_zip'
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'build',
 		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
-		'wp_deploy',
-		'clean'
+		'wp_deploy'
 	] );
 };

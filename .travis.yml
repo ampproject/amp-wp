@@ -4,30 +4,9 @@ language: php
 # Opt to use Travis container-based environment.
 sudo: false
 
-# PHP version used in first build configuration.
-php:
-    - "7.1"
-
-# WordPress version used in first build configuration.
-env:
-    - WP_VERSION=latest
-
 # Newer versions like trusty don't have PHP 5.2 or 5.3
 # https://blog.travis-ci.com/2017-07-11-trusty-as-default-linux-is-coming
 dist: precise
-
-# Next we define our matrix of additional build configurations to test against.
-# The versions listed above will automatically create our first configuration,
-# so it doesn't need to be re-defined below.
-
-# WP_VERSION specifies the tag to use. The way these tests are configured to run
-# requires at least WordPress 3.8. Specify "latest" to test against SVN trunk.
-
-# Note that Travis CI supports listing these above to automatically build a
-# matrix of configurations, but we're being nice here by manually building a
-# total of four configurations even though we're testing 4 versions of PHP
-# along with 2 versions of WordPress (which would build 8 configs otherwise).
-# This takes half as long to run while still providing adequate coverage.
 
 notifications:
   email:
@@ -39,27 +18,11 @@ cache:
     - node_modules
     - vendor
     - $HOME/phpunit-bin
-
-matrix:
-  include:
-   - php: "5.3"
-     env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
-   - php: "5.3"
-     env: WP_VERSION=4.7 DEV_LIB_SKIP=phpcs
-   - php: "5.4"
-     env: WP_VERSION=latest
-   - php: "5.4"
-     env: WP_VERSION=4.7
-   - php: "7.0"
-     env: WP_VERSION=latest
-   - php: "7.0"
-     env: WP_VERSION=4.7
-     # 7.1 / latest already included above as first build.
-   - php: "7.1"
-     env: WP_VERSION=4.7
+    - $HOME/deployment-targets
 
 install:
-  - nvm install 6 && nvm use 6
+  - if [[ $DEV_LIB_SKIP =~ composer ]]; then composer install --no-dev; fi
+  - nvm install 8.11.4 && nvm use 8.11.4
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh
 
@@ -68,3 +31,47 @@ script:
 
 after_script:
   - source $DEV_LIB_PATH/travis.after_script.sh
+
+jobs:
+  include:
+    - stage: test
+      php: "7.2"
+      env: WP_VERSION=5.0
+    - php: "5.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=composer,phpcs
+    - php: "5.4"
+      env: WP_VERSION=4.8    DEV_LIB_SKIP=composer,phpcs
+    - php: "5.5"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+    - php: "5.6"
+      env: WP_VERSION=4.9    DEV_LIB_SKIP=phpcs
+    - php: "5.6"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+    - php: "7.0"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+    - php: "7.1"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+    - stage: deploy
+      if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
+      php: "7.1"
+      env: WP_VERSION=latest DEV_LIB_ONLY=composer,grunt
+      script:
+        - |
+          if ! command -v wp >/dev/null 2>&1; then
+            mkdir -p /tmp/wp-cli
+            wget -O /tmp/wp-cli/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+            chmod +x /tmp/wp-cli/wp
+            export PATH="/tmp/wp-cli:$PATH"
+            wp cli update --yes --nightly # Temporary until WP-CLI 2.1 or 2.0.1
+          fi
+          eval "$(ssh-agent -s)"
+          pantheon_branch=$( echo $TRAVIS_BRANCH | sed 's/^\([0-9]\)/v\1/' | sed 's/[^a-z0-9-]/-/' )
+          echo "Initializing deployment to Pantheon branch: $pantheon_branch"
+          openssl aes-256-cbc -K $encrypted_7eb11f40d4e9_key -iv $encrypted_7eb11f40d4e9_iv -in bin/keys/id_rsa_ampconfdemo.enc -out bin/keys/id_rsa_ampconfdemo -d
+          chmod 600 bin/keys/id_rsa_ampconfdemo
+          ./bin/deploy-travis-pantheon.sh \
+            ampconfdemo \
+            db7f3307-9808-4753-aaa4-acb387c94472 \
+            $(pwd)/bin/keys/id_rsa_ampconfdemo \
+            $pantheon_branch
+      after_script: skip

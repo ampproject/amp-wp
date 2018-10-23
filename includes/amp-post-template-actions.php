@@ -2,6 +2,7 @@
 /**
  * Callbacks for adding content to an AMP template.
  *
+ * @todo Rename this file from amp-post-template-actions.php to amp-post-template-functions.php.
  * @package AMP
  */
 
@@ -46,23 +47,18 @@ function amp_post_template_add_canonical( $amp_template ) {
 /**
  * Print scripts.
  *
+ * @see amp_register_default_scripts()
+ * @see amp_filter_script_loader_tag()
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
-	$scripts = $amp_template->get( 'amp_component_scripts', array() );
-	foreach ( $scripts as $element => $script ) {
-		$custom_type = ( 'amp-mustache' === $element ) ? 'template' : 'element';
-		printf(
-			'<script custom-%s="%s" src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-			esc_attr( $custom_type ),
-			esc_attr( $element ),
-			esc_url( $script )
-		);
-	}
-	printf(
-		'<script src="%s" async></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		esc_url( $amp_template->get( 'amp_runtime_script' ) )
-	);
+	echo amp_render_scripts( array_merge(
+		array(
+			// Just in case the runtime has been overridden by amp_post_template_data filter.
+			'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
+		),
+		$amp_template->get( 'amp_component_scripts', array() )
+	) ); // WPCS: xss ok.
 }
 
 /**
@@ -103,6 +99,12 @@ function amp_post_template_add_schemaorg_metadata() {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_styles( $amp_template ) {
+	$stylesheets = $amp_template->get( 'post_amp_stylesheets' );
+	if ( ! empty( $stylesheets ) ) {
+		echo '/* Inline stylesheets */' . PHP_EOL; // WPCS: XSS OK.
+		echo implode( '', $stylesheets ); // WPCS: XSS OK.
+	}
+
 	$styles = $amp_template->get( 'post_amp_styles' );
 	if ( ! empty( $styles ) ) {
 		echo '/* Inline styles */' . PHP_EOL; // WPCS: XSS OK.
@@ -134,13 +136,4 @@ function amp_post_template_add_analytics_script( $data ) {
 function amp_post_template_add_analytics_data() {
 	$analytics = amp_add_custom_analytics();
 	amp_print_analytics( $analytics );
-}
-
-/**
- * Add generator metadata.
- *
- * @since 6.0
- */
-function amp_add_generator_metadata() {
-	printf( '<meta name="generator" content="%s" />', esc_attr( 'AMP Plugin v' . AMP__VERSION ) );
 }

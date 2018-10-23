@@ -39,26 +39,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			</fieldset>
 		<?php else : ?>
 			<div class="inline notice notice-warning notice-alt">
-				<p>
-					<?php
-					$support_errors_codes = AMP_Post_Type_Support::get_support_errors( $post );
-					$support_errors       = array();
-					if ( in_array( 'password-protected', $support_errors_codes, true ) ) {
-						$support_errors[] = __( 'AMP cannot be enabled on password protected posts.', 'amp' );
-					}
-					if ( in_array( 'post-type-support', $support_errors_codes, true ) ) {
-						/* translators: %s is URL to AMP settings screen */
-						$support_errors[] = wp_kses_post( sprintf( __( 'AMP cannot be enabled because this <a href="%s">post type does not support it</a>.', 'amp' ), admin_url( 'admin.php?page=amp-options' ) ) );
-					}
-					if ( in_array( 'skip-post', $support_errors_codes, true ) ) {
-						$support_errors[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
-					}
-					if ( count( array_diff( $support_errors_codes, array( 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post' ) ) ) > 0 ) {
-						$support_errors[] = __( 'Unavailable for an unknown reason.', 'amp' );
-					}
-					echo implode( ' ', $support_errors ); // WPCS: xss ok.
-					?>
-				</p>
+				<p><?php echo implode( ' ', $error_messages ); // WPCS: xss ok. ?></p>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">

@@ -33,7 +33,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 			),
 			'converted' => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				array( 'amp-vine' => 'https://cdn.ampproject.org/v0/amp-vine-latest.js' ),
+				array( 'amp-vine' => true ),
 			),
 		);
 	}

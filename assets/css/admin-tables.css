@@ -1,0 +1,57 @@
+.column-error_status .dashicons-editor-help {
+	color: #767676;
+}
+.column-sources .dashicons,
+.column-sources_with_invalid_output .dashicons {
+	margin-right: 5px;
+}
+.column-source .dashicons-admin-plugins,
+.column-sources_with_invalid_output .dashicons-admin-plugins {
+	color: #64a2e9;
+}
+.column-source .dashicons-admin-appearance,
+.column-sources_with_invalid_output .dashicons-admin-appearance {
+	color: #ebb04f;
+}
+.column-source, .dashicons-wordpress-alt,
+.column-sources_with_invalid_output .dashicons-wordpress-alt {
+	color: #92b371;
+}
+.amp-logo-icon {
+	background-image: url( '../images/amp-logo-icon.svg' );
+	background-color: transparent;
+	background-size: 20px 20px;
+	height: 20px;
+	width: 20px;
+	display: inline-block;
+}
+.column-error_status .error-status {
+	line-height: 20px;
+	display: inline-block;
+	position: relative;
+	vertical-align: top;
+	margin-left: 10px;
+}
+td.column-found_elements_and_attributes {
+	color: #970010;
+}
+td.column-found_elements_and_attributes div {
+	margin-bottom: 0.6rem;
+}
+.column-error_status .dashicons-flag.new {
+	color: #d98501;
+}
+.column-error_status .dashicons-yes.new {
+	color: #ff0000;
+}
+.column-error_status .dashicons-warning.rejected {
+	color: #68c6ff;
+}
+.column-sources .source,
+.column-sources_with_invalid_output .source {
+	margin-bottom: 10px;
+	display: block;
+}
+.wrap .wp-heading-inline + .page-title-action {
+	margin-left: 1rem;
+}
