@@ -1578,6 +1578,12 @@ class AMP_Theme_Support {
 			$style_element->parentNode->removeChild( $style_element );
 		}
 
+		// Preserve all svg defs which aren't inside the content element.
+		$svgs_with_def = array();
+		foreach ( $xpath->query( '//svg[.//defs]' ) as $svg ) {
+			$svgs_with_def[] = $svg;
+		}
+
 		// Isolate the content element from the rest of the elements in the body.
 		$remove_siblings = function( DOMElement $node ) {
 			while ( $node->previousSibling ) {
@@ -1602,6 +1608,44 @@ class AMP_Theme_Support {
 		// Restore style elements.
 		foreach ( $style_elements as $style_element ) {
 			$body->appendChild( $style_element );
+		}
+
+		// Restore SVGs with defs.
+		foreach ( $svgs_with_def as $svg ) {
+			/*
+			 * Check if the node was removed from the document.
+			 * This is needed because Node.compareDocumentPosition() is not available in PHP.
+			 */
+			$is_connected = false;
+			$node         = $svg;
+			while ( $node->parentNode ) {
+				if ( $node === $svg->ownerDocument ) {
+					$is_connected = true;
+					break;
+				}
+				$node = $node->parentNode;
+			}
+
+			// Re-add the SVG element to the body with only its defs elements.
+			if ( ! $is_connected ) {
+				$defs = array();
+				foreach ( $svg->getElementsByTagName( 'defs' ) as $def ) {
+					$defs[] = $def;
+				}
+
+				// Remove all children.
+				while ( $svg->firstChild ) {
+					$svg->removeChild( $svg->firstChild );
+				}
+
+				// Re-add all defs.
+				foreach ( $defs as $def ) {
+					$svg->appendChild( $def );
+				}
+
+				// Add to body.
+				$body->appendChild( $svg );
+			}
 		}
 	}
 
