@@ -25,10 +25,9 @@ install:
   - nvm install 8.11.4 && nvm use 8.11.4
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh
+  - mkdir -p $WP_CORE_DIR/src/wp-includes/css/dist/block-library/ && touch $WP_CORE_DIR/src/wp-includes/css/dist/block-library/style.css
 
 script:
-  # Workaround for error in testing with WP 5.0 since we aren't building from source.
-  - mkdir -p $WP_CORE_DIR/src/wp-includes/css/dist/block-library/ && touch $WP_CORE_DIR/src/wp-includes/css/dist/block-library/style.css
   - source $DEV_LIB_PATH/travis.script.sh
 
 after_script:
