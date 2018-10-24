@@ -186,8 +186,8 @@ class AMP_Theme_Support {
 				) ), '1.0' );
 			}
 
-			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['shadow_root_xpath'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required shadow_root_xpath arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['content_element_id'] ) ) {
+				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required content_element_id arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 				unset( $args['app_shell'] );
 			}
 
@@ -1810,11 +1810,10 @@ class AMP_Theme_Support {
 		$content_element = null;
 		if ( $app_shell_component ) {
 			$support_args    = self::get_theme_support_args();
-			$content_xpath   = $support_args['app_shell']['shadow_root_xpath'];
-			$content_element = $xpath->query( $content_xpath )->item( 0 );
+			$content_element = $dom->getElementById( $support_args['app_shell']['content_element_id'] );
 			if ( ! $content_element ) {
 				status_header( 500 );
-				return esc_html__( 'Unable to locate shadow_root_xpath.', 'amp' );
+				return esc_html__( 'Unable to locate content_element_id.', 'amp' );
 			}
 			if ( 'outer' === $app_shell_component ) {
 				self::prepare_outer_app_shell_document( $content_element );
@@ -1958,20 +1957,11 @@ class AMP_Theme_Support {
 				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
 		} elseif ( 'outer' === $app_shell_component && $content_element ) {
-			$script   = $dom->createElement( 'script' );
-			$source   = file_get_contents( AMP__DIR__ . '/assets/js/amp-app-shell.js' ); // phpcs:ignore
-			$source   = preg_replace( '#/\*\s*global.+?\*/#', '', $source );
-			$selector = $content_element->nodeName;
-			if ( $content_element->getAttribute( 'id' ) ) {
-				$selector .= '#' . $content_element->getAttribute( 'id' );
-			}
-			if ( $content_element->getAttribute( 'class' ) ) {
-				$classes = array_filter( preg_split( '/\s+/', trim( $content_element->getAttribute( 'class' ) ) ) );
-				foreach ( $classes as $class ) {
-					$selector .= '.' . $class;
-				}
-			}
-			$source = str_replace( 'SHADOW_ROOT_SELECTOR', wp_json_encode( $selector ), $source );
+			$script = $dom->createElement( 'script' );
+			// @todo Consider loading external async script.
+			$source = file_get_contents( AMP__DIR__ . '/assets/js/amp-app-shell.js' ); // phpcs:ignore
+			$source = preg_replace( '#/\*\s*global.+?\*/#', '', $source );
+			$source = str_replace( 'CONTENT_ELEMENT_ID', wp_json_encode( $content_element->getAttribute( 'id' ) ), $source );
 			$script->appendChild( $dom->createTextNode( $source ) );
 			$content_element->parentNode->insertBefore( $script, $content_element->nextSibling );
 		}

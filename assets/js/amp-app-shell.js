@@ -1,10 +1,10 @@
-/* global SHADOW_ROOT_SELECTOR, Promise */
+/* global CONTENT_ELEMENT_ID, Promise */
 /* eslint-disable no-console */
 
 ( window.AMP = window.AMP || [] ).push( ( AMP ) => {
 	const currentUrl = new URL( location.href );
 
-	console.info( "Called AMP Shadow callback! AMP.attachShadowDoc", AMP.attachShadowDoc );
+	console.info( "Called AMP Shadow callback! AMP.attachShadowDoc:", AMP.attachShadowDoc );
 
 	const fetchDocument = ( url ) => {
 		// unfortunately fetch() does not support retrieving documents,
@@ -25,7 +25,7 @@
 
 	if ( parseInt( currentUrl.searchParams.get( 'amp_shadow_doc_populate' ) ) ) {
 		currentUrl.searchParams.set( 'amp_app_shell_component', 'inner' );
-		const container = document.querySelector( SHADOW_ROOT_SELECTOR );
+		const container = document.getElementById( CONTENT_ELEMENT_ID );
 
 		fetchDocument( currentUrl ).then( ( doc ) => {
 			const shadowDoc = AMP.attachShadowDoc( container, doc, currentUrl );
