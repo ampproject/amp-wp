@@ -186,8 +186,8 @@ class AMP_Theme_Support {
 				) ), '1.0' );
 			}
 
-			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['content_element_id'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required content_element_id arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['shadow_root_xpath'] ) ) {
+				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required shadow_root_xpath arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 				unset( $args['app_shell'] );
 			}
 
@@ -1807,13 +1807,14 @@ class AMP_Theme_Support {
 		}
 
 		// Remove the children of the content if requesting the outer app shell.
+		$content_element = null;
 		if ( $app_shell_component ) {
 			$support_args    = self::get_theme_support_args();
-			$content_xpath   = sprintf( '//div[@id="%s"]', $support_args['app_shell']['content_element_id'] );
+			$content_xpath   = $support_args['app_shell']['shadow_root_xpath'];
 			$content_element = $xpath->query( $content_xpath )->item( 0 );
 			if ( ! $content_element ) {
 				status_header( 500 );
-				return esc_html__( 'Unable to locate content_element_id.', 'amp' );
+				return esc_html__( 'Unable to locate shadow_root_xpath.', 'amp' );
 			}
 			if ( 'outer' === $app_shell_component ) {
 				self::prepare_outer_app_shell_document( $content_element );
@@ -1956,16 +1957,23 @@ class AMP_Theme_Support {
 				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
 				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
-		} elseif ( 'outer' === $app_shell_component ) {
-			$script = $dom->createElement( 'script' );
-			$script->appendChild( $dom->createTextNode(
-				'
-				(window.AMP = window.AMP || []).push(function(AMP) {
-					console.info( "Hello AMP! AMP.attachShadowDoc", AMP.attachShadowDoc );
-				});
-				'
-			) );
-			$head->appendChild( $script );
+		} elseif ( 'outer' === $app_shell_component && $content_element ) {
+			$script   = $dom->createElement( 'script' );
+			$source   = file_get_contents( AMP__DIR__ . '/assets/js/amp-app-shell.js' ); // phpcs:ignore
+			$source   = preg_replace( '#/\*\s*global.+?\*/#', '', $source );
+			$selector = $content_element->nodeName;
+			if ( $content_element->getAttribute( 'id' ) ) {
+				$selector .= '#' . $content_element->getAttribute( 'id' );
+			}
+			if ( $content_element->getAttribute( 'class' ) ) {
+				$classes = array_filter( preg_split( '/\s+/', trim( $content_element->getAttribute( 'class' ) ) ) );
+				foreach ( $classes as $class ) {
+					$selector .= '.' . $class;
+				}
+			}
+			$source = str_replace( 'SHADOW_ROOT_SELECTOR', wp_json_encode( $selector ), $source );
+			$script->appendChild( $dom->createTextNode( $source ) );
+			$content_element->parentNode->insertBefore( $script, $content_element->nextSibling );
 		}
 
 		$response  = "<!DOCTYPE html>\n";
