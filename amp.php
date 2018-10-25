@@ -31,9 +31,9 @@ if ( version_compare( phpversion(), '5.3.2', '<' ) ) {
 }
 
 /**
- * Print admin notice regarding DOM extension is not installed
+ * Print admin notice regarding DOM extension is not installed.
  *
- * @since 0.7.2
+ * @since 1.0
  */
 function _amp_print_php_dom_document_notice() {
 	?>
