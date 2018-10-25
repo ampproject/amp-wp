@@ -37,13 +37,12 @@ if ( version_compare( phpversion(), '5.3.2', '<' ) ) {
  */
 function _amp_print_php_dom_document_notice() {
 	?>
-    <div class="notice notice-error">
-        <p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install DOM extension.', 'amp' ); ?></p>
-    </div>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install DOM extension.', 'amp' ); ?></p>
+	</div>
 	<?php
 }
-
-if ( !class_exists('DOMDocument') ) {
+if ( ! class_exists( 'DOMDocument' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
 	return;
 }
