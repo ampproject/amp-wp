@@ -78,6 +78,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
 			),
 			'set_twentyseventeen_quotes_icon'     => array(),
+			'add_twentyseventeen_attachment_image_attributes' => array(),
 		),
 
 		// Twenty Sixteen.
@@ -345,6 +346,51 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Add filter to adjust the attachment image attributes to ensure attachment pages have a consistent <amp-img> rendering.
+	 *
+	 * This is only used in Twenty Seventeen.
+	 *
+	 * @since 1.0
+	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
+	 */
+	public static function add_twentyseventeen_attachment_image_attributes() {
+		add_filter( 'wp_get_attachment_image_attributes', function ( $attr, $attachment, $size ) {
+			if ( isset( $attr['class'] ) && 'custom-logo' === $attr['class'] ) {
+				unset( $attr['sizes'] );
+			} elseif ( is_attachment() ) {
+				$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+				if ( false !== $sizes ) {
+					$attr['sizes'] = $sizes;
+				}
+			}
+			return $attr;
+		}, 11, 3 );
+
+		/*
+		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless
+		 * there is header media in which case it is 200px. Issues related to vertically-squashed
+		 * images can be avoided if we just make sure that the image has this height to begin with.
+		 */
+		add_filter( 'get_custom_logo', function( $html ) {
+			$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
+			if ( ! $src ) {
+				return $html;
+			}
+
+			if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
+				$height = 200;
+			} else {
+				$height = 80;
+			}
+			$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
+
+			$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
+			$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
+			return $html;
+		} );
+	}
+
+	/**
 	 * Fix up core themes to do things in the AMP way.
 	 *
 	 * @since 1.0
@@ -474,6 +520,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the (common) navigation outer height.
+	 *
+	 * @todo If the nav menu has many items and it spans multiple rows, this will be too small.
+	 * @link https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L50
+	 *
+	 * @return int Navigation outer height.
+	 */
+	protected static function get_twentyseventeen_navigation_outer_height() {
+		return 72;
+	}
+
+	/**
 	 * Add required styles for video and image headers.
 	 *
 	 * This is currently used exclusively for Twenty Seventeen.
@@ -543,6 +601,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					display: none;
 				}
 
+				<?php if ( $is_front_page_layout && ! has_custom_header() ) : ?>
+					/* https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L92-L94 */
+					.site-branding {
+						margin-bottom: <?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px;
+					}
+				<?php endif; ?>
+
 				@media screen and (min-width: 48em) {
 					/* Note that adjustHeaderHeight() is irrelevant with this change */
 					<?php if ( ! $is_front_page_layout ) : ?>
@@ -554,7 +619,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					/* Initial styles that amp-animations for navigationTopShow and navigationTopHide will override */
 					.navigation-top.site-navigation-fixed {
 						opacity: 0;
-						transform: translateY( -72px );
+						transform: translateY( -<?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px );
 						display: block;
 					}
 				}
@@ -635,7 +700,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'media'     => '(min-width: 48em)',
 					'keyframes' => array(
 						'opacity'   => 0.0,
-						'transform' => 'translateY( -72px )',
+						'transform' => sprintf( 'translateY( -%dpx )', self::get_twentyseventeen_navigation_outer_height() ),
 					),
 				),
 			),

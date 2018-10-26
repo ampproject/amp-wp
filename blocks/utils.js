@@ -48,6 +48,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
 				{
 					wp.i18n.sprintf(
+						/* translators: %s is the layout name */
 						__( 'Width is required for %s layout', 'amp' ),
 						ampLayout
 					)
@@ -65,6 +66,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			<Notice key="showHeightNotice" status="error" isDismissible={ false }>
 				{
 					wp.i18n.sprintf(
+						/* translators: %s is the layout name */
 						__( 'Height is required for %s layout', 'amp' ),
 						ampLayout
 					)

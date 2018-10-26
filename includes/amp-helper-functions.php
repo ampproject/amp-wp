@@ -8,26 +8,15 @@
 /**
  * Get the slug used in AMP for the query var, endpoint, and post type support.
  *
- * This function always returns 'amp' when 'amp' theme support is present. Otherwise,
- * the return value can be overridden by previously defining a AMP_QUERY_VAR
+ * The return value can be overridden by previously defining a AMP_QUERY_VAR
  * constant or by adding a 'amp_query_var' filter, but *warning* this ability
  * may be deprecated in the future. Normally the slug should be just 'amp'.
  *
  * @since 0.7
- * @since 1.0 The return value is always 'amp' when 'amp' theme support is present, and the 'amp_query_var' filter no longer applies.
  *
  * @return string Slug used for query var, endpoint, and post type support.
  */
 function amp_get_slug() {
-	if ( current_theme_supports( 'amp' ) ) {
-		if ( ! defined( 'AMP_QUERY_VAR' ) ) {
-			define( 'AMP_QUERY_VAR', 'amp' );
-		} elseif ( 'amp' !== AMP_QUERY_VAR ) {
-			_doing_it_wrong( __FUNCTION__, esc_html__( 'The AMP_QUERY_VAR constant should only be defined as "amp" when "amp" theme support is present.', 'amp' ), '1.0' );
-		}
-		return 'amp';
-	}
-
 	if ( defined( 'AMP_QUERY_VAR' ) ) {
 		return AMP_QUERY_VAR;
 	}
@@ -38,7 +27,6 @@ function amp_get_slug() {
 	 * Warning: This filter may become deprecated.
 	 *
 	 * @since 0.3.2
-	 * @since 1.0 This filter does not apply when 'amp' theme support is present.
 	 *
 	 * @param string $query_var The AMP query variable.
 	 */
@@ -73,19 +61,17 @@ function amp_get_current_url() {
  * Retrieves the full AMP-specific permalink for the given post ID.
  *
  * @since 0.1
- * @since 1.0 The query var 'amp' is always used exclusively when 'amp' theme support is present; the 'amp_pre_get_permalink' and 'amp_get_permalink' filters do not apply.
  *
  * @param int $post_id Post ID.
- *
  * @return string AMP permalink.
  */
 function amp_get_permalink( $post_id ) {
 
 	// When theme support is present, the plain query var should always be used.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
 		if ( ! amp_is_canonical() ) {
-			$permalink = add_query_arg( 'amp', '', $permalink );
+			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
 	}
@@ -191,7 +177,7 @@ function amp_add_amphtml_link() {
 	$current_url = amp_get_current_url();
 
 	$amp_url = null;
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
@@ -209,8 +195,8 @@ function amp_add_amphtml_link() {
 	}
 
 	// Check to see if there are known unaccepted validation errors for this URL.
-	if ( current_theme_supports( 'amp' ) ) {
-		$validation_errors = AMP_Invalid_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
 			echo "<!--\n";
@@ -278,13 +264,23 @@ function is_amp_endpoint() {
 		false !== get_query_var( amp_get_slug(), false )
 	);
 
-	if ( ! current_theme_supports( 'amp' ) ) {
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return $has_amp_query_var;
 	}
 
 	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
+	}
+
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
 	}
 
 	$availability = AMP_Theme_Support::get_template_availability();
@@ -312,6 +308,23 @@ function amp_get_asset_url( $file ) {
 function amp_get_boilerplate_code() {
 	return '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
 		. '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+}
+
+/**
+ * Add generator metadata.
+ *
+ * @since 6.0
+ * @since 1.0 Add template mode.
+ */
+function amp_add_generator_metadata() {
+	if ( amp_is_canonical() ) {
+		$mode = 'native';
+	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		$mode = 'paired';
+	} else {
+		$mode = 'classic';
+	}
+	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
 }
 
 /**
@@ -347,23 +360,19 @@ function amp_register_default_scripts( $wp_scripts ) {
 
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
-	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tags() as $allowed_tag ) {
-		foreach ( $allowed_tag as $rule_spec ) {
-			if ( ! empty( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension'] ) ) {
-				$extensions = array_merge(
-					$extensions,
-					$rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['requires_extension']
-				);
-			}
+	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
+		if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'], $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'] ) ) {
+			$versions = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'];
+			array_pop( $versions );
+			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
 		}
 	}
-	$extensions = array_unique( $extensions );
 
-	foreach ( $extensions as $extension ) {
+	foreach ( $extensions as $extension => $version ) {
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
 			$extension,
-			'latest'
+			$version
 		);
 
 		$wp_scripts->add(
@@ -483,6 +492,49 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 }
 
 /**
+ * Explicitly opt-in to CORS mode by adding the crossorigin attribute to font stylesheet links.
+ *
+ * This explicitly triggers a CORS request, and gets back a non-opaque response, ensuring that a service
+ * worker caching the external stylesheet will not inflate the storage quota. This must be done in AMP
+ * and non-AMP alike because in paired mode the service worker could cache the font stylesheets in a
+ * non-AMP document without CORS (crossorigin="anonymous") in which case the service worker could then
+ * fail to serve the cached font resources in an AMP document with the warning:
+ *
+ * > The FetchEvent resulted in a network error response: an "opaque" response was used for a request whose type is not no-cors
+ *
+ * @since 1.0
+ * @link https://developers.google.com/web/tools/workbox/guides/storage-quota#beware_of_opaque_responses
+ * @link https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests#cross-origin_requests_and_opaque_responses
+ * @todo This should be proposed for WordPress core.
+ *
+ * @param string $tag    Link tag HTML.
+ * @param string $handle Dependency handle.
+ * @param string $href   Link URL.
+ * @return string Link tag HTML.
+ */
+function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href ) {
+	static $allowed_font_src_regex = null;
+	unset( $handle );
+	if ( ! $allowed_font_src_regex ) {
+		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
+			if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && $spec_name === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+				$allowed_font_src_regex = '@^(' . $spec_rule[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['href']['value_regex'] . ')$@';
+				break;
+			}
+		}
+	}
+
+	$href = preg_replace( '#^(http:)?(?=//)#', 'https:', $href );
+
+	if ( preg_match( $allowed_font_src_regex, $href ) && false === strpos( $tag, 'crossorigin=' ) ) {
+		$tag = preg_replace( '/(?<=<link\s)/', 'crossorigin="anonymous" ', $tag );
+	}
+
+	return $tag;
+}
+
+/**
  * Retrieve analytics data added in backend.
  *
  * @since 0.7
@@ -540,7 +592,7 @@ function amp_print_analytics( $analytics ) {
 	// Can enter multiple configs within backend.
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
 		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
-			/* translators: %1$s is analytics entry ID, %2$s is actual entry keys. */
+			/* translators: 1: the analytics entry ID, 2: comma-separated list of the actual entry keys. */
 			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
 			continue;
 		}
@@ -567,7 +619,7 @@ function amp_print_analytics( $analytics ) {
  * @return array Embed handlers.
  */
 function amp_get_content_embed_handlers( $post = null ) {
-	if ( current_theme_supports( 'amp' ) && $post ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
 	}
@@ -618,7 +670,7 @@ function amp_get_content_embed_handlers( $post = null ) {
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
-	if ( current_theme_supports( 'amp' ) && $post ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
 	}
@@ -650,7 +702,7 @@ function amp_get_content_sanitizers( $post = null ) {
 				'add_placeholder' => true,
 			),
 			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-				'carousel_required' => ! current_theme_supports( 'amp' ), // For back-compat.
+				'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
 			),
 			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Script_Sanitizer'            => array(),
@@ -877,4 +929,18 @@ function amp_print_schemaorg_metadata() {
 	?>
 	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
 	<?php
+}
+
+/**
+ * Filters content and keeps only allowable HTML elements by amp-mustache.
+ *
+ * @see wp_kses()
+ * @since 1.0
+ *
+ * @param string $markup Markup to sanitize.
+ * @return string HTML markup with tags allowed by amp-mustache.
+ */
+function amp_wp_kses_mustache( $markup ) {
+	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
+	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
 }

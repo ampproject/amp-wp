@@ -214,6 +214,76 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-playbuzz' ),
 			),
 
+			// AMP-NEXT-PAGE > [separator].
+			'reference-point-amp-next-page-separator' => array(
+				'<amp-next-page src="https://example.com/config.json"><div separator><h1>Keep reading</h1></div></amp-next-page>',
+				null,
+				array( 'amp-next-page' ),
+			),
+
+			// amp-next-page extension .json configuration.
+			'reference-point-amp-next-page-json-config' => array(
+				'<amp-next-page><script type="application/json">{"pages": []}</script></amp-next-page>',
+				null,
+				array( 'amp-next-page' ),
+			),
+
+			'reference-point-amp-carousel-lightbox-exclude' => array(
+				'<amp-carousel width="400" height="300" layout="responsive" type="slides" lightbox=""><amp-img src="/awesome.png" width="300" height="300" lightbox=""></amp-img><amp-img src="/awesome.png" width="300" height="300" lightbox-exclude=""></amp-img></amp-carousel>',
+				null,
+				array( 'amp-carousel', 'amp-lightbox-gallery' ),
+			),
+
+			'reference-point-lightbox-thumbnail-id' => array(
+				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
+				null,
+				array(),
+			),
+
+			'reference-points-amp-live-list' => array(
+				'<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"><button update on="tap:my-live-list.update">You have updates!</button><div items></div><div pagination></div></amp-live-list>',
+				null,
+				array( 'amp-live-list' ),
+			),
+
+			'reference-points-amp-story' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+					<amp-story standalone title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+						<amp-story-page id="my-first-page">
+							<amp-story-grid-layer template="fill">
+								<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
+								</amp-img>
+							</amp-story-grid-layer>
+							<amp-story-grid-layer template="vertical">
+								<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
+							</amp-story-grid-layer>
+						</amp-story-page>
+						<amp-story-page id="my-second-page">
+							<amp-story-grid-layer template="thirds">
+								<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
+								</amp-img>
+							</amp-story-grid-layer>
+							<amp-story-grid-layer template="vertical">
+								<h1>The End</h1>
+							</amp-story-grid-layer>
+						</amp-story-page>
+						<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
+					</amp-story>
+					'
+				),
+				null,
+				array( 'amp-story' ),
+			),
+
+			'reference-points-bad' => array(
+				'<div lightbox-thumbnail-id update items pagination separator option selected disabled>BAD REFERENCE POINTS</div>',
+				'<div>BAD REFERENCE POINTS</div>',
+				array(),
+			),
+
 			'amp-position-observer' => array(
 				'<amp-position-observer intersection-ratios="1"></amp-position-observer>',
 				null, // No change.
@@ -396,6 +466,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
 					'<a href="webcal:foo">Click me.</a>',
 					'<a href="whatsapp:foo">Click me.</a>',
+					'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
 				) ),
 			),
 
@@ -533,8 +604,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'leave_attribute_on_node_with_present_mandatory_parent' => array(
-				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
-				'<form action="form.php" target="_top"><div submit-success>This is a test.</div></form>',
+				'<form action-xhr="form.php" method="post" target="_top"><div submit-success>This is a test.</div></form>',
+				null,
 				array( 'amp-form' ),
 			),
 
@@ -560,7 +631,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-img_with_good_protocols' => array(
-				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1, https://example.com/resource2"></amp-img>',
+				'<amp-img src="https://example.com/resource1" srcset="https://example.com/resource1 320w, https://example.com/resource2 480w"></amp-img>',
+			),
+
+			'amp-img_with_relative_urls_containing_colons' => array(
+				'<amp-img src="/winning:yes.jpg" width="100" height="200"></amp-img>',
 			),
 
 			'allowed_tag_only' => array(
@@ -569,7 +644,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'disallowed_attributes' => array(
-				'<a href="/path/to/file.jpg" style="border: 1px solid red;">Link</a>',
+				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
@@ -583,12 +658,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_disallowed_attributes' => array(
-				'<a href="/path/to/file.jpg" style="border: 1px solid red;" onclick="alert(e);">Link</a>',
+				'<a href="/path/to/file.jpg" style="border: 1px solid red !important;" onclick="alert(e);">Link</a>',
 				'<a href="/path/to/file.jpg">Link</a>',
 			),
 
 			'attribute_recursive' => array(
-				'<div style="border: 1px solid red;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
+				'<div style="border: 1px solid red !important;"><a href="/path/to/file.jpg" onclick="alert(e);">Hello World</a></div>',
 				'<div><a href="/path/to/file.jpg">Hello World</a></div>',
 			),
 
@@ -668,7 +743,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'a_empty_with_children_with_restricted_attributes' => array(
-				'<a><span style="color: red;">Red</span>&amp;<span style="color: blue;">Orange</span></a>',
+				'<a><span style="color: red !important;">Red</span>&amp;<span style="color: blue !important;">Orange</span></a>',
 				'<a><span>Red</span>&amp;<span>Orange</span></a>',
 			),
 
@@ -716,7 +791,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			// font is removed so we should check that other elements are checked as well.
 			'font_with_other_bad_elements' => array(
-				'<font size="1">Headline</font><span style="color: blue">Span</span>',
+				'<font size="1">Headline</font><span style="color: blue !important">Span</span>',
 				'Headline<span>Span</span>',
 			),
 
@@ -739,8 +814,47 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
-			'amp_selector_and_carousel_with_boolean_attributes' => array(
-				'<form action="/" method="get" target="_blank" id="form1"><amp-selector layout="container" name="single_image_select"><ul><li><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img></li><li><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img></li><li option="na" selected>None of the Above</li></ul></amp-selector><amp-selector layout="container" name="multi_image_select" multiple><amp-img src="/img1.png" width="50" height="50" option="1"></amp-img><amp-img src="/img2.png" width="50" height="50" option="2"></amp-img><amp-img src="/img3.png" width="50" height="50" option="3"></amp-img></amp-selector><amp-selector layout="container" name="multi_image_select_1" multiple><amp-carousel id="carousel-1" width="200" height="60" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img></amp-carousel></amp-selector></form><amp-selector layout="container" name="multi_image_select_2" multiple form="form1"><amp-carousel id="carousel-1" width="400" height="300" type="slides" controls><amp-img src="/img1.png" width="80" height="60" option="a"></amp-img><amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img><amp-img src="/img3.png" width="80" height="60" option="c"></amp-img><amp-img src="/img4.png" width="80" height="60" option="d"></amp-img></amp-carousel></amp-selector>',
+			'reference-points-amp_selector_and_carousel_with_boolean_attributes' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+					<form action="/" method="get" target="_blank" id="form1">
+						<amp-selector layout="container" name="single_image_select">
+							<ul>
+								<li>
+									<amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
+								</li>
+								<li>
+									<amp-img src="/img2.png" width="50" height="50" option="2" disabled></amp-img>
+								</li>
+								<li option="na" selected>None of the Above</li>
+							</ul>
+						</amp-selector>
+						<amp-selector layout="container" name="multi_image_select" multiple>
+							<amp-img src="/img1.png" width="50" height="50" option="1"></amp-img>
+							<amp-img src="/img2.png" width="50" height="50" option="2"></amp-img>
+							<amp-img src="/img3.png" width="50" height="50" option="3"></amp-img>
+						</amp-selector>
+						<amp-selector layout="container" name="multi_image_select_1" multiple>
+							<amp-carousel id="carousel-1" width="200" height="60" controls>
+								<amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+								<amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img>
+								<amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
+								<amp-img src="/img4.png" width="80" height="60" option="d" disabled></amp-img>
+							</amp-carousel>
+						</amp-selector>
+					</form>
+					<amp-selector layout="container" name="multi_image_select_2" multiple form="form1">
+						<amp-carousel id="carousel-1" width="400" height="300" type="slides" controls>
+							<amp-img src="/img1.png" width="80" height="60" option="a"></amp-img>
+							<amp-img src="/img2.png" width="80" height="60" option="b" selected></amp-img>
+							<amp-img src="/img3.png" width="80" height="60" option="c"></amp-img>
+							<amp-img src="/img4.png" width="80" height="60" option="d"></amp-img>
+						</amp-carousel>
+					</amp-selector>
+					'
+				),
 				null, // No change.
 				array( 'amp-selector', 'amp-form', 'amp-carousel' ),
 			),
@@ -761,6 +875,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-date-picker id="simple-date-picker" type="single" mode="overlay" layout="container" on="select:AMP.setState({date1: event.date, dateType1: event.id})" format="Y-MM-DD" open-after-select input-selector="[name=date1]" class="mr1 ml1 flex picker"><div class="ampstart-input inline-block mt1"><input class="border-none p0" name="date1" placeholder="Pick a date"></div><button class="ampstart-btn m1 caps" on="tap: simple-date-picker.clear">Clear</button></amp-date-picker>',
 				null, // No change.
 				array( 'amp-date-picker' ),
+			),
+
+			'amp_date_picker_range' => array(
+				'<amp-date-picker type="range" minimum-nights="2" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
+				null, // No change.
+				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
 
 			'amp-img-layout-allowed' => array(
@@ -796,7 +916,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'non-layout-col-element-attrs' => array(
-				'<table><col class="foo" width="123" style="background:red;"><col class="bar" style="background:green;" width="12%"><col class="baz" style="background:blue;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
+				'<table><col class="foo" width="123" style="background:red !important;"><col class="bar" style="background:green !important;" width="12%"><col class="baz" style="background:blue !important;" width="2*"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				'<table><col class="foo"><col class="bar"><col class="baz"><tr><td>1</td><td>2</td><td>3</td></tr></table>',
 				array(),
 			),
@@ -811,6 +931,72 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-addthis width="320" height="92" data-pub-id="ra-59c2c366435ef478" data-widget-id="0fyg"></amp-addthis>',
 				null,
 				array( 'amp-addthis' ),
+			),
+
+			'amp-3d-gltf' => array(
+				'<amp-3d-gltf layout="responsive" width="320" height="240" alpha="true" antialiasing="true" src="path/to/model.glb"></amp-3d-gltf>',
+				null,
+				array( 'amp-3d-gltf' ),
+			),
+
+			'amp-date-countdown' => array(
+				'<amp-date-countdown timestamp-seconds="2147483648" layout="fixed-height" height="50"><template type="amp-mustache"><p class="p1"> {{d}} days, {{h}} hours, {{m}} minutes and {{s}} seconds until <a href="https://en.wikipedia.org/wiki/Year_2038_problem">Y2K38</a>.</p></template></amp-date-countdown>',
+				null,
+				array( 'amp-date-countdown', 'amp-mustache' ),
+			),
+
+			'amp-google-document-embed' => array(
+				'<amp-google-document-embed src="https://www.example.com/document.pdf" width="800" height="600" layout="responsive"></amp-google-document-embed>',
+				null,
+				array( 'amp-google-document-embed' ),
+			),
+
+			'amp-orientation-observer' => array(
+				'<amp-orientation-observer on="beta:clockAnim1.seekTo(percent=event.percent)" layout="nodisplay"></amp-orientation-observer>',
+				null,
+				array( 'amp-orientation-observer' ),
+			),
+
+			'amp-pan-zoom' => array(
+				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg> ... </svg></amp-pan-zoom></amp-layout>',
+				null,
+				array( 'amp-pan-zoom' ),
+			),
+
+			'amp-yotpo' => array(
+				'<amp-yotpo width="550" height="700" layout="responsive" data-app-key="liSBkl621ZZsb88tsckAs6Bzx6jQeTJTv8CDf8y5" data-widget-type="MainWidget" data-product-id="9408616206" data-name="hockey skates" data-url="https://ranabram.myshopify.com/products/hockey-skates" data-image-url="https://ichef.bbci.co.uk/news/320/media/images/83351000/jpg/_83351965_explorer273lincolnshirewoldssouthpicturebynicholassilkstone.jpg" data-descriptipn="skates" data-yotpo-element-id="1"></amp-yotpo>',
+				null,
+				array( 'amp-yotpo' ),
+			),
+
+			'amp-embedly' => array(
+				'<amp-embedly-key value="12af2e3543ee432ca35ac30a4b4f656a" layout="nodisplay"></amp-embedly-key><amp-embedly-card data-url="https://twitter.com/AMPhtml/status/986750295077040128" layout="responsive" width="150" height="80" data-card-theme="dark" data-card-controls="0"></amp-embedly-card>',
+				null,
+				array( 'amp-embedly-card' ),
+			),
+
+			'amp-lightbox' => array(
+				'<amp-lightbox id="my-lightbox" [open]="true" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
+				null,
+				array( 'amp-lightbox', 'amp-bind' ),
+			),
+
+			'amp-fom-messages' => array(
+				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
+				null,
+				array( 'amp-form', 'amp-mustache' ),
+			),
+
+			'amp-viqeo-player' => array(
+				'<amp-viqeo-player data-profileid="184" data-videoid="b51b70cdbb06248f4438" width="640" height="360" layout="responsive"></amp-viqeo-player>',
+				null,
+				array( 'amp-viqeo-player' ),
+			),
+
+			'amp-image-slider' => array(
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
+				null,
+				array( 'amp-image-slider' ),
 			),
 		);
 	}
@@ -857,6 +1043,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		preg_match_all( '#<.+?>#', $expected, $expected_matches );
+		preg_match_all( '#<.+?>#', $content, $content_matches );
+		$this->assertEquals(
+			$expected_matches,
+			$content_matches
+		);
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
@@ -957,6 +1149,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		preg_match_all( '#<.+?>#', $expected, $expected_matches );
+		preg_match_all( '#<.+?>#', $content, $content_matches );
+		$this->assertEquals(
+			$expected_matches,
+			$content_matches
+		);
 		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
@@ -1024,16 +1222,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 </div>
 EOB;
 		$expected_errors[] = array(
-			'node_name'       => 'bazfoo',
-			'parent_name'     => 'div',
-			'code'            => 'invalid_element',
-			'node_attributes' => array(),
-		);
-		$expected_errors[] = array(
 			'node_name'       => 'invalid_p',
 			'parent_name'     => 'div',
 			'code'            => 'invalid_element',
 			'node_attributes' => array( 'id' => 'invalid' ),
+		);
+		$expected_errors[] = array(
+			'node_name'       => 'bazfoo',
+			'parent_name'     => 'div',
+			'code'            => 'invalid_element',
+			'node_attributes' => array(),
 		);
 		$content[]         = <<<EOB
 <ul>
@@ -1054,7 +1252,8 @@ EOB;
 			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
 				'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
 					$expected = $expected_errors[ $error_index ];
-					$tag      = $expected['node_name'];
+					$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
+					$tag = $expected['node_name'];
 					$that->assertEquals( $expected, $error );
 					$that->assertInstanceOf( 'DOMElement', $context['node'] );
 					$that->assertEquals( $tag, $context['node']->tagName );

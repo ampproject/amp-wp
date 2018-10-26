@@ -46,10 +46,10 @@ module.exports = function( grunt ) {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
 			pot_to_php: {
-				command: 'npm run pot-to-php'
+				command: 'npm run pot-to-php && php -l languages/amp-translations.php'
 			},
 			makepot: {
-				command: 'wp i18n make-pot .'
+				command: 'wp i18n make-pot . languages/amp-js.pot --include="*.js" --file-comment="*/null/*"' // The --file-comment is a temporary workaround for <https://github.com/Automattic/amp-wp/issues/1416>.
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
@@ -92,6 +92,8 @@ module.exports = function( grunt ) {
 		stdout = [];
 
 		grunt.task.run( 'shell:webpack_production' );
+		grunt.task.run( 'shell:makepot' );
+		grunt.task.run( 'shell:pot_to_php' );
 
 		spawnQueue.push(
 			{
@@ -108,7 +110,7 @@ module.exports = function( grunt ) {
 			var commitHash, lsOutput, versionAppend, paths;
 			commitHash = stdout.shift();
 			lsOutput = stdout.shift();
-			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
+			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
 				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*|languages\/README.*)/.test( file );
@@ -118,7 +120,6 @@ module.exports = function( grunt ) {
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 			paths.push( 'languages/amp-translations.php' );
-			paths.push( 'languages/amp.pot' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
@@ -178,17 +179,10 @@ module.exports = function( grunt ) {
 		'shell:create_build_zip'
 	] );
 
-	grunt.registerTask( 'build-release', [
-		'shell:makepot',
-		'shell:pot_to_php',
-		'build'
-	] );
-
 	grunt.registerTask( 'deploy', [
 		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
-		'build-release',
 		'wp_deploy'
 	] );
 };

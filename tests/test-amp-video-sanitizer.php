@@ -40,9 +40,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
 			),
 
-			'video_with_blacklisted_attribute' => array(
-				'<video width="300" height="300" src="https://example.com/video.mp4" style="border-color: red;"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"></amp-video>',
+			'video_with_custom_attribute' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"></amp-video>',
 			),
 
 			'video_with_sizes_attribute_is_overridden' => array(
@@ -74,18 +74,26 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_same_video' => array(
-				'<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>
-<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+				implode( '', array(
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+				) ),
 				'<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video>',
 			),
 
 			'multiple_different_videos' => array(
-				'<video src="https://example.com/video1.mp4" width="480" height="300"></video>
-<video src="https://example.com/video2.ogv" width="300" height="480"></video>
-<video src="https://example.com/video3.webm" height="100" width="200"></video>',
-				'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video><amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+				implode( '', array(
+					'<video src="https://example.com/video1.mp4" width="480" height="300"></video>',
+					'<video src="https://example.com/video2.ogv" width="300" height="480"></video>',
+					'<video src="https://example.com/video3.webm" height="100" width="200"></video>',
+				) ),
+				implode( '', array(
+					'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video>',
+					'<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+				) ),
 			),
 
 			'https_not_required' => array(
@@ -94,11 +102,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'http_video_with_children' => array(
-				'<video width="480" height="300" poster="http://example.com/video-image.gif">
-	<source src="http://example.com/video.mp4" type="video/mp4">
-	<source src="http://example.com/video.ogv" type="video/ogg">
-</video>',
-				'<amp-video width="480" height="300" poster="http://example.com/video-image.gif" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"></amp-video>',
+				'<video width="480" height="300" poster="https://example.com/poster.jpeg"><source src="http://example.com/video.mp4" type="video/mp4"><source src="http://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt" /><a href="http://example.com/video.mp4">http://example.com/video.mp4</a></video>',
+				'<amp-video width="480" height="300" poster="https://example.com/poster.jpeg" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt"><a href="http://example.com/video.mp4" fallback="">http://example.com/video.mp4</a></amp-video>',
 			),
 		);
 	}
@@ -110,6 +115,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
+
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
 	}
@@ -123,6 +132,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			'require_https_src' => true,
 		) );
 		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+		$whitelist_sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );

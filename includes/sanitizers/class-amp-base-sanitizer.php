@@ -317,7 +317,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string URL which may have been updated with HTTPS, or may have been made empty.
 	 */
 	public function maybe_enforce_https_src( $src, $force_https = false ) {
-		$protocol = strtok( $src, ':' );
+		$protocol = strtok( $src, ':' ); // @todo What about relative URLs? This should use wp_parse_url( $src, PHP_URL_SCHEME )
 		if ( 'https' !== $protocol ) {
 			// Check if https is required.
 			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
@@ -436,23 +436,43 @@ abstract class AMP_Base_Sanitizer {
 			if ( ! isset( $error['code'] ) ) {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
 			}
-			$error['node_attributes'] = array();
-			foreach ( $node->attributes as $attribute ) {
-				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+
+			if ( ! isset( $error['type'] ) ) {
+				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
+			}
+
+			if ( ! isset( $error['node_attributes'] ) ) {
+				$error['node_attributes'] = array();
+				foreach ( $node->attributes as $attribute ) {
+					$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				}
 			}
 
 			// Capture script contents.
 			if ( 'script' === $node->nodeName && ! $node->hasAttribute( 'src' ) ) {
 				$error['text'] = $node->textContent;
 			}
+
+			// Suppress 'ver' param from enqueued scripts and styles.
+			if ( 'script' === $node->nodeName && isset( $error['node_attributes']['src'] ) && false !== strpos( $error['node_attributes']['src'], 'ver=' ) ) {
+				$error['node_attributes']['src'] = add_query_arg( 'ver', '__normalized__', $error['node_attributes']['src'] );
+			} elseif ( 'link' === $node->nodeName && isset( $error['node_attributes']['href'] ) && false !== strpos( $error['node_attributes']['href'], 'ver=' ) ) {
+				$error['node_attributes']['href'] = add_query_arg( 'ver', '__normalized__', $error['node_attributes']['href'] );
+			}
 		} elseif ( $node instanceof DOMAttr ) {
 			if ( ! isset( $error['code'] ) ) {
 				$error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
 			}
-			$error['element_attributes'] = array();
-			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
-				foreach ( $node->parentNode->attributes as $attribute ) {
-					$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			if ( ! isset( $error['type'] ) ) {
+				// If this is an attribute that begins with on, like onclick, it should be a js_error.
+				$error['type'] = preg_match( '/^on\w+/', $node->nodeName ) ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE;
+			}
+			if ( ! isset( $error['element_attributes'] ) ) {
+				$error['element_attributes'] = array();
+				if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
+					foreach ( $node->parentNode->attributes as $attribute ) {
+						$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+					}
 				}
 			}
 		}

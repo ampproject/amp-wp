@@ -206,8 +206,9 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$parent_tag_name = 'div';
 		$dom_document    = new DOMDocument( '1.0', 'utf-8' );
 		$parent          = $dom_document->createElement( $parent_tag_name );
-		$child           = $dom_document->createElement( 'h1' );
+		$child           = $dom_document->createElement( 'script' );
 		$child->setAttribute( 'id', 'foo' );
+		$child->setAttribute( 'src', 'http://example.com/bad.js?ver=123' );
 		$parent->appendChild( $child );
 
 		$expected_error = array(
@@ -215,13 +216,15 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'node_name'       => $child->nodeName,
 			'parent_name'     => $parent_tag_name,
 			'node_attributes' => array(
-				'id' => 'foo',
+				'id'  => 'foo',
+				'src' => 'http://example.com/bad.js?ver=__normalized__',
 			),
 			'foo'             => 'bar',
 			'sources'         => null,
+			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 		);
 
-		// Test sanitized.
+		// Test forcibly sanitized with filter.
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
@@ -231,17 +234,17 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->remove_invalid_child( $child, array( 'foo' => 'bar' ) );
 		$this->assertEquals( null, $parent->firstChild );
-		$this->assertCount( 1, AMP_Validation_Manager::$validation_results );
-		$this->assertEquals(
-			array(
-				'error'     => $expected_error,
-				'sanitized' => true,
-			),
-			AMP_Validation_Manager::$validation_results[0]
-		);
+		$this->assertCount( 0, AMP_Validation_Manager::$validation_results );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 
 		// Test unsanitized.
+		$child = $dom_document->createElement( 'link' );
+		$child->setAttribute( 'id', 'foo' );
+		$child->setAttribute( 'href', 'http://example.com/bad.css?ver=123' );
+		$expected_error['node_name'] = 'link';
+		unset( $expected_error['node_attributes']['src'] );
+		$expected_error['node_attributes']['href'] = 'http://example.com/bad.css?ver=__normalized__';
+		$expected_error['type']                    = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
 		AMP_Validation_Manager::reset_validation_results();
 		$parent->appendChild( $child );
@@ -286,6 +289,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 								'id'     => 'bar',
 								'onload' => 'someFunc()',
 							),
+						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 					),
 					$error
 				);
@@ -312,6 +316,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 								'id'     => 'bar',
 								'onload' => 'someFunc()',
 							),
+						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 					),
 					$error
 				);

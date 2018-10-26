@@ -40,7 +40,7 @@ abstract class AMP_Rule_Spec {
 	 */
 	const ALLOW_EMPTY             = 'allow_empty';
 	const ALLOW_RELATIVE          = 'allow_relative';
-	const ALLOWED_PROTOCOL        = 'allowed_protocol';
+	const ALLOWED_PROTOCOL        = 'protocol';
 	const ALTERNATIVE_NAMES       = 'alternative_names';
 	const BLACKLISTED_VALUE_REGEX = 'blacklisted_value_regex';
 	const DISALLOWED_DOMAIN       = 'disallowed_domain';
@@ -68,39 +68,6 @@ abstract class AMP_Rule_Spec {
 		7 => 'flex-item',
 		8 => 'fluid',
 		9 => 'intrinsic',
-	);
-
-	/**
-	 * If a node type listed here is invalid, it and it's subtree will be
-	 * removed if it is invalid. This is mainly  because any children will be
-	 * non-functional without this parent.
-	 *
-	 * If a tag is not listed here, it will be replaced by its children if it
-	 * is invalid.
-	 *
-	 * @todo There are other nodes that should probably be listed here as well.
-	 *
-	 * @var array
-	 */
-	public static $node_types_to_remove_if_invalid = array(
-		'form',
-		'input',
-		'link',
-		'meta',
-		'style',
-		// Include 'script' here?
-	);
-
-	/**
-	 *  It is mentioned in the documentation in several places that data-*
-	 *  is generally allowed, but there is no specific rule for it in the
-	 *  protoascii file, so we include it here.
-	 *
-	 * @var array
-	 */
-	public static $whitelisted_attr_regex = array(
-		'@^data-[a-zA-Z][\\w:.-]*$@uis',
-		'(update|item|pagination|option|selected|disabled)', // Allowed for live reference points.
 	);
 
 	/**
