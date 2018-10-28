@@ -951,6 +951,7 @@ function amp_wp_kses_mustache( $markup ) {
  * Depends on adding app_shell to the amp theme support args.
  *
  * @since 1.1
+ * @todo Should this take an argument for the content placeholder?
  */
 function amp_start_app_shell_content() {
 	$support_args = AMP_Theme_Support::get_theme_support_args();
@@ -962,6 +963,21 @@ function amp_start_app_shell_content() {
 
 	// Start output buffering if requesting outer shell, since all content will be omitted from the response.
 	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
+
+		$content_placeholder = '<p>' . esc_html__( 'Loading&hellip;', 'amp' ) . '</p>';
+
+		/**
+		 * Filters the content which is shown in the app shell for the content before it is loaded.
+		 *
+		 * This is used to display a loading message or a content skeleton.
+		 *
+		 * @since 1.1
+		 * @todo Consider using template part for this instead, or an action with a default.
+		 *
+		 * @param string $content_placeholder Content placeholder.
+		 */
+		echo apply_filters( 'amp_app_shell_content_placeholder', $content_placeholder ); // WPCS: XSS OK.
+
 		ob_start();
 	}
 }
