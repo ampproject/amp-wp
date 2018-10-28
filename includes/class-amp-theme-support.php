@@ -62,6 +62,13 @@ class AMP_Theme_Support {
 	const APP_SHELL_COMPONENT_QUERY_VAR = 'amp_app_shell_component';
 
 	/**
+	 * ID for element that contains the content for app shell.
+	 *
+	 * @var string
+	 */
+	const APP_SHELL_CONTENT_ELEMENT_ID = 'amp-app-shell-content';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -184,11 +191,6 @@ class AMP_Theme_Support {
 					join( ', ', $keys ),
 					join( ', ', array_keys( $args ) )
 				) ), '1.0' );
-			}
-
-			if ( ! empty( $args['app_shell'] ) && empty( $args['app_shell']['content_element_id'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'Missing required content_element_id arg for app_shell in amp theme support.', 'amp' ), '1.1' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-				unset( $args['app_shell'] );
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
@@ -1523,7 +1525,7 @@ class AMP_Theme_Support {
 		}
 
 		$theme_support_args = self::get_theme_support_args();
-		if ( empty( $theme_support_args['app_shell'] ) ) {
+		if ( ! isset( $theme_support_args['app_shell'] ) ) {
 			return null;
 		}
 
@@ -1853,11 +1855,10 @@ class AMP_Theme_Support {
 		// Remove the children of the content if requesting the outer app shell.
 		$content_element = null;
 		if ( $app_shell_component ) {
-			$support_args    = self::get_theme_support_args();
-			$content_element = $dom->getElementById( $support_args['app_shell']['content_element_id'] );
+			$content_element = $dom->getElementById( self::APP_SHELL_CONTENT_ELEMENT_ID );
 			if ( ! $content_element ) {
 				status_header( 500 );
-				return esc_html__( 'Unable to locate content_element_id.', 'amp' );
+				return esc_html__( 'Unable to locate APP_SHELL_CONTENT_ELEMENT_ID.', 'amp' );
 			}
 			if ( 'outer' === $app_shell_component ) {
 				self::prepare_outer_app_shell_document( $content_element );
@@ -2005,7 +2006,7 @@ class AMP_Theme_Support {
 			// @todo Consider loading external async script.
 			$source = file_get_contents( AMP__DIR__ . '/assets/js/amp-app-shell.js' ); // phpcs:ignore
 			$source = preg_replace( '#/\*\s*global.+?\*/#', '', $source );
-			$source = str_replace( 'CONTENT_ELEMENT_ID', wp_json_encode( $content_element->getAttribute( 'id' ) ), $source );
+			$source = str_replace( 'CONTENT_ELEMENT_ID', wp_json_encode( self::APP_SHELL_CONTENT_ELEMENT_ID ), $source );
 			$script->appendChild( $dom->createTextNode( $source ) );
 			$content_element->parentNode->insertBefore( $script, $content_element->nextSibling );
 		}

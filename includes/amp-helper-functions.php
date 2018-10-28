@@ -944,3 +944,45 @@ function amp_wp_kses_mustache( $markup ) {
 	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
 }
+
+/**
+ * Mark the beginning of the content that will be displayed inside the app shell.
+ *
+ * Depends on adding app_shell to the amp theme support args.
+ *
+ * @since 1.1
+ */
+function amp_start_app_shell_content() {
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	if ( ! isset( $support_args['app_shell'] ) ) {
+		return;
+	}
+
+	printf( '<div id="%s">', esc_attr( AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID ) );
+
+	// Start output buffering if requesting outer shell, since all content will be omitted from the response.
+	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
+		ob_start();
+	}
+}
+
+/**
+ * Mark the end of the content that will be displayed inside the app shell.
+ *
+ * Depends on adding app_shell to the amp theme support args.
+ *
+ * @since 1.1
+ */
+function amp_end_app_shell_content() {
+	$support_args = AMP_Theme_Support::get_theme_support_args();
+	if ( ! isset( $support_args['app_shell'] ) ) {
+		return;
+	}
+
+	// Clean output buffer if requesting outer shell, since all content will be omitted from the response.
+	if ( 'outer' === AMP_Theme_Support::get_requested_app_shell_component() ) {
+		ob_end_clean();
+	}
+
+	echo '</div><!-- #amp-app-shell-content -->';
+}
