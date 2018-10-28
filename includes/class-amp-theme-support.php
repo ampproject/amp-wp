@@ -238,6 +238,7 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
+		$requested_app_shell_component = self::get_requested_app_shell_component();
 		if ( ! is_amp_endpoint() ) {
 
 			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
@@ -246,9 +247,27 @@ class AMP_Theme_Support {
 			}
 
 			amp_add_frontend_actions();
+			if ( 'outer' === $requested_app_shell_component ) {
+				wp_enqueue_script( 'amp-shadow' );
+				// @todo Enqueue script which hooks uses AMP Shadow API (assets/js/amp-app-shell.js).
+				// @todo Prevent showing admin bar?
+			} elseif ( 'inner' === $requested_app_shell_component ) {
+				wp_die(
+					esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
+					esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
+					array( 'response' => 400 )
+				);
+			}
 			return;
 		}
 
+		if ( 'outer' === $requested_app_shell_component ) {
+			wp_die(
+				esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+				esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+				array( 'response' => 400 )
+			);
+		}
 		self::ensure_proper_amp_location();
 
 		$theme_support = self::get_theme_support_args();
@@ -1296,8 +1315,8 @@ class AMP_Theme_Support {
 		$amp_scripts     = array();
 		$ordered_scripts = array();
 		$head_scripts    = array();
-		$base_handle     = 'outer' === self::get_requested_app_shell_component() ? 'amp-shadow' : 'amp-runtime';
-		$runtime_src     = wp_scripts()->registered[ $base_handle ]->src;
+		$runtime_handle  = 'amp-runtime';
+		$runtime_src     = wp_scripts()->registered[ $runtime_handle ]->src;
 		foreach ( $head->getElementsByTagName( 'script' ) as $script ) { // Note that prepare_response() already moved body scripts to head.
 			$head_scripts[] = $script;
 		}
@@ -1307,7 +1326,7 @@ class AMP_Theme_Support {
 				continue;
 			}
 			if ( $runtime_src === $src ) {
-				$amp_scripts[ $base_handle ] = $script;
+				$amp_scripts[ $runtime_handle ] = $script;
 			} elseif ( $script->hasAttribute( 'custom-element' ) ) {
 				$amp_scripts[ $script->getAttribute( 'custom-element' ) ] = $script;
 			} elseif ( $script->hasAttribute( 'custom-template' ) ) {
@@ -1387,8 +1406,8 @@ class AMP_Theme_Support {
 		 * should not be preloaded because they might take away important bandwidth for the initial render."
 		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
 		 */
-		if ( isset( $amp_scripts[ $base_handle ] ) ) {
-			$ordered_scripts[ $base_handle ] = $amp_scripts[ $base_handle ];
+		if ( isset( $amp_scripts[ $runtime_handle ] ) ) {
+			$ordered_scripts[ $runtime_handle ] = $amp_scripts[ $runtime_handle ];
 		}
 		foreach ( $render_delaying_extensions as $extension ) {
 			if ( isset( $amp_scripts[ $extension ] ) ) {
@@ -1534,17 +1553,6 @@ class AMP_Theme_Support {
 			return $component;
 		}
 		return null;
-	}
-
-	/**
-	 * Prepare outer app shell.
-	 *
-	 * @param DOMElement $content_element Content element.
-	 */
-	protected static function prepare_outer_app_shell_document( DOMElement $content_element ) {
-		while ( $content_element->firstChild ) {
-			$content_element->removeChild( $content_element->firstChild );
-		}
 	}
 
 	/**
@@ -1860,9 +1868,7 @@ class AMP_Theme_Support {
 				status_header( 500 );
 				return esc_html__( 'Unable to locate APP_SHELL_CONTENT_ELEMENT_ID.', 'amp' );
 			}
-			if ( 'outer' === $app_shell_component ) {
-				self::prepare_outer_app_shell_document( $content_element );
-			} elseif ( 'inner' === $app_shell_component ) {
+			if ( 'inner' === $app_shell_component ) {
 				self::prepare_inner_app_shell_document( $content_element );
 			}
 		}
@@ -1932,19 +1938,13 @@ class AMP_Theme_Support {
 
 		self::ensure_required_markup( $dom, array_keys( $amp_scripts ) );
 
-		// When serving outer app shell document, prevent it from being read as a valid AMP document (since it isn't).
-		if ( 'outer' === $app_shell_component ) {
-			$dom->documentElement->removeAttribute( 'amp' );
-			$dom->documentElement->removeAttribute( '⚡️' );
-		}
-
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
 			 * In native AMP, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
-			if ( amp_is_canonical() || 'outer' === $app_shell_component ) {
+			if ( amp_is_canonical() ) {
 				$dom->documentElement->removeAttribute( 'amp' );
 				$dom->documentElement->removeAttribute( '⚡️' );
 
@@ -2001,14 +2001,6 @@ class AMP_Theme_Support {
 				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
 				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
-		} elseif ( 'outer' === $app_shell_component && $content_element ) {
-			$script = $dom->createElement( 'script' );
-			// @todo Consider loading external async script.
-			$source = file_get_contents( AMP__DIR__ . '/assets/js/amp-app-shell.js' ); // phpcs:ignore
-			$source = preg_replace( '#/\*\s*global.+?\*/#', '', $source );
-			$source = str_replace( 'CONTENT_ELEMENT_ID', wp_json_encode( self::APP_SHELL_CONTENT_ELEMENT_ID ), $source );
-			$script->appendChild( $dom->createTextNode( $source ) );
-			$content_element->parentNode->insertBefore( $script, $content_element->nextSibling );
 		}
 
 		$response  = "<!DOCTYPE html>\n";
@@ -2125,7 +2117,7 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		wp_enqueue_script( 'outer' === self::get_requested_app_shell_component() ? 'amp-shadow' : 'amp-runtime' );
+		wp_enqueue_script( 'amp-runtime' );
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
