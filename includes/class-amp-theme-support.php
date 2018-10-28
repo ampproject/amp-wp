@@ -238,7 +238,8 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
-		$requested_app_shell_component = self::get_requested_app_shell_component();
+		self::init_app_shell();
+
 		if ( ! is_amp_endpoint() ) {
 
 			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
@@ -247,27 +248,9 @@ class AMP_Theme_Support {
 			}
 
 			amp_add_frontend_actions();
-			if ( 'outer' === $requested_app_shell_component ) {
-				wp_enqueue_script( 'amp-shadow' );
-				// @todo Enqueue script which hooks uses AMP Shadow API (assets/js/amp-app-shell.js).
-				// @todo Prevent showing admin bar?
-			} elseif ( 'inner' === $requested_app_shell_component ) {
-				wp_die(
-					esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
-					esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
-					array( 'response' => 400 )
-				);
-			}
 			return;
 		}
 
-		if ( 'outer' === $requested_app_shell_component ) {
-			wp_die(
-				esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
-				esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
-				array( 'response' => 400 )
-			);
-		}
 		self::ensure_proper_amp_location();
 
 		$theme_support = self::get_theme_support_args();
@@ -284,6 +267,51 @@ class AMP_Theme_Support {
 		foreach ( self::$sanitizer_classes as $sanitizer_class => $args ) {
 			if ( method_exists( $sanitizer_class, 'add_buffering_hooks' ) ) {
 				call_user_func( array( $sanitizer_class, 'add_buffering_hooks' ), $args );
+			}
+		}
+	}
+
+	/**
+	 * Init app shell.
+	 *
+	 * @since 1.1
+	 */
+	public static function init_app_shell() {
+		$theme_support = self::get_theme_support_args();
+		if ( ! isset( $theme_support['app_shell'] ) ) {
+			return;
+		}
+
+		$requested_app_shell_component = self::get_requested_app_shell_component();
+
+		if ( ! is_amp_endpoint() ) {
+
+			if ( 'outer' === $requested_app_shell_component ) {
+				wp_enqueue_script( 'amp-shadow' );
+				// @todo Enqueue script which hooks uses AMP Shadow API (assets/js/amp-app-shell.js).
+				// @todo Prevent showing admin bar?
+				// @todo For non-outer
+			} elseif ( 'inner' === $requested_app_shell_component ) {
+				wp_die(
+					esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
+					esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
+					array( 'response' => 400 )
+				);
+			}
+
+			// @todo Is this right? It should really be enqueued regardless. It's not about whether the current template has AMP available, but _other_ URLs.
+			$template_availability = self::get_template_availability();
+			if ( ! empty( $template_availability['supported'] ) ) {
+				wp_enqueue_script( 'amp-shadow' );
+				// @todo Enqueue other required scripts.
+			}
+		} else {
+			if ( 'outer' === $requested_app_shell_component ) {
+				wp_die(
+					esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+					esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+					array( 'response' => 400 )
+				);
 			}
 		}
 	}
