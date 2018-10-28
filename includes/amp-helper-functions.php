@@ -358,6 +358,18 @@ function amp_register_default_scripts( $wp_scripts ) {
 		'async' => true,
 	) );
 
+	// App shell library.
+	$handle = 'amp-wp-app-shell';
+	$wp_scripts->add(
+		$handle,
+		amp_get_asset_url( 'js/amp-wp-app-shell.js' ),
+		array( 'amp-shadow' ),
+		null
+	);
+	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
+		'async' => true,
+	) );
+
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
 	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {

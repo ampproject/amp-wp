@@ -1,4 +1,4 @@
-/* global CONTENT_ELEMENT_ID, Promise */
+/* global ampWpAppShell */
 /* eslint-disable no-console */
 
 ( window.AMP = window.AMP || [] ).push( ( AMP ) => {
@@ -25,7 +25,7 @@
 
 	if ( parseInt( currentUrl.searchParams.get( 'amp_shadow_doc_populate' ) ) ) {
 		currentUrl.searchParams.set( 'amp_app_shell_component', 'inner' );
-		const container = document.getElementById( CONTENT_ELEMENT_ID );
+		const container = document.getElementById( ampWpAppShell.contentElementId );
 
 		fetchDocument( currentUrl ).then( ( doc ) => {
 			const shadowDoc = AMP.attachShadowDoc( container, doc, currentUrl );

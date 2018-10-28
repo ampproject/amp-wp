@@ -16,7 +16,8 @@
 		"react"
 	],
 	"env": {
-		"browser": true
+		"browser": true,
+		"es6": true
 	},
 	"globals": {
 		"wp": true,

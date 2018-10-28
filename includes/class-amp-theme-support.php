@@ -284,35 +284,30 @@ class AMP_Theme_Support {
 
 		$requested_app_shell_component = self::get_requested_app_shell_component();
 
-		if ( ! is_amp_endpoint() ) {
+		// @todo Prevent showing admin bar in outer app shell?
+		if ( ! is_amp_endpoint() && 'inner' === $requested_app_shell_component ) {
+			// @todo For non-outer
+			wp_die(
+				esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
+				esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
+				array( 'response' => 400 )
+			);
+		} elseif ( is_amp_endpoint() && 'outer' === $requested_app_shell_component ) {
+			wp_die(
+				esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+				esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+				array( 'response' => 400 )
+			);
+		}
 
-			if ( 'outer' === $requested_app_shell_component ) {
-				wp_enqueue_script( 'amp-shadow' );
-				// @todo Enqueue script which hooks uses AMP Shadow API (assets/js/amp-app-shell.js).
-				// @todo Prevent showing admin bar?
-				// @todo For non-outer
-			} elseif ( 'inner' === $requested_app_shell_component ) {
-				wp_die(
-					esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
-					esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
-					array( 'response' => 400 )
-				);
-			}
-
-			// @todo Is this right? It should really be enqueued regardless. It's not about whether the current template has AMP available, but _other_ URLs.
-			$template_availability = self::get_template_availability();
-			if ( ! empty( $template_availability['supported'] ) ) {
-				wp_enqueue_script( 'amp-shadow' );
-				// @todo Enqueue other required scripts.
-			}
-		} else {
-			if ( 'outer' === $requested_app_shell_component ) {
-				wp_die(
-					esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
-					esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
-					array( 'response' => 400 )
-				);
-			}
+		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
+		if ( 'inner' !== $requested_app_shell_component ) {
+			wp_enqueue_script( 'amp-shadow' );
+			wp_enqueue_script( 'amp-wp-app-shell' );
+			$exports = array(
+				'contentElementId' => self::APP_SHELL_CONTENT_ELEMENT_ID,
+			);
+			wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampWpAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
 		}
 	}
 
