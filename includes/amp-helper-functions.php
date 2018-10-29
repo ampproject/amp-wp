@@ -364,7 +364,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		amp_get_asset_url( 'js/amp-wp-app-shell.js' ),
 		array( 'amp-shadow' ),
-		null
+		AMP__VERSION
 	);
 	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
 		'async' => true,

@@ -304,10 +304,16 @@ class AMP_Theme_Support {
 		if ( 'inner' !== $requested_app_shell_component ) {
 			wp_enqueue_script( 'amp-shadow' );
 			wp_enqueue_script( 'amp-wp-app-shell' );
+
+			// @todo The exports will eventually need to vary the precached app shell.
 			$exports = array(
-				'contentElementId' => self::APP_SHELL_CONTENT_ELEMENT_ID,
+				'contentElementId'  => self::APP_SHELL_CONTENT_ELEMENT_ID,
+				'homeUrl'           => home_url( '/' ),
+				'adminUrl'          => admin_url( '/' ),
+				'ampQueryVar'       => amp_get_slug(),
+				'componentQueryVar' => self::APP_SHELL_COMPONENT_QUERY_VAR,
 			);
-			wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampWpAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
+			wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
 		}
 	}
 
