@@ -509,6 +509,7 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
  * Redirects the old AMP URL to the new AMP URL.
  *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
+ * Also includes all original query vars.
  *
  * @since 0.5
  * @deprecated This function is irrelevant when 'amp' theme support is added.
@@ -523,6 +524,9 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
+		if ( ! empty( AMP_HTTP::$purged_amp_query_vars ) ) {
+			$link = add_query_arg( AMP_HTTP::$purged_amp_query_vars, $link );
 		}
 	}
 
