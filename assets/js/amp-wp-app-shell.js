@@ -97,6 +97,8 @@
 	 * @param {string|URL} url - URL.
 	 */
 	const loadUrl = ( url, { scrollIntoView = false } = {} ) => {
+		updateNavMenuClasses( url );
+
 		const ampUrl = new URL( url );
 		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
 		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
@@ -114,13 +116,17 @@
 
 				currentShadowDoc = AMP.attachShadowDoc( newContainer, doc, url.toString() );
 
-				// @todo Update nav menus.
 				// @todo Improve styling of header when transitioning between home and non-home.
 				// @todo Synchronize additional meta in head.
 				// Update body class name.
 				document.body.className = doc.querySelector( 'body' ).className;
 				document.title = currentShadowDoc.title;
 				history.pushState( {}, currentShadowDoc.title, currentShadowDoc.canonicalUrl );
+
+				// Update the nav menu classes if the final URL has redirected somewhere else.
+				if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
+					updateNavMenuClasses( currentShadowDoc.canonicalUrl );
+				}
 
 				currentShadowDoc.ampdoc.whenReady().then( () => {
 					newContainer.shadowRoot.addEventListener( 'click', handleClick );
@@ -136,6 +142,105 @@
 				} );
 			}
 		);
+	};
+
+	/**
+	 * Update class names in nav menus based on what URL is being navigated to.
+	 *
+	 * Note that this will only be able to account for:
+	 *  - current-menu-item (current_{object}_item)
+	 *  - current-menu-parent (current_{object}_parent)
+	 *  - current-menu-ancestor (current_{object}_ancestor)
+	 *
+	 * @param {string|URL} url URL.
+	 */
+	const updateNavMenuClasses = ( url ) => {
+		const queriedUrl = new URL( url );
+		queriedUrl.hash = '';
+
+		// Remove all contextual class names.
+		for ( const relation of [ 'item', 'parent', 'ancestor' ] ) {
+			const pattern = new RegExp( '^current[_-](.+)[_-]' + relation + '$' );
+			for ( const item of document.querySelectorAll( '.menu-item.current-menu-' + relation + ', .page_item.current_page_' + relation ) ) { // Non-live NodeList.
+				for ( const className of Array.from( item.classList ) ) { // Live DOMTokenList.
+					if ( pattern.test( className ) ) {
+						item.classList.remove( className );
+					}
+				}
+			}
+		}
+
+		// Re-add class names to items generated from nav menus.
+		for ( const link of document.querySelectorAll( '.menu-item > a[href]' ) ) {
+			if ( link.href !== url.href ) {
+				continue;
+			}
+
+			let menuItemObjectName;
+			const menuItemObjectNamePrefix = 'menu-item-object-';
+			for ( const className of link.parentElement.classList ) {
+				if ( className.startsWith( menuItemObjectNamePrefix ) ) {
+					menuItemObjectName = className.substr( menuItemObjectNamePrefix.length );
+					break;
+				}
+			}
+
+			let depth = 0;
+			let item = link.parentElement;
+			while ( item ) {
+				if ( 0 === depth ) {
+					item.classList.add( 'current-menu-item' );
+					if ( menuItemObjectName ) {
+						link.parentElement.classList.add( `current_${menuItemObjectName}_item` );
+					}
+				} else if ( 1 === depth ) {
+					item.classList.add( 'current-menu-parent' );
+					item.classList.add( 'current-menu-ancestor' );
+					if ( menuItemObjectName ) {
+						link.parentElement.classList.add( `current_${menuItemObjectName}_parent` );
+						link.parentElement.classList.add( `current_${menuItemObjectName}_ancestor` );
+					}
+				} else {
+					item.classList.add( 'current-menu-ancestor' );
+					if ( menuItemObjectName ) {
+						link.parentElement.classList.add( `current_${menuItemObjectName}_ancestor` );
+					}
+				}
+				depth++;
+
+				if ( ! item.parentElement ) {
+					break;
+				}
+				item = item.parentElement.closest( '.menu-item-has-children' );
+			}
+
+			link.parentElement.classList.add( 'current-menu-item' );
+		}
+
+		// Re-add class names to items generated from page listings.
+		for ( const link of document.querySelectorAll( '.page_item > a[href]' ) ) {
+			if ( link.href !== url.href ) {
+				continue;
+			}
+			let depth = 0;
+			let item = link.parentElement;
+			while ( item ) {
+				if ( 0 === depth ) {
+					item.classList.add( 'current_page_item' );
+				} else if ( 1 === depth ) {
+					item.classList.add( 'current_page_parent' );
+					item.classList.add( 'current_page_ancestor' );
+				} else {
+					item.classList.add( 'current_page_ancestor' );
+				}
+				depth++;
+
+				if ( ! item.parentElement ) {
+					break;
+				}
+				item = item.parentElement.closest( '.page_item_has_children' );
+			}
+		}
 	};
 
 	/**
