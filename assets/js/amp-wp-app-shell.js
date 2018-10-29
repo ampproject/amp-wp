@@ -16,6 +16,7 @@
 		// @todo Intercept GET submissions.
 		// @todo Make sure that POST submissions are handled.
 		document.body.addEventListener( 'click', handleClick );
+		document.body.addEventListener( 'submit', handleSubmit );
 
 		window.addEventListener( 'popstate', handlePopState );
 	};
@@ -52,11 +53,54 @@
 			return;
 		}
 
+		event.preventDefault();
+		loadUrl( url );
+	};
+
+	/**
+	 * Handle popstate event.
+	 */
+	const handlePopState = () => {
+		// @todo
+	};
+
+	/**
+	 * Handle submit on forms.
+	 *
+	 * @param {Event} event - Event.
+	 */
+	const handleSubmit = ( event ) => {
+		if ( ! event.target.matches( 'form[action]' ) || event.target.method.toUpperCase() !== 'GET' ) {
+			return;
+		}
+
+		const url = new URL( event.target.action );
+		if ( ! isLoadableURL( url ) ) {
+			return;
+		}
+
+		event.preventDefault();
+
+		for ( const element of event.target.elements ) {
+			if ( element.name && ! element.disabled ) {
+				// @todo Need to handle radios, checkboxes, submit buttons, etc.
+				url.searchParams.set( element.name, element.value );
+			}
+		}
+		loadUrl( url );
+	};
+
+	/**
+	 * Load URL.
+	 *
+	 * @todo When should scroll to the top? Only if the first element of the content is not visible?
+	 * @param {string|URL} url - URL.
+	 */
+	const loadUrl = ( url, { scrollIntoView = false } = {} ) => {
 		const ampUrl = new URL( url );
 		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
 		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
 
-		event.preventDefault();
 		fetchDocument( ampUrl ).then(
 			( doc ) => {
 				if ( currentShadowDoc ) {
@@ -72,6 +116,7 @@
 
 				// @todo Update nav menus.
 				// @todo Improve styling of header when transitioning between home and non-home.
+				// @todo Synchronize additional meta in head.
 				// Update body class name.
 				document.body.className = doc.querySelector( 'body' ).className;
 				document.title = currentShadowDoc.title;
@@ -79,16 +124,18 @@
 
 				currentShadowDoc.ampdoc.whenReady().then( () => {
 					newContainer.shadowRoot.addEventListener( 'click', handleClick );
+					newContainer.shadowRoot.addEventListener( 'submit', handleSubmit );
+
+					if ( scrollIntoView ) {
+						document.body.scrollIntoView( {
+							block: 'start',
+							inline: 'start',
+							behavior: 'smooth'
+						} );
+					}
 				} );
 			}
 		);
-	};
-
-	/**
-	 * Handle popstate event.
-	 */
-	const handlePopState = () => {
-		// @todo
 	};
 
 	/**
