@@ -20,11 +20,9 @@ Bring the speed and features of the open source [AMP project](https://www.amppro
 
 Run AMP on your entire site, with your own theme. This can mean little or no custom development to get the same experience in AMP.
 
-There can be challenges, like reimplementing JavaScript. But the plugin will let you know when it removed invalid nodes.
+There's also a validator to help you ensure that AMP URLs look and function the same as in non-AMP.
 
-There's a UI to help you ensure that AMP URLs look and function the same as in non-AMP.
-
-This supports all native Gutenberg blocks, and adds new blocks for AMP components. Including [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
+This plugin supports all native Gutenberg blocks, and adds new blocks for AMP components. Including [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
 
 Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" page. These have full support of commenting and widgets.
 
@@ -62,9 +60,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ![Select the exact templates to be AMP-enabled.](wp-assets/screenshot-4.png)
 
-### See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
+### The validator shows the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
 
-![See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.](wp-assets/screenshot-5.png)
+![The validator shows the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.](wp-assets/screenshot-5.png)
 
 ### Get the details for a single URL's validation.
 
