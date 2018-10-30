@@ -46,13 +46,13 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Screenshots ##
 
-### AMP with the Twenty Seventeen theme, which looks and functions the same in AMP and non-AMP.
+### AMP with the Twenty Seventeen theme, which looks and functions the same as in non-AMP.
 
-![AMP with the Twenty Seventeen theme, which looks and functions the same in AMP and non-AMP.](wp-assets/screenshot-1.png)
+![AMP with the Twenty Seventeen theme, which looks and functions the same as in non-AMP.](wp-assets/screenshot-1.png)
 
-### AMP with the Twenty Sixteen theme, which also displays and function the same as in non-AMP.
+### AMP with the Twenty Sixteen theme, which also displays and functions the same as in non-AMP.
 
-![AMP with the Twenty Sixteen theme, which also displays and function the same as in non-AMP.](wp-assets/screenshot-2.png)
+![AMP with the Twenty Sixteen theme, which also displays and functions the same as in non-AMP.](wp-assets/screenshot-2.png)
 
 ### Choose a "Template Mode," which determines whether there are separate URLs for AMP, and whether this uses your theme.
 

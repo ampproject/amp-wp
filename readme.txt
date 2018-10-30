@@ -42,8 +42,8 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Screenshots ==
 
-1. AMP with the Twenty Seventeen theme, which looks and functions the same in AMP and non-AMP.
-1. AMP with the Twenty Sixteen theme, which also displays and function the same as in non-AMP.
+1. AMP with the Twenty Seventeen theme, which looks and functions the same as in non-AMP.
+1. AMP with the Twenty Sixteen theme, which also displays and functions the same as in non-AMP.
 1. Choose a "Template Mode," which determines whether there are separate URLs for AMP, and whether this uses your theme.
 1. Select the exact templates to be AMP-enabled.
 1. See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
