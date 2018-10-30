@@ -38,7 +38,7 @@ The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Sim
 
 "Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
-In "Classic" mode, posts, pages, media, and custom post types can have AMP-compatible versions, accessible by appending `/amp/` to your URL. For example, if your post URL is `http://example.com/2019/01/01/amp-on/`, you can access the AMP version at `http://example.com/2019/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
+Posts, pages, media, and custom post types can have AMP-compatible versions in "Classic" mode. They're accessible by appending `/amp/` to your URL. For example, if your post URL is `http://example.com/2019/01/01/amp-on/`, you can access the AMP version at `http://example.com/2019/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
@@ -48,33 +48,37 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ![AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.](wp-assets/screenshot-1.png)
 
+### AMP with the Twenty Sixteen theme, also displaying the same in AMP and non-AMP.
+
+![AMP with the Twenty Sixteen theme, also displaying the same in AMP and non-AMP.](wp-assets/screenshot-2.png)
+
 ### Choose whether you'd like separate URLs for AMP.
 
-![Choose whether you'd like separate URLs for AMP.](wp-assets/screenshot-2.png)
+![Choose whether you'd like separate URLs for AMP.](wp-assets/screenshot-3.png)
 
 ### Select the exact templates to be AMP-enabled.
 
-![Select the exact templates to be AMP-enabled.](wp-assets/screenshot-3.png)
+![Select the exact templates to be AMP-enabled.](wp-assets/screenshot-4.png)
 
 ### See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
 
-![See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.](wp-assets/screenshot-4.png)
+![See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.](wp-assets/screenshot-5.png)
 
 ### Get the details for a single URL's validation.
 
-![Get the details for a single URL's validation.](wp-assets/screenshot-5.png)
+![Get the details for a single URL's validation.](wp-assets/screenshot-6.png)
 
 ### See all of the validation errors.
 
-![See all of the validation errors.](wp-assets/screenshot-6.png)
+![See all of the validation errors.](wp-assets/screenshot-7.png)
 
 ### The details for a single error also point to the the invalid node.
 
-![The details for a single error also point to the the invalid node.](wp-assets/screenshot-7.png)
+![The details for a single error also point to the the invalid node.](wp-assets/screenshot-8.png)
 
-### Article from Halfbrick showing customized AMP template.
+### Article from Halfbrick showing a customized "Classic" mode template.
 
-![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-8.png)
+![Article from Halfbrick showing a customized "Classic" mode template.](wp-assets/screenshot-9.png)
 
 ## Installation ##
 
