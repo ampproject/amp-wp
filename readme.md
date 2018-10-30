@@ -2,7 +2,7 @@
 # AMP for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-Enable Accelerated Mobile Pages (AMP) on your WordPress site.
+AMP, with all of the features of WordPress and your theme.
 
 **Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
@@ -18,17 +18,25 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
 
-With the plugin active, all posts on your site will have AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
+Run AMP on your entire site, with your own theme. This means little or no custom development to get the same experience in AMP.
 
-Also, your pages and custom post types can have AMP versions. Simply check their boxes on the 'AMP Settings' page in `/wp-admin`.
+There can be challenges, like reimplementing JavaScript. But the plugin will let you know when it removed invalid nodes.
 
-Your entire site can render as "Native AMP" if your theme calls `add_theme_support( 'amp' )`. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended. See this [wiki page](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#native-amp) for details and restrictions.
+There's a UI to help you ensure that AMP URLs look and function the same as in non-AMP.
 
-Your theme can also use [Paired Mode](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#paired-mode), with your own custom templates for the AMP URLs.
+Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" page. These have full support of commenting and widgets.
 
-"Native AMP" and "Paired Mode" add full support for commenting and widgets.
+"Native" mode will render your entire site as AMP. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended.
 
-If your theme doesn't support `'amp'`, this will use basic legacy post templates for AMP consumers like Google Search and Twitter. And when visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
+"Paired" mode has an AMP URL and a non-AMP URL for the templates where AMP is enabled. For example, the non-AMP URL of `http://example.com/foo/` will have an AMP URL of `http://example.com/foo/?amp`.
+
+In this mode, you can select which templates should have AMP URLs. Choose a single template type like "Category," a few templates, or your entire site.
+
+There's also a way for themes to set these modes by adding theme support of `'amp'`. Please see this document for more details.
+
+"Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
+
+In "Classic" mode, posts, pages, media, and custom post types can have AMP-compatible versions, accessible by appending `/amp/` to your URL. For example, if your post URL is `http://example.com/2019/01/01/amp-on/`, you can access the AMP version at `http://example.com/2019/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
