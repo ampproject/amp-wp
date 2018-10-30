@@ -18,7 +18,7 @@ AMP, with all of the features of WordPress and your theme.
 
 Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
 
-Run AMP on your entire site, with your own theme. This means little or no custom development to get the same experience in AMP.
+Run AMP on your entire site, with your own theme. This can mean little or no custom development to get the same experience in AMP.
 
 There can be challenges, like reimplementing JavaScript. But the plugin will let you know when it removed invalid nodes.
 
