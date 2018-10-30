@@ -36,7 +36,7 @@ In both of these modes, you can select which templates should have AMP enabled. 
 
 There's also a way for themes to set these modes by adding theme support of `'amp'`. Please see this document for more details.
 
-The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP.
+The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP without changing anything.
 
 "Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
@@ -46,17 +46,17 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Screenshots ##
 
-### AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.
+### AMP with the Twenty Seventeen theme, which looks and functions the same in AMP and non-AMP.
 
-![AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.](wp-assets/screenshot-1.png)
+![AMP with the Twenty Seventeen theme, which looks and functions the same in AMP and non-AMP.](wp-assets/screenshot-1.png)
 
-### AMP with the Twenty Sixteen theme, also displaying the same in AMP and non-AMP.
+### AMP with the Twenty Sixteen theme, which also displays and function the same as in non-AMP.
 
-![AMP with the Twenty Sixteen theme, also displaying the same in AMP and non-AMP.](wp-assets/screenshot-2.png)
+![AMP with the Twenty Sixteen theme, which also displays and function the same as in non-AMP.](wp-assets/screenshot-2.png)
 
-### Choose whether you'd like separate URLs for AMP.
+### Choose a "Template Mode," which determines whether there are separate URLs for AMP, and whether this uses your theme.
 
-![Choose whether you'd like separate URLs for AMP.](wp-assets/screenshot-3.png)
+![Choose a "Template Mode," which determines whether there are separate URLs for AMP, and whether this uses your theme.](wp-assets/screenshot-3.png)
 
 ### Select the exact templates to be AMP-enabled.
 
