@@ -30,9 +30,11 @@ Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" 
 
 "Paired" mode has an AMP URL and a non-AMP URL for the templates where AMP is enabled. For example, the non-AMP URL of `http://example.com/foo/` will have an AMP URL of `http://example.com/foo/?amp`.
 
-In this mode, you can select which templates should have AMP URLs. Choose a single template type like "Category," a few templates, or your entire site.
+In both of these modes, you can select which templates should have AMP enabled. Choose a single template type like "Categories," a few templates, or your entire site.
 
 There's also a way for themes to set these modes by adding theme support of `'amp'`. Please see this document for more details.
+
+The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP.
 
 "Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
@@ -42,25 +44,37 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Screenshots ##
 
-### Post rendered in AMP template.
+### AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.
 
-![Post rendered in AMP template.](wp-assets/screenshot-1.png)
+![AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.](wp-assets/screenshot-1.png)
 
-### Customizing appearance of AMP template.
+### Choose whether you'd like separate URLs for AMP.
 
-![Customizing appearance of AMP template.](wp-assets/screenshot-2.png)
+![Choose whether you'd like separate URLs for AMP.](wp-assets/screenshot-2.png)
 
-### Article from New York Post showing customized AMP template.
+### Select the exact templates to be AMP-enabled.
 
-![Article from New York Post showing customized AMP template.](wp-assets/screenshot-3.png)
+![Select the exact templates to be AMP-enabled.](wp-assets/screenshot-3.png)
 
-### Article from TNW showing customized AMP template.
+### See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
 
-![Article from TNW showing customized AMP template.](wp-assets/screenshot-4.png)
+![See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.](wp-assets/screenshot-4.png)
+
+### Get the details for a single URL's validation.
+
+![Get the details for a single URL's validation.](wp-assets/screenshot-5.png)
+
+### See all of the validation errors.
+
+![See all of the validation errors.](wp-assets/screenshot-6.png)
+
+### The details for a single error also point to the the invalid node.
+
+![The details for a single error also point to the the invalid node.](wp-assets/screenshot-7.png)
 
 ### Article from Halfbrick showing customized AMP template.
 
-![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-5.png)
+![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-8.png)
 
 ## Installation ##
 

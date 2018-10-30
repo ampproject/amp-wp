@@ -26,9 +26,11 @@ Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" 
 
 "Paired" mode has an AMP URL and a non-AMP URL for the templates where AMP is enabled. For example, the non-AMP URL of `http://example.com/foo/` will have an AMP URL of `http://example.com/foo/?amp`.
 
-In this mode, you can select which templates should have AMP URLs. Choose a single template type like "Category," a few templates, or your entire site.
+In both of these modes, you can select which templates should have AMP enabled. Choose a single template type like "Categories," a few templates, or your entire site.
 
 There's also a way for themes to set these modes by adding theme support of `'amp'`. Please see this document for more details.
+
+The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP.
 
 "Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
@@ -38,10 +40,13 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 == Screenshots ==
 
-1. Post rendered in AMP template.
-1. Customizing appearance of AMP template.
-1. Article from New York Post showing customized AMP template.
-1. Article from TNW showing customized AMP template.
+1. AMP with the Twenty Seventeen theme, supporting all native WordPress features like widgets, embeds, and comments.
+1. Choose whether you'd like separate URLs for AMP.
+1. Select the exact templates to be AMP-enabled.
+1. See the URLs that have validation errors, to make sure your AMP pages look the same as in non-AMP.
+1. Get the details for a single URL's validation.
+1. See all of the validation errors.
+1. The details for a single error also point to the the invalid node.
 1. Article from Halfbrick showing customized AMP template.
 
 == Installation ==
