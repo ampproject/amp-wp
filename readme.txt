@@ -20,6 +20,8 @@ There can be challenges, like reimplementing JavaScript. But the plugin will let
 
 There's a UI to help you ensure that AMP URLs look and function the same as in non-AMP.
 
+This supports all native Gutenberg blocks, and adds new blocks for AMP components. Including [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
+
 Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" page. These have full support of commenting and widgets.
 
 "Native" mode will render your entire site as AMP. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended.
