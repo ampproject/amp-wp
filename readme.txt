@@ -18,7 +18,7 @@ Run AMP on your entire site, with your own theme.
 
 There's a validator to help you ensure that AMP URLs look and function the same as in non-AMP.
 
-This plugin supports all native Gutenberg blocks, and adds new blocks for AMP components. Including [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
+This plugin supports all native Gutenberg blocks, and adds new blocks for AMP components, for example [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
 
 Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" page. These have full support of commenting and widgets.
 
@@ -27,6 +27,8 @@ There can be challenges, like reimplementing JavaScript that the plugin has to r
 "Native" mode will render your entire site as AMP. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended.
 
 "Paired" mode has an AMP URL and a non-AMP URL for the templates where AMP is enabled. For example, the non-AMP URL of `http://example.com/foo/` will have an AMP URL of `http://example.com/foo/?amp`.
+
+This AMP URL ending in `?amp` or `&amp` is how your visitors will access your site from AMP consumers such as Google Search, Twitter, and Bing.
 
 In both of these modes, you can select which templates should have AMP enabled. Choose a single template type like "Categories," a few templates, or your entire site.
 
