@@ -14,13 +14,15 @@ AMP, with all of the features of WordPress and your theme.
 
 Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
 
-Run AMP on your entire site, with your own theme. This can mean little or no custom development to get the same experience in AMP.
+Run AMP on your entire site, with your own theme.
 
-There's also a validator to help you ensure that AMP URLs look and function the same as in non-AMP.
+There's a validator to help you ensure that AMP URLs look and function the same as in non-AMP.
 
 This plugin supports all native Gutenberg blocks, and adds new blocks for AMP components. Including [amp-jwplayer](https://ampbyexample.com/components/amp-jwplayer/) and [amp-timeago](https://ampbyexample.com/components/amp-timeago/).
 
 Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" page. These have full support of commenting and widgets.
+
+There can be challenges, like reimplementing JavaScript that the plugin has to remove to produce valid AMP. But the validator helps you to see which templates are ready for AMP, and which might need development.
 
 "Native" mode will render your entire site as AMP. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended.
 
@@ -28,7 +30,7 @@ Use your own theme by selecting "Native" or "Paired" mode on the "AMP Settings" 
 
 In both of these modes, you can select which templates should have AMP enabled. Choose a single template type like "Categories," a few templates, or your entire site.
 
-There's also a way for themes to set these modes by adding theme support of `'amp'`. Please see this document for more details.
+There's also a way for themes to set these modes by [adding theme support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) for `'amp'`. Please see this document for more details.
 
 The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP without changing anything.
 
