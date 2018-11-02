@@ -38,7 +38,7 @@ In both of these modes, you can select which templates should have AMP enabled. 
 
 There's also a way for themes to set these modes by [adding theme support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) for `'amp'`. Please see this document for more details.
 
-The themes Twenty Fifteen, Twenty Sixteen, and Twenty Seventeen support AMP. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP without changing anything.
+This plugin makes the themes [Twenty Fifteen](https://wordpress.org/themes/twentyfifteen/), [Twenty Sixteen](https://wordpress.org/themes/twentysixteen), and [Twenty Seventeen](https://wordpress.org/themes/twentyseventeen) AMP-compatible. Simply select "Native" or "Paired" mode, and you can run your entire site as AMP without changing anything.
 
 "Classic" mode uses basic legacy post templates for AMP consumers like Google Search and Twitter. When visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
 
