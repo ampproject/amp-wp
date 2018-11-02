@@ -122,7 +122,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Fix handling of amp-bind attributes to ensure that `“>”` can appear inside attribute values. See [#1119](https://github.com/Automattic/amp-wp/pull/1119). Props westonruter.
 - Tree-shake CSS selectors for HTML elements that target non-active languages. See [#1221](https://github.com/Automattic/amp-wp/pull/1221). Props westonruter.
 - Redirect to post list table in case of admin bar validate request failure. See [#1229](https://github.com/Automattic/amp-wp/pull/1229). Props westonruter.
-- Fix expected output for `test_decorate_shortcode_and_filter_source`. See [#1535](https://github.com/Automattic/amp-wp/pull/1535). Props westonruter.
+- Amend AMP style elements with sourceURL comment for DevTools to be able to perform CSS code coverage. See [#1584](https://github.com/Automattic/amp-wp/pull/1584). Props westonruter.
 - Prevent erroneously tree-shaking keyframe selectors like `from`, `to`, and percentages. See [#1211](https://github.com/Automattic/amp-wp/pull/1211). Props westonruter.
 - Add caching of redirect to non-AMP URL when validation errors present. See [#1207](https://github.com/Automattic/amp-wp/pull/1207). Props westonruter.
 - Discontinue using 'latest' version of component scripts. See [#1464](https://github.com/Automattic/amp-wp/pull/1464). Props westonruter.
