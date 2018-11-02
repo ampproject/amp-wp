@@ -113,12 +113,8 @@
 	function loadUrl( url, { scrollIntoView = false } = {} ) {
 		updateNavMenuClasses( url );
 
-		const ampUrl = new URL( url );
-		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
-		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
-
-		fetchDocument( ampUrl ).then(
-			( doc ) => {
+		fetchDocument( url )
+			.then( ( doc ) => {
 				if ( currentShadowDoc ) {
 					currentShadowDoc.close();
 				}
@@ -168,6 +164,9 @@
 						} );
 					}
 				} );
+			} )
+			.catch( () => {
+				window.location.assign( url );
 			}
 		);
 	}
@@ -278,18 +277,29 @@
 	 * @return {Promise<Document>} Promise which resolves to the fetched document.
 	 */
 	function fetchDocument( url ) {
+
+		const ampUrl = new URL( url );
+		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
+		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+
 		// unfortunately fetch() does not support retrieving documents,
 		// so we have to resort to good old XMLHttpRequest.
 		const xhr = new XMLHttpRequest();
 
 		// @todo Handle reject.
-		return new Promise( ( resolve ) => {
-			xhr.open( 'GET', url.toString(), true );
+		return new Promise( ( resolve, reject ) => {
+			xhr.open( 'GET', ampUrl.toString(), true );
 			xhr.responseType = 'document';
 			xhr.setRequestHeader( 'Accept', 'text/html' );
 			xhr.onload = () => {
-				resolve( xhr.responseXML );
+				// @todo Before getting to this point, catch for redirecting to the non-AMP version.
+				if ( ! xhr.responseXML.documentElement.hasAttribute( 'amp' ) && ! xhr.responseXML.documentElement.hasAttribute( '⚡️' ) ) {
+					reject();
+				} else {
+					resolve( xhr.responseXML );
+				}
 			};
+			xhr.onerror = reject;
 			xhr.send();
 		} );
 	}
