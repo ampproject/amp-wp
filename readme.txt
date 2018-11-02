@@ -28,7 +28,7 @@ There can be challenges, like reimplementing JavaScript that the plugin has to r
 
 "Paired" mode has an AMP URL and a non-AMP URL for the templates where AMP is enabled. For example, the non-AMP URL of `http://example.com/foo/` will have an AMP URL of `http://example.com/foo/?amp`.
 
-This AMP URL ending in `?amp` or `&amp` is how your visitors will access your site from AMP consumers such as Google Search, Twitter, and Bing.
+This AMP URL ending in `?amp` is how your visitors will access your site from AMP consumers such as Google Search, Twitter, and Bing.
 
 In both of these modes, you can select which templates should have AMP enabled. Choose a single template type like "Categories," a few templates, or your entire site.
 
@@ -42,7 +42,7 @@ Posts, pages, media, and custom post types can have AMP-compatible versions in "
 
 To find the AMP URL, you can also look in the page source for the `<link rel="amphtml"...>`. Its `href` will be the URL of the AMP page, for example `<link rel="amphtml" href="https://example.com/foo/?amp">`.
 
-Also, the [AMP Validator Chrome extension](https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc?hl=en) shows an icon with the AMP version of a URL, and displays the validation status of an AMP URL.
+Also, the [AMP Validator Chrome extension](https://chrome.google.com/webstore/detail/amp-validator/nmoffdblmcmgeicmolmhobpoocbbmknc) shows an icon with the AMP version of a URL, and displays the validation status of an AMP URL.
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
