@@ -53,8 +53,8 @@
 			return;
 		}
 
-		event.preventDefault();
 		loadUrl( url );
+		event.preventDefault();
 	}
 
 	/**
@@ -79,8 +79,6 @@
 			return;
 		}
 
-		event.preventDefault();
-
 		for ( const element of event.target.elements ) {
 			if ( element.name && ! element.disabled ) {
 				// @todo Need to handle radios, checkboxes, submit buttons, etc.
@@ -88,6 +86,7 @@
 			}
 		}
 		loadUrl( url );
+		event.preventDefault();
 	}
 
 	/**
