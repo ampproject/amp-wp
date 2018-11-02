@@ -7,7 +7,7 @@
 	/**
 	 * Initialize.
 	 */
-	const init = () => {
+	function init() {
 		const container = document.getElementById( ampAppShell.contentElementId );
 		if ( ! container ) {
 			throw new Error( 'Lacking element with ID: ' + ampAppShell.contentElementId );
@@ -19,7 +19,7 @@
 		document.body.addEventListener( 'submit', handleSubmit );
 
 		window.addEventListener( 'popstate', handlePopState );
-	};
+	}
 
 	/**
 	 * Is loadable URL.
@@ -27,7 +27,7 @@
 	 * @param {URL} url - URL to be loaded.
 	 * @return {boolean} Whether the URL can be loaded into a shadow doc.
 	 */
-	const isLoadableURL = ( url ) => {
+	function isLoadableURL( url ) {
 		if ( url.pathname.endsWith( '.php' ) ) {
 			return false;
 		}
@@ -35,14 +35,14 @@
 			return false;
 		}
 		return url.href.startsWith( ampAppShell.homeUrl );
-	};
+	}
 
 	/**
 	 * Handle clicks on links.
 	 *
 	 * @param {MouseEvent} event - Event.
 	 */
-	const handleClick = ( event ) => {
+	function handleClick( event ) {
 		if ( ! event.target.matches( 'a[href]' ) ) {
 			return;
 		}
@@ -55,21 +55,21 @@
 
 		event.preventDefault();
 		loadUrl( url );
-	};
+	}
 
 	/**
 	 * Handle popstate event.
 	 */
-	const handlePopState = () => {
+	function handlePopState() {
 		// @todo
-	};
+	}
 
 	/**
 	 * Handle submit on forms.
 	 *
 	 * @param {Event} event - Event.
 	 */
-	const handleSubmit = ( event ) => {
+	function handleSubmit( event ) {
 		if ( ! event.target.matches( 'form[action]' ) || event.target.method.toUpperCase() !== 'GET' ) {
 			return;
 		}
@@ -88,15 +88,16 @@
 			}
 		}
 		loadUrl( url );
-	};
+	}
 
 	/**
 	 * Load URL.
 	 *
 	 * @todo When should scroll to the top? Only if the first element of the content is not visible?
 	 * @param {string|URL} url - URL.
+	 * @param {boolean} scrollIntoView - Scroll into view.
 	 */
-	const loadUrl = ( url, { scrollIntoView = false } = {} ) => {
+	function loadUrl( url, { scrollIntoView = false } = {} ) {
 		updateNavMenuClasses( url );
 
 		const ampUrl = new URL( url );
@@ -132,6 +133,16 @@
 					newContainer.shadowRoot.addEventListener( 'click', handleClick );
 					newContainer.shadowRoot.addEventListener( 'submit', handleSubmit );
 
+					/*
+					 * Let admin bar in shadow doc replace admin bar in app shell (if it still exists).
+					 * Very conveniently the admin bar _inside_ the shadow root can appear _outside_
+					 * the shadow root via fixed positioning!
+					 */
+					const originalAdminBar = document.getElementById( 'wpadminbar' );
+					if ( originalAdminBar ) {
+						originalAdminBar.remove();
+					}
+
 					if ( scrollIntoView ) {
 						document.body.scrollIntoView( {
 							block: 'start',
@@ -142,7 +153,7 @@
 				} );
 			}
 		);
-	};
+	}
 
 	/**
 	 * Update class names in nav menus based on what URL is being navigated to.
@@ -154,7 +165,7 @@
 	 *
 	 * @param {string|URL} url URL.
 	 */
-	const updateNavMenuClasses = ( url ) => {
+	function updateNavMenuClasses( url ) {
 		const queriedUrl = new URL( url );
 		queriedUrl.hash = '';
 
@@ -241,7 +252,7 @@
 				item = item.parentElement.closest( '.page_item_has_children' );
 			}
 		}
-	};
+	}
 
 	/**
 	 * Fetch document.
@@ -249,7 +260,7 @@
 	 * @param {string|URL} url URL.
 	 * @return {Promise<Document>} Promise which resolves to the fetched document.
 	 */
-	const fetchDocument = ( url ) => {
+	function fetchDocument( url ) {
 		// unfortunately fetch() does not support retrieving documents,
 		// so we have to resort to good old XMLHttpRequest.
 		const xhr = new XMLHttpRequest();
@@ -264,7 +275,7 @@
 			};
 			xhr.send();
 		} );
-	};
+	}
 
 	// Initialize when Shadow API loaded and DOM Ready.
 	( window.AMP = window.AMP || [] ).push( () => {
