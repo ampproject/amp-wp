@@ -22,6 +22,15 @@
 	}
 
 	/**
+	 * Handle popstate event.
+	 *
+	 * @param {Event} event - Event.
+	 */
+	function handlePopState( event ) {
+		console.info( 'popstate', event );
+	}
+
+	/**
 	 * Is loadable URL.
 	 *
 	 * @param {URL} url - URL to be loaded.
@@ -43,7 +52,12 @@
 	 * @param {MouseEvent} event - Event.
 	 */
 	function handleClick( event ) {
-		if ( ! event.target.matches( 'a[href]' ) ) {
+		if ( ! event.target.matches( 'a[href]' ) || event.target.closest( '#wpadminbar' ) ) {
+			return;
+		}
+
+		// Skip handling click if it was handled already.
+		if ( event.defaultPrevented ) {
 			return;
 		}
 
@@ -58,19 +72,19 @@
 	}
 
 	/**
-	 * Handle popstate event.
-	 */
-	function handlePopState() {
-		// @todo
-	}
-
-	/**
 	 * Handle submit on forms.
+	 *
+	 * @todo Handle POST requests.
 	 *
 	 * @param {Event} event - Event.
 	 */
 	function handleSubmit( event ) {
-		if ( ! event.target.matches( 'form[action]' ) || event.target.method.toUpperCase() !== 'GET' ) {
+		if ( ! event.target.matches( 'form[action]' ) || event.target.method.toUpperCase() !== 'GET' || event.target.closest( '#wpadminbar' ) ) {
+			return;
+		}
+
+		// Skip handling click if it was handled already.
+		if ( event.defaultPrevented ) {
 			return;
 		}
 
@@ -121,7 +135,11 @@
 				// Update body class name.
 				document.body.className = doc.querySelector( 'body' ).className;
 				document.title = currentShadowDoc.title;
-				history.pushState( {}, currentShadowDoc.title, currentShadowDoc.canonicalUrl );
+				history.pushState(
+					{}, // @todo Add current scroll position?
+					currentShadowDoc.title,
+					currentShadowDoc.canonicalUrl
+				);
 
 				// Update the nav menu classes if the final URL has redirected somewhere else.
 				if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
