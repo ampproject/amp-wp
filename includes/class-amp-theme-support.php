@@ -303,7 +303,7 @@ class AMP_Theme_Support {
 		}
 
 		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
-		if ( 'inner' !== $requested_app_shell_component ) {
+		if ( ! is_amp_endpoint() && 'inner' !== $requested_app_shell_component ) {
 			wp_enqueue_script( 'amp-shadow' );
 			wp_enqueue_script( 'amp-wp-app-shell' );
 
