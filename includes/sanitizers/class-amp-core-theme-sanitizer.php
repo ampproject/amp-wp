@@ -51,6 +51,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = array(
+		// Twenty Nineteen.
+		'twentynineteen'  => array(
+			'dequeue_scripts' => array(
+				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
+				'twentynineteen-touch-navigation', // @todo There should be an AMP implementation of this.
+			),
+		),
+
 		// Twenty Seventeen.
 		'twentyseventeen' => array(
 			// @todo Try to implement belowEntryMetaClass().
@@ -119,6 +127,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_nav_sub_menu_buttons' => array(),
 		),
 	);
+
+	/**
+	 * Get list of supported core themes.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string[] Slugs for supported themes.
+	 */
+	public static function get_supported_themes() {
+		return array_keys( self::$theme_features );
+	}
 
 	/**
 	 * Get the acceptable validation errors.
@@ -197,6 +216,53 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 								'name'    => 'viewport',
 								'content' => 'width=device-width, initial-scale=1',
 							),
+						),
+					),
+				);
+			case 'twentynineteen':
+				return array(
+					// @todo Eliminate this once https://github.com/ampproject/amphtml/issues/18896 is resolved and deployed.
+					'invalid_element'     => array(
+						array(
+							'node_name'       => 'meta',
+							'parent_name'     => 'head',
+							'node_attributes' => array(
+								'name'    => 'viewport',
+								'content' => 'width=device-width, initial-scale=1',
+							),
+						),
+					),
+					'invalid_attribute'   => array(
+						// @todo AMP should allow this attribute.
+						array(
+							'node_name' => 'focusable',
+						),
+						// @todo There need to be AMP alternatives to the following.
+						array(
+							'node_name'          => 'onclick',
+							'type'               => 'js_error',
+							'parent_name'        => 'a',
+							'element_attributes' => array(
+								'class' => 'mobile-submenu-expand',
+							),
+						),
+						array(
+							'node_name'          => 'onclick',
+							'type'               => 'js_error',
+							'parent_name'        => 'a',
+							'element_attributes' => array(
+								'class' => 'menu-item-link-return',
+							),
+						),
+					),
+					'illegal_css_at_rule' => array(
+						// @todo Eliminate this once https://github.com/ampproject/amphtml/pull/17481 is live.
+						array(
+							'at_rule' => 'page',
+						),
+						// @todo Eliminate this once https://github.com/Automattic/amp-wp/issues/1515 is resolved.
+						array(
+							'at_rule' => 'charset',
 						),
 					),
 				);
