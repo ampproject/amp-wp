@@ -165,8 +165,12 @@
 					}
 				} );
 			} )
-			.catch( () => {
-				window.location.assign( url );
+			.catch( ( error ) => {
+				if ( 'amp_unavailable' === error ) {
+					window.location.assign( url );
+				} else {
+					console.error( error );
+				}
 			}
 		);
 	}
@@ -286,20 +290,30 @@
 		// so we have to resort to good old XMLHttpRequest.
 		const xhr = new XMLHttpRequest();
 
-		// @todo Handle reject.
 		return new Promise( ( resolve, reject ) => {
+			/*
+			 * It would be ideal if the XHR would not follow redirects automatically so that if a redirect to a URL
+			 * without the 'amp' query var happens, then we could skip having to waste CPU to construct the responseXML
+			 * document. But XHR does not support this, while fetch does: <https://stackoverflow.com/a/343359/93579>.
+			 * @todo Consider using fetch() and then construct the DOM with DOMImplementation.createHTMLDocument().
+			 */
 			xhr.open( 'GET', ampUrl.toString(), true );
 			xhr.responseType = 'document';
 			xhr.setRequestHeader( 'Accept', 'text/html' );
+
 			xhr.onload = () => {
-				// @todo Before getting to this point, catch for redirecting to the non-AMP version.
-				if ( ! xhr.responseXML.documentElement.hasAttribute( 'amp' ) && ! xhr.responseXML.documentElement.hasAttribute( '⚡️' ) ) {
-					reject();
-				} else {
+				if ( ! xhr.responseXML ) {
+					reject( 'no_response' );
+				} else if ( xhr.responseXML.documentElement.hasAttribute( 'amp' ) || xhr.responseXML.documentElement.hasAttribute( '⚡️' ) ) {
 					resolve( xhr.responseXML );
+				} else {
+					reject( 'amp_unavailable' );
 				}
 			};
-			xhr.onerror = reject;
+			// @todo What about abort and timeout events?
+			xhr.onerror = () => {
+				reject( 'xhr_error' );
+			};
 			xhr.send();
 		} );
 	}
