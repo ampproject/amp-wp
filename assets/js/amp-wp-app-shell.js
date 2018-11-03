@@ -27,7 +27,7 @@
 	 * @param {Event} event - Event.
 	 */
 	function handlePopState( event ) {
-		console.info( 'popstate', event );
+		loadUrl( window.location.href, { pushState: false } );
 	}
 
 	/**
@@ -67,7 +67,7 @@
 			return;
 		}
 
-		loadUrl( url );
+		loadUrl( url, { scrollIntoView: true } );
 		event.preventDefault();
 	}
 
@@ -99,8 +99,19 @@
 				url.searchParams.set( element.name, element.value );
 			}
 		}
-		loadUrl( url );
+		loadUrl( url, { scrollIntoView: true } );
 		event.preventDefault();
+	}
+
+	/**
+	 * Determine whether header is visible at all.
+	 *
+	 * @return {boolean} Whether header image is visible.
+	 */
+	function isHeaderVisible() {
+		const element = document.querySelector( '.site-branding' );
+		const clientRect = element.getBoundingClientRect();
+		return clientRect.height + clientRect.top >= 0;
 	}
 
 	/**
@@ -109,8 +120,9 @@
 	 * @todo When should scroll to the top? Only if the first element of the content is not visible?
 	 * @param {string|URL} url - URL.
 	 * @param {boolean} scrollIntoView - Scroll into view.
+	 * @param {boolean} pushState - Whether to push state.
 	 */
-	function loadUrl( url, { scrollIntoView = false } = {} ) {
+	function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
 		updateNavMenuClasses( url );
 
 		fetchDocument( url )
@@ -124,6 +136,7 @@
 				newContainer.setAttribute( 'id', oldContainer.getAttribute( 'id' ) );
 				oldContainer.parentNode.replaceChild( newContainer, oldContainer );
 
+				// @todo Use streaming.
 				currentShadowDoc = AMP.attachShadowDoc( newContainer, doc, url.toString() );
 
 				// @todo Improve styling of header when transitioning between home and non-home.
@@ -131,11 +144,13 @@
 				// Update body class name.
 				document.body.className = doc.querySelector( 'body' ).className;
 				document.title = currentShadowDoc.title;
-				history.pushState(
-					{}, // @todo Add current scroll position?
-					currentShadowDoc.title,
-					currentShadowDoc.canonicalUrl
-				);
+				if ( pushState ) {
+					history.pushState(
+						{},
+						currentShadowDoc.title,
+						currentShadowDoc.canonicalUrl
+					);
+				}
 
 				// Update the nav menu classes if the final URL has redirected somewhere else.
 				if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
@@ -156,8 +171,9 @@
 						originalAdminBar.remove();
 					}
 
-					if ( scrollIntoView ) {
-						document.body.scrollIntoView( {
+					if ( scrollIntoView && ! isHeaderVisible() ) {
+						// @todo The scroll position is not correct when admin bar is used. Consider scrolling to Y coordinate smoothly instead.
+						document.querySelector( '.site-content-contain' ).scrollIntoView( {
 							block: 'start',
 							inline: 'start',
 							behavior: 'smooth'
