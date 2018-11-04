@@ -55,7 +55,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentynineteen'  => array(
 			'dequeue_scripts' => array(
 				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
-				'twentynineteen-touch-navigation', // @todo There should be an AMP implementation of this.
+				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
 			),
 		),
 
@@ -233,11 +233,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						),
 					),
 					'invalid_attribute'   => array(
-						// @todo AMP should allow this attribute.
+						// @todo This can be removed once https://github.com/ampproject/amphtml/pull/19128 is live.
 						array(
 							'node_name' => 'focusable',
 						),
-						// @todo There need to be AMP alternatives to the following.
+						// @todo The following can be removed once https://github.com/WordPress/twentynineteen/pull/479 is merged.
 						array(
 							'node_name'          => 'onclick',
 							'type'               => 'js_error',
