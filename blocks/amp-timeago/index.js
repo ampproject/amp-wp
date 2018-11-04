@@ -58,6 +58,7 @@ export default registerBlockType(
 			},
 			ampLayout: {
 				type: 'string',
+				default: 'fixed-height',
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'layout'
@@ -70,6 +71,7 @@ export default registerBlockType(
 			},
 			height: {
 				type: 'number',
+				default: 20,
 				source: 'attribute',
 				selector: 'amp-timeago',
 				attribute: 'height'
@@ -99,7 +101,7 @@ export default registerBlockType(
 			}
 
 			const ampLayoutOptions = [
-				{ value: '', label: __( 'Responsive', 'amp' ) }, // Default for amp-timeago.
+				{ value: '', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) }
 			];
