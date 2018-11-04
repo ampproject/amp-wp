@@ -260,10 +260,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						array(
 							'at_rule' => 'page',
 						),
-						// @todo Eliminate this once https://github.com/Automattic/amp-wp/issues/1515 is resolved.
-						array(
-							'at_rule' => 'charset',
-						),
 					),
 				);
 		}
