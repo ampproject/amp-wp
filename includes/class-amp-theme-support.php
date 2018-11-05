@@ -1656,7 +1656,7 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		// Ensure the mandatory amp attribute is present on the html element.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
