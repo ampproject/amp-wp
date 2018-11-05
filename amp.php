@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-RC2
+ * Version: 1.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -31,6 +31,23 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
 }
 
 /**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.1
+ */
+function _amp_print_php_dom_document_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install DOM extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! class_exists( 'DOMDocument' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
+	return;
+}
+
+/**
  * Print admin notice when composer install has not been performed.
  *
  * @since 1.0
@@ -49,7 +66,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-RC2' );
+define( 'AMP__VERSION', '1.1-alpha' );
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();

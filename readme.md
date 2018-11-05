@@ -62,6 +62,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ## Changelog ##
 
+### 1.1 (unreleased) ###
+...
+
 ### 1.0 (unreleased) ###
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 

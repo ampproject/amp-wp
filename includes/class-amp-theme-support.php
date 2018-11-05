@@ -753,6 +753,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
+		// Let the AMP plugin manage service worker streaming in the PWA plugin.
+		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
+
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -1508,6 +1511,7 @@ class AMP_Theme_Support {
 	 */
 	public static function prepare_response( $response, $args = array() ) {
 		global $content_width;
+		$prepare_response_start = microtime( true );
 
 		if ( isset( $args['validation_error_callback'] ) ) {
 			_doing_it_wrong( __METHOD__, 'Do not supply validation_error_callback arg.', '1.0' );
@@ -1521,6 +1525,12 @@ class AMP_Theme_Support {
 		 */
 		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
+		}
+
+		// Dependencies on the PWA plugin for service worker streaming.
+		$stream_fragment = null;
+		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
+			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
 		}
 
 		$args = array_merge(
@@ -1537,6 +1547,7 @@ class AMP_Theme_Support {
 					! is_customize_preview()
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
+				'stream_fragment'         => $stream_fragment,
 			),
 			$args
 		);
@@ -1551,18 +1562,38 @@ class AMP_Theme_Support {
 			$args['enable_response_caching']                   = ! $disable_response_caching;
 		}
 
+		/*
+		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
+		 * This is also used as the ETag.
+		 */
+		$response_cache_key = md5( wp_json_encode( array(
+			$args,
+			$response,
+			self::$sanitizer_classes,
+			self::$embed_handlers,
+			AMP__VERSION,
+		) ) );
+
+		/*
+		 * Per rfc7232:
+		 * "The server generating a 304 response MUST generate any of the
+		 * following header fields that would have been sent in a 200 (OK)
+		 * response to the same request: Cache-Control, Content-Location, Date,
+		 * ETag, Expires, and Vary." The only one of these headers which would
+		 * not have been set yet during the WordPress template generation is
+		 * the ETag. The AMP plugin sends a Vary header at amp_init.
+		 */
+		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+
+		// Handle responses that are cached by the browser.
+		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+			status_header( 304 );
+			return '';
+		}
+
 		// Return cache if enabled and found.
 		$cache_response = null;
 		if ( true === $args['enable_response_caching'] ) {
-			// Set response cache hash, the data values dictates whether a new hash key should be generated or not.
-			$response_cache_key = md5( wp_json_encode( array(
-				$args,
-				$response,
-				self::$sanitizer_classes,
-				self::$embed_handlers,
-				AMP__VERSION,
-			) ) );
-
 			$response_cache = wp_cache_get( $response_cache_key, self::RESPONSE_CACHE_GROUP );
 
 			// Make sure that all of the validation errors should be sanitized in the same way; if not, then the cached body should be discarded.
@@ -1582,6 +1613,18 @@ class AMP_Theme_Support {
 
 			// Short-circuit response with cached body.
 			if ( isset( $response_cache['body'] ) ) {
+
+				// Re-send the headers that were sent before when the response was first cached.
+				if ( isset( $response_cache['headers'] ) ) {
+					foreach ( $response_cache['headers'] as $header ) {
+						if ( in_array( $header, AMP_HTTP::$headers_sent, true ) ) {
+							continue; // Skip sending headers that were already sent prior to post-processing.
+						}
+						AMP_HTTP::send_header( $header['name'], $header['value'], wp_array_slice_assoc( $header, array( 'replace', 'status_code' ) ) );
+					}
+				}
+
+				AMP_HTTP::send_server_timing( 'amp_processor_cache_hit', -$prepare_response_start );
 
 				// Redirect to non-AMP version.
 				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
@@ -1604,7 +1647,11 @@ class AMP_Theme_Support {
 
 				return wp_cache_set(
 					$response_cache_key,
-					compact( 'body', 'validation_results' ),
+					array(
+						'headers'            => AMP_HTTP::$headers_sent,
+						'body'               => $body,
+						'validation_results' => $validation_results,
+					),
 					AMP_Theme_Support::RESPONSE_CACHE_GROUP,
 					MONTH_IN_SECONDS
 				);
@@ -1631,6 +1678,21 @@ class AMP_Theme_Support {
 
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+
+		// Remove scripts that are being added for PWA service worker streaming for restoration later.
+		$stream_combine_script_define_element     = null;
+		$stream_combine_script_define_placeholder = null;
+		$stream_combine_script_invoke_element     = null;
+		$stream_combine_script_invoke_placeholder = null;
+		if ( 'header' === $stream_fragment ) {
+			$stream_combine_script_define_element = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+			if ( $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
+			}
+		} elseif ( 'body' === $stream_fragment ) {
+			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
+		}
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -1746,8 +1808,41 @@ class AMP_Theme_Support {
 			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
 		) );
 
+		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
+		$truncate_after_comment  = null;
+		$truncate_before_comment = null;
+		if ( $stream_fragment ) {
+			if ( $stream_combine_script_define_placeholder && $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder->parentNode->replaceChild( $stream_combine_script_define_element, $stream_combine_script_define_placeholder );
+				$truncate_after_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_HEADER' );
+				$stream_combine_script_define_element->parentNode->insertBefore( $truncate_after_comment, $stream_combine_script_define_element->nextSibling );
+			}
+			if ( $stream_combine_script_invoke_placeholder ) {
+				$stream_combine_script_invoke_element = WP_Service_Worker_Navigation_Routing_Component::get_header_combine_invoke_script( $dom, false );
+				$stream_combine_script_invoke_placeholder->parentNode->replaceChild( $stream_combine_script_invoke_element, $stream_combine_script_invoke_placeholder );
+				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
+				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
+			}
+		}
+
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+
+		// For service worker streaming, make sure that the header response doesn't contain closing tags, and that the body fragment starts with the required script tag.
+		if ( $truncate_after_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, 0, $position );
+			}
+		}
+		if ( $truncate_before_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_before_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, $position + strlen( $search ) );
+			}
+		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 

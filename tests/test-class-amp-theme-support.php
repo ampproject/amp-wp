@@ -1151,6 +1151,21 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Get the ETag header value from the list of sent headers.
+	 *
+	 * @param array $headers Headers sent.
+	 * @return string|null The ETag if found.
+	 */
+	protected function get_etag_header_value( $headers ) {
+		foreach ( $headers as $header_sent ) {
+			if ( 'ETag' === $header_sent['name'] ) {
+				return $header_sent['value'];
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Test prepare_response.
 	 *
 	 * @global WP_Widget_Factory $wp_widget_factory
@@ -1160,9 +1175,23 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \amp_render_scripts()
 	 */
 	public function test_prepare_response() {
+		$prepare_response_args = array(
+			'enable_response_caching' => false,
+		);
+
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-		$original_html  = $this->get_original_html();
-		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
+		$original_html = $this->get_original_html();
+
+		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
+			AMP_HTTP::$headers_sent                     = array();
+			AMP_Validation_Manager::$validation_results = array();
+			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
+		};
+
+		$sanitized_html = $call_prepare_response();
+
+		$etag = $this->get_etag_header_value( AMP_HTTP::$headers_sent );
+		$this->assertNotEmpty( $etag );
 
 		$this->assertNotContains( 'handle=', $sanitized_html );
 		$this->assertEquals( 2, substr_count( $sanitized_html, '<!-- wp_print_scripts -->' ) );
@@ -1247,49 +1276,57 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Make sure trailing content after </html> gets moved.
 		$this->assertRegExp( '#<!--comment-after-html-->\s*<div id="after-html"></div>\s*<!--comment-end-html-->\s*</body>\s*</html>\s*$#s', $sanitized_html );
 
-		$prepare_response_args = array(
-			'enable_response_caching' => true,
-		);
+		// Test that ETag allows response to short-circuit via If-None-Match request header.
+		$_SERVER['HTTP_IF_NONE_MATCH'] = $etag;
+		$this->assertEmpty( '', $call_prepare_response() );
+		$_SERVER['HTTP_IF_NONE_MATCH'] = $etag . '-v2';
+		$this->assertNotEmpty( $call_prepare_response() );
+		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
+		unset( $_SERVER['HTTP_IF_NONE_MATCH'] );
 
-		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
-			AMP_HTTP::$headers_sent                     = array();
-			AMP_Validation_Manager::$validation_results = array();
-			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
-		};
+		$prepare_response_args['enable_response_caching'] = true;
 
 		// Test that first response isn't cached.
-		$first_response = $call_prepare_response();
-		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+		$first_response                = $call_prepare_response();
+		$initial_server_timing_headers = $this->get_server_timing_headers();
+		$this->assertGreaterThan( 0, count( $initial_server_timing_headers ) );
 		$this->assertContains( '<html amp="">', $first_response ); // Note: AMP because sanitized validation errors.
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response cache is return upon second call.
 		$this->assertEquals( $first_response, $call_prepare_response() );
-		$this->assertSame( 0, $this->get_server_timing_header_count() );
+		$server_timing_headers = $this->get_server_timing_headers();
+		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test new cache upon argument change.
 		$prepare_response_args['test_reset_by_arg'] = true;
 		$call_prepare_response();
-		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+		$server_timing_headers = $this->get_server_timing_headers();
+		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test response is cached.
 		$call_prepare_response();
-		$this->assertSame( 0, $this->get_server_timing_header_count() );
+		$server_timing_headers = $this->get_server_timing_headers();
+		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response is no longer cached due to a change whether validation errors are sanitized.
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
-		$prepared_html = $call_prepare_response();
-		$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+		$prepared_html         = $call_prepare_response();
+		$server_timing_headers = $this->get_server_timing_headers();
+		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
 		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
 		$this->reset_post_processor_cache_effectiveness();
 
 		// And test response is cached.
 		$call_prepare_response();
-		$this->assertSame( 0, $this->get_server_timing_header_count() );
+		$server_timing_headers     = $this->get_server_timing_headers();
+		$last_server_timing_header = array_pop( $server_timing_headers );
+		$this->assertStringStartsWith( 'amp_processor_cache_hit;', $last_server_timing_header['value'] );
+		$this->assertSame( count( $server_timing_headers ), count( $initial_server_timing_headers ) );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
@@ -1345,7 +1382,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 			}
 
-			$this->assertGreaterThan( 0, $this->get_server_timing_header_count() );
+			$this->assertGreaterThan( 0, count( $this->get_server_timing_headers() ) );
 		}
 
 		// Reset.
@@ -1437,15 +1474,17 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Returns the "Server-Timing" header count.
+	 * Returns the "Server-Timing" headers.
+	 *
+	 * @return array Server-Timing headers.
 	 */
-	private function get_server_timing_header_count() {
-		return count( array_filter(
+	private function get_server_timing_headers() {
+		return array_filter(
 			AMP_HTTP::$headers_sent,
 			function( $header ) {
 				return 'Server-Timing' === $header['name'];
 			}
-		) );
+		);
 	}
 
 	/**
