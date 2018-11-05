@@ -159,6 +159,8 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Omit validation errors sanitized by filter or tree-shaking option; since sanitization is forced, there is no point to store. See (#1413)[https://github.com/Automattic/amp-wp/pull/1413]. Props westonruter.
 - Prevent URL validation from happening during bulk imports. See [#1424](https://github.com/Automattic/amp-wp/pull/1424), [#1404](https://github.com/Automattic/amp-wp/issues/1404). Props westonruter.
 - Normalize invalid URL stored for `amp_validated_url` post type. See [#1436](https://github.com/Automattic/amp-wp/pull/1436). Props westonruter.
+- Make the default layout responsive for the `<amp-ooyala-player>` block. See [#1585](https://github.com/Automattic/amp-wp/pull/1585). Props kienstra.
+- Add default values for AMP Timeago block. See [#1586](https://github.com/Automattic/amp-wp/pull/1586). Props kienstra.
 - Expose and store queried object for validated URL; show edit link. See [#1426](https://github.com/Automattic/amp-wp/pull/1426), [#1428](https://github.com/Automattic/amp-wp/pull/1428), [#1433](https://github.com/Automattic/amp-wp/pull/1433). Props westonruter.
 - Re-validate the site when switching modes and show the results in a notice. See [#1443](https://github.com/Automattic/amp-wp/pull/1443). Props kienstra, westonruter.
 - Improve access to AMP admin screens for users who are not administrators. [#1437](https://github.com/Automattic/amp-wp/pull/1437). Props westonruter.
