@@ -1761,6 +1761,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$stylesheet_sets = array(
 			'custom'    => array(
+				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'pending_stylesheets' => array(),
@@ -1768,6 +1769,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'remove_unused_rules' => $this->args['remove_unused_rules'],
 			),
 			'keyframes' => array(
+				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'pending_stylesheets' => array(),
@@ -1835,6 +1837,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
 			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+			$css .= $stylesheet_sets['custom']['source_map_comment'];
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -1921,9 +1924,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				) );
 			} else {
+				$css  = implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] );
+				$css .= $stylesheet_sets['keyframes']['source_map_comment'];
+
 				$style_element = $this->dom->createElement( 'style' );
 				$style_element->setAttribute( 'amp-keyframes', '' );
-				$style_element->appendChild( $this->dom->createTextNode( implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] ) ) );
+				$style_element->appendChild( $this->dom->createTextNode( $css ) );
 				$body->appendChild( $style_element );
 			}
 		}
@@ -2003,7 +2009,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Finalized stylesheet set.
 	 */
 	private function finalize_stylesheet_set( $stylesheet_set ) {
-		$is_too_much_css   = $stylesheet_set['total_size'] > $stylesheet_set['cdata_spec']['max_bytes'];
+		$max_bytes         = $stylesheet_set['cdata_spec']['max_bytes'] - strlen( $stylesheet_set['source_map_comment'] );
+		$is_too_much_css   = $stylesheet_set['total_size'] > $max_bytes;
 		$should_tree_shake = (
 			'always' === $stylesheet_set['remove_unused_rules'] || (
 				$is_too_much_css
@@ -2097,7 +2104,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
+			if ( $final_size + $sheet_size > $max_bytes ) {
 				$validation_error = array(
 					'code' => 'excessive_css',
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
