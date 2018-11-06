@@ -15,7 +15,9 @@ const { select } = wp.data;
 const { getBlock } = select( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
-	'amp/amp-story-grid-layer',
+	'amp/amp-story-grid-layer-vertical',
+	'amp/amp-story-grid-layer-fill',
+	'amp/amp-story-grid-layer-thirds',
 	'amp/amp-story-cta-layer'
 ];
 
@@ -29,7 +31,7 @@ const ALLOWED_BLOCKS = [
  */
 const getStoryPageTemplate = memoize( ( grids, hasCTA ) => {
 	let template = _.times( grids, () => [
-		'amp/amp-story-grid-layer',
+		'amp/amp-story-grid-layer-vertical',
 		[
 			[
 				'core/paragraph',
@@ -94,13 +96,18 @@ export default registerBlockType(
 				setAttributes( { id: uuid() } );
 			}
 			const block = getBlock( props.clientId );
+			const gridLayerBlocks = [
+				'amp/amp-story-grid-layer-vertical',
+				'amp/amp-story-grid-layer-fill',
+				'amp/amp-story-grid-layer-thirds'
+			];
 			let grids = block.innerBlocks.length;
 			let hasCTALayer = false;
 			_.each( block.innerBlocks, function( child ) {
 				if ( 'amp/amp-story-cta-layer' === child.name ) {
 					grids--;
 					hasCTALayer = true;
-				} else if ( 'amp/amp-story-grid-layer' !== child.name ) {
+				} else if ( -1 !== gridLayerBlocks.indexOf( child.name ) ) {
 					grids--;
 				}
 			} );

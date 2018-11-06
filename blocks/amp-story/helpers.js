@@ -1,8 +1,14 @@
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 100 ] } ] */
+
 const { __ } = wp.i18n;
 const {
 	SelectControl,
 	RangeControl
 } = wp.components;
+
+const {
+	PanelColorSettings
+} = wp.editor;
 
 const ANIMATION_DEFAULTS = {
 	drop: 1600,
@@ -24,6 +30,20 @@ const ANIMATION_DEFAULTS = {
 	'zoom-in': 1000,
 	'zoom-out': 1000
 };
+
+export const ALLOWED_BLOCKS = [
+	'core/code',
+	'core/embed',
+	'core/image',
+	'core/list',
+	'core/paragraph',
+	'core/preformatted',
+	'core/pullquote',
+	'core/quote',
+	'core/table',
+	'core/verse',
+	'core/video'
+];
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -144,4 +164,76 @@ export function getAmpStoryAnimationControls( setAttributes, attributes ) {
 			max='5000'
 		/>
 	];
+}
+
+/**
+ * Get background settings fof grid layers.
+ *
+ * @param {Function} setAttributes Set attributes function.
+ * @param {Object} attributes Attributes object.
+ * @return {[XML,XML]} Array of elements.
+ */
+export function getAmpGridLayerBackgroundSettings( setAttributes, attributes ) {
+	const onChangeBackgroundColor = newBackgroundColor => {
+		setAttributes( { backgroundColor: newBackgroundColor } );
+	};
+
+	return [
+		<PanelColorSettings
+			title={ __( 'Background Color Settings', 'amp' ) }
+			initialOpen={ false }
+			key='bgColor'
+			colorSettings={ [
+				{
+					value: attributes.backgroundColor,
+					onChange: onChangeBackgroundColor,
+					label: __( 'Background Color', 'amp' )
+				}
+			] }
+		/>,
+		<RangeControl
+			key='opacity'
+			label={ __( 'Layer Opacity (%)', 'amp' ) }
+			value={ parseInt( attributes.opacity * 100 ) }
+			onChange={ ( value ) => {
+				value = value / 100;
+				setAttributes( { opacity: value } );
+			} }
+			min='0'
+			max='100'
+			placeholder='100'
+			initialPosition='100'
+		/>
+	];
+}
+
+export function getGridLayerAttributes() {
+	return {
+		animationType: {
+			type: 'string',
+			source: 'attribute',
+			selector: 'amp-story-grid-layer',
+			attribute: 'animate-in'
+		},
+		animationDuration: {
+			type: 'string',
+			source: 'attribute',
+			selector: 'amp-story-grid-layer',
+			attribute: 'animate-in-duration'
+		},
+		animationDelay: {
+			type: 'string',
+			source: 'attribute',
+			selector: 'amp-story-grid-layer',
+			attribute: 'animate-in-delay',
+			default: '0ms'
+		},
+		backgroundColor: {
+			type: 'string'
+		},
+		opacity: {
+			type: 'number',
+			default: 1
+		}
+	};
 }

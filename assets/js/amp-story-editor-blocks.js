@@ -40,6 +40,11 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/verse': 'pre',
 				'core/video': 'figure'
 			},
+			gridBlocks: [
+				'amp/amp-story-grid-layer-fill',
+				'amp/amp-story-grid-layer-vertical',
+				'amp/amp-story-grid-layer-thirds'
+			],
 			ampStoryPositionOptions: [
 				{
 					value: 'upper-third',
@@ -160,13 +165,35 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 */
 	component.boot = function boot() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', component.addAMPAttributes );
+		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', component.setBlockParent );
 		wp.hooks.addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', component.filterBlocksEdit );
-		wp.hooks.addFilter( 'editor.BlockListBlock', 'my-plugin/with-data-align', component.addWrapperProps );
+		wp.hooks.addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', component.addWrapperProps );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 	};
 
 	/**
-	 * Add wrapper props to the blocks within AMP Story layers.
+	 * Filter layer properties to define the parent block.
+	 *
+	 * @param {Object} props Block properties.
+	 * @return {Object} Properties.
+	 */
+	component.setBlockParent = function( props ) {
+		if ( component.data.gridBlocks.includes( props.name ) || 'amp/amp-story-cta-layer' === props.name ) {
+			let parent = [ props.name ];
+			if ( props.parent ) {
+				parent = parent.concat( props.parent );
+			}
+			return Object.assign(
+				{},
+				props,
+				{ parent: parent }
+			);
+		}
+		return props;
+	};
+
+	/**
+	 * Add wrapper props to the blocks within AMP Story Thirds layer.
 	 *
 	 * @param {Object} BlockListBlock BlockListBlock element.
 	 * @return {Function} Handler.
@@ -177,7 +204,31 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		return function( props ) {
 			var parentClientId,
 				parentBlock,
-				ampStoryPosition;
+				ampStoryPosition,
+				newProps;
+
+			// In case of any grid layer lets add data-amp-type for styling purposes.
+			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-type': 'grid'
+							}
+						)
+					}
+				);
+
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
 			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
 				return [
 					el( BlockListBlock, _.extend( {
@@ -188,13 +239,17 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 			parentClientId = select.getBlockRootClientId( props.block.clientId );
 			parentBlock = select.getBlock( parentClientId );
-			ampStoryPosition = props.block.attributes.ampStoryPosition;
-
-			if ( 'thirds' !== parentBlock.attributes.template ) {
-				ampStoryPosition = null;
+			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
+				return [
+					el( BlockListBlock, _.extend( {
+						key: 'original'
+					}, props ) )
+				];
 			}
 
-			var newProps = lodash.assign(
+			ampStoryPosition = props.block.attributes.ampStoryPosition;
+
+			newProps = lodash.assign(
 				{},
 				props,
 				{
@@ -331,7 +386,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			parentBlock = select.getBlock( parentClientId );
-			if ( ! parentBlock || ( 'amp/amp-story-grid-layer' !== parentBlock.name && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
+			if ( ! parentBlock || ( -1 === component.data.gridBlocks.indexOf( parentBlock.name ) && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
 				// Return original.
 				return [
 					el( BlockEdit, _.extend( {
@@ -340,13 +395,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			if ( 'thirds' !== parentBlock.attributes.template ) {
+			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
 						component.getAnimationControls( props )
 					)
 				);
 			} else {
+				// In case of children of the thirds grid layer we need to add the placement on the thirds control.
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
 						el( SelectControl, {

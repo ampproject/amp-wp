@@ -34,7 +34,12 @@ class BlockSelector extends Component {
 		let hasCtaLayer = false;
 
 		window.lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
-			let template = ! block.attributes.template ? 'vertical' : block.attributes.template;
+			let template = 'vertical';
+			if ( 'amp/amp-story-grid-layer-fill' === block.name ) {
+				template = 'fill';
+			} else if ( 'amp/amp-story-grid-layer-thirds' === block.name ) {
+				template = 'thirds';
+			}
 			let className = 'component-editor__selector template-' + template;
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
