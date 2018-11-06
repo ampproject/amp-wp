@@ -23,10 +23,8 @@
 
 	/**
 	 * Handle popstate event.
-	 *
-	 * @param {Event} event - Event.
 	 */
-	function handlePopState( event ) {
+	function handlePopState() {
 		loadUrl( window.location.href, { pushState: false } );
 	}
 
@@ -123,6 +121,18 @@
 	 * @param {boolean} pushState - Whether to push state.
 	 */
 	function loadUrl( url, { scrollIntoView = false, pushState = true } = {} ) {
+		const previousUrl = location.href;
+		const navigateEvent = new CustomEvent( 'wp-amp-app-shell-navigate', {
+			cancelable: true,
+			detail: {
+				previousUrl,
+				url
+			}
+		} );
+		if ( ! window.dispatchEvent( navigateEvent ) ) {
+			return; // Allow scripts on page to cancel navigation via preventDefault() on wp-amp-app-shell-navigate event.
+		}
+
 		updateNavMenuClasses( url );
 
 		fetchDocument( url )
@@ -157,7 +167,28 @@
 					updateNavMenuClasses( currentShadowDoc.canonicalUrl );
 				}
 
+				const loadEvent = new CustomEvent( 'wp-amp-app-shell-load', {
+					cancelable: false,
+					detail: {
+						previousUrl,
+						document: doc,
+						oldContainer,
+						newContainer
+					}
+				} );
+				window.dispatchEvent( loadEvent );
+
 				currentShadowDoc.ampdoc.whenReady().then( () => {
+					// @todo Consider allowing cancelable and when happens to prevent default initialization.
+					const readyEvent = new CustomEvent( 'wp-amp-app-shell-ready', {
+						cancelable: false,
+						detail: {
+							previousUrl,
+							document: doc
+						}
+					} );
+					window.dispatchEvent( readyEvent );
+
 					newContainer.shadowRoot.addEventListener( 'click', handleClick );
 					newContainer.shadowRoot.addEventListener( 'submit', handleSubmit );
 
