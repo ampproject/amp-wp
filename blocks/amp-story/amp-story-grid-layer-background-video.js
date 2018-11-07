@@ -42,14 +42,6 @@ export default registerBlockType(
 		attributes: getGridLayerAttributes(),
 		inserter: false,
 
-		/*
-		 * <amp-story-grid-layer>:
-		 *   mandatory_ancestor: "AMP-STORY-PAGE"
-		 *   descendant_tag_list: "amp-story-grid-layer-allowed-descendants"
-		 *
-		 * https://github.com/ampproject/amphtml/blob/87fe1d02f902be97b596b36ec3421592c83d241e/extensions/amp-story/validator-amp-story.protoascii#L172-L188
-		 */
-
 		edit( props ) {
 			const { setAttributes, attributes } = props;
 
