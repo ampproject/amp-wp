@@ -934,6 +934,12 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		// Show nothing if there are no valudation errors.
+		if ( 0 === count( array_filter( $error_summary ) ) ) {
+			esc_html_e( '--', 'amp' );
+			return;
+		}
+
 		$active_theme          = null;
 		$validated_environment = get_post_meta( $post_id, '_amp_validated_environment', true );
 		if ( isset( $validated_environment['theme'] ) ) {
