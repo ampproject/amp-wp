@@ -41,9 +41,11 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/video': 'figure'
 			},
 			gridBlocks: [
-				'amp/amp-story-grid-layer-fill',
+				'amp/amp-story-grid-layer-horizontal',
 				'amp/amp-story-grid-layer-vertical',
-				'amp/amp-story-grid-layer-thirds'
+				'amp/amp-story-grid-layer-thirds',
+				'amp/amp-story-grid-layer-background-image',
+				'amp/amp-story-grid-layer-background-video'
 			],
 			ampStoryPositionOptions: [
 				{

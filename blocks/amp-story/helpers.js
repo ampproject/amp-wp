@@ -1,4 +1,4 @@
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 100 ] } ] */
+/* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 100 ] } ] */
 
 const { __ } = wp.i18n;
 const {
@@ -7,7 +7,8 @@ const {
 } = wp.components;
 
 const {
-	PanelColorSettings
+	PanelColorSettings,
+	InnerBlocks
 } = wp.editor;
 
 const ANIMATION_DEFAULTS = {
@@ -207,6 +208,11 @@ export function getAmpGridLayerBackgroundSettings( setAttributes, attributes ) {
 	];
 }
 
+/**
+ * Get attributes for all grid layers.
+ *
+ * @return {Object} Attributes object.
+ */
 export function getGridLayerAttributes() {
 	return {
 		animationType: {
@@ -236,4 +242,43 @@ export function getGridLayerAttributes() {
 			default: 1
 		}
 	};
+}
+
+/**
+ * Save method for Fill Grid Layers.
+ *
+ * @param {Object} attributes Block attributes.
+ * @return {XML} Content to save.
+ */
+export function saveFillGridLayer( attributes ) {
+	let layerProps = {
+			template: 'fill'
+		},
+		style = {};
+	if ( attributes.animationType ) {
+		layerProps[ 'animate-in' ] = attributes.animationType;
+
+		if ( attributes.animationDelay ) {
+			layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
+		}
+		if ( attributes.animationDuration ) {
+			layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
+		}
+	}
+
+	if ( 1 !== attributes.opacity ) {
+		style.opacity = attributes.opacity;
+	}
+	if ( attributes.backgroundColor ) {
+		style.backgroundColor = attributes.backgroundColor;
+	}
+	if ( ! _.isEmpty( style ) ) {
+		layerProps.style = style;
+	}
+
+	return (
+		<amp-story-grid-layer { ...layerProps }>
+			<InnerBlocks.Content />
+		</amp-story-grid-layer>
+	);
 }

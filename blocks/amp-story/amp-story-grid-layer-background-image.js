@@ -1,10 +1,10 @@
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1 ] } ] */
 
 import {
-	ALLOWED_BLOCKS,
 	getAmpStoryAnimationControls,
 	getAmpGridLayerBackgroundSettings,
-	getGridLayerAttributes
+	getGridLayerAttributes,
+	saveFillGridLayer
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -19,13 +19,22 @@ const {
 	PanelBody
 } = wp.components;
 
+const TEMPLATE = [
+	[
+		'core/image',
+		{
+			ampLayout: 'fill'
+		}
+	]
+];
+
 /**
  * Register block.
  */
 export default registerBlockType(
-	'amp/amp-story-grid-layer-thirds',
+	'amp/amp-story-grid-layer-background-image',
 	{
-		title: __( 'Thirds Grid Layer' ),
+		title: __( 'Background Image Layer' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
@@ -48,49 +57,20 @@ export default registerBlockType(
 					{
 						getAmpGridLayerBackgroundSettings( setAttributes, attributes )
 					}
-					<PanelBody key='animation' title={ __( 'Grid Layer Animation', 'amp' ) }>
+					<PanelBody key='animation' title={ __( 'Image Layer Animation', 'amp' ) }>
 						{
 							getAmpStoryAnimationControls( setAttributes, attributes )
 						}
 					</PanelBody>
 				</InspectorControls>,
-				<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className='amp-grid-template amp-grid-template-thirds'>
-					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
+				<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className='amp-grid-template amp-grid-template-fill'>
+					<InnerBlocks template={ TEMPLATE } templateLock='all' />
 				</div>
 			];
 		},
 
 		save( { attributes } ) {
-			let layerProps = {
-					template: 'thirds'
-				},
-				style = {};
-			if ( attributes.animationType ) {
-				layerProps[ 'animate-in' ] = attributes.animationType;
-
-				if ( attributes.animationDelay ) {
-					layerProps[ 'animate-in-delay' ] = attributes.animationDelay;
-				}
-				if ( attributes.animationDuration ) {
-					layerProps[ 'animate-in-duration' ] = attributes.animationDuration;
-				}
-			}
-
-			if ( 1 !== attributes.opacity ) {
-				style.opacity = attributes.opacity;
-			}
-			if ( attributes.backgroundColor ) {
-				style.backgroundColor = attributes.backgroundColor;
-			}
-			if ( ! _.isEmpty( style ) ) {
-				layerProps.style = style;
-			}
-
-			return (
-				<amp-story-grid-layer { ...layerProps }>
-					<InnerBlocks.Content />
-				</amp-story-grid-layer>
-			);
+			return saveFillGridLayer( attributes );
 		}
 	}
 );

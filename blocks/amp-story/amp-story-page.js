@@ -98,7 +98,9 @@ export default registerBlockType(
 			const block = getBlock( props.clientId );
 			const gridLayerBlocks = [
 				'amp/amp-story-grid-layer-vertical',
-				'amp/amp-story-grid-layer-fill',
+				'amp/amp-story-grid-layer-horizontal',
+				'amp/amp-story-grid-layer-background-image',
+				'amp/amp-story-grid-layer-background-video',
 				'amp/amp-story-grid-layer-thirds'
 			];
 			let grids = block.innerBlocks.length;
