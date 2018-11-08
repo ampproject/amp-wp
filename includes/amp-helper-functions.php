@@ -368,11 +368,12 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$handle,
 		amp_get_asset_url( 'js/amp-wp-app-shell.js' ),
 		array( 'amp-shadow' ),
-		AMP__VERSION
+		AMP__VERSION . ( WP_DEBUG ? '-' . md5( file_get_contents( AMP__DIR__ . '/assets/js/amp-wp-app-shell.js' ) ) : '' ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
 	);
 	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
 		'async' => true,
 	) );
+	$wp_scripts->add_data( $handle, 'precache', true );
 
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
