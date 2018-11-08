@@ -163,6 +163,21 @@ class AMP_HTTP {
 	}
 
 	/**
+	 * Add purged query vars to the supplied URL.
+	 *
+	 * @since 1.0
+	 *
+	 * @param string $url URL.
+	 * @return string URL with purged query vars.
+	 */
+	public static function add_purged_query_vars( $url ) {
+		if ( ! empty( self::$purged_amp_query_vars ) ) {
+			$url = add_query_arg( self::$purged_amp_query_vars, $url );
+		}
+		return $url;
+	}
+
+	/**
 	 * Filter the allowed redirect hosts to include AMP caches.
 	 *
 	 * @since 1.0

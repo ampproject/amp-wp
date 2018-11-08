@@ -165,6 +165,7 @@ function amp_init() {
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
+	add_filter( 'redirect_canonical', array( 'AMP_HTTP', 'add_purged_query_vars' ) );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
@@ -524,9 +525,6 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 			$link = add_query_arg( amp_get_slug(), '', $link );
 		} else {
 			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
-		}
-		if ( ! empty( AMP_HTTP::$purged_amp_query_vars ) ) {
-			$link = add_query_arg( AMP_HTTP::$purged_amp_query_vars, $link );
 		}
 	}
 
