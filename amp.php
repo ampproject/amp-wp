@@ -165,7 +165,7 @@ function amp_init() {
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
-	add_filter( 'redirect_canonical', array( 'AMP_HTTP', 'add_purged_query_vars' ) );
+	add_filter( 'wp_redirect', array( 'AMP_HTTP', 'add_purged_query_vars' ) );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
