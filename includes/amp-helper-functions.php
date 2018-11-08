@@ -554,8 +554,8 @@ function amp_get_analytics( $analytics = array() ) {
 	 * This filter also applies when there is no theme support, but in that case the filter 'amp_post_template_analytics' is also available.
 	 *
 	 * @since 0.7
-	 *
 	 * @link https://developers.google.com/analytics/devguides/collection/amp-analytics/#basic_setup_to_track_page_views
+	 *
 	 * @param array $analytics_entries[][] {
 	 *     An array of associative array(s) of the analytics entries to output.
 	 *
