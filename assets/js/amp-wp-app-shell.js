@@ -1,7 +1,7 @@
 /* global ampAppShell, AMP */
 /* eslint-disable no-console */
 
-{
+( function() {
 	let currentShadowDoc;
 
 	/**
@@ -434,4 +434,4 @@
 			document.addEventListener( 'DOMContentLoaded', init );
 		}
 	} );
-}
+} )();
