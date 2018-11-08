@@ -3,11 +3,13 @@
 const { __ } = wp.i18n;
 const {
 	SelectControl,
-	RangeControl
+	RangeControl,
+	PanelBody
 } = wp.components;
 
 const {
 	PanelColorSettings,
+	InspectorControls,
 	InnerBlocks
 } = wp.editor;
 
@@ -245,14 +247,15 @@ export function getGridLayerAttributes() {
 }
 
 /**
- * Save method for Fill Grid Layers.
+ * Save method for Grid Layers.
  *
  * @param {Object} attributes Block attributes.
+ * @param {string} template Template type: fill, vertical, horizontal, thirds.
  * @return {XML} Content to save.
  */
-export function saveFillGridLayer( attributes ) {
+export function saveGridLayer( attributes, template ) {
 	let layerProps = {
-			template: 'fill'
+			template: template
 		},
 		style = {};
 	if ( attributes.animationType ) {
@@ -281,4 +284,58 @@ export function saveFillGridLayer( attributes ) {
 			<InnerBlocks.Content />
 		</amp-story-grid-layer>
 	);
+}
+
+/**
+ * Function for grid layers' block Edit.
+ *
+ * @param {Object} props Properties.
+ * @param {string} type Template type: vertical, horizontal, thirds.
+ * @return {[XML,XML]} Edit.
+ */
+export function editGridLayer( props, type ) {
+	const { setAttributes, attributes } = props;
+
+	return [
+		<InspectorControls key='inspector'>
+			{
+				getAmpGridLayerBackgroundSettings( setAttributes, attributes )
+			}
+			<PanelBody key='animation' title={ __( 'Grid Layer Animation', 'amp' ) }>
+				{
+					getAmpStoryAnimationControls( setAttributes, attributes )
+				}
+			</PanelBody>
+		</InspectorControls>,
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type }>
+			<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
+		</div>
+	];
+}
+
+/**
+ * Function for grid fill layers' block Edit.
+ *
+ * @param {Object} props Properties.
+ * @param {Array} template Gutenberg block template.
+ * @return {[XML,XML]} Edit.
+ */
+export function editFillLayer( props, template ) {
+	const { setAttributes, attributes } = props;
+
+	return [
+		<InspectorControls key='inspector'>
+			{
+				getAmpGridLayerBackgroundSettings( setAttributes, attributes )
+			}
+			<PanelBody key='animation' title={ __( 'Layer Animation', 'amp' ) }>
+				{
+					getAmpStoryAnimationControls( setAttributes, attributes )
+				}
+			</PanelBody>
+		</InspectorControls>,
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className='amp-grid-template amp-grid-template-fill'>
+			<InnerBlocks template={ template } templateLock='all' />
+		</div>
+	];
 }
