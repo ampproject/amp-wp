@@ -361,51 +361,6 @@
 		}
 	}
 
-	/**
-	 * Fetch document.
-	 *
-	 * @param {string|URL} url URL.
-	 * @return {Promise<Document>} Promise which resolves to the fetched document.
-	 */
-	function fetchDocument( url ) {
-
-		const ampUrl = new URL( url );
-		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
-		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
-
-		// unfortunately fetch() does not support retrieving documents,
-		// so we have to resort to good old XMLHttpRequest.
-		const xhr = new XMLHttpRequest();
-
-		return new Promise( ( resolve, reject ) => {
-			/*
-			 * It would be ideal if the XHR would not follow redirects automatically so that if a redirect to a URL
-			 * without the 'amp' query var happens, then we could skip having to waste CPU to construct the responseXML
-			 * document. But XHR does not support this, while fetch does: <https://stackoverflow.com/a/343359/93579>.
-			 * @todo Consider using fetch() and then construct the DOM with DOMImplementation.createHTMLDocument().
-			 */
-			xhr.open( 'GET', ampUrl.toString(), true );
-			xhr.withCredentials = true;
-			xhr.responseType = 'document';
-			xhr.setRequestHeader( 'Accept', 'text/html' );
-
-			xhr.onload = () => {
-				if ( ! xhr.responseXML ) {
-					reject( 'no_response' );
-				} else if ( xhr.responseXML.documentElement.hasAttribute( 'amp' ) || xhr.responseXML.documentElement.hasAttribute( '⚡️' ) ) {
-					resolve( xhr.responseXML );
-				} else {
-					reject( 'amp_unavailable' );
-				}
-			};
-			// @todo What about abort and timeout events?
-			xhr.onerror = () => {
-				reject( 'xhr_error' );
-			};
-			xhr.send();
-		} );
-	}
-
 	// Initialize when Shadow DOM API loaded and DOM Ready.
 	const ampReadyPromise = new Promise( resolve => {
 		if ( ! window.AMP ) {
