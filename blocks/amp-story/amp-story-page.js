@@ -53,7 +53,7 @@ const getStoryPageTemplate = memoize( ( grids, hasCTA ) => {
 export default registerBlockType(
 	'amp/amp-story-page',
 	{
-		title: __( 'AMP Story Page', 'amp' ),
+		title: __( 'Page', 'amp' ),
 		category: 'layout',
 		icon: 'admin-page',
 
