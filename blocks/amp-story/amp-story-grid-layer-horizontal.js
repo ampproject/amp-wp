@@ -1,7 +1,8 @@
 import {
 	getGridLayerAttributes,
 	saveGridLayer,
-	editGridLayer
+	editGridLayer,
+	BLOCK_ICONS
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -17,7 +18,7 @@ export default registerBlockType(
 	{
 		title: __( 'Horizontal Layer', 'amp' ),
 		category: 'layout',
-		icon: 'grid-view',
+		icon: BLOCK_ICONS['amp/amp-story-grid-layer-horizontal'],
 		parent: [ 'amp/amp-story-page' ],
 		attributes: getGridLayerAttributes(),
 		inserter: false,

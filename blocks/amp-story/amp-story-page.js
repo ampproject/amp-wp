@@ -1,5 +1,8 @@
 import uuid from 'uuid/v4';
 import BlockSelector from './block-selector';
+import {
+	BLOCK_ICONS
+} from './helpers';
 
 const { __ } = wp.i18n;
 const {
@@ -40,7 +43,7 @@ export default registerBlockType(
 	{
 		title: __( 'Page', 'amp' ),
 		category: 'layout',
-		icon: 'admin-page',
+		icon: BLOCK_ICONS['amp/amp-story-page'],
 
 		// @todo Enforce that the amp-story-page can only be a root-level block; Using `parent: []` does not work, and it causes the inserter to be disabled entirely.
 		attributes: {
