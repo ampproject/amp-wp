@@ -424,6 +424,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 
+		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
@@ -997,6 +998,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_keyframe_sanitizer( $source, $expected = null, $expected_errors = array() ) {
 		$expected    = isset( $expected ) ? $expected : $source;
+		$expected    = preg_replace( '#(?=</style>)#', "\n\n/*# sourceURL=amp-keyframes.css */", $expected );
 		$dom         = AMP_DOM_Utils::get_dom_from_content( $source );
 		$error_codes = array();
 		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
