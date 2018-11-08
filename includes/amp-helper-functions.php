@@ -358,6 +358,16 @@ function amp_register_default_scripts( $wp_scripts ) {
 		'async' => true,
 	) );
 
+	// Add Web Components polyfill if Shadow DOM is not natively available.
+	$wp_scripts->add_inline_script(
+		$handle,
+		sprintf(
+			'if ( ! Element.prototype.attachShadow ) { const script = document.createElement( "script" ); script.src = %s; script.async = true; document.head.appendChild( script ); }',
+			wp_json_encode( 'https://cdnjs.cloudflare.com/ajax/libs/webcomponentsjs/1.0.3/webcomponents-sd-ce.js' )
+		),
+		'after'
+	);
+
 	// App shell library.
 	$handle = 'amp-wp-app-shell';
 	$wp_scripts->add(

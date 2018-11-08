@@ -406,8 +406,23 @@
 		} );
 	}
 
-	// Initialize when Shadow API loaded and DOM Ready.
-	( window.AMP = window.AMP || [] ).push( () => {
+	// Initialize when Shadow DOM API loaded and DOM Ready.
+	const ampReadyPromise = new Promise( resolve => {
+		if ( ! window.AMP ) {
+			window.AMP = [];
+		}
+		window.AMP.push( resolve );
+	} );
+	const shadowDomPolyfillReadyPromise = new Promise( resolve => {
+		if ( Element.prototype.attachShadow ) {
+			// Native available.
+			resolve();
+		} else {
+			// Otherwise, wait for polyfill to be installed.
+			window.addEventListener( 'WebComponentsReady', resolve );
+		}
+	} );
+	Promise.all( [ ampReadyPromise, shadowDomPolyfillReadyPromise ] ).then( () => {
 		// Code from @wordpress/dom-ready NPM package <https://github.com/WordPress/gutenberg/tree/master/packages/dom-ready>.
 		if (
 			document.readyState === 'complete' || // DOMContentLoaded + Images/Styles/etc loaded, so we call directly.
