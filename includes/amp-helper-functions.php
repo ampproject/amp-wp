@@ -342,9 +342,6 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
 
 	// Shadow AMP API.
 	$handle = 'amp-shadow';
@@ -354,9 +351,6 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
 
 	// Add Web Components polyfill if Shadow DOM is not natively available.
 	$wp_scripts->add_inline_script(
@@ -466,17 +460,17 @@ function amp_render_scripts( $scripts ) {
 function amp_filter_script_loader_tag( $tag, $handle ) {
 	$prefix = 'https://cdn.ampproject.org/';
 	$src    = wp_scripts()->registered[ $handle ]->src;
-	if ( 0 !== strpos( $src, $prefix ) ) {
+
+	$attributes = wp_scripts()->get_data( $handle, 'amp_script_attributes' );
+	if ( empty( $attributes ) && 0 === strpos( $src, $prefix ) ) {
+		// All scripts from AMP CDN should be loaded async.
+		$attributes = array(
+			'async' => true,
+		);
+	}
+	if ( empty( $attributes ) ) {
 		return $tag;
 	}
-
-	/*
-	 * All scripts from AMP CDN should be loaded async.
-	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
-	 */
-	$attributes = array(
-		'async' => true,
-	);
 
 	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.
 	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
