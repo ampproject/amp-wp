@@ -113,6 +113,27 @@
 	}
 
 	/**
+	 * Fetch response for URL of shadow doc.
+	 *
+	 * @param {string} url - URL.
+	 * @return {Promise<Response>} Response promise.
+	 */
+	function fetchShadowDocResponse( url ) {
+		const ampUrl = new URL( url );
+		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
+		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+
+		return fetch( ampUrl.toString(), {
+			method: 'GET',
+			mode: 'same-origin',
+			credentials: 'include',
+			redirect: 'follow',
+			cache: 'default',
+			referrer: 'client'
+		} );
+	}
+
+	/**
 	 * Load URL.
 	 *
 	 * @todo When should scroll to the top? Only if the first element of the content is not visible?
@@ -135,8 +156,8 @@
 
 		updateNavMenuClasses( url );
 
-		fetchDocument( url )
-			.then( ( doc ) => {
+		fetchShadowDocResponse( url )
+			.then( response => {
 				if ( currentShadowDoc ) {
 					currentShadowDoc.close();
 				}
@@ -146,45 +167,40 @@
 				newContainer.setAttribute( 'id', oldContainer.getAttribute( 'id' ) );
 				oldContainer.parentNode.replaceChild( newContainer, oldContainer );
 
-				// @todo Use streaming.
-				currentShadowDoc = AMP.attachShadowDoc( newContainer, doc, url.toString() );
-
-				// @todo Improve styling of header when transitioning between home and non-home.
-				// @todo Synchronize additional meta in head.
-				// Update body class name.
-				document.body.className = doc.querySelector( 'body' ).className;
-				document.title = currentShadowDoc.title;
-				if ( pushState ) {
-					history.pushState(
-						{},
-						currentShadowDoc.title,
-						currentShadowDoc.canonicalUrl
-					);
-				}
-
-				// Update the nav menu classes if the final URL has redirected somewhere else.
-				if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
-					updateNavMenuClasses( currentShadowDoc.canonicalUrl );
-				}
-
-				const loadEvent = new CustomEvent( 'wp-amp-app-shell-load', {
-					cancelable: false,
-					detail: {
-						previousUrl,
-						document: doc,
-						oldContainer,
-						newContainer
-					}
-				} );
-				window.dispatchEvent( loadEvent );
+				/*
+				 * For more on this, see:
+				 * https://www.ampproject.org/latest/blog/streaming-in-the-shadow-reader/
+				 * https://github.com/ampproject/amphtml/blob/master/spec/amp-shadow-doc.md#fetching-and-attaching-shadow-docs
+				 */
+				currentShadowDoc = AMP.attachShadowDocAsStream( newContainer, url, {} );
 
 				currentShadowDoc.ampdoc.whenReady().then( () => {
+					// Update the nav menu classes if the final URL has redirected somewhere else.
+					if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
+						updateNavMenuClasses( currentShadowDoc.canonicalUrl );
+					}
+
+					// @todo Improve styling of header when transitioning between home and non-home.
+					// @todo Synchronize additional meta in head.
+					// Update body class name.
+					document.body.className = newContainer.shadowRoot.querySelector( 'body' ).className;
+					document.title = currentShadowDoc.title;
+					if ( pushState ) {
+						history.pushState(
+							{},
+							currentShadowDoc.title,
+							currentShadowDoc.canonicalUrl
+						);
+					}
+
 					// @todo Consider allowing cancelable and when happens to prevent default initialization.
 					const readyEvent = new CustomEvent( 'wp-amp-app-shell-ready', {
 						cancelable: false,
 						detail: {
 							previousUrl,
-							document: doc
+							oldContainer,
+							newContainer,
+							shadowDoc: currentShadowDoc
 						}
 					} );
 					window.dispatchEvent( readyEvent );
@@ -211,6 +227,31 @@
 						} );
 					}
 				} );
+
+				const reader = response.body.getReader();
+				const decoder = new TextDecoder();
+
+				function readChunk() {
+					return reader.read().then( chunk => {
+						const input = chunk.value || new Uint8Array();
+						const text = decoder.decode(
+							input,
+							{
+								stream: ! chunk.done
+							}
+						);
+						if ( text ) {
+							currentShadowDoc.writer.write( text );
+						}
+						if ( chunk.done ) {
+							currentShadowDoc.writer.close();
+						} else {
+							return readChunk();
+						}
+					} );
+				}
+
+				return readChunk();
 			} )
 			.catch( ( error ) => {
 				if ( 'amp_unavailable' === error ) {
@@ -331,7 +372,6 @@
 		const ampUrl = new URL( url );
 		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
 		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
-		ampUrl.searchParams.set( '_cache_bust', Math.random().toString() ); // @todo Temporary since XHR is aggressively using disk cache.
 
 		// unfortunately fetch() does not support retrieving documents,
 		// so we have to resort to good old XMLHttpRequest.
