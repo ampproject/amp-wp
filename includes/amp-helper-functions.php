@@ -549,11 +549,19 @@ function amp_get_analytics( $analytics = array() ) {
 	 * Add amp-analytics tags.
 	 *
 	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-	 * This filter should be used to alter entries for paired mode.
+	 * To be used to alter entries when there is theme support, whether through calling add_theme_support( 'amp' ),
+	 * or from selecting ‘Native’ or ‘Paired’ from ‘AMP Settings’ > ‘Template Mode’.
+	 * This filter also applies when there is no theme support, but in that case the filter 'amp_post_template_analytics' is also available.
 	 *
 	 * @since 0.7
 	 *
-	 * @param array $analytics_entries An associative array of the analytics entries we want to output. Each array entry must have a unique key, and the value should be an array with the following keys: `type`, `attributes`, `script_data`. See readme for more details.
+	 * @link https://developers.google.com/analytics/devguides/collection/amp-analytics/#basic_setup_to_track_page_views
+	 * @param array $analytics_entries[][] {
+	 *     An array of associative array(s) of the analytics entries to output.
+	 *
+	 *     @type string $type   The analytics vendor, like 'googleanalytics' or 'nielsen'.
+	 *     @type string $config JSON-encoded data to be output inside the <amp-analytics> element's <script type="application/json">, see the link above for an example.
+	 * }
 	 */
 	$analytics_entries = apply_filters( 'amp_analytics_entries', $analytics_entries );
 
