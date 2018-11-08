@@ -28,7 +28,7 @@ export default registerBlockType(
 	{
 		title: __( 'Fill Video Layer', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-grid-layer-background-video'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-grid-layer-background-video' ],
 		parent: [ 'amp/amp-story-page' ],
 		attributes: getGridLayerAttributes(),
 		inserter: false,

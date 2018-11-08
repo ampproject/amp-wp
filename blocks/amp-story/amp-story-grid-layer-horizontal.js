@@ -18,7 +18,7 @@ export default registerBlockType(
 	{
 		title: __( 'Horizontal Layer', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-grid-layer-horizontal'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-grid-layer-horizontal' ],
 		parent: [ 'amp/amp-story-page' ],
 		attributes: getGridLayerAttributes(),
 		inserter: false,

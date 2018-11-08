@@ -43,7 +43,7 @@ export default registerBlockType(
 	{
 		title: __( 'Page', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-page'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
 
 		// @todo Enforce that the amp-story-page can only be a root-level block; Using `parent: []` does not work, and it causes the inserter to be disabled entirely.
 		attributes: {

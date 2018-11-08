@@ -55,7 +55,7 @@ export default registerBlockType(
 	{
 		title: __( 'CTA Layer', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-cta-layer'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-cta-layer' ],
 		parent: [ 'amp/amp-story-page' ],
 
 		attributes: {
