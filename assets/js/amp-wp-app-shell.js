@@ -218,8 +218,7 @@
 				} else {
 					console.error( error );
 				}
-			}
-		);
+			} );
 	}
 
 	/**
@@ -332,6 +331,7 @@
 		const ampUrl = new URL( url );
 		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
 		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
+		ampUrl.searchParams.set( '_cache_bust', Math.random().toString() ); // @todo Temporary since XHR is aggressively using disk cache.
 
 		// unfortunately fetch() does not support retrieving documents,
 		// so we have to resort to good old XMLHttpRequest.
@@ -345,6 +345,7 @@
 			 * @todo Consider using fetch() and then construct the DOM with DOMImplementation.createHTMLDocument().
 			 */
 			xhr.open( 'GET', ampUrl.toString(), true );
+			xhr.withCredentials = true;
 			xhr.responseType = 'document';
 			xhr.setRequestHeader( 'Accept', 'text/html' );
 
