@@ -1,4 +1,3 @@
-import memoize from 'memize';
 import uuid from 'uuid/v4';
 import BlockSelector from './block-selector';
 
@@ -11,8 +10,6 @@ const {
 	PanelColorSettings,
 	InspectorControls
 } = wp.editor;
-const { select } = wp.data;
-const { getBlock } = select( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer-vertical',
@@ -21,16 +18,8 @@ const ALLOWED_BLOCKS = [
 	'amp/amp-story-cta-layer'
 ];
 
-/**
- * Returns the amp-story-page's configuration for a given number of amp-story-grid-layer and if added, amp-story-cta-layer.
- *
- * @param {number} grids Number of grids.
- * @param {bool}   hasCTA If has amp-story-cta-layer.
- *
- * @return {Object[]} Story page's layout configuration.
- */
-const getStoryPageTemplate = memoize( ( grids, hasCTA ) => {
-	let template = _.times( grids, () => [
+const TEMPLATE = [
+	[
 		'amp/amp-story-grid-layer-vertical',
 		[
 			[
@@ -40,14 +29,8 @@ const getStoryPageTemplate = memoize( ( grids, hasCTA ) => {
 				}
 			]
 		]
-	] );
-	if ( hasCTA ) {
-		template.push(
-			[ 'amp/amp-story-cta-layer' ]
-		);
-	}
-	return template;
-} );
+	]
+];
 
 /**
  * Register block.
@@ -95,29 +78,6 @@ export default registerBlockType(
 			if ( ! attributes.id ) {
 				setAttributes( { id: uuid() } );
 			}
-			const block = getBlock( props.clientId );
-			const gridLayerBlocks = [
-				'amp/amp-story-grid-layer-vertical',
-				'amp/amp-story-grid-layer-horizontal',
-				'amp/amp-story-grid-layer-background-image',
-				'amp/amp-story-grid-layer-background-video',
-				'amp/amp-story-grid-layer-thirds'
-			];
-			let grids = block.innerBlocks.length;
-			let hasCTALayer = false;
-			_.each( block.innerBlocks, function( child ) {
-				if ( 'amp/amp-story-cta-layer' === child.name ) {
-					grids--;
-					hasCTALayer = true;
-				} else if ( -1 !== gridLayerBlocks.indexOf( child.name ) ) {
-					grids--;
-				}
-			} );
-
-			// Have at least one layout grid in the template.
-			if ( 0 === grids ) {
-				grids = 1;
-			}
 
 			return [
 				<InspectorControls key='controls'>
@@ -136,7 +96,7 @@ export default registerBlockType(
 				<BlockSelector key="selectors" rootClientId={ props.clientId } />,
 				// Get the template dynamically.
 				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
-					<InnerBlocks template={ getStoryPageTemplate( grids, hasCTALayer ) } allowedBlocks={ ALLOWED_BLOCKS } />
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			];
 		},

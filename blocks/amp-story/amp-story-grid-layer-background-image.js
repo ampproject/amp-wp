@@ -24,7 +24,7 @@ const TEMPLATE = [
 export default registerBlockType(
 	'amp/amp-story-grid-layer-background-image',
 	{
-		title: __( 'Background Image Layer', 'amp' ),
+		title: __( 'Fill Image Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],

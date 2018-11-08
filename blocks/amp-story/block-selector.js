@@ -1,5 +1,8 @@
 
-const { __, sprintf } = wp.i18n;
+const { __ } = wp.i18n;
+const {
+	getBlockType
+} = wp.blocks;
 const { Component } = wp.element;
 const { Button } = wp.components;
 const {
@@ -47,18 +50,21 @@ class BlockSelector extends Component {
 				className += ' is-selected';
 			}
 
-			let title = sprintf( __( 'Layer %d ', 'amp' ), index + 1 );
+			let blockType = getBlockType( block.name );
+
 			if ( 'amp/amp-story-cta-layer' === block.name ) {
-				title = __( 'CTA Layer', 'amp' );
 				hasCtaLayer = true;
 			}
+
+
+
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
 					<Button id={ block.clientId } onClick={ ( e ) => {
 						e.stopPropagation();
 						selectBlock( block.clientId );
 					}}>
-						{ title }
+						{ blockType.title.replace( 'Layer', '' ).trim() }
 					</Button>
 				</li>
 			);
