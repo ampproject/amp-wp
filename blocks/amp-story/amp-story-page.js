@@ -22,6 +22,7 @@ const ALLOWED_BLOCKS = [
 ];
 
 const TEMPLATE = [
+	[ 'amp/amp-story-grid-layer-background-image' ],
 	[
 		'amp/amp-story-grid-layer-vertical',
 		[
