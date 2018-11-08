@@ -25,7 +25,7 @@ const {
 export default registerBlockType(
 	'amp/amp-story-grid-layer-thirds',
 	{
-		title: __( 'Thirds Grid Layer' ),
+		title: __( 'Thirds Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],

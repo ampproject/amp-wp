@@ -81,7 +81,7 @@ class LayerInserter extends Component {
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<IconButton
 						icon="insert"
-						label={ __( 'Add new layer' ) }
+						label={ __( 'Add new layer', 'amp' ) }
 						onClick={ onToggle }
 						className="editor-inserter__amp-inserter"
 						aria-haspopup="true"
@@ -114,7 +114,7 @@ class LayerInserter extends Component {
 								className="editor-inserter__results"
 								tabIndex="0"
 								role="region"
-								aria-label={ __( 'Available block types' ) }
+								aria-label={ __( 'Available block types', 'amp' ) }
 							>
 								<ul role="list" className={ listClassName }>
 									{ items.map( ( item ) => {

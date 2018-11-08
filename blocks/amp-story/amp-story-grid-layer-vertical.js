@@ -25,7 +25,7 @@ const {
 export default registerBlockType(
 	'amp/amp-story-grid-layer-vertical',
 	{
-		title: __( 'Vertical Grid Layer' ),
+		title: __( 'Vertical Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],

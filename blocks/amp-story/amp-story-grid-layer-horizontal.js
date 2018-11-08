@@ -25,7 +25,7 @@ const {
 export default registerBlockType(
 	'amp/amp-story-grid-layer-horizontal',
 	{
-		title: __( 'Horizontal Grid Layer' ),
+		title: __( 'Horizontal Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],

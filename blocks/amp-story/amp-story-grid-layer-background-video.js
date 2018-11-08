@@ -35,7 +35,7 @@ const TEMPLATE = [
 export default registerBlockType(
 	'amp/amp-story-grid-layer-background-video',
 	{
-		title: __( 'Background Video Layer' ),
+		title: __( 'Background Video Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],
