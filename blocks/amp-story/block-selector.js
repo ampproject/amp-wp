@@ -56,8 +56,6 @@ class BlockSelector extends Component {
 				hasCtaLayer = true;
 			}
 
-
-
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
 					<Button id={ block.clientId } onClick={ ( e ) => {
