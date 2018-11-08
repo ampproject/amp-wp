@@ -50,7 +50,7 @@ const ALLOWED_BLOCKS = [
 export default registerBlockType(
 	'amp/amp-story-cta-layer',
 	{
-		title: __( 'AMP Story CTA Layer' ),
+		title: __( 'CTA Layer', 'amp' ),
 		category: 'layout',
 		icon: 'grid-view',
 		parent: [ 'amp/amp-story-page' ],

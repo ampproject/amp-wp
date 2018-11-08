@@ -109,6 +109,14 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
 
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+
+		// @todo Add a page-specific style file instead.
+		add_action( 'wp_enqueue_scripts', function() {
+			$custom_css = 'amp-story-grid-layer[template="fill"] .wp-block-image {
+	margin: 0;
+}';
+			wp_add_inline_style( 'wp-block-library', $custom_css );
+		} );
 	}
 
 	/**
