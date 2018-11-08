@@ -54,7 +54,7 @@ wp.hooks.addFilter(
 export default registerBlockType(
 	'amp/amp-story-grid-layer',
 	{
-		title: __( 'AMP Story Grid Layer' ),
+		title: __( 'Grid Layer' ),
 		category: 'layout',
 		icon: 'grid-view',
 
