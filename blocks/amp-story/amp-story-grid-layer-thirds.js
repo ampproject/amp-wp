@@ -18,7 +18,7 @@ export default registerBlockType(
 	{
 		title: __( 'Thirds Layer', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-grid-layer-thirds'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-grid-layer-thirds' ],
 		parent: [ 'amp/amp-story-page' ],
 		attributes: getGridLayerAttributes(),
 		inserter: false,

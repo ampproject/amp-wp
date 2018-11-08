@@ -18,7 +18,7 @@ export default registerBlockType(
 	{
 		title: __( 'Vertical Layer', 'amp' ),
 		category: 'layout',
-		icon: BLOCK_ICONS['amp/amp-story-grid-layer-vertical'],
+		icon: BLOCK_ICONS[ 'amp/amp-story-grid-layer-vertical' ],
 		parent: [ 'amp/amp-story-page' ],
 		attributes: getGridLayerAttributes(),
 		inserter: false,
