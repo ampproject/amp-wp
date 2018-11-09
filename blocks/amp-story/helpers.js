@@ -49,13 +49,13 @@ export const ALLOWED_BLOCKS = [
 ];
 
 export const BLOCK_ICONS = {
-	'amp/amp-story-page': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-cta-layer': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-grid-layer-horizontal': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-grid-layer-vertical': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-grid-layer-thirds': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-grid-layer-background-image': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
-	'amp/amp-story-grid-layer-background-video': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>
+	'amp/amp-story-page': <svg id="story-page-icon" viewBox="0 0 24 24"><g id="icon" fill="#181D21"><path id="page" d="M18.4 21H5.6V3h7.8l5 4.9V21zM7.1 19.5h9.8V8.6l-4-4.1H7.1v15z"/><path id="corner" d="M11.5 5.4v4.3h4.4"/></g></svg>,
+	'amp/amp-story-cta-layer': <svg id="cta-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path id="page_1_" d="M5.6 3v18h12.8V3H5.6zm11.3 16.5H7.1v-3.9h9.8v3.9zm-9.8-5.4V4.5h9.8v9.6H7.1z"/><path id="action" d="M9.1 16.8h5.8v1.5H9.1v-1.5z"/></g></svg>,
+	'amp/amp-story-grid-layer-horizontal': <svg id="horizontal-layer-icon" viewBox="0 0 24 24"><g id="icon" fill="#181D21"><path id="page" d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path d="M8.8 6H11v12H8.8V6z"/></g></svg>,
+	'amp/amp-story-grid-layer-vertical': <svg id="vertical-layer-icon" viewBox="0 0 24 24"><g id="icon" fill="#181D21"><path id="page" d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path d="M15.4 6.4v2.2H8.6V6.4h6.8z"/></g></svg>,
+	'amp/amp-story-grid-layer-thirds': <svg id="thirds-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path id="page_1_" d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path d="M15.3 6.5v2.2H8.5V6.5h6.8zm0 4.4v2.2H8.5v-2.2h6.8zm0 4.3v2.2H8.5v-2.2h6.8z"/></g></svg>,
+	'amp/amp-story-grid-layer-background-image': <svg id="image-fill-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path id="mountains" d="M8.2 14.1L10 11l1.4 2 1.9-3.1 2.3 4.2H8.2z"/></g></svg>,
+	'amp/amp-story-grid-layer-background-video': <svg id="video-fill-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path id="page_1_" d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path id="arrow_1_" d="M12 8.8c-1.8 0-3.2 1.4-3.2 3.2s1.4 3.2 3.2 3.2 3.2-1.4 3.2-3.2-1.4-3.2-3.2-3.2zm-1.3 4.8v-3.2l3.2 1.7c.1 0-3.2 1.5-3.2 1.5z"/></g></svg>
 };
 
 /**

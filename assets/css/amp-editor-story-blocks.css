@@ -157,7 +157,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 
 .editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
 .editor-block-list__layout div[data-amp-type="grid"].is-selected-parent ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
+.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
 .editor-block-list__layout div[data-amp-type="grid"].is-selected-parent ~ div[data-type="amp/amp-story-cta-layer"]{
 	display: none;
 }
