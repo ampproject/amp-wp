@@ -1,5 +1,8 @@
 
-const { __, sprintf } = wp.i18n;
+const { __ } = wp.i18n;
+const {
+	getBlockType
+} = wp.blocks;
 const { Component } = wp.element;
 const { Button } = wp.components;
 const {
@@ -34,32 +37,32 @@ class BlockSelector extends Component {
 		let hasCtaLayer = false;
 
 		window.lodash.forEachRight( rootBlock.innerBlocks, function( block, index ) {
-			let template = ! block.attributes.template ? 'vertical' : block.attributes.template;
+			let template = 'vertical';
+			if ( 'amp/amp-story-grid-layer-background-image' === block.name || 'amp/amp-story-grid-layer-background-video' === block.name ) {
+				template = 'fill';
+			} else if ( 'amp/amp-story-grid-layer-thirds' === block.name ) {
+				template = 'thirds';
+			} else if ( 'amp/amp-story-grid-layer-horizontal' === block.name ) {
+				template = 'horizontal';
+			}
 			let className = 'component-editor__selector template-' + template;
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
 			}
 
-			let title = sprintf( __( 'Layer %d ', 'amp' ), index + 1 );
+			let blockType = getBlockType( block.name );
+
 			if ( 'amp/amp-story-cta-layer' === block.name ) {
-				title = __( 'CTA Layer', 'amp' );
 				hasCtaLayer = true;
 			}
+
 			links.push(
 				<li className={ className } key={ 'selector-' + index }>
 					<Button id={ block.clientId } onClick={ ( e ) => {
 						e.stopPropagation();
-
-						// @todo This selects the first inner child instead for some reason. Note that this also creates a new paragraph as the first child is it doesn't exist.
 						selectBlock( block.clientId );
-
-						// @todo This is a temporary workaround for selecting the correct block. Remove when possible.
-						let timeout = 1;
-						setTimeout( function() {
-							selectBlock( block.clientId );
-						}, timeout );
 					}}>
-						{ title }
+						{ blockType.title.replace( 'Layer', '' ).trim() }
 					</Button>
 				</li>
 			);

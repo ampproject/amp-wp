@@ -64,7 +64,7 @@ class AMP_Story_Post_Type {
 						array(),
 						array(
 							array(
-								'amp/amp-story-grid-layer',
+								'amp/amp-story-grid-layer-vertical',
 								array(),
 								array(
 									array(

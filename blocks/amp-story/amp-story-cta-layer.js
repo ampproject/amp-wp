@@ -1,4 +1,7 @@
-import { getAmpStoryAnimationControls } from './helpers';
+import {
+	getAmpStoryAnimationControls,
+	BLOCK_ICONS
+} from './helpers';
 
 const { __ } = wp.i18n;
 const {
@@ -52,7 +55,7 @@ export default registerBlockType(
 	{
 		title: __( 'CTA Layer', 'amp' ),
 		category: 'layout',
-		icon: 'grid-view',
+		icon: BLOCK_ICONS[ 'amp/amp-story-cta-layer' ],
 		parent: [ 'amp/amp-story-page' ],
 
 		attributes: {

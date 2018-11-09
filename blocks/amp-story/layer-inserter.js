@@ -64,6 +64,13 @@ class LayerInserter extends Component {
 		}
 
 		const onInsertBlock = this.onInsertBlock;
+		const gridLayers = [
+			'amp/amp-story-grid-layer-horizontal',
+			'amp/amp-story-grid-layer-vertical',
+			'amp/amp-story-grid-layer-thirds',
+			'amp/amp-story-grid-layer-background-image',
+			'amp/amp-story-grid-layer-background-video'
+		];
 
 		return (
 			<Dropdown
@@ -74,7 +81,7 @@ class LayerInserter extends Component {
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<IconButton
 						icon="insert"
-						label={ __( 'Add new layer' ) }
+						label={ __( 'Add new layer', 'amp' ) }
 						onClick={ onToggle }
 						className="editor-inserter__amp-inserter"
 						aria-haspopup="true"
@@ -84,7 +91,7 @@ class LayerInserter extends Component {
 				) }
 				renderContent={ ( { onClose } ) => {
 					const onSelect = ( item ) => {
-						if ( ! hasCtaLayer || 'amp/amp-story-grid-layer' === item.name ) {
+						if ( ! hasCtaLayer || gridLayers.includes( item.name ) ) {
 							onInsertBlock( item, rootClientId );
 							onClose();
 						}
@@ -92,9 +99,12 @@ class LayerInserter extends Component {
 
 					// @todo If CTA layer is already added, don't display it here.
 					items = [
-						getBlockType( 'amp/amp-story-grid-layer' ),
 						getBlockType( 'amp/amp-story-cta-layer' )
 					];
+
+					_.each( gridLayers, function( layer ) {
+						items.push( getBlockType( layer ) );
+					} );
 
 					const listClassName = 'editor-block-types-list' + ( hasCtaLayer ? ' amp-story-has-cta-layer' : '' );
 
@@ -104,7 +114,7 @@ class LayerInserter extends Component {
 								className="editor-inserter__results"
 								tabIndex="0"
 								role="region"
-								aria-label={ __( 'Available block types' ) }
+								aria-label={ __( 'Available block types', 'amp' ) }
 							>
 								<ul role="list" className={ listClassName }>
 									{ items.map( ( item ) => {
