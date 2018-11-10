@@ -1599,7 +1599,15 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_meta_boxes() {
 		remove_meta_box( 'submitdiv', self::POST_TYPE_SLUG, 'side' );
 		remove_meta_box( 'slugdiv', self::POST_TYPE_SLUG, 'normal' );
-		add_meta_box( self::STATUS_META_BOX, __( 'Status', 'amp' ), array( __CLASS__, 'print_status_meta_box' ), self::POST_TYPE_SLUG, 'side' );
+		add_meta_box(
+			self::STATUS_META_BOX,
+			__( 'Status', 'amp' ),
+			array( __CLASS__, 'print_status_meta_box' ),
+			self::POST_TYPE_SLUG,
+			'side',
+			'default',
+			array( '__back_compat_meta_box' => true )
+		);
 	}
 
 	/**
