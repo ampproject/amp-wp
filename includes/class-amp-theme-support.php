@@ -308,6 +308,7 @@ class AMP_Theme_Support {
 				'adminUrl'          => admin_url( '/' ),
 				'ampQueryVar'       => amp_get_slug(),
 				'componentQueryVar' => self::APP_SHELL_COMPONENT_QUERY_VAR,
+				'isOuterAppShell'   => 'outer' === $requested_app_shell_component,
 			);
 			wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
 		}

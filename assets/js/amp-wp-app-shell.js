@@ -19,6 +19,10 @@
 		document.body.addEventListener( 'submit', handleSubmit );
 
 		window.addEventListener( 'popstate', handlePopState );
+
+		if ( ampAppShell.isOuterAppShell ) {
+			loadUrl( location.href );
+		}
 	}
 
 	/**
