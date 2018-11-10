@@ -296,6 +296,13 @@ class AMP_Theme_Support {
 			);
 		}
 
+		// @todo This query param should be standardized and then this can be handled in the same place as WP_Service_Worker_Navigation_Routing_Component::filter_title_for_streaming_header().
+		if ( 'outer' === $requested_app_shell_component ) {
+			add_filter( 'pre_get_document_title', function() {
+				return __( 'Loading...', 'amp' );
+			} );
+		}
+
 		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
 		if ( ! is_amp_endpoint() && 'inner' !== $requested_app_shell_component ) {
 			wp_enqueue_script( 'amp-shadow' );
