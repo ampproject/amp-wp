@@ -57,6 +57,7 @@ class AMP_Theme_Support {
 	/**
 	 * Query var for requesting the inner or outer app shell.
 	 *
+	 * @todo This can go into the AMP_Service_Worker class or rather an AMP_App_Shell class.
 	 * @var string
 	 */
 	const APP_SHELL_COMPONENT_QUERY_VAR = 'amp_app_shell_component';
@@ -286,15 +287,8 @@ class AMP_Theme_Support {
 
 		$requested_app_shell_component = self::get_requested_app_shell_component();
 
-		// @todo Prevent showing admin bar in outer app shell?
-		if ( ! is_amp_endpoint() && 'inner' === $requested_app_shell_component ) {
-			// @todo For non-outer
-			wp_die(
-				esc_html__( 'Inner app shell can only be requested of the AMP version (thus requires paired mode).', 'amp' ),
-				esc_html__( 'AMP Inner App Shell Problem', 'amp' ),
-				array( 'response' => 400 )
-			);
-		} elseif ( is_amp_endpoint() && 'outer' === $requested_app_shell_component ) {
+		// When inner app shell is requested, it is always an AMP request. Do not allow AMP when getting outer app shell for now (but this should be allowed in the future).
+		if ( is_amp_endpoint() && 'outer' === $requested_app_shell_component ) {
 			wp_die(
 				esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
 				esc_html__( 'AMP Outer App Shell Problem', 'amp' ),

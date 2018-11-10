@@ -258,10 +258,17 @@ function is_amp_endpoint() {
 		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
 	}
 
+	$support_args      = AMP_Theme_Support::get_theme_support_args();
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
 		||
 		false !== get_query_var( amp_get_slug(), false )
+		||
+		(
+			isset( $support_args['app_shell'] )
+			&&
+			'inner' === AMP_Theme_Support::get_requested_app_shell_component()
+		)
 	);
 
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
