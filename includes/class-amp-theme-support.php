@@ -148,6 +148,7 @@ class AMP_Theme_Support {
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+		add_action( 'parse_query', array( __CLASS__, 'init_app_shell' ), 9 );
 
 		/*
 		 * Note that wp action is use instead of template_redirect because some themes/plugins output
@@ -241,8 +242,6 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
-		self::init_app_shell();
-
 		if ( ! is_amp_endpoint() ) {
 
 			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
@@ -288,12 +287,17 @@ class AMP_Theme_Support {
 		$requested_app_shell_component = self::get_requested_app_shell_component();
 
 		// When inner app shell is requested, it is always an AMP request. Do not allow AMP when getting outer app shell for now (but this should be allowed in the future).
-		if ( is_amp_endpoint() && 'outer' === $requested_app_shell_component ) {
-			wp_die(
-				esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
-				esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
-				array( 'response' => 400 )
-			);
+		if ( 'outer' === $requested_app_shell_component ) {
+			add_action( 'template_redirect', function() {
+				if ( ! is_amp_endpoint() ) {
+					return;
+				}
+				wp_die(
+					esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+					esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+					array( 'response' => 400 )
+				);
+			} );
 		}
 
 		// @todo This query param should be standardized and then this can be handled in the same place as WP_Service_Worker_Navigation_Routing_Component::filter_title_for_streaming_header().
@@ -304,20 +308,27 @@ class AMP_Theme_Support {
 		}
 
 		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
-		if ( ! is_amp_endpoint() && 'inner' !== $requested_app_shell_component ) {
-			wp_enqueue_script( 'amp-shadow' );
-			wp_enqueue_script( 'amp-wp-app-shell' );
+		if ( 'inner' !== $requested_app_shell_component ) {
+			add_action(
+				'wp_enqueue_scripts',
+				function() use ( $requested_app_shell_component ) {
+					if ( is_amp_endpoint() ) {
+						return;
+					}
+					wp_enqueue_script( 'amp-shadow' );
+					wp_enqueue_script( 'amp-wp-app-shell' );
 
-			// @todo The exports will eventually need to vary the precached app shell.
-			$exports = array(
-				'contentElementId'  => self::APP_SHELL_CONTENT_ELEMENT_ID,
-				'homeUrl'           => home_url( '/' ),
-				'adminUrl'          => admin_url( '/' ),
-				'ampQueryVar'       => amp_get_slug(),
-				'componentQueryVar' => self::APP_SHELL_COMPONENT_QUERY_VAR,
-				'isOuterAppShell'   => 'outer' === $requested_app_shell_component,
+					// @todo The exports will eventually need to vary the precached app shell.
+					$exports = array(
+						'contentElementId'  => AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID,
+						'homeUrl'           => home_url( '/' ),
+						'adminUrl'          => admin_url( '/' ),
+						'componentQueryVar' => AMP_Theme_Support::APP_SHELL_COMPONENT_QUERY_VAR,
+						'isOuterAppShell'   => 'outer' === $requested_app_shell_component,
+					);
+					wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
+				}
 			);
-			wp_add_inline_script( 'amp-wp-app-shell', sprintf( 'var ampAppShell = %s;', wp_json_encode( $exports ) ), 'before' );
 		}
 	}
 

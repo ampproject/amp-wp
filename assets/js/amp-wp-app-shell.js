@@ -124,7 +124,6 @@
 	 */
 	function fetchShadowDocResponse( url ) {
 		const ampUrl = new URL( url );
-		ampUrl.searchParams.set( ampAppShell.ampQueryVar, '1' );
 		ampUrl.searchParams.set( ampAppShell.componentQueryVar, 'inner' );
 
 		return fetch( ampUrl.toString(), {
@@ -178,10 +177,24 @@
 				 */
 				currentShadowDoc = AMP.attachShadowDocAsStream( newContainer, url, {} );
 
+				// @todo If it is not an AMP document, then the loaded document needs to break out of the app shell. This should be done in readChunk() below.
 				currentShadowDoc.ampdoc.whenReady().then( () => {
+					let currentUrl;
+					if ( currentShadowDoc.canonicalUrl ) {
+						currentUrl = new URL( currentShadowDoc.canonicalUrl );
+
+						// Prevent updating the URL if the canonical URL is for the error template.
+						// @todo The rel=canonical link should not be output for these templates.
+						if ( currentUrl.searchParams.has( 'wp_error_template' ) ) {
+							currentUrl = currentUrl.href = url;
+						}
+					} else {
+						currentUrl = new URL( url );
+					}
+
 					// Update the nav menu classes if the final URL has redirected somewhere else.
-					if ( currentShadowDoc.canonicalUrl !== url.toString() ) {
-						updateNavMenuClasses( currentShadowDoc.canonicalUrl );
+					if ( currentUrl.toString() !== url.toString() ) {
+						updateNavMenuClasses( currentUrl );
 					}
 
 					// @todo Improve styling of header when transitioning between home and non-home.
@@ -193,7 +206,7 @@
 						history.pushState(
 							{},
 							currentShadowDoc.title,
-							currentShadowDoc.canonicalUrl
+							currentUrl.toString()
 						);
 					}
 
