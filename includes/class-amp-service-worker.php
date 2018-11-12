@@ -78,6 +78,20 @@ class AMP_Service_Worker {
 					return $blacklist_patterns;
 				}
 			);
+
+			// Make sure the offline template is added to list of templates in AMP.
+			add_filter(
+				'amp_supportable_templates',
+				function( $supportable_templates ) {
+					if ( ! isset( $supportable_templates['is_offline'] ) ) {
+						$supportable_templates['is_offline'] = array(
+							'label' => __( 'Offline', 'amp' ),
+						);
+					}
+					return $supportable_templates;
+				},
+				1000
+			);
 		}
 	}
 
