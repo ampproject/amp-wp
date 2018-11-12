@@ -258,7 +258,20 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				)
 			] );
 
-			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
+			var options = {
+				id: 'amp-errors-notice'
+			};
+			if ( ampValidity.review_link ) {
+				options.actions = [
+					{
+						label: wp.i18n.__( 'Review issues', 'amp' ),
+						url: ampValidity.review_link,
+					}
+				];
+			}
+
+			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, options );
+			module.validationWarningNoticeId = options.id;
 		},
 
 		/**
@@ -303,7 +316,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		resetWarningNotice: function resetWarningNotice() {
 			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				wp.data.dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
 				module.validationWarningNoticeId = null;
 			}
 		},
