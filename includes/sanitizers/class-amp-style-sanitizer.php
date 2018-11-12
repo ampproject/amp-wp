@@ -2063,6 +2063,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 									empty( $parsed_selector['tags'] )
 									||
 									0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+									||
+									0 === count( array_diff( $parsed_selector['tags'], $stylesheet_set['cdata_spec']['css_spec']['allowed_at_rules'] ) )
 								)
 							)
 						);
