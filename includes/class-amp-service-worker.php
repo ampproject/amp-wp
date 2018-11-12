@@ -2,8 +2,6 @@
 /**
  * AMP Service Workers.
  *
- * NOTE: This functionality will eventually be moved to the AMP plugin. It exists here now to facilitate iteration on the PWA plugin's API.
- *
  * @package AMP
  * @since 1.0
  */
@@ -11,7 +9,7 @@
 /**
  * Class AMP_Service_Worker.
  *
- * @todo It would seem preferable for this class to exted WP_Service_Worker_Base_Integration. However, to do so we'll have to break out methods for query_vars, parse_request, and wp actions.
+ * @todo It would seem preferable for this class to extend WP_Service_Worker_Base_Integration. However, to do so we'll have to break out methods for query_vars, parse_request, and wp actions.
  */
 class AMP_Service_Worker {
 

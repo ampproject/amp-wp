@@ -318,7 +318,6 @@ class AMP_Theme_Support {
 					wp_enqueue_script( 'amp-shadow' );
 					wp_enqueue_script( 'amp-wp-app-shell' );
 
-					// @todo The exports will eventually need to vary the precached app shell.
 					$exports = array(
 						'contentElementId'  => AMP_Theme_Support::APP_SHELL_CONTENT_ELEMENT_ID,
 						'homeUrl'           => home_url( '/' ),
