@@ -145,7 +145,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -249,29 +249,20 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
 
-			noticeElement = wp.element.createElement( 'p', {}, [
-				noticeMessage + ' ',
-				ampValidity.review_link && wp.element.createElement(
-					'a',
-					{ key: 'review_link', href: ampValidity.review_link, target: '_blank' },
-					wp.i18n.__( 'Review issues', 'amp' )
-				)
-			] );
-
-			var options = {
+			noticeOptions = {
 				id: 'amp-errors-notice'
 			};
 			if ( ampValidity.review_link ) {
-				options.actions = [
+				noticeOptions.actions = [
 					{
 						label: wp.i18n.__( 'Review issues', 'amp' ),
-						url: ampValidity.review_link,
+						url: ampValidity.review_link
 					}
 				];
 			}
 
-			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, options );
-			module.validationWarningNoticeId = options.id;
+			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			module.validationWarningNoticeId = noticeOptions.id;
 		},
 
 		/**
