@@ -162,6 +162,10 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
+	global $amp_service_worker;
+	$amp_service_worker = new AMP_Service_Worker();
+	$amp_service_worker->init();
+
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
