@@ -150,7 +150,7 @@
 			cancelable: true,
 			detail: {
 				previousUrl,
-				url
+				url: String( url )
 			}
 		} );
 		if ( ! window.dispatchEvent( navigateEvent ) ) {
@@ -307,7 +307,7 @@
 
 		// Re-add class names to items generated from nav menus.
 		for ( const link of document.querySelectorAll( '.menu-item > a[href]' ) ) {
-			if ( link.href !== url.href ) {
+			if ( link.href !== queriedUrl.href ) {
 				continue;
 			}
 
@@ -354,7 +354,7 @@
 
 		// Re-add class names to items generated from page listings.
 		for ( const link of document.querySelectorAll( '.page_item > a[href]' ) ) {
-			if ( link.href !== url.href ) {
+			if ( link.href !== queriedUrl.href ) {
 				continue;
 			}
 			let depth = 0;
