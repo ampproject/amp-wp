@@ -142,7 +142,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * Handles admin notice for featured image.
 		 */
 		handleStoryPortrait: function handleMissingFeaturedImage() {
-			var currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			var currentPost = wp.data.select( 'core/editor' ).getCurrentPost(),
+				storyErrorNoticeID = 'amp-story-errors-notice';
 			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
 				return;
 			}
@@ -153,11 +154,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						'warning',
 						wp.i18n.__( 'Featured image is used as poster-portrait-src and is mandatory', 'amp' ),
 						{
-							id: 'amp-story-errors-notice'
+							id: storyErrorNoticeID
 						}
 					);
 				} else if ( module.hasPortraitSrcNotice && currentPost.featured_media ) {
-					wp.data.dispatch( 'core/notices' ).removeNotice( 'amp-story-errors-notice' );
+					wp.data.dispatch( 'core/notices' ).removeNotice( storyErrorNoticeID );
 					module.hasPortraitSrcNotice = null;
 				}
 			}

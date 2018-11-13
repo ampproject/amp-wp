@@ -59,6 +59,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	width: 100%;
 }
 
+.editor-block-list__layout div[data-amp-type="grid"] .components-toolbar button[aria-label="Link"] {
+	display: none;
+}
+
 .amp-grid-template .editor-block-list__layout:first-of-type {
 	display: grid;
 	padding: 68px 32px 32px;
