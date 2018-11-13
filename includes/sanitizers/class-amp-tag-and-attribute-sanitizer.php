@@ -665,6 +665,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
+			$this->remove_disallowed_children( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+		}
+
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return false;
 		}
@@ -1772,6 +1776,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$parsed_specs[ $spec_name ] = compact( 'tag_name', 'attributes' );
 		return $parsed_specs[ $spec_name ];
+	}
+
+	/**
+	 * Loop through node's children and remove the ones that are not whitelisted.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $allowed_descendants List of allowed descendant tags.
+	 */
+	private function remove_disallowed_children( $node, $allowed_descendants ) {
+		foreach ( $node->childNodes as $child ) {
+			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) ) {
+				$this->remove_node( $child );
+				continue;
+			}
+			$this->remove_disallowed_children( $child, $allowed_descendants );
+		}
 	}
 
 	/**
