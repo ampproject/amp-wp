@@ -124,6 +124,12 @@ div[data-amp-position="lower-third"] {
 	right: 0;
 	top: 0;
 	width: auto;
+	display: flex;
+}
+
+.amp-grid-template-fill .editor-block-list__block-edit,
+.amp-grid-template-fill .editor-block-list__block-edit > div {
+	display: flex;
 }
 
 .amp-grid-template-fill > :not(:first-child) {
