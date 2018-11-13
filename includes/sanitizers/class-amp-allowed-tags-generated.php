@@ -3897,6 +3897,16 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-story',
 					),
+					'child_tags' => array(
+						'amp-analytics',
+						'amp-consent',
+						'amp-geo',
+						'amp-pixel',
+						'amp-story-access',
+						'amp-story-auto-ads',
+						'amp-story-bookend',
+						'amp-story-page',
+					),
 				),
 			),
 		),

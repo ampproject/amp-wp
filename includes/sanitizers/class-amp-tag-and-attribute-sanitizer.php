@@ -665,12 +665,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
-			$this->remove_disallowed_children( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
-		}
-
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
 			return false;
+		}
+
+		// @todo Since these are not just validating but sanitizing the descendant tags, should we move these two into a separate method?
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
+			$this->remove_disallowed_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
+		}
+
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
+			$this->remove_disallowed_descendants( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
 		}
 
 		return true;
@@ -1779,12 +1784,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Loop through node's children and remove the ones that are not whitelisted.
+	 * Loop through node's descendants and remove the ones that are not whitelisted.
 	 *
 	 * @param DOMNode $node Node.
 	 * @param array   $allowed_descendants List of allowed descendant tags.
 	 */
-	private function remove_disallowed_children( $node, $allowed_descendants ) {
+	private function remove_disallowed_descendants( $node, $allowed_descendants ) {
 		if ( ! $node->hasChildNodes() ) {
 			return;
 		}
@@ -1793,7 +1798,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$this->remove_node( $child );
 				continue;
 			}
-			$this->remove_disallowed_children( $child, $allowed_descendants );
+			$this->remove_disallowed_descendants( $child, $allowed_descendants );
+		}
+	}
+
+	/**
+	 * Loop through node's children and remove the ones that are not whitelisted.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $allowed_children List of allowed child tags.
+	 */
+	private function remove_disallowed_children( $node, $allowed_children ) {
+		if ( ! $node->hasChildNodes() ) {
+			return;
+		}
+		foreach ( $node->childNodes as $child ) {
+			if ( ! in_array( $child->nodeName, $allowed_children, true ) ) {
+				$this->remove_node( $child );
+				continue;
+			}
 		}
 	}
 
