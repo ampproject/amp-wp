@@ -1785,6 +1785,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array   $allowed_descendants List of allowed descendant tags.
 	 */
 	private function remove_disallowed_children( $node, $allowed_descendants ) {
+		if ( ! $node->hasChildNodes() ) {
+			return;
+		}
 		foreach ( $node->childNodes as $child ) {
 			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) ) {
 				$this->remove_node( $child );
