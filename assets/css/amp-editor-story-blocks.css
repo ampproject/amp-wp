@@ -142,7 +142,14 @@ div[data-amp-position="lower-third"] {
 	height: 533px;
 }
 
-.amp-grid-template-fill .wp-block-image {
+.amp-grid-template-fill .components-disabled {
+	width: 318px;
+	max-height: 533px;
+	overflow: hidden;
+}
+
+.amp-grid-template-fill .wp-block-image,
+.amp-grid-template-fill .wp-block-video {
 	margin-top: 0;
 	margin-bottom: 0;
 }
