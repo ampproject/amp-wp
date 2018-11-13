@@ -127,9 +127,15 @@ div[data-amp-position="lower-third"] {
 	display: flex;
 }
 
-.amp-grid-template-fill .editor-block-list__block-edit,
-.amp-grid-template-fill .editor-block-list__block-edit > div {
+.amp-grid-template-fill .editor-block-list__block-edit {
 	display: flex;
+	flex-direction: column;
+}
+
+.amp-grid-template-fill .editor-block-list__block-edit > div:last-child {
+	display: flex;
+	flex: 1;
+}
 }
 
 .amp-grid-template-fill > :not(:first-child) {
