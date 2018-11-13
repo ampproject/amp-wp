@@ -31,8 +31,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin: auto;
 	max-height: 75vh !important;
 	max-width: 45vh !important;
-	min-width: 320px !important;
-	min-height: 533px;
+	width: 320px !important;
+	height: 533px !important;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
