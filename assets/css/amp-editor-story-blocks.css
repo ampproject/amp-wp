@@ -136,6 +136,23 @@ div[data-amp-position="lower-third"] {
 	display: flex;
 	flex: 1;
 }
+
+.amp-grid-template-fill .components-resizable-box__container {
+	width: 318px;
+	height: 533px;
+}
+
+.amp-grid-template-fill .wp-block-image {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.amp-grid-template-fill .components-resizable-box__container img {
+	object-fit: cover;
+	width: 318px !important;
+	height: 533px !important;
+	max-height: 75vh !important;
+	max-width: 45vh !important;
 }
 
 .amp-grid-template-fill > :not(:first-child) {
