@@ -13,6 +13,8 @@ const {
 	InnerBlocks
 } = wp.editor;
 
+const { hasSelectedInnerBlock } = wp.data.select( 'core/editor' );
+
 const ANIMATION_DEFAULTS = {
 	drop: 1600,
 	'fade-in': 500,
@@ -57,6 +59,16 @@ export const BLOCK_ICONS = {
 	'amp/amp-story-grid-layer-background-image': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>,
 	'amp/amp-story-grid-layer-background-video': <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0V0z" /><path d="M19 13H5v-2h14v2z" /></svg>
 };
+
+/**
+ * Maybe return is-selected-parent class.
+ *
+ * @param {string} clientId Block ID.
+ * @return {string} Class name.
+ */
+export function maybeIsSelectedParentClass( clientId ) {
+	return hasSelectedInnerBlock( clientId, true ) ? 'is-selected-parent' : '';
+}
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -317,7 +329,7 @@ export function editGridLayer( props, type ) {
 				}
 			</PanelBody>
 		</InspectorControls>,
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type }>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type + ' ' + maybeIsSelectedParentClass( props.clientId ) }>
 			<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 		</div>
 	];
@@ -344,7 +356,7 @@ export function editFillLayer( props, template ) {
 				}
 			</PanelBody>
 		</InspectorControls>,
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className='amp-grid-template amp-grid-template-fill'>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill ' + maybeIsSelectedParentClass( props.clientId ) }>
 			<InnerBlocks template={ template } templateLock='all' />
 		</div>
 	];
