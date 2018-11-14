@@ -1795,7 +1795,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		foreach ( $node->childNodes as $child ) {
 			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) ) {
-				$this->remove_node( $child );
+				$this->remove_invalid_child( $child );
 				continue;
 			}
 			$this->remove_disallowed_descendants( $child, $allowed_descendants );
@@ -1814,7 +1814,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		foreach ( $node->childNodes as $child ) {
 			if ( ! in_array( $child->nodeName, $allowed_children, true ) ) {
-				$this->remove_node( $child );
+				$this->remove_invalid_child( $child );
 				continue;
 			}
 		}
