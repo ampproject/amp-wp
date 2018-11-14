@@ -458,7 +458,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			FontSizePicker = wp.components.FontSizePicker,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
-			label = __( 'Use AMP Fit Text' ),
+			label = __( 'Automatically fit text to container', 'amp' ),
 			FONT_SIZES = [
 				{
 					name: 'small',
@@ -702,8 +702,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
 		var text = attributes.text || '',
 			fitTextProps = {
-				layout: 'fixed-height',
-				children: element
+				layout: 'fixed-height'
 			};
 
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
@@ -759,7 +758,19 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( attributes.height ) {
 				fitTextProps.height = attributes.height;
 			}
-			return wp.element.createElement( 'amp-fit-text', fitTextProps );
+			var newProps = {
+				className: element.props.className,
+				style: element.props.style
+			};
+			return wp.element.createElement(
+				element.props.tagName,
+				newProps,
+				wp.element.createElement( 'amp-fit-text', fitTextProps, wp.element.createElement(
+					wp.element.RawHTML,
+					{},
+					attributes.content
+				) )
+			);
 		}
 		return element;
 	};
