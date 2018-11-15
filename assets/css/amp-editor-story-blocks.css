@@ -231,3 +231,34 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 .post-type-amp_story .components-range-control__number {
 	width: 60px;
 }
+
+/* Hide first level block elements with the exception of Page */
+
+.post-type-amp_story .editor-inserter__results .editor-block-types-list button:not( .editor-block-list-item-amp-amp-story-page ) {
+	display: none;
+}
+
+.post-type-amp_story .editor-inserter__results .editor-block-types-list__list-item {
+	margin-bottom: 0;
+}
+
+.post-type-amp_story .editor-inserter__results > .components-panel__body {
+	border: none;
+}
+
+.post-type-amp_story.post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks button, /* Child inserter, first batch. */
+.post-type-amp_story.post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks ~ div button, /* Child inserter, secondary batches. */
+.post-type-amp_story.post-type-amp_story .editor-inserter__results > .editor-block-types-list button /* Side inserter. */
+{
+	display: flex;
+}
+
+.post-type-amp_story.post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks .editor-block-types-list__list-item, /* Child inserter, first batch. */
+.post-type-amp_story.post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks .editor-block-types-list__list-item {
+	margin-bottom: 12px;
+}
+
+/* .post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks .components-panel__body-title, */
+.post-type-amp_story .editor-inserter__results .editor-inserter__child-blocks ~ div .components-panel__body-title {
+	display: block;
+}
