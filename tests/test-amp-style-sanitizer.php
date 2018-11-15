@@ -140,7 +140,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'@page{margin:1cm}body{color:black}',
 				),
-				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
+				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),
 
 			'allowed_at_rules_retained' => array(
