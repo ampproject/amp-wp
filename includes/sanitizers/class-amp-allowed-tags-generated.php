@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 752;
+	private static $spec_file_revision = 757;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -1037,9 +1037,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'autoplay' => array(
-						'value' => array(
-							'',
-						),
+						'value_regex' => '(|[0-9]+)',
 					),
 					'controls' => array(),
 					'delay' => array(
@@ -3292,6 +3290,48 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-powr-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'[data-referrer]' => array(),
+					'autoplay' => array(),
+					'data-account' => array(
+						'mandatory' => true,
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'data-player' => array(
+						'mandatory' => true,
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'data-terms' => array(),
+					'data-video' => array(
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-powr-player',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-powr-player',
+				),
+			),
+		),
 		'amp-reach-player' => array(
 			array(
 				'attr_spec_list' => array(
@@ -3527,6 +3567,43 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'body',
 					'requires_extension' => array(
 						'amp-sidebar',
+					),
+				),
+			),
+		),
+		'amp-skimlinks' => array(
+			array(
+				'attr_spec_list' => array(
+					'custom-tracking-id' => array(
+						'value_regex_casei' => '^.{0,50}$',
+					),
+					'excluded-domains' => array(),
+					'link-selector' => array(),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'publisher-code' => array(
+						'mandatory' => true,
+						'value_regex_casei' => '^[0-9]+X[0-9]+$',
+					),
+					'tracking' => array(
+						'value' => array(
+							'false',
+							'true',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-skimlinks',
 					),
 				),
 			),
@@ -4828,6 +4905,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -4919,6 +4997,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5043,6 +5122,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5326,6 +5406,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5416,6 +5497,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5501,6 +5583,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5590,6 +5673,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5673,6 +5757,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5757,6 +5842,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5859,6 +5945,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5969,6 +6056,7 @@ class AMP_Allowed_Tags_Generated {
 					'filterunits' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6199,6 +6287,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6282,6 +6371,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6368,6 +6458,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6629,6 +6720,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6716,6 +6808,13 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'alt' => array(),
 					'border' => array(),
+					'decoding' => array(
+						'value' => array(
+							'async',
+							'auto',
+							'sync',
+						),
+					),
 					'height' => array(),
 					'ismap' => array(),
 					'longdesc' => array(
@@ -7104,6 +7203,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7191,6 +7291,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7562,6 +7663,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7649,6 +7751,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7738,10 +7841,7 @@ class AMP_Allowed_Tags_Generated {
 							'height' => array(),
 							'initial-scale' => array(),
 							'maximum-scale' => array(),
-							'minimum-scale' => array(
-								'mandatory' => true,
-								'value_double' => 1.0,
-							),
+							'minimum-scale' => array(),
 							'shrink-to-fit' => array(),
 							'user-scalable' => array(),
 							'viewport-fit' => array(),
@@ -8352,6 +8452,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8436,6 +8537,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8553,6 +8655,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8637,6 +8740,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8755,6 +8859,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8864,6 +8969,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -11154,6 +11260,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-powr-player',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-reach-player',
 						'requires_usage' => 2,
@@ -11286,6 +11417,31 @@ class AMP_Allowed_Tags_Generated {
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-sidebar',
 						'requires_usage' => 2,
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-skimlinks',
 						'version' => array(
 							'0.1',
 							'latest',
@@ -11997,6 +12153,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12443,6 +12600,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12535,6 +12693,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12616,6 +12775,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12839,6 +12999,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12973,6 +13134,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13465,6 +13627,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13566,6 +13729,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13670,6 +13834,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),

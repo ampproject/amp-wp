@@ -394,7 +394,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<html lang="en-US" class="no-js">
 			<head>
 				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width">
+				<meta name="viewport" content="maximum-scale=1.0">
 				<?php wp_head(); ?>
 			</head>
 			<body>
@@ -406,10 +406,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$sanitized_html = AMP_Theme_Support::prepare_response( $original_html );
 
 		// Invalid viewport meta tag is not present.
-		$this->assertNotContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
+		$this->assertNotContains( '<meta name="viewport" content="maximum-scale=1.0">', $sanitized_html );
 
 		// Correct viewport meta tag was added.
-		$this->assertContains( '<meta name="viewport" content="width=device-width,minimum-scale=1">', $sanitized_html );
+		$this->assertContains( '<meta name="viewport" content="width=device-width">', $sanitized_html );
 
 		// MathML script was added.
 		$this->assertContains( '<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>', $sanitized_html ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -1170,7 +1170,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$ordered_contains = array(
 			'<html amp="">',
 			'<meta charset="' . get_bloginfo( 'charset' ) . '">',
-			'<meta name="viewport" content="width=device-width,minimum-scale=1">',
+			'<meta name="viewport" content="width=device-width">',
 			'<meta name="generator" content="AMP Plugin',
 			'<title>',
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',

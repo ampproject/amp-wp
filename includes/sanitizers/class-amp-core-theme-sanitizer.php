@@ -147,16 +147,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width',
-							),
-						),
-					),
 				);
 			case 'twentysixteen':
 				return array(
@@ -175,30 +165,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 			case 'twentyseventeen':
 				return array(
 					'removed_unused_css_rules' => true,
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 		}
 		return array();
