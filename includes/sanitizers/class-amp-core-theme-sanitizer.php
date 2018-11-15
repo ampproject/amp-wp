@@ -195,20 +195,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				return array(
 					'removed_unused_css_rules' => true,
 				);
-			case 'twentynineteen':
-				return array(
-					'invalid_attribute'   => array(
-						// @todo The following can be removed once https://github.com/WordPress/twentynineteen/pull/603 is merged.
-						array(
-							'node_name'          => 'onclick',
-							'type'               => 'js_error',
-							'parent_name'        => 'a',
-							'element_attributes' => array(
-								'class' => 'menu-item-link-return',
-							),
-						),
-					),
-				);
 		}
 		return array();
 	}
