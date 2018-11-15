@@ -164,6 +164,40 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_amp_cache_hosts().
+	 *
+	 * @covers AMP_HTTP::get_amp_cache_hosts()
+	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
+	 */
+	public function test_get_amp_cache_hosts() {
+		update_option( 'home', 'https://example.com' );
+		update_option( 'siteurl', 'https://example.org' );
+
+		$hosts = AMP_HTTP::get_amp_cache_hosts();
+
+		$expected = array(
+			'cdn.ampproject.org',
+			'example-org.cdn.ampproject.org',
+			'example-org.amp.cloudflare.com',
+			'example-org.bing-amp.com',
+			'example-com.cdn.ampproject.org',
+			'example-com.amp.cloudflare.com',
+			'example-com.bing-amp.com',
+		);
+		$this->assertEqualSets( $expected, $hosts );
+
+		$extra_allowed_redirect_hosts = array(
+			'example.net',
+			'example.info',
+		);
+
+		$this->assertEqualSets(
+			array_merge( $extra_allowed_redirect_hosts, $expected ),
+			AMP_HTTP::filter_allowed_redirect_hosts( $extra_allowed_redirect_hosts )
+		);
+	}
+
+	/**
 	 * Test send_cors_headers().
 	 *
 	 * @covers AMP_HTTP::send_cors_headers()
