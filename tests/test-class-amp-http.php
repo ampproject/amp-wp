@@ -177,11 +177,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 
 		$expected = array(
 			'cdn.ampproject.org',
-			'bing-amp.com',
 			'example-org.cdn.ampproject.org',
 			'example-org.amp.cloudflare.com',
+			'example-org.bing-amp.com',
 			'example-com.cdn.ampproject.org',
 			'example-com.amp.cloudflare.com',
+			'example-com.bing-amp.com',
 		);
 		$this->assertEqualSets( $expected, $hosts );
 
