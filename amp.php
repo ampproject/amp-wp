@@ -96,34 +96,6 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }
 
-/**
- * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
- *
- * @since 1.0
- */
-function _amp_incorrect_plugin_slug_admin_notice() {
-	$actual_slug = basename( AMP__DIR__ );
-	?>
-	<div class="notice notice-warning">
-		<p>
-			<?php
-			echo wp_kses_post(
-				sprintf(
-					/* translators: %1$s is the current directory name, and %2$s is the required directory name */
-					__( 'You appear to have installed the AMP plugin incorrectly. It is currently installed in the <code>%1$s</code> directory, but it needs to be placed in a directory named <code>%2$s</code>. Please rename the directory. This is important for WordPress plugin auto-updates.', 'amp' ),
-					$actual_slug,
-					'amp'
-				)
-			);
-			?>
-		</p>
-	</div>
-	<?php
-}
-if ( 'amp' !== basename( AMP__DIR__ ) ) {
-	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
-}
-
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
 
