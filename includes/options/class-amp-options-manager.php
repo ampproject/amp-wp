@@ -23,15 +23,16 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = array(
-		'theme_support'           => 'disabled',
-		'supported_post_types'    => array( 'post' ),
-		'analytics'               => array(),
-		'force_sanitization'      => true,
-		'accept_tree_shaking'     => true,
-		'disable_admin_bar'       => false,
-		'all_templates_supported' => true,
-		'supported_templates'     => array( 'is_singular' ),
-		'enable_response_caching' => true,
+		'theme_support'            => 'disabled',
+		'supported_post_types'     => array( 'post' ),
+		'analytics'                => array(),
+		'auto_accept_sanitization' => true,
+		'accept_tree_shaking'      => true,
+		'disable_admin_bar'        => false,
+		'all_templates_supported'  => true,
+		'supported_templates'      => array( 'is_singular' ),
+		'enable_response_caching'  => true,
+		'version'                  => AMP__VERSION,
 	);
 
 	/**
@@ -124,11 +125,16 @@ class AMP_Options_Manager {
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
+
+			// If this option was changed, display a notice with the new template mode.
+			if ( self::get_option( 'theme_support' ) !== $new_options['theme_support'] ) {
+				add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'handle_updated_theme_support_option' ) );
+			}
 		}
 
-		$options['force_sanitization']  = ! empty( $new_options['force_sanitization'] );
-		$options['accept_tree_shaking'] = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']   = ! empty( $new_options['disable_admin_bar'] );
+		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
+		$options['accept_tree_shaking']      = ! empty( $new_options['accept_tree_shaking'] );
+		$options['disable_admin_bar']        = ! empty( $new_options['disable_admin_bar'] );
 
 		// Validate post type support.
 		$options['supported_post_types'] = array();
@@ -239,7 +245,7 @@ class AMP_Options_Manager {
 				continue;
 			}
 
-			$post_type_supported = post_type_supports( $post_type->name, amp_get_slug() );
+			$post_type_supported = post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG );
 			$is_support_elected  = in_array( $post_type->name, $supported_types, true );
 
 			$error = null;
@@ -333,8 +339,6 @@ class AMP_Options_Manager {
 	 *
 	 * Uses the user meta values for the dismissed WP pointers.
 	 * So once the user dismisses this notice, it will never appear again.
-	 *
-	 * @todo: Add the full copy for this notice when it is decided.
 	 */
 	public static function render_welcome_notice() {
 		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
@@ -348,12 +352,15 @@ class AMP_Options_Manager {
 		}
 
 		?>
-		<div class="notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
-			<img src="<?php echo esc_url( amp_get_asset_url( 'images/amp-logo-icon.svg' ) ); ?>" alt="AMP" width="40" height="40" style="float: left; margin: 5px;">
-			<h1><?php esc_html_e( 'Welcome to the AMP for WordPress plugin v1.0', 'amp' ); ?></h1>
-			<p><?php esc_html_e( 'Thank you for installing! Bring the speed and features of the open source AMP project to your site, the WordPress way, complete with the tools to support content authoring and website development.', 'amp' ); ?></p>
-			<h2><?php esc_html_e( 'What&#8217;s New', 'amp' ); ?></h2>
-			<p><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this v1.0 release makes it easier than ever to bring a rich, performant experience to your WordPress site via AMP HTML.', 'amp' ); ?></p>
+		<div class="amp-welcome-notice notice notice-info is-dismissible" id="<?php echo esc_attr( $notice_id ); ?>">
+			<div class="notice-dismiss"></div>
+			<div class="amp-welcome-icon-holder">
+				<img class="amp-welcome-icon" src="<?php echo esc_url( amp_get_asset_url( 'images/amp-welcome-icon.svg' ) ); ?>" alt="<?php esc_html_e( 'Illustration of WordPress running AMP plugin.', 'amp' ); ?>" />
+			</div>
+			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
+			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
+			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
+			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
 		</div>
 
 		<script>
@@ -367,6 +374,30 @@ class AMP_Options_Manager {
 			} );
 		} );
 		</script>
+		<style type="text/css">
+			.amp-welcome-notice {
+				padding: 38px;
+			}
+			.amp-welcome-icon-holder {
+				width: 200px;
+				height: 200px;
+				float: left;
+				margin: 0 38px 38px 0;
+			}
+			.amp-welcome-icon {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+			.amp-welcome-notice h1 {
+				font-weight: bold;
+			}
+			.amp-welcome-notice h3 {
+				font-size: 16px;
+				font-weight: 500;
+			}
+
+		</style>
 		<?php
 	}
 
@@ -423,5 +454,164 @@ class AMP_Options_Manager {
 			&&
 			AMP_Theme_Support::exceeded_cache_miss_threshold()
 		);
+	}
+
+	/**
+	 * Adds a message for an update of the theme support setting.
+	 */
+	public static function handle_updated_theme_support_option() {
+		$template_mode = self::get_option( 'theme_support' );
+
+		// Make sure post type support has been added for sake of amp_admin_get_preview_permalink().
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
+			remove_post_type_support( $post_type, AMP_Post_Type_Support::SLUG );
+		}
+		AMP_Post_Type_Support::add_post_type_support();
+
+		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
+		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
+		if ( $has_theme_support ) {
+			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
+			if ( ! is_array( $theme_support ) ) {
+				$theme_support = array();
+			}
+			$theme_support['paired'] = 'paired' === $template_mode;
+			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
+		} else {
+			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for classic URL.
+		}
+
+		$url = amp_admin_get_preview_permalink();
+
+		$notice_type     = 'updated';
+		$review_messages = array();
+		if ( $url && $has_theme_support ) {
+			$validation = AMP_Validation_Manager::validate_url( $url );
+
+			if ( is_wp_error( $validation ) ) {
+				$review_messages[] = esc_html( sprintf(
+					/* translators: %1$s is the error message, %2$s is the error code */
+					__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
+					$validation->get_error_message(),
+					$validation->get_error_code()
+				) );
+
+				$error_message = $validation->get_error_message();
+				if ( $error_message ) {
+					$review_messages[] = $error_message;
+				} else {
+					/* translators: %s is the error code */
+					$review_messages[] = esc_html( sprintf( __( 'Error code: %s.', 'amp' ), $validation->get_error_code() ) );
+				}
+				$notice_type = 'error';
+			} elseif ( is_array( $validation ) ) {
+				$new_errors      = 0;
+				$rejected_errors = 0;
+
+				$errors = wp_list_pluck( $validation['results'], 'error' );
+				foreach ( $errors as $error ) {
+					$sanitization    = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+					$is_new_rejected = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['status'];
+					if ( $is_new_rejected || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status'] ) {
+						$new_errors++;
+					}
+					if ( $is_new_rejected || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['status'] ) {
+						$rejected_errors++;
+					}
+				}
+
+				$invalid_url_post_id    = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, $url );
+				$invalid_url_screen_url = ! is_wp_error( $invalid_url_post_id ) ? get_edit_post_link( $invalid_url_post_id, 'raw' ) : null;
+
+				if ( $rejected_errors > 0 ) {
+					$notice_type = 'error';
+
+					$message = wp_kses_post(
+						sprintf(
+							/* translators: %s is count of rejected errors */
+							_n(
+								'However, AMP is not yet available due to %s validation error (for one URL at least).',
+								'However, AMP is not yet available due to %s validation errors (for one URL at least).',
+								number_format_i18n( $rejected_errors ),
+								'amp'
+							),
+							$rejected_errors,
+							esc_url( $invalid_url_screen_url )
+						)
+					);
+
+					if ( $invalid_url_screen_url ) {
+						$message .= ' ' . wp_kses_post(
+							sprintf(
+								/* translators: %s is URL to review issues */
+								_n(
+									'<a href="%s">Review Issue</a>.',
+									'<a href="%s">Review Issues</a>.',
+									$rejected_errors,
+									'amp'
+								),
+								esc_url( $invalid_url_screen_url )
+							)
+						);
+					}
+
+					$review_messages[] = $message;
+				} else {
+					$message = wp_kses_post(
+						sprintf(
+							/* translators: %s is an AMP URL */
+							__( 'View an <a href="%s">AMP version of your site</a>.', 'amp' ),
+							esc_url( $url )
+						)
+					);
+
+					if ( $new_errors > 0 && $invalid_url_screen_url ) {
+						$message .= ' ' . wp_kses_post(
+							sprintf(
+								/* translators: %1$s is URL to review issues, %2$s is count of new errors */
+								_n(
+									'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
+									'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',
+									$new_errors,
+									'amp'
+								),
+								esc_url( $invalid_url_screen_url ),
+								number_format_i18n( $new_errors )
+							)
+						);
+					}
+
+					$review_messages[] = $message;
+				}
+			}
+		}
+
+		switch ( $template_mode ) {
+			case 'native':
+				$message = esc_html__( 'Native mode activated!', 'amp' );
+				if ( $review_messages ) {
+					$message .= ' ' . join( ' ', $review_messages );
+				}
+				break;
+			case 'paired':
+				$message = esc_html__( 'Paired mode activated!', 'amp' );
+				if ( $review_messages ) {
+					$message .= ' ' . join( ' ', $review_messages );
+				}
+				break;
+			case 'disabled':
+				$message = wp_kses_post(
+					sprintf(
+						/* translators: %s is an AMP URL */
+						__( 'Classic mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Paired mode.', 'amp' ),
+						esc_url( $url )
+					)
+				);
+				break;
+		}
+
+		if ( isset( $message ) ) {
+			add_settings_error( self::OPTION_NAME, 'template_mode_updated', $message, $notice_type );
+		}
 	}
 }

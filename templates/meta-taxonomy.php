@@ -3,7 +3,7 @@
 	<div class="amp-wp-meta amp-wp-tax-category">
 		<?php
 		/* translators: %s: list of categories. */
-		echo esc_html( sprintf( __( 'Categories: %s', 'amp' ), $categories ) );
+		printf( esc_html__( 'Categories: %s', 'amp' ), $categories ); // WPCS: XSS OK.
 		?>
 	</div>
 <?php endif; ?>
@@ -19,7 +19,7 @@ $tags = get_the_tag_list(
 	<div class="amp-wp-meta amp-wp-tax-tag">
 		<?php
 		/* translators: %s: list of tags. */
-		echo esc_html( sprintf( __( 'Tags: %s', 'amp' ), $tags ) );
+		printf( esc_html__( 'Tags: %s', 'amp' ), $tags ); // WPCS: XSS OK.
 		?>
 	</div>
 <?php endif; ?>

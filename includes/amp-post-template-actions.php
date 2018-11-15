@@ -137,12 +137,3 @@ function amp_post_template_add_analytics_data() {
 	$analytics = amp_add_custom_analytics();
 	amp_print_analytics( $analytics );
 }
-
-/**
- * Add generator metadata.
- *
- * @since 6.0
- */
-function amp_add_generator_metadata() {
-	printf( '<meta name="generator" content="%s" />', esc_attr( 'AMP Plugin v' . AMP__VERSION ) );
-}

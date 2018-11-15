@@ -519,8 +519,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Remove all invalid attributes.
-		foreach ( $disallowed_attributes as $disallowed_attribute ) {
-			$this->remove_invalid_attribute( $node, $disallowed_attribute );
+		if ( ! empty( $disallowed_attributes ) ) {
+			/*
+			 * Capture all element attributes up front so that differing validation errors result when
+			 * one invalid attribute is accepted but the others are still rejected.
+			 */
+			$validation_error = array(
+				'element_attributes' => array(),
+			);
+			foreach ( $node->attributes as $attribute ) {
+				$validation_error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+			foreach ( $disallowed_attributes as $disallowed_attribute ) {
+				$this->remove_invalid_attribute( $node, $disallowed_attribute, $validation_error );
+			}
 		}
 
 		// Add required AMP component scripts if the element is still in the document.
@@ -1589,7 +1601,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
 		$attr_name = $attr_node->nodeName;
-		if ( isset( $attr_spec_list[ $attr_name ] ) || 'data-' === substr( $attr_name, 0, 5 ) ) {
+		if (
+			isset( $attr_spec_list[ $attr_name ] )
+			||
+			'data-' === substr( $attr_name, 0, 5 )
+			||
+			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
+			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )
+		) {
 			return true;
 		}
 

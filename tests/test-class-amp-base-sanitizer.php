@@ -224,7 +224,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 			'type'            => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 		);
 
-		// Test forcibly sanitized with filter, resulting in no validation error being surfaced.
+		// Test forcibly sanitized with filter.
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(

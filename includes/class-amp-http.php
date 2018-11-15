@@ -405,7 +405,7 @@ class AMP_HTTP {
 	public static function filter_comment_post_redirect( $url, $comment ) {
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
 
-		// Cause a page refresh if amp-live-list is not implemented for comments via add_theme_support( 'amp', array( 'comments_live_list' => true ) ).
+		// Cause a page refresh if amp-live-list is not implemented for comments via add_theme_support( AMP_Theme_Support::SLUG, array( 'comments_live_list' => true ) ).
 		if ( empty( $theme_support['comments_live_list'] ) ) {
 			/*
 			 * Add the comment ID to the URL to force AMP to refresh the page.
