@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 751;
+	private static $spec_file_revision = 752;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -1331,6 +1331,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-date-picker' => array(
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1416,6 +1418,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1497,6 +1501,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1588,6 +1594,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -12265,6 +12273,7 @@ class AMP_Allowed_Tags_Generated {
 							'font-face',
 							'keyframes',
 							'media',
+							'page',
 							'supports',
 						),
 						'declaration' => array(),
