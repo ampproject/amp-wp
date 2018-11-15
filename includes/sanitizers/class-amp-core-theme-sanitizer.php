@@ -55,7 +55,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentynineteen'  => array(
 			'dequeue_scripts' => array(
 				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
+				'twentynineteen-priority-menu',
 				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
+			),
+			'remove_actions'  => array(
+				'wp_print_footer_scripts' => array(
+					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
+				),
 			),
 		),
 
@@ -191,31 +197,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			case 'twentynineteen':
 				return array(
-					// @todo Eliminate this once https://github.com/ampproject/amphtml/issues/18896 is resolved and deployed.
-					'invalid_element'     => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 					'invalid_attribute'   => array(
-						// @todo This can be removed once https://github.com/ampproject/amphtml/pull/19128 is live.
-						array(
-							'node_name' => 'focusable',
-						),
-						// @todo The following can be removed once https://github.com/WordPress/twentynineteen/pull/479 is merged.
-						array(
-							'node_name'          => 'onclick',
-							'type'               => 'js_error',
-							'parent_name'        => 'a',
-							'element_attributes' => array(
-								'class' => 'mobile-submenu-expand',
-							),
-						),
+						// @todo The following can be removed once https://github.com/WordPress/twentynineteen/pull/603 is merged.
 						array(
 							'node_name'          => 'onclick',
 							'type'               => 'js_error',
@@ -223,12 +206,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							'element_attributes' => array(
 								'class' => 'menu-item-link-return',
 							),
-						),
-					),
-					'illegal_css_at_rule' => array(
-						// @todo Eliminate this once https://github.com/ampproject/amphtml/pull/17481 is live.
-						array(
-							'at_rule' => 'page',
 						),
 					),
 				);
