@@ -61,7 +61,7 @@ export default registerBlockType(
 			},
 			ampLayout: {
 				type: 'string',
-				default: 'fixed',
+				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
 				attribute: 'layout'

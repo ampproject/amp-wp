@@ -138,7 +138,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
 				'',
 				array(
-					'body{color:black}',
+					'@page{margin:1cm}body{color:black}',
 				),
 				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),

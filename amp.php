@@ -5,7 +5,7 @@
  * Plugin URI: https://github.com/automattic/amp-wp
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-RC1
+ * Version: 1.0-RC2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -31,6 +31,23 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
 }
 
 /**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.1
+ */
+function _amp_print_php_dom_document_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install DOM extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! class_exists( 'DOMDocument' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
+	return;
+}
+
+/**
  * Print admin notice when composer install has not been performed.
  *
  * @since 1.0
@@ -49,7 +66,35 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-RC1' );
+define( 'AMP__VERSION', '1.0-RC2' );
+
+/**
+ * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
+ *
+ * @since 1.0
+ */
+function _amp_incorrect_plugin_slug_admin_notice() {
+	$actual_slug = basename( AMP__DIR__ );
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %1$s is the current directory name, and %2$s is the required directory name */
+					__( 'You appear to have installed the AMP plugin incorrectly. It is currently installed in the <code>%1$s</code> directory, but it needs to be placed in a directory named <code>%2$s</code>. Please rename the directory. This is important for WordPress plugin auto-updates.', 'amp' ),
+					$actual_slug,
+					'amp'
+				)
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( 'amp' !== basename( AMP__DIR__ ) ) {
+	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
+}
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
