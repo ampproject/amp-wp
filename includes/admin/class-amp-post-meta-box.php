@@ -177,7 +177,6 @@ class AMP_Post_Meta_Box {
 
 	/**
 	 * Enqueues block assets.
-	 * The name of gutenberg_get_jed_locale_data() may change, as the Gutenberg Core merge approaches.
 	 *
 	 * @since 1.0
 	 */
@@ -204,9 +203,7 @@ class AMP_Post_Meta_Box {
 			'errorMessages' => $error_messages,
 		);
 
-		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$script_data['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
-		}
+		$script_data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
 
 		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,

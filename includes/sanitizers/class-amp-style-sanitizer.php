@@ -777,7 +777,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v11'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v12'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -971,7 +971,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
-			$css_document    = $css_parser->parse();
+			$css_document    = $css_parser->parse(); // @todo If 'utf-8' is not $css_parser->getCharset() then issue warning?
 
 			if ( ! empty( $options['stylesheet_url'] ) ) {
 				$this->real_path_urls(
@@ -1296,13 +1296,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $css_item instanceof AtRule ) {
-				$error     = array(
-					'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
-					'at_rule' => $css_item->atRuleName(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				);
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				$results[] = compact( 'error', 'sanitized' );
+				if ( 'charset' === $css_item->atRuleName() ) {
+					/*
+					 * The @charset at-rule is not allowed in style elements, so it is not allowed in AMP.
+					 * If the @charset is defined, then it really should have already been acknowledged
+					 * by PHP-CSS-Parser when the CSS was parsed in the first place, so at this point
+					 * it is irrelevant and can be removed.
+					 */
+					$sanitized = true;
+				} else {
+					$error     = array(
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
 			} else {
 				$error     = array(
 					'code' => 'unrecognized_css',
