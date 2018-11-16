@@ -36,37 +36,31 @@ export default registerBlockType(
 				type: 'boolean'
 			},
 			dataPartner: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-brid-player',
 				attribute: 'data-partner'
 			},
 			dataPlayer: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-brid-player',
 				attribute: 'data-player'
 			},
 			dataVideo: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-brid-player',
 				attribute: 'data-video'
 			},
 			dataPlaylist: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-brid-player',
 				attribute: 'data-playlist'
 			},
 			dataOutstream: {
-				type: 'number',
 				source: 'attribute',
 				selector: 'amp-brid-player',
 				attribute: 'data-outstream'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-brid-player',
@@ -77,7 +71,6 @@ export default registerBlockType(
 				default: 600
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-brid-player',
