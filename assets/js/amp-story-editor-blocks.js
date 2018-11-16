@@ -357,7 +357,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 			if ( 'core/paragraph' === name ) {
 				settings.attributes.fontSize.default = 'large';
-				settings.attributes.ampFitText.default = true;
 			}
 		}
 		return settings;

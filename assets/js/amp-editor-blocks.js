@@ -758,19 +758,80 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( attributes.height ) {
 				fitTextProps.height = attributes.height;
 			}
-			var newProps = {
-				className: element.props.className,
-				style: element.props.style
-			};
-			return wp.element.createElement(
-				element.props.tagName,
-				newProps,
-				wp.element.createElement( 'amp-fit-text', fitTextProps, wp.element.createElement(
+
+			/*
+			 * This is a workaround for AMP Stories since AMP Story CSS is overriding the amp-fit-text CSS.
+			 * Note that amp-fit-text should support containing elements as well:
+			 * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
+			 */
+			if ( 0 && 'core/paragraph' === blockType.name ) {
+				/*newProps = Object.assign( {}, element.props );
+				disallowedProps = [ 'dir', 'format', 'tagName', 'value' ];
+				_.each( disallowedProps, function( prop ) {
+					if ( newProps.hasOwnProperty( prop ) ) {
+						delete newProps[ prop ];
+					}
+				} );
+
+				var contentRegex = /<em\b[^>]*>(.*?)<\/em>/;
+				var match = contentRegex.exec( attributes.content );
+				var content = attributes.content;
+				if ( match && match[1] ) {
+					content = match[1];
+				}
+				var ampFitTextContent = '<em ';
+				_.each( fitTextProps, function( value, att ) {
+					ampFitTextContent += att + '="' + value + '" ';
+				} );
+				ampFitTextContent += '>' + content + '</em>';
+				return wp.element.createElement(
+					'p',
+					newProps,
+					wp.element.createElement(
+						wp.element.RawHTML,
+						{},
+						ampFitTextContent
+					)
+				);
+
+				var contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
+				var match = contentRegex.exec( attributes.content );
+				var content = attributes.content;
+				if ( match && match[1] ) {
+					content = match[1];
+				}
+				var ampFitTextContent = '<amp-fit-text';
+				_.each( fitTextProps, function( value, att ) {
+					ampFitTextContent += ' ' + att + '="' + value + '"';
+				} );
+				ampFitTextContent += '>' + content + '</amp-fit-text>';
+				var ampFitTextK = '<amp-fit-text layout="fixed-height" min-font-size="14" max-font-size="48" height="150">Tere</amp-fit-text>';
+
+				return wp.element.cloneElement(
+					element,
+					{
+						key: 'new',
+						value: ampFitTextContent
+					}
+				);
+
+				return wp.element.createElement(
 					wp.element.RawHTML,
-					{},
+					null,
 					attributes.content
-				) )
-			);
+				);
+
+				return wp.element.createElement(
+					element.tagName,
+					{
+						key: 'ampFitText'
+					},
+					wp.element.createElement( 'amp-fit-text', fitTextProps )
+				);*/
+			}
+
+			fitTextProps.children = element;
+			return wp.element.createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
 	};
