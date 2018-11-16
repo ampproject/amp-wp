@@ -1250,7 +1250,7 @@ class AMP_Theme_Support {
 		if ( ! $meta_viewport ) {
 			$meta_viewport = AMP_DOM_Utils::create_node( $dom, 'meta', array(
 				'name'    => 'viewport',
-				'content' => 'width=device-width,minimum-scale=1',
+				'content' => 'width=device-width',
 			) );
 		} else {
 			$head->removeChild( $meta_viewport ); // So we can move it.
@@ -1718,7 +1718,7 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		// Ensure the mandatory amp attribute is present on the html element.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
