@@ -696,6 +696,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
 		var text = attributes.text || '',
+			content = '',
 			fitTextProps = {
 				layout: 'fixed-height'
 			};
@@ -743,6 +744,17 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					text
 				);
 			}
+		} else if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
+			content = component.getAmpFitTextContent( attributes.content );
+			if ( content !== attributes.content ) {
+				return wp.element.cloneElement(
+					element,
+					{
+						key: 'new',
+						value: content
+					}
+				);
+			}
 		} else if ( -1 !== component.data.textBlocks.indexOf( blockType.name ) && attributes.ampFitText ) {
 			if ( attributes.minFont ) {
 				fitTextProps[ 'min-font-size' ] = attributes.minFont;
@@ -759,48 +771,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			 * Note that amp-fit-text should support containing elements as well:
 			 * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
 			 */
-			if ( 0 && 'core/paragraph' === blockType.name ) {
-				/*newProps = Object.assign( {}, element.props );
-				disallowedProps = [ 'dir', 'format', 'tagName', 'value' ];
-				_.each( disallowedProps, function( prop ) {
-					if ( newProps.hasOwnProperty( prop ) ) {
-						delete newProps[ prop ];
-					}
-				} );
-
-				var contentRegex = /<em\b[^>]*>(.*?)<\/em>/;
-				var match = contentRegex.exec( attributes.content );
-				var content = attributes.content;
-				if ( match && match[1] ) {
-					content = match[1];
-				}
-				var ampFitTextContent = '<em ';
-				_.each( fitTextProps, function( value, att ) {
-					ampFitTextContent += att + '="' + value + '" ';
-				} );
-				ampFitTextContent += '>' + content + '</em>';
-				return wp.element.createElement(
-					'p',
-					newProps,
-					wp.element.createElement(
-						wp.element.RawHTML,
-						{},
-						ampFitTextContent
-					)
-				);
-
-				var contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
-				var match = contentRegex.exec( attributes.content );
-				var content = attributes.content;
-				if ( match && match[1] ) {
-					content = match[1];
-				}
+			if ( 'core/paragraph' === blockType.name ) {
 				var ampFitTextContent = '<amp-fit-text';
 				_.each( fitTextProps, function( value, att ) {
 					ampFitTextContent += ' ' + att + '="' + value + '"';
 				} );
-				ampFitTextContent += '>' + content + '</amp-fit-text>';
-				var ampFitTextK = '<amp-fit-text layout="fixed-height" min-font-size="14" max-font-size="48" height="150">Tere</amp-fit-text>';
+				ampFitTextContent += '>' + component.getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
 
 				return wp.element.cloneElement(
 					element,
@@ -809,26 +785,29 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						value: ampFitTextContent
 					}
 				);
-
-				return wp.element.createElement(
-					wp.element.RawHTML,
-					null,
-					attributes.content
-				);
-
-				return wp.element.createElement(
-					element.tagName,
-					{
-						key: 'ampFitText'
-					},
-					wp.element.createElement( 'amp-fit-text', fitTextProps )
-				);*/
 			}
 
 			fitTextProps.children = element;
 			return wp.element.createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
+	};
+
+	/**
+	 * Get inner content of AMP Fit Text tag.
+	 *
+	 * @param {string} content Original content.
+	 * @return {string} Modified content.
+	 */
+	component.getAmpFitTextContent = function getAmpFitTextContent( content ) {
+		var contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/,
+			match, newContent;
+		match = contentRegex.exec( content );
+		newContent = content;
+		if ( match && match[ 1 ] ) {
+			newContent = match[ 1 ];
+		}
+		return newContent;
 	};
 
 	/**
