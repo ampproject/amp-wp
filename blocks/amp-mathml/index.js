@@ -26,7 +26,6 @@ export default registerBlockType(
 
 		attributes: {
 			dataFormula: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-mathml',
 				attribute: 'data-formula'
