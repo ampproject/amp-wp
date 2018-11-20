@@ -1982,13 +1982,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// An element (type) either starts a selector or is preceded by combinator or opening paren.
+			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~)';
+			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
+
 			$edited_selectors = array( $selector );
 			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
-				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+				$html_pattern = '/' . $before_type_selector_pattern . preg_quote( $html_selector, '/' ) . $after_type_selector_pattern . '/i';
 				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
 					$original_selector = $edited_selector;
 					$amp_selector      = array_shift( $amp_selectors );
-					$amp_tag_pattern   = '/(?<=^|\s|>)' . preg_quote( $amp_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+					$amp_tag_pattern   = '/' . $before_type_selector_pattern . preg_quote( $amp_selector, '/' ) . $after_type_selector_pattern . '/i';
 					preg_match( $amp_tag_pattern, $edited_selector, $matches );
 					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
 						continue;
