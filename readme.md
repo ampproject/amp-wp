@@ -152,7 +152,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Gutenberg: Fix displaying validation warning and usage of PHP function. See [#1612](https://github.com/Automattic/amp-wp/pull/1612). Props miina.
 - Fix stretched images in Twenty Seventeen them and Gutenberg. See [#1321](https://github.com/Automattic/amp-wp/issues/1321), [#1281](https://github.com/Automattic/amp-wp/issues/1281), [#1237](https://github.com/Automattic/amp-wp/issues/1237). Props hellofromtonya.
 - Fix image dimension extractor so it does not disregard duplicate images. See [#1314](https://github.com/Automattic/amp-wp/issues/1314). Props lukas9393.
-- Short-circuit polldaddy shortcode when no poll or survey supplied. See [#1621](#https://github.com/Automattic/amp-wp/pull/1621). Props westonruter.
+- Short-circuit polldaddy shortcode when no poll or survey supplied. See [#1621](https://github.com/Automattic/amp-wp/pull/1621). Props westonruter.
 - Remove redundant version from composer.json and add PHP version requirement. See [#1333](https://github.com/Automattic/amp-wp/issues/1333), [#1328](https://github.com/Automattic/amp-wp/issues/1328), [#1334](https://github.com/Automattic/amp-wp/issues/1334), [#1332](https://github.com/Automattic/amp-wp/issues/1332). Props swissspidy.
 - Add warning when AMP plugin is installed in incorrect directory. See [#1593](https://github.com/Automattic/amp-wp/pull/1593). Props westonruter.
 - Store validation errors in order of occurrence in document. See [#1335](https://github.com/Automattic/amp-wp/issues/1335). Props westonruter.
@@ -167,6 +167,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Normalize 'ver' query param in script/style validation errors to prevent recurrence after accepted. See [#1346](https://github.com/Automattic/amp-wp/issues/1346). Props westonruter.
 - Add bing-amp.com to the list of AMP Cache hosts. See [#1447](https://github.com/Automattic/amp-wp/pull/1447). Props westonruter.
 - Add missing tabindex attribute to lightbox images. See [#1350](https://github.com/Automattic/amp-wp/issues/1350). Props amedina.
+- Update AMP spec to 757 (v1811091519050). See [#1588](https://github.com/Automattic/amp-wp/pull/1588). Props westonruter, kienstra.
 - Detect ineffectual post-processor response cache due to high MISS rates and auto-disable. See [#1325](https://github.com/Automattic/amp-wp/issues/1325), [#1239](https://github.com/Automattic/amp-wp/issues/1239). Props hellofromtonya, westonruter.
 - Update the validator spec version to 720 and AMP v1534879991178; add support for reference points. See [#1315](https://github.com/Automattic/amp-wp/issues/1315), [#1386](https://github.com/Automattic/amp-wp/issues/1386), [#1330](https://github.com/Automattic/amp-wp/issues/1330). Props westonruter.
 - Update spec from revision 720 to 734. See [#1475](https://github.com/Automattic/amp-wp/pull/1475). Props kienstra.
@@ -179,7 +180,6 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Fix handling responses to form submissions from an AMP Cache. See [#1382](https://github.com/Automattic/amp-wp/issues/1382), [#1356](https://github.com/Automattic/amp-wp/issues/1356).
 - Replace Gutenberg's deprecated isCleanNewPost selector. See [#1387](https://github.com/Automattic/amp-wp/issues/1387). Props miina.
 - Updates php-css-parser to include fix for parsing calc() with negative values. See [#1392](https://github.com/Automattic/amp-wp/issues/1392). Props westonruter.
-- Update AMP spec to 757 (v1811091519050). See [#1588](https://github.com/Automattic/amp-wp/pull/1588). Props westonruter, kienstra.
 - Add embed support for Twitter timelines via new amp-twitter attributes. See [#1396](https://github.com/Automattic/amp-wp/issues/1396). Props felixarntz.
 - Fix tooltip position. See [#1472](https://github.com/Automattic/amp-wp/pull/1472). Props jacobschweitzer.
 - Add error type filters on validation error and invalid URL screens. See [#1373](https://github.com/Automattic/amp-wp/issues/1373). Props kienstra.
