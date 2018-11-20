@@ -50,6 +50,12 @@ Also, the [AMP Validator Chrome extension](https://chrome.google.com/webstore/de
 
 Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
 
+#### Libraries Used
+
+[PHP CSS Parser](https://github.com/sabberworm/PHP-CSS-Parser): Parses CSS into PHP to enable tree-shaking.
+
+[FastImage](https://github.com/sdsykes/fastimage): Gets the size or type of remotely-hosted images, while fetching the minimum amount of data needed.
+
 ## Screenshots ##
 
 ### AMP with the Twenty Seventeen theme, which looks and functions the same as in non-AMP.
