@@ -1,7 +1,8 @@
 import uuid from 'uuid/v4';
 import BlockNavigation from './block-navigation';
 import {
-	BLOCK_ICONS
+	BLOCK_ICONS,
+	maybeIsSelectedParentClass
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -29,6 +30,7 @@ const {
 } = wp.data.select( 'core/editor' );
 
 const TEMPLATE = [
+	[ 'amp/amp-story-grid-layer-background-image' ],
 	[
 		'amp/amp-story-grid-layer-vertical',
 		[
@@ -118,7 +120,7 @@ export default registerBlockType(
 					</div>
 				),
 				// Get the template dynamically.
-				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
+				<div key="contents" className={ maybeIsSelectedParentClass( props.clientId ) } style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			];
