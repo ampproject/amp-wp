@@ -1046,6 +1046,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
+		// Strip the dreaded UTF-8 byte order mark (BOM, \uFEFF). This should ideally get handled by PHP-CSS-Parser <https://github.com/sabberworm/PHP-CSS-Parser/issues/150>.
+		$stylesheet_string = preg_replace( '/^\xEF\xBB\xBF/', '', $stylesheet_string );
+
 		$stylesheet         = array();
 		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
 		$validation_results = $parsed_stylesheet['validation_results'];
@@ -1838,9 +1841,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
 			$css .= $stylesheet_sets['custom']['source_map_comment'];
 
-			// Remove the Byte Order Mark if it exists, as it can prevent styles from rendering.
-			$css = preg_replace( '/\x{FEFF}/u', '', $css );
-
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
 			 * !important: Updating the contents of this style element by setting textContent is not
@@ -2066,8 +2066,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 									empty( $parsed_selector['tags'] )
 									||
 									0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
-									||
-									0 === count( array_diff( $parsed_selector['tags'], $stylesheet_set['cdata_spec']['css_spec']['allowed_at_rules'] ) )
 								)
 							)
 						);
