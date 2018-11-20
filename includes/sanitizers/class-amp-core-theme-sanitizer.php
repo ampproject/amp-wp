@@ -51,6 +51,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = array(
+		// Twenty Nineteen.
+		'twentynineteen'  => array(
+			'dequeue_scripts' => array(
+				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
+				'twentynineteen-priority-menu',
+				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
+			),
+			'remove_actions'  => array(
+				'wp_print_footer_scripts' => array(
+					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
+				),
+			),
+		),
+
 		// Twenty Seventeen.
 		'twentyseventeen' => array(
 			// @todo Try to implement belowEntryMetaClass().
@@ -121,6 +135,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Get list of supported core themes.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string[] Slugs for supported themes.
+	 */
+	public static function get_supported_themes() {
+		return array_keys( self::$theme_features );
+	}
+
+	/**
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
@@ -147,16 +172,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width',
-							),
-						),
-					),
 				);
 			case 'twentysixteen':
 				return array(
@@ -175,30 +190,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 			case 'twentyseventeen':
 				return array(
 					'removed_unused_css_rules' => true,
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 		}
 		return array();

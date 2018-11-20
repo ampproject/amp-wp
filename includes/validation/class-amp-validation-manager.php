@@ -1916,7 +1916,7 @@ class AMP_Validation_Manager {
 		);
 
 		$data = wp_json_encode( array(
-			'i18n'                 => gutenberg_get_jed_locale_data( 'amp' ),
+			'i18n'                 => function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' ),
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 			'isCanonical'          => amp_is_canonical(),
 		) );
