@@ -503,9 +503,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
 			),
 			'type_class_names' => array(
-				'<img src="https://example.org/foo.webp" width="100" height="100" class="audio iframe video img form">',
-				'.audio{color:purple;} .video{color:blue;} .iframe{color:black;} img.img{color:purple;} .form{color:green;}',
-				'.audio{color:purple}.video{color:blue}.iframe{color:black}amp-img.img{color:purple}.form{color:green}',
+				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
+				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
 			),
 		);
 	}

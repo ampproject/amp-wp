@@ -1982,8 +1982,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// An element (type) either starts a selector or is preceded by combinator or opening paren.
-			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~)';
+			// An element (type) either starts a selector or is preceded by combinator, comma, opening paren, or closing brace.
+			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
 			$edited_selectors = array( $selector );
