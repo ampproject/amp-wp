@@ -68,6 +68,24 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	box-sizing: border-box;
 }
 
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
 .amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
 	grid-auto-flow: column !important;
 	grid-template-rows: 100% !important;
