@@ -165,8 +165,6 @@ div[data-amp-position="lower-third"] {
 	object-fit: cover;
 	width: 318px !important;
 	height: 533px !important;
-	max-height: 75vh !important;
-	max-width: 45vh !important;
 }
 
 .amp-grid-template-fill > :not(:first-child) {
