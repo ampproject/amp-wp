@@ -61,11 +61,12 @@ class AMP_Story_Post_Type {
 				'template'     => array(
 					array(
 						'amp/amp-story-page',
-						array(),
 						array(
 							array(
+								'amp/amp-story-grid-layer-background-image',
+							),
+							array(
 								'amp/amp-story-grid-layer-vertical',
-								array(),
 								array(
 									array(
 										'core/paragraph',
