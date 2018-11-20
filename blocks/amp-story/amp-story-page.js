@@ -22,6 +22,12 @@ const ALLOWED_BLOCKS = [
 	'amp/amp-story-cta-layer'
 ];
 
+const {
+	hasSelectedInnerBlock,
+	getSelectedBlockClientId,
+	getBlockIndex
+} = wp.data.select( 'core/editor' );
+
 const TEMPLATE = [
 	[
 		'amp/amp-story-grid-layer-vertical',
@@ -73,14 +79,22 @@ export default registerBlockType(
 		 * */
 
 		edit( props ) {
-			const { setAttributes, attributes } = props;
+			const { setAttributes, attributes, isSelected } = props;
 			const onChangeBackgroundColor = newBackgroundColor => {
 				setAttributes( { backgroundColor: newBackgroundColor } );
 			};
+			let displayNavigation = false;
 
 			// If the page ID is not set, add one.
 			if ( ! attributes.id ) {
 				setAttributes( { id: uuid() } );
+			}
+
+			if (
+				( ! getSelectedBlockClientId() && 0 === getBlockIndex( props.clientId ) ) ||
+				( hasSelectedInnerBlock( props.clientId, true ) || isSelected )
+			) {
+				displayNavigation = true;
 			}
 
 			return [
@@ -97,10 +111,12 @@ export default registerBlockType(
 						] }
 					/>
 				</InspectorControls>,
-				<div className='editor-selectors'>
-					<LayerInserter key="selectors" rootClientId={ props.clientId } />
-					<BlockNavigation key='navigation' />
-				</div>,
+				displayNavigation && (
+					<div className='editor-selectors'>
+						<LayerInserter key="selectors" rootClientId={ props.clientId } />
+						<BlockNavigation key='navigation' />
+					</div>
+				),
 				// Get the template dynamically.
 				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />

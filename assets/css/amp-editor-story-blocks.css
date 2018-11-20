@@ -162,15 +162,23 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	display: none;
 }
 
+.components-icon-button.editor-block-navigation {
+	display: none;
+}
+
 .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
-	position: absolute;
-	left: -155px;
-	top: 0;
-	width: 150px;
+	position: fixed;
+	left: 200px;
+	top: 150px;
+	width: 300px;
 	z-index: 80;
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
+}
+
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-block-navigation__list {
+	list-style-type: none;
 }
 
 .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .components-icon-button .dashicon {

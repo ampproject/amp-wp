@@ -17,7 +17,7 @@ function BlockNavigationList( {
 	blocks,
 	selectedBlockClientId,
 	selectBlock,
-	showNestedBlocks,
+	showNestedBlocks
 } ) {
 	return (
 		/*
@@ -29,12 +29,16 @@ function BlockNavigationList( {
 			{ map( blocks, ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
+				let className = 'editor-block-navigation__item-button';
+				if ( isSelected ) {
+					className += ' is-selected';
+				}
 
 				return (
 					<li key={ block.clientId }>
 						<div className="editor-block-navigation__item">
 							<Button
-								className={ 'editor-block-navigation__item-button' + block.clientId === selectedBlockClientId ? ' is-selected' : '' }
+								className={ className }
 								onClick={ () => selectBlock( block.clientId ) }
 							>
 								<BlockIcon icon={ blockType.icon } showColors />
@@ -104,13 +108,13 @@ export default compose(
 			getSelectedBlockClientId,
 			getBlockHierarchyRootClientId,
 			getBlock,
-			getBlocks,
+			getBlocks
 		} = select( 'core/editor' );
 		const selectedBlockClientId = getSelectedBlockClientId();
 		return {
 			rootBlocks: getBlocks(),
 			rootBlock: selectedBlockClientId ? getBlock( getBlockHierarchyRootClientId( selectedBlockClientId ) ) : null,
-			selectedBlockClientId,
+			selectedBlockClientId
 		};
 	} ),
 	withDispatch( ( dispatch, { onSelect = noop } ) => {
@@ -118,7 +122,7 @@ export default compose(
 			selectBlock( clientId ) {
 				dispatch( 'core/editor' ).selectBlock( clientId );
 				onSelect( clientId );
-			},
+			}
 		};
 	} )
 )( BlockNavigation );
