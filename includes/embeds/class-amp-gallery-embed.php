@@ -17,6 +17,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
+		add_filter( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
@@ -231,6 +232,23 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'layout' => 'responsive',
 			),
 			implode( PHP_EOL, $images )
+		);
+	}
+
+	/**
+	 * Enqueues the Gallery block styling.
+	 *
+	 * It would be better to enqueue this in AMP_Gallery_Block_Sanitizer,
+	 * but by the time that runs, it's too late to call wp_enqueue_style().
+	 *
+	 * @return void
+	 */
+	public function enqueue_styles() {
+		wp_enqueue_style(
+			'amp-gallery-block',
+			amp_get_asset_url( 'css/amp-gallery-block.css' ),
+			array(),
+			AMP__VERSION
 		);
 	}
 }
