@@ -226,10 +226,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				);
 
 				if ( wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
-					if ( ! newProps.className ) {
-						newProps.wrapperProps.className = '';
-					}
-					newProps.wrapperProps.className += ' is-selected-parent';
+					newProps.wrapperProps['data-amp-selected'] = 'parent';
 				}
 
 				return el(
