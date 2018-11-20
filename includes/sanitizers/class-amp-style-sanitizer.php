@@ -1046,6 +1046,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$options
 		);
 
+		// Strip the dreaded UTF-8 byte order mark (BOM, \uFEFF). This should ideally get handled by PHP-CSS-Parser <https://github.com/sabberworm/PHP-CSS-Parser/issues/150>.
+		$stylesheet_string = preg_replace( '/^\xEF\xBB\xBF/', '', $stylesheet_string );
+
 		$stylesheet         = array();
 		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
 		$validation_results = $parsed_stylesheet['validation_results'];
