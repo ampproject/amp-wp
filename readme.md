@@ -52,9 +52,10 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 #### Libraries Used
 
-[PHP CSS Parser](https://github.com/sabberworm/PHP-CSS-Parser): Parses CSS into PHP to enable tree-shaking.
-
-[FastImage](https://github.com/sdsykes/fastimage): Gets the size or type of remotely-hosted images, while fetching the minimum amount of data needed.
+* [PHP CSS Parser](https://github.com/sabberworm/PHP-CSS-Parser) (and [XWP fork](https://github.com/xwp/PHP-CSS-Parser)): Parses CSS into PHP to enable tree-shaking. By Raphael Schweikert. MIT license.
+* [FastImage](https://github.com/sdsykes/fastimage): Gets the size or type of remotely-hosted images, while fetching the minimum amount of data needed. By Stephen Sykes. MIT license.
+* [FasterImage](https://github.com/willwashburn/FasterImage): A faster version of the above. By Will Washburn. MIT license.
+* Refer to [package.json](https://github.com/Automattic/amp-wp/blob/develop/package.json) for the JavaScript packages utilized.
 
 ## Screenshots ##
 
