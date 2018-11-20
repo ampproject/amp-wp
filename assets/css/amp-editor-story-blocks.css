@@ -162,72 +162,24 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	display: none;
 }
 
-.edit-post-visual-editor .editor-block-list__block ul.editor-selectors {
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
 	position: absolute;
-	right: -155px;
-	bottom: 0;
-	width: 120px;
+	left: -155px;
+	top: 0;
+	width: 150px;
 	z-index: 80;
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
 }
 
-.editor-selectors .component-editor__selector button {
-	background: no-repeat left top;
-	padding-left: 37px;
-	height: 40px;
-	margin: 1px 0 1px 4px;
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .components-icon-button .dashicon {
+	margin-right: 5px;
 }
 
 .editor-selectors .component-editor__selector .components-button:focus {
 	box-shadow: none;
 }
-
-.editor-selectors .component-editor__selector.template-fill button {
-	background-image: url( '../images/grid-fill-inactive.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-fill.is-selected button {
-	background-image: url( '../images/grid-fill-active.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-horizontal button {
-	background-image: url( '../images/grid-horizontal-inactive.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-horizontal.is-selected button {
-	background-image: url( '../images/grid-horizontal-active.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-vertical button {
-	background-image: url( '../images/grid-vertical-inactive.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-vertical.is-selected button {
-	background-image: url( '../images/grid-vertical-active.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-thirds button {
-	background-image: url( '../images/grid-thirds-inactive.svg' );
-}
-
-.editor-selectors .component-editor__selector.template-thirds.is-selected button {
-	background-image: url( '../images/grid-thirds-active.svg' );
-}
-
-.editor-selectors .component-editor__selector.page-selector button {
-	background-image: url( '../images/page-inactive.svg' );
-}
-
-.editor-selectors .component-editor__selector.page-selector.is-selected button {
-	background-image: url( '../images/page-active.svg' );
-}
-
-.editor-selectors .component-editor__selector button {
-	cursor: pointer;
-}
-
 .post-type-amp_story .components-range-control__number {
 	width: 60px;
 }

@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import BlockSelector from './block-selector';
+import LayerInserter from './layer-inserter';
 import {
 	BLOCK_ICONS
 } from './helpers';
@@ -11,7 +11,8 @@ const {
 const {
 	InnerBlocks,
 	PanelColorSettings,
-	InspectorControls
+	InspectorControls,
+	BlockNavigationDropdown
 } = wp.editor;
 
 const ALLOWED_BLOCKS = [
@@ -96,7 +97,10 @@ export default registerBlockType(
 						] }
 					/>
 				</InspectorControls>,
-				<BlockSelector key="selectors" rootClientId={ props.clientId } />,
+				<div className='editor-selectors'>
+					<LayerInserter key="selectors" rootClientId={ props.clientId } />
+					<BlockNavigationDropdown key='navigation' />
+				</div>,
 				// Get the template dynamically.
 				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />

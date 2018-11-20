@@ -50,9 +50,18 @@ class LayerInserter extends Component {
 
 	render() {
 		const {
-			rootClientId,
-			hasCtaLayer
+			rootClientId
 		} = this.props;
+
+		if ( ! rootClientId ) {
+			return null;
+		}
+
+		const rootBlock = getBlock( this.props.rootClientId );
+
+		if ( ! rootBlock.innerBlocks.length ) {
+			return null;
+		}
 
 		const {
 			getInserterItems
@@ -62,6 +71,15 @@ class LayerInserter extends Component {
 		if ( items.length === 0 ) {
 			return null;
 		}
+
+		let hasCtaLayer = false;
+
+		window.lodash.forEachRight( rootBlock.innerBlocks, function( block ) {
+			if ( 'amp/amp-story-cta-layer' === block.name ) {
+				hasCtaLayer = true;
+				return true;
+			}
+		} );
 
 		const onInsertBlock = this.onInsertBlock;
 		const gridLayers = [
@@ -73,97 +91,100 @@ class LayerInserter extends Component {
 		];
 
 		return (
-			<Dropdown
-				className="editor-inserter"
-				contentClassName="editor-inserter__popover editor-inserter__amp"
-				onToggle={ this.onToggle }
-				expandOnMobile
-				renderToggle={ ( { onToggle, isOpen } ) => (
-					<IconButton
-						icon="insert"
-						label={ __( 'Add new layer', 'amp' ) }
-						onClick={ onToggle }
-						className="editor-inserter__amp-inserter"
-						aria-haspopup="true"
-						aria-expanded={ isOpen }
-					>
-					</IconButton>
-				) }
-				renderContent={ ( { onClose } ) => {
-					const onSelect = ( item ) => {
-						if ( ! hasCtaLayer || gridLayers.includes( item.name ) ) {
-							onInsertBlock( item, rootClientId );
-							onClose();
-						}
-					};
+			<ul>
+				<Dropdown
+					className="editor-inserter"
+					contentClassName="editor-inserter__popover editor-inserter__amp"
+					onToggle={ this.onToggle }
+					expandOnMobile
+					renderToggle={ ( { onToggle, isOpen } ) => (
+						<IconButton
+							icon="insert"
+							label={ __( 'Add new layer', 'amp' ) }
+							onClick={ onToggle }
+							className="editor-inserter__amp-inserter"
+							aria-haspopup="true"
+							aria-expanded={ isOpen }
+						>
+							{ __( 'Add New Layer' ) }
+						</IconButton>
+					) }
+					renderContent={ ( { onClose } ) => {
+						const onSelect = ( item ) => {
+							if ( ! hasCtaLayer || gridLayers.includes( item.name ) ) {
+								onInsertBlock( item, rootClientId );
+								onClose();
+							}
+						};
 
-					// @todo If CTA layer is already added, don't display it here.
-					items = [
-						getBlockType( 'amp/amp-story-cta-layer' )
-					];
+						// @todo If CTA layer is already added, don't display it here.
+						items = [
+							getBlockType( 'amp/amp-story-cta-layer' )
+						];
 
-					_.each( gridLayers, function( layer ) {
-						items.push( getBlockType( layer ) );
-					} );
+						_.each( gridLayers, function( layer ) {
+							items.push( getBlockType( layer ) );
+						} );
 
-					const listClassName = 'editor-block-types-list' + ( hasCtaLayer ? ' amp-story-has-cta-layer' : '' );
+						const listClassName = 'editor-block-types-list' + ( hasCtaLayer ? ' amp-story-has-cta-layer' : '' );
 
-					return (
-						<div className="editor-inserter__menu">
-							<div
-								className="editor-inserter__results"
-								tabIndex="0"
-								role="region"
-								aria-label={ __( 'Available block types', 'amp' ) }
-							>
-								<ul role="list" className={ listClassName }>
-									{ items.map( ( item ) => {
-										const itemIconStyle = item.icon ? {
-											backgroundColor: item.icon.background,
-											color: item.icon.foreground
-										} : {};
-										const itemIconStackStyle = item.icon && item.icon.shadowColor ? {
-											backgroundColor: item.icon.shadowColor
-										} : {};
+						return (
+							<div className="editor-inserter__menu">
+								<div
+									className="editor-inserter__results"
+									tabIndex="0"
+									role="region"
+									aria-label={ __( 'Available block types', 'amp' ) }
+								>
+									<ul role="list" className={ listClassName }>
+										{ items.map( ( item ) => {
+											const itemIconStyle = item.icon ? {
+												backgroundColor: item.icon.background,
+												color: item.icon.foreground
+											} : {};
+											const itemIconStackStyle = item.icon && item.icon.shadowColor ? {
+												backgroundColor: item.icon.shadowColor
+											} : {};
 
-										const className = 'editor-block-types-list__item ' + getBlockMenuDefaultClassName( item.name );
+											const className = 'editor-block-types-list__item ' + getBlockMenuDefaultClassName( item.name );
 
-										return (
-											<li className="editor-block-types-list__list-item" key={ item.name }>
-												<button
-													className={ className }
-													onClick={ () => {
-														onSelect( item );
-													} }
-													aria-label={ item.title } // Fix for IE11 and JAWS 2018.
-												>
-													<span
-														className="editor-block-types-list__item-icon"
-														style={ itemIconStyle }
+											return (
+												<li className="editor-block-types-list__list-item" key={ item.name }>
+													<button
+														className={ className }
+														onClick={ () => {
+															onSelect( item );
+														} }
+														aria-label={ item.title } // Fix for IE11 and JAWS 2018.
 													>
-														<BlockIcon icon={ item.icon && item.icon.src } showColors />
-														{ item.hasChildBlocks &&
 														<span
-															className="editor-block-types-list__item-icon-stack"
-															style={ itemIconStackStyle }
-														/>
-														}
-													</span>
+															className="editor-block-types-list__item-icon"
+															style={ itemIconStyle }
+														>
+															<BlockIcon icon={ item.icon && item.icon.src } showColors />
+															{ item.hasChildBlocks &&
+															<span
+																className="editor-block-types-list__item-icon-stack"
+																style={ itemIconStackStyle }
+															/>
+															}
+														</span>
 
-													<span className="editor-block-types-list__item-title">
-														{ item.title }
-													</span>
-												</button>
-											</li>
-										);
-									} ) }
-								</ul>
+														<span className="editor-block-types-list__item-title">
+															{ item.title }
+														</span>
+													</button>
+												</li>
+											);
+										} ) }
+									</ul>
 
+								</div>
 							</div>
-						</div>
-					);
-				} }
-			/>
+						);
+					} }
+				/>
+			</ul>
 		);
 	}
 }
