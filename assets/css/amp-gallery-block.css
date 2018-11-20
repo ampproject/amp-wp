@@ -1,9 +1,0 @@
-/**
- * For the AMP implementation of the Gallery block.
- * This rule is copied exactly from block-library/style.css, but the selector here has amp-img >.
- * The image sanitizer normally converts the <img> from that original stylesheet <amp-img>,
- * but that doesn't have the same effect as applying it to the <img>.
- */
-.wp-block-gallery.is-cropped .blocks-gallery-item amp-img > img {
-	object-fit: cover;
-}

@@ -17,7 +17,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'wp_print_styles', array( $this, 'print_styles' ) );
 	}
 
 	/**
@@ -236,19 +236,23 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Enqueues the Gallery block styling.
+	 * Prints the Gallery block styling.
 	 *
-	 * It would be better to enqueue this in AMP_Gallery_Block_Sanitizer,
-	 * but by the time that runs, it's too late to call wp_enqueue_style().
+	 * It would be better to print this in AMP_Gallery_Block_Sanitizer,
+	 * but by the time that runs, it's too late.
+	 * This rule is copied exactly from block-library/style.css, but the selector here has amp-img >.
+	 * The image sanitizer normally converts the <img> from that original stylesheet <amp-img>,
+	 * but that doesn't have the same effect as applying it to the <img>.
 	 *
 	 * @return void
 	 */
-	public function enqueue_styles() {
-		wp_enqueue_style(
-			'amp-gallery-block',
-			amp_get_asset_url( 'css/amp-gallery-block.css' ),
-			array(),
-			AMP__VERSION
-		);
+	public function print_styles() {
+		?>
+		<style>
+			.wp-block-gallery.is-cropped .blocks-gallery-item amp-img > img {
+				object-fit: cover;
+			}
+		</style>
+		<?php
 	}
 }
