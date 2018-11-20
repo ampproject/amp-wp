@@ -208,15 +208,14 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	display: none;
 }
 
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected ~ div {
-	opacity: 0.5;
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
+	opacity: 0.3;
 	filter: blur(8px);
 	-webkit-filter: blur(8px);
 }
 
 div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
 	opacity: 1;
-	background: #fff;
 	filter: none;
 	-webkit-filter: none;
 }
