@@ -495,6 +495,9 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		];
 
 		if ( ampFitText ) {
+			maxFont = parseInt( maxFont, 10 );
+			height = parseInt( height, 10 );
+			minFont = parseInt( minFont, 10 );
 			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
 				el( TextControl, {
 					label: __( 'Height' ),
@@ -504,7 +507,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						props.setAttributes( { height: nextHeight } );
 					}
 				} ),
-				parseInt( maxFont ) > parseInt( height ) && el(
+				maxFont > height && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -521,13 +524,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							if ( ! nextMinFont ) {
 								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
 							}
-							if ( parseInt( nextMinFont ) <= parseInt( maxFont ) ) {
+							if ( parseInt( nextMinFont, 10 ) <= maxFont ) {
 								props.setAttributes( { minFont: nextMinFont } );
 							}
 						}
 					} )
 				),
-				parseInt( minFont ) > parseInt( maxFont ) && el(
+				minFont > maxFont && el(
 					wp.components.Notice,
 					{
 						status: 'error',
