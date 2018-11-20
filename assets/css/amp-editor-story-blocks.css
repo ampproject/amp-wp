@@ -29,8 +29,6 @@ div[data-type="amp/amp-story-page"] {
 div[data-type="amp/amp-story-page"],
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	margin: auto;
-	max-height: 75vh !important;
-	max-width: 45vh !important;
 	width: 320px !important;
 	height: 533px !important;
 }
