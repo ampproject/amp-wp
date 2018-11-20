@@ -64,6 +64,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				),
 			),
 			'add_twentynineteen_masthead_styles' => array(),
+			'add_twentynineteen_image_styles'    => array(),
 		),
 
 		// Twenty Seventeen.
@@ -1055,5 +1056,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$item_output .= $dropdown_button;
 			return $item_output;
 		}, 10, 4 );
+	}
+
+	/**
+	 * Output image styles for twentynineteen.
+	 *
+	 * When <img> tags have an 'aligncenter' class, AMP_Img_Sanitizer::handle_centering() wraps theme in <figure class="aligncenter">.
+	 * This ensures that the image inside it is centered.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $args Arguments.
+	 */
+	public static function add_twentynineteen_image_styles( $args = array() ) {
+		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
+			ob_start();
+			?>
+			<style>
+				figure.aligncenter {
+					text-align: center
+				}
+			</style>
+			<?php
+			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+			wp_add_inline_style( get_template() . '-style', $styles );
+		}, 11 );
 	}
 }
