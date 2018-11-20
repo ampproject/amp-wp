@@ -17,7 +17,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
-		add_filter( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
 	}
 
 	/**
