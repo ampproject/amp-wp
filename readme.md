@@ -169,6 +169,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Add missing tabindex attribute to lightbox images. See [#1350](https://github.com/Automattic/amp-wp/issues/1350). Props amedina.
 - Update AMP spec to 757 (v1811091519050). See [#1588](https://github.com/Automattic/amp-wp/pull/1588). Props westonruter, kienstra.
 - Detect ineffectual post-processor response cache due to high MISS rates and auto-disable. See [#1325](https://github.com/Automattic/amp-wp/issues/1325), [#1239](https://github.com/Automattic/amp-wp/issues/1239). Props hellofromtonya, westonruter.
+- Update regex for tag selectors. See [#1534](https://github.com/Automattic/amp-wp/pull/1534). Props swissspidy, westonruter.
 - Update the validator spec version to 720 and AMP v1534879991178; add support for reference points. See [#1315](https://github.com/Automattic/amp-wp/issues/1315), [#1386](https://github.com/Automattic/amp-wp/issues/1386), [#1330](https://github.com/Automattic/amp-wp/issues/1330). Props westonruter.
 - Update spec from revision 720 to 734. See [#1475](https://github.com/Automattic/amp-wp/pull/1475). Props kienstra.
 - Fix form sanitizer's handling of relative actions by making them absolute. See [#1352](https://github.com/Automattic/amp-wp/issues/1352), [#1349](https://github.com/Automattic/amp-wp/issues/1349). Props ricardobrg.
