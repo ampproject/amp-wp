@@ -1839,7 +1839,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css .= $stylesheet_sets['custom']['source_map_comment'];
 
 			// Remove the Byte Order Mark if it exists, as it can prevent styles from rendering.
-			$css = preg_replace('/\x{FEFF}/u', '', $css );
+			$css = preg_replace( '/\x{FEFF}/u', '', $css );
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
