@@ -62,6 +62,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	padding: 68px 32px 32px;
 }
 
+.amp-grid-template .editor-block-list__layout:first-of-type .wp-block {
+	margin-bottom: 12px;
+}
+
 .amp-grid-template .editor-block-list__layout:first-of-type *:not(.editor-block-toolbar) {
 	box-sizing: border-box;
 }
