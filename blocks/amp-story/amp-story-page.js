@@ -15,8 +15,6 @@ const {
 	InspectorControls
 } = wp.editor;
 
-const { hasSelectedInnerBlock } = wp.data.select( 'core/editor' );
-
 const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer-vertical',
 	'amp/amp-story-grid-layer-fill',
