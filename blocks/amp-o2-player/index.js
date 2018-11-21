@@ -34,49 +34,41 @@ export default registerBlockType(
 		// @todo Add other useful macro toggles, e.g. showing relevant content.
 		attributes: {
 			dataPid: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'data-pid'
 			},
 			dataVid: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'data-vid'
 			},
 			dataBcid: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'data-bcid'
 			},
 			dataBid: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'data-bid'
 			},
 			autoPlay: {
-				type: 'boolean',
 				default: false
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-o2-player',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-o2-player',
