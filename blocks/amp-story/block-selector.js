@@ -52,7 +52,9 @@ class BlockSelector extends Component {
 				// Do not blur the CTA layer so the user can edit the elements within it.
 				if ( 'amp/amp-story-cta-layer' === block.name ) {
 					const ampStoryDiv = document.getElementById( 'block-' + block.clientId );
-					ampStoryDiv.classList.add( 'is-selected' );
+					if ( ampStoryDiv ) {
+						ampStoryDiv.classList.add( 'is-selected' );
+					}
 				}
 			}
 
