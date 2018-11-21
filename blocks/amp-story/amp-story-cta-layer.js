@@ -105,9 +105,25 @@ export default registerBlockType(
 			}
 
 			componentDidMount() {
+				const rootClientID = getBlockRootClientId( this.props.clientId );
+				const blockIndex = wp.data.select( 'core/editor' ).getBlockIndex( rootClientID );
+				let noticeMessage = null;
+				const noticeOptions = {
+					id: 'amp-errors-notice-removed-cta'
+				};
+
 				if ( this.props.attributes.hasMultipleCtaBlocks ) {
 					removeBlock( this.props.clientId );
-					dispatch( 'core/editor' ).createWarningNotice( __( 'Multiple CTA Layers are not allowed, the block was removed.', 'amp' ) );
+					noticeMessage = wp.i18n.__( 'Multiple CTA Layers are not allowed, the block was removed.', 'amp' );
+				}
+
+				if ( 0 === blockIndex ) {
+					removeBlock( this.props.clientId );
+					noticeMessage = wp.i18n.__( 'CTA layer is not allowed on the first page, the block was removed.', 'amp' );
+				}
+
+				if ( noticeMessage ) {
+					dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
 				}
 			}
 
