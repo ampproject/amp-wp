@@ -202,7 +202,9 @@ class AMP_Post_Meta_Box {
 			'errorMessages' => $error_messages,
 		);
 
-		$script_data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::BLOCK_ASSET_HANDLE, 'amp' );
+		}
 
 		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,
