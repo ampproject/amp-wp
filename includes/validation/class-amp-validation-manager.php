@@ -1915,8 +1915,11 @@ class AMP_Validation_Manager {
 			true
 		);
 
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( $slug, 'amp' );
+		}
+
 		$data = wp_json_encode( array(
-			'i18n'                 => function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' ),
 			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
 			'isCanonical'          => amp_is_canonical(),
 		) );

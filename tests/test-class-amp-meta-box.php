@@ -77,7 +77,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
-		if ( ! function_exists( 'wp_get_jed_locale_data' ) && ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+		if ( ! function_exists( 'the_gutenberg_project' ) ) {
 			$this->markTestSkipped( 'Gutenberg is not available' );
 		}
 

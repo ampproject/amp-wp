@@ -1282,7 +1282,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
-		if ( ! function_exists( 'wp_get_jed_locale_data' ) && ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+		if ( ! function_exists( 'the_gutenberg_project' ) ) {
 			$this->markTestSkipped( 'Gutenberg not available.' );
 		}
 
