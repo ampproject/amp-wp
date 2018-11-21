@@ -239,6 +239,11 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	-webkit-filter: none;
 }
 
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"]  > .editor-block-list__block-edit::before,
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
 .edit-post-visual-editor .editor-block-list__block ul.editor-selectors {
 	position: absolute;
 	right: -155px;
