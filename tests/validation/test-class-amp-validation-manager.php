@@ -1292,10 +1292,15 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 
-		$script        = wp_scripts()->registered[ $slug ];
-		$inline_script = $script->extra['after'][1];
+		$script                = wp_scripts()->registered[ $slug ];
+		$inline_script         = $script->extra['after'][1];
+		$expected_dependencies = array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			$expected_dependencies[] = 'wp-i18n';
+		}
+
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
+		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
