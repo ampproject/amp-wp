@@ -1300,7 +1300,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME, $inline_script );
-		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
 	/**
