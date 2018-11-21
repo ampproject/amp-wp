@@ -97,6 +97,20 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
 }
 
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
+	opacity: 0.9;
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
 .amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
 	grid-auto-flow: column !important;
 	grid-template-rows: 100% !important;
