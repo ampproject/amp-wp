@@ -1,7 +1,8 @@
 import uuid from 'uuid/v4';
 import BlockSelector from './block-selector';
 import {
-	BLOCK_ICONS
+	BLOCK_ICONS,
+	maybeIsSelectedParentClass
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -22,6 +23,7 @@ const ALLOWED_BLOCKS = [
 ];
 
 const TEMPLATE = [
+	[ 'amp/amp-story-grid-layer-background-image' ],
 	[
 		'amp/amp-story-grid-layer-vertical',
 		[
@@ -98,7 +100,7 @@ export default registerBlockType(
 				</InspectorControls>,
 				<BlockSelector key="selectors" rootClientId={ props.clientId } />,
 				// Get the template dynamically.
-				<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
+				<div key="contents" className={ maybeIsSelectedParentClass( props.clientId ) } style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			];
