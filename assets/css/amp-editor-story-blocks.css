@@ -2,6 +2,10 @@ div[data-type="amp/amp-story-page"] {
 	border: 1px solid #ffdddd;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
 	margin: 60px auto 0;
