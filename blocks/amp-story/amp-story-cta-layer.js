@@ -48,10 +48,6 @@ const ALLOWED_BLOCKS = [
 	'core/video'
 ];
 
-const TEMPLATE = [
-	[ 'RichText', { placeholder: 'Add CTA here' } ],
-];
-
 /**
  * Register block.
  */
@@ -158,7 +154,7 @@ export default registerBlockType(
 							}
 						</PanelBody>
 					</InspectorControls>,
-					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } template={ TEMPLATE } />
+					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
 				];
 			}
 
