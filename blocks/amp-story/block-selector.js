@@ -48,6 +48,12 @@ class BlockSelector extends Component {
 			let className = 'component-editor__selector template-' + template;
 			if ( isBlockSelected( block.clientId ) || hasSelectedInnerBlock( block.clientId ) ) {
 				className += ' is-selected';
+
+				// Do not blur the CTA layer so the user can edit the elements within it.
+				if ( 'amp/amp-story-cta-layer' === block.name ) {
+					const ampStoryDiv = document.getElementById( 'block-' + block.clientId );
+					ampStoryDiv.classList.add( 'is-selected' );
+				}
 			}
 
 			let blockType = getBlockType( block.name );
