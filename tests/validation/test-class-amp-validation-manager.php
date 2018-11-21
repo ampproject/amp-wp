@@ -668,9 +668,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			),
 			'latest_posts' => array(
-				'<!-- wp:latest-posts {"postsToShow":1} /-->',
+				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
 					function_exists( 'gutenberg_wpautop' ) ? 'plugin' : 'core',
 					function_exists( 'gutenberg_wpautop' ) ? 'gutenberg' : 'wp-includes'
 				),

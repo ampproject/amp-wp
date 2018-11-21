@@ -53,17 +53,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected static $theme_features = array(
 		// Twenty Nineteen.
 		'twentynineteen'  => array(
-			'dequeue_scripts'                    => array(
+			'dequeue_scripts'                             => array(
 				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 				'twentynineteen-priority-menu',
 				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
 			),
-			'remove_actions'                     => array(
+			'remove_actions'                              => array(
 				'wp_print_footer_scripts' => array(
 					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
 				),
 			),
-			'add_twentynineteen_masthead_styles' => array(),
+			'add_twentynineteen_masthead_styles'          => array(),
+			'add_twentynineteen_image_styles'             => array(),
+			'remove_twentynineteen_thumbnail_image_sizes' => array(),
+
 		),
 
 		// Twenty Seventeen.
@@ -339,6 +342,26 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 			return $content;
 		} );
+	}
+
+	/**
+	 * Remove the sizes attribute from thumbnail images in Twenty Nineteen.
+	 *
+	 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
+	 * For example, <amp-img style="width:calc(50vw)">.
+	 * Removing the 'sizes' attribute isn't ideal, but it looks like it's not possible to override that inline style.
+	 *
+	 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
+	 * @since 1.0
+	 */
+	public static function remove_twentynineteen_thumbnail_image_sizes() {
+		add_filter( 'wp_get_attachment_image_attributes', function( $attr ) {
+			if ( isset( $attr['class'] ) && false !== strpos( $attr['class'], 'attachment-post-thumbnail' ) ) {
+				unset( $attr['sizes'] );
+			}
+
+			return $attr;
+		}, 11 );
 	}
 
 	/**
@@ -1055,5 +1078,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$item_output .= $dropdown_button;
 			return $item_output;
 		}, 10, 4 );
+	}
+
+	/**
+	 * Output image styles for twentynineteen.
+	 *
+	 * When <img> tags have an 'aligncenter' class, AMP_Img_Sanitizer::handle_centering() wraps theme in <figure class="aligncenter">.
+	 * This ensures that the image inside it is centered.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $args Arguments.
+	 */
+	public static function add_twentynineteen_image_styles( $args = array() ) {
+		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
+			ob_start();
+			?>
+			<style>
+				figure.aligncenter {
+					text-align: center
+				}
+			</style>
+			<?php
+			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+			wp_add_inline_style( get_template() . '-style', $styles );
+		}, 11 );
 	}
 }
