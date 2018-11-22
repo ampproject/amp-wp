@@ -290,3 +290,48 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 .post-type-amp_story .components-range-control__number {
 	width: 60px;
 }
+
+.post-type-amp_story .editor-default-block-appender {
+	max-width: 318px;
+}
+
+.post-type-amp_story .editor-default-block-appender .editor-inserter {
+	position: relative;
+	margin: 0 auto;
+	left: 0;
+	top: 0;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point {
+	position: static;
+	margin-top: 38px;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter {
+	opacity: 1;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button {
+	background-color: #FAFAFA;
+	background-image: url( '../images/add-page-inserter.svg' );
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 86px 96px;
+	border: 10px solid #eff0f1;
+	border-radius: 0;
+	height: 533px;
+	width: 318px;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
+	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg {
+	display: none;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__block-edit {
+	display: none;
+}
