@@ -1,5 +1,19 @@
 div[data-type="amp/amp-story-page"] {
-	border: 1px solid #ffdddd;
+	border: 10px solid #eff0f1;
+}
+
+div[data-type="amp/amp-story-page"]::after {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	width: 100%;
+	height: 10px;
+	background: #eff0f1;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
@@ -8,7 +22,7 @@ div[data-type="amp/amp-story-page"] {
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
-	background: #dcdcdc;
+	background: #f9f9f9;
 }
 
 @media (min-width: 600px) {
@@ -29,8 +43,14 @@ div[data-type="amp/amp-story-page"] {
 div[data-type="amp/amp-story-page"],
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	margin: auto;
-	width: 320px !important;
-	height: 533px !important;
+	width: 100%;
+	max-width: 338px;
+	height: 553px;
+}
+
+div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
+	width: 316px;
+
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
@@ -73,6 +93,38 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .amp-grid-template .editor-block-list__layout:first-of-type *:not(.editor-block-toolbar) {
 	box-sizing: border-box;
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
+	opacity: 0.9;
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
 }
 
 .amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
@@ -173,9 +225,15 @@ div[data-amp-position="lower-third"] {
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
 	position: absolute;
-	height: 20%;
-	width: 100%;
-	bottom: 0;
+	min-height: 20%;
+	height: auto;
+	width: 318px;
+	bottom: 38px;
+
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
+	height: auto !important;
 }
 
 .editor-block-list__layout > div {
@@ -186,11 +244,6 @@ div[data-amp-position="lower-third"] {
 div[data-amp-type="grid"] .block-library-image__resizer {
 	max-width: 318px !important;
 	max-height: 533px !important;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"].is-selected,
-.editor-block-list__layout div[data-amp-type="grid"].is-selected .editor-block-list__block {
-	outline: 1px dotted #99c2e0;
 }
 
 .editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
@@ -221,6 +274,10 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	-webkit-filter: none;
 }
 
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
 .components-icon-button.editor-block-navigation {
     display: none;
 }
@@ -244,9 +301,83 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	margin-right: 5px;
 }
 
+.editor-selectors .component-editor__selector button {
+	background: no-repeat left top;
+	padding-left: 37px;
+	height: 40px;
+	margin: 1px 0 1px 4px;
+}
+
 .editor-selectors .component-editor__selector .components-button:focus {
 	box-shadow: none;
 }
+
 .post-type-amp_story .components-range-control__number {
 	width: 60px;
+}
+
+
+.post-type-amp_story .editor-default-block-appender {
+	max-width: 318px;
+}
+
+.post-type-amp_story .editor-default-block-appender .editor-inserter {
+	position: relative;
+	margin: 0 auto;
+	left: 0;
+	top: 0;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender {
+	position: static;
+	margin-top: 38px;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter {
+	opacity: 1;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button {
+	background-color: #FAFAFA;
+	background-image: url( '../images/add-page-inserter.svg' );
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 86px 96px;
+	border: 10px solid #eff0f1;
+	border-radius: 0;
+	height: 533px;
+	width: 338px;
+	margin: 0 auto;
+	outline: none;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
+	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button svg {
+	display: none;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__block-edit {
+	display: none;
+}
+
+/* Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer. */
+.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
+	pointer-events: all;
+}
+
+.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
+	pointer-events: none;
+}
+
+.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
+	outline: none;
 }
