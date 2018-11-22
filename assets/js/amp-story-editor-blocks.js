@@ -210,7 +210,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				newProps;
 
 			// In case of any grid layer lets add data-amp-type for styling purposes.
-			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) ) {
+			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) || 'amp/amp-story-cta-layer' === props.block.name ) {
 				newProps = lodash.assign(
 					{},
 					props,
