@@ -43,8 +43,8 @@ div[data-type="amp/amp-story-page"]::after {
 div[data-type="amp/amp-story-page"],
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	margin: auto;
-	width: 340px !important;
-	height: 555px !important;
+	width: 338px !important;
+	height: 553px !important;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
@@ -234,11 +234,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	max-height: 533px !important;
 }
 
-.editor-block-list__layout div[data-amp-type="grid"].is-selected,
-.editor-block-list__layout div[data-amp-type="grid"].is-selected .editor-block-list__block {
-	outline: 1px dotted #99c2e0;
-}
-
 .editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
 	z-index: 0;
 }
@@ -267,7 +262,6 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	-webkit-filter: none;
 }
 
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"]  > .editor-block-list__block-edit::before,
 div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
 	outline: 1px solid #007cba;
 }
@@ -371,9 +365,8 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	background-size: 86px 96px;
 	border: 10px solid #eff0f1;
 	border-radius: 0;
-	height: 555px;
-	width: 340px;
-
+	height: 553px;
+	width: 338px;
 }
 
 .post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
@@ -396,4 +389,8 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 
 .post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
+}
+
+.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
+	outline: none;
 }
