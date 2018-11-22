@@ -1,5 +1,15 @@
 div[data-type="amp/amp-story-page"] {
-	border: 1px solid #ffdddd;
+	border: 10px solid #eff0f1;
+}
+
+div[data-type="amp/amp-story-page"]::after {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	width: 100%;
+	height: 10px;
+	background: #eff0f1;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
@@ -33,8 +43,8 @@ div[data-type="amp/amp-story-page"] {
 div[data-type="amp/amp-story-page"],
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	margin: auto;
-	width: 320px !important;
-	height: 533px !important;
+	width: 340px !important;
+	height: 555px !important;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
@@ -361,8 +371,9 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	background-size: 86px 96px;
 	border: 10px solid #eff0f1;
 	border-radius: 0;
-	height: 533px;
-	width: 318px;
+	height: 555px;
+	width: 340px;
+
 }
 
 .post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
