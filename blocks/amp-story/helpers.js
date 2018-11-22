@@ -386,7 +386,7 @@ export function editFillLayer( props, template ) {
  */
 function getLayerBreadCrumb( clientId, rootClientId ) {
 	return (
-		<div className={ 'editor-block-list__breadcrumb' }>
+		<div key='breadcrumb' className={ 'editor-block-list__breadcrumb' }>
 			<Toolbar>
 				{ rootClientId && (
 					<Fragment>
