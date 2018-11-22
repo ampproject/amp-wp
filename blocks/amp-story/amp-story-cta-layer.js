@@ -9,8 +9,7 @@ const {
 } = wp.blocks;
 const {
 	InspectorControls,
-	InnerBlocks,
-	RichText
+	InnerBlocks
 } = wp.editor;
 const {
 	Notice,
@@ -46,6 +45,10 @@ const ALLOWED_BLOCKS = [
 	'core/table',
 	'core/verse',
 	'core/video'
+];
+
+const TEMPLATE = [
+	[ 'core/button', { placeholder: 'CTA layer' } ]
 ];
 
 /**
@@ -154,7 +157,7 @@ export default registerBlockType(
 							}
 						</PanelBody>
 					</InspectorControls>,
-					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } />
+					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } template={TEMPLATE} />
 				];
 			}
 
