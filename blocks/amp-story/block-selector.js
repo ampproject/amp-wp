@@ -53,7 +53,7 @@ class BlockSelector extends Component {
 				if ( 'amp/amp-story-cta-layer' === block.name ) {
 					const ampStoryDiv = document.getElementById( 'block-' + block.clientId );
 					if ( ampStoryDiv ) {
-						ampStoryDiv.classList.add( 'is-selected' );
+						ampStoryDiv.setAttribute( 'data-amp-selected', 'parent' );
 					}
 				}
 			}
