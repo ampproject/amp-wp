@@ -225,11 +225,13 @@ div[data-amp-position="lower-third"] {
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
 	position: absolute;
-	min-height: 20%;
-	height: auto;
+	height: 20%;
 	width: 318px;
 	bottom: 38px;
+}
 
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__block-edit {
+	max-height: 100%;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
