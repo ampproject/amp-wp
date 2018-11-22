@@ -96,7 +96,9 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 .amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before {
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
+div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
+{
 	outline: 1px solid #007cba;
 }
 
