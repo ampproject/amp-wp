@@ -135,7 +135,7 @@ class AMP_Editor_Blocks {
 			wp_enqueue_script(
 				'amp-editor-blocks-build',
 				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
 		}
@@ -143,7 +143,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			array( 'wp-editor', 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
