@@ -358,6 +358,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					default: 0
 				};
 			}
+
+			if ( 'core/paragraph' === name ) {
+				settings.attributes.fontSize.default = 'large';
+			}
 		}
 		return settings;
 	};
