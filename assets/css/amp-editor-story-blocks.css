@@ -323,6 +323,11 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	width: 318px;
 }
 
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
+	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
+}
+
 .post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg {
 	display: none;
 }
