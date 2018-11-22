@@ -210,7 +210,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				newProps;
 
 			// In case of any grid layer lets add data-amp-type for styling purposes.
-			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) || 'amp/amp-story-cta-layer' === props.block.name ) {
+			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) ) {
 				newProps = lodash.assign(
 					{},
 					props,
@@ -228,6 +228,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				if ( wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
 					newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
 				}
+
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
+			if ( 'amp/amp-story-cta-layer' === props.block.name && wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-selected': 'parent'
+							}
+						)
+					}
+				);
 
 				return el(
 					BlockListBlock,
