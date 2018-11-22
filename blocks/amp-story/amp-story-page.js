@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4';
-import BlockSelector from './block-selector';
+import BlockNavigation from './block-navigation';
 import {
 	BLOCK_ICONS,
 	maybeIsSelectedParentClass
@@ -12,7 +12,8 @@ const {
 const {
 	InnerBlocks,
 	PanelColorSettings,
-	InspectorControls
+	InspectorControls,
+	Inserter
 } = wp.editor;
 
 const ALLOWED_BLOCKS = [
@@ -21,6 +22,12 @@ const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer-thirds',
 	'amp/amp-story-cta-layer'
 ];
+
+const {
+	hasSelectedInnerBlock,
+	getSelectedBlockClientId,
+	getBlockIndex
+} = wp.data.select( 'core/editor' );
 
 const TEMPLATE = [
 	[ 'amp/amp-story-grid-layer-background-image' ],
@@ -74,14 +81,22 @@ export default registerBlockType(
 		 * */
 
 		edit( props ) {
-			const { setAttributes, attributes } = props;
+			const { setAttributes, attributes, isSelected } = props;
 			const onChangeBackgroundColor = newBackgroundColor => {
 				setAttributes( { backgroundColor: newBackgroundColor } );
 			};
+			let displayNavigation = false;
 
 			// If the page ID is not set, add one.
 			if ( ! attributes.id ) {
 				setAttributes( { id: uuid() } );
+			}
+
+			if (
+				( ! getSelectedBlockClientId() && 0 === getBlockIndex( props.clientId ) ) ||
+				( hasSelectedInnerBlock( props.clientId, true ) || isSelected )
+			) {
+				displayNavigation = true;
 			}
 
 			return [
@@ -98,7 +113,12 @@ export default registerBlockType(
 						] }
 					/>
 				</InspectorControls>,
-				<BlockSelector key="selectors" rootClientId={ props.clientId } />,
+				displayNavigation && (
+					<div key='layerManager' className='editor-selectors'>
+						<Inserter rootClientId={ props.clientId } />
+						<BlockNavigation />
+					</div>
+				),
 				// Get the template dynamically.
 				<div key="contents" className={ maybeIsSelectedParentClass( props.clientId ) } style={{ backgroundColor: attributes.backgroundColor }}>
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
