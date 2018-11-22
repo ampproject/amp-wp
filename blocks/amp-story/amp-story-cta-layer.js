@@ -48,7 +48,7 @@ const ALLOWED_BLOCKS = [
 ];
 
 const TEMPLATE = [
-	[ 'core/button', { placeholder: 'CTA layer' } ]
+	[ 'core/button', { placeholder: __( 'CTA layer', 'amp' ) } ]
 ];
 
 /**
@@ -118,10 +118,10 @@ export default registerBlockType(
 
 				if ( this.props.attributes.hasMultipleCtaBlocks ) {
 					removeBlock( this.props.clientId );
-					noticeMessage = wp.i18n.__( 'Multiple CTA Layers are not allowed, the block was removed.', 'amp' );
+					noticeMessage = __( 'Multiple CTA Layers are not allowed, the block was removed.', 'amp' );
 				} else if ( 0 === blockIndex ) {
 					removeBlock( this.props.clientId );
-					noticeMessage = wp.i18n.__( 'CTA layer is not allowed on the first page, the block was removed.', 'amp' );
+					noticeMessage = __( 'CTA layer is not allowed on the first page, the block was removed.', 'amp' );
 				}
 
 				if ( noticeMessage ) {
