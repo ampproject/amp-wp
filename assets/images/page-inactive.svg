@@ -1,16 +1,1 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg width="29px" height="38px" viewBox="0 0 29 38" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <!-- Generator: Sketch 51.2 (57519) - http://www.bohemiancoding.com/sketch -->
-    <title>page-inactive</title>
-    <desc>Created with Sketch.</desc>
-    <defs></defs>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="page-inactive">
-            <rect id="Rectangle-9-Copy" stroke="#E4E4E4" fill="#FFFFFF" fill-rule="nonzero" x="0.5" y="0.5" width="28" height="37"></rect>
-            <rect id="Rectangle-8" stroke="#686868" stroke-width="2" fill="#999999" fill-rule="nonzero" x="7" y="8" width="15" height="22"></rect>
-            <text id="Button-Text-Copy-12" font-family="Dashicons-Regular, Dashicons" font-size="12" font-weight="normal" fill="#FFFFFF">
-                <tspan x="8.5" y="26"></tspan>
-            </text>
-        </g>
-    </g>
-</svg>
+<svg enable-background="new 0 0 29 38" viewBox="0 0 29 38" xmlns="http://www.w3.org/2000/svg"><g fill="#fff"><path d="m.5.5h28v37h-28z" stroke="#e4e4e4"/><text transform="translate(1 33.3333)"/><text transform="translate(.5 33.3333)"/></g><path d="m10.7 9.9h6.1c1.9 0 3.5 1.6 3.5 3.5v11.9c0 1.9-1.6 3.5-3.5 3.5h-6.1c-1.9 0-3.5-1.6-3.5-3.5v-11.9c-.1-1.9 1.5-3.5 3.5-3.5z" fill="#999" stroke="#999" stroke-width="2"/><text fill="#d7d9d7" stroke="#565656" transform="translate(.5 33.3333)"/></svg>
