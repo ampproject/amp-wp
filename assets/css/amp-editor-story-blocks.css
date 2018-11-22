@@ -219,9 +219,15 @@ div[data-amp-position="lower-third"] {
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
 	position: absolute;
-	height: 20%;
+	min-height: 20%;
+	height: auto;
 	width: 100%;
-	bottom: 0;
+	bottom: 38px;
+
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
+	height: auto !important;
 }
 
 .editor-block-list__layout > div {
@@ -365,7 +371,7 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	background-size: 86px 96px;
 	border: 10px solid #eff0f1;
 	border-radius: 0;
-	height: 553px;
+	height: 533px;
 	width: 338px;
 }
 
