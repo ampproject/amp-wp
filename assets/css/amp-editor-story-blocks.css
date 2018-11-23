@@ -2,7 +2,8 @@
 [Table of contents]
 
 	1. Style story pages wrapper
-	2. Selected state outlines
+	2. Selected state
+		2.1 Selected label
 	3. Story page dimensions
 	4. Layers stacking
 		4.1 Hide layers above
@@ -73,6 +74,21 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 }
 
 /*
+ * 2.1 Selected label
+ * Show label while the layer is selected
+ */
+
+ .post-type-amp_story .editor-block-list__breadcrumb {
+	 z-index: 6;
+	 pointer-events: none;
+ }
+
+ .post-type-amp_story .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
+	 opacity: 1;
+	 animation: none;
+ }
+
+/*
  * 3. Story page dimensions.
  * Fix the page editor size to the ratio of the stories.
  */
@@ -129,6 +145,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	position: absolute;
 	height: 100%;
 	width: 100%;
+}
+
+.editor-block-list__layout div[data-amp-selected="parent"] {
+	z-index: 1;
 }
 
 .amp-grid-template .editor-block-list__layout:first-of-type {
@@ -396,8 +416,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	opacity: 1;
 }
 
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button
-
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button,
 .post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button,
 .post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button {
 	background-color: #FAFAFA;
