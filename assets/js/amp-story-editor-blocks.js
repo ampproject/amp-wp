@@ -180,8 +180,21 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Properties.
 	 */
 	component.setBlockParent = function( props ) {
-		if ( component.data.gridBlocks.includes( props.name ) || 'amp/amp-story-cta-layer' === props.name ) {
-			let parent = [ props.name ];
+		// Note that `parent` setting gets priority over `allowedBlocks`.
+		if ( component.data.allowedBlocks.includes( props.name ) ) {
+			// Allow CTA as the parent for all the blocks.
+			let parent = [
+				'amp/amp-story-cta-layer'
+			];
+
+			// In case of other allowed blocks except for button also add other grid layers as parents.
+			if ( 'core/button' !== props.name ) {
+				parent = parent.concat( [
+					'amp/amp-story-grid-layer-horizontal',
+					'amp/amp-story-grid-layer-vertical',
+					'amp/amp-story-grid-layer-thirds'
+				] );
+			}
 			if ( props.parent ) {
 				parent = parent.concat( props.parent );
 			}
@@ -189,6 +202,13 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{},
 				props,
 				{ parent: parent }
+			);
+		} else if ( -1 === props.name.indexOf( 'amp/amp-story-' ) ) {
+			// Do not allow inserting any of the blocks if they're not AMP Story blocks.
+			return Object.assign(
+				{},
+				props,
+				{ parent: [ '' ] }
 			);
 		}
 		return props;
@@ -228,6 +248,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				if ( wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
 					newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
 				}
+
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
+			if ( 'amp/amp-story-cta-layer' === props.block.name && wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-selected': 'parent'
+							}
+						)
+					}
+				);
 
 				return el(
 					BlockListBlock,
@@ -357,6 +398,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					type: 'number',
 					default: 0
 				};
+			}
+
+			if ( 'core/paragraph' === name ) {
+				settings.attributes.fontSize.default = 'large';
 			}
 		}
 		return settings;

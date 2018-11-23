@@ -7,7 +7,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 **Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.7  
-**Tested up to:** 4.9  
+**Tested up to:** 5.0  
 **Stable tag:** 0.7.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.3.6  
@@ -75,6 +75,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - **Add support for allowing a site subset to be native AMP.** See [#1235](https://github.com/Automattic/amp-wp/pull/1235). Props westonruter.
 - Add an admin pointer for updated AMP settings screen for version 1.0. See [#1271](https://github.com/Automattic/amp-wp/pull/1271), [#1254](https://github.com/Automattic/amp-wp/issues/1254). Props kienstra.
 - Add support for three core themes (Twenty Fifteen, Twenty Sixteen, Twenty Seventeen) so that they can be used out of the box with AMP theme support added without needing to create a child theme. See [#1074](https://github.com/Automattic/amp-wp/pull/1074). Props westonruter, DavidCramer, kienstra.
+- Add AMP support for Twenty Nineteen. See [#1587](https://github.com/Automattic/amp-wp/pull/1587), [#1619](https://github.com/Automattic/amp-wp/pull/1619). Props westonruter.
 - Add AMP menu item to admin bar on frontend with indication of AMP validation status; accessing an AMP URL that has unaccepted validation errors will redirect to the non-AMP page and cause the AMP admin bar item to indicate the failure, along with a link to access the validation results. See [#1199](https://github.com/Automattic/amp-wp/pull/1199). Props westonruter.
 - Add dynamic handling of validation errors. See [#1093](https://github.com/Automattic/amp-wp/pull/1093), [#1063](https://github.com/Automattic/amp-wp/pull/1063), [#1087](https://github.com/Automattic/amp-wp/issues/1087). Props westonruter.
 - Add AMP validation of blocks. See [#1019](https://github.com/Automattic/amp-wp/pull/1019). Props westonruter.
@@ -147,20 +148,28 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Improve validation and presentation of analytics form. See [#1299](https://github.com/Automattic/amp-wp/pull/1299), [#1133](https://github.com/Automattic/amp-wp/issues/1133), [#1296](https://github.com/Automattic/amp-wp/pull/1296). Props westonruter, AdelDima.
 - Prevent validation of auto-drafts, including when merely accessing New Post screen. See [#1301](https://github.com/Automattic/amp-wp/pull/1301). Props westonruter.
 - Fix inability to move link element due to assigned parent. See [#1322](https://github.com/Automattic/amp-wp/issues/1322). Props westonruter.
+- Gutenberg: Remove 'type' from attributes where 'source' is set. See [#1622](https://github.com/Automattic/amp-wp/pull/1622). Props miina.
+- Gutenberg: Fix displaying validation warning and usage of PHP function. See [#1612](https://github.com/Automattic/amp-wp/pull/1612). Props miina.
 - Fix stretched images in Twenty Seventeen them and Gutenberg. See [#1321](https://github.com/Automattic/amp-wp/issues/1321), [#1281](https://github.com/Automattic/amp-wp/issues/1281), [#1237](https://github.com/Automattic/amp-wp/issues/1237). Props hellofromtonya.
 - Fix image dimension extractor so it does not disregard duplicate images. See [#1314](https://github.com/Automattic/amp-wp/issues/1314). Props lukas9393.
+- Short-circuit polldaddy shortcode when no poll or survey supplied. See [#1621](https://github.com/Automattic/amp-wp/pull/1621). Props westonruter.
 - Remove redundant version from composer.json and add PHP version requirement. See [#1333](https://github.com/Automattic/amp-wp/issues/1333), [#1328](https://github.com/Automattic/amp-wp/issues/1328), [#1334](https://github.com/Automattic/amp-wp/issues/1334), [#1332](https://github.com/Automattic/amp-wp/issues/1332). Props swissspidy.
+- Add warning when AMP plugin is installed in incorrect directory. See [#1593](https://github.com/Automattic/amp-wp/pull/1593). Props westonruter.
 - Store validation errors in order of occurrence in document. See [#1335](https://github.com/Automattic/amp-wp/issues/1335). Props westonruter.
 - Add .editorconfig file. See [#1336](https://github.com/Automattic/amp-wp/issues/1336), [#51](https://github.com/Automattic/amp-wp/issues/51). Props swissspidy.
 - Update i18n to make use of updated WP-CLI command. See [#1329](https://github.com/Automattic/amp-wp/issues/1329), [#1327](https://github.com/Automattic/amp-wp/issues/1327), [#1341](https://github.com/Automattic/amp-wp/issues/1341), [#1345](https://github.com/Automattic/amp-wp/issues/1345), [#1393](https://github.com/Automattic/amp-wp/issues/1393). Props swissspidy, felixarntz, westonruter.
 - Use all eligible post types when `all_templates_supported` is selected. See [#1338](https://github.com/Automattic/amp-wp/issues/1338), [#1302](https://github.com/Automattic/amp-wp/issues/1302), [#1344](https://github.com/Automattic/amp-wp/issues/1344). Props hellofromtonya, westonruter.
+- Do not show fallback source as active theme if no validation errors. See [#1592](https://github.com/Automattic/amp-wp/pull/1592). Props westonruter.
 - Respect default AMP enabled status when creating a new post in Gutenberg. See [#1339](https://github.com/Automattic/amp-wp/issues/1339). Props hellofromtonya.
 - Fix incorrect attribution of theme as source for content validation errors. See [#1467](https://github.com/Automattic/amp-wp/pull/1467). Props westonruter.
 - Fix conversion of video to amp-video. See [#1477](https://github.com/Automattic/amp-wp/pull/1477). Props westonruter.
 - Add new icon, text, and style to splash notice. See [#1470](https://github.com/Automattic/amp-wp/pull/1470). Props jacobschweitzer.
 - Normalize 'ver' query param in script/style validation errors to prevent recurrence after accepted. See [#1346](https://github.com/Automattic/amp-wp/issues/1346). Props westonruter.
+- Add bing-amp.com to the list of AMP Cache hosts. See [#1447](https://github.com/Automattic/amp-wp/pull/1447). Props westonruter.
 - Add missing tabindex attribute to lightbox images. See [#1350](https://github.com/Automattic/amp-wp/issues/1350). Props amedina.
+- Update AMP spec to 757 (v1811091519050). See [#1588](https://github.com/Automattic/amp-wp/pull/1588). Props westonruter, kienstra.
 - Detect ineffectual post-processor response cache due to high MISS rates and auto-disable. See [#1325](https://github.com/Automattic/amp-wp/issues/1325), [#1239](https://github.com/Automattic/amp-wp/issues/1239). Props hellofromtonya, westonruter.
+- Update regex for tag selectors. See [#1534](https://github.com/Automattic/amp-wp/pull/1534). Props swissspidy, westonruter.
 - Update the validator spec version to 720 and AMP v1534879991178; add support for reference points. See [#1315](https://github.com/Automattic/amp-wp/issues/1315), [#1386](https://github.com/Automattic/amp-wp/issues/1386), [#1330](https://github.com/Automattic/amp-wp/issues/1330). Props westonruter.
 - Update spec from revision 720 to 734. See [#1475](https://github.com/Automattic/amp-wp/pull/1475). Props kienstra.
 - Fix form sanitizer's handling of relative actions by making them absolute. See [#1352](https://github.com/Automattic/amp-wp/issues/1352), [#1349](https://github.com/Automattic/amp-wp/issues/1349). Props ricardobrg.
@@ -186,6 +195,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Improve access to AMP admin screens for users who are not administrators. [#1437](https://github.com/Automattic/amp-wp/pull/1437). Props westonruter.
 - Display a welcome notice on the main 'AMP Settings' page. See [#1442](https://github.com/Automattic/amp-wp/pull/1442). Props kienstra.
 - Fix URL protocol validation and parsing attribute values with multiple URLs. See [#1411](https://github.com/Automattic/amp-wp/pull/1411), [#1410](https://github.com/Automattic/amp-wp/issues/1410). Props westonruter.
+- Prevent a notice from appearing in the Compatibility Tool meta box. See [#1605](https://github.com/Automattic/amp-wp/pull/1605). Props kienstra.
 - Restore ability to customize 'amp' query var when theme support added. [#1455](https://github.com/Automattic/amp-wp/pull/1455). Props westonruter.
 - Add slug constants for theme support and post type support. [#1456](https://github.com/Automattic/amp-wp/pull/1456). Props westonruter.
 - Fix ability to add AMP support for custom post types. See [#1441](https://github.com/Automattic/amp-wp/pull/1441). Props westonruter.

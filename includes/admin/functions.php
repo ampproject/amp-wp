@@ -68,11 +68,13 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	$post_ids = get_posts( array(
-		'post_status'    => 'publish',
-		'post_password'  => '',
-		'post_type'      => $supported_post_types,
-		'posts_per_page' => 1,
-		'fields'         => 'ids',
+		'no_found_rows'    => true,
+		'suppress_filters' => false,
+		'post_status'      => 'publish',
+		'post_password'    => '',
+		'post_type'        => $supported_post_types,
+		'posts_per_page'   => 1,
+		'fields'           => 'ids',
 		// @todo This should eventually do a meta_query to make sure there are none that have AMP_Post_Meta_Box::STATUS_POST_META_KEY = DISABLED_STATUS.
 	) );
 

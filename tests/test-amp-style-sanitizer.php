@@ -502,6 +502,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
 				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
 			),
+			'type_class_names' => array(
+				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
+				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
+			),
 		);
 	}
 

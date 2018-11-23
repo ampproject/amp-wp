@@ -203,7 +203,13 @@ class AMP_Post_Meta_Box {
 			'errorMessages' => $error_messages,
 		);
 
-		$script_data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::BLOCK_ASSET_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) ) {
+			$script_data['i18n'] = wp_get_jed_locale_data( 'amp' );
+		} elseif ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$script_data['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
+		}
 
 		wp_add_inline_script(
 			self::BLOCK_ASSET_HANDLE,

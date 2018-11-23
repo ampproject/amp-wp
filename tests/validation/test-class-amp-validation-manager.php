@@ -668,9 +668,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			),
 			'latest_posts' => array(
-				'<!-- wp:latest-posts {"postsToShow":1} /-->',
+				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
 					function_exists( 'gutenberg_wpautop' ) ? 'plugin' : 'core',
 					function_exists( 'gutenberg_wpautop' ) ? 'gutenberg' : 'wp-includes'
 				),
@@ -1282,8 +1282,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
-		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$this->markTestSkipped( 'Gutenberg not available.' );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
 		global $post;
@@ -1292,15 +1292,19 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 
-		$script        = wp_scripts()->registered[ $slug ];
-		$inline_script = $script->extra['after'][1];
+		$script                = wp_scripts()->registered[ $slug ];
+		$inline_script         = $script->extra['after'][1];
+		$expected_dependencies = array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			$expected_dependencies[] = 'wp-i18n';
+		}
+
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
+		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME, $inline_script );
-		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
 	/**

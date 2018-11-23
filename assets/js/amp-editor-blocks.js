@@ -231,25 +231,21 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampFitText = {
-				type: 'boolean',
 				default: false
 			};
 			settings.attributes.minFont = {
-				type: 'number',
 				default: component.data.fontSizes.small,
 				source: 'attribute',
 				selector: 'amp-fit-text',
 				attribute: 'min-font-size'
 			};
 			settings.attributes.maxFont = {
-				type: 'number',
 				default: component.data.fontSizes.larger,
 				source: 'attribute',
 				selector: 'amp-fit-text',
 				attribute: 'max-font-size'
 			};
 			settings.attributes.height = {
-				type: 'number',
 				default: 50,
 				source: 'attribute',
 				selector: 'amp-fit-text',
@@ -458,7 +454,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			FontSizePicker = wp.components.FontSizePicker,
 			ToggleControl = wp.components.ToggleControl,
 			PanelBody = wp.components.PanelBody,
-			label = __( 'Use AMP Fit Text' ),
+			label = __( 'Automatically fit text to container', 'amp' ),
 			FONT_SIZES = [
 				{
 					name: 'small',
@@ -499,17 +495,19 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		];
 
 		if ( ampFitText ) {
+			maxFont = parseInt( maxFont, 10 );
+			height = parseInt( height, 10 );
+			minFont = parseInt( minFont, 10 );
 			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
 				el( TextControl, {
 					label: __( 'Height' ),
 					value: height,
-					type: 'number',
 					min: 1,
 					onChange: function( nextHeight ) {
 						props.setAttributes( { height: nextHeight } );
 					}
 				} ),
-				maxFont > height && el(
+				parseInt( maxFont ) > parseInt( height ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -526,13 +524,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							if ( ! nextMinFont ) {
 								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
 							}
-							if ( nextMinFont <= maxFont ) {
+							if ( parseInt( nextMinFont, 10 ) <= maxFont ) {
 								props.setAttributes( { minFont: nextMinFont } );
 							}
 						}
 					} )
 				),
-				minFont > maxFont && el(
+				parseInt( minFont ) > parseInt( maxFont ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -701,9 +699,9 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
 		var text = attributes.text || '',
+			content = '',
 			fitTextProps = {
-				layout: 'fixed-height',
-				children: element
+				layout: 'fixed-height'
 			};
 
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
@@ -749,6 +747,17 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					text
 				);
 			}
+		} else if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
+			content = component.getAmpFitTextContent( attributes.content );
+			if ( content !== attributes.content ) {
+				return wp.element.cloneElement(
+					element,
+					{
+						key: 'new',
+						value: content
+					}
+				);
+			}
 		} else if ( -1 !== component.data.textBlocks.indexOf( blockType.name ) && attributes.ampFitText ) {
 			if ( attributes.minFont ) {
 				fitTextProps[ 'min-font-size' ] = attributes.minFont;
@@ -759,9 +768,49 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( attributes.height ) {
 				fitTextProps.height = attributes.height;
 			}
+
+			/*
+			 * This is a workaround for AMP Stories since AMP Story CSS is overriding the amp-fit-text CSS.
+			 * Note that amp-fit-text should support containing elements as well:
+			 * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
+			 */
+			if ( 'core/paragraph' === blockType.name ) {
+				var ampFitTextContent = '<amp-fit-text';
+				_.each( fitTextProps, function( value, att ) {
+					ampFitTextContent += ' ' + att + '="' + value + '"';
+				} );
+				ampFitTextContent += '>' + component.getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
+
+				return wp.element.cloneElement(
+					element,
+					{
+						key: 'new',
+						value: ampFitTextContent
+					}
+				);
+			}
+
+			fitTextProps.children = element;
 			return wp.element.createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
+	};
+
+	/**
+	 * Get inner content of AMP Fit Text tag.
+	 *
+	 * @param {string} content Original content.
+	 * @return {string} Modified content.
+	 */
+	component.getAmpFitTextContent = function getAmpFitTextContent( content ) {
+		var contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/,
+			match, newContent;
+		match = contentRegex.exec( content );
+		newContent = content;
+		if ( match && match[ 1 ] ) {
+			newContent = match[ 1 ];
+		}
+		return newContent;
 	};
 
 	/**
