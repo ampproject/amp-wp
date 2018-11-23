@@ -1,3 +1,32 @@
+/*------------------------------------------------------------------
+[Table of contents]
+
+	1. Style story pages wrapper
+	2. Selected state outlines
+	3. Story page dimensions
+	4. Layers stacking
+		4.1 Hide layers above
+		4.2 Blur layers above
+		4.3 Stroke text for legibility.
+	5. Layers Styling
+		5.1 Thirds Layer
+		5.2 Fill layer
+		5.3 CTA layer
+	6. Inserter customisations.
+		6.1 Ghosted page inserter
+	7. Block navigator
+	8. Shame
+		8.1 Gutenberg - Warning div not clickable
+
+-------------------------------------------------------------------*/
+
+
+/*
+ * 1. Style story pages wrapper.
+ * - Add thicker border around the pages
+ * - Change background to light gray
+ */
+
 div[data-type="amp/amp-story-page"] {
 	border: 10px solid #eff0f1;
 }
@@ -12,17 +41,45 @@ div[data-type="amp/amp-story-page"]::after {
 	background: #eff0f1;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
+	background: #f9f9f9;
+}
+
+/*
+ * 2. Selected state outlines.
+ * Change default gray selected highlights into blue,
+ * as gray was not visible in a multi-layer setup.
+ */
+
 .editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
 	outline: 1px solid #007cba;
 }
 
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
+div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
+{
+	outline: 1px solid #007cba;
+}
+
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
+/* Remove one default outline as it was unnecessary with the above implementation. */
+
+.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
+	outline: none;
+}
+
+/*
+ * 3. Story page dimensions.
+ * Fix the page editor size to the ratio of the stories.
+ */
+
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
 	margin: 60px auto 0;
-}
-
-.editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
-	background: #f9f9f9;
 }
 
 @media (min-width: 600px) {
@@ -30,14 +87,6 @@ div[data-type="amp/amp-story-page"]::after {
 		margin: 0;
 		padding: 0;
 	}
-}
-
-.components-popover.editor-inserter__amp .components-popover__content {
-	height: 200px;
-}
-
-.editor-inserter__popover .amp-story-has-cta-layer .editor-block-list-item-amp-amp-story-cta-layer {
-	opacity: 0.5;
 }
 
 div[data-type="amp/amp-story-page"],
@@ -50,14 +99,19 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
 	width: 316px;
-
 }
+
+/* Also override needed core inline styles. */
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
 	min-height: initial !important;
 }
 
-/* Make layer be exactly on top of each other */
+/*
+ * 4. Layers stacking.
+ * Setup on top of each other layering on the story children.
+ */
+
 .editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block:first-child .editor-block-list__block-edit {
 	margin: 0;
 }
@@ -95,40 +149,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	box-sizing: border-box;
 }
 
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
-div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
-{
-	outline: 1px solid #007cba;
-}
-
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
-	text-shadow:
-		0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
-}
-
-.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
-	opacity: 0.9;
-	text-shadow:
-		0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
-}
-
 .amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
 	grid-auto-flow: column !important;
 	grid-template-rows: 100% !important;
@@ -158,6 +178,90 @@ div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-bloc
 	width: 100%;
 }
 
+/*
+ * 4.1 Hide layers above
+ * Hide elements above the currently selected layer.
+ */
+
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
+	z-index: 0;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
+	display: none;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
+.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-amp-type="grid"],
+.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
+.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-type="amp/amp-story-cta-layer"]{
+	display: none;
+}
+
+/*
+ * 4.2 Blur layers above
+ * Layers - Blur and fade out the layers beneath the currently selected layer.
+ */
+
+.editor-block-list__layout > div {
+	transition: .3s;
+	transition-property: opacity, filter;
+}
+
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
+	opacity: 0.3;
+	filter: blur(8px);
+	-webkit-filter: blur(8px);
+}
+
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
+div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
+	opacity: 1;
+	filter: none;
+	-webkit-filter: none;
+}
+
+/*
+ * 4.3 Stroke text for legibility.
+ * Add white stroke to text in layers in order to be legible
+ * while editing on top of varying colored background.
+ */
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
+	opacity: 0.9;
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
+/*
+ * 5. Layers Styling
+ */
+
+/*
+ * 5.1 Thirds layer.
+ */
+
 .amp-grid-template-thirds .editor-block-list__layout:first-of-type {
 	grid-template-rows: 1fr 1fr 1fr;
 	grid-template-areas: "upper-third" "middle-third" "lower-third";
@@ -175,6 +279,10 @@ div[data-amp-position="lower-third"] {
 	grid-area: lower-third / lower-third / lower-third / lower-third;
 }
 
+/*
+ * 5.2 Fill layer.
+ * Style the fill image & fill video type layers.
+ */
 
 .amp-grid-template-fill .editor-block-list__layout > :first-child {
 	bottom: 0;
@@ -221,9 +329,18 @@ div[data-amp-position="lower-third"] {
 	height: 533px !important;
 }
 
+div[data-amp-type="grid"] .block-library-image__resizer {
+	max-width: 318px !important;
+	max-height: 533px !important;
+}
+
 .amp-grid-template-fill > :not(:first-child) {
 	display: none;
 }
+
+/*
+ * 5.3 CTA layer.
+ */
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
 	position: absolute;
@@ -240,86 +357,23 @@ div[data-amp-position="lower-third"] {
 	height: auto !important;
 }
 
-.editor-block-list__layout > div {
-	transition: .3s;
-	transition-property: opacity, filter;
+/*
+ * 6. Inserter customisations.
+ */
+
+ .components-popover.editor-inserter__amp .components-popover__content {
+	height: 200px;
 }
 
-div[data-amp-type="grid"] .block-library-image__resizer {
-	max-width: 318px !important;
-	max-height: 533px !important;
+/* Fade out CTA Layer in inserter when it's already present */
+.editor-inserter__popover .amp-story-has-cta-layer .editor-block-list-item-amp-amp-story-cta-layer {
+	opacity: 0.5;
 }
 
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
-	z-index: 0;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
-	display: none;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-type="amp/amp-story-cta-layer"]{
-	display: none;
-}
-
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
-	opacity: 0.3;
-	filter: blur(8px);
-	-webkit-filter: blur(8px);
-}
-
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
-	opacity: 1;
-	filter: none;
-	-webkit-filter: none;
-}
-
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
-	outline: 1px solid #007cba;
-}
-
-.components-icon-button.editor-block-navigation {
-    display: none;
-}
-
-.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
-    position: fixed;
-    left: 200px;
-    top: 150px;
-    width: 300px;
-    z-index: 80;
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-block-navigation__list {
-	list-style-type: none;
-}
-
-.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .components-icon-button .dashicon {
-	margin-right: 5px;
-}
-
-.editor-selectors .component-editor__selector button {
-	background: no-repeat left top;
-	padding-left: 37px;
-	height: 40px;
-	margin: 1px 0 1px 4px;
-}
-
-.editor-selectors .component-editor__selector .components-button:focus {
-	box-shadow: none;
-}
-
-.post-type-amp_story .components-range-control__number {
-	width: 60px;
-}
-
+/*
+ * 6.1 Ghosted page inserter
+ * Change the last inserter into a ghosted page.
+ */
 
 .post-type-amp_story .editor-default-block-appender {
 	max-width: 318px;
@@ -373,15 +427,59 @@ div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-
 	display: none;
 }
 
-/* Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer. */
+/* 7. Block navigator */
+
+.components-icon-button.editor-block-navigation {
+    display: none;
+}
+
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+    position: fixed;
+    left: 200px;
+    top: 150px;
+    width: 300px;
+    z-index: 80;
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-block-navigation__list {
+	list-style-type: none;
+}
+
+.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .components-icon-button .dashicon {
+	margin-right: 5px;
+}
+
+.editor-selectors .component-editor__selector button {
+	background: no-repeat left top;
+	padding-left: 37px;
+	height: 40px;
+	margin: 1px 0 1px 4px;
+}
+
+.editor-selectors .component-editor__selector .components-button:focus {
+	box-shadow: none;
+}
+
+.post-type-amp_story .components-range-control__number {
+	width: 60px;
+}
+
+/*
+ * 8. Shame
+ */
+
+/*
+ * 8.1 Gutenberg - Warning div not clickable
+ * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
+ */
+
 .post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
 	pointer-events: all;
 }
 
 .post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
-}
-
-.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
-	outline: none;
 }
