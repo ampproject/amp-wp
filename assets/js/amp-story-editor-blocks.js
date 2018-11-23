@@ -255,6 +255,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
+			if ( 'amp/amp-story-cta-layer' === props.block.name && wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-selected': 'parent'
+							}
+						)
+					}
+				);
+
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
 			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
 				return [
 					el( BlockListBlock, _.extend( {
