@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { map, noop } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 const { withSelect, withDispatch } = wp.data;
@@ -26,7 +21,7 @@ function BlockNavigationList( {
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<ul key='navigation-list' className="editor-block-navigation__list" role="list">
-			{ map( blocks, ( block ) => {
+			{ _.map( blocks, ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
 				let className = 'editor-block-navigation__item-button';
@@ -117,7 +112,7 @@ export default compose(
 			selectedBlockClientId
 		};
 	} ),
-	withDispatch( ( dispatch, { onSelect = noop } ) => {
+	withDispatch( ( dispatch, { onSelect = _.noop } ) => {
 		return {
 			selectBlock( clientId ) {
 				dispatch( 'core/editor' ).selectBlock( clientId );
