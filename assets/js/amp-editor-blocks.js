@@ -507,7 +507,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						props.setAttributes( { height: nextHeight } );
 					}
 				} ),
-				maxFont > height && el(
+				parseInt( maxFont ) > parseInt( height ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -530,7 +530,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						}
 					} )
 				),
-				minFont > maxFont && el(
+				parseInt( minFont ) > parseInt( maxFont ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
