@@ -2038,20 +2038,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$final_size = 0;
 		$dom        = $this->dom;
 		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
-			$stylesheet = '';
+			$stylesheet_parts = array();
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
-					if ( '}' === $stylesheet_part && ! empty( $query ) ) {
-						if ( count( $query ) >= 2 ) {
-							$query[]     = $stylesheet_part;
-							$stylesheet .= implode( '', $query );
-						}
-						unset( $query );
-					} elseif ( strpos( $stylesheet_part, '@media' ) !== false ) {
-						$query = array( $stylesheet_part );
-					} else {
-						$stylesheet .= $stylesheet_part;
-					}
+					$stylesheet_parts[] = $stylesheet_part;
 					continue;
 				}
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
@@ -2092,13 +2082,54 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array_keys( $selectors_parsed );
 				}
 				if ( ! empty( $selectors ) ) {
-					if ( ! empty( $query ) ) {
-						$query[] = implode( ',', $selectors ) . $declaration_block;
-					} else {
-						$stylesheet .= implode( ',', $selectors ) . $declaration_block;
+					$stylesheet_parts[] = implode( ',', $selectors ) . $declaration_block;
+				}
+			}
+
+			// Strip empty at-rules after tree shaking.
+			$stylesheet_part_count = count( $stylesheet_parts );
+			for ( $i = 0; $i < $stylesheet_part_count; $i++ ) {
+				$stylesheet_part = $stylesheet_parts[ $i ];
+				if ( '@' !== substr( $stylesheet_part, 0, 1 ) ) {
+					continue;
+				}
+
+				// Delete empty at-rules.
+				if ( '{}' === substr( $stylesheet_part, -2 ) ) {
+					$stylesheet_part_count--;
+					array_splice( $stylesheet_parts, $i, 1 );
+					$i--;
+					continue;
+				}
+
+				// Delete at-rules that were emptied due to tree-shaking.
+				if ( '{' === substr( $stylesheet_part, -1 ) ) {
+					$open_braces = 1;
+					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
+						$stylesheet_part = $stylesheet_parts[ $j ];
+						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
+						if ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+							$open_braces++;
+
+						} elseif ( '}' === $stylesheet_part ) {
+							$open_braces--;
+						} else {
+							break;
+						}
+
+						// Splice out the parts that are empty.
+						if ( 0 === $open_braces ) {
+							array_splice( $stylesheet_parts, $i, $j - $i + 1 );
+							$stylesheet_part_count = count( $stylesheet_parts );
+							$i--;
+							continue;
+						}
 					}
 				}
 			}
+			$stylesheet = implode( '', $stylesheet_parts );
+
+			// @todo Rename $stylesheet to $stylesheet_parts above.
 			$sheet_size                 = strlen( $stylesheet );
 			$pending_stylesheet['size'] = $sheet_size;
 

@@ -831,23 +831,28 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '<style>#nonexists { color:black; } #exists { color:white; }</style>';
 		$html .= '<style>div { color:black; } span { color:white; } </style>';
 		$html .= '<style>@media only screen and (min-width: 1280px) { .not-exists-selector { margin: 0 auto; } } .b { background: lightblue; }</style>';
-		$html .= '<style>@media screen and (max-width: 1000px) {
-  @supports (display: grid) {
-    .b::before {
-      content: "@media screen and (max-width: 1000px) {";
-    }
-    .b::after {
-      content: "}";
-    }
-  }
-}
-@media screen and (min-width: 750px) and (max-width: 999px) {
-  .b::before {
-    content: "@media screen and (max-width: 1000px) {}";
-    content: \'@media screen and (max-width: 1000px) {}\';
-  }
-}
-@media screen {}</style>';
+		$html .= '
+			<style>
+			@media screen and (max-width: 1000px) {
+				@supports (display: grid) {
+					.b::before {
+						content: "@media screen and (max-width: 1000px) {";
+					}
+					.b::after {
+						content: "}";
+					}
+				}
+			}
+			@media print { @media print { @media print { #nonexists { color:red; } } } }
+			@media screen and (min-width: 750px) and (max-width: 999px) {
+				.b::before {
+					content: "@media screen and (max-width: 1000px) {}";
+					content: \'@media screen and (max-width: 1000px) {}\';
+				}
+			}
+			@media screen {}
+			</style>
+		';
 		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
@@ -988,8 +993,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'style_amp_keyframes_last_child'   => array(
-				'<b>before</b> <style amp-keyframes>@keyframes anim1 {}</style> between <style amp-keyframes>@keyframes anim2 {}</style> as <b>after</b>',
-				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{}@keyframes anim2{}</style>',
+				'<b>before</b> <style amp-keyframes>@keyframes anim1 { from { opacity:1; } to { opacity:0.5; } }</style> between <style amp-keyframes>@keyframes anim2 { from { opacity:0.25; } to { opacity:0.75; } }</style> as <b>after</b>',
+				'<b>before</b>  between  as <b>after</b><style amp-keyframes="">@keyframes anim1{from{opacity:1}to{opacity:.5}}@keyframes anim2{from{opacity:.25}to{opacity:.75}}</style>',
 				array(),
 			),
 
