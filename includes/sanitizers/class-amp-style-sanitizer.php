@@ -2147,9 +2147,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
-			$stylesheet = implode( '', $stylesheet_parts );
 
-			// @todo Rename $stylesheet to $stylesheet_parts above.
+			$stylesheet = implode( '', $stylesheet_parts );
+			unset( $stylesheet_parts );
 			$sheet_size                 = strlen( $stylesheet );
 			$pending_stylesheet['size'] = $sheet_size;
 
