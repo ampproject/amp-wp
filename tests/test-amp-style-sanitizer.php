@@ -138,9 +138,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
 				'',
 				array(
-					'body{color:black}',
+					'@page{margin:1cm}body{color:black}',
 				),
-				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
+				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),
 
 			'allowed_at_rules_retained' => array(
@@ -365,6 +365,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'charset_ruleset_removed_without_warning'  => array(
+				'<html amp><body><style>@charset "utf-8"; body { color:limegreen; }</style></body></html>',
+				array(
+					'body{color:limegreen}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -424,6 +431,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 
+		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
 		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
@@ -493,6 +501,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<div>test</div>',
 				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
 				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
+			),
+			'type_class_names' => array(
+				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
+				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
 			),
 		);
 	}
@@ -1022,6 +1035,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_keyframe_sanitizer( $source, $expected = null, $expected_errors = array() ) {
 		$expected    = isset( $expected ) ? $expected : $source;
+		$expected    = preg_replace( '#(?=</style>)#', "\n\n/*# sourceURL=amp-keyframes.css */", $expected );
 		$dom         = AMP_DOM_Utils::get_dom_from_content( $source );
 		$error_codes = array();
 		$sanitizer   = new AMP_Style_Sanitizer( $dom, array(
@@ -1226,12 +1240,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests that font URLs get validated.
 	 *
+	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 * @dataProvider get_font_urls
 	 * @param string $url         Font URL.
 	 * @param array  $error_codes Error codes.
 	 */
 	public function test_font_urls( $url, $error_codes ) {
-		$dom = AMP_DOM_Utils::get_dom( sprintf( '<html><head><link rel="stylesheet" href="%s"></head></html>', $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$tag = sprintf( '<link rel="stylesheet" href="%s">', esc_url( $url ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$tag = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, 'font', $url );
+
+		$dom = AMP_DOM_Utils::get_dom( sprintf( '<html><head>%s</head></html>', $tag ) );
 
 		$validation_errors = array();
 
@@ -1262,11 +1280,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test addition of crossorigin attribute to external stylesheet links.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 */
 	public function test_cors_enabled_stylesheet_url() {
 
 		// Test supplying crossorigin attribute.
-		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$url       = 'https://fonts.googleapis.com/css?family=Tangerine';
+		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$document  = AMP_DOM_Utils::get_dom( "<html><head>$link</head></html>" );
 		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -1274,7 +1295,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( 'anonymous', $link->getAttribute( 'crossorigin' ) );
 
 		// Test that existing crossorigin attribute is not overridden.
-		$document  = AMP_DOM_Utils::get_dom( '<html><head><link rel="stylesheet" crossorigin="use-credentials" href="https://fonts.googleapis.com/css?family=Tangerine"></head></html>' ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$link      = amp_filter_font_style_loader_tag_with_crossorigin_anonymous( "<link crossorigin='use-credentials' rel='stylesheet' href='$url'>", 'font', $url ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$document  = AMP_DOM_Utils::get_dom( "<html><head>$link</head></html>" ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$sanitizer = new AMP_Style_Sanitizer( $document, array( 'use_document_element' => true ) );
 		$sanitizer->sanitize();
 		$link = $document->getElementsByTagName( 'link' )->item( 0 );
@@ -1363,7 +1385,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_unicode_stylesheet() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();
 

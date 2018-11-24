@@ -638,18 +638,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * Opt-in to CORS Mode for the stylesheet. This ensures that a service worker caching the external
-			 * stylesheet will not inflate the storage quota.
-			 *
-			 * See:
-			 * - https://developers.google.com/web/tools/workbox/guides/storage-quota#beware_of_opaque_responses
-			 * - https://developers.google.com/web/tools/workbox/guides/handle-third-party-requests#cross-origin_requests_and_opaque_responses
-			 */
-			if ( ! $element->hasAttribute( 'crossorigin' ) ) {
-				$element->setAttribute( 'crossorigin', 'anonymous' );
-			}
-
-			/*
 			 * Make sure rel=preconnect link is present for Google Fonts stylesheet.
 			 * Note that core themes normally do this already, per <https://core.trac.wordpress.org/ticket/37171>.
 			 * But not always, per <https://core.trac.wordpress.org/ticket/44668>.
@@ -830,6 +818,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $parsed || ! isset( $parsed['stylesheet'] ) || ! is_array( $parsed['stylesheet'] ) ) {
 			$parsed = $this->prepare_stylesheet( $stylesheet, $options );
 
+			/*
+			 * When an object cache is not available, we cache with an expiration to prevent the options table from
+			 * getting filled infinitely. On the other hand, if an external object cache is available then we don't
+			 * set an expiration because it should implement LRU cache expulsion policy.
+			 */
 			if ( wp_using_ext_object_cache() ) {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
@@ -978,7 +971,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
-			$css_document    = $css_parser->parse();
+			$css_document    = $css_parser->parse(); // @todo If 'utf-8' is not $css_parser->getCharset() then issue warning?
 
 			if ( ! empty( $options['stylesheet_url'] ) ) {
 				$this->real_path_urls(
@@ -1052,6 +1045,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			$options
 		);
+
+		// Strip the dreaded UTF-8 byte order mark (BOM, \uFEFF). This should ideally get handled by PHP-CSS-Parser <https://github.com/sabberworm/PHP-CSS-Parser/issues/150>.
+		$stylesheet_string = preg_replace( '/^\xEF\xBB\xBF/', '', $stylesheet_string );
 
 		$stylesheet         = array();
 		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
@@ -1311,13 +1307,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $css_item instanceof AtRule ) {
-				$error     = array(
-					'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
-					'at_rule' => $css_item->atRuleName(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				);
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				$results[] = compact( 'error', 'sanitized' );
+				if ( 'charset' === $css_item->atRuleName() ) {
+					/*
+					 * The @charset at-rule is not allowed in style elements, so it is not allowed in AMP.
+					 * If the @charset is defined, then it really should have already been acknowledged
+					 * by PHP-CSS-Parser when the CSS was parsed in the first place, so at this point
+					 * it is irrelevant and can be removed.
+					 */
+					$sanitized = true;
+				} else {
+					$error     = array(
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
 			} else {
 				$error     = array(
 					'code' => 'unrecognized_css',
@@ -1775,6 +1781,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$stylesheet_sets = array(
 			'custom'    => array(
+				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'pending_stylesheets' => array(),
@@ -1782,6 +1789,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'remove_unused_rules' => $this->args['remove_unused_rules'],
 			),
 			'keyframes' => array(
+				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'pending_stylesheets' => array(),
@@ -1849,6 +1857,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
 			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
+			$css .= $stylesheet_sets['custom']['source_map_comment'];
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -1935,9 +1944,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				) );
 			} else {
+				$css  = implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] );
+				$css .= $stylesheet_sets['keyframes']['source_map_comment'];
+
 				$style_element = $this->dom->createElement( 'style' );
 				$style_element->setAttribute( 'amp-keyframes', '' );
-				$style_element->appendChild( $this->dom->createTextNode( implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] ) ) );
+				$style_element->appendChild( $this->dom->createTextNode( $css ) );
 				$body->appendChild( $style_element );
 			}
 		}
@@ -1978,13 +1990,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// An element (type) either starts a selector or is preceded by combinator, comma, opening paren, or closing brace.
+			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
+			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
+
 			$edited_selectors = array( $selector );
 			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
-				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+				$html_pattern = '/' . $before_type_selector_pattern . preg_quote( $html_selector, '/' ) . $after_type_selector_pattern . '/i';
 				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
 					$original_selector = $edited_selector;
 					$amp_selector      = array_shift( $amp_selectors );
-					$amp_tag_pattern   = '/(?<=^|[^a-z0-9_-])' . preg_quote( $amp_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+					$amp_tag_pattern   = '/' . $before_type_selector_pattern . preg_quote( $amp_selector, '/' ) . $after_type_selector_pattern . '/i';
 					preg_match( $amp_tag_pattern, $edited_selector, $matches );
 					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
 						continue;
@@ -2017,7 +2033,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Finalized stylesheet set.
 	 */
 	private function finalize_stylesheet_set( $stylesheet_set ) {
-		$is_too_much_css   = $stylesheet_set['total_size'] > $stylesheet_set['cdata_spec']['max_bytes'];
+		$max_bytes         = $stylesheet_set['cdata_spec']['max_bytes'] - strlen( $stylesheet_set['source_map_comment'] );
+		$is_too_much_css   = $stylesheet_set['total_size'] > $max_bytes;
 		$should_tree_shake = (
 			'always' === $stylesheet_set['remove_unused_rules'] || (
 				$is_too_much_css
@@ -2141,7 +2158,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Report validation error if size is now too big.
-			if ( $final_size + $sheet_size > $stylesheet_set['cdata_spec']['max_bytes'] ) {
+			if ( $final_size + $sheet_size > $max_bytes ) {
 				$validation_error = array(
 					'code' => 'excessive_css',
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,

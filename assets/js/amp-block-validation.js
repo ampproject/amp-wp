@@ -145,7 +145,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity, hasActuallyUnacceptedError;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -161,15 +161,19 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				return;
 			}
 
-			hasActuallyUnacceptedError = false;
 			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
+
+			// Show all validation errors which have not been explicitly acknowledged as accepted.
 			validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
-					if ( result.status !== 1 /* ACCEPTED */ ) {
-						hasActuallyUnacceptedError = true;
-					}
-					return result.term_status !== 1; // ACCEPTED
+					// @todo Show VALIDATION_ERROR_ACK_REJECTED_STATUS differently since moderated?
+					return (
+						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+						1 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS */ === result.status ||
+						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status || // eslint-disable-line no-magic-numbers
+						3 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+					);
 				} ),
 				function( result ) {
 					return result.error;
@@ -192,8 +196,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			noticeMessage = wp.i18n.sprintf(
 				wp.i18n._n(
-					'There is %s issue from AMP validation.',
-					'There are %s issues from AMP validation.',
+					'There is %s issue from AMP validation which needs review.',
+					'There are %s issues from AMP validation which need review.',
 					validationErrors.length,
 					'amp'
 				),
@@ -239,22 +243,26 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			noticeMessage += ' ';
-			if ( hasActuallyUnacceptedError && ! module.data.isCanonical ) {
-				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			if ( module.data.isCanonical ) {
+				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
 			} else {
-				noticeMessage += wp.i18n.__( 'The invalid markup will be automatically sanitized to ensure a valid AMP response is served.', 'amp' );
+				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
 
-			noticeElement = wp.element.createElement( 'p', {}, [
-				noticeMessage + ' ',
-				ampValidity.review_link && wp.element.createElement(
-					'a',
-					{ key: 'review_link', href: ampValidity.review_link, target: '_blank' },
-					wp.i18n.__( 'Review issues', 'amp' )
-				)
-			] );
+			noticeOptions = {
+				id: 'amp-errors-notice'
+			};
+			if ( ampValidity.review_link ) {
+				noticeOptions.actions = [
+					{
+						label: wp.i18n.__( 'Review issues', 'amp' ),
+						url: ampValidity.review_link
+					}
+				];
+			}
 
-			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
+			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			module.validationWarningNoticeId = noticeOptions.id;
 		},
 
 		/**
@@ -299,7 +307,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		resetWarningNotice: function resetWarningNotice() {
 			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				wp.data.dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
 				module.validationWarningNoticeId = null;
 			}
 		},

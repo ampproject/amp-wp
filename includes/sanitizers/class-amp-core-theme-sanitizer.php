@@ -51,6 +51,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected static $theme_features = array(
+		// Twenty Nineteen.
+		'twentynineteen'  => array(
+			'dequeue_scripts'                             => array(
+				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
+				'twentynineteen-priority-menu',
+				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
+			),
+			'remove_actions'                              => array(
+				'wp_print_footer_scripts' => array(
+					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
+				),
+			),
+			'add_twentynineteen_masthead_styles'          => array(),
+			'add_twentynineteen_image_styles'             => array(),
+			'remove_twentynineteen_thumbnail_image_sizes' => array(),
+
+		),
+
 		// Twenty Seventeen.
 		'twentyseventeen' => array(
 			// @todo Try to implement belowEntryMetaClass().
@@ -121,6 +139,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Get list of supported core themes.
+	 *
+	 * @since 1.0
+	 *
+	 * @return string[] Slugs for supported themes.
+	 */
+	public static function get_supported_themes() {
+		return array_keys( self::$theme_features );
+	}
+
+	/**
 	 * Get the acceptable validation errors.
 	 *
 	 * @since 1.0
@@ -147,16 +176,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width',
-							),
-						),
-					),
 				);
 			case 'twentysixteen':
 				return array(
@@ -175,30 +194,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							),
 						),
 					),
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 			case 'twentyseventeen':
 				return array(
 					'removed_unused_css_rules' => true,
-					'invalid_element'          => array(
-						array(
-							'node_name'       => 'meta',
-							'parent_name'     => 'head',
-							'node_attributes' => array(
-								'name'    => 'viewport',
-								'content' => 'width=device-width, initial-scale=1',
-							),
-						),
-					),
 				);
 		}
 		return array();
@@ -346,6 +345,26 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Remove the sizes attribute from thumbnail images in Twenty Nineteen.
+	 *
+	 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
+	 * For example, <amp-img style="width:calc(50vw)">.
+	 * Removing the 'sizes' attribute isn't ideal, but it looks like it's not possible to override that inline style.
+	 *
+	 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
+	 * @since 1.0
+	 */
+	public static function remove_twentynineteen_thumbnail_image_sizes() {
+		add_filter( 'wp_get_attachment_image_attributes', function( $attr ) {
+			if ( isset( $attr['class'] ) && false !== strpos( $attr['class'], 'attachment-post-thumbnail' ) ) {
+				unset( $attr['sizes'] );
+			}
+
+			return $attr;
+		}, 11 );
+	}
+
+	/**
 	 * Add filter to adjust the attachment image attributes to ensure attachment pages have a consistent <amp-img> rendering.
 	 *
 	 * This is only used in Twenty Seventeen.
@@ -355,17 +374,39 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes() {
 		add_filter( 'wp_get_attachment_image_attributes', function ( $attr, $attachment, $size ) {
-			if ( ! is_attachment() ) {
-				return $attr;
+			if ( isset( $attr['class'] ) && 'custom-logo' === $attr['class'] ) {
+				unset( $attr['sizes'] );
+			} elseif ( is_attachment() ) {
+				$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+				if ( false !== $sizes ) {
+					$attr['sizes'] = $sizes;
+				}
 			}
-
-			$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
-			if ( false !== $sizes ) {
-				$attr['sizes'] = $sizes;
-			}
-
 			return $attr;
 		}, 11, 3 );
+
+		/*
+		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless
+		 * there is header media in which case it is 200px. Issues related to vertically-squashed
+		 * images can be avoided if we just make sure that the image has this height to begin with.
+		 */
+		add_filter( 'get_custom_logo', function( $html ) {
+			$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
+			if ( ! $src ) {
+				return $html;
+			}
+
+			if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
+				$height = 200;
+			} else {
+				$height = 80;
+			}
+			$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
+
+			$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
+			$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
+			return $html;
+		} );
 	}
 
 	/**
@@ -498,6 +539,64 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the (common) navigation outer height.
+	 *
+	 * @todo If the nav menu has many items and it spans multiple rows, this will be too small.
+	 * @link https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L50
+	 *
+	 * @return int Navigation outer height.
+	 */
+	protected static function get_twentyseventeen_navigation_outer_height() {
+		return 72;
+	}
+
+	/**
+	 * Add required styles for featured image header in Twenty Nineteen.
+	 *
+	 * The following is necessary because the styles in the theme apply to the featured img,
+	 * and the CSS parser will then convert the selectors to amp-img. Nevertheless, object-fit
+	 * does not apply on amp-img and it needs to apply on an actual img.
+	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/5.0/src/wp-content/themes/twentynineteen/style.css#L2276-L2299
+	 * @since 1.0
+	 */
+	public static function add_twentynineteen_masthead_styles() {
+		add_action( 'wp_enqueue_scripts', function() {
+			ob_start();
+			?>
+			<style>
+			.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
+				height: auto;
+				left: 50%;
+				max-width: 1000%;
+				min-height: 100%;
+				min-width: 100vw;
+				position: absolute;
+				top: 50%;
+				transform: translateX(-50%) translateY(-50%);
+				width: auto;
+				z-index: 1;
+				/* When image filters are active, make it grayscale to colorize it blue. */
+			}
+
+			@supports (object-fit: cover) {
+				.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
+					height: 100%;
+					left: 0;
+					object-fit: cover;
+					top: 0;
+					transform: none;
+					width: 100%;
+				}
+			}
+			</style>
+			<?php
+			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+			wp_add_inline_style( get_template() . '-style', $styles );
+		}, 11 );
+	}
+
+	/**
 	 * Add required styles for video and image headers.
 	 *
 	 * This is currently used exclusively for Twenty Seventeen.
@@ -567,6 +666,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					display: none;
 				}
 
+				<?php if ( $is_front_page_layout && ! has_custom_header() ) : ?>
+					/* https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L92-L94 */
+					.site-branding {
+						margin-bottom: <?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px;
+					}
+				<?php endif; ?>
+
 				@media screen and (min-width: 48em) {
 					/* Note that adjustHeaderHeight() is irrelevant with this change */
 					<?php if ( ! $is_front_page_layout ) : ?>
@@ -578,7 +684,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					/* Initial styles that amp-animations for navigationTopShow and navigationTopHide will override */
 					.navigation-top.site-navigation-fixed {
 						opacity: 0;
-						transform: translateY( -72px );
+						transform: translateY( -<?php echo (int) AMP_Core_Theme_Sanitizer::get_twentyseventeen_navigation_outer_height(); ?>px );
 						display: block;
 					}
 				}
@@ -659,7 +765,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'media'     => '(min-width: 48em)',
 					'keyframes' => array(
 						'opacity'   => 0.0,
-						'transform' => 'translateY( -72px )',
+						'transform' => sprintf( 'translateY( -%dpx )', self::get_twentyseventeen_navigation_outer_height() ),
 					),
 				),
 			),
@@ -972,5 +1078,30 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$item_output .= $dropdown_button;
 			return $item_output;
 		}, 10, 4 );
+	}
+
+	/**
+	 * Output image styles for twentynineteen.
+	 *
+	 * When <img> tags have an 'aligncenter' class, AMP_Img_Sanitizer::handle_centering() wraps theme in <figure class="aligncenter">.
+	 * This ensures that the image inside it is centered.
+	 *
+	 * @since 1.0
+	 *
+	 * @param array $args Arguments.
+	 */
+	public static function add_twentynineteen_image_styles( $args = array() ) {
+		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
+			ob_start();
+			?>
+			<style>
+				figure.aligncenter {
+					text-align: center
+				}
+			</style>
+			<?php
+			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+			wp_add_inline_style( get_template() . '-style', $styles );
+		}, 11 );
 	}
 }

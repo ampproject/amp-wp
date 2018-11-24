@@ -153,7 +153,7 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION
 		);
 
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability   = AMP_Theme_Support::get_template_availability( $post );
 			$support_errors = $availability['errors'];
 		} else {
@@ -176,7 +176,6 @@ class AMP_Post_Meta_Box {
 
 	/**
 	 * Enqueues block assets.
-	 * The name of gutenberg_get_jed_locale_data() may change, as the Gutenberg Core merge approaches.
 	 *
 	 * @since 1.0
 	 */
@@ -203,7 +202,11 @@ class AMP_Post_Meta_Box {
 			'errorMessages' => $error_messages,
 		);
 
-		if ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::BLOCK_ASSET_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) ) {
+			$script_data['i18n'] = wp_get_jed_locale_data( 'amp' );
+		} elseif ( function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$script_data['i18n'] = gutenberg_get_jed_locale_data( 'amp' );
 		}
 
@@ -265,7 +268,7 @@ class AMP_Post_Meta_Box {
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present
 		 * then we just check get_support_errors.
 		 */
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
 			$errors       = array_diff( $availability['errors'], array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.

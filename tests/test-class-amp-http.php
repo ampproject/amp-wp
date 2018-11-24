@@ -164,6 +164,40 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_amp_cache_hosts().
+	 *
+	 * @covers AMP_HTTP::get_amp_cache_hosts()
+	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
+	 */
+	public function test_get_amp_cache_hosts() {
+		update_option( 'home', 'https://example.com' );
+		update_option( 'siteurl', 'https://example.org' );
+
+		$hosts = AMP_HTTP::get_amp_cache_hosts();
+
+		$expected = array(
+			'cdn.ampproject.org',
+			'example-org.cdn.ampproject.org',
+			'example-org.amp.cloudflare.com',
+			'example-org.bing-amp.com',
+			'example-com.cdn.ampproject.org',
+			'example-com.amp.cloudflare.com',
+			'example-com.bing-amp.com',
+		);
+		$this->assertEqualSets( $expected, $hosts );
+
+		$extra_allowed_redirect_hosts = array(
+			'example.net',
+			'example.info',
+		);
+
+		$this->assertEqualSets(
+			array_merge( $extra_allowed_redirect_hosts, $expected ),
+			AMP_HTTP::filter_allowed_redirect_hosts( $extra_allowed_redirect_hosts )
+		);
+	}
+
+	/**
 	 * Test send_cors_headers().
 	 *
 	 * @covers AMP_HTTP::send_cors_headers()
@@ -331,7 +365,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_intercept_post_request_redirect() {
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
@@ -467,7 +501,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			return '__return_null';
 		} );
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$post    = $this->factory()->post->create_and_get();
 		$comment = $this->factory()->comment->create_and_get( array(
 			'comment_post_ID' => $post->ID,
@@ -482,7 +516,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		);
 
 		// Test with comments_live_list.
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'comments_live_list' => true,
 		) );
 		add_filter( 'amp_comment_posted_message', function( $message, WP_Comment $filter_comment ) {

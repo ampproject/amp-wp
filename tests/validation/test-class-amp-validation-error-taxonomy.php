@@ -30,10 +30,12 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * Resets the state after each test method.
 	 */
 	public function tearDown() {
-		remove_theme_support( 'amp' );
+		$_REQUEST = array();
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		remove_all_filters( 'terms_clauses' );
+		AMP_Validation_Manager::$validation_error_status_overrides = array();
 		parent::tearDown();
 	}
 
@@ -44,7 +46,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_register() {
 		global $wp_taxonomies;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
 		AMP_Validation_Error_Taxonomy::register();
 		$taxonomy_object = $wp_taxonomies[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ];
@@ -58,7 +60,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertFalse( $taxonomy_object->meta_box_cb );
 		$this->assertEquals( 'AMP Validation Error Index', $taxonomy_object->label );
 		$this->assertEquals( 'do_not_allow', $taxonomy_object->cap->assign_terms );
-		$this->assertEquals( array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
+		$this->assertEquals( array( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ), $taxonomy_object->object_type );
 
 		$labels = $taxonomy_object->labels;
 		$this->assertEquals( 'AMP Validation Error Index', $labels->name );
@@ -87,10 +89,10 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_should_show_in_menu() {
 		global $pagenow;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
 		$pagenow          = 'edit-tags.php'; // WPCS: override ok.
@@ -99,6 +101,119 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		$_GET['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
+	}
+
+	/**
+	 * Test get_term.
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::get_term()
+	 */
+	public function test_get_term() {
+		$foo_error = array( 'code' => 'foo' );
+		$bar_error = array( 'code' => 'bar' );
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			array( $foo_error, $bar_error ),
+			home_url( '/' )
+		);
+		$foo_term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $foo_error );
+
+		$term = AMP_Validation_Error_Taxonomy::get_term( $foo_error );
+		$this->assertEquals( $term, AMP_Validation_Error_Taxonomy::get_term( $foo_term_data['slug'] ) );
+		$this->assertEquals( $foo_error, json_decode( $term->description, true ) );
+	}
+
+	/**
+	 * Test delete_empty_terms.
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::delete_empty_terms()
+	 */
+	public function test_delete_empty_terms() {
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+
+		$post_id_1 = AMP_Validated_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+				array( 'code' => 'bar' ),
+				array( 'code' => 'baz' ),
+			),
+			home_url( '/1' )
+		);
+		$post_id_2 = AMP_Validated_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			home_url( '/2' )
+		);
+		$post_id_3 = AMP_Validated_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'quux' ),
+			),
+			home_url( '/3' )
+		);
+
+		$this->assertEquals( 4, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_delete_post( $post_id_3, true );
+
+		$this->assertEquals( 4, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+		$this->assertEquals( 3, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_delete_post( $post_id_1, true );
+		$this->assertEquals( 3, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 2, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+
+		wp_delete_post( $post_id_2, true );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::delete_empty_terms() );
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+	}
+
+	/**
+	 * Test sanitize_term_status.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::sanitize_term_status()
+	 */
+	public function test_sanitize_term_status() {
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( '' ) );
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( false ) );
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( null ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( '0' ) );
+		$this->assertSame( array(), AMP_Validation_Error_Taxonomy::sanitize_term_status( '', array( 'multiple' => true ) ) );
+		$this->assertNull( AMP_Validation_Error_Taxonomy::sanitize_term_status( '100' ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( (string) AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS ) );
+		$this->assertSame( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, AMP_Validation_Error_Taxonomy::sanitize_term_status( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, array( 'multiple' => false ) ) );
+
+		$this->assertEquals(
+			array(
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
+			AMP_Validation_Error_Taxonomy::sanitize_term_status(
+				implode(
+					',',
+					array(
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+						AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+						121930,
+					)
+				),
+				array( 'multiple' => true )
+			)
+		);
+	}
+
+	/**
+	 * Test prepare_term_group_in_sql.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql()
+	 */
+	public function test_prepare_term_group_in_sql() {
+		$this->assertEquals( 'IN ( 1, 2, 3 )', AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( array( 1, 2, 3 ) ) );
+		$this->assertEquals( 'IN ( 0 )', AMP_Validation_Error_Taxonomy::prepare_term_group_in_sql( array( '"bad"' ) ) );
 	}
 
 	/**
@@ -130,54 +245,137 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test is_validation_error_sanitized.
+	 * Test is_validation_error_sanitized and get_validation_error_sanitization.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::is_validation_error_sanitized()
-	 */
-	public function test_is_validation_error_sanitized() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
-
-		// Trigger Native AMP, which makes all errors accepted.
-		add_theme_support( 'amp' );
-		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $this->get_mock_error() ) );
-	}
-
-	/**
-	 * Test get_validation_error_sanitization.
-	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::get_validation_error_sanitization()
 	 */
-	public function test_get_validation_error_sanitization() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+	public function test_is_validation_error_sanitized_and_get_validation_error_sanitization() {
+
+		// New accepted.
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$error_foo = array_merge(
+			$this->get_mock_error(),
+			array( 'foo' => 1 )
+		);
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			array( $error_foo ),
+			home_url( '/foo' )
+		);
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
 		$this->assertEquals(
 			array(
 				'forced'      => false,
-				'status'      => 0,
-				'term_status' => 0,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 			),
-			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_foo )
 		);
 
-		// Trigger Native AMP, which should result in 'forced' => 'with_option'.
-		add_theme_support( 'amp' );
+		// New rejected.
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$error_bar = array_merge(
+			$this->get_mock_error(),
+			array( 'bar' => 1 )
+		);
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			array( $error_bar ),
+			home_url( '/bar' )
+		);
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_bar ) );
 		$this->assertEquals(
 			array(
-				'forced'      => 'with_option',
-				'status'      => 1,
-				'term_status' => 0,
+				'forced'      => false,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			),
-			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
 		);
 
+		// New accepted, since canonical.
+		add_theme_support( AMP_Theme_Support::SLUG, array(
+			'paired' => false,
+		) );
+		$this->assertTrue( amp_is_canonical() );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
+		$error_baz = array_merge(
+			$this->get_mock_error(),
+			array( 'baz' => 1 )
+		);
+		AMP_Validated_URL_Post_Type::store_validation_errors(
+			array( $error_baz ),
+			home_url( '/baz' )
+		);
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_baz ) );
+		$this->assertEquals(
+			array(
+				'forced'      => false,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_baz )
+		);
+
+		// New accepted => Ack rejected.
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
+		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_foo );
+		$term      = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+			'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+		) );
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
+		$this->assertEquals(
+			array(
+				'forced'      => false,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_foo )
+		);
+
+		// New rejected => Ack accepted.
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_bar ) );
+		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_bar );
+		$term      = get_term_by( 'slug', $term_data['slug'], AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		wp_update_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
+			'term_group' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+		) );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_bar ) );
+		$this->assertEquals(
+			array(
+				'forced'      => false,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
+		);
+
+		// Ack rejected => Ack accepted (forcibly by filter). The next time the URL will be re-checked, this validation error will be omitted.
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_foo ) );
 		$this->assertEquals(
 			array(
 				'forced'      => 'with_filter',
-				'status'      => 1,
-				'term_status' => 0,
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			),
-			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $this->get_mock_error() )
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_foo )
+		);
+		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
+
+		// Ack accepted => Ack rejected (forcibly by preview).
+		$this->assertTrue( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_bar ) );
+		$term_data = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( $error_bar );
+		AMP_Validation_Manager::$validation_error_status_overrides[ $term_data['slug'] ] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+		$this->assertFalse( AMP_Validation_Error_Taxonomy::is_validation_error_sanitized( $error_bar ) );
+		$this->assertEquals(
+			array(
+				'forced'      => 'with_preview',
+				'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			),
+			AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error_bar )
 		);
 	}
 
@@ -274,7 +472,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_where, AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query ) );
 
 		// Only the first part of the conditional is met, so this still shouldn't filter the WHERE clause.
-		$wp_query->set( 'post_type', array( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$wp_query->set( 'post_type', array( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( $initial_where, AMP_Validation_Error_Taxonomy::filter_posts_where_for_validation_error_status( $initial_where, $wp_query ) );
 
 		// The entire conditional should now be true, so this should filter the WHERE clause.
@@ -336,7 +534,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS => array(
 				$element_node_name => 1,
 			),
-			'sources_with_invalid_output' => array(
+			AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => array(
 				'plugin' => array( 'foo' ),
 				'theme'  => array( 'bar' ),
 			),
@@ -350,7 +548,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Error_Taxonomy::register();
 
 		// add_group_terms_clauses_filter() needs the screen to be set.
@@ -361,31 +559,36 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'redirect_term_location', array( self::TESTED_CLASS, 'add_term_filter_query_var' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_group_terms_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
-		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_taxonomy_filters' ) ) ) );
+		$this->assertEquals( 10, has_action( 'load-post.php', array( self::TESTED_CLASS, 'add_error_type_clauses_filter' ) ) );
 		$this->assertEquals( 10, has_action( sprintf( 'after-%s-table', AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'render_link_to_errors_by_url' ) ) ) );
 		$this->assertEquals( 10, has_filter( 'user_has_cap', array( self::TESTED_CLASS, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ) ) );
 		$this->assertEquals( 10, has_filter( 'terms_clauses', array( self::TESTED_CLASS, 'filter_terms_clauses_for_description_search' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_notices', array( self::TESTED_CLASS, 'add_admin_notices' ) ) );
 		$this->assertEquals( 10, has_filter( 'tag_row_actions', array( self::TESTED_CLASS, 'filter_tag_row_actions' ) ) );
 		$this->assertEquals( 10, has_action( 'admin_menu', array( self::TESTED_CLASS, 'add_admin_menu_validation_error_item' ) ) );
+		$this->assertEquals( 10, has_filter( 'parse_term_query', array( self::TESTED_CLASS, 'parse_post_php_term_query' ) ) );
 		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_custom_column', array( self::TESTED_CLASS, 'filter_manage_custom_columns' ) ) );
+		$this->assertEquals( 10, has_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( self::TESTED_CLASS, 'add_single_post_sortable_columns' ) ) );
 		$this->assertEquals( 10, has_filter( 'posts_where', array( self::TESTED_CLASS, 'filter_posts_where_for_validation_error_status' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_and_inline_actions' ) ) );
+		$this->assertEquals( 10, has_filter( 'post_action_' . AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION, array( self::TESTED_CLASS, 'handle_single_url_page_bulk_and_inline_actions' ) ) );
 		$this->assertEquals( 10, has_filter( 'handle_bulk_actions-edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( self::TESTED_CLASS, 'handle_validation_error_update' ) ) );
 		$this->assertEquals( 10, has_action( 'load-edit-tags.php', array( self::TESTED_CLASS, 'handle_inline_edit_request' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts' ) );
 
 		$cb              = '<input type="checkbox" />';
 		$initial_columns = array( 'cb' => $cb );
 		$this->assertEquals(
-			array(
+			array_keys( array(
 				'cb'               => $cb,
 				'error'            => 'Error',
-				'status'           => 'Status',
-				'details'          => 'Details',
+				'status'           => 'Status<div class="tooltip dashicons dashicons-editor-help"><h3>Statuses tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'details'          => 'Details<div class="tooltip dashicons dashicons-editor-help"><h3>Details tooltip title</h3><p>An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.</p></div>',
+				'error_type'       => 'Type',
 				'created_date_gmt' => 'Last Seen',
 				'posts'            => 'Found URLs',
-				'error_type'       => 'Type',
-			),
-			apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+			) ),
+			array_keys( apply_filters( 'manage_edit-' . AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG . '_columns', $initial_columns ) ) // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 		);
 
 		// Assert that the 'query_vars' callback adds these query vars.
@@ -415,7 +618,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertFalse( has_filter( $tested_filter ) );
 
 		// The entire conditional should be true, and this should add the filter.
-		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = 1;
+		$_GET[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 		AMP_Validation_Error_Taxonomy::add_group_terms_clauses_filter();
 		$this->assertTrue( has_filter( $tested_filter ) );
 	}
@@ -427,7 +630,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	 */
 	public function test_add_term_filter_query_var() {
 		$initial_url      = admin_url( 'edit-tags.php' );
-		$correct_taxonomy = new WP_Taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$correct_taxonomy = new WP_Taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$wrong_taxonomy   = new WP_Taxonomy( 'category', 'post' );
 
 		// Because the VALIDATION_ERROR_TYPE_QUERY_VAR isn't present in the POST request, this should return the $initial_url unchanged, without adding the query var.
@@ -449,7 +652,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
 
 		// The $_POST has correct 'post_type', so this should add the VALIDATION_ERROR_TYPE_QUERY_VAR to the $initial_url.
-		$_POST['post_type'] = AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG;
+		$_POST['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
 		$expected_url       = add_query_arg(
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			$type_query_var_value,
@@ -458,12 +661,11 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $expected_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
 
 		// The $_POST has a value for the accepted status, so this method should pass that to the redirect URL as a query var.
-		$status_query_var_value = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS;
+		$status_query_var_value = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR ] = $status_query_var_value;
 		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_TYPE_QUERY_VAR ]   = null;
 		$expected_url = add_query_arg(
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR,
-			$status_query_var_value,
+			array( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array( $status_query_var_value ) ),
 			$initial_url
 		);
 		$this->assertEquals( $expected_url, AMP_Validation_Error_Taxonomy::add_term_filter_query_var( $initial_url, $correct_taxonomy ) );
@@ -520,7 +722,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->factory()->term->create( array(
 			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 			'description' => wp_json_encode( $this->get_mock_error() ),
-			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		) );
 
 		// When passing the wrong $taxonomy_name to the method, it should not output anything.
@@ -532,7 +734,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->factory()->term->create( array(
 			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 			'description' => wp_json_encode( $this->get_mock_error() ),
-			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+			'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 		) );
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
@@ -540,25 +742,27 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test render_link_to_errors_by_url.
+	 * Test render_link_to_invalid_urls_screen.
 	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url()
+	 * @covers \AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen()
 	 */
-	public function test_render_link_to_errors_by_url() {
-		// When passing the wrong $taxomomy argument, this should not render anything.
+	public function test_render_link_to_invalid_urls_screen() {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		// When passing the wrong $taxonomy argument, this should not render anything.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( 'category' );
+		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( 'category' );
 		$this->assertEmpty( ob_get_clean() );
 
 		// When passing the correct taxonomy, this should render the link.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_link_to_errors_by_url( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_link_to_invalid_urls_screen( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 		$output = ob_get_clean();
-		$this->assertContains( 'View errors by URL', $output );
+		$this->assertContains( 'View Validated URLs', $output );
 		$this->assertContains(
 			add_query_arg(
 				'post_type',
-				AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+				AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				admin_url( 'edit.php' )
 			),
 			$output
@@ -582,26 +786,22 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		set_current_screen( 'edit.php' );
 		$number_of_errors = 10;
 		for ( $i = 0; $i < $number_of_errors; $i++ ) {
-			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 			$validation_error_term = $this->factory()->term->create( array(
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 				'description' => wp_json_encode( $this->get_mock_error() ),
-				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			) );
 
 			// Associate the validation error term with a URL so that it appears in a query.
 			wp_set_post_terms(
 				$invalid_url_post,
-				$validation_error_term,
+				array( $validation_error_term ),
 				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG
 			);
 		}
 
-		/*
-		 * This is on another accepted screen, so this should again render markup.
-		 * When there are 10 accepted errors, the <option> element for it should end with (10).
-		 */
-		set_current_screen( 'edit-tags.php' );
+		// When there are 10 accepted errors, the <option> element for it should end with (10).
 		ob_start();
 		AMP_Validation_Error_Taxonomy::render_error_status_filter();
 		$this->assertContains(
@@ -637,13 +837,13 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			$this->factory()->term->create( array(
 				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 				'description' => wp_json_encode( $this->get_mock_error() ),
-				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+				'term_group'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			) );
 		}
 
 		// The strings below should be present.
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_error_type_filter();
 		$markup = ob_get_clean();
 
 		$expected_to_contain = array(
@@ -652,21 +852,11 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
 			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-			'<script>',
 		);
 
 		foreach ( $expected_to_contain as $expected ) {
 			$this->assertContains( $expected, $markup );
 		}
-
-		// When there are 10 errors with this status, its <option> element should have (10).
-		$this->assertContains(
-			sprintf(
-				'New Errors <span class="count">(%d)</span>',
-				$number_of_errors
-			),
-			$markup
-		);
 
 		// On the edit-tags.php page, the <option> text should not have 'With', like 'With JS Errors'.
 		$this->assertNotContains( 'With', $markup );
@@ -674,8 +864,27 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		// On the edit.php page (Errors by URL), the <option> text should have 'With', like 'With JS Errors'.
 		set_current_screen( 'edit.php' );
 		ob_start();
-		AMP_Validation_Error_Taxonomy::render_taxonomy_filters( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+		AMP_Validation_Error_Taxonomy::render_error_type_filter();
 		$this->assertContains( 'With', ob_get_clean() );
+	}
+
+	/**
+	 * Test render_clear_empty_button.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_clear_empty_button()
+	 */
+	public function test_render_clear_empty_button() {
+
+		ob_start();
+		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
+		$this->assertEmpty( ob_get_clean() );
+
+		ob_start();
+		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( array( $this->get_mock_error() ), home_url( '/' ) );
+		wp_delete_post( $post_id, true );
+		AMP_Validation_Error_Taxonomy::render_clear_empty_button();
+		$output = ob_get_clean();
+		$this->assertContains( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, $output );
 	}
 
 	/**
@@ -786,9 +995,9 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$accept_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ];
 		$reject_action      = $filtered_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ];
 		$this->assertContains( strval( $term_this_taxonomy->term_id ), $accept_action );
-		$this->assertContains( 'Accepting an error means it will get sanitized and not block a URL from being served as AMP.', $accept_action );
-		$this->assertContains( 'Rejecting an error acknowledges that it should block a URL from being served as AMP.', $reject_action );
-
+		$this->assertContains( strval( $term_this_taxonomy->term_id ), $reject_action );
+		$this->assertContains( 'Accept', $accept_action );
+		$this->assertContains( 'Reject', $reject_action );
 	}
 
 	/**
@@ -806,11 +1015,43 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$expected_submenu = array(
 			'Error Index',
 			'manage_categories',
-			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_invalid_url',
+			'edit-tags.php?taxonomy=amp_validation_error&amp;post_type=amp_validated_url',
 			'Error Index',
 		);
 		$amp_options      = $submenu[ AMP_Options_Manager::OPTION_NAME ];
 		$this->assertEquals( $expected_submenu, end( $amp_options ) );
+	}
+
+	/**
+	 * Test parse_post_php_term_query.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::parse_post_php_term_query()
+	 */
+	public function test_parse_post_php_term_query() {
+		$wp_term_query = new WP_Term_Query();
+
+		// If is_admin() is false, the conditional will be false and this won't add a query_var value.
+		set_current_screen( 'front' );
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// This is now on the proper screen, but there is no post ID in $_GET['post'].
+		set_current_screen( 'post.php' );
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// Though $_GET['post'] has a post ID, it's not for the amp_validated_url post type.
+		$post_id_wrong_type = $this->factory()->post->create();
+		$_GET['post']       = $post_id_wrong_type;
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEmpty( $wp_term_query->query_vars );
+
+		// Now that $_GET['post'] has a post ID of the correct post type, it should be in the query var.
+		$post_id_correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$_GET['post']              = $post_id_correct_post_type;
+		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
+		$this->assertEquals( $post_id_correct_post_type, $wp_term_query->query_vars['object_ids'] );
 	}
 
 	/**
@@ -827,11 +1068,28 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_details_summary_label.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_details_summary_label()
+	 */
+	public function test_get_details_summary_label() {
+		$validation_error = $this->get_mock_error();
+		$this->assertEquals( '<code>&lt;link&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ATTRIBUTE_CODE;
+		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		unset( $validation_error['node_name'] );
+		$this->assertEquals( '<code>&lt;head&gt;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+		$validation_error['code'] = 'some_other_code';
+		$this->assertEquals( '<code>&hellip;</code>', AMP_Validation_Error_Taxonomy::get_details_summary_label( $validation_error ) );
+	}
+
+	/**
 	 * Test filter_manage_custom_columns.
 	 *
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_manage_custom_columns()
 	 */
 	public function test_filter_manage_custom_columns() {
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Validation_Error_Taxonomy::register();
 		$validation_error = $this->get_mock_error();
 		$initial_content  = 'example initial content';
@@ -844,15 +1102,21 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		$url = admin_url( add_query_arg( array(
 			AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
-			'post_type'                                  => AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			'post_type'                                  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 		), 'edit.php' ) );
 		// Test the 'error' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
-		$this->assertEquals( $initial_content . '<p><a href="' . $url . '"><code>illegal_css_at_rule</code></a>: <code>@-ms-viewport</code></p>', $filtered_content );
+		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
 
-		// Test the 'status' block in the switch.
-		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
-		$this->assertEquals( $initial_content . '<span class="status-text new">New</span>', $filtered_content );
+		// Test the 'status' block in the switch for the error taxonomy page.
+		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
+		$this->assertContains( $initial_content . '<span class="status-text new rejected">New Rejected</span>', $filtered_content );
+
+		// Test the 'status' block switch for the single error page.
+		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
+		$this->assertContains( '<select class="amp-validation-error-status" id="amp_validation_error_term_status', $filtered_content );
 
 		// Test the 'created_date_gmt' block in the switch.
 		$date = current_time( 'mysql', true );
@@ -863,8 +1127,137 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the 'details' block in the switch.
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'details', $term_id );
-		$this->assertContains( $validation_error['node_attributes']['id'], $filtered_content );
-		$this->assertContains( $validation_error['node_name'], $filtered_content );
+		$this->assertContains( '<details open class="details-attributes"><summary class="details-attributes__summary"', $filtered_content );
+
+		// Test the 'error_type' block in the switch.
+		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error_type', $term_id );
+		$this->assertContains( 'CSS', $filtered_content );
+	}
+
+	/**
+	 * Test for add_single_post_sortable_columns()
+	 *
+	 * @covers AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns()
+	 */
+	public function test_add_single_post_sortable_columns() {
+		$initial_columns              = array(
+			'description' => 'description',
+			'links'       => 'count',
+		);
+		$columns_expected_to_be_added = array(
+			'error'      => 'amp_validation_code',
+			'error_type' => 'amp_validation_error_type',
+		);
+		$this->assertEquals(
+			array_merge( $initial_columns, $columns_expected_to_be_added ),
+			AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns( $initial_columns )
+		);
+
+		// In the unlikely case that the initial columns has an 'error' value, this method should overwrite it.
+		$initial_columns_with_error = array(
+			'error' => 'foobar',
+		);
+		$this->assertEquals(
+			$columns_expected_to_be_added,
+			AMP_Validation_Error_Taxonomy::add_single_post_sortable_columns( $initial_columns_with_error )
+		);
+	}
+
+	/**
+	 * Test render_single_url_error_details.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::render_single_url_error_details()
+	 */
+	public function test_render_single_url_error_details() {
+		$validation_error         = self::get_mock_error();
+		$validation_error['code'] = AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE;
+		$term                     = $this->factory()->term->create_and_get( array( 'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
+		$html                     = AMP_Validation_Error_Taxonomy::render_single_url_error_details( $validation_error, $term );
+		$this->assertContains( '<details open>', $html );
+	}
+
+	/**
+	 * Test get_translated_type_name.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::get_translated_type_name()
+	 */
+	public function test_get_translated_type_name() {
+		// When the error doesn't have a type, this should return null.
+		$error_without_type = array(
+			'code' => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+		);
+		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_without_type ) );
+
+		// When the error has a type that's not recognized, this should also return null.
+		$error_with_unrecognized_type = array(
+			'type' => 'foobar',
+		);
+		$this->assertEmpty( AMP_Validation_Error_Taxonomy::get_translated_type_name( $error_with_unrecognized_type ) );
+
+		$translated_names = array(
+			AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE => 'HTML Element',
+			AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE => 'HTML Attribute',
+			AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE  => 'JavaScript',
+			AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE => 'CSS',
+		);
+
+		foreach ( $translated_names as $slug => $name ) {
+			$validation_error = array(
+				'type' => $slug,
+			);
+			$this->assertEquals( $name, AMP_Validation_Error_Taxonomy::get_translated_type_name( $validation_error ) );
+		}
+	}
+
+	/**
+	 * Test handle_single_url_page_bulk_and_inline_actions.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions()
+	 */
+	public function test_handle_single_url_page_bulk_and_inline_actions() {
+		// Create a new error term.
+		$initial_accepted_status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+		$error_term              = $this->factory()->term->create_and_get( array(
+			'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+			'description' => wp_json_encode( $this->get_mock_error() ),
+		) );
+		wp_update_term( $error_term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array( 'term_group' => $initial_accepted_status ) );
+
+		// Because the action is incorrect, the tested method should exit and not update the validation error term.
+		$_REQUEST['action']   = 'incorrect-action';
+		$_POST['delete_tags'] = array( $error_term->term_id );
+		$correct_post_type    = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
+
+		// Because the post type is wrong, the tested method should again return without updating the term.
+		$_REQUEST['action']  = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION;
+		$incorrect_post_type = $this->factory()->post->create();
+		AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $incorrect_post_type );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, $initial_accepted_status );
+
+		/*
+		 * Now that the post type is correct, this should update the post accepted status to be 'accepted'.
+		 * There should be a warning because wp_safe_redirect() should be called at the end of the tested method.
+		 */
+		try {
+			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+
+		$this->assertContains( 'Cannot modify header information', $e->getMessage() );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS );
+
+		// When the action is to 'reject' the error, this should update the status of the error to 'rejected'.
+		$_REQUEST['action'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
+		try {
+			AMP_Validation_Error_Taxonomy::handle_single_url_page_bulk_and_inline_actions( $correct_post_type );
+		} catch ( Exception $exception ) {
+			$e = $exception;
+		}
+
+		$this->assertContains( 'Cannot modify header information', $e->getMessage() );
+		$this->assertEquals( get_term( $error_term->term_id )->term_group, AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS );
 	}
 
 	/**
@@ -893,6 +1286,52 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handle_clear_empty_terms_request.
+	 *
+	 * @covers \AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request()
+	 */
+	public function test_handle_clear_empty_terms_request() {
+		add_filter( 'wp_redirect', function() {
+			throw new Exception( 'redirected' );
+		} );
+		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( array( $this->get_mock_error() ), home_url( '/' ) );
+		wp_delete_post( $post_id, true );
+		$_REQUEST = &$_POST; // WPCS: csrf ok.
+
+		// No-op.
+		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		// Bad nonce.
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION ]            = 1;
+		$_POST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = 'bad';
+		try {
+			$exception = null;
+			AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( 'WPDieException', $exception );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		// Good nonce, but no permissions.
+		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
+		try {
+			$exception = null;
+			AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		} catch ( Exception $e ) {
+			$exception = $e;
+		}
+		$this->assertInstanceOf( 'WPDieException', $exception );
+		$this->assertEquals( 1, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$_REQUEST[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] = wp_create_nonce( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_CLEAR_EMPTY_ACTION );
+		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();
+		$this->assertEquals( 0, AMP_Validation_Error_Taxonomy::get_validation_error_count() );
+	}
+
+	/**
 	 * Gets a mock validation error for testing.
 	 *
 	 * @return array $error Mock validation error.
@@ -910,6 +1349,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			),
 			'node_name'       => 'link',
 			'parent_name'     => 'head',
+			'type'            => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 		);
 	}
 }

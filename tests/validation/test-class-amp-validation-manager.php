@@ -97,7 +97,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$_REQUEST = array();
 		unset( $GLOBALS['current_screen'] );
 		AMP_Validation_Manager::$should_locate_sources = false;
@@ -113,10 +113,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::init()
 	 */
 	public function test_init() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
-		$this->assertTrue( post_type_exists( AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
+		$this->assertTrue( post_type_exists( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertTrue( taxonomy_exists( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) );
 
 		$this->assertEquals( 10, has_action( 'save_post', self::TESTED_CLASS . '::handle_save_post_prompting_validation' ) );
@@ -135,7 +135,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Make sure should_locate_sources arg is recognized, as is disabling of tree-shaking.
 		remove_all_filters( 'amp_validation_error_sanitized' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
 		AMP_Validation_Manager::init( array(
 			'should_locate_sources' => true,
@@ -157,28 +157,28 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	/**
 	 * Test add_validation_hooks.
 	 *
-	 * @covers AMP_Validation_Manager::is_sanitization_forcibly_accepted()
+	 * @covers AMP_Validation_Manager::is_sanitization_auto_accepted()
 	 */
-	public function test_is_sanitization_forcibly_accepted() {
-		remove_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+	public function test_is_sanitization_auto_accepted() {
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		remove_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', true );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( 'amp' );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( 'amp', array( 'paired' => true ) );
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		$this->assertFalse( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( 'amp', array( 'paired' => true ) );
-		AMP_Options_Manager::update_option( 'force_sanitization', true );
-		$this->assertTrue( AMP_Validation_Manager::is_sanitization_forcibly_accepted() );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 	}
 
 	/**
@@ -187,7 +187,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_admin_bar_menu_items()
 	 */
 	public function test_add_admin_bar_menu_items() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		// No admin bar item when user lacks capability.
 		$this->go_to( home_url( '/' ) );
@@ -200,7 +200,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// No admin bar item when no template available.
 		$this->go_to( home_url() );
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
@@ -212,7 +212,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 
 		// Admin bar item available in native mode.
-		add_theme_support( 'amp', array( 'paired' => false ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -222,7 +222,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
-		add_theme_support( 'amp', array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -233,7 +233,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Admin bar item available in paired mode with validation errors.
 		$_GET[ AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ] = 3;
-		add_theme_support( 'amp', array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -253,15 +253,15 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEmpty( AMP_Validation_Manager::$validation_error_status_overrides );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_content', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'the_excerpt', array( self::TESTED_CLASS, 'decorate_filter_source' ) ) );
-		$this->assertEquals( -1, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
+		$this->assertEquals( PHP_INT_MAX, has_action( 'do_shortcode_tag', array( self::TESTED_CLASS, 'decorate_shortcode_source' ) ) );
 
 		// Test overrides.
 		$validation_error_term_1 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array( 'test' => 1 ) );
 		$validation_error_term_2 = AMP_Validation_Error_Taxonomy::prepare_validation_error_taxonomy_term( array( 'test' => 2 ) );
 		$_REQUEST[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		$_REQUEST[ AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] = array(
-			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPTED_STATUS,
-			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECTED_STATUS,
+			$validation_error_term_1['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			$validation_error_term_2['slug'] => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 		);
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		$this->assertCount( 2, AMP_Validation_Manager::$validation_error_status_overrides );
@@ -347,7 +347,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
 		// Test in a Native AMP (canonical) context.
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::add_rest_api_fields();
 		$post_types_canonical = get_post_types_by_support( 'editor' );
 		$this->assert_rest_api_field_present( $post_types_canonical );
@@ -379,8 +379,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_get_amp_validity_rest_field() {
-		AMP_Options_Manager::update_option( 'force_sanitization', false );
-		AMP_Invalid_URL_Post_Type::register();
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
 		$id = $this->factory()->post->create();
@@ -425,8 +425,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 					return array(
 						'sanitized'   => false,
 						'error'       => $error,
-						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
-						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_STATUS,
+						'status'      => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+						'term_status' => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 						'forced'      => false,
 					);
 				},
@@ -545,9 +545,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
-		AMP_Invalid_URL_Post_Type::register();
+		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 		$this->set_capability();
 		$post = $this->factory()->post->create_and_get();
@@ -557,7 +557,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		AMP_Invalid_URL_Post_Type::store_validation_errors(
+		AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
 				array(
 					'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
@@ -668,8 +668,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			),
 			'latest_posts' => array(
-				'<!-- wp:latest-posts /-->',
-				'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"type":"plugin","name":"gutenberg","function":"render_block_core_latest_posts"}-->',
+				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
+				sprintf(
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
+					function_exists( 'gutenberg_wpautop' ) ? 'plugin' : 'core',
+					function_exists( 'gutenberg_wpautop' ) ? 'gutenberg' : 'wp-includes'
+				),
 				array(
 					'element' => 'ul',
 					'blocks'  => array( 'core/latest-posts' ),
@@ -927,13 +931,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
-		$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"}';
-		if ( 9 === has_filter( 'the_content', 'do_blocks' ) ) {
-			$source_json .= ',{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"}';
+		if ( ! function_exists( 'gutenberg_wpautop' ) && has_filter( 'the_content', 'do_blocks' ) ) {
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"core","name":"wp-includes","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
+		} elseif ( has_filter( 'the_content', 'do_blocks' ) ) {
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"plugin","name":"gutenberg","function":"gutenberg_wpautop"},{"type":"plugin","name":"amp","function":"AMP_Validation_Manager::add_block_source_comments"},{"type":"plugin","name":"gutenberg","function":"do_blocks"},{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		} else {
-			$source_json .= ',{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"}';
+			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		}
-		$source_json .= ',{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 
 		$expected_content = implode( '', array(
 			"<!--amp-source-stack $source_json-->",
@@ -1132,7 +1136,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		foreach ( $filtered_sanitizers as $sanitizer => $args ) {
 			$this->assertEquals( $expected_callback, $args['validation_error_callback'] );
 		}
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -1182,7 +1186,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_validate_url() {
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
 		$validation_errors = array(
 			array(
@@ -1201,7 +1205,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		add_filter( 'pre_http_request', $filter );
 		$r = AMP_Validation_Manager::validate_url( home_url( '/' ) );
 		$this->assertInstanceOf( 'WP_Error', $r );
-		$this->assertEquals( 'response_comment_absent', $r->get_error_code() );
+		$this->assertEquals( 'white_screen_of_death', $r->get_error_code() );
 		remove_filter( 'pre_http_request', $filter );
 
 		// Test success.
@@ -1278,8 +1282,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::enqueue_block_validation()
 	 */
 	public function test_enqueue_block_validation() {
-		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$this->markTestSkipped( 'Gutenberg not available.' );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
 		global $post;
@@ -1288,15 +1292,19 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
 
-		$script        = wp_scripts()->registered[ $slug ];
-		$inline_script = $script->extra['after'][1];
+		$script                = wp_scripts()->registered[ $slug ];
+		$inline_script         = $script->extra['after'][1];
+		$expected_dependencies = array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE );
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			$expected_dependencies[] = 'wp-i18n';
+		}
+
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
-		$this->assertEqualSets( array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ), $script->deps );
+		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, wp_scripts()->queue, true ) );
 		$this->assertContains( 'ampBlockValidation.boot', $inline_script );
 		$this->assertContains( AMP_Validation_Manager::VALIDITY_REST_FIELD_NAME, $inline_script );
-		$this->assertContains( '"domain":"amp"', $inline_script );
 	}
 
 	/**
@@ -1425,6 +1433,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			$url = home_url( '/' );
 		}
 
-		return AMP_Invalid_URL_Post_Type::store_validation_errors( $errors, $url );
+		return AMP_Validated_URL_Post_Type::store_validation_errors( $errors, $url );
 	}
 }

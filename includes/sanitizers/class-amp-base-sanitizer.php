@@ -317,7 +317,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return string URL which may have been updated with HTTPS, or may have been made empty.
 	 */
 	public function maybe_enforce_https_src( $src, $force_https = false ) {
-		$protocol = strtok( $src, ':' );
+		$protocol = strtok( $src, ':' ); // @todo What about relative URLs? This should use wp_parse_url( $src, PHP_URL_SCHEME )
 		if ( 'https' !== $protocol ) {
 			// Check if https is required.
 			if ( isset( $this->args['require_https_src'] ) && true === $this->args['require_https_src'] ) {
@@ -441,9 +441,11 @@ abstract class AMP_Base_Sanitizer {
 				$error['type'] = 'script' === $node->nodeName ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 			}
 
-			$error['node_attributes'] = array();
-			foreach ( $node->attributes as $attribute ) {
-				$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			if ( ! isset( $error['node_attributes'] ) ) {
+				$error['node_attributes'] = array();
+				foreach ( $node->attributes as $attribute ) {
+					$error['node_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+				}
 			}
 
 			// Capture script contents.
@@ -465,10 +467,12 @@ abstract class AMP_Base_Sanitizer {
 				// If this is an attribute that begins with on, like onclick, it should be a js_error.
 				$error['type'] = preg_match( '/^on\w+/', $node->nodeName ) ? AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE : AMP_Validation_Error_Taxonomy::HTML_ATTRIBUTE_ERROR_TYPE;
 			}
-			$error['element_attributes'] = array();
-			if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
-				foreach ( $node->parentNode->attributes as $attribute ) {
-					$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			if ( ! isset( $error['element_attributes'] ) ) {
+				$error['element_attributes'] = array();
+				if ( $node->parentNode && $node->parentNode->hasAttributes() ) {
+					foreach ( $node->parentNode->attributes as $attribute ) {
+						$error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+					}
 				}
 			}
 		}
