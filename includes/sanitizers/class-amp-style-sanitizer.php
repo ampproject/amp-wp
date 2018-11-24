@@ -777,7 +777,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v12'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v13'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1062,15 +1062,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$between_selectors                 = '/*AMP_WP_BETWEEN_SELECTORS*/';
 			$after_declaration_block_selectors = '/*AMP_WP_BEFORE_DECLARATION_SELECTORS*/';
 			$after_declaration_block           = '/*AMP_WP_AFTER_DECLARATION*/';
+			$before_at_rule                    = '/*AMP_WP_BEFORE_AT_RULE*/';
+			$after_at_rule                     = '/*AMP_WP_AFTER_AT_RULE*/';
 
 			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
 			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
 			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
 			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
+			$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
+			$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
 
 			$stylesheet_string = $css_document->render( $output_format );
 
 			$pattern  = '#';
+			$pattern .= preg_quote( $before_at_rule, '#' );
+			$pattern .= '|';
+			$pattern .= preg_quote( $after_at_rule, '#' );
+			$pattern .= '|';
 			$pattern .= '(' . preg_quote( $before_declaration_block, '#' ) . ')';
 			$pattern .= '(.+?)';
 			$pattern .= preg_quote( $after_declaration_block_selectors, '#' );
@@ -2047,10 +2055,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$final_size = 0;
 		$dom        = $this->dom;
 		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
-			$stylesheet = '';
+			$stylesheet_parts = array();
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
-					$stylesheet .= $stylesheet_part;
+					$stylesheet_parts[] = $stylesheet_part;
 					continue;
 				}
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
@@ -2091,9 +2099,57 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array_keys( $selectors_parsed );
 				}
 				if ( ! empty( $selectors ) ) {
-					$stylesheet .= implode( ',', $selectors ) . $declaration_block;
+					$stylesheet_parts[] = implode( ',', $selectors ) . $declaration_block;
 				}
 			}
+
+			// Strip empty at-rules after tree shaking.
+			$stylesheet_part_count = count( $stylesheet_parts );
+			for ( $i = 0; $i < $stylesheet_part_count; $i++ ) {
+				$stylesheet_part = $stylesheet_parts[ $i ];
+				if ( '@' !== substr( $stylesheet_part, 0, 1 ) ) {
+					continue;
+				}
+
+				// Delete empty at-rules.
+				if ( '{}' === substr( $stylesheet_part, -2 ) ) {
+					$stylesheet_part_count--;
+					array_splice( $stylesheet_parts, $i, 1 );
+					$i--;
+					continue;
+				}
+
+				// Delete at-rules that were emptied due to tree-shaking.
+				if ( '{' === substr( $stylesheet_part, -1 ) ) {
+					$open_braces = 1;
+					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
+						$stylesheet_part = $stylesheet_parts[ $j ];
+						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
+						if ( empty( $stylesheet_part ) ) {
+							continue; // There was a shaken rule.
+						} elseif ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
+							continue; // The rule opens is empty from the start.
+						} elseif ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+							$open_braces++;
+						} elseif ( '}' === $stylesheet_part ) {
+							$open_braces--;
+						} else {
+							break;
+						}
+
+						// Splice out the parts that are empty.
+						if ( 0 === $open_braces ) {
+							array_splice( $stylesheet_parts, $i, $j - $i + 1 );
+							$stylesheet_part_count = count( $stylesheet_parts );
+							$i--;
+							continue 2;
+						}
+					}
+				}
+			}
+
+			$stylesheet = implode( '', $stylesheet_parts );
+			unset( $stylesheet_parts );
 			$sheet_size                 = strlen( $stylesheet );
 			$pending_stylesheet['size'] = $sheet_size;
 
