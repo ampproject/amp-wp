@@ -777,7 +777,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v12'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v13'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2125,9 +2125,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
 						$stylesheet_part = $stylesheet_parts[ $j ];
 						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
-						if ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+						if ( empty( $stylesheet_part ) ) {
+							continue; // There was a shaken rule.
+						} elseif ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
+							continue; // The rule opens is empty from the start.
+						} elseif ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
 							$open_braces++;
-
 						} elseif ( '}' === $stylesheet_part ) {
 							$open_braces--;
 						} else {
@@ -2139,7 +2142,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							array_splice( $stylesheet_parts, $i, $j - $i + 1 );
 							$stylesheet_part_count = count( $stylesheet_parts );
 							$i--;
-							continue;
+							continue 2;
 						}
 					}
 				}
