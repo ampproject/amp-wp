@@ -503,6 +503,10 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 			margin: 0;
 	}
 
+	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-inserter__toggle::after {
+		content: 'Add Layer';
+	}
+
 	/*
 		Legend of the magic numbers:
 		Sidebar
