@@ -451,26 +451,104 @@ div[data-amp-type="grid"] .block-library-image__resizer {
  * Hides the toggler and shows the navigator by default on large screens.
  */
 
-@media( max-width: 949px) {
+@media( max-width: 960px) {
 	.editor-block-list__block-edit > div > .editor-selectors {
 		display: none;
 	}
 }
 
-@media (min-width: 950px) {
+@media (min-width: 961px) {
+	.post-type-amp_story .editor-post-title__input {
+		text-align: center;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
+		padding-left: 15px;
+		padding-right: 15px;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div {
+		display: grid;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div::before {
+		content: '';
+		grid-column: 1 / 1;
+		grid-row: 1 / 2;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > div:first-child {
+		grid-column: 2 / 2;
+		grid-row: 1 / 1;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
+		grid-column: 2 / 2;
+		grid-row: 2 / 2;
+	}
+
 	.components-icon-button.editor-block-navigation {
 			display: none;
 	}
 
 	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
 			position: fixed;
-			left: 200px;
+			left: 168px;
 			top: 150px;
 			width: 300px;
 			z-index: 80;
 			list-style-type: none;
 			padding: 0;
 			margin: 0;
+	}
+
+	/*
+		Legend of the magic numbers:
+		Sidebar
+			Expanded - 160px wide
+			Folded - 36px wide
+		Settings
+			Shown - 280px wide
+		Content - 383px (including 15px padding)
+		Block Navigation - <= 300px
+	*/
+
+	/* Navigator in the context of the open sidebar, settings hidden. */
+	.post-type-amp_story .edit-post-layout .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+		max-width: calc( 100vw - 160px - 383px );
+	}
+
+	.post-type-amp_story .edit-post-layout .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 160px - 315px ) );
+	}
+
+	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+		max-width: calc( 100vw - 280px - 160px - 383px );
+	}
+
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 280px - 160px - 315px ) );
+	}
+
+	/* Navigator in the context of folded sidebar, settings hidden. */
+	.post-type-amp_story.folded .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+		left: 44px;
+		max-width: calc( 100vw - 36px - 383px );
+	}
+
+	.post-type-amp_story.folded .edit-post-visual-editor .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 315px ) );
+	}
+
+	/* Navigator in the context of folded sidebar, settings shown. */
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+		left: 44px;
+		max-width: calc( 100vw - 36px - 280px - 383px );
+	}
+
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 280px - 315px ) );
 	}
 
 	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-block-navigation__list {
