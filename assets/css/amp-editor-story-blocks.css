@@ -364,7 +364,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 
 .editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
 	position: absolute;
-	min-height: 20%;
+	height: 20%;
 	width: 318px;
 	bottom: 38px;
 }
