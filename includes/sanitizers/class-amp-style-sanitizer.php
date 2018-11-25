@@ -1870,14 +1870,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			$this->amp_custom_style_element->appendChild( $this->dom->createTextNode( $css ) );
 
-			$included_size    = 0;
-			$excluded_size    = 0;
-			$included_sources = array();
+			$included_size          = 0;
+			$included_original_size = 0;
+			$excluded_size          = 0;
+			$excluded_original_size = 0;
+			$included_sources       = array();
 			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
 				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
 					continue;
 				}
-				$message  = sprintf( '% 6d B: ', $pending_stylesheet['size'] );
+				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
+				if ( $pending_stylesheet['size'] && $pending_stylesheet['size'] !== $pending_stylesheet['original_size'] ) {
+					$message .= sprintf( ' (%d%%)', $pending_stylesheet['size'] / $pending_stylesheet['original_size'] * 100 );
+				}
+				$message .= ': ';
 				$message .= $pending_stylesheet['node']->nodeName;
 				if ( $pending_stylesheet['node']->getAttribute( 'id' ) ) {
 					$message .= '#' . $pending_stylesheet['node']->getAttribute( 'id' );
@@ -1892,28 +1898,54 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				if ( ! empty( $pending_stylesheet['included'] ) ) {
-					$included_sources[] = $message;
-					$included_size     += $pending_stylesheet['size'];
+					$included_sources[]      = $message;
+					$included_size          += $pending_stylesheet['size'];
+					$included_original_size += $pending_stylesheet['original_size'];
 				} else {
-					$excluded_sources[] = $message;
-					$excluded_size     += $pending_stylesheet['size'];
+					$excluded_sources[]      = $message;
+					$excluded_size          += $pending_stylesheet['size'];
+					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
 			}
 			$comment = '';
-			if ( ! empty( $included_sources ) ) {
+			if ( ! empty( $included_sources ) && $included_original_size > 0 ) {
 				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
-				/* translators: %d is number of bytes */
-				$comment .= sprintf( esc_html__( 'Total included size: %d bytes', 'amp' ), $included_size ) . "\n";
+				$comment .= sprintf(
+					/* translators: %1$d is number of included bytes, %2$d is percentage of total CSS actually included after tree shaking, %3$d is total included size */
+					esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
+					number_format_i18n( $included_size ),
+					$included_size / $included_original_size * 100,
+					number_format_i18n( $included_original_size )
+				) . "\n";
 			}
-			if ( ! empty( $excluded_sources ) ) {
+			if ( ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
 				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n" . implode( "\n", $excluded_sources ) . "\n";
 
-				/* translators: %d is number of bytes */
-				$comment .= sprintf( esc_html__( 'Total excluded size: %d bytes', 'amp' ), $excluded_size ) . "\n";
+				$comment .= sprintf(
+					/* translators: %1$d is number of excluded bytes, %2$d is percentage of total CSS actually excluded even after tree shaking, %3$d is total excluded size */
+					esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
+					number_format_i18n( $excluded_size ),
+					$excluded_size / $excluded_original_size * 100,
+					number_format_i18n( $excluded_original_size )
+				) . "\n";
+
+				$total_size          = $included_size + $excluded_size;
+				$total_original_size = $included_original_size + $excluded_original_size;
+				if ( $total_size !== $total_original_size ) {
+					$comment .= "\n";
+					$comment .= sprintf(
+						/* translators: %1$d is total combined bytes, %2$d is percentage of CSS after tree shaking, %3$d is total before tree shaking */
+						esc_html__( 'Total combined size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
+						number_format_i18n( $total_size ),
+						( $total_size / $total_original_size ) * 100,
+						number_format_i18n( $total_original_size )
+					) . "\n";
+				}
 			}
+
 			if ( $comment ) {
 				$this->amp_custom_style_element->parentNode->insertBefore(
 					$this->dom->createComment( "\n$comment" ),
@@ -2056,11 +2088,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$dom        = $this->dom;
 		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
 			$stylesheet_parts = array();
+			$original_size    = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
 				if ( is_string( $stylesheet_part ) ) {
 					$stylesheet_parts[] = $stylesheet_part;
+					$original_size     += strlen( $stylesheet_part );
 					continue;
 				}
+
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
 				if ( $should_tree_shake ) {
 					$selectors = array();
@@ -2098,8 +2133,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				} else {
 					$selectors = array_keys( $selectors_parsed );
 				}
+				$stylesheet_part = implode( ',', $selectors ) . $declaration_block;
+				$original_size  += strlen( $stylesheet_part );
 				if ( ! empty( $selectors ) ) {
-					$stylesheet_parts[] = implode( ',', $selectors ) . $declaration_block;
+					$stylesheet_parts[] = $stylesheet_part;
 				}
 			}
 
@@ -2147,6 +2184,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
+			$pending_stylesheet['original_size'] = $original_size;
 
 			$stylesheet = implode( '', $stylesheet_parts );
 			unset( $stylesheet_parts );
