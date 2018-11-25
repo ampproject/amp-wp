@@ -393,6 +393,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 /*
  * 6.1 Ghosted page inserter
  * Change the last inserter into a ghosted page.
+ * Shame disclaimer: long selectors needed because the classes are quite common.
  */
 
 .post-type-amp_story .editor-default-block-appender {
