@@ -503,11 +503,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 			margin: 0;
 	}
 
-	/* #amp-root-navigation {
-		position: absolute;
-		top: 200px;
-	} */
-
 	#amp-root-navigation .editor-inserter__toggle::after {
 		content: 'Add Layer';
 	}
