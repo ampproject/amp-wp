@@ -77,8 +77,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
-		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$this->markTestSkipped( 'Gutenberg is not available' );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available' );
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.

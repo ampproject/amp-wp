@@ -135,15 +135,19 @@ class AMP_Editor_Blocks {
 			wp_enqueue_script(
 				'amp-editor-blocks-build',
 				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-				array( 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
+
+			if ( function_exists( 'wp_set_script_translations' ) ) {
+				wp_set_script_translations( 'amp-editor-blocks-build', 'amp' );
+			}
 		}
 
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			array( 'wp-editor', 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
@@ -155,11 +159,16 @@ class AMP_Editor_Blocks {
 			) ) )
 		);
 
-		wp_add_inline_script(
-			'wp-i18n',
-			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
-			'after'
-		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			wp_add_inline_script(
+				'wp-i18n',
+				'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "amp" );',
+				'after'
+			);
+		}
 	}
 
 	/**

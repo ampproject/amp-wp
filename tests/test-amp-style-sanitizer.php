@@ -138,9 +138,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>@charset "utf-8"; @namespace svg url(http://www.w3.org/2000/svg); @page { margin: 1cm; } @viewport { width: device-width; } @counter-style thumbs { system: cyclic; symbols: "\1F44D"; suffix: " "; } body { color: black; }</style>',
 				'',
 				array(
-					'body{color:black}',
+					'@page{margin:1cm}body{color:black}',
 				),
-				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
+				array( 'illegal_css_at_rule', 'illegal_css_at_rule', 'illegal_css_at_rule' ),
 			),
 
 			'allowed_at_rules_retained' => array(
@@ -365,6 +365,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'charset_ruleset_removed_without_warning'  => array(
+				'<html amp><body><style>@charset "utf-8"; body { color:limegreen; }</style></body></html>',
+				array(
+					'body{color:limegreen}',
+				),
+				array(),
+			),
 		);
 	}
 
@@ -494,6 +501,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<div>test</div>',
 				'span {color:red;} @keyframes foo { from: { opacity:0; } 50% {opacity:0.5} 75%,80% { opacity:0.6 } to { opacity:1 }  }',
 				'@keyframes foo{from:{opacity:0}50%{opacity:.5}75%,80%{opacity:.6}to{opacity:1}}',
+			),
+			'type_class_names' => array(
+				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
+				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
 			),
 		);
 	}

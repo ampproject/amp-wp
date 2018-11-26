@@ -777,7 +777,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v11'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v12'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -971,7 +971,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$parser_settings = Sabberworm\CSS\Settings::create();
 			$css_parser      = new Sabberworm\CSS\Parser( $stylesheet_string, $parser_settings );
-			$css_document    = $css_parser->parse();
+			$css_document    = $css_parser->parse(); // @todo If 'utf-8' is not $css_parser->getCharset() then issue warning?
 
 			if ( ! empty( $options['stylesheet_url'] ) ) {
 				$this->real_path_urls(
@@ -1045,6 +1045,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			$options
 		);
+
+		// Strip the dreaded UTF-8 byte order mark (BOM, \uFEFF). This should ideally get handled by PHP-CSS-Parser <https://github.com/sabberworm/PHP-CSS-Parser/issues/150>.
+		$stylesheet_string = preg_replace( '/^\xEF\xBB\xBF/', '', $stylesheet_string );
 
 		$stylesheet         = array();
 		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
@@ -1296,13 +1299,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					);
 				}
 			} elseif ( $css_item instanceof AtRule ) {
-				$error     = array(
-					'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
-					'at_rule' => $css_item->atRuleName(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				);
-				$sanitized = $this->should_sanitize_validation_error( $error );
-				$results[] = compact( 'error', 'sanitized' );
+				if ( 'charset' === $css_item->atRuleName() ) {
+					/*
+					 * The @charset at-rule is not allowed in style elements, so it is not allowed in AMP.
+					 * If the @charset is defined, then it really should have already been acknowledged
+					 * by PHP-CSS-Parser when the CSS was parsed in the first place, so at this point
+					 * it is irrelevant and can be removed.
+					 */
+					$sanitized = true;
+				} else {
+					$error     = array(
+						'code'    => self::ILLEGAL_AT_RULE_ERROR_CODE,
+						'at_rule' => $css_item->atRuleName(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					);
+					$sanitized = $this->should_sanitize_validation_error( $error );
+					$results[] = compact( 'error', 'sanitized' );
+				}
 			} else {
 				$error     = array(
 					'code' => 'unrecognized_css',
@@ -1969,13 +1982,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// An element (type) either starts a selector or is preceded by combinator, comma, opening paren, or closing brace.
+			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
+			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
+
 			$edited_selectors = array( $selector );
 			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
-				$html_pattern = '/(?<=^|[^a-z0-9_-])' . preg_quote( $html_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+				$html_pattern = '/' . $before_type_selector_pattern . preg_quote( $html_selector, '/' ) . $after_type_selector_pattern . '/i';
 				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
 					$original_selector = $edited_selector;
 					$amp_selector      = array_shift( $amp_selectors );
-					$amp_tag_pattern   = '/(?<=^|[^a-z0-9_-])' . preg_quote( $amp_selector, '/' ) . '(?=$|[^a-z0-9_-])/i';
+					$amp_tag_pattern   = '/' . $before_type_selector_pattern . preg_quote( $amp_selector, '/' ) . $after_type_selector_pattern . '/i';
 					preg_match( $amp_tag_pattern, $edited_selector, $matches );
 					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
 						continue;

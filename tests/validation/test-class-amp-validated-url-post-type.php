@@ -1123,6 +1123,10 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			),
 			$side_meta_box['callback']
 		);
+		$this->assertEquals(
+			array( '__back_compat_meta_box' => true ),
+			$side_meta_box['args']
+		);
 
 		$contexts = $wp_meta_boxes[ AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ]['side'];
 		foreach ( $contexts as $context ) {

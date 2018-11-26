@@ -141,7 +141,8 @@ class AMP_Options_Menu {
 		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
 		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' );
 		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. Your canonical URLs are AMP. AMP-specific blocks are available for inserting into content. Any AMP validation errors are automatically sanitized.', 'amp' );
-		$builtin_support    = in_array( get_template(), array( 'twentyfifteen', 'twentysixteen', 'twentyseventeen' ), true );
+
+		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
 		<?php if ( current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Theme_Support::is_support_added_via_option() ) : ?>
 			<div class="notice notice-info notice-alt inline">
