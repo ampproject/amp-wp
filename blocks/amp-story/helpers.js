@@ -4,16 +4,25 @@ const { __ } = wp.i18n;
 const {
 	SelectControl,
 	RangeControl,
-	PanelBody
+	PanelBody,
+	Toolbar
 } = wp.components;
+
+const {
+	Fragment
+} = wp.element;
 
 const {
 	PanelColorSettings,
 	InspectorControls,
-	InnerBlocks
+	InnerBlocks,
+	BlockTitle
 } = wp.editor;
 
-const { hasSelectedInnerBlock } = wp.data.select( 'core/editor' );
+const {
+	hasSelectedInnerBlock,
+	getBlockRootClientId
+} = wp.data.select( 'core/editor' );
 
 const ANIMATION_DEFAULTS = {
 	drop: 1600,
@@ -316,8 +325,8 @@ export function saveGridLayer( attributes, template ) {
  * @return {[XML,XML]} Edit.
  */
 export function editGridLayer( props, type ) {
-	const { setAttributes, attributes } = props;
-
+	const { setAttributes, attributes, isSelected } = props;
+	const rootClientId = getBlockRootClientId( props.clientId );
 	return [
 		<InspectorControls key='inspector'>
 			{
@@ -329,6 +338,9 @@ export function editGridLayer( props, type ) {
 				}
 			</PanelBody>
 		</InspectorControls>,
+		isSelected && (
+			getLayerBreadCrumb( props.clientId, rootClientId )
+		),
 		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type + ' ' + maybeIsSelectedParentClass( props.clientId ) }>
 			<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 		</div>
@@ -343,7 +355,7 @@ export function editGridLayer( props, type ) {
  * @return {[XML,XML]} Edit.
  */
 export function editFillLayer( props, template ) {
-	const { setAttributes, attributes } = props;
+	const { setAttributes, attributes, isSelected } = props;
 
 	return [
 		<InspectorControls key='inspector'>
@@ -356,8 +368,34 @@ export function editFillLayer( props, template ) {
 				}
 			</PanelBody>
 		</InspectorControls>,
+		isSelected && (
+			getLayerBreadCrumb( props.clientId, getBlockRootClientId( props.clientId ) )
+		),
 		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill ' + maybeIsSelectedParentClass( props.clientId ) }>
 			<InnerBlocks template={ template } templateLock='all' />
 		</div>
 	];
+}
+
+/**
+ * Get Layer Breadcrumb.
+ *
+ * @param {string} clientId Layer ID.
+ * @param {string} rootClientId Parent ID.
+ * @return {XML} Breadcrumb.
+ */
+function getLayerBreadCrumb( clientId, rootClientId ) {
+	return (
+		<div key='breadcrumb' className={ 'editor-block-list__breadcrumb' }>
+			<Toolbar>
+				{ rootClientId && (
+					<Fragment>
+						<BlockTitle clientId={ rootClientId } />
+						<span className="editor-block-list__descendant-arrow" />
+					</Fragment>
+				) }
+				<BlockTitle clientId={ clientId } />
+			</Toolbar>
+		</div>
+	);
 }
