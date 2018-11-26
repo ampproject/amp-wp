@@ -321,10 +321,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return [
-				inspectorControls,
 				el( BlockEdit, _.extend( {
 					key: 'original'
-				}, props ) )
+				}, props ) ),
+				inspectorControls
 			];
 		};
 	};
