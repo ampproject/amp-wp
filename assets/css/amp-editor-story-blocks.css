@@ -596,3 +596,8 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 .post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
 }
+
+#amp-root-navigation {
+	position: absolute;
+	top: 200px;
+}
