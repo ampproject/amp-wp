@@ -507,6 +507,14 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 		content: 'Add Layer';
 	}
 
+	.post-type-amp_story #amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {
+		transform: translateX( -13% );
+	}
+
+	.post-type-amp_story.folded #amp-root-navigation .components-popover:not(.is-mobile):not(.is-middle).is-right .components-popover__content {
+		margin-left: -50px;
+	}
+
 	/*
 		Legend of the magic numbers:
 		Sidebar
