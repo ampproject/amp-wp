@@ -492,10 +492,10 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 			display: none;
 	}
 
-	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
-			position: fixed;
-			left: 168px;
-			top: 150px;
+	#amp-root-navigation {
+			position: absolute;
+			left: 5px;
+			top: 182px;
 			width: 300px;
 			z-index: 80;
 			list-style-type: none;
@@ -503,7 +503,12 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 			margin: 0;
 	}
 
-	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-inserter__toggle::after {
+	/* #amp-root-navigation {
+		position: absolute;
+		top: 200px;
+	} */
+
+	#amp-root-navigation .editor-inserter__toggle::after {
 		content: 'Add Layer';
 	}
 
@@ -519,7 +524,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	*/
 
 	/* Navigator in the context of the open sidebar, settings hidden. */
-	.post-type-amp_story .edit-post-layout .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+	.post-type-amp_story .edit-post-layout #amp-root-navigation {
 		max-width: calc( 100vw - 160px - 383px );
 	}
 
@@ -528,7 +533,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	}
 
 	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
-	.post-type-amp_story .edit-post-layout.is-sidebar-opened .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-root-navigation {
 		max-width: calc( 100vw - 280px - 160px - 383px );
 	}
 
@@ -537,8 +542,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	}
 
 	/* Navigator in the context of folded sidebar, settings hidden. */
-	.post-type-amp_story.folded .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
-		left: 44px;
+	.post-type-amp_story.folded #amp-root-navigation {
 		max-width: calc( 100vw - 36px - 383px );
 	}
 
@@ -547,8 +551,7 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	}
 
 	/* Navigator in the context of folded sidebar, settings shown. */
-	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened .edit-post-visual-editor .editor-block-list__block-edit .editor-selectors {
-		left: 44px;
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-root-navigation {
 		max-width: calc( 100vw - 36px - 280px - 383px );
 	}
 
@@ -556,11 +559,11 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 280px - 315px ) );
 	}
 
-	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .editor-block-navigation__list {
+	#amp-root-navigation .editor-block-navigation__list {
 		list-style-type: none;
 	}
 
-	.edit-post-visual-editor .editor-block-list__block-edit .editor-selectors .components-icon-button .dashicon {
+	#amp-root-navigation .components-icon-button .dashicon {
 		margin-right: 5px;
 	}
 
@@ -597,7 +600,4 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	pointer-events: none;
 }
 
-#amp-root-navigation {
-	position: absolute;
-	top: 200px;
-}
+
