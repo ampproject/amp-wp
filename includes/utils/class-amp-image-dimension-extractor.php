@@ -216,7 +216,7 @@ class AMP_Image_Dimension_Extractor {
 		$urls = array_keys( $urls_to_fetch );
 
 		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
-			require_once AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php';
+			require_once AMP__DIR__ . '/includes/amp-fasterimage.php';
 		}
 
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );

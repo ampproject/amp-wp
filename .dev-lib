@@ -1,4 +1,4 @@
-PATH_EXCLUDES_PATTERN=includes/lib/
+PATH_EXCLUDES_PATTERN=third_party/
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
 PROJECT_SLUG=amp
