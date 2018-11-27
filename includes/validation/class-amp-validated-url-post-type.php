@@ -982,7 +982,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = '</details>';
 			}
 		}
-		if ( isset( $sources['theme'] ) ) {
+		if ( isset( $sources['theme'] ) && empty( $sources['embed'] ) ) {
 			$output[] = '<div class="source">';
 			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
 			$themes   = array_unique( $sources['theme'] );

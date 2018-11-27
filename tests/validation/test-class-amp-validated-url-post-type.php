@@ -619,6 +619,78 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test for render_sources_column()
+	 *
+	 * @covers AMP_Validated_URL_Post_Type::render_sources_column()
+	 */
+	public function test_render_sources_column() {
+		$theme_name    = 'foo-theme';
+		$post_id       = 9876;
+		$error_summary = array(
+			'removed_attributes'          => array(
+				'webkitallowfullscreen' => 1,
+			),
+			'removed_elements'            => array(),
+			'sources_with_invalid_output' => array(
+				'embed' => true,
+				'hook'  => 'the_content',
+				'theme' => array( $theme_name ),
+			),
+		);
+
+		// If there is an embed and a theme source, this should only output the embed icon.
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$sources_column = ob_get_clean();
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Embed</strong>', $sources_column );
+
+		// If there is no embed source, but there is a theme, this should output the theme icon.
+		unset( $error_summary['sources_with_invalid_output']['embed'] );
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$sources_column      = ob_get_clean();
+		$expected_theme_icon = '<div class="source"><span class="dashicons dashicons-admin-appearance"></span><strong>' . $theme_name . '</strong></div>';
+		$this->assertEquals( $expected_theme_icon, $sources_column );
+
+		// If there is a plugin and theme source, this should output icons for both of them.
+		$plugin_name = 'baz-plugin';
+		$error_summary['sources_with_invalid_output']['plugin'] = array( $plugin_name );
+		$expected_plugin_icon                                   = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
+		unset( $error_summary['sources_with_invalid_output']['embed'] );
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$sources_column = ob_get_clean();
+		$this->assertEquals( $expected_plugin_icon . $expected_theme_icon, $sources_column );
+
+		// If there is a 'core' source, it should appear in the column output.
+		$error_summary['sources_with_invalid_output']['core'] = array();
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$sources_column = ob_get_clean();
+		$this->assertContains( '<strong><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
+
+		// Even if there is a hook in the sources, it should not appear in the column if there is any other source.
+		$hook_name = 'wp_header';
+		$error_summary['sources_with_invalid_output']['hook'] = array( $hook_name );
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$this->assertNotContains( $hook_name, ob_get_clean() );
+
+		// If a hook is the only source, it should appear in the column.
+		$error_summary['sources_with_invalid_output'] = array( 'hook' => $hook_name );
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>' . $hook_name . '</strong>', ob_get_clean() );
+
+		// If there's no source in 'sources_with_invalid_output', this should output the theme name.
+		update_post_meta( $post_id, '_amp_validated_environment', array( 'theme' => $theme_name ) );
+		$error_summary['sources_with_invalid_output'] = array();
+		ob_start();
+		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
+		$this->assertEquals( '<div class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . ' (?)</div>', ob_get_clean() );
+	}
+
+	/**
 	 * Test for filter_bulk_actions()
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::filter_bulk_actions()
