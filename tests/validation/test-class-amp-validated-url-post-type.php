@@ -653,7 +653,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( $expected_theme_icon, $sources_column );
 
 		// If there is a plugin and theme source, this should output icons for both of them.
-		$plugin_name                                            = 'baz-plugin';
+		$plugin_name = 'baz-plugin';
 		$error_summary['sources_with_invalid_output']['plugin'] = array( $plugin_name );
 		$expected_plugin_icon = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
@@ -670,7 +670,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertContains( '<strong><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
 
 		// Even if there is a hook in the sources, it should not appear in the column if there is any other source.
-		$hook_name                                            = 'wp_header';
+		$hook_name = 'wp_header';
 		$error_summary['sources_with_invalid_output']['hook'] = array( $hook_name );
 		ob_start();
 		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
