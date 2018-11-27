@@ -194,6 +194,18 @@ class AMP_Story_Post_Type {
 		);
 
 		wp_enqueue_script(
+			'amp-image-caption-toggle',
+			amp_get_asset_url( 'js/amp-image-caption-toggle.js' ),
+			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
+			AMP__VERSION
+		);
+
+		wp_add_inline_script(
+			'amp-image-caption-toggle',
+			'ampImageCaptionToggle.boot();'
+		);
+
+		wp_enqueue_script(
 			'amp-editor-story-blocks-build',
 			amp_get_asset_url( 'js/amp-story-blocks-compiled.js' ),
 			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
