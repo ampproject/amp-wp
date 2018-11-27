@@ -100,12 +100,13 @@ def GeneratePHP(out_dir):
 	logging.info('entering ...')
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	allowed_tags, attr_lists, reference_points, versions = ParseRules(out_dir)
+	allowed_tags, attr_lists, descendant_lists, reference_points, versions = ParseRules(out_dir)
 
 	#Generate the output
 	out = []
 	GenerateHeaderPHP(out)
 	GenerateSpecVersionPHP(out, versions)
+	GenerateDescendantListsPHP(out, descendant_lists)
 	GenerateAllowedTagsPHP(out, allowed_tags)
 	GenerateLayoutAttributesPHP(out, attr_lists)
 	GenerateGlobalAttributesPHP(out, attr_lists)
@@ -158,6 +159,13 @@ def GenerateSpecVersionPHP(out, versions):
 		out.append('\tprivate static $spec_file_revision = %d;' % versions['spec_file_revision'])
 	if versions['min_validator_revision_required']:
 		out.append('\tprivate static $minimum_validator_revision_required = %d;' % versions['min_validator_revision_required'])
+	logging.info('... done')
+
+def GenerateDescendantListsPHP(out, descendant_lists):
+	logging.info('entering ...')
+
+	out.append('')
+	out.append('\tprivate static $descendant_tag_lists = %s;' % Phpize( descendant_lists, 1 ).lstrip() )
 	logging.info('... done')
 
 
@@ -230,6 +238,32 @@ def GenerateFooterPHP(out):
 	}
 
 	/**
+	 * Get descendant tag lists.
+	 *
+	 * @since 1.1
+	 * @return array Descendant tags list.
+	 */
+	public static function get_descendant_tag_lists() {
+		return self::$descendant_tag_lists;
+	}
+
+	/**
+	 * Get allowed descendant tag list for a tag.
+	 *
+	 * Get the descendant rules for a single tag so that the entire data structure needn't be passed around.
+	 *
+	 * @since 1.1
+	 * @param string $name Name for the descendants list.
+	 * @return array|bool Allowed tags list, or false if there are no restrictions.
+	 */
+	public static function get_descendant_tag_list( $name ) {
+		if ( isset( self::$descendant_tag_lists[ $name ] ) ) {
+			return self::$descendant_tag_lists[ $name ];
+		}
+		return false;
+	}
+
+	/**
 	 * Get reference point spec.
 	 *
 	 * @since 1.0
@@ -282,6 +316,7 @@ def ParseRules(out_dir):
 
 	allowed_tags = {}
 	attr_lists = {}
+	descendant_lists = {}
 	reference_points = {}
 	versions = {}
 
@@ -346,9 +381,14 @@ def ParseRules(out_dir):
 				if gotten_tag_spec is not None:
 					tag_list.append(gotten_tag_spec)
 					allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
+		elif 'descendant_tag_list' == field_desc.name:
+			for list in field_val:
+				descendant_lists[list.name] = []
+				for val in list.tag:
+					descendant_lists[list.name].append( val.lower() )
 
 	logging.info('... done')
-	return allowed_tags, attr_lists, reference_points, versions
+	return allowed_tags, attr_lists, descendant_lists, reference_points, versions
 
 
 def GetTagSpec(tag_spec, attr_lists):
@@ -494,6 +534,18 @@ def GetTagRules(tag_spec):
 
 	if tag_spec.HasField('unique_warning'):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
+
+	if tag_spec.HasField('child_tags'):
+		child_tags = []
+		for field in tag_spec.child_tags.ListFields():
+			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+				if 'child_tag_name_oneof' == field[0].name:
+					for val in field[1]:
+						child_tags.append( val.lower() )
+		tag_rules['child_tags'] = child_tags
+
+	if tag_spec.HasField('descendant_tag_list'):
+		tag_rules['descendant_tag_list'] = tag_spec.descendant_tag_list
 
 	if tag_spec.HasField('amp_layout'):
 		amp_layout = {}
