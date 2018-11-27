@@ -390,6 +390,11 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	opacity: 0.5;
 }
 
+/* Hide CTA button when inserting on the first page */
+.amp-story-page-first .editor-block-types-list .editor-block-list-item-amp-amp-story-cta-layer {
+	display: none;
+}
+
 /*
  * 6.1 Ghosted page inserter
  * Change the last inserter into a ghosted page.
