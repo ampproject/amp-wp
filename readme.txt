@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 0.7.2
+Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3.6
@@ -14,13 +14,13 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site, the WordPress way.
 
 AMP is an open-source library of highly optimized web components, a runtime system, and a validation framework; together, these elements provide a well-lit path to progressive web development: the development of [beautiful and highly optimized web experiences](https://www.ampproject.org/learn/showcases/) leveraging the capabilities of the modern web. The official AMP plugin for WordPress enables AMP content creation seamlessly integrated with the standard content creation workflows in WordPress; and this is true both classic editing, or the new block-based editor (Gutenberg).
 
-Some of the most salient features and capabilities provided by the plugin are:
+Features and capabilities provided by the plugin include:
 
-- **Compatibility Tool**: to assist the development of AMP experiences by enabling AMP debugging based on exposing extensive and detailed information about validation errors that may exist, the markup/scripts causing them, and the specific components on site (e.g theme, plugin, core) bearing the responsibility of that page content.
-- **CSS Tree Shaking**: to assist in the process of putting the CSS-house in order in cases where  existing CSS rule exceed the maximum limited permitted on single AMP pages.
-- **Core Theme Support**: enabling full AMP validity for four default themes (i.e.  2015, 2016, 2017, 2019).
-- **Gutenberg Support**: enabling AMP content creation fully integrated with Gutenberg, the new and powerful editing experience in WordPress.
-- **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing by one-bit the flexibility of the platform, or the fidelity of content.
+- **Compatibility Tool**: to assist the development of AMP experiences by enabling AMP debugging with detailed information about validation errors that may exist, the markup/scripts causing them, and the specific components on site (e.g theme, plugin, core) responsible for that page content.
+- **CSS Tree Shaking**: to assist in dealing with cases where the defined CSS rules on a site exceed the CSS size limit allowed on single AMP pages.
+- **Core Theme Support**: enabling full AMP validity for four default themes (i.e. Twenty Fifteen, Twenty Sixteen, Twenty Seventeen, Twenty Nineteen).
+- **Gutenberg Support**: enabling AMP content creation fully integrated with Gutenberg.
+- **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
 - **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
 
 With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible,and well-known content creation workflow.
@@ -33,7 +33,7 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 == Getting Started ==
 
-To learn more about the plugin, how to install it, and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](htts://amp-wp.org).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](htts://amp-wp.org).
 
 And if you are a developer and you would like to follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp).
 
