@@ -134,7 +134,7 @@ let ampImageCaptionToggle = ( function() { // eslint-disable-line no-unused-vars
 							props.setAttributes( { ampShowImageCaption: !! value } );
 						},
 						help: __( 'Toggle on to show image caption', 'amp' ),
-					} ),
+					} )
 				)
 			);
 
