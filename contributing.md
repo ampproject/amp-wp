@@ -30,8 +30,7 @@ This project follows
 ## Code of Conduct
 
 In addition to the Community Guidelines, this project follows
-an explicit [Code of Conduct]
-(https://github.com/Automattic/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
+an explicit [Code of Conduct](https://github.com/Automattic/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
 
 ## Contributing
 
