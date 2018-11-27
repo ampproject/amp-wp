@@ -635,7 +635,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 				'embed' => true,
 				'hook'  => 'the_content',
 				'theme' => array( $theme_name ),
-			)
+			),
 		);
 
 		// If there is an embed and a theme source, this should only output the embed icon.
