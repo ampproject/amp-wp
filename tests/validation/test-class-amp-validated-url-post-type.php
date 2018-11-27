@@ -655,7 +655,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		// If there is a plugin and theme source, this should output icons for both of them.
 		$plugin_name = 'baz-plugin';
 		$error_summary['sources_with_invalid_output']['plugin'] = array( $plugin_name );
-		$expected_plugin_icon = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
+		$expected_plugin_icon                                   = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
 		ob_start();
 		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
