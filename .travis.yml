@@ -1,9 +1,6 @@
 # Tell Travis CI we're using PHP
 language: php
 
-# Opt to use Travis container-based environment.
-sudo: false
-
 # Newer versions like trusty don't have PHP 5.2 or 5.3
 # https://blog.travis-ci.com/2017-07-11-trusty-as-default-linux-is-coming
 dist: precise
