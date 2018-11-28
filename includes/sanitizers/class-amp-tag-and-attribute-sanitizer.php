@@ -669,7 +669,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		// @todo Since these are not just validating but sanitizing the descendant tags, should we move these two into a separate method?
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
 			$this->remove_disallowed_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
 		}
