@@ -17,8 +17,8 @@
 					body: body
 				} );
 
-				// Add request to queue. @todo Replace when upgrading to Workbox v4!
-				queue.addRequest( queuedRequest );
+				// Add request to queue.
+				queue.pushRequest( queuedRequest );
 
 				const jsonBody = JSON.stringify( { message: errorMessages.comment } );
 				return new Response( jsonBody, {
