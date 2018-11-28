@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 1.0.0
+Stable tag: 0.7.2
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3.6
@@ -33,7 +33,7 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 == Getting Started ==
 
-To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](htts://amp-wp.org).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](https://amp-wp.org).
 
 And if you are a developer and you would like to follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp).
 
