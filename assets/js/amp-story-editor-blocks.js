@@ -462,7 +462,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							key: 'position',
 							label: __( 'Show or hide the caption', 'amp' ),
 							checked: ampShowImageCaption,
-							onChange: function( value ) {
+							onChange: function() {
 								const showCaption = ! ampShowImageCaption;
 								if ( ! showCaption ) {
 									props.setAttributes( { caption: '' } );
