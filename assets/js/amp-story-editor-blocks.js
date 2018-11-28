@@ -453,7 +453,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				parentClientId = select.getBlockRootClientId( props.clientId ),
 				parentBlock = select.getBlock( parentClientId );
 
-			if ( 'core/image' === name || ( parentBlock && 'amp/amp-story-grid-layer-background-image' === parentBlock.name ) ) {
+			if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
 				const ToggleControl = wp.components.ToggleControl,
 					ampShowImageCaption = !! attributes.ampShowImageCaption;
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
