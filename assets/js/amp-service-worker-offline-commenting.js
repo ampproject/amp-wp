@@ -18,7 +18,9 @@
 				} );
 
 				// Add request to queue.
-				queue.pushRequest( queuedRequest );
+				queue.pushRequest( {
+					request: queuedRequest
+				} );
 
 				const jsonBody = JSON.stringify( { message: errorMessages.comment } );
 				return new Response( jsonBody, {
