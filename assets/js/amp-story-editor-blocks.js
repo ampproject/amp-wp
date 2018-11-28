@@ -469,7 +469,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 								}
 								props.setAttributes( { ampShowImageCaption: showCaption } );
 							},
-							help: __( 'Toggle on to show image caption', 'amp' ),
+							help: __( 'Toggle on to show image caption', 'amp' )
 						} )
 					)
 				);
