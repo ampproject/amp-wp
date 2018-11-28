@@ -453,34 +453,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				parentClientId = select.getBlockRootClientId( props.clientId ),
 				parentBlock = select.getBlock( parentClientId );
 
-			if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
-				const ToggleControl = wp.components.ToggleControl,
-					ampShowImageCaption = !! attributes.ampShowImageCaption;
-				inspectorControls = el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'Toggle Image Caption', 'amp' ), key: 'amp-image-no-caption' },
-						el( ToggleControl, {
-							key: 'position',
-							label: __( 'Show or hide the caption', 'amp' ),
-							checked: ampShowImageCaption,
-							onChange: function() {
-								const showCaption = ! ampShowImageCaption;
-								if ( ! showCaption ) {
-									props.setAttributes( { caption: '' } );
-								}
-								props.setAttributes( { ampShowImageCaption: showCaption } );
-							},
-							help: __( 'Toggle on to show image caption', 'amp' )
-						} )
-					)
-				);
-				return [
-					inspectorControls,
-					el( BlockEdit, _.extend( {
-						key: 'original'
-					}, props ) )
-				];
-			}
-
 			if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
 				// Return original.
 				return [
@@ -500,9 +472,27 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
+				let ampStorySettings = component.getAnimationControls( props );
+				if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
+					const ToggleControl = wp.components.ToggleControl,
+						ampShowImageCaption = !! attributes.ampShowImageCaption;
+					ampStorySettings.push( el( ToggleControl, {
+						key: 'position',
+						label: __( 'Show or hide the caption', 'amp' ),
+						checked: ampShowImageCaption,
+						onChange: function() {
+							const showCaption = ! ampShowImageCaption;
+							if ( ! showCaption ) {
+								props.setAttributes( { caption: '' } );
+							}
+							props.setAttributes( { ampShowImageCaption: showCaption } );
+						},
+						help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
+					} ) );
+				}
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
-						component.getAnimationControls( props )
+						ampStorySettings
 					)
 				);
 			} else {
