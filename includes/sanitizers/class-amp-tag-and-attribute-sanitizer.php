@@ -662,7 +662,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
-			$this->remove_disallowed_descendants( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( AMP_Rule_Spec::DESCENDANT_TAG_LIST );
+			if ( ! empty( $allowed_tags ) ) {
+				$this->remove_disallowed_descendants( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+			}
 		}
 
 		return true;

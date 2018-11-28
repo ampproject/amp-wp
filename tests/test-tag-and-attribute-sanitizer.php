@@ -1199,6 +1199,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'code'            => 'invalid_element',
 			'node_attributes' => array( 'class' => 'baz-invalid' ),
 		);
+		$content[]         = '<amp-story-grid-layer class="a-invalid"><a href="">Invalid a tag.</a></amp-story-grid-layer>';
+		$expected_errors[] = array(
+			'node_name'       => 'amp-story-grid-layer',
+			'parent_name'     => 'body',
+			'code'            => 'invalid_element',
+			'node_attributes' => array( 'class' => 'a-invalid' ),
+		);
 		$content[]         = '<foo class="foo-invalid">Invalid foo tag.</foo>';
 		$expected_errors[] = array(
 			'node_name'       => 'foo',
