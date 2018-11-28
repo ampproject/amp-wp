@@ -276,6 +276,26 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
+			if ( 'core/image' === props.block.name && ! props.block.attributes.ampShowImageCaption ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-image-caption': 'noCaption'
+							}
+						)
+					}
+				);
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
 			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
 				return [
 					el( BlockListBlock, _.extend( {
@@ -403,6 +423,12 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( 'core/paragraph' === name ) {
 				settings.attributes.fontSize.default = 'large';
 			}
+
+			if ( 'core/image' === name ) {
+				settings.attributes.ampShowImageCaption = {
+					type: 'boolean'
+				};
+			}
 		}
 		return settings;
 	};
@@ -425,7 +451,35 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				PanelBody = wp.components.PanelBody,
 				SelectControl = wp.components.SelectControl,
 				parentClientId = select.getBlockRootClientId( props.clientId ),
-				parentBlock;
+				parentBlock = select.getBlock( parentClientId );
+
+			if ( 'core/image' === name || ( parentBlock && 'amp/amp-story-grid-layer-background-image' === parentBlock.name ) ) {
+				const ToggleControl = wp.components.ToggleControl,
+					ampShowImageCaption = !! attributes.ampShowImageCaption;
+				inspectorControls = el( InspectorControls, { key: 'inspector' },
+					el( PanelBody, { title: __( 'Toggle Image Caption', 'amp' ), key: 'amp-image-no-caption' },
+						el( ToggleControl, {
+							key: 'position',
+							label: __( 'Show or hide the caption', 'amp' ),
+							checked: ampShowImageCaption,
+							onChange: function( value ) {
+								const showCaption = ! ampShowImageCaption;
+								if ( ! showCaption ) {
+									props.setAttributes( { caption: '' } );
+								}
+								props.setAttributes( { ampShowImageCaption: showCaption } );
+							},
+							help: __( 'Toggle on to show image caption', 'amp' ),
+						} )
+					)
+				);
+				return [
+					inspectorControls,
+					el( BlockEdit, _.extend( {
+						key: 'original'
+					}, props ) )
+				];
+			}
 
 			if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
 				// Return original.
@@ -436,7 +490,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			parentBlock = select.getBlock( parentClientId );
 			if ( ! parentBlock || ( -1 === component.data.gridBlocks.indexOf( parentBlock.name ) && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
 				// Return original.
 				return [
