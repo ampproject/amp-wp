@@ -16,8 +16,9 @@
 	6. Inserter customisations.
 		6.1 Ghosted page inserter
 	7. Block navigator
-	8. Shame
-		8.1 Gutenberg - Warning div not clickable
+	8. Block mover
+	100. Shame
+		100.1 Gutenberg - Warning div not clickable
 
 -------------------------------------------------------------------*/
 
@@ -395,6 +396,17 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	display: none;
 }
 
+/* Hide inserter inside of the page when block navigator is visible */
+@media (min-width: 961px) {
+	div[data-type="amp/amp-story-page"] .block-list-appender {
+		display: none;
+	}
+
+	.post-type-amp_story .amp-grid-template .editor-block-list__layout:first-of-type {
+		padding-top: 24px;
+	}
+}
+
 /*
  * 6.1 Ghosted page inserter
  * Change the last inserter into a ghosted page.
@@ -500,12 +512,19 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	#amp-root-navigation {
 			position: absolute;
 			left: 5px;
-			top: 182px;
+			top: 218px;
 			width: 300px;
 			z-index: 80;
 			list-style-type: none;
 			padding: 0;
 			margin: 0;
+	}
+
+	#amp-root-navigation .editor-inserter {
+		position: absolute;
+		bottom: 100%;
+		left: 0;
+		width: 100%;
 	}
 
 	#amp-root-navigation .editor-inserter__toggle::after {
@@ -592,11 +611,26 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 }
 
 /*
- * 8. Shame
+ * 8. Block mover
+ * Show the block mover by default.
+ */
+
+.post-type-amp_story .is-selected .editor-block-mover {
+	opacity: 0.7;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.post-type-amp_story .is-selected .editor-block-mover.is-visible {
+	opacity: 1;
+}
+
+/*
+ * 100. Shame
  */
 
 /*
- * 8.1 Gutenberg - Warning div not clickable
+ * 100.1 Gutenberg - Warning div not clickable
  * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
  */
 
