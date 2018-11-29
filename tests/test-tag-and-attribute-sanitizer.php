@@ -290,12 +290,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-position-observer' ),
 			),
 
-			'amp-script' => array(
-				'<amp-script layout="container" src="https://example.com/foo.js"><div class="foo"><p>Example text</p></div></amp-script>',
-				null, // No change.
-				array( 'amp-script' ),
-			),
-
 			'amp-twitter' => array(
 				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765"></amp-twitter>',
 				null, // No change.
