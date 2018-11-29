@@ -801,9 +801,14 @@ class AMP_Validation_Error_Taxonomy {
 				'status'           => sprintf(
 					'%s<span class="dashicons dashicons-editor-help tooltip-button" tabindex="0"></span><div class="tooltip" hidden data-content="%s"></div>',
 					esc_html__( 'Status', 'amp' ),
-					esc_attr( sprintf( '<h3>%s</h3><p>%s</p>',
+					esc_attr( sprintf( '<h3>%s</h3><p>%s %s</p>',
 						esc_html__( 'Status', 'amp' ),
-						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' ),
+						sprintf(
+							'<a href="%s">%s</a>',
+							esc_url( __( 'https://amp-wp.org/documentation/how-the-plugin-works/amp-validation/', 'amp' ) ),
+							esc_html__( 'More details', 'amp' )
+						)
 					) )
 				),
 				'details'          => sprintf(
