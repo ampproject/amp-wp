@@ -883,6 +883,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
 
+			'amp-delight-player' => array(
+				'<amp-delight-player data-content-id="-987521" layout="responsive" width="400" height="300"></amp-delight-player>',
+				null, // No change.
+				array( 'amp-delight-player' ),
+			),
+
 			'amp-img-layout-allowed' => array(
 				implode( '', array(
 					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
