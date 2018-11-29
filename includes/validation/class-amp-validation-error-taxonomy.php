@@ -1601,7 +1601,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_reader_friendly_error_type_text( $error_type ) {
 		switch ( $error_type ) {
 			case 'js_error':
-				return esc_html__( 'JavaScript', 'amp' );
+				return esc_html__( 'JS', 'amp' );
 
 			case 'html_element_error':
 				return esc_html__( 'HTML (Element)', 'amp' );
