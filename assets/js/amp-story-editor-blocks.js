@@ -472,27 +472,9 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
-				let ampStorySettings = component.getAnimationControls( props );
-				if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
-					const ToggleControl = wp.components.ToggleControl,
-						ampShowImageCaption = !! attributes.ampShowImageCaption;
-					ampStorySettings.push( el( ToggleControl, {
-						key: 'position',
-						label: __( 'Show or hide the caption', 'amp' ),
-						checked: ampShowImageCaption,
-						onChange: function() {
-							const showCaption = ! ampShowImageCaption;
-							if ( ! showCaption ) {
-								props.setAttributes( { caption: '' } );
-							}
-							props.setAttributes( { ampShowImageCaption: showCaption } );
-						},
-						help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
-					} ) );
-				}
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
-						ampStorySettings
+						component.getAmpStorySettings( props )
 					)
 				);
 			} else {
@@ -508,7 +490,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 								props.setAttributes( { ampStoryPosition: value } );
 							}
 						} ),
-						component.getAnimationControls( props )
+						component.getAmpStorySettings( props )
 					)
 				);
 			}
@@ -522,16 +504,22 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		};
 	};
 
-	component.getAnimationControls = function getAnimationControls( props ) {
-		var RangeControl = wp.components.RangeControl,
+	component.getAmpStorySettings = function getAmpStorySettings( props ) {
+		const RangeControl = wp.components.RangeControl,
 			el = wp.element.createElement,
 			SelectControl = wp.components.SelectControl,
 			attributes = props.attributes,
-			placeHolder;
+			select = wp.data.select( 'core/editor' ),
+			parentClientId = select.getBlockRootClientId( props.clientId ),
+			parentBlock = select.getBlock( parentClientId );
+
+		let placeHolder,
+			ampStorySettings,
+			name = props.name;
 
 		placeHolder = component.data.animationDurationDefaults[ attributes.ampAnimationType ] || 0;
 
-		return [
+		ampStorySettings = [
 			el( SelectControl, {
 				key: 'animation-type',
 				label: __( 'Animation type', 'amp' ),
@@ -566,6 +554,24 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} )
 		];
+		if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
+			const ToggleControl = wp.components.ToggleControl,
+				ampShowImageCaption = !! attributes.ampShowImageCaption;
+			ampStorySettings.push( el( ToggleControl, {
+				key: 'position',
+				label: __( 'Show or hide the caption', 'amp' ),
+				checked: ampShowImageCaption,
+				onChange: function() {
+					const showCaption = ! ampShowImageCaption;
+					if ( ! showCaption ) {
+						props.setAttributes( { caption: '' } );
+					}
+					props.setAttributes( { ampShowImageCaption: showCaption } );
+				},
+				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
+			} ) );
+		}
+		return ampStorySettings;
 	};
 
 	return component;
