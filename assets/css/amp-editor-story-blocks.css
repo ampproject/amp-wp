@@ -608,4 +608,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	pointer-events: none;
 }
 
-
+div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
+    display: none;
+}
