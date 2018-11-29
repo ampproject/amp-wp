@@ -108,7 +108,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Allow spaces around commas in value property lists. See [#1112](https://github.com/Automattic/amp-wp/pull/1112). Props westonruter.
 - Restore admin bar on AMP pages and improve AMP menu items. See [#1219](https://github.com/Automattic/amp-wp/pull/1219). Props westonruter.
 - Remove empty media queries. See [#1423](https://github.com/Automattic/amp-wp/pull/1423). Props korobochkin, westonruter.
-- Update PHP-CSS-Parser and include tree shaker effectiveness in style[amp-custom] manifest comment. See [#1650](https://github.com/Automattic/amp-wp/pull/1650). Props westonruter.
+- Update PHP-CSS-Parser and include tree shaker effectiveness in `style[amp-custom]` manifest comment. See [#1650](https://github.com/Automattic/amp-wp/pull/1650). Props westonruter.
 - Display admin notice if there's no persistent object caching. See [#1050](https://github.com/Automattic/amp-wp/pull/1050). Props oscarssanchez.
 - Re-use styling for unmoderated comments to apply to new accepted/rejected validation errors. See [#1458](https://github.com/Automattic/amp-wp/pull/1458). Props westonruter, johnwatkins0, jacobschweitzer.
 - Update PHP-CSS-Parser to use new calc() support. See [#1116](https://github.com/Automattic/amp-wp/pull/1116), [#1284](https://github.com/Automattic/amp-wp/pull/1284). Props westonruter.
@@ -190,7 +190,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Replace Gutenberg's deprecated isCleanNewPost selector. See [#1387](https://github.com/Automattic/amp-wp/issues/1387). Props miina.
 - Updates php-css-parser to include fix for parsing calc() with negative values. See [#1392](https://github.com/Automattic/amp-wp/issues/1392). Props westonruter.
 - Add embed support for Twitter timelines via new amp-twitter attributes. See [#1396](https://github.com/Automattic/amp-wp/issues/1396). Props felixarntz.
-- Eliminate obsolete sudo:false from Travis config. See [#1651](https://github.com/Automattic/amp-wp/pull/1651). Props westonruter.
+- Eliminate obsolete `sudo:false` from Travis config. See [#1651](https://github.com/Automattic/amp-wp/pull/1651). Props westonruter.
 - Fix tooltip position. See [#1472](https://github.com/Automattic/amp-wp/pull/1472). Props jacobschweitzer.
 - Add error type filters on validation error and invalid URL screens. See [#1373](https://github.com/Automattic/amp-wp/issues/1373). Props kienstra.
 - Default to auto sanitization and tree shaking being enabled. See [#1402](https://github.com/Automattic/amp-wp/issues/1402). Props westonruter.
