@@ -344,12 +344,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var acceptedStatus, blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			acceptedStatus = 3; // eslint-disable-line no-magic-numbers
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
-					return result.term_status !== 3; // If not accepted by the user.
+					return result.term_status !== acceptedStatus; // If not accepted by the user.
 				} ),
 				function( result ) {
 					return result.error;
