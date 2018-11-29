@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 757;
+	private static $spec_file_revision = 767;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -1680,6 +1680,36 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-delight-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-content-id' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-delight-player',
+					),
+				),
+			),
+		),
 		'amp-embed' => array(
 			array(
 				'attr_spec_list' => array(
@@ -2936,6 +2966,36 @@ class AMP_Allowed_Tags_Generated {
 					'unique' => true,
 				),
 			),
+			array(
+				'attr_spec_list' => array(
+					'data-client' => array(
+						'mandatory' => true,
+					),
+					'data-slot' => array(
+						'mandatory' => true,
+					),
+					'type' => array(
+						'mandatory' => true,
+						'value' => array(
+							'adsense',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'reference_points' => array(
+						'AMP-NEXT-PAGE > [separator]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+					),
+					'requires_extension' => array(
+						'amp-next-page',
+					),
+					'spec_name' => 'amp-next-page [type=adsense]',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-next-page',
+					'unique' => true,
+				),
+			),
 		),
 		'amp-nexxtv-player' => array(
 			array(
@@ -3435,47 +3495,6 @@ class AMP_Allowed_Tags_Generated {
 						'amp-riddle-quiz',
 					),
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-riddle-quiz',
-				),
-			),
-		),
-		'amp-script' => array(
-			array(
-				'attr_spec_list' => array(
-					'media' => array(),
-					'noloading' => array(
-						'value' => array(
-							'',
-						),
-					),
-					'src' => array(
-						'blacklisted_value_regex' => '__amp_source_origin',
-						'mandatory' => true,
-						'value_url' => array(
-							'allow_relative' => false,
-							'protocol' => array(
-								'https',
-							),
-						),
-					),
-				),
-				'tag_spec' => array(
-					'amp_layout' => array(
-						'supported_layouts' => array(
-							5,
-							6,
-							2,
-							3,
-							7,
-							1,
-							4,
-						),
-					),
-					'disallowed_ancestor' => array(
-						'amp-script',
-					),
-					'requires_extension' => array(
-						'amp-script',
-					),
 				),
 			),
 		),
@@ -6807,6 +6826,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'attribution' => array(),
 					'border' => array(),
 					'decoding' => array(
 						'value' => array(
@@ -6826,6 +6846,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'sizes' => array(),
 					'src' => array(
 						'alternative_names' => array(
 							'srcset',
@@ -10042,6 +10063,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-delight-player',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-dynamic-css-classes',
 						'requires_usage' => 3,
@@ -11363,31 +11409,6 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
-						'name' => 'amp-script',
-						'version' => array(
-							'0.1',
-							'latest',
-						),
-					),
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'async' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/javascript',
-						),
-					),
-				),
-				'tag_spec' => array(
-					'extension_spec' => array(
 						'name' => 'amp-selector',
 						'requires_usage' => 2,
 						'version' => array(
@@ -11635,6 +11656,25 @@ class AMP_Allowed_Tags_Generated {
 							'latest',
 						),
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story-bookend',
+					'requires_extension' => array(
+						'amp-story',
+					),
+					'spec_name' => 'amp-story-bookend extension .json script',
+					'unique' => true,
 				),
 			),
 			array(
@@ -14384,6 +14424,20 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'data-tooltip-icon' => array(
+					'value_url' => array(
+						'protocol' => array(
+							'http',
+							'https',
+							'data',
+						),
+					),
+				),
+				'target' => array(
+					'value' => array(
+						'_blank',
+					),
+				),
 			),
 			'tag_spec' => array(
 				'reference_points' => array(
@@ -14450,6 +14504,15 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'data-tooltip-icon' => array(
+					'value_url' => array(
+						'protocol' => array(
+							'http',
+							'https',
+							'data',
+						),
+					),
+				),
 				'grid-area' => array(),
 				'justify-content' => array(
 					'value' => array(
@@ -14476,6 +14539,11 @@ class AMP_Allowed_Tags_Generated {
 						'end',
 						'start',
 						'stretch',
+					),
+				),
+				'target' => array(
+					'value' => array(
+						'_blank',
 					),
 				),
 			),
