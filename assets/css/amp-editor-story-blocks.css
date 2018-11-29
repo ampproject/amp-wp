@@ -16,8 +16,9 @@
 	6. Inserter customisations.
 		6.1 Ghosted page inserter
 	7. Block navigator
-	8. Shame
-		8.1 Gutenberg - Warning div not clickable
+	8. Block mover
+	100. Shame
+		100.1 Gutenberg - Warning div not clickable
 
 -------------------------------------------------------------------*/
 
@@ -610,11 +611,26 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 }
 
 /*
- * 8. Shame
+ * 8. Block mover
+ * Show the block mover by default.
+ */
+
+.post-type-amp_story .is-selected .editor-block-mover {
+	opacity: 0.7;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.post-type-amp_story .is-selected .editor-block-mover.is-visible {
+	opacity: 1;
+}
+
+/*
+ * 100. Shame
  */
 
 /*
- * 8.1 Gutenberg - Warning div not clickable
+ * 100.1 Gutenberg - Warning div not clickable
  * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
  */
 
