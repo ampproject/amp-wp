@@ -12,12 +12,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8"
+                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
-                "reference": "bd0c481ba28ccd54bbbb1846a69ead237cd26cd8",
+                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/22311fa3d67217c5fcd0b839670be39a768eda7b",
+                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b",
                 "shasum": ""
             },
             "require": {
@@ -50,7 +50,7 @@
             "support": {
                 "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
             },
-            "time": "2018-09-06 16:11:27"
+            "time": "2018-11-25 04:50:29"
         }
     ],
     "packages-dev": [
