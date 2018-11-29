@@ -862,7 +862,7 @@ class AMP_Validated_URL_Post_Type {
 				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Error Type', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
 		);
 	}
 
