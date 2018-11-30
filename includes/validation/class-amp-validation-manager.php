@@ -843,16 +843,18 @@ class AMP_Validation_Manager {
 		echo ' ';
 
 		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
-		if ( self::is_sanitization_auto_accepted() && ! $has_rejected_error ) {
-			esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
-		} elseif ( self::is_sanitization_auto_accepted() && $has_rejected_error ) {
-			/*
-			 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
-			 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
-			 * In that case, this will block serving AMP.
-			 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
-			 */
-			esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+		if ( self::is_sanitization_auto_accepted() ) {
+			if ( ! $has_rejected_error ) {
+				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+			} else {
+				/*
+				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
+				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
+				 * In that case, this will block serving AMP.
+				 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
+				 */
+				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+			}
 		} else {
 			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 		}
