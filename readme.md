@@ -2,7 +2,7 @@
 # AMP for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-Enable Accelerated Mobile Pages (AMP) on your WordPress site.
+Enable Accelerated Mobile Pages (AMP) on your WordPress site, the WordPress way.
 
 **Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
@@ -16,21 +16,30 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site.
 
 ## Description ##
 
-Bring the speed and features of the open source [AMP project](https://www.ampproject.org/) to your site, the WordPress way.
+AMP is an open-source library of highly optimized web components, a runtime system, and a validation framework; together, these elements provide a well-lit path to progressive web development: the development of [beautiful and highly optimized web experiences](https://www.ampproject.org/learn/showcases/) leveraging the capabilities of the modern web. The official AMP plugin for WordPress enables AMP content creation seamlessly integrated with the standard content creation workflows in WordPress; and this is true both classic editing, or the new block-based editor (Gutenberg).
 
-With the plugin active, all posts on your site will have AMP-compatible versions, accessible by appending `/amp/` to the end your post URLs. For example, if your post URL is `http://example.com/2016/01/01/amp-on/`, you can access the AMP version at `http://example.com/2016/01/01/amp-on/amp/`. If you do not have [pretty permalinks](https://codex.wordpress.org/Using_Permalinks#mod_rewrite:_.22Pretty_Permalinks.22) enabled, you can do the same thing by appending `?amp=1`, i.e. `http://example.com/?p=123&amp=1`
+Features and capabilities provided by the plugin include:
 
-Also, your pages and custom post types can have AMP versions. Simply check their boxes on the 'AMP Settings' page in `/wp-admin`.
+- **Compatibility Tool**: to assist the development of AMP experiences by enabling AMP debugging with detailed information about validation errors that may exist, the markup/scripts causing them, and the specific components on site (e.g theme, plugin, core) responsible for that page content.
+- **CSS Tree Shaking**: to assist in dealing with cases where the defined CSS rules on a site exceed the CSS size limit allowed on single AMP pages.
+- **Core Theme Support**: enabling full AMP validity for four default themes (i.e. Twenty Fifteen, Twenty Sixteen, Twenty Seventeen, Twenty Nineteen).
+- **Gutenberg Support**: enabling AMP content creation fully integrated with Gutenberg.
+- **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
+- **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
 
-Your entire site can render as "Native AMP" if your theme calls `add_theme_support( 'amp' )`. There will only be one version of each URL: the AMP version. There won't be separate URLs with `/amp` or `?amp` appended. See this [wiki page](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#native-amp) for details and restrictions.
+With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible,and well-known content creation workflow.
 
-Your theme can also use [Paired Mode](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support#paired-mode), with your own custom templates for the AMP URLs.
+## Installation ##
 
-"Native AMP" and "Paired Mode" add full support for commenting and widgets.
+1. Upload the folder to the `/wp-content/plugins/` directory
+1. Activate the plugin through the 'Plugins' menu in WordPress
+1. If you currently use older versions of the pluin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`
 
-If your theme doesn't support `'amp'`, this will use basic legacy post templates for AMP consumers like Google Search and Twitter. And when visiting the site, the AMP content won't normally appear without appending strings to the URL like `/amp` or `?amp`.
+## Getting Started ##
 
-Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp). For more information on the plugin, how the plugin works and how to configure and extend it, please see the [project wiki](https://github.com/Automattic/amp-wp/wiki).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](https://amp-wp.org).
+
+And if you are a developer and you would like to follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp).
 
 ## Screenshots ##
 
@@ -54,18 +63,9 @@ Follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/deve
 
 ![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-5.png)
 
-## Installation ##
-
-1. Upload the folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. You may need to refresh your permalinks by going to `Settings > Permalinks` and tapping the `Save` button.
-
 ## Changelog ##
 
-### 1.1 (unreleased) ###
-...
-
-### 1.0 (unreleased) ###
+### 1.0 ###
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 
 - **Add runtime CSS minification, `!important` replacement, and tree shaking.** See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142), [#1320](https://github.com/Automattic/amp-wp/pull/1320), [#1073](https://github.com/Automattic/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
