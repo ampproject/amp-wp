@@ -251,7 +251,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			noticeMessage += ' ';
 			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
 			if ( module.data.isSanitizationAutoAccepted ) {
-				if ( ! rejectedErrors.length ) {
+				if ( 0 === rejectedErrors.length ) {
 					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
 				} else {
 					noticeMessage += wp.i18n._n(
@@ -277,7 +277,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			// Display notice if there were validation errors.
+			if ( validationErrors.length > 0 ) {
+				wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			}
+
 			module.validationWarningNoticeId = noticeOptions.id;
 		},
 
