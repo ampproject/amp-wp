@@ -47,7 +47,11 @@ And if you are a developer and you would like to follow along with or [contribut
 
 == Changelog ==
 
-= 1.0 =
+= 1.1 (unreleased) =
+
+...
+
+= 1.0 (unreleased) =
 
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 
