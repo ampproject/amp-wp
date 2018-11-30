@@ -80,6 +80,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Fetch (local) stylesheets with `@import`, instead of removing them. See [#1181](https://github.com/Automattic/amp-wp/pull/1181). Props miina.
 - Fetch external stylesheets (which aren't from whitelisted font CDNs) to include in amp-custom style. See [#1174](https://github.com/Automattic/amp-wp/pull/1174). Props miina.
 - Transform CSS selectors according to sanitizer HTML element to AMP component conversions. See [#1175](https://github.com/Automattic/amp-wp/pull/1175). Props miina, westonruter.
+- Rework displaying block validation messages. See [#1682](https://github.com/Automattic/amp-wp/pull/1682). Props miina.
 - Ensure layout attributes are only allowed on supporting elements. See [#1075](https://github.com/Automattic/amp-wp/pull/1075). Props westonruter.
 - Correct the width attribute in `col` tags to the equivalent CSS rule. See [#1064](https://github.com/Automattic/amp-wp/pull/1064). Props amedina.
 - Ensure that video `source` elements use HTTPS. See [#1274](https://github.com/Automattic/amp-wp/pull/1274), [#976](https://github.com/Automattic/amp-wp/issues/976). Props hellofromtonya.
