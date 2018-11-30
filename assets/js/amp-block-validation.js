@@ -20,7 +20,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		data: {
 			i18n: {},
 			ampValidityRestField: '',
-			isCanonical: false
+			isSanitizationAutoAccepted: false
 		},
 
 		/**
@@ -145,7 +145,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity, rejectedErrors;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -241,9 +241,26 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
+			rejectedErrors = _.filter( ampValidity.results, function( result ) {
+				return (
+					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+				);
+			} );
+
 			noticeMessage += ' ';
-			if ( module.data.isCanonical ) {
-				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+			if ( module.data.isSanitizationAutoAccepted ) {
+				if ( ! rejectedErrors.length ) {
+					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+				} else {
+					noticeMessage += wp.i18n._n(
+						'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						validationErrors.length,
+						'amp'
+					);
+				}
 			} else {
 				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}

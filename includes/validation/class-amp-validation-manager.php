@@ -849,7 +849,7 @@ class AMP_Validation_Manager {
 			/*
 			 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
 			 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
-			 * In that case, this will still redirect to a non-AMP URL.
+			 * In that case, this will block serving AMP.
 			 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
 			 */
 			esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
@@ -1936,8 +1936,8 @@ class AMP_Validation_Manager {
 		);
 
 		$data = array(
-			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
-			'isCanonical'          => amp_is_canonical(),
+			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
