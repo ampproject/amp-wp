@@ -38,7 +38,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		lastStates: {
 			noticesAreReset: false,
 			validationErrors: [],
-			blockOrder: []
+			blockOrder: [],
+			blockValidationErrors: {}
 		},
 
 		/**
@@ -205,6 +206,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
+				module.lastStates.blockValidationErrors = blockValidationErrors.byClientId;
 				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
@@ -473,55 +475,64 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			function AmpNoticeBlockEdit( props ) {
-				var edit, details;
-				edit = wp.element.createElement(
-					BlockEdit,
-					props
-				);
+			return function( ownProps ) {
+				var validationErrors,
+					mergedProps;
+				function AmpNoticeBlockEdit( props ) {
+					var edit, details;
+					edit = wp.element.createElement(
+						BlockEdit,
+						props
+					);
 
-				if ( 0 === props.ampBlockValidationErrors.length ) {
-					return edit;
+					if ( 0 === props.ampBlockValidationErrors.length ) {
+						return edit;
+					}
+
+					details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
+						wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
+							wp.i18n._n(
+								'There is %s issue from AMP validation.',
+								'There are %s issues from AMP validation.',
+								props.ampBlockValidationErrors.length,
+								'amp'
+							),
+							props.ampBlockValidationErrors.length
+						) ),
+						wp.element.createElement(
+							'ul',
+							{ key: 'list', className: 'amp-block-validation-errors__list' },
+							_.map( props.ampBlockValidationErrors, function( error, key ) {
+								return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
+							} )
+						)
+					] );
+
+					return wp.element.createElement(
+						wp.element.Fragment, {},
+						wp.element.createElement(
+							wp.components.Notice,
+							{
+								status: 'warning',
+								isDismissible: false
+							},
+							details
+						),
+						edit
+					);
 				}
 
-				details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
-					wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
-						wp.i18n._n(
-							'There is %s issue from AMP validation.',
-							'There are %s issues from AMP validation.',
-							props.ampBlockValidationErrors.length,
-							'amp'
-						),
-						props.ampBlockValidationErrors.length
-					) ),
-					wp.element.createElement(
-						'ul',
-						{ key: 'list', className: 'amp-block-validation-errors__list' },
-						_.map( props.ampBlockValidationErrors, function( error, key ) {
-							return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
-						} )
-					)
-				] );
+				if ( ! module.lastStates.blockValidationErrors[ ownProps.clientId ] ) {
+					validationErrors = wp.data.select( module.storeName ).getBlockValidationErrors( ownProps.clientId );
+					module.lastStates.blockValidationErrors[ ownProps.clientId ] = validationErrors;
+				}
 
-				return wp.element.createElement(
-					wp.element.Fragment, {},
-					wp.element.createElement(
-						wp.components.Notice,
-						{
-							status: 'warning',
-							isDismissible: false
-						},
-						details
-					),
-					edit
-				);
-			}
-
-			return wp.data.withSelect( function( select, ownProps ) {
-				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.clientId )
+				mergedProps = _.extend( {}, ownProps, {
+					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ]
 				} );
-			} )( AmpNoticeBlockEdit );
+
+				return AmpNoticeBlockEdit( mergedProps );
+			};
 		}
 	};
 
