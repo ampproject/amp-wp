@@ -388,20 +388,17 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			// Define selector according to mappings.
 			if ( _.has( component.data.blockTagMapping, name ) ) {
 				settings.attributes.ampAnimationType = {
-					type: 'string',
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
 					attribute: 'animate-in'
 				};
 				settings.attributes.ampAnimationDelay = {
-					type: 'string',
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
 					attribute: 'animate-in-delay',
 					default: '0ms'
 				};
 				settings.attributes.ampAnimationDuration = {
-					type: 'string',
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
 					attribute: 'animate-in-duration'

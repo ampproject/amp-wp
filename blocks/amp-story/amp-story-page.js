@@ -59,13 +59,11 @@ export default registerBlockType(
 		icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
 		attributes: {
 			id: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-story-page',
 				attribute: 'id'
 			},
 			backgroundColor: {
-				type: 'string',
 				default: '#ffffff'
 			}
 		},
