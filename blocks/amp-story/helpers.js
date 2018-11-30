@@ -249,19 +249,16 @@ export function getAmpGridLayerBackgroundSettings( setAttributes, attributes ) {
 export function getGridLayerAttributes() {
 	return {
 		animationType: {
-			type: 'string',
 			source: 'attribute',
 			selector: 'amp-story-grid-layer',
 			attribute: 'animate-in'
 		},
 		animationDuration: {
-			type: 'string',
 			source: 'attribute',
 			selector: 'amp-story-grid-layer',
 			attribute: 'animate-in-duration'
 		},
 		animationDelay: {
-			type: 'string',
 			source: 'attribute',
 			selector: 'amp-story-grid-layer',
 			attribute: 'animate-in-delay',

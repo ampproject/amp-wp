@@ -276,6 +276,26 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
+			if ( 'core/image' === props.block.name && ! props.block.attributes.ampShowImageCaption ) {
+				newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps,
+							{
+								'data-amp-image-caption': 'noCaption'
+							}
+						)
+					}
+				);
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
 			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
 				return [
 					el( BlockListBlock, _.extend( {
@@ -403,6 +423,12 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( 'core/paragraph' === name ) {
 				settings.attributes.fontSize.default = 'large';
 			}
+
+			if ( 'core/image' === name ) {
+				settings.attributes.ampShowImageCaption = {
+					type: 'boolean'
+				};
+			}
 		}
 		return settings;
 	};
@@ -425,7 +451,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				PanelBody = wp.components.PanelBody,
 				SelectControl = wp.components.SelectControl,
 				parentClientId = select.getBlockRootClientId( props.clientId ),
-				parentBlock;
+				parentBlock = select.getBlock( parentClientId );
 
 			if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
 				// Return original.
@@ -436,7 +462,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			parentBlock = select.getBlock( parentClientId );
 			if ( ! parentBlock || ( -1 === component.data.gridBlocks.indexOf( parentBlock.name ) && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
 				// Return original.
 				return [
@@ -449,7 +474,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
 				inspectorControls = el( InspectorControls, { key: 'inspector' },
 					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
-						component.getAnimationControls( props )
+						component.getAmpStorySettings( props )
 					)
 				);
 			} else {
@@ -465,7 +490,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 								props.setAttributes( { ampStoryPosition: value } );
 							}
 						} ),
-						component.getAnimationControls( props )
+						component.getAmpStorySettings( props )
 					)
 				);
 			}
@@ -479,16 +504,22 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		};
 	};
 
-	component.getAnimationControls = function getAnimationControls( props ) {
-		var RangeControl = wp.components.RangeControl,
+	component.getAmpStorySettings = function getAmpStorySettings( props ) {
+		const RangeControl = wp.components.RangeControl,
 			el = wp.element.createElement,
 			SelectControl = wp.components.SelectControl,
 			attributes = props.attributes,
-			placeHolder;
+			select = wp.data.select( 'core/editor' ),
+			parentClientId = select.getBlockRootClientId( props.clientId ),
+			parentBlock = select.getBlock( parentClientId );
+
+		let placeHolder,
+			ampStorySettings,
+			name = props.name;
 
 		placeHolder = component.data.animationDurationDefaults[ attributes.ampAnimationType ] || 0;
 
-		return [
+		ampStorySettings = [
 			el( SelectControl, {
 				key: 'animation-type',
 				label: __( 'Animation type', 'amp' ),
@@ -523,6 +554,24 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} )
 		];
+		if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
+			const ToggleControl = wp.components.ToggleControl,
+				ampShowImageCaption = !! attributes.ampShowImageCaption;
+			ampStorySettings.push( el( ToggleControl, {
+				key: 'position',
+				label: __( 'Show or hide the caption', 'amp' ),
+				checked: ampShowImageCaption,
+				onChange: function() {
+					const showCaption = ! ampShowImageCaption;
+					if ( ! showCaption ) {
+						props.setAttributes( { caption: '' } );
+					}
+					props.setAttributes( { ampShowImageCaption: showCaption } );
+				},
+				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
+			} ) );
+		}
+		return ampStorySettings;
 	};
 
 	return component;

@@ -20,7 +20,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		data: {
 			i18n: {},
 			ampValidityRestField: '',
-			isCanonical: false
+			isSanitizationAutoAccepted: false
 		},
 
 		/**
@@ -173,7 +173,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity, rejectedErrors;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -199,8 +199,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					return (
 						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
 						1 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS */ === result.status ||
-						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status || // eslint-disable-line no-magic-numbers
-						3 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
 					);
 				} ),
 				function( result ) {
@@ -270,9 +269,26 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
+			rejectedErrors = _.filter( ampValidity.results, function( result ) {
+				return (
+					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+				);
+			} );
+
 			noticeMessage += ' ';
-			if ( module.data.isCanonical ) {
-				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+			if ( module.data.isSanitizationAutoAccepted ) {
+				if ( 0 === rejectedErrors.length ) {
+					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+				} else {
+					noticeMessage += wp.i18n._n(
+						'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						validationErrors.length,
+						'amp'
+					);
+				}
 			} else {
 				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
@@ -289,7 +305,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			// Display notice if there were validation errors.
+			if ( validationErrors.length > 0 ) {
+				wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			}
+
 			module.validationWarningNoticeId = noticeOptions.id;
 		},
 
@@ -372,12 +392,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var acceptedStatus, blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			acceptedStatus = 3; // eslint-disable-line no-magic-numbers
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
-					return result.term_status !== 1; // If not accepted by the user.
+					return result.term_status !== acceptedStatus; // If not accepted by the user.
 				} ),
 				function( result ) {
 					return result.error;

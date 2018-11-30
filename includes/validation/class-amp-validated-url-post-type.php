@@ -862,7 +862,7 @@ class AMP_Validated_URL_Post_Type {
 				) )
 			),
 			'sources_with_invalid_output' => __( 'Sources', 'amp' ),
-			'error_type'                  => __( 'Error Type', 'amp' ),
+			'error_type'                  => __( 'Type', 'amp' ),
 		);
 	}
 
@@ -982,7 +982,7 @@ class AMP_Validated_URL_Post_Type {
 				$output[] = '</details>';
 			}
 		}
-		if ( isset( $sources['theme'] ) ) {
+		if ( isset( $sources['theme'] ) && empty( $sources['embed'] ) ) {
 			$output[] = '<div class="source">';
 			$output[] = '<span class="dashicons dashicons-admin-appearance"></span>';
 			$themes   = array_unique( $sources['theme'] );

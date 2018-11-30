@@ -118,12 +118,21 @@ table.striped > tbody > tr.even {
 	margin-top: 0.5rem;
 }
 
+/* Give enough width to prevent the widest column status, 'New Accepted,' from forcing the <select> below the icon. */
 .wp-list-table th.column-status {
+	width: 150px;
+}
+
+.wp-list-table th.column-sources_with_invalid_output {
 	width: 20%;
 }
 
 .wp-list-table th.column-error {
-	width: 30%;
+	width: 25%;
+}
+
+.wp-list-table th.column-details {
+	width: 20%;
 }
 
 /** Add space between list table and the filter and search box above it. */
