@@ -493,7 +493,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_amp_accordion_value' => array(
-				'<amp-accordion disable-session-states="">test</amp-accordion>',
+				'<amp-accordion disable-session-states=""><section>test</section></amp-accordion>',
 				null, // No change.
 				array( 'amp-accordion' ),
 			),
