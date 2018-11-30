@@ -545,7 +545,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		add_theme_support( AMP_Theme_Support::SLUG );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -557,29 +558,52 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
-		AMP_Validated_URL_Post_Type::store_validation_errors(
+		$validation_errors = array(
 			array(
-				array(
-					'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
-					'node_name'       => $this->disallowed_tag_name,
-					'parent_name'     => 'div',
-					'node_attributes' => array(),
-					'sources'         => array(
-						array(
-							'type' => 'plugin',
-							'name' => $this->plugin_name,
-						),
+				'code'            => AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE,
+				'node_name'       => $this->disallowed_tag_name,
+				'parent_name'     => 'div',
+				'node_attributes' => array(),
+				'sources'         => array(
+					array(
+						'type' => 'plugin',
+						'name' => $this->plugin_name,
 					),
 				),
 			),
-			get_permalink( $post->ID )
 		);
+
+		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		ob_start();
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
+		// In 'Paired' mode with 'auto_accept_sanitization' set to false.
+		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.';
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( '<code>script</code>', $output );
+		$this->assertContains( $expected_notice_non_accepted_errors, $output );
+
+		// In 'Native' mode, there should be a notice that explains that this will accept the sanitization errors.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		ob_start();
+		AMP_Validation_Manager::print_edit_form_validation_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( 'There is content which fails AMP validation. However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', $output );
+
+		/*
+		 * When there are 'Rejected' or 'New Rejected' errors, there should be a message that explains that this will serve a non-AMP URL.
+		 * This simulates 'auto_accept_sanitization' being true, but it having been false when the validation errors were stored,
+		 * as there are errors with 'New Rejected' status.
+		 */
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+		ob_start();
+		AMP_Validation_Manager::print_edit_form_validation_status( $post );
+		$output = ob_get_clean();
+		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 	}
 
 	/**
