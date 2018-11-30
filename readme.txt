@@ -47,6 +47,12 @@ And if you are a developer and you would like to follow along with or [contribut
 1. Twenty Twelve.
 1. Twenty Thirteen.
 1. Twenty Fourteen.
+1. Admin bar: paired mode, unmoderated validation errors.
+1. Admin bar: native mode, ejected validation errors.
+1. Admin bar with link to AMP.
+1. AMP content at a glance.
+1. Site validation with WP CLI.
+1. Twenty Nineteen.
 
 == Changelog ==
 

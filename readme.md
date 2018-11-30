@@ -75,6 +75,26 @@ And if you are a developer and you would like to follow along with or [contribut
 
 ![Twenty Fourteen.](wp-assets/screenshot-8.png)
 
+### Admin bar: paired mode, unmoderated validation errors.
+
+![Admin bar: paired mode, unmoderated validation errors.](wp-assets/screenshot-9.png)
+
+### Admin bar with link to AMP.
+
+![Admin bar with link to AMP.](wp-assets/screenshot-11.png)
+
+### AMP content at a glance.
+
+![AMP content at a glance.](wp-assets/screenshot-12.png)
+
+### Site validation with WP CLI.
+
+![Site validation with WP CLI.](wp-assets/screenshot-13.png)
+
+### Twenty Nineteen.
+
+![Twenty Nineteen.](wp-assets/screenshot-14.png)
+
 ## Changelog ##
 
 ### 1.0 ###
