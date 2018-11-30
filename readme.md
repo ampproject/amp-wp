@@ -65,7 +65,10 @@ And if you are a developer and you would like to follow along with or [contribut
 
 ## Changelog ##
 
-### 1.0 ###
+### 1.1 (unreleased) ###
+...
+
+### 1.0 (unreleased) ###
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/Automattic/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/Automattic/amp-wp/wiki/Implementing-Interactivity).
 
 - **Add runtime CSS minification, `!important` replacement, and tree shaking.** See [#1048](https://github.com/Automattic/amp-wp/pull/1048), [#1111](https://github.com/Automattic/amp-wp/pull/1111), [#1142](https://github.com/Automattic/amp-wp/pull/1142), [#1320](https://github.com/Automattic/amp-wp/pull/1320), [#1073](https://github.com/Automattic/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
