@@ -43,25 +43,37 @@ And if you are a developer and you would like to follow along with or [contribut
 
 ## Screenshots ##
 
-### Post rendered in AMP template.
+### Supported template modes.
 
-![Post rendered in AMP template.](wp-assets/screenshot-1.png)
+![Supported template modes.](wp-assets/screenshot-1.png)
 
-### Customizing appearance of AMP template.
+### Classic single template.
 
-![Customizing appearance of AMP template.](wp-assets/screenshot-2.png)
+![Classic single template.](wp-assets/screenshot-2.png)
 
-### Article from New York Post showing customized AMP template.
+### AMP settings.
 
-![Article from New York Post showing customized AMP template.](wp-assets/screenshot-3.png)
+![AMP settings.](wp-assets/screenshot-3.png)
 
-### Article from TNW showing customized AMP template.
+### Validated URL screen.
 
-![Article from TNW showing customized AMP template.](wp-assets/screenshot-4.png)
+![Validated URL screen.](wp-assets/screenshot-4.png)
 
-### Article from Halfbrick showing customized AMP template.
+### Twenty Seventeen.
 
-![Article from Halfbrick showing customized AMP template.](wp-assets/screenshot-5.png)
+![Twenty Seventeen.](wp-assets/screenshot-5.png)
+
+### Twenty Twelve.
+
+![Twenty Twelve.](wp-assets/screenshot-6.png)
+
+### Twenty Thirteen.
+
+![Twenty Thirteen.](wp-assets/screenshot-7.png)
+
+### Twenty Fourteen.
+
+![Twenty Fourteen.](wp-assets/screenshot-8.png)
 
 ## Changelog ##
 

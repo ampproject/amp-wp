@@ -39,11 +39,14 @@ And if you are a developer and you would like to follow along with or [contribut
 
 == Screenshots ==
 
-1. Post rendered in AMP template.
-1. Customizing appearance of AMP template.
-1. Article from New York Post showing customized AMP template.
-1. Article from TNW showing customized AMP template.
-1. Article from Halfbrick showing customized AMP template.
+1. Supported template modes.
+1. Classic single template.
+1. AMP settings.
+1. Validated URL screen.
+1. Twenty Seventeen.
+1. Twenty Twelve.
+1. Twenty Thirteen.
+1. Twenty Fourteen.
 
 == Changelog ==
 
