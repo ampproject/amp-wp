@@ -213,15 +213,10 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		$urls = array_keys( $urls_to_fetch );
-
-		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
-			require_once AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php';
-		}
-
+		$urls       = array_keys( $urls_to_fetch );
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client = amp_get_fasterimage_client( $user_agent );
-		$images = $client->batch( $urls );
+		$client     = new \FasterImage\FasterImage( $user_agent );
+		$images     = $client->batch( $urls );
 	}
 
 	/**

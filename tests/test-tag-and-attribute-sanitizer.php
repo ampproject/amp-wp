@@ -290,12 +290,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-position-observer' ),
 			),
 
-			'amp-script' => array(
-				'<amp-script layout="container" src="https://example.com/foo.js"><div class="foo"><p>Example text</p></div></amp-script>',
-				null, // No change.
-				array( 'amp-script' ),
-			),
-
 			'amp-twitter' => array(
 				'<amp-twitter width="321" height="543" layout="responsive" data-tweetid="98765"></amp-twitter>',
 				null, // No change.
@@ -887,6 +881,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-date-picker type="range" minimum-nights="2" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
 				null, // No change.
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
+			),
+
+			'amp-delight-player' => array(
+				'<amp-delight-player data-content-id="-987521" layout="responsive" width="400" height="300"></amp-delight-player>',
+				null, // No change.
+				array( 'amp-delight-player' ),
 			),
 
 			'amp-img-layout-allowed' => array(

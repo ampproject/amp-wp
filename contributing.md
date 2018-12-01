@@ -1,6 +1,38 @@
 # AMP Contributing Guide
 
-Thanks for taking the time to contribute!
+We'd love to accept your patches and contributions to this project. There are
+just a few small guidelines you need to follow.
+
+## Contributor License Agreement
+
+Contributions to this project must be accompanied by a Contributor License
+Agreement. You (or your employer) retain the copyright to your contribution;
+this simply gives us permission to use and redistribute your contributions as
+part of the project. Head over to <https://cla.developers.google.com/> to see
+your current agreements on file or to sign a new one.
+
+You generally only need to submit a CLA once, so if you've already submitted one
+(even if it was for a different project), you probably don't need to do it
+again.
+
+## Code Reviews
+
+All submissions, including submissions by project members, require review. We
+use GitHub pull requests for this purpose. Consult
+[GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
+information on using pull requests.
+
+## Community Guidelines
+
+This project follows
+[Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
+
+## Code of Conduct
+
+In addition to the Community Guidelines, this project follows
+an explicit [Code of Conduct](https://github.com/Automattic/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
+
+## Contributing
 
 To start, clone this repository into your WordPress install being used for development:
 
@@ -107,7 +139,7 @@ Contributors who want to make a new release, follow these steps:
 7. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 8. Publish GitHub release.
 9. Create built release tag: `git fetch --tags && git checkout $(git tag | tail -n1) && ./bin/tag-built.sh` (then add link from release)
-10. Merge release branch into `develop`.
+10. Create a new branch off of the release branch, merge `develop` into it and resolve conflicts (e.g. with version and changelog), and then open pull request to merge changes into `develop`.
 11. Merge release tag into `master`.
 12. Publish release blog post, including link to GitHub release.
 13. Close the GitHub milestone and project.
