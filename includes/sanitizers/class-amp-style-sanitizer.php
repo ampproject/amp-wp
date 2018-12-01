@@ -2005,15 +2005,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			/*
-			 * Remove any rule with a responsive styling class for blocks, which isn't needed in AMP.
-			 * @link https://github.com/WordPress/gutenberg/blob/9a16ac09ddff4b0bf12430d1426c4cfefa75b56d/packages/block-library/src/embed/style.scss#L26
-			 */
-			if ( preg_match( '/wp-embed-aspect-\S/', $selector ) ) {
-				$changes++;
-				continue;
-			}
-
 			// Automatically remove selectors that are for another language (and thus are irrelevant). This is safe because amp-bind'ed [lang] is not allowed.
 			$is_other_language = (
 				preg_match( '/^html\[lang(?P<starts_with>\^?)=([\'"]?)(?P<lang>.+?)\2\]/', $selector, $matches )
