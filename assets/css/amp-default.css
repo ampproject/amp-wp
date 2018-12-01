@@ -34,7 +34,7 @@ body.wp-embed-responsive .wp-block-embed[class*="wp-embed-aspect-"] .wp-block-em
 
 /*
  * Override the position: absolute style rule in the block editor.
- * The <amp-iframe> with a layout of responsive typically has a layout of relative.
+ * The <amp-iframe> with a layout of responsive typically has a position of relative.
  * https://github.com/WordPress/gutenberg/blob/9a16ac09ddff4b0bf12430d1426c4cfefa75b56d/packages/block-library/src/embed/style.scss#L42
  */
 body.wp-embed-responsive .wp-block-embed[class*="wp-embed-aspect-"] .wp-block-embed__wrapper amp-iframe {
