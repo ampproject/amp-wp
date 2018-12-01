@@ -2006,7 +2006,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * Remove a responsive styling class for blocks, which isn't needed in AMP.
+			 * Remove any rule with a responsive styling class for blocks, which isn't needed in AMP.
 			 * @link https://github.com/WordPress/gutenberg/blob/9a16ac09ddff4b0bf12430d1426c4cfefa75b56d/packages/block-library/src/embed/style.scss#L26
 			 */
 			if ( preg_match( '/wp-embed-aspect-\S/', $selector ) ) {
