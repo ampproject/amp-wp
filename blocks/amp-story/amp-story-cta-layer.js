@@ -64,19 +64,16 @@ export default registerBlockType(
 
 		attributes: {
 			animationType: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
 				attribute: 'animate-in'
 			},
 			animationDuration: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
 				attribute: 'animate-in-duration'
 			},
 			animationDelay: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
 				attribute: 'animate-in-delay',

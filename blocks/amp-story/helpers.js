@@ -268,7 +268,6 @@ export function getGridLayerAttributes() {
 			type: 'string'
 		},
 		opacity: {
-			type: 'number',
 			default: 1
 		}
 	};
