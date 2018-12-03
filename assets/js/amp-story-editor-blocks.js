@@ -31,7 +31,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/button': 'div.wp-block-button',
 				'core/code': 'pre',
 				'core/embed': 'figure',
-				'core/image': 'figure.wp-block-image',
+				'core/image': '.wp-block-image',
 				'core/paragraph': 'p',
 				'core/preformatted': 'pre',
 				'core/pullquote': 'blockquote',

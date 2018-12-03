@@ -90,7 +90,7 @@ export default registerBlockType(
 				}
 			}
 
-			componentDidUpdate() {
+			componentDidMount() {
 				// If no blocks are selected or if it's the current page, change the view.
 				if ( ! getSelectedBlockClientId() || this.props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( this.props.clientId, true ) ) {
 					const editLayout = document.getElementsByClassName( 'edit-post-layout' );
