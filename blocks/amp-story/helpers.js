@@ -70,16 +70,6 @@ export const BLOCK_ICONS = {
 };
 
 /**
- * Maybe return is-selected-parent class.
- *
- * @param {string} clientId Block ID.
- * @return {string} Class name.
- */
-export function maybeIsSelectedParentClass( clientId ) {
-	return hasSelectedInnerBlock( clientId, true ) ? 'is-selected-parent' : '';
-}
-
-/**
  * Animation controls for AMP Story layout blocks'.
  *
  * @param {Function} setAttributes Set Attributes.
@@ -337,7 +327,7 @@ export function editGridLayer( props, type ) {
 		isSelected && (
 			getLayerBreadCrumb( props.clientId, rootClientId )
 		),
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type + ' ' + maybeIsSelectedParentClass( props.clientId ) }>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type }>
 			<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 		</div>
 	];
@@ -367,7 +357,7 @@ export function editFillLayer( props, template ) {
 		isSelected && (
 			getLayerBreadCrumb( props.clientId, getBlockRootClientId( props.clientId ) )
 		),
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill ' + maybeIsSelectedParentClass( props.clientId ) }>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill' }>
 			<InnerBlocks template={ template } templateLock='all' />
 		</div>
 	];

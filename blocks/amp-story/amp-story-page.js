@@ -3,8 +3,7 @@
 import uuid from 'uuid/v4';
 import BlockNavigation from './block-navigation';
 import {
-	BLOCK_ICONS,
-	maybeIsSelectedParentClass
+	BLOCK_ICONS
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -144,7 +143,7 @@ export default registerBlockType(
 							] }
 						/>
 					</InspectorControls>,
-					<div key="contents" className={ maybeIsSelectedParentClass( props.clientId ) } style={{ backgroundColor: attributes.backgroundColor }}>
+					<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
 						<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 					</div>
 				];
