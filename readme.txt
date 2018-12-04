@@ -39,11 +39,16 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 == Screenshots ==
 
-1. Post rendered in AMP template.
-1. Customizing appearance of AMP template.
-1. Article from New York Post showing customized AMP template.
-1. Article from TNW showing customized AMP template.
-1. Article from Halfbrick showing customized AMP template.
+1. Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
+1. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
+1. Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+1. Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+1. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+1. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
+1. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+1. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
+1. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+1. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 
