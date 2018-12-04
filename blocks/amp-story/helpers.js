@@ -20,7 +20,6 @@ const {
 } = wp.editor;
 
 const {
-	hasSelectedInnerBlock,
 	getBlockRootClientId
 } = wp.data.select( 'core/editor' );
 
