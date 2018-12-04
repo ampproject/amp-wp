@@ -3,8 +3,7 @@
 import uuid from 'uuid/v4';
 import BlockNavigation from './block-navigation';
 import {
-	BLOCK_ICONS,
-	maybeIsSelectedParentClass
+	BLOCK_ICONS
 } from './helpers';
 
 const { __ } = wp.i18n;
@@ -90,7 +89,7 @@ export default registerBlockType(
 				}
 			}
 
-			componentDidMount() {
+			maybeAddBlockNavigation() {
 				// If no blocks are selected or if it's the current page, change the view.
 				if ( ! getSelectedBlockClientId() || this.props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( this.props.clientId, true ) ) {
 					const editLayout = document.getElementsByClassName( 'edit-post-layout' );
@@ -123,6 +122,15 @@ export default registerBlockType(
 				}
 			}
 
+			componentDidMount() {
+				this.maybeAddBlockNavigation();
+			}
+
+			componentDidUpdate() {
+				// @todo Check if there is a better way to do this without calling it on both componentDidMount and componentDidUpdate.
+				this.maybeAddBlockNavigation();
+			}
+
 			render() {
 				const props = this.props;
 				const { setAttributes, attributes } = props;
@@ -144,7 +152,7 @@ export default registerBlockType(
 							] }
 						/>
 					</InspectorControls>,
-					<div key="contents" className={ maybeIsSelectedParentClass( props.clientId ) } style={{ backgroundColor: attributes.backgroundColor }}>
+					<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
 						<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 					</div>
 				];

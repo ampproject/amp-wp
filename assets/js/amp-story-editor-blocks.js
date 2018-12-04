@@ -214,98 +214,86 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		return props;
 	};
 
+	component.wrapperWithSelect = wp.compose.compose(
+		wp.data.withSelect( ( select, props ) => {
+			var parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId );
+			return {
+				blockName: select( 'core/editor' ).getBlockName( props.clientId ),
+				attributes: select( 'core/editor' ).getBlockAttributes( props.clientId ),
+				hasSelectedInnerBlock: select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ),
+				parentBlock: select( 'core/editor' ).getBlock( parentClientId ),
+				props: props
+			};
+		} )
+	);
+
 	/**
 	 * Add wrapper props to the blocks within AMP Story Thirds layer.
 	 *
 	 * @param {Object} BlockListBlock BlockListBlock element.
 	 * @return {Function} Handler.
 	 */
-	component.addWrapperProps = function( BlockListBlock ) {
-		var el = wp.element.createElement,
-			select = wp.data.select( 'core/editor' );
-		return function( props ) {
-			var parentClientId,
-				parentBlock,
-				ampStoryPosition,
-				newProps;
+	component.addWrapperProps = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+		return component.wrapperWithSelect( ( {
+			blockName,
+			attributes,
+			hasSelectedInnerBlock,
+			parentBlock,
+			props
+		} ) => {
+			var newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps
+						)
+					}
+				),
+				el = wp.element.createElement;
+
+			if (
+				hasSelectedInnerBlock &&
+				(
+					'amp/amp-story-cta-layer' === blockName ||
+					'amp/amp-story-page' === blockName
+				)
+			) {
+				newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
 
 			// In case of any grid layer lets add data-amp-type for styling purposes.
-			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-type': 'grid'
-							}
-						)
-					}
-				);
-
-				if ( wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
+			if ( -1 !== component.data.gridBlocks.indexOf( blockName ) ) {
+				newProps.wrapperProps[ 'data-amp-type' ] = 'grid';
+				if ( hasSelectedInnerBlock ) {
 					newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
 				}
-
 				return el(
 					BlockListBlock,
 					newProps
 				);
 			}
 
-			if ( 'amp/amp-story-cta-layer' === props.block.name && wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-selected': 'parent'
-							}
-						)
-					}
-				);
-
+			if ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) {
+				newProps.wrapperProps[ 'data-amp-image-caption' ] = 'noCaption';
 				return el(
 					BlockListBlock,
 					newProps
 				);
 			}
 
-			if ( 'core/image' === props.block.name && ! props.block.attributes.ampShowImageCaption ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-image-caption': 'noCaption'
-							}
-						)
-					}
-				);
-				return el(
-					BlockListBlock,
-					newProps
-				);
-			}
-
-			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
+			if ( -1 === component.data.allowedBlocks.indexOf( blockName ) || ! attributes.ampStoryPosition ) {
 				return [
 					el( BlockListBlock, _.extend( {
 						key: 'original'
 					}, props ) )
 				];
 			}
-
-			parentClientId = select.getBlockRootClientId( props.block.clientId );
-			parentBlock = select.getBlock( parentClientId );
 			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
 				return [
 					el( BlockListBlock, _.extend( {
@@ -313,29 +301,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					}, props ) )
 				];
 			}
-
-			ampStoryPosition = props.block.attributes.ampStoryPosition;
-
-			newProps = lodash.assign(
-				{},
-				props,
-				{
-					wrapperProps: lodash.assign(
-						{},
-						props.wrapperProps,
-						{
-							'data-amp-position': ampStoryPosition
-						}
-					)
-				}
-			);
+			newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
 
 			return el(
 				BlockListBlock,
 				newProps
 			);
-		};
-	};
+		} );
+	}, 'addWrapperProps' );
 
 	/**
 	 * Add extra attributes to save to DB.
