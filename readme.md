@@ -43,57 +43,45 @@ And if you are a developer and you would like to follow along with or [contribut
 
 ## Screenshots ##
 
-### Supported template modes.
+### Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
 
-![Supported template modes.](wp-assets/screenshot-1.png)
+![Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.](wp-assets/screenshot-1.png)
 
-### Classic single template.
+### Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
 
-![Classic single template.](wp-assets/screenshot-2.png)
+![Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-2.png)
 
-### AMP settings.
+### Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
 
-![AMP settings.](wp-assets/screenshot-3.png)
+![Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
 
-### Validated URL screen.
+### Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
 
-![Validated URL screen.](wp-assets/screenshot-4.png)
+![Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
 
-### Twenty Seventeen.
+### Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 
-![Twenty Seventeen.](wp-assets/screenshot-5.png)
+![Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.](wp-assets/screenshot-5.png)
 
-### Twenty Twelve.
+### Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
 
-![Twenty Twelve.](wp-assets/screenshot-6.png)
+![Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.](wp-assets/screenshot-6.png)
 
-### Twenty Thirteen.
+### The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
 
-![Twenty Thirteen.](wp-assets/screenshot-7.png)
+![The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.](wp-assets/screenshot-7.png)
 
-### Twenty Fourteen.
+### Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
 
-![Twenty Fourteen.](wp-assets/screenshot-8.png)
+![Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.](wp-assets/screenshot-8.png)
 
-### Admin bar: paired mode, unmoderated validation errors.
+### Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
 
-![Admin bar: paired mode, unmoderated validation errors.](wp-assets/screenshot-9.png)
+![Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.](wp-assets/screenshot-9.png)
 
-### Admin bar with link to AMP.
+### A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
-![Admin bar with link to AMP.](wp-assets/screenshot-11.png)
-
-### AMP content at a glance.
-
-![AMP content at a glance.](wp-assets/screenshot-12.png)
-
-### Site validation with WP CLI.
-
-![Site validation with WP CLI.](wp-assets/screenshot-13.png)
-
-### Twenty Nineteen.
-
-![Twenty Nineteen.](wp-assets/screenshot-14.png)
+![A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.](wp-assets/screenshot-10.png)
 
 ## Changelog ##
 
