@@ -216,10 +216,16 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 	component.wrapperWithSelect = wp.compose.compose(
 		wp.data.withSelect( ( select, props ) => {
-			var parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId );
+			var parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId ),
+				attributes;
+			if ( props.block && props.block.attributes ) {
+				attributes = props.block.attributes;
+			} else if ( select( 'core/editor' ).getBlockAttributes ) {
+				attributes = select( 'core/editor' ).getBlockAttributes( props.clientId );
+			}
 			return {
 				blockName: select( 'core/editor' ).getBlockName( props.clientId ),
-				attributes: select( 'core/editor' ).getBlockAttributes( props.clientId ),
+				attributes: attributes,
 				hasSelectedInnerBlock: select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ),
 				parentBlock: select( 'core/editor' ).getBlock( parentClientId ),
 				props: props
