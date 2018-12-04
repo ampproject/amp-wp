@@ -810,7 +810,8 @@ class AMP_Validation_Manager {
 		}
 
 		// Show all validation errors which have not been explicitly acknowledged as accepted.
-		$validation_errors = array();
+		$validation_errors  = array();
+		$has_rejected_error = false;
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
 			$needs_moderation = (
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
@@ -819,6 +820,14 @@ class AMP_Validation_Manager {
 			);
 			if ( $needs_moderation ) {
 				$validation_errors[] = $error['data'];
+			}
+
+			if (
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status']
+				||
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status']
+			) {
+				$has_rejected_error = true;
 			}
 		}
 
@@ -832,11 +841,24 @@ class AMP_Validation_Manager {
 		// @todo Check if the error actually occurs in the_content, and if not, consider omitting the warning if the user does not have privileges to manage_options.
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
-		if ( amp_is_canonical() ) {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+
+		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+		if ( self::is_sanitization_auto_accepted() ) {
+			if ( ! $has_rejected_error ) {
+				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+			} else {
+				/*
+				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
+				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
+				 * In that case, this will block serving AMP.
+				 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
+				 */
+				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+			}
 		} else {
 			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 		}
+
 		echo sprintf(
 			' <a href="%s" target="_blank">%s</a>',
 			esc_url( get_edit_post_link( $invalid_url_post ) ),
@@ -1916,8 +1938,8 @@ class AMP_Validation_Manager {
 		);
 
 		$data = array(
-			'ampValidityRestField' => self::VALIDITY_REST_FIELD_NAME,
-			'isCanonical'          => amp_is_canonical(),
+			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
