@@ -8,11 +8,11 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3.6
 
-Enable Accelerated Mobile Pages (AMP) on your WordPress site, the WordPress way.
+Enable AMP on your WordPress site, the WordPress way.
 
 == Description ==
 
-AMP is an open-source library of highly optimized web components, a runtime system, and a validation framework; together, these elements provide a well-lit path to progressive web development: the development of [beautiful and highly optimized web experiences](https://www.ampproject.org/learn/showcases/) leveraging the capabilities of the modern web. The official AMP plugin for WordPress enables AMP content creation seamlessly integrated with the standard content creation workflows in WordPress; and this is true both classic editing, or the new block-based editor (Gutenberg).
+The AMP Project is an open-source initiative aiming to make the web better for all.  AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The Official AMP Plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
@@ -33,17 +33,22 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 == Getting Started ==
 
-To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](https://amp-wp.org).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP plugin product site](https://amp-wp.org).
 
-And if you are a developer and you would like to follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp).
+If you are a developer, we encourage you to follow along or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
 
 == Screenshots ==
 
-1. Post rendered in AMP template.
-1. Customizing appearance of AMP template.
-1. Article from New York Post showing customized AMP template.
-1. Article from TNW showing customized AMP template.
-1. Article from Halfbrick showing customized AMP template.
+1. Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
+1. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
+1. Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+1. Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+1. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+1. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
+1. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+1. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
+1. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+1. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 
