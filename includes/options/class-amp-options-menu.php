@@ -140,7 +140,7 @@ class AMP_Options_Menu {
 	public function render_theme_support() {
 		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
 		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' );
-		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. Your canonical URLs are AMP. AMP-specific blocks are available for inserting into content. Any AMP validation errors are automatically sanitized.', 'amp' );
+		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP. AMP-specific blocks are available for inserting into content, and you can fully use AMP as the framework on your site (e.g. in template files and Custom HTML widgets). Any AMP validation errors are automatically sanitized.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -151,10 +151,10 @@ class AMP_Options_Menu {
 			<p>
 				<?php if ( amp_is_canonical() ) : ?>
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
-					<?php echo esc_html( $native_description ); ?>
+					<?php echo wp_kses_post( $native_description ); ?>
 				<?php else : ?>
 					<strong><?php esc_html_e( 'Paired:', 'amp' ); ?></strong>
-					<?php echo esc_html( $paired_description ); ?>
+					<?php echo wp_kses_post( $paired_description ); ?>
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
@@ -172,7 +172,7 @@ class AMP_Options_Menu {
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $native_description ); ?>
+						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
@@ -181,7 +181,7 @@ class AMP_Options_Menu {
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $paired_description ); ?>
+						<?php echo wp_kses_post( $paired_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
