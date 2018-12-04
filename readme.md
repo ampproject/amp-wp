@@ -2,7 +2,7 @@
 # AMP for WordPress
 
 ![Banner](wp-assets/banner-1544x500.png)
-Enable Accelerated Mobile Pages (AMP) on your WordPress site, the WordPress way.
+Enable AMP on your WordPress site, the WordPress way.
 
 **Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
@@ -16,7 +16,7 @@ Enable Accelerated Mobile Pages (AMP) on your WordPress site, the WordPress way.
 
 ## Description ##
 
-AMP is an open-source library of highly optimized web components, a runtime system, and a validation framework; together, these elements provide a well-lit path to progressive web development: the development of [beautiful and highly optimized web experiences](https://www.ampproject.org/learn/showcases/) leveraging the capabilities of the modern web. The official AMP plugin for WordPress enables AMP content creation seamlessly integrated with the standard content creation workflows in WordPress; and this is true both classic editing, or the new block-based editor (Gutenberg).
+The AMP Project is an open-source initiative aiming to make the web better for all.  AMP enables web experiences that are consistently fast, beautiful and high-performing across distribution platforms. The Official AMP Plugin for WordPress supports fully integrated AMP publishing for WordPress sites, with robust capabilities and granular publisher controls.
 
 Features and capabilities provided by the plugin include:
 
@@ -37,9 +37,9 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 ## Getting Started ##
 
-To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP pluging product site](https://amp-wp.org).
+To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP plugin product site](https://amp-wp.org).
 
-And if you are a developer and you would like to follow along with or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin [on GitHub](https://github.com/Automattic/amp-wp).
+If you are a developer, we encourage you to follow along or [contribute](https://github.com/Automattic/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
 
 ## Screenshots ##
 
