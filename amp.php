@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: AMP
- * Description: Add AMP support to your WordPress site.
- * Plugin URI: https://github.com/automattic/amp-wp
+ * Description: Enable AMP on your WordPress site, the WordPress way.
+ * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
  * Version: 1.0.0

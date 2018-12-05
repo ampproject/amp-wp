@@ -1,4 +1,4 @@
-=== AMP for WordPress ===
+=== AMP ===
 Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp, westonruter
 Tags: amp, mobile
 Requires at least: 4.7
