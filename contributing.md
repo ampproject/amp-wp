@@ -15,6 +15,10 @@ You generally only need to submit a CLA once, so if you've already submitted one
 (even if it was for a different project), you probably don't need to do it
 again.
 
+## Contributors List Policy
+
+The list of contributors who are featured on the WordPress.org plugin directory are subject to change over time. The organizations and individuals who contribute significantly and consistently (e.g. 3-month period) to the project are eligible to be listed. Those listed should generally be considered as those who take responsibility for the project (i.e. owners). Note that contributions include more than just code, though contributors who commit are [most visible](https://github.com/Automattic/amp-wp/graphs/contributors). The sort order of the contributors list should generally follow the sort order of the GitHub contributors page, though again, this order does not consider work in issues and the support forum, so it cannot be relied on solely.
+
 ## Code Reviews
 
 All submissions, including submissions by project members, require review. We
@@ -32,7 +36,7 @@ This project follows
 In addition to the Community Guidelines, this project follows
 an explicit [Code of Conduct](https://github.com/Automattic/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
 
-## Contributing
+## Dev Setup
 
 To start, clone this repository into your WordPress install being used for development:
 
