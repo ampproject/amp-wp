@@ -207,7 +207,7 @@ To learn how to use the new features in this release, please see the wiki pages 
 - Add WP-CLI command for testing the AMP compatibility of an entire site. See [#1183](https://github.com/Automattic/amp-wp/issues/1183), [#1007](https://github.com/Automattic/amp-wp/issues/1007). Props kienstra, westonruter.
 - Update screenshots. See [#1701](https://github.com/Automattic/amp-wp/pull/1701). Props westonruter, amedina.
 - Update the description of the AMP project in readme file. See [#1693](https://github.com/Automattic/amp-wp/pull/1693). Props amedina.
-- Use new banner images. See [#1692](https://github.com/Automattic/amp-wp/pull/1692). Props cathibosco1.
+- Use new banner images. See [#1692](https://github.com/Automattic/amp-wp/pull/1692). Props cathibosco.
 - Display when validation results are stale due to active theme/plugin changes. See [#1375](https://github.com/Automattic/amp-wp/issues/1375). Props westonruter.
 - Fix displaying of expected notices when theme support enabled by theme. See [#1374](https://github.com/Automattic/amp-wp/issues/1374), [#1358](https://github.com/Automattic/amp-wp/issues/1358). Props westonruter.
 - Update native mode description to mention AMP-first. See [#1703](https://github.com/Automattic/amp-wp/pull/1703). Props westonruter.
