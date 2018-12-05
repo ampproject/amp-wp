@@ -3,7 +3,7 @@ Contributors: batmoo, joen, automattic, potatomaster, albertomedina, google, xwp
 Tags: amp, mobile
 Requires at least: 4.7
 Tested up to: 5.0
-Stable tag: 0.7.2
+Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3.6
