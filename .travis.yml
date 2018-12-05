@@ -37,7 +37,7 @@ jobs:
     - php: "5.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=composer,phpcs
     - php: "5.4"
-      env: WP_VERSION=4.8    DEV_LIB_SKIP=composer,phpcs
+      env: WP_VERSION=4.9    DEV_LIB_SKIP=composer,phpcs
     - php: "5.5"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
     - php: "5.6"

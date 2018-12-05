@@ -4,9 +4,9 @@
 ![Banner](wp-assets/banner-1544x500.png)
 Enable AMP on your WordPress site, the WordPress way.
 
-**Contributors:** [batmoo](https://profiles.wordpress.org/batmoo), [joen](https://profiles.wordpress.org/joen), [automattic](https://profiles.wordpress.org/automattic), [potatomaster](https://profiles.wordpress.org/potatomaster), [albertomedina](https://profiles.wordpress.org/albertomedina), [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [westonruter](https://profiles.wordpress.org/westonruter)  
+**Contributors:** [automattic](https://profiles.wordpress.org/automattic), [xwp](https://profiles.wordpress.org/xwp), [google](https://profiles.wordpress.org/google), [westonruter](https://profiles.wordpress.org/westonruter), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [batmoo](https://profiles.wordpress.org/batmoo), [stubgo](https://profiles.wordpress.org/stubgo), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry), [joshuawold](https://profiles.wordpress.org/joshuawold), [postphotos](https://profiles.wordpress.org/postphotos)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
-**Requires at least:** 4.7  
+**Requires at least:** 4.9  
 **Tested up to:** 5.0  
 **Stable tag:** 1.0.0  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
@@ -27,13 +27,13 @@ Features and capabilities provided by the plugin include:
 - **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
 - **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
 
-With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible,and well-known content creation workflow.
+With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible, and well-known content creation workflow.
 
 ## Installation ##
 
-1. Upload the folder to the `/wp-content/plugins/` directory
-1. Activate the plugin through the 'Plugins' menu in WordPress
-1. If you currently use older versions of the pluin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`
+1. Upload the folder to the `/wp-content/plugins/` directory.
+1. Activate the plugin through the 'Plugins' menu in WordPress.
+1. If you currently use older versions of the plugin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`.
 
 ## Getting Started ##
 
