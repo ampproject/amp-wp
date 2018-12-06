@@ -158,7 +158,90 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'pan-up': 1000,
 				'zoom-in': 1000,
 				'zoom-out': 1000
-			}
+			},
+			ampStoryFonts: [
+				{
+					value: '',
+					label: __( 'None', 'amp' )
+				},
+				{
+					value: 'arial',
+					label: __( 'Arial', 'amp' )
+				},
+				{
+					value: 'arial-black',
+					label: __( 'Arial Black', 'amp' )
+				},
+				{
+					value: 'arial-narrow',
+					label: __( 'Arial Narrow', 'amp' )
+				},
+				{
+					value: 'baskerville',
+					label: __( 'Baskerville', 'amp' )
+				},
+				{
+					value: 'brush-script-mt',
+					label: __( 'Brush Script MT', 'amp' )
+				},
+				{
+					value: 'copperplate',
+					label: __( 'Copperplate', 'amp' )
+				},
+				{
+					value: 'courier-new',
+					label: __( 'Courier New', 'amp' )
+				},
+				{
+					value: 'century-gothic',
+					label: __( 'Century Gothic', 'amp' )
+				},
+				{
+					value: 'garamond',
+					label: __( 'Garamond', 'amp' )
+				},
+				{
+					value: 'georgia',
+					label: __( 'Georgia', 'amp' )
+				},
+				{
+					value: 'gill-sans',
+					label: __( 'Gill Sans', 'amp' )
+				},
+				{
+					value: 'lucida-bright',
+					label: __( 'Lucida Bright', 'amp' )
+				},
+				{
+					value: 'lucida-sans-typewriter',
+					label: __( 'Lucida Sans Typewriter', 'amp' )
+				},
+				{
+					value: 'papyrus',
+					label: __( 'Papyrus', 'amp' )
+				},
+				{
+					value: 'palatino',
+					label: __( 'Palatino', 'amp' )
+				},
+				{
+					value: 'tahoma',
+					label: __( 'Tahoma', 'amp' )
+				},
+				{
+					value: 'times-new-roman',
+					label: __( 'Times New Roman', 'amp' )
+				},
+				{
+					value: 'trebuchet-ms',
+					label: __( 'Trebuchet MS', 'amp' )
+				},
+				{
+					value: 'verdana',
+					label: __( 'Verdana', 'amp' )
+				},
+
+			]
 		}
 	};
 
@@ -308,6 +391,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 			newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
+			newProps.wrapperProps[ 'data-amp-font-family' ] = attributes.ampFontFamily;
 
 			return el(
 				BlockListBlock,
@@ -344,6 +428,9 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 		}
 
+		if ( attributes.ampFontFamily ) {
+			ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
+		}
 		return _.extend( ampAttributes, props );
 	};
 
@@ -361,6 +448,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampStoryPosition = {
+				type: 'string'
+			};
+
+			settings.attributes.ampFontFamily = {
 				type: 'string'
 			};
 
@@ -527,6 +618,15 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				onChange: function( value ) {
 					var msValue = value + 'ms';
 					props.setAttributes( { ampAnimationDelay: msValue } );
+				}
+			} ),
+			el( SelectControl, {
+				key: 'font',
+				label: __( 'Font family', 'amp' ),
+				value: attributes.ampFontFamily,
+				options: component.data.ampStoryFonts,
+				onChange: function( value ) {
+					props.setAttributes( { ampFontFamily: value } );
 				}
 			} )
 		];

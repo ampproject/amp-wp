@@ -111,13 +111,7 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
 
-		// @todo Add a page-specific style file instead.
-		add_action( 'wp_enqueue_scripts', function() {
-			$custom_css = 'amp-story-grid-layer[template="fill"] .wp-block-image {
-	margin: 0;
-}';
-			wp_add_inline_style( 'wp-block-library', $custom_css );
-		} );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_frontend_css' ) );
 	}
 
 	/**
@@ -160,6 +154,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['data-font-family']    = true;
 		}
 
 		return $allowed_tags;
@@ -218,5 +213,22 @@ class AMP_Story_Post_Type {
 			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
 		}
 		return $template;
+	}
+
+	/**
+	 * Add CSS to the frontend for AMP Stories.
+	 *
+	 * @see /assets/css/amp-story-frontend.css
+	 */
+	public function add_frontend_css() {
+		$post = get_post();
+		if ( 'amp_story' !== $post->post_type ) {
+			return;
+		}
+
+		$css_src      = AMP__DIR__ . '/assets/css/amp-story-frontend.css';
+		$css_contents = file_get_contents( $css_src );
+
+		wp_add_inline_style( 'wp-block-library', $css_contents );
 	}
 }
