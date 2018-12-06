@@ -487,7 +487,7 @@ class AMP_Options_Menu {
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
 					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
-						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
+						<a href="<?php echo esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
 				</div>
 			<?php endif; ?>
 			<p>

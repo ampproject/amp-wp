@@ -64,7 +64,7 @@ class AMP_DOM_Utils {
 
 		$dom = new DOMDocument();
 
-		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+		// @todo In the future consider an AMP_DOMDocument subclass that does this automatically. See <https://github.com/ampproject/amp-wp/pull/895/files#r163825513>.
 		$document = self::convert_amp_bind_attributes( $document );
 
 		// Force all self-closing tags to have closing tags since DOMDocument isn't fully aware.
@@ -271,7 +271,7 @@ class AMP_DOM_Utils {
 		 * DOMDocument to attempt to load it.  If the AMP HTML doesn't make use of amp-bind or similar
 		 * attributes, then everything should still work.
 		 *
-		 * See https://github.com/Automattic/amp-wp/issues/993 for additional context on this issue.
+		 * See https://github.com/ampproject/amp-wp/issues/993 for additional context on this issue.
 		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
 		 */
 		return ( ! is_null( $converted ) ) ? $converted : $html;
@@ -358,7 +358,7 @@ class AMP_DOM_Utils {
 	 * @since 0.6
 	 * @see AMP_DOM_Utils::get_dom() Where the operations in this method are mirrored.
 	 * @see AMP_DOM_Utils::get_content_from_dom() Reciprocal function.
-	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/Automattic/amp-wp/pull/895/files#r163825513>.
+	 * @todo In the future consider an AMP_DOMDocument subclass that does this automatically at saveHTML(). See <https://github.com/ampproject/amp-wp/pull/895/files#r163825513>.
 	 *
 	 * @param DOMDocument $dom  Represents an HTML document.
 	 * @param DOMElement  $node Represents an HTML element of the $dom from which to extract HTML content.

@@ -17,7 +17,7 @@ again.
 
 ## Contributors List Policy
 
-The list of contributors who are featured on the WordPress.org plugin directory are subject to change over time. The organizations and individuals who contribute significantly and consistently (e.g. 3-month period) to the project are eligible to be listed. Those listed should generally be considered as those who take responsibility for the project (i.e. owners). Note that contributions include more than just code, though contributors who commit are [most visible](https://github.com/Automattic/amp-wp/graphs/contributors). The sort order of the contributors list should generally follow the sort order of the GitHub contributors page, though again, this order does not consider work in issues and the support forum, so it cannot be relied on solely.
+The list of contributors who are featured on the WordPress.org plugin directory are subject to change over time. The organizations and individuals who contribute significantly and consistently (e.g. 3-month period) to the project are eligible to be listed. Those listed should generally be considered as those who take responsibility for the project (i.e. owners). Note that contributions include more than just code, though contributors who commit are [most visible](https://github.com/ampproject/amp-wp/graphs/contributors). The sort order of the contributors list should generally follow the sort order of the GitHub contributors page, though again, this order does not consider work in issues and the support forum, so it cannot be relied on solely.
 
 ## Code Reviews
 
@@ -34,14 +34,14 @@ This project follows
 ## Code of Conduct
 
 In addition to the Community Guidelines, this project follows
-an explicit [Code of Conduct](https://github.com/Automattic/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
+an explicit [Code of Conduct](https://github.com/ampproject/amp-wp/blob/develop/CODE_OF_CONDUCT.md).
 
 ## Dev Setup
 
 To start, clone this repository into your WordPress install being used for development:
 
 ```bash
-cd wp-content/plugins && git clone --recursive git@github.com:Automattic/amp-wp.git amp
+cd wp-content/plugins && git clone --recursive git@github.com:ampproject/amp-wp.git amp
 ```
 
 If you happened to have cloned without `--recursive` previously, please do `git submodule update --init` to ensure the [dev-lib](https://github.com/xwp/wp-dev-lib/) submodule is available for development.
@@ -138,7 +138,7 @@ Contributors who want to make a new release, follow these steps:
 2. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 3. Add changelog entry to readme.
 4. Draft blog post about the new release.
-5. [Draft new release](https://github.com/Automattic/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
+5. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
 6. Run `npm run deploy` to to commit the plugin to WordPress.org.
 7. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 8. Publish GitHub release.
