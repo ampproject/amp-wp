@@ -289,7 +289,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 *
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 * @covers \AMP_DOM_Utils::get_content_from_dom()
-	 * @link https://github.com/Automattic/amp-wp/issues/1304
+	 * @link https://github.com/ampproject/amp-wp/issues/1304
 	 */
 	public function test_whitespace_preservation() {
 		$body = " start <ul><li>First</li><li>Second</li></ul><style>pre::before { content:'⚡️'; }</style><script type=\"application/json\">\"⚡️\"</script><pre>\t* one\n\t* two\n\t* three</pre> end ";

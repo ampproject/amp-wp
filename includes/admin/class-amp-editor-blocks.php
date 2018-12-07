@@ -53,7 +53,7 @@ class AMP_Editor_Blocks {
 			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
 			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
 			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
-			 * as much as possible. For more, see <https://github.com/Automattic/amp-wp/issues/1192>.
+			 * as much as possible. For more, see <https://github.com/ampproject/amp-wp/issues/1192>.
 			 */
 			if ( amp_is_canonical() ) {
 				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );

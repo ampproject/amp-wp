@@ -1801,7 +1801,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.3.3
 	 * @since 1.0 Fix silently removing unrecognized elements.
-	 * @see https://github.com/Automattic/amp-wp/issues/1100
+	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */
