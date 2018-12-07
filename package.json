@@ -1,10 +1,10 @@
 {
  "name": "amp-wp",
  "title": "AMP for WordPress",
- "homepage": "https://github.com/Automattic/amp-wp",
+ "homepage": "https://github.com/ampproject/amp-wp",
  "repository": {
   "type": "git",
-  "url": "https://github.com/Automattic/amp-wp.git"
+  "url": "https://github.com/ampproject/amp-wp.git"
  },
  "license": "GPL-2.0+",
  "private": true,

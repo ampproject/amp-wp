@@ -310,7 +310,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * So this strips that class, and instead wraps the image in a <figure> to center it.
 	 *
 	 * @since 0.7
-	 * @see https://github.com/Automattic/amp-wp/issues/1104
+	 * @see https://github.com/ampproject/amp-wp/issues/1104
 	 *
 	 * @param DOMElement $node The <amp-img> node.
 	 * @return DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
@@ -345,7 +345,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * Add an inline style to set the `<figure>` element's width to `auto` instead of `fit-content`.
 	 *
 	 * @since 1.0
-	 * @see https://github.com/Automattic/amp-wp/issues/1086
+	 * @see https://github.com/ampproject/amp-wp/issues/1086
 	 *
 	 * @param DOMElement $node The DOMNode to adjust and replace.
 	 */
