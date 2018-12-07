@@ -111,7 +111,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
 
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_frontend_css' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_amp_story_css' ) );
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'add_amp_story_css' ) );
 	}
 
 	/**
@@ -220,15 +221,19 @@ class AMP_Story_Post_Type {
 	 *
 	 * @see /assets/css/amp-story-frontend.css
 	 */
-	public function add_frontend_css() {
+	public function add_amp_story_css() {
 		$post = get_post();
 		if ( 'amp_story' !== $post->post_type ) {
 			return;
 		}
 
-		$css_src      = AMP__DIR__ . '/assets/css/amp-story-frontend.css';
-		$css_contents = file_get_contents( $css_src );
+		if ( is_admin() ) {
+			wp_enqueue_style( 'amp-story-css', plugin_dir_url( AMP__FILE__ ) . 'assets/css/amp-stories.css' );
+		} else {
+			$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
+			$css_contents = file_get_contents( $css_src );
 
-		wp_add_inline_style( 'wp-block-library', $css_contents );
+			wp_add_inline_style( 'wp-block-library', $css_contents );
+		}
 	}
 }
