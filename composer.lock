@@ -4,11 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "33d4c9d9bf48285e6557d79a6b4b7601",
+    "content-hash": "b8432d8f248557e2589567614d402586",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
-            "version": "dev-master",
+            "version": "8.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/PHP-CSS-Parser.git",
@@ -50,7 +50,7 @@
             "support": {
                 "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
             },
-            "time": "2018-11-25 04:50:29"
+            "time": "2018-11-25T04:50:29+00:00"
         }
     ],
     "packages-dev": [
@@ -269,9 +269,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "sabberworm/php-css-parser": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {

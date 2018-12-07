@@ -1519,7 +1519,7 @@ class AMP_Validated_URL_Post_Type {
 		 */
 		if ( $updated_count > 0 ) {
 			$validation_results = self::recheck_post( $post->ID );
-			// @todo For WP_Error case, see <https://github.com/Automattic/amp-wp/issues/1166>.
+			// @todo For WP_Error case, see <https://github.com/ampproject/amp-wp/issues/1166>.
 			if ( ! is_wp_error( $validation_results ) ) {
 				$args[ self::REMAINING_ERRORS ] = count( array_filter(
 					$validation_results,

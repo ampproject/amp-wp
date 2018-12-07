@@ -754,9 +754,9 @@ class AMP_Validation_Manager {
 		/*
 		 * Ignore validation errors which are forcibly sanitized by filter. This includes tree shaking error
 		 * accepted by options and via AMP_Validation_Error_Taxonomy::accept_validation_errors()).
-		 * This was introduced in <https://github.com/Automattic/amp-wp/pull/1413> to prevent forcibly-sanitized
+		 * This was introduced in <https://github.com/ampproject/amp-wp/pull/1413> to prevent forcibly-sanitized
 		 * validation errors from being reported, to avoid noise and wasted storage. It was inadvertently
-		 * reverted in de7b04b but then restored as part of <https://github.com/Automattic/amp-wp/pull/1413>.
+		 * reverted in de7b04b but then restored as part of <https://github.com/ampproject/amp-wp/pull/1413>.
 		 */
 		if ( $sanitized && 'with_filter' === $sanitization['forced'] ) {
 			return true;
