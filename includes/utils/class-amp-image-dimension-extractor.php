@@ -5,12 +5,26 @@ class AMP_Image_Dimension_Extractor {
 	const STATUS_FAILED_LAST_ATTEMPT = 'failed';
 	const STATUS_IMAGE_EXTRACTION_FAILED = 'failed';
 
-	static public function extract( $urls ) {
+	/**
+	 * Extract dimensions from image URLs.
+	 *
+	 * @since 0.2
+	 *
+	 * @param array|string $urls Array of URLs to extract dimensions from, or a single URL string.
+	 * @return array|string Extracted dimensions keyed by original URL, or else the single set of dimensions if one URL string is passed.
+	 */
+	public static function extract( $urls ) {
 		if ( ! self::$callbacks_registered ) {
 			self::register_callbacks();
 		}
 
 		$return_dimensions = array();
+
+		// Back-compat for users calling this method directly.
+		$is_single = is_string( $urls );
+		if ( $is_single ) {
+			$urls = array( $urls );
+		}
 
 		// Normalize URLs and also track a map of normalized-to-original as we'll need it to reformat things when returning the data.
 		$url_map = array();
@@ -18,7 +32,7 @@ class AMP_Image_Dimension_Extractor {
 		foreach ( $urls as $original_url ) {
 			$normalized_url = self::normalize_url( $original_url );
 			if ( false !== $normalized_url ) {
-				$url_map[ $normalized_url ] = $original_url;
+				$url_map[ $original_url ] = $normalized_url;
 				$normalized_urls[] = $normalized_url;
 			} else {
 				// This is not a URL we can extract dimensions from, so default to false.
@@ -30,9 +44,13 @@ class AMP_Image_Dimension_Extractor {
 		$extracted_dimensions = apply_filters( 'amp_extract_image_dimensions_batch', $extracted_dimensions );
 
 		// We need to return a map with the original (un-normalized URL) as we that to match nodes that need dimensions.
-		foreach ( $extracted_dimensions as $normalized_url => $dimension ) {
-			$original_url = $url_map[ $normalized_url ];
-			$return_dimensions[ $original_url ] = $dimension;
+		foreach ( $url_map as $original_url => $normalized_url ) {
+			$return_dimensions[ $original_url ] = $extracted_dimensions[ $normalized_url ];
+		}
+
+		// Back-compat: just return the dimensions, not the full mapped array.
+		if ( $is_single ) {
+			return current( $return_dimensions );
 		}
 
 		return $return_dimensions;
@@ -51,7 +69,7 @@ class AMP_Image_Dimension_Extractor {
 			return set_url_scheme( $url, 'http' );
 		}
 
-		$parsed = AMP_WP_Utils::parse_url( $url );
+		$parsed = wp_parse_url( $url );
 		if ( ! isset( $parsed['host'] ) ) {
 			$path = '';
 			if ( isset( $parsed['path'] ) ) {
@@ -195,15 +213,10 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		$urls = array_keys( $urls_to_fetch );
-
-		if ( ! function_exists( 'amp_get_fasterimage_client' ) ) {
-			require_once( AMP__DIR__ . '/includes/lib/fasterimage/amp-fasterimage.php' );
-		}
-
+		$urls       = array_keys( $urls_to_fetch );
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client = amp_get_fasterimage_client( $user_agent );
-		$images = $client->batch( $urls );
+		$client     = new \FasterImage\FasterImage( $user_agent );
+		$images     = $client->batch( $urls );
 	}
 
 	/**

@@ -11,12 +11,20 @@
 class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 	/**
+	 * The mock Site Icon value to use in a filter.
+	 *
+	 * @var string
+	 */
+	const MOCK_SITE_ICON = 'https://example.com/new-site-icon.jpg';
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
-		remove_theme_support( 'amp' );
-		global $wp_scripts;
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
+		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
 		parent::tearDown();
 	}
 
@@ -42,12 +50,38 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_current_url().
+	 *
+	 * @covers \amp_get_current_url()
+	 */
+	public function test_amp_get_current_url() {
+		$request_uris = array(
+			'/foo',
+			'/bar?baz',
+			null,
+		);
+
+		foreach ( $request_uris as $request_uri ) {
+			if ( $request_uri ) {
+				$_SERVER['REQUEST_URI'] = wp_slash( $request_uri );
+			} else {
+				unset( $_SERVER['REQUEST_URI'] );
+			}
+			$this->assertEquals(
+				home_url( $request_uri ? $request_uri : '/' ),
+				amp_get_current_url(),
+				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
+			);
+		}
+	}
+
+	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
 	 * @covers \amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 
@@ -80,6 +114,17 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
 	}
 
 	/**
@@ -94,6 +139,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
+		$add_anchor_fragment = function( $url ) {
+			return $url . '#anchor';
+		};
+
 		$drafted_post   = $this->factory()->post->create( array(
 			'post_name'   => 'draft',
 			'post_status' => 'draft',
@@ -107,10 +156,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_status' => 'publish',
 			'post_type'   => 'page',
 		) );
-
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '/amp/', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/amp/#anchor', amp_get_permalink( $published_post ) );
+		remove_filter( 'post_link', $add_anchor_fragment );
 
 		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
 		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
@@ -121,6 +173,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10 );
 		$url = amp_get_permalink( $published_post );
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
+		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
+
+		// Now check with theme support added (in paired mode).
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
+		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
+		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_page ) );
+		add_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+		add_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ), 10, 2 );
+		$this->assertNotContains( 'current_filter=amp_pre_get_permalink', amp_get_permalink( $published_post ) ); // Filter does not apply.
+
+		// Make sure that if permalink has anchor that it is persists.
+		add_filter( 'post_link', $add_anchor_fragment );
+		$this->assertStringEndsWith( '/?amp#anchor', amp_get_permalink( $published_post ) );
 	}
 
 	/**
@@ -130,7 +197,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_permalink_with_theme_support() {
 		global $wp_rewrite;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 
 		update_option( 'permalink_structure', '/%year%/%monthnum%/%day%/%postname%/' );
 		$wp_rewrite->use_trailing_slashes = true;
@@ -140,7 +207,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$post_id = $this->factory()->post->create();
 		$this->assertEquals( get_permalink( $post_id ), amp_get_permalink( $post_id ) );
 
-		add_theme_support( 'amp', array(
+		add_theme_support( AMP_Theme_Support::SLUG, array(
 			'template_dir' => 'amp',
 		) );
 	}
@@ -155,6 +222,149 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'https://example.com/foo/?#bar', amp_remove_endpoint( 'https://example.com/foo/?amp#bar' ) );
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/amp/' ) );
 		$this->assertEquals( 'https://example.com/foo/?blaz', amp_remove_endpoint( 'https://example.com/foo/amp/?blaz' ) );
+	}
+
+
+	/**
+	 * Test that hook is added.
+	 *
+	 * @covers \amp_add_frontend_actions()
+	 */
+	public function test_amp_add_frontend_actions() {
+		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+		amp_add_frontend_actions();
+		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
+	}
+
+	/**
+	 * URLs to test amphtml link.
+	 *
+	 * @return array
+	 */
+	public function get_amphtml_urls() {
+		$post_id = $this->factory()->post->create();
+		return array(
+			'home' => array(
+				home_url( '/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/' ) ),
+			),
+			'404'  => array(
+				home_url( '/no-existe/' ),
+				add_query_arg( amp_get_slug(), '', home_url( '/no-existe/' ) ),
+			),
+			'post' => array(
+				get_permalink( $post_id ),
+				amp_get_permalink( $post_id ),
+			),
+		);
+	}
+
+	/**
+	 * Adding link when theme support is not present.
+	 *
+	 * @dataProvider get_amphtml_urls
+	 * @covers \amp_add_amphtml_link()
+	 * @param string $canonical_url Canonical URL.
+	 * @param string $amphtml_url   The amphtml URL.
+	 */
+	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
+		$test = $this; // For PHP 5.3.
+		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
+
+		$get_amp_html_link = function() {
+			ob_start();
+			amp_add_amphtml_link();
+			return ob_get_clean();
+		};
+
+		$assert_amphtml_link_present = function() use ( $test, $amphtml_url, $get_amp_html_link ) {
+			$test->assertEquals(
+				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
+				$get_amp_html_link()
+			);
+		};
+
+		$this->go_to( $canonical_url );
+		$assert_amphtml_link_present();
+
+		// Make sure adding the filter hides the amphtml link.
+		add_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$this->assertEmpty( $get_amp_html_link() );
+		remove_filter( 'amp_frontend_show_canonical', '__return_false' );
+		$assert_amphtml_link_present();
+
+		// Make sure that the link is not provided when there are validation errors associated with the URL.
+		add_theme_support( AMP_Theme_Support::SLUG, array(
+			'template_dir' => './',
+		) );
+		AMP_Theme_Support::init();
+		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
+			array(
+				array( 'code' => 'foo' ),
+			),
+			$canonical_url
+		);
+		$this->assertNotInstanceOf( 'WP_Error', $invalid_url_post_id );
+
+		// Allow the URL when the errors are forcibly sanitized.
+		$this->assertContains( '<!--', $get_amp_html_link() );
+		add_filter( 'amp_validation_error_sanitized', '__return_true' );
+		$assert_amphtml_link_present();
+	}
+
+	/**
+	 * Test is_amp_endpoint() function.
+	 *
+	 * @covers \is_amp_endpoint()
+	 */
+	public function test_is_amp_endpoint() {
+		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Legacy query var.
+		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Paired theme support.
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
+		$_GET['amp'] = '';
+		$this->assertTrue( is_amp_endpoint() );
+		unset( $_GET['amp'] );
+		$this->assertFalse( is_amp_endpoint() );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+
+		// Native theme support.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$this->assertTrue( is_amp_endpoint() );
+
+		// Special core pages.
+		$pages = array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' );
+		foreach ( $pages as $page ) {
+			$GLOBALS['pagenow'] = $page;
+			$this->assertFalse( is_amp_endpoint() );
+		}
+		unset( $GLOBALS['pagenow'] );
+
+		/**
+		 * Simulate a user unchecking almost all of the boxes in 'AMP Settings' > 'Supported Templates'.
+		 * The user has chosen not to show them as AMP, so most URLs should not be AMP endpoints.
+		 */
+		AMP_Options_Manager::update_option( 'all_templates_supported', false );
+		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+
+		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
+		$this->go_to( $this->factory()->post->create() );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// The homepage shouldn't be an AMP endpoint, as it was also unchecked in the UI.
+		$this->go_to( home_url( '/' ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// When the user passes a flag to the WP-CLI command, it forces AMP validation no matter whether the user disabled AMP on any template.
+		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
+		$this->assertTrue( is_amp_endpoint() );
 	}
 
 	/**
@@ -176,6 +386,34 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'args'           => func_get_args(),
 		);
 		return $value;
+	}
+
+	/**
+	 * Test amp_add_generator_metadata.
+	 *
+	 * @covers \amp_add_generator_metadata()
+	 */
+	public function test_amp_add_generator_metadata() {
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=classic', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=paired', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		ob_start();
+		amp_add_generator_metadata();
+		$output = ob_get_clean();
+		$this->assertContains( 'mode=native', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
 	}
 
 	/**
@@ -203,15 +441,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( 'amp-mustache', 'enqueued' ) );
 
 		// Try overriding URL.
-		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-0.1.js';
+		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-latest.js';
 
 		ob_start();
 		wp_print_scripts();
 		$output = ob_get_clean();
 
 		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-latest.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-0.1.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try rendering via amp_render_scripts() instead of amp_render_scripts(), which is how component scripts get added normally.
 		$output = amp_render_scripts( array(
@@ -221,7 +459,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		) );
 		$this->assertNotContains( 'amp-mathml', $output, 'The amp-mathml component was already printed above.' );
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-2.0.js\' async custom-element="amp-carousel"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
-		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-latest.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-accordion-0.1.js\' async custom-element="amp-accordion"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', array( 'amp-runtime' ), null );
@@ -241,7 +479,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_content_embed_handlers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_embed_handlers();
 		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
@@ -249,7 +487,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $this->last_filter_call['args'][1] );
 
 		$this->last_filter_call = null;
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_embed_handlers( $post );
 		$this->assertArrayHasKey( 'AMP_SoundCloud_Embed_Handler', $handlers );
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
@@ -265,7 +503,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_content_embed_handlers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_embed_handlers' );
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_embed_handlers( $post );
 	}
 
@@ -279,7 +517,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_filter( 'amp_content_sanitizers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers();
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
@@ -289,7 +527,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', end( $handler_classes ) );
 
 		$this->last_filter_call = null;
-		remove_theme_support( 'amp' );
+		remove_theme_support( AMP_Theme_Support::SLUG );
 		$handlers = amp_get_content_sanitizers( $post );
 		$this->assertArrayHasKey( 'AMP_Style_Sanitizer', $handlers );
 		$this->assertEquals( 'amp_content_sanitizers', $this->last_filter_call['current_filter'] );
@@ -315,7 +553,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_get_content_sanitizers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_sanitizers' );
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_sanitizers( $post );
 	}
 
@@ -325,7 +563,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers \post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
-		add_post_type_support( 'page', amp_get_slug() );
+		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
@@ -346,7 +584,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( post_supports_amp( $post ) );
 
 		// Reset.
-		remove_post_type_support( 'page', amp_get_slug() );
+		remove_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
 	}
 
 	/**
@@ -437,8 +675,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
+		$publisher_type     = 'Organization';
+		$logo_type          = 'ImageObject';
 		$expected_publisher = array(
-			'@type' => 'Organization',
+			'@type' => $publisher_type,
 			'name'  => 'Foo',
 		);
 
@@ -457,13 +697,122 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'post_author' => $user_id,
 		) );
 
-		// Test non-singular.
+		// Test non-singular, with no publisher logo.
 		$this->go_to( home_url() );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+
+		// Test the custom_logo as the publisher logo.
+		$custom_logo_src    = 'example/custom-logo.jpeg';
+		$custom_logo_height = 45;
+		$custom_logo_width  = 600;
+		$custom_logo_id     = $this->factory()->attachment->create_object(
+			$custom_logo_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_logo_img  = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
+
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $custom_logo_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width,
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+
+		// Test the site icon as the publisher logo.
+		$site_icon_src          = 'foo/site-icon.jpeg';
+		$site_icon_id           = $this->factory()->attachment->create_object(
+			$site_icon_src,
+			0,
+			array(
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
+
+		update_option( 'site_icon', $site_icon_id );
+		$expected_schema_site_icon = array(
+			'@type'  => $logo_type,
+			'height' => 32,
+			'url'    => $expected_site_icon_img[0],
+			'width'  => 32,
+		);
+		$metadata                  = amp_get_schemaorg_metadata();
+		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test the publisher logo when the Custom Logo naturally has too much height, a common scenario.
+		 *
+		 * It's expected that the URL is the same,
+		 * but the height should be 60, the maximum height for the schema.org publisher logo.
+		 * And the width should be proportional to the new height.
+		 */
+		$custom_logo_excessive_height = 250;
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_excessive_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		update_option( 'site_icon', $site_icon_id );
+		$metadata   = amp_get_schemaorg_metadata();
+		$max_height = 60;
+		$this->assertEquals(
+			array(
+				'@type'  => $logo_type,
+				'height' => $max_height,
+				'url'    => $expected_logo_img[0],
+				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
+			),
+			$metadata['publisher']['logo']
+		);
+		set_theme_mod( 'custom_logo', null );
+		update_option( 'site_icon', null );
+
+		/**
+		 * Test that the 'amp_site_icon_url' filter also applies to the Custom Logo.
+		 *
+		 * Before, this only applied to the Site Icon, as that was the only possible schema.org publisher logo.
+		 * But now that the Custom Logo is preferred, this filter should also apply to that.
+		 */
+		update_post_meta(
+			$custom_logo_id,
+			'_wp_attachment_metadata',
+			array(
+				'width'  => $custom_logo_width,
+				'height' => $custom_logo_height,
+			)
+		);
+		set_theme_mod( 'custom_logo', $custom_logo_id );
+		add_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		remove_filter( 'amp_site_icon_url', array( __CLASS__, 'mock_site_icon' ) );
+		set_theme_mod( 'custom_logo', null );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
@@ -515,5 +864,16 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+	/**
+	 * Get a mock publisher logo URL, to test that the filter works as expected.
+	 *
+	 * @param string $site_icon The publisher logo in the schema.org data.
+	 * @return string $site_icon The filtered publisher logo in the schema.org data.
+	 */
+	public static function mock_site_icon( $site_icon ) {
+		unset( $site_icon );
+		return self::MOCK_SITE_ICON;
 	}
 }

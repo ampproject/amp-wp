@@ -3,50 +3,54 @@
 
 class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 
-    public function get_data() {
-        return array(
-            'no_playbuzz_item' => array(
-                '<h1>Im Not A Playbuzz Embed</h1>',
-                '<h1>Im Not A Playbuzz Embed</h1>',
-            ),
+	/**
+	 * Data for converter test.
+	 *
+	 * @return array Data.
+	 */
+	public function get_data() {
+		return array(
+			'no_playbuzz_item'                           => array(
+				'<h1>Im Not A Playbuzz Embed</h1>',
+				'<h1>Im Not A Playbuzz Embed</h1>',
+			),
 
-            'playbuzz_item_without_sorce' => array(
-                '<div class="pb_feed"></div>',
-                '<div class="pb_feed"></div>'
-            ),
+			'playbuzz_item_without_sorce'                => array(
+				'<div class="pb_feed"></div>',
+				'<div class="pb_feed"></div>',
+			),
 
-            'playbuzz_item_with_data_item' => array(
-                '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-                '<amp-playbuzz data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>'
-            ),
+			'playbuzz_item_with_data_item'               => array(
+				'<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'<amp-playbuzz class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
+			),
 
-            'playbuzz_item_with_data_game' => array(
-                '<div class="pb_feed" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
-                '<amp-playbuzz src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
-            ),
+			'playbuzz_item_with_data_game'               => array(
+				'<div class="pb_feed" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
+				'<amp-playbuzz class="pb_feed" src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>',
+			),
 
-            'playbuzz_item_with_data_game_and_data_item' => array(
-                '<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
-                '<amp-playbuzz data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>'
-            ),
+			'playbuzz_item_with_data_game_and_data_item' => array(
+				'<div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" data-game="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right"></div>',
+				'<amp-playbuzz class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" src="https://www.playbuzz.com/jessiemills10/donald-trump-hits-out-at-rachel-maddow-and-accuses-nbc-of-being-fake-news-is-he-right" height="500"></amp-playbuzz>',
+			),
 
-            'playbuzz_item_with_data_game_info' => array(
-                '<div class="pb_feed" data-game-info="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-                '<amp-playbuzz data-item-info="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
-            ),
+			'playbuzz_item_with_data_game_info'          => array(
+				'<div class="pb_feed" data-game-info="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'<amp-playbuzz class="pb_feed" data-game-info="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
+			),
 
-            'playbuzz_item_with_data_shares_info' => array(
-                '<div class="pb_feed" data-shares="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-                '<amp-playbuzz data-share-buttons="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
-            ),
+			'playbuzz_item_with_data_shares_info'        => array(
+				'<div class="pb_feed" data-shares="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'<amp-playbuzz class="pb_feed" data-share-buttons="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
+			),
 
-            'playbuzz_item_with_data_comments' => array(
-                '<div class="pb_feed" data-comments="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
-                '<amp-playbuzz data-comments="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
-            )
-
-        );
-    }
+			'playbuzz_item_with_data_comments'           => array(
+				'<div class="pb_feed" data-comments="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
+				'<amp-playbuzz class="pb_feed" data-comments="true" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121" height="500"></amp-playbuzz>',
+			),
+		);
+	}
 
     /**
      * @dataProvider get_data

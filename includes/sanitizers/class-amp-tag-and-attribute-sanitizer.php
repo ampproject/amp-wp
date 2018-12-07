@@ -86,6 +86,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $script_components = array();
 
 	/**
+	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
+	 *
+	 * @var array
+	 */
+	protected $should_not_replace_nodes = array();
+
+	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
 	 *
 	 * @since 0.5
@@ -201,7 +208,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                  or if it did not find any HTML elements to convert to AMP equivalents.
 	 */
 	public function get_scripts() {
-		return array_fill_keys( $this->script_components, true );
+		return array_fill_keys( array_unique( $this->script_components ), true );
 	}
 
 	/**
@@ -233,7 +240,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Sanitize the <video> elements from the HTML contained in this instance's DOMDocument.
+	 * Sanitize the elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.5
 	 */
@@ -248,7 +255,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		while ( ! empty( $this->stack ) ) {
 
 			// Get the next node to process.
-			$node = array_pop( $this->stack );
+			$node = array_shift( $this->stack );
 
 			/**
 			 * Process this node.
@@ -270,7 +277,83 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Process a node by sanitizing and/or validating it per.
+	 * Augment rule spec for validation.
+	 *
+	 * @since 1.0
+	 *
+	 * @param DOMElement $node      Node.
+	 * @param array      $rule_spec Rule spec.
+	 * @return array Augmented rule spec.
+	 */
+	private function get_rule_spec_list_to_validate( $node, $rule_spec ) {
+
+		// Expand extension_spec into a set of attr_spec_list.
+		if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
+			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
+			$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
+
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
+				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
+				AMP_Rule_Spec::MANDATORY => true,
+			);
+
+			$versions = array_unique( array_merge(
+				isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
+				isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
+			) );
+
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
+				AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
+					'^',
+					preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
+					'(' . implode( '|', $versions ) . ')',
+					'\.js$',
+				) ),
+			);
+		}
+
+		// Augment the attribute list according to the parent's reference points, if it has them.
+		if ( ! empty( $node->parentNode ) && isset( $this->allowed_tags[ $node->parentNode->nodeName ] ) ) {
+			foreach ( $this->allowed_tags[ $node->parentNode->nodeName ] as $parent_rule_spec ) {
+				if ( empty( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] ) ) {
+					continue;
+				}
+				foreach ( $parent_rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['reference_points'] as $reference_point_spec_name => $reference_point_spec_instance_attrs ) {
+					$reference_point = AMP_Allowed_Tags_Generated::get_reference_point_spec( $reference_point_spec_name );
+					if ( empty( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] ) ) {
+						/*
+						 * See special case for amp-selector in AMP_Tag_And_Attribute_Sanitizer::is_amp_allowed_attribute()
+						 * where its reference point applies to any descendant elements, not just direct children.
+						 */
+						continue;
+					}
+					foreach ( $reference_point[ AMP_Rule_Spec::ATTR_SPEC_LIST ] as $attr_name => $reference_point_spec_attr ) {
+						$reference_point_spec_attr = array_merge(
+							$reference_point_spec_attr,
+							$reference_point_spec_instance_attrs
+						);
+
+						/*
+						 * Ignore mandatory constraint for now since this would end up causing other sibling children
+						 * getting removed due to missing a mandatory attribute. To sanitize this it would require
+						 * higher-level processing to look at an element's surrounding context, similar to how the
+						 * sanitizer does not yet handle the mandatory_oneof constraint.
+						 */
+						unset( $reference_point_spec_attr['mandatory'] );
+
+						$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] = $reference_point_spec_attr;
+					}
+				}
+			}
+		}
+		return $rule_spec;
+	}
+
+	/**
+	 * Process a node by checking if an element and its attributes are valid, and removing them when invalid.
+	 *
+	 * Attributes which are not valid are removed. Elements which are not allowed are also removed,
+	 * including elements which miss mandatory attributes.
 	 *
 	 * @param DOMNode $node Node.
 	 */
@@ -308,28 +391,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		foreach ( $rule_spec_list as $id => $rule_spec ) {
 			if ( $this->validate_tag_spec_for_node( $node, $rule_spec[ AMP_Rule_Spec::TAG_SPEC ] ) ) {
-
-				// Expand extension_spec into a set of attr_spec_list.
-				if ( isset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'] ) ) {
-					$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
-					$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
-
-					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
-						AMP_Rule_Spec::VALUE     => $extension_spec['name'],
-						AMP_Rule_Spec::MANDATORY => true,
-					);
-
-					$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
-						AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
-							'^',
-							preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
-							'(' . implode( '|', $extension_spec['allowed_versions'] ) . ')',
-							'\.js$',
-						) ),
-					);
-				}
-
-				$rule_spec_list_to_validate[ $id ] = $rule_spec;
+				$rule_spec_list_to_validate[ $id ] = $this->get_rule_spec_list_to_validate( $node, $rule_spec );
 			}
 		}
 
@@ -412,7 +474,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$attr_spec_list = $first_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ];
 				}
 			}
-		} // End if().
+		}
 
 		if ( ! empty( $attr_spec_list ) && $this->is_missing_mandatory_attribute( $attr_spec_list, $node ) ) {
 			$this->remove_node( $node );
@@ -433,6 +495,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$attr_spec_list
 		);
 
+		// Amend spec list with layout.
+		if ( isset( $tag_spec['amp_layout'] ) ) {
+			$merged_attr_spec_list = array_merge( $merged_attr_spec_list, $this->layout_allowed_attributes );
+
+			if ( isset( $tag_spec['amp_layout']['supported_layouts'] ) ) {
+				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
+
+				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+			}
+		}
+
 		// Identify any remaining disallowed attributes.
 		$disallowed_attributes = $this->get_disallowed_attributes_in_node( $node, $merged_attr_spec_list );
 
@@ -446,8 +519,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Remove all invalid attributes.
-		foreach ( $disallowed_attributes as $disallowed_attribute ) {
-			$this->remove_invalid_attribute( $node, $disallowed_attribute );
+		if ( ! empty( $disallowed_attributes ) ) {
+			/*
+			 * Capture all element attributes up front so that differing validation errors result when
+			 * one invalid attribute is accepted but the others are still rejected.
+			 */
+			$validation_error = array(
+				'element_attributes' => array(),
+			);
+			foreach ( $node->attributes as $attribute ) {
+				$validation_error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+			foreach ( $disallowed_attributes as $disallowed_attribute ) {
+				$this->remove_invalid_attribute( $node, $disallowed_attribute, $validation_error );
+			}
 		}
 
 		// Add required AMP component scripts if the element is still in the document.
@@ -524,6 +609,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
 				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
+			}
+		} elseif ( isset( $cdata_spec['cdata_regex'] ) ) {
+			$delimiter = false === strpos( $cdata_spec['cdata_regex'], '@' ) ? '@' : '#';
+			if ( ! preg_match( $delimiter . $cdata_spec['cdata_regex'] . $delimiter . 'u', $element->textContent ) ) {
+				return new WP_Error( 'cdata_regex' );
 			}
 		}
 		return true;
@@ -822,7 +912,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$attrs_to_remove = array();
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
-			if ( ! $this->is_amp_allowed_attribute( $attr_name, $attr_spec_list ) ) {
+			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
 				$attrs_to_remove[] = $attr_node;
 			}
 		}
@@ -1027,33 +1117,43 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * This takes into account boolean attributes where value can match name (e.g. selected="selected").
 	 *
 	 * @since 0.7.0
+	 * @since 1.0.0 The spec value is now an array.
 	 *
-	 * @param string $attr_name  Attribute name.
-	 * @param string $attr_value Attribute value.
-	 * @param string $spec_value Attribute spec value.
+	 * @param string       $attr_name   Attribute name.
+	 * @param string       $attr_value  Attribute value.
+	 * @param string|array $spec_values Attribute spec value(s).
 	 * @return bool Is value valid.
 	 */
-	private function check_matching_attribute_value( $attr_name, $attr_value, $spec_value ) {
-		if ( $spec_value === $attr_value ) {
-			return true;
+	private function check_matching_attribute_value( $attr_name, $attr_value, $spec_values ) {
+		if ( is_string( $spec_values ) ) {
+			$spec_values = (array) $spec_values;
 		}
+		foreach ( $spec_values as $spec_value ) {
+			if ( $spec_value === $attr_value ) {
+				return true;
+			}
 
-		// Check for boolean attribute.
-		return (
-			'' === $spec_value
-			&&
-			in_array( $attr_name, AMP_Rule_Spec::$boolean_attributes, true )
-			&&
-			strtolower( $attr_value ) === strtolower( $attr_name )
-		);
+			// Check for boolean attribute.
+			$is_bool_match = (
+				'' === $spec_value
+				&&
+				in_array( $attr_name, AMP_Rule_Spec::$boolean_attributes, true )
+				&&
+				strtolower( $attr_value ) === strtolower( $attr_name )
+			);
+			if ( $is_bool_match ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
 	 * Check if attribute has a value rule determine if its value matches ignoring case.
 	 *
-	 * @param DOMElement       $node           Node.
-	 * @param string           $attr_name      Attribute name.
-	 * @param array[]|string[] $attr_spec_rule Attribute spec rule.
+	 * @param DOMElement   $node           Node.
+	 * @param string       $attr_name      Attribute name.
+	 * @param array|string $attr_spec_rule Attribute spec rule.
 	 *
 	 * @return string:
 	 *      - AMP_Rule_Spec::PASS - $attr_name has a value that matches the rule.
@@ -1062,17 +1162,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_value_casei( $node, $attr_name, $attr_spec_rule ) {
-		/**
-		 * Check 'value_casei' - case insensitive
-		 */
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
-			$rule_value = strtolower( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] );
+		if ( ! isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ] ) ) {
+			return AMP_Rule_Spec::NOT_APPLICABLE;
+		}
+
+		$result      = AMP_Rule_Spec::NOT_APPLICABLE;
+		$rule_values = (array) $attr_spec_rule[ AMP_Rule_Spec::VALUE_CASEI ];
+		foreach ( $rule_values as $rule_value ) {
+			$rule_value = strtolower( $rule_value );
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 				if ( $attr_value === (string) $rule_value ) {
 					return AMP_Rule_Spec::PASS;
 				} else {
-					return AMP_Rule_Spec::FAIL;
+					$result = AMP_Rule_Spec::FAIL;
 				}
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
@@ -1081,13 +1184,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 						if ( $attr_value === (string) $rule_value ) {
 							return AMP_Rule_Spec::PASS;
 						} else {
-							return AMP_Rule_Spec::FAIL;
+							$result = AMP_Rule_Spec::FAIL;
 						}
 					}
 				}
 			}
 		}
-		return AMP_Rule_Spec::NOT_APPLICABLE;
+		return $result;
 	}
 
 	/**
@@ -1107,6 +1210,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Check 'value_regex' - case sensitive regex match.
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			/*
 			 * The regex pattern has '^' and '$' though they are not in the AMP spec.
@@ -1114,7 +1218,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * matched by a regex rule of '(_blank|_self|_top)'. As the AMP JS validator
 			 * only accepts '_blank' we leave it this way for now.
 			 */
-			if ( preg_match( '@^' . $rule_value . '$@u', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
@@ -1142,9 +1246,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ] ) && $node->hasAttribute( $attr_name ) ) {
 			$rule_value = $attr_spec_rule[ AMP_Rule_Spec::VALUE_REGEX_CASEI ];
+			$rule_value = str_replace( '/', '\\/', $rule_value );
 
 			// See note above regarding the '^' and '$' that are added here.
-			if ( preg_match( '/^' . $rule_value . '$/ui', $node->getAttribute( $attr_name ) ) ) {
+			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
 			} else {
 				return AMP_Rule_Spec::FAIL;
@@ -1171,18 +1276,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$url = urldecode( $url );
-					// Check if the host contains invalid chars.
-					$url_host = wp_parse_url( $url, PHP_URL_HOST );
-					if ( $url_host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $url_host ) ) {
-						return AMP_Rule_Spec::FAIL;
+
+					// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
+					$protocol = $this->parse_protocol( $url );
+					if ( isset( $protocol ) ) {
+						if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
+							return AMP_Rule_Spec::FAIL;
+						}
+						$url = substr( $url, strlen( $protocol ) + 1 );
 					}
 
-					// Check if the protocol contains invalid chars.
-					$dots_pos = strpos( $url, ':' );
-					if ( false !== $dots_pos && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', substr( $url, 0, $dots_pos ) ) ) {
+					// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
+					$host = wp_parse_url( $url, PHP_URL_HOST );
+					if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
 				}
@@ -1192,6 +1300,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		return AMP_Rule_Spec::NOT_APPLICABLE;
+	}
+
+	/**
+	 * Parse protocol from URL.
+	 *
+	 * This may not be a valid protocol (scheme), but it will be where the protocol should be in the URL.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L235-L282
+	 * @param string $url URL.
+	 * @return string|null Protocol without colon if matched. Otherwise null.
+	 */
+	private function parse_protocol( $url ) {
+		if ( preg_match( '#^[^/]+(?=:)#', $url, $matches ) ) {
+			return $matches[0];
+		}
+		return null;
 	}
 
 	/**
@@ -1210,34 +1334,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_allowed_protocol( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
-					/*
-					 * This seems to be an acceptable check since the AMP validator
-					 * will allow a URL with no protocol to pass validation.
-					 */
-					$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
-					if ( $url_scheme ) {
-						if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
-							return AMP_Rule_Spec::FAIL;
-						}
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+					$url_scheme = $this->parse_protocol( $url );
+					if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+						return AMP_Rule_Spec::FAIL;
 					}
 				}
 				return AMP_Rule_Spec::PASS;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
-						foreach ( $urls_to_test as $url ) {
-							/*
-							 * This seems to be an acceptable check since the AMP validator
-							 *  will allow a URL with no protocol to pass validation.
-							 */
-							$url_scheme = AMP_WP_Utils::parse_url( $url, PHP_URL_SCHEME );
-							if ( $url_scheme ) {
-								if ( ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
-									return AMP_Rule_Spec::FAIL;
-								}
+						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
+							$url_scheme = $this->parse_protocol( $url );
+							if ( isset( $url_scheme ) && ! in_array( strtolower( $url_scheme ), $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOWED_PROTOCOL ], true ) ) {
+								return AMP_Rule_Spec::FAIL;
 							}
 						}
 						return AMP_Rule_Spec::PASS;
@@ -1249,7 +1359,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Check if attribute has disallowed relative value rule determine if disallowed relative value matches.
+	 * Extract URLs from attribute.
+	 *
+	 * @param DOMAttr     $attribute_node Attribute node.
+	 * @param string|null $spec_attr_name Non-alternative attribute name for the spec.
+	 * @return string[] List of URLs.
+	 */
+	private function extract_attribute_urls( $attribute_node, $spec_attr_name = null ) {
+		/*
+		 * Handle the srcset special case where the attribute value can contain multiple parts, each in the format `URL [WIDTH] [PIXEL_DENSITY]`.
+		 * So we split the srcset attribute value by commas and then return the first token of each item, omitting width descriptor and pixel density descriptor.
+		 * This splitting cannot be done for other URLs because it a comma can appear in a URL itself generally, but the syntax can break in srcset,
+		 * unless the commas are URL-encoded.
+		 */
+		if ( 'srcset' === $attribute_node->nodeName || 'srcset' === $spec_attr_name ) {
+			return array_filter( array_map(
+				function ( $srcset_part ) {
+					// Remove descriptors for width and pixel density.
+					return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
+				},
+				preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
+			) );
+		} else {
+			return array( $attribute_node->nodeValue );
+		}
+	}
+
+	/**
+	 * Check if attribute has disallowed relative URL value according to rule spec.
 	 *
 	 * @param DOMElement       $node           Node.
 	 * @param string           $attr_name      Attribute name.
@@ -1264,9 +1401,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
-				$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $attr_name ) );
-				foreach ( $urls_to_test as $url ) {
-					$parsed_url = AMP_WP_Utils::parse_url( $url );
+				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+					$parsed_url = wp_parse_url( $url );
 
 					/*
 					 *  The JS AMP validator seems to consider 'relative' to mean
@@ -1283,9 +1419,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
-						$urls_to_test = preg_split( '/\s*,\s*/', $node->getAttribute( $alternative_name ) );
-						foreach ( $urls_to_test as $url ) {
-							$parsed_url = AMP_WP_Utils::parse_url( $url );
+						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
+							$parsed_url = wp_parse_url( $url );
 							if ( empty( $parsed_url['scheme'] ) ) {
 								return AMP_Rule_Spec::FAIL;
 							}
@@ -1338,7 +1473,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	private function check_attr_spec_rule_disallowed_domain( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] ) && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
-			$url_domain = AMP_WP_Utils::parse_url( $attr_value, PHP_URL_HOST );
+			$url_domain = wp_parse_url( $attr_value, PHP_URL_HOST );
 			if ( ! empty( $url_domain ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::DISALLOWED_DOMAIN ] as $disallowed_domain ) {
 					if ( strtolower( $url_domain ) === strtolower( $disallowed_domain ) ) {
@@ -1417,7 +1552,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 2 !== count( $pair_parts ) ) {
 					return 0;
 				}
-				$properties[ strtolower( $pair_parts[0] ) ] = $pair_parts[1];
+				$properties[ trim( strtolower( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			// Fail if there are unrecognized properties.
@@ -1460,19 +1595,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @param string           $attr_name      Attribute name.
+	 * @param DOMAttr          $attr_node      Attribute node.
 	 * @param array[]|string[] $attr_spec_list Attribute spec list.
 	 * @return bool Return true if attribute name is valid for this attr_spec_list, false otherwise.
 	 */
-	private function is_amp_allowed_attribute( $attr_name, $attr_spec_list ) {
-		if ( isset( $this->globally_allowed_attributes[ $attr_name ] ) || isset( $this->layout_allowed_attributes[ $attr_name ] ) || isset( $attr_spec_list[ $attr_name ] ) ) {
+	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
+		$attr_name = $attr_node->nodeName;
+		if (
+			isset( $attr_spec_list[ $attr_name ] )
+			||
+			'data-' === substr( $attr_name, 0, 5 )
+			||
+			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
+			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )
+		) {
 			return true;
-		} else {
-			foreach ( AMP_Rule_Spec::$whitelisted_attr_regex as $whitelisted_attr_regex ) {
-				if ( preg_match( $whitelisted_attr_regex, $attr_name ) ) {
-					return true;
-				}
-			}
 		}
 
 		$is_allowed_alt_name_attr = (
@@ -1482,6 +1619,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		if ( $is_allowed_alt_name_attr ) {
 			return true;
+		}
+
+		/*
+		 * Handle special case for amp-selector where its reference points do not have to be direct children.
+		 * This is noted as a special case in the AMP validator spec for amp-selector, so that is why it is
+		 * a special case here in this method. It is also implemented in this way for the sake of efficiency
+		 * to prevent having to waste time in process_node() merging attribute lists. For more on amp-selector's
+		 * unique reference point, see:
+		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
+		 */
+		$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' );
+		if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
+			$parent = $attr_node->parentNode;
+			while ( $parent ) {
+				if ( 'amp-selector' === $parent->nodeName ) {
+					return true;
+				}
+				$parent = $parent->parentNode;
+			}
 		}
 
 		return false;
@@ -1511,19 +1667,34 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Determine if the supplied $node has a parent with the specified tag name.
+	 * Determine if the supplied $node has a parent with the specified spec name.
 	 *
 	 * @since 0.5
 	 *
-	 * @param DOMNode $node            Node.
-	 * @param string  $parent_tag_name Parent tag name.
+	 * @todo It would be more robust if the the actual tag spec were looked up and then matched against the parent, but this is currently overkill.
+	 *
+	 * @param DOMNode $node             Node.
+	 * @param string  $parent_spec_name Parent spec name, for example 'body' or 'form [method=post]'.
 	 * @return bool Return true if given node has direct parent with the given name, false otherwise.
 	 */
-	private function has_parent( $node, $parent_tag_name ) {
-		if ( $node && $node->parentNode && ( $node->parentNode->nodeName === $parent_tag_name ) ) {
-			return true;
+	private function has_parent( $node, $parent_spec_name ) {
+		if ( ! $node ) {
+			return false;
 		}
-		return false;
+		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $parent_spec_name );
+
+		if ( ! $node->parentNode || $node->parentNode->nodeName !== $parsed_spec_name['tag_name'] ) {
+			return false;
+		}
+
+		// Ensure attributes match; if not move up to the next node.
+		foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
+			if ( $node instanceof DOMElement && strtolower( $node->getAttribute( $attr_name ) ) !== $attr_value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
@@ -1531,31 +1702,92 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.5
 	 *
-	 * @todo The $ancestor_tag_name here is not sufficient as it is not just a tag name but an entire selector that is used.
 	 * @param DOMNode $node              Node.
 	 * @param string  $ancestor_tag_name Ancestor tag name.
 	 * @return bool Return true if given node has any ancestor with the give name, false otherwise.
 	 */
 	private function has_ancestor( $node, $ancestor_tag_name ) {
-		if ( $this->get_ancestor_with_tag_name( $node, $ancestor_tag_name ) ) {
+		if ( $this->get_ancestor_with_matching_spec_name( $node, $ancestor_tag_name ) ) {
 			return true;
 		}
 		return false;
 	}
 
 	/**
+	 * Parse tag name and attributes from spec name.
+	 *
+	 * Given a spec name like 'form [method=post]', extract the tag name 'form' and the attributes.
+	 *
+	 * @todo This is admittedly rudimentary. It would be more robust to actually look up the tag spec by the name and obtain the required attributes from there, but this is not necessary yet.
+	 *
+	 * @param string $spec_name Spec name.
+	 * @return array Tag name and attributes.
+	 */
+	private function parse_tag_and_attributes_from_spec_name( $spec_name ) {
+		static $parsed_specs = array();
+		if ( isset( $parsed_specs[ $spec_name ] ) ) {
+			return $parsed_specs[ $spec_name ];
+		}
+
+		$attributes = array();
+
+		/*
+		 * This matches spec names like:
+		 * - body
+		 * - form [method=post]
+		 * - form > div [submit-error][template]
+		 */
+		if ( preg_match( '/^(?P<ancestors>.+? )?(?P<tag_name>[a-z0-9_-]+?)( (?P<raw_attrs>\[.+?\]))?$/i', $spec_name, $matches ) ) {
+			$tag_name = $matches['tag_name'];
+
+			if ( isset( $matches['raw_attrs'] ) ) {
+				$raw_attr_pairs = explode( '][', trim( $matches['raw_attrs'], '[]' ) );
+				foreach ( $raw_attr_pairs as $raw_attr_pair ) {
+					$raw_attr_pair = explode( '=', $raw_attr_pair );
+
+					$attr_key = $raw_attr_pair[0];
+					$attr_val = isset( $raw_attr_pair[1] ) ? $raw_attr_pair[1] : true;
+
+					$attributes[ $attr_key ] = $attr_val;
+				}
+			}
+		} else {
+			$tag_name = strtok( $spec_name, ' ' ); // Fallback case.
+		}
+
+		$parsed_specs[ $spec_name ] = compact( 'tag_name', 'attributes' );
+		return $parsed_specs[ $spec_name ];
+	}
+
+	/**
 	 * Get the first ancestor node matching the specified tag name for the supplied $node.
 	 *
 	 * @since 0.5
+	 * @todo It would be more robust if the the actual tag spec were looked up and then matched for each ancestor, but this is currently overkill.
 	 *
-	 * @param DOMNode $node              Node.
-	 * @param string  $ancestor_tag_name Ancestor tag name.
+	 * @param DOMNode $node               Node.
+	 * @param string  $ancestor_spec_name Ancestor spec name, e.g. 'body' or 'form [method=post]'.
 	 * @return DOMNode|null Returns an ancestor node for the name specified, or null if not found.
 	 */
-	private function get_ancestor_with_tag_name( $node, $ancestor_tag_name ) {
+	private function get_ancestor_with_matching_spec_name( $node, $ancestor_spec_name ) {
+		$parsed_spec_name = $this->parse_tag_and_attributes_from_spec_name( $ancestor_spec_name );
+
 		while ( $node && $node->parentNode ) {
 			$node = $node->parentNode;
-			if ( $node->nodeName === $ancestor_tag_name ) {
+			if ( $node->nodeName === $parsed_spec_name['tag_name'] ) {
+
+				// Ensure attributes match; if not move up to the next node.
+				foreach ( $parsed_spec_name['attributes'] as $attr_name => $attr_value ) {
+					$match = (
+						$node instanceof DOMElement
+						&&
+						true === $attr_value ? $node->hasAttribute( $attr_name ) : strtolower( $node->getAttribute( $attr_name ) ) === $attr_value
+					);
+					if ( ! $match ) {
+						continue 2;
+					}
+				}
+
 				return $node;
 			}
 		}
@@ -1568,34 +1800,46 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Also adds them to the stack for processing by the sanitize() function.
 	 *
 	 * @since 0.3.3
+	 * @since 1.0 Fix silently removing unrecognized elements.
+	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */
 	private function replace_node_with_children( $node ) {
 
+		// If node has no children or no parent, just remove the node.
 		if ( ! $node->hasChildNodes() || ! $node->parentNode ) {
-			// If node has no children or no parent, just remove the node.
 			$this->remove_node( $node );
 
-		} else {
-			/*
-			 * If node has children, replace it with them and push children onto stack
-			 *
-			 * Create a DOM fragment to hold the children
-			 */
-			$fragment = $this->dom->createDocumentFragment();
+			return;
+		}
 
-			// Add all children to fragment/stack.
-			$child = $node->firstChild;
-			while ( $child ) {
-				$fragment->appendChild( $child );
-				$this->stack[] = $child;
-				$child         = $node->firstChild;
-			}
+		/*
+		 * If node has children, replace it with them and push children onto stack
+		 *
+		 * Create a DOM fragment to hold the children
+		 */
+		$fragment = $this->dom->createDocumentFragment();
 
-			// Replace node with fragment.
+		// Add all children to fragment/stack.
+		$child = $node->firstChild;
+		while ( $child ) {
+			$fragment->appendChild( $child );
+			$this->stack[] = $child;
+			$child         = $node->firstChild;
+		}
+
+		// Prevent double-reporting nodes that are rejected for sanitization.
+		if ( isset( $this->should_not_replace_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_replace_nodes[ $node->nodeName ], true ) ) {
+			return;
+		}
+
+		// Replace node with fragment.
+		$should_replace = $this->should_sanitize_validation_error( array(), compact( 'node' ) );
+		if ( $should_replace ) {
 			$node->parentNode->replaceChild( $fragment, $node );
-
+		} else {
+			$this->should_not_replace_nodes[ $node->nodeName ][] = $node;
 		}
 	}
 

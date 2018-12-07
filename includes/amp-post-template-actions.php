@@ -2,6 +2,7 @@
 /**
  * Callbacks for adding content to an AMP template.
  *
+ * @todo Rename this file from amp-post-template-actions.php to amp-post-template-functions.php.
  * @package AMP
  */
 
@@ -98,6 +99,12 @@ function amp_post_template_add_schemaorg_metadata() {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_styles( $amp_template ) {
+	$stylesheets = $amp_template->get( 'post_amp_stylesheets' );
+	if ( ! empty( $stylesheets ) ) {
+		echo '/* Inline stylesheets */' . PHP_EOL; // WPCS: XSS OK.
+		echo implode( '', $stylesheets ); // WPCS: XSS OK.
+	}
+
 	$styles = $amp_template->get( 'post_amp_styles' );
 	if ( ! empty( $styles ) ) {
 		echo '/* Inline styles */' . PHP_EOL; // WPCS: XSS OK.
@@ -129,13 +136,4 @@ function amp_post_template_add_analytics_script( $data ) {
 function amp_post_template_add_analytics_data() {
 	$analytics = amp_add_custom_analytics();
 	amp_print_analytics( $analytics );
-}
-
-/**
- * Add generator metadata.
- *
- * @since 6.0
- */
-function amp_add_generator_metadata() {
-	printf( '<meta name="generator" content="%s" />', esc_attr( 'AMP Plugin v' . AMP__VERSION ) );
 }

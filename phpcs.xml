@@ -28,7 +28,7 @@
 	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument" />
+			<property name="customPropertiesWhitelist" value="childNodes,tagName,textContent,parentNode,nodeType,nodeName,nextSibling,firstChild,lastChild,nodeValue,DEFAULT_ARGS,documentElement,removeChild,ownerDocument,DEFAULT_WIDTH,DEFAULT_HEIGHT" />
 		</properties>
 	</rule>
 
@@ -45,6 +45,6 @@
 	<exclude-pattern>*/dev-lib/*</exclude-pattern>
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
-	<exclude-pattern>includes/lib/*</exclude-pattern>
+	<exclude-pattern>third_party/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 </ruleset>

@@ -77,4 +77,51 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $scripts );
 	}
+
+	/**
+	 * Data for test__raw_embed_sanitizer.
+	 *
+	 * @return array
+	 */
+	public function get_raw_embed_dataset() {
+		return array(
+			'no_embed_blockquote'   => array(
+				'<p>Hello world.</p>',
+				'<p>Hello world.</p>',
+			),
+			'div_without_instagram' => array(
+				'<div>lorem ipsum</div>',
+				'<div>lorem ipsum</div>',
+			),
+
+			'post_embed'            => array(
+				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
+				'<amp-facebook data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive" width="600" height="400"></amp-facebook>',
+			),
+			'video_embed'           => array(
+				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
+				'<amp-facebook data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-embed-as="video" layout="responsive" width="600" height="400"></amp-facebook>',
+			),
+		);
+	}
+
+
+	/**
+	 * Test raw_embed_sanitizer.
+	 *
+	 * @param string $source  Content.
+	 * @param string $expected Expected content.
+	 * @dataProvider get_raw_embed_dataset
+	 * @covers AMP_Facebook_Embed_Handler::sanitize_raw_embeds()
+	 */
+	public function test__raw_embed_sanitizer( $source, $expected ) {
+		$dom   = AMP_DOM_Utils::get_dom_from_content( $source );
+		$embed = new AMP_Facebook_Embed_Handler();
+
+		$embed->sanitize_raw_embeds( $dom );
+
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEquals( $expected, $content );
+	}
 }

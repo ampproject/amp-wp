@@ -8,6 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	private $vendor = 'googleanalytics';
@@ -82,7 +83,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that nothing is added if no analytics option defined in the DB
 	 */
-	function test_no_options() {
+	public function test_no_options() {
 		$options = $this->get_options();
 		$this->assertEmpty( $options );
 	}
@@ -90,7 +91,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that exactly one analytics component is inserted into the DB
 	 */
-	function test_one_option_inserted() {
+	public function test_one_option_inserted() {
 		$this->insert_one_option(
 			$this->vendor,
 			$this->config_one
@@ -103,7 +104,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that two analytics components are inserted into the DB
 	 */
-	function test_two_options_inserted() {
+	public function test_two_options_inserted() {
 
 		/* Insert analytics option one */
 		$this->insert_one_option(
@@ -124,7 +125,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that the analytics JS is added to the page
 	 */
-	function test_analytics_js_added() {
+	public function test_analytics_js_added() {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -137,7 +138,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
 		// Create a new DOM document
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		// Load the rendered page into it
 		$dom->loadHTML( $amp_rendered );
 
@@ -158,7 +159,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that exactly one analytics component are added to the page
 	 */
-	function test_one_analytics_component_added() {
+	public function test_one_analytics_component_added() {
 
 		/* Insert analytics option */
 		$this->insert_one_option(
@@ -171,7 +172,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
@@ -186,7 +187,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test that two analytics components are added to the page
 	 */
-	function test_two_analytics_components_added() {
+	public function test_two_analytics_components_added() {
 
 		$this->insert_one_option(
 			$this->vendor,
@@ -202,7 +203,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$libxml_previous_state = libxml_use_internal_errors( true );
 
-		$dom = new DOMDocument;
+		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 		// Two amp-analytics components should be in the page
@@ -231,7 +232,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
-		add_theme_support( 'amp' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $key ) {
 			$analytics[ $key ]['type'] = 'test';
 			return $analytics;

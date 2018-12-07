@@ -1,7 +1,7 @@
 /* exported ampCustomizeControls */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
-var ampCustomizeControls = ( function( api, $ ) {
+var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var component = {
@@ -46,7 +46,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Add state for AMP.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	component.addState = function addState() {
 		api.state.add( 'ampEnabled', new api.Value( false ) );
@@ -84,7 +84,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 		urlParser.href = url;
 		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
 
-		if ( urlParser.search.length > 1 ) {
+		if ( 1 < urlParser.search.length ) {
 			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
 			delete params[ component.data.queryVar ];
 			urlParser.search = $.param( params );
@@ -112,7 +112,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Try to close the tooltip after a given timeout.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	component.tryToCloseTooltip = function tryToCloseTooltip() {
 		clearTimeout( component.tooltipTimeoutId );
@@ -120,7 +120,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			if ( ! component.tooltipVisible.get() ) {
 				return;
 			}
-			if ( component.tooltipFocused.get() > 0 ) {
+			if ( 0 < component.tooltipFocused.get() ) {
 				component.tryToCloseTooltip();
 			} else {
 				component.tooltipVisible.set( false );
@@ -157,7 +157,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 	 * Enable AMP and navigate to the given URL.
 	 *
 	 * @param {string} url - URL.
-	 * @returns {void}
+	 * @return {void}
 	 */
 	component.enableAndNavigateToUrl = function enableAndNavigateToUrl( url ) {
 		api.state( 'ampEnabled' ).set( true );
@@ -167,10 +167,11 @@ var ampCustomizeControls = ( function( api, $ ) {
 	/**
 	 * Update panel notifications.
 	 *
-	 * @returns {void}
+	 * @return {void}
 	 */
 	component.updatePanelNotifications = function updatePanelNotifications() {
-		var panel = api.panel( component.data.panelId ), containers;
+		var panel = api.panel( component.data.panelId ),
+			containers;
 		containers = panel.sections().concat( [ panel ] );
 		if ( api.state( 'ampAvailable' ).get() ) {
 			_.each( containers, function( container ) {
@@ -223,7 +224,6 @@ var ampCustomizeControls = ( function( api, $ ) {
 			if ( api.state( 'ampAvailable' ).get() ) {
 				api.state( 'ampEnabled' ).set( panel.expanded.get() );
 			} else if ( ! panel.notifications ) {
-
 				/*
 				 * This is only done if panel notifications aren't supported.
 				 * If they are (as of 4.9) then a notification will be shown
@@ -270,7 +270,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 				}
 				return val;
 			};
-		} )( api.previewer.previewUrl.validate );
+		}( api.previewer.previewUrl.validate ) );
 
 		// Listen for ampEnabled state changes.
 		api.state( 'ampEnabled' ).bind( function( enabled ) {
@@ -302,7 +302,7 @@ var ampCustomizeControls = ( function( api, $ ) {
 			tooltip.attr( 'aria-hidden', visible ? 'false' : 'true' );
 			if ( visible ) {
 				$( document ).on( 'click.amp-toggle-outside', function( event ) {
-					if ( ! $.contains( ampToggleContainer[0], event.target ) ) {
+					if ( ! $.contains( ampToggleContainer[ 0 ], event.target ) ) {
 						component.tooltipVisible.set( false );
 					}
 				} );
@@ -347,5 +347,4 @@ var ampCustomizeControls = ( function( api, $ ) {
 	};
 
 	return component;
-
-} )( wp.customize, jQuery );
+}( wp.customize, jQuery ) );

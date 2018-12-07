@@ -49,6 +49,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'iframe' => array(
+				'amp-iframe',
+			),
+		);
+	}
+
+	/**
 	 * Sanitize the <iframe> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @since 0.2
@@ -62,9 +75,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node           = $nodes->item( $i );
-			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-
-			$new_attributes = $this->filter_attributes( $old_attributes );
+			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
 			 * If the src doesn't exist, remove the node. Either it never
@@ -73,44 +84,32 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 * @todo: add a filter to allow for a fallback element in this instance.
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( empty( $new_attributes['src'] ) ) {
+			if ( empty( $normalized_attributes['src'] ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
 			}
 
 			$this->did_convert_elements = true;
-			$new_attributes             = $this->set_layout( $new_attributes );
-			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
-				$new_attributes['layout'] = 'intrinsic';
-				$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
+			$normalized_attributes      = $this->set_layout( $normalized_attributes );
+			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
+				$normalized_attributes['layout'] = 'intrinsic';
+				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
 			}
 
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $new_attributes );
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
 			if ( true === $this->args['add_placeholder'] ) {
-				$placeholder_node = $this->build_placeholder( $new_attributes );
+				$placeholder_node = $this->build_placeholder( $normalized_attributes );
 				$new_node->appendChild( $placeholder_node );
 			}
 
-			$parent_node = $node->parentNode;
-			if ( 'p' !== strtolower( $parent_node->tagName ) ) {
-				$parent_node->replaceChild( $new_node, $node );
-			} else {
-				// AMP does not like iframes in <p> tags.
-				$parent_node->removeChild( $node );
-				$parent_node->parentNode->insertBefore( $new_node, $parent_node->nextSibling );
-
-				if ( AMP_DOM_Utils::is_node_empty( $parent_node ) ) {
-					$parent_node->parentNode->removeChild( $parent_node );
-				}
-			}
+			$node->parentNode->replaceChild( $new_node, $node );
 		}
 	}
 
 	/**
-	 * "Filter" HTML attributes for <amp-iframe> elements.
+	 * Normalize HTML attributes for <amp-iframe> elements.
 	 *
-	 * @since 0.2
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -121,23 +120,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string $sandbox <iframe> `sandbox` attribute - Pass along if found; default to value of self::SANDBOX_DEFAULTS
 	 *      @type string $class <iframe> `class` attribute - Pass along if found
 	 *      @type string $sizes <iframe> `sizes` attribute - Pass along if found
+	 *      @type string $id <iframe> `id` attribute - Pass along if found
 	 *      @type int $frameborder <iframe> `frameborder` attribute - Filter to '0' or '1'; default to '0'
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
 	 * }
-	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
 	 */
-	private function filter_attributes( $attributes ) {
+	private function normalize_attributes( $attributes ) {
 		$out = array();
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
-				case 'sandbox':
-				case 'class':
-				case 'sizes':
-					$out[ $name ] = $value;
-					break;
-
 				case 'src':
 					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
 					break;
@@ -162,6 +156,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
+					$out[ $name ] = $value;
 					break;
 			}
 		}
@@ -176,6 +171,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Builds a DOMElement to use as a placeholder for an <iframe>.
 	 *
+	 * Important: The element returned must not be block-level (e.g. div) as the PHP DOM parser
+	 * will move it out from inside any containing paragraph. So this is why a span is used.
+	 *
 	 * @since 0.2
 	 *
 	 * @param string[] $parent_attributes {
@@ -187,9 +185,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMElement|false
 	 */
 	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'div', array(
+		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'span', array(
 			'placeholder' => '',
-			'class' => 'amp-wp-iframe-placeholder',
+			'class'       => 'amp-wp-iframe-placeholder',
 		) );
 
 		return $placeholder_node;

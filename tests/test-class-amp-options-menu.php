@@ -72,12 +72,12 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
 		// Test add_setting_section().
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_sections );
-		$this->assertArrayHasKey( 'post_types', $wp_settings_sections['amp-options'] );
+		$this->assertArrayHasKey( 'general', $wp_settings_sections['amp-options'] );
 
 		// Test add_setting_field().
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
-		$this->assertArrayHasKey( 'post_types', $wp_settings_fields['amp-options'] );
-		$this->assertArrayHasKey( 'supported_post_types', $wp_settings_fields['amp-options']['post_types'] );
+		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
+		$this->assertArrayHasKey( 'supported_templates', $wp_settings_fields['amp-options']['general'] );
 	}
 
 	/**

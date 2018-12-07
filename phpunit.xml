@@ -7,14 +7,14 @@
 	convertWarningsToExceptions="true"
 	>
 	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php" />
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php" />
 	</php>
 	<testsuites>
 		<testsuite>
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	    <testsuite name="Test Tag and Attribute Sanitizer Private Methods">
-	      <file phpVersion="5.3.2" phpVersionOperator=">=">./tests/amp-tag-and-attribute-sanitizer-private-methods-tests.php</file>
+	      <file phpVersion="5.3.6" phpVersionOperator=">=">./tests/amp-tag-and-attribute-sanitizer-private-methods-tests.php</file>
 	    </testsuite>
 	</testsuites>
 	<filter>

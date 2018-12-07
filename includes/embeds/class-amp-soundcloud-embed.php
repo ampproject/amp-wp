@@ -178,7 +178,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Track ID or empty string if none matched.
 	 */
 	private function get_track_id_from_url( $url ) {
-		$parsed_url = AMP_WP_Utils::parse_url( $url );
+		$parsed_url = wp_parse_url( $url );
 		if ( ! preg_match( '#tracks/(?P<track_id>[^/]+)#', $parsed_url['path'], $matches ) ) {
 			return '';
 		}
