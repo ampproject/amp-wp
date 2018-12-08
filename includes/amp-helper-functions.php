@@ -870,8 +870,8 @@ function amp_get_schemaorg_metadata() {
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => date( 'c', get_the_date( 'U', $post->ID ) ),
-				'dateModified'     => date( 'c', get_the_date( 'U', $post->ID ) ),
+				'datePublished'    => date( 'c', intval( get_the_date( 'U', $post->ID ) ) ),
+				'dateModified'     => date( 'c', intval( get_the_date( 'U', $post->ID ) ) ),
 			)
 		);
 
