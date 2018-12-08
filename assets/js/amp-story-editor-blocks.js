@@ -342,6 +342,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				),
 				el = wp.element.createElement;
 
+			if ( attributes.ampFontFamily ) {
+				newProps.wrapperProps[ 'data-font-family' ] = attributes.ampFontFamily;
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
+
 			if (
 				hasSelectedInnerBlock &&
 				(
@@ -391,7 +399,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 			newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
-			newProps.wrapperProps[ 'data-amp-font-family' ] = attributes.ampFontFamily;
 
 			return el(
 				BlockListBlock,
@@ -621,7 +628,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} ),
 			el( SelectControl, {
-				key: 'font',
+				key: 'font-family',
 				label: __( 'Font family', 'amp' ),
 				value: attributes.ampFontFamily,
 				options: component.data.ampStoryFonts,
