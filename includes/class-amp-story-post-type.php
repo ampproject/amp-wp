@@ -228,7 +228,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @see /assets/css/amp-story-frontend.css
 	 */
-	public function add_amp_story_css() {
+	public static function add_amp_story_css() {
 		$post = get_post();
 		if ( 'amp_story' !== $post->post_type ) {
 			return;
