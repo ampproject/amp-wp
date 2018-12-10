@@ -1889,8 +1889,8 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Strip host name from AMP validated URL being printed.
 	 *
-	 * @param string  $title Title.
-	 * @param int     $id  Post ID.
+	 * @param string $title Title.
+	 * @param int    $id Post ID.
 	 *
 	 * @return string Title.
 	 */
