@@ -1894,7 +1894,10 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * @return string Title.
 	 */
-	public static function filter_the_title_in_post_list_table( $title, $post ) {
+	public static function filter_the_title_in_post_list_table( $title, $post = '' ) {
+		if($post == ''){
+			$post = get_post();
+		}
 		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
