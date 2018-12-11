@@ -85,6 +85,9 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 ## Changelog ##
 
+### 1.0.1 (Unreleased) ###
+...
+
 ### 1.0.0 (2018-12-05)  ###
 To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/ampproject/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/ampproject/amp-wp/wiki/Implementing-Interactivity).
 

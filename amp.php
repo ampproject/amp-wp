@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.0.0
+ * Version: 1.0.1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -33,7 +33,7 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
 /**
  * Print admin notice regarding DOM extension is not installed.
  *
- * @since 1.1
+ * @since 1.0
  */
 function _amp_print_php_dom_document_notice() {
 	?>
@@ -66,7 +66,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0.0' );
+define( 'AMP__VERSION', '1.0.1' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
