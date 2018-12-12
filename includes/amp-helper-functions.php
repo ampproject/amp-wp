@@ -870,7 +870,7 @@ function amp_get_schemaorg_metadata() {
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
-				'datePublished'    => date( 'c', intval( get_the_date( 'U', $post->ID ) ) ),
+				'datePublished'    => mysql2date( 'c', $post->post_date_gmt, false ),
 				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
 			)
 		);
