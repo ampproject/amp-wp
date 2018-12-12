@@ -871,7 +871,7 @@ function amp_get_schemaorg_metadata() {
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
 				'datePublished'    => date( 'c', intval( get_the_date( 'U', $post->ID ) ) ),
-				'dateModified'     => date( 'c', intval( get_the_date( 'U', $post->ID ) ) ),
+				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
 			)
 		);
 
