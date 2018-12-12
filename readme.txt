@@ -52,9 +52,16 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 == Changelog ==
 
-= 1.0.1 (Unreleased) =
+= 1.0.1 (2018-12-12) =
 
-...
+- Add check for required iconv extension. See [#1727](https://github.com/ampproject/amp-wp/pull/1727). Props westonruter.
+- Plugin Conflict: Also using Give plugin currently creates 500 server error when viewing /wp-admin/. See [#1720](https://github.com/ampproject/amp-wp/issues/1720). Props KZeni, westonruter.
+- Fix Plugin Conflict with Give plugin (previously created 500 server error when viewing site admin). See [#1725](https://github.com/ampproject/amp-wp/pull/1725). Props KZeni.
+- Second argument of the_title filter is an Int not WP_Post. See [#1723](https://github.com/ampproject/amp-wp/pull/1723). Props lesterchan, westonruter.
+- Prevent image with caption from overflowing its container in Classic mode. See [#1728](https://github.com/ampproject/amp-wp/pull/1728). Props kienstra.
+- Ensure Schema.org meta data has correct date. See [#1721](https://github.com/ampproject/amp-wp/pull/1721). Props westonruter.
+
+See [1.0.1 milestone](https://github.com/ampproject/amp-wp/milestone/11?closed=1).
 
 = 1.0.0 (2018-12-05)  =
 
