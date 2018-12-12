@@ -93,7 +93,7 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 - Prevent image with caption from overflowing its container in Classic mode. See [#1728](https://github.com/ampproject/amp-wp/pull/1728). Props kienstra.
 - Ensure Schema.org meta data has correct date. See [#1721](https://github.com/ampproject/amp-wp/pull/1721). Props westonruter.
 
-See [1.0.1 milestone](https://github.com/ampproject/amp-wp/milestone/11?closed=1).
+See the [1.0.1 release](https://github.com/ampproject/amp-wp/releases/tag/1.0.1).
 
 ### 1.0.0 (2018-12-05)  ###
 To learn how to use the new features in this release, please see the documentation for [Serving Strategies](https://amp-wp.org/documentation/how-the-plugin-works/amp-plugin-serving-strategies/) and [Implementing Interactivity](https://amp-wp.org/documentation/playbooks/implementing-interactivity/).
