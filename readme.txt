@@ -65,7 +65,7 @@ See [1.0.1 milestone](https://github.com/ampproject/amp-wp/milestone/11?closed=1
 
 = 1.0.0 (2018-12-05)  =
 
-To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/ampproject/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/ampproject/amp-wp/wiki/Implementing-Interactivity).
+To learn how to use the new features in this release, please see the documentation for [Serving Strategies](https://amp-wp.org/documentation/how-the-plugin-works/amp-plugin-serving-strategies/) and [Implementing Interactivity](https://amp-wp.org/documentation/playbooks/implementing-interactivity/).
 
 - **Add runtime CSS minification, `!important` replacement, and tree shaking.** See [#1048](https://github.com/ampproject/amp-wp/pull/1048), [#1111](https://github.com/ampproject/amp-wp/pull/1111), [#1142](https://github.com/ampproject/amp-wp/pull/1142), [#1320](https://github.com/ampproject/amp-wp/pull/1320), [#1073](https://github.com/ampproject/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
 - **Keep track of new validation errors and add ability to accept/reject in order to allow or block AMP for a given URL.** See [#1003](https://github.com/ampproject/amp-wp/issues/1003). Props westonruter.
