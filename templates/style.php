@@ -241,7 +241,7 @@ blockquote p:last-child {
 	margin-left: 1em;
 }
 
-.amp-wp-article-content figure.wp-caption {
+.amp-wp-article-content .wp-caption {
 	max-width: 100%;
 }
 
