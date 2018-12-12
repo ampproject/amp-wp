@@ -239,8 +239,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				{
 					value: 'verdana',
 					label: __( 'Verdana', 'amp' )
-				},
-
+				}
 			]
 		}
 	};
