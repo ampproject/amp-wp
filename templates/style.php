@@ -287,7 +287,6 @@ amp-youtube,
 amp-instagram,
 amp-vine {
 	background: <?php echo sanitize_hex_color( $border_color ); ?>;
-	margin: 0 -16px 1.5em;
 }
 
 .amp-wp-article-content amp-carousel amp-img {
