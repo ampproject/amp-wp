@@ -97,6 +97,8 @@ class AMP_Story_Post_Type {
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
 
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
+
 		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
@@ -110,14 +112,6 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
 
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
-
-		// @todo Add a page-specific style file instead.
-		add_action( 'wp_enqueue_scripts', function() {
-			$custom_css = 'amp-story-grid-layer[template="fill"] .wp-block-image {
-	margin: 0;
-}';
-			wp_add_inline_style( 'wp-block-library', $custom_css );
-		} );
 	}
 
 	/**
@@ -160,6 +154,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['data-font-family']    = true;
 		}
 
 		return $allowed_tags;
@@ -172,6 +167,14 @@ class AMP_Story_Post_Type {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			return;
 		}
+
+		// This CSS is separately since it's used both in frontend and in the editor.
+		wp_enqueue_style(
+			'amp-story-fonts',
+			amp_get_asset_url( 'css/amp-stories.css' ),
+			false,
+			AMP__VERSION
+		);
 
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
@@ -200,11 +203,20 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
-		wp_add_inline_script(
-			'amp-editor-story-blocks-build',
-			'wp.i18n.setLocaleData( ' . wp_json_encode( gutenberg_get_jed_locale_data( 'amp' ) ) . ', "amp" );',
-			'before'
-		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			$translations = wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp-editor-story-blocks-build' ) : gutenberg_get_jed_locale_data( 'amp-editor-story-blocks-build' );
+			$translations = wp_json_encode( $locale_data );
+		}
+
+		if ( ! empty( $translations ) ) {
+			wp_add_inline_script(
+				'amp-editor-story-blocks-build',
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'before'
+			);
+		}
 	}
 
 	/**
@@ -218,5 +230,20 @@ class AMP_Story_Post_Type {
 			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
 		}
 		return $template;
+	}
+
+	/**
+	 * Add CSS to AMP Stories' frontend.
+	 *
+	 * @see /assets/css/amp-stories.css
+	 */
+	public static function add_custom_block_styles() {
+		$post = get_post();
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return;
+		}
+		$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
+		$css_contents = file_get_contents( $css_src ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		wp_add_inline_style( 'wp-block-library', $css_contents );
 	}
 }
