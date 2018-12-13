@@ -9,17 +9,6 @@ module.exports = function( grunt ) {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
 
-		// JavaScript linting with JSHint.
-		jshint: {
-			options: {
-				jshintrc: '.jshintrc'
-			},
-			all: [
-				'Gruntfile.js',
-				'assets/**/*.js'
-			]
-		},
-
 		// Clean up the build.
 		clean: {
 			build: {
@@ -72,7 +61,6 @@ module.exports = function( grunt ) {
 	// Load tasks.
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
 
@@ -180,7 +168,6 @@ module.exports = function( grunt ) {
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
 		'wp_deploy'
