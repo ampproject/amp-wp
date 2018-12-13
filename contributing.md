@@ -19,6 +19,10 @@ again.
 
 The list of contributors who are featured on the WordPress.org plugin directory are subject to change over time. The organizations and individuals who contribute significantly and consistently (e.g. 3-month period) to the project are eligible to be listed. Those listed should generally be considered as those who take responsibility for the project (i.e. owners). Note that contributions include more than just code, though contributors who commit are [most visible](https://github.com/ampproject/amp-wp/graphs/contributors). The sort order of the contributors list should generally follow the sort order of the GitHub contributors page, though again, this order does not consider work in issues and the support forum, so it cannot be relied on solely.
 
+## Branches
+
+To include your changes in the next patch release (e.g. `1.0.x`), please base your branch off of the current release branch (e.g. `1.0`) and open your pull request back to that branch. If you open your pull request with the `develop` branch then it will be by default included in the next minor version (e.g. `1.x`).
+
 ## Code Reviews
 
 All submissions, including submissions by project members, require review. We
@@ -134,17 +138,19 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-2. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
-3. Add changelog entry to readme.
-4. Draft blog post about the new release.
-5. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
-6. Run `npm run deploy` to to commit the plugin to WordPress.org.
-7. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
-8. Publish GitHub release.
-9. Create built release tag: `git fetch --tags && git checkout $(git tag | tail -n1) && ./bin/tag-built.sh` (then add link from release)
-10. Create a new branch off of the release branch, merge `develop` into it and resolve conflicts (e.g. with version and changelog), and then open pull request to merge changes into `develop`.
-11. Merge release tag into `master`.
-12. Publish release blog post, including link to GitHub release.
-13. Close the GitHub milestone and project.
-14. Make announcements.
+0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install && wp cli update`.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
+2. Add changelog entry to readme.
+3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+4. Do sanity check by comparing the `build` directory with the previously-deployed plugin at http://plugins.svn.wordpress.org/amp/trunk
+5. Draft blog post about the new release.
+6. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
+7. Run `npm run deploy` to commit the plugin to WordPress.org.
+8. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
+9. Publish GitHub release.
+10. Create built release tag: `git fetch --tags && git checkout $(git tag | tail -n1) && ./bin/tag-built.sh` (then add link from release)
+11. Create a new branch off of the release branch (e.g. `update/develop-with-1.0.x`), merge `develop` into it and resolve conflicts (e.g. with version and changelog), and then open pull request to merge changes into `develop`.
+12. Merge release tag into `master`.
+13. Publish release blog post, including link to GitHub release.
+14. Close the GitHub milestone and project.
+15. Make announcements.
