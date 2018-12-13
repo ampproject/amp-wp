@@ -1889,13 +1889,13 @@ class AMP_Validated_URL_Post_Type {
 	/**
 	 * Strip host name from AMP validated URL being printed.
 	 *
-	 * @param string  $title Title.
-	 * @param WP_Post $post  Post.
+	 * @param string $title Title.
+	 * @param int    $id Post ID.
 	 *
 	 * @return string Title.
 	 */
-	public static function filter_the_title_in_post_list_table( $title, $post ) {
-		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+	public static function filter_the_title_in_post_list_table( $title, $id = null ) {
+		if ( function_exists( 'get_current_screen' ) && get_current_screen() && get_current_screen()->base === 'edit' && get_current_screen()->post_type === self::POST_TYPE_SLUG && self::POST_TYPE_SLUG === get_post_type( $id ) ) {
 			$title = preg_replace( '#^(\w+:)?//[^/]+#', '', $title );
 		}
 		return $title;
