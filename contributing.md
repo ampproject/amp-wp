@@ -19,6 +19,10 @@ again.
 
 The list of contributors who are featured on the WordPress.org plugin directory are subject to change over time. The organizations and individuals who contribute significantly and consistently (e.g. 3-month period) to the project are eligible to be listed. Those listed should generally be considered as those who take responsibility for the project (i.e. owners). Note that contributions include more than just code, though contributors who commit are [most visible](https://github.com/ampproject/amp-wp/graphs/contributors). The sort order of the contributors list should generally follow the sort order of the GitHub contributors page, though again, this order does not consider work in issues and the support forum, so it cannot be relied on solely.
 
+## Branches
+
+To include your changes in the next patch release (e.g. `1.0.x`), please base your branch off of the current release branch (e.g. `1.0`) and open your pull request back to that branch. If you open your pull request with the `develop` branch then it will be by default included in the next minor version (e.g. `1.x`).
+
 ## Code Reviews
 
 All submissions, including submissions by project members, require review. We
@@ -134,6 +138,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
+0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install && wp cli update`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 2. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 3. Add changelog entry to readme.
