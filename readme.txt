@@ -3,7 +3,7 @@ Contributors: automattic, xwp, google, westonruter, ryankienstra, batmoo, stubgo
 Tags: amp, mobile
 Requires at least: 4.9
 Tested up to: 5.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 Requires PHP: 5.3.6
@@ -52,13 +52,20 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 == Changelog ==
 
-= 1.0.1 (Unreleased) =
+= 1.0.1 (2018-12-12) =
 
-...
+- Add check for required iconv extension. See [#1727](https://github.com/ampproject/amp-wp/pull/1727). Props westonruter.
+- Plugin Conflict: Also using Give plugin currently creates 500 server error when viewing /wp-admin/. See [#1720](https://github.com/ampproject/amp-wp/issues/1720). Props KZeni, westonruter.
+- Fix Plugin Conflict with Give plugin (previously created 500 server error when viewing site admin). See [#1725](https://github.com/ampproject/amp-wp/pull/1725). Props KZeni.
+- Second argument of the_title filter is an Int not WP_Post. See [#1723](https://github.com/ampproject/amp-wp/pull/1723). Props lesterchan, westonruter.
+- Prevent image with caption from overflowing its container in Classic mode. See [#1728](https://github.com/ampproject/amp-wp/pull/1728). Props kienstra.
+- Ensure Schema.org meta data has correct date. See [#1721](https://github.com/ampproject/amp-wp/pull/1721). Props westonruter.
+
+See [1.0.1 release](https://github.com/ampproject/amp-wp/releases/tag/1.0.1).
 
 = 1.0.0 (2018-12-05)  =
 
-To learn how to use the new features in this release, please see the wiki pages for [Adding Theme Support](https://github.com/ampproject/amp-wp/wiki/Adding-Theme-Support) and [Implementing Interactivity](https://github.com/ampproject/amp-wp/wiki/Implementing-Interactivity).
+To learn how to use the new features in this release, please see the documentation for [Serving Strategies](https://amp-wp.org/documentation/how-the-plugin-works/amp-plugin-serving-strategies/) and [Implementing Interactivity](https://amp-wp.org/documentation/playbooks/implementing-interactivity/).
 
 - **Add runtime CSS minification, `!important` replacement, and tree shaking.** See [#1048](https://github.com/ampproject/amp-wp/pull/1048), [#1111](https://github.com/ampproject/amp-wp/pull/1111), [#1142](https://github.com/ampproject/amp-wp/pull/1142), [#1320](https://github.com/ampproject/amp-wp/pull/1320), [#1073](https://github.com/ampproject/amp-wp/issues/1073). Props westonruter, hellofromtonya, amedina, pbakaus, igrigorik, camelburrito.
 - **Keep track of new validation errors and add ability to accept/reject in order to allow or block AMP for a given URL.** See [#1003](https://github.com/ampproject/amp-wp/issues/1003). Props westonruter.
