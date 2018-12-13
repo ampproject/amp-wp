@@ -341,14 +341,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				),
 				el = wp.element.createElement;
 
-			if ( attributes.ampFontFamily ) {
-				newProps.wrapperProps[ 'data-font-family' ] = attributes.ampFontFamily;
-				return el(
-					BlockListBlock,
-					newProps
-				);
-			}
-
+			// If we have an inner block selected lets add 'data-amp-selected=parent' to the wrapper.
 			if (
 				hasSelectedInnerBlock &&
 				(
@@ -375,29 +368,28 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				);
 			}
 
-			if ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) {
-				newProps.wrapperProps[ 'data-amp-image-caption' ] = 'noCaption';
-				return el(
-					BlockListBlock,
-					newProps
-				);
+			// If we got this far and it's not an allowed inner block then lets return original.
+			if ( -1 === component.data.allowedBlocks.indexOf( blockName ) ) {
+				return [
+					el( BlockListBlock, _.extend( {
+						key: 'original'
+					}, props ) )
+				];
 			}
 
-			if ( -1 === component.data.allowedBlocks.indexOf( blockName ) || ! attributes.ampStoryPosition ) {
-				return [
-					el( BlockListBlock, _.extend( {
-						key: 'original'
-					}, props ) )
-				];
+			// If it's an image block and doesn't have "show image caption" set
+			if ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) {
+				newProps.wrapperProps[ 'data-amp-image-caption' ] = 'noCaption';
 			}
-			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
-				return [
-					el( BlockListBlock, _.extend( {
-						key: 'original'
-					}, props ) )
-				];
+
+			if ( attributes.ampFontFamily ) {
+				newProps.wrapperProps[ 'data-font-family' ] = attributes.ampFontFamily;
 			}
-			newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
+
+			// If we have the thirds layer as parent and the thirds position set.
+			if ( 'amp/amp-story-grid-layer-thirds' === parentBlock.name && attributes.ampStoryPosition ) {
+				newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
+			}
 
 			return el(
 				BlockListBlock,
@@ -457,10 +449,6 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				type: 'string'
 			};
 
-			settings.attributes.ampFontFamily = {
-				type: 'string'
-			};
-
 			// Define selector according to mappings.
 			if ( _.has( component.data.blockTagMapping, name ) ) {
 				settings.attributes.ampAnimationType = {
@@ -497,9 +485,17 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes.fontSize.default = 'large';
 			}
 
+			// Lets add font family to the text blocks.
+			if ( 'core/paragraph' === name || 'core/heading' === name ) {
+				settings.attributes.ampFontFamily = {
+					type: 'string'
+				};
+			}
+
 			if ( 'core/image' === name ) {
 				settings.attributes.ampShowImageCaption = {
-					type: 'boolean'
+					type: 'boolean',
+					default: false
 				};
 			}
 		}
@@ -625,30 +621,35 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					var msValue = value + 'ms';
 					props.setAttributes( { ampAnimationDelay: msValue } );
 				}
-			} ),
-			el( SelectControl, {
-				key: 'font-family',
-				label: __( 'Font family', 'amp' ),
-				value: attributes.ampFontFamily,
-				options: component.data.ampStoryFonts,
-				onChange: function( value ) {
-					props.setAttributes( { ampFontFamily: value } );
-				}
 			} )
 		];
+
+		// Lets add font family select to the text blocks.
+		if ( 'core/paragraph' === name || 'core/heading' === name ) {
+			ampStorySettings.push(
+				el( SelectControl, {
+					key: 'font-family',
+					label: __( 'Font family', 'amp' ),
+					value: attributes.ampFontFamily,
+					options: component.data.ampStoryFonts,
+					onChange: function( value ) {
+						props.setAttributes( { ampFontFamily: value } );
+					}
+				} )
+			);
+		}
 		if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
-			const ToggleControl = wp.components.ToggleControl,
-				ampShowImageCaption = !! attributes.ampShowImageCaption;
+			const ToggleControl = wp.components.ToggleControl;
+
 			ampStorySettings.push( el( ToggleControl, {
 				key: 'position',
 				label: __( 'Show or hide the caption', 'amp' ),
-				checked: ampShowImageCaption,
+				checked: attributes.ampShowImageCaption,
 				onChange: function() {
-					const showCaption = ! ampShowImageCaption;
-					if ( ! showCaption ) {
+					props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
+					if ( ! attributes.ampShowImageCaption ) {
 						props.setAttributes( { caption: '' } );
 					}
-					props.setAttributes( { ampShowImageCaption: showCaption } );
 				},
 				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
 			} ) );
