@@ -85,6 +85,9 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 ## Changelog ##
 
+### 1.1 (unreleased) ###
+...
+
 ### 1.0.1 (2018-12-12) ###
 - Add check for required iconv extension. See [#1727](https://github.com/ampproject/amp-wp/pull/1727). Props westonruter.
 - Plugin Conflict: Also using Give plugin currently creates 500 server error when viewing /wp-admin/. See [#1720](https://github.com/ampproject/amp-wp/issues/1720). Props KZeni, westonruter.
