@@ -1,10 +1,10 @@
 {
  "name": "amp-wp",
  "title": "AMP for WordPress",
- "homepage": "https://github.com/Automattic/amp-wp",
+ "homepage": "https://github.com/ampproject/amp-wp",
  "repository": {
   "type": "git",
-  "url": "https://github.com/Automattic/amp-wp.git"
+  "url": "https://github.com/ampproject/amp-wp.git"
  },
  "license": "GPL-2.0+",
  "private": true,
@@ -23,7 +23,6 @@
   "grunt": "^1.0.2",
   "grunt-contrib-clean": "^1.1.0",
   "grunt-contrib-copy": "^1.0.0",
-  "grunt-contrib-jshint": "^1.1.0",
   "grunt-shell": "^2.1.0",
   "grunt-wp-deploy": "^1.2.1",
   "timeago.js": "3.0.2",

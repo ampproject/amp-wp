@@ -1365,7 +1365,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		set_current_screen( 'front' );
 
 		// The first conditional isn't true yet, so $title should be unchanged.
-		$this->assertEquals( $title, AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post ) );
+		$this->assertEquals( $title, AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post->ID ) );
 
 		/*
 		 * The first conditional still isn't true yet, as the $post->post_type isn't correct.
@@ -1373,7 +1373,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		 */
 		set_current_screen( 'edit.php' );
 		$current_screen->post_type = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-		$this->assertEquals( $title, AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post ) );
+		$this->assertEquals( $title, AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post->ID ) );
 
 		// The conditional should be true, and this should return the filtered $title.
 		$post_correct_post_type = $this->factory()->post->create_and_get( array(
