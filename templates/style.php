@@ -241,6 +241,10 @@ blockquote p:last-child {
 	margin-left: 1em;
 }
 
+.amp-wp-article-content .wp-caption {
+	max-width: 100%;
+}
+
 .amp-wp-article-content amp-img {
 	margin: 0 auto;
 }
