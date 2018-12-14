@@ -976,61 +976,36 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Ensure that JS-only nav menu styles apply to AMP as well since even though scripts are not allowed, there are AMP-bind implementations.
+	 * Ensure that support is added for nav menu toggles that are typically JS-only.
 	 *
 	 * @since 1.0
+	 * @since 1.1 Made method static so it acts as a buffering hook for adjusting theme support instead of a post-sanitizer.
 	 *
 	 * @param array $args Args.
 	 */
-	public function add_nav_menu_toggle( $args = array() ) {
+	public static function add_nav_menu_toggle( $args = array() ) {
 		$args = array_merge(
 			self::get_theme_config( get_template() ),
 			$args
 		);
 
-		$nav_el    = $this->dom->getElementById( $args['nav_container_id'] );
-		$button_el = $this->xpath->query( $args['menu_button_xpath'] )->item( 0 );
-		if ( ! $nav_el ) {
-			if ( $button_el ) {
-
-				// Remove the button since it won't be used.
-				$button_el->parentNode->removeChild( $button_el );
-			}
+		if ( empty( $args ) ) {
 			return;
 		}
 
-		if ( ! $button_el ) {
-			return;
+		$support = AMP_Theme_Support::get_theme_support_args();
+		if ( ! is_array( $support ) ) {
+			$support = array();
 		}
 
-		$state_id = 'navMenuToggledOn';
-		$expanded = false;
-
-		$nav_el->setAttribute(
-			AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
-			sprintf(
-				"%s + ( $state_id ? %s : '' )",
-				wp_json_encode( $nav_el->getAttribute( 'class' ) ),
-				wp_json_encode( ' ' . $args['nav_container_toggle_class'] )
-			)
+		$support['nav_menu_toggle'] = array(
+			'nav_container_id'             => $args['nav_container_id'],
+			'nav_menu_button_xpath'        => $args['menu_button_xpath'],
+			'nav_container_toggle_class'   => $args['nav_container_toggle_class'],
+			'nav_menu_button_toggle_class' => $args['menu_button_toggle_class'],
 		);
 
-		$state_el = $this->dom->createElement( 'amp-state' );
-		$state_el->setAttribute( 'id', $state_id );
-		$script_el = $this->dom->createElement( 'script' );
-		$script_el->setAttribute( 'type', 'application/json' );
-		$script_el->appendChild( $this->dom->createTextNode( wp_json_encode( $expanded ) ) );
-		$state_el->appendChild( $script_el );
-		$nav_el->parentNode->insertBefore( $state_el, $nav_el );
-
-		$button_on = sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" );
-		$button_el->setAttribute( 'on', $button_on );
-		$button_el->setAttribute( 'aria-expanded', 'false' );
-		$button_el->setAttribute( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'aria-expanded', "$state_id ? 'true' : 'false'" );
-		$button_el->setAttribute(
-			AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
-			sprintf( "%s + ( $state_id ? %s : '' )", wp_json_encode( $button_el->getAttribute( 'class' ) ), wp_json_encode( ' ' . $args['menu_button_toggle_class'] ) )
-		);
+		add_theme_support( AMP_Theme_Support::SLUG, $support );
 	}
 
 	/**

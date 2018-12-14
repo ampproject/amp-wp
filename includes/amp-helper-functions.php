@@ -670,7 +670,9 @@ function amp_get_content_embed_handlers( $post = null ) {
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+
+	if ( is_array( $theme_support_args ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
 	}
@@ -702,9 +704,10 @@ function amp_get_content_sanitizers( $post = null ) {
 				'add_placeholder' => true,
 			),
 			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-				'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
+				'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 			),
 			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+			'AMP_Nav_Menu_Toggle_Sanitizer'   => ! empty( $theme_support_args['nav_menu_toggle'] ) ? $theme_support_args['nav_menu_toggle'] : array(),
 			'AMP_Script_Sanitizer'            => array(),
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
