@@ -998,12 +998,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$support = array();
 		}
 
-		$support['nav_menu_toggle'] = array(
-			'nav_container_id'             => $args['nav_container_id'],
-			'nav_menu_button_xpath'        => $args['menu_button_xpath'],
-			'nav_container_toggle_class'   => $args['nav_container_toggle_class'],
-			'nav_menu_button_toggle_class' => $args['menu_button_toggle_class'],
-		);
+		$support['nav_menu_toggle'] = $args;
 
 		add_theme_support( AMP_Theme_Support::SLUG, $support );
 	}
