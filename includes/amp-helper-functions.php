@@ -708,6 +708,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			),
 			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
 			'AMP_Nav_Menu_Toggle_Sanitizer'   => ! empty( $theme_support_args['nav_menu_toggle'] ) ? $theme_support_args['nav_menu_toggle'] : array(),
+			'AMP_Nav_Menu_Dropdown_Sanitizer' => ! empty( $theme_support_args['nav_menu_dropdown'] ) ? $theme_support_args['nav_menu_dropdown'] : array(),
 			'AMP_Script_Sanitizer'            => array(),
 			'AMP_Style_Sanitizer'             => array(),
 			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
