@@ -65,7 +65,7 @@ html {
 body {
 	background: <?php echo sanitize_hex_color( $theme_color ); ?>;
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
-	font-family: 'Merriweather', 'Times New Roman', Times, Serif;
+	font-family: Georgia, 'Times New Roman', Times, Serif;
 	font-weight: 300;
 	line-height: 1.75em;
 }
