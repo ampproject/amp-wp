@@ -1,23 +1,23 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8432d8f248557e2589567614d402586",
+    "content-hash": "f21c1eede87c2603ceb8a979d919046c",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.1.1",
+            "version": "8.2.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b"
+                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "reference": "8be357d90c29c2f6dd426be4cb60bf09ef6d0120"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/22311fa3d67217c5fcd0b839670be39a768eda7b",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/8be357d90c29c2f6dd426be4cb60bf09ef6d0120",
+                "reference": "8be357d90c29c2f6dd426be4cb60bf09ef6d0120",
                 "shasum": ""
             },
             "require": {
@@ -32,6 +32,7 @@
                     "Sabberworm\\CSS": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -47,10 +48,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
-            },
-            "time": "2018-11-25T04:50:29+00:00"
+            "time": "2018-07-13T13:23:56+00:00"
         }
     ],
     "packages-dev": [
@@ -224,6 +222,7 @@
                 "phpcs",
                 "standards"
             ],
+            "abandoned": "phpcompatibility/php-compatibility",
             "time": "2018-07-17T13:42:26+00:00"
         },
         {

@@ -12,11 +12,11 @@
     ],
     "require": {
         "php": "^5.3.6 || ^7.0",
-        "sabberworm/php-css-parser": "^8"
+        "sabberworm/php-css-parser": "8.2.0"
     },
     "require-dev": {
-        "wp-coding-standards/wpcs": "^0.14.0",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
-        "wimg/php-compatibility": "^8.1"
+        "wp-coding-standards/wpcs": "0.14.1",
+        "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
+        "wimg/php-compatibility": "8.2.0"
     }
 }
