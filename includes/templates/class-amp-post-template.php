@@ -131,9 +131,7 @@ class AMP_Post_Template {
 
 			'customizer_settings'   => array(),
 
-			'font_urls'             => array(
-				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
-			),
+			'font_urls'             => array(),
 
 			'post_amp_stylesheets'  => array(),
 			'post_amp_styles'       => array(), // Deprecated.
