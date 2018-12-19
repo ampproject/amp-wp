@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b8432d8f248557e2589567614d402586",
+    "content-hash": "2911b7c22bbd3e4d618b7e3eb26608b6",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
