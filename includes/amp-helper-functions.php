@@ -512,7 +512,7 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  * @param string $href   Link URL.
  * @return string Link tag HTML.
  */
-function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href ) {
+function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href = '' ) {
 	static $allowed_font_src_regex = null;
 	unset( $handle );
 	if ( ! $allowed_font_src_regex ) {
