@@ -21,7 +21,7 @@
   "eslint-config-wordpress": "2.0.0",
   "eslint-plugin-react": "7.11.1",
   "grunt": "1.0.2",
-  "grunt-contrib-clean": "1.1.0",
+  "grunt-contrib-clean": "2.0.0",
   "grunt-contrib-copy": "1.0.0",
   "grunt-shell": "2.1.0",
   "grunt-wp-deploy": "1.2.1",
