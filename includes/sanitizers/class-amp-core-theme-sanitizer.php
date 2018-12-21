@@ -102,34 +102,34 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		'twentysixteen'   => array(
 			// @todo Figure out an AMP solution for onResizeARIA().
 			// @todo Try to implement belowEntryMetaClass().
-			'dequeue_scripts'          => array(
+			'dequeue_scripts'     => array(
 				'twentysixteen-script',
 				'twentysixteen-html5', // Only relevant for IE<9.
 				'twentysixteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
 				'twentysixteen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
 			),
-			'remove_actions'           => array(
+			'remove_actions'      => array(
 				'wp_head' => array(
 					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
 				),
 			),
-			'add_nav_menu_styles'      => array(),
+			'add_nav_menu_styles' => array(),
 		),
 
 		// Twenty Fifteen.
 		'twentyfifteen'   => array(
 			// @todo Figure out an AMP solution for onResizeARIA().
-			'dequeue_scripts'          => array(
+			'dequeue_scripts'     => array(
 				'twentyfifteen-script',
 				'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
 				'twentyfifteen-skip-link-focus-fix', // Only needed by IE11 and when admin bar is present.
 			),
-			'remove_actions'           => array(
+			'remove_actions'      => array(
 				'wp_head' => array(
 					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
 				),
 			),
-			'add_nav_menu_styles'      => array(),
+			'add_nav_menu_styles' => array(),
 		),
 	);
 
