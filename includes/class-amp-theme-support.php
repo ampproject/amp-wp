@@ -128,6 +128,9 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// Ensure extra theme support for core themes is in place.
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+
 		self::$init_start_time = microtime( true );
 
 		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
