@@ -513,6 +513,12 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  * @return string Link tag HTML.
  */
 function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href = '' ) {
+
+	// In the case of concatenated CSS stylesheet links, $href is not being passed to function. Ref - <https://github.com/ampproject/amp-wp/pull/1754#issue-239925151>.
+	if ( empty( $href ) && preg_match( '#<link.+?href=[\'"](.+?)[\'"]#', $tag, $matches ) ) {
+		$href = html_entity_decode( $matches[1], ENT_QUOTES );
+	}
+
 	static $allowed_font_src_regex = null;
 	unset( $handle );
 	if ( ! $allowed_font_src_regex ) {
