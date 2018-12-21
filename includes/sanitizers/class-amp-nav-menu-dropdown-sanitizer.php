@@ -51,11 +51,6 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_buffering_hooks( $args = array() ) {
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
-		if ( is_array( $theme_support_args ) && ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
-			$args = array_merge( $args, $theme_support_args['nav_menu_dropdown'] );
-		}
-
 		if ( empty( $args['sub_menu_button_class'] ) || empty( $args['sub_menu_button_toggle_class'] ) ) {
 			return;
 		}

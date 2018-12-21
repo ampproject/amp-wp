@@ -61,11 +61,6 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 */
 	public function sanitize() {
-		$theme_support_args = AMP_Theme_Support::get_theme_support_args();
-		if ( is_array( $theme_support_args ) && ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
-			$this->args = array_merge( $this->args, $theme_support_args['nav_menu_toggle'] );
-		}
-
 		$this->xpath = new DOMXPath( $this->dom );
 
 		$nav_el    = $this->get_nav_container();
