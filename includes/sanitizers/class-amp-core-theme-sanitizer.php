@@ -90,7 +90,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_twentyseventeen_image_styles'    => array(),
 			'add_twentyseventeen_sticky_nav_menu' => array(),
 			'add_has_header_video_body_class'     => array(),
-			'add_nav_menu_styles'                 => array(),
+			'add_nav_menu_styles'                 => array(
+				'sub_menu_button_toggle_class' => 'toggled-on',
+			),
 			'add_smooth_scrolling'                => array(
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
 			),
@@ -113,7 +115,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
 				),
 			),
-			'add_nav_menu_styles' => array(),
+			'add_nav_menu_styles' => array(
+				'sub_menu_button_toggle_class' => 'toggled-on',
+			),
 		),
 
 		// Twenty Fifteen.
@@ -129,7 +133,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
 				),
 			),
-			'add_nav_menu_styles' => array(),
+			'add_nav_menu_styles' => array(
+				'sub_menu_button_toggle_class' => 'toggle-on',
+			),
 		),
 	);
 
@@ -880,7 +886,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_nav_menu_styles( $args = array() ) {
-		add_action( 'wp_enqueue_scripts', function() {
+		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
 			ob_start();
 			?>
 			<style>
@@ -890,7 +896,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				/* Use sibling selector and re-use class on button instead of toggling toggle-on class on ul.sub-menu */
-				.main-navigation ul .toggled-on + .sub-menu {
+				.main-navigation ul .<?php echo esc_html( $args['sub_menu_button_toggle_class'] ); ?> + .sub-menu {
 					display: block;
 				}
 
