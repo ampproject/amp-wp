@@ -664,15 +664,51 @@ function amp_get_content_embed_handlers( $post = null ) {
  * Get content sanitizers.
  *
  * @since 0.7
+ * @since 1.1 Added AMP_Nav_Menu_Toggle_Sanitizer and AMP_Nav_Menu_Dropdown_Sanitizer.
  *
  * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply
  *                      to non-post data (e.g. Text widget).
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+
+	if ( is_array( $theme_support_args ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
+	}
+
+	$sanitizers = array(
+		'AMP_Core_Theme_Sanitizer'        => array(
+			'template'   => get_template(),
+			'stylesheet' => get_stylesheet(),
+		),
+		'AMP_Img_Sanitizer'               => array(),
+		'AMP_Form_Sanitizer'              => array(),
+		'AMP_Comments_Sanitizer'          => array(),
+		'AMP_Video_Sanitizer'             => array(),
+		'AMP_O2_Player_Sanitizer'         => array(),
+		'AMP_Audio_Sanitizer'             => array(),
+		'AMP_Playbuzz_Sanitizer'          => array(),
+		'AMP_Embed_Sanitizer'             => array(),
+		'AMP_Iframe_Sanitizer'            => array(
+			'add_placeholder' => true,
+		),
+		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
+		),
+		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+		'AMP_Script_Sanitizer'            => array(),
+		'AMP_Style_Sanitizer'             => array(),
+		'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+	);
+
+	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
+		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
+	}
+
+	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
+		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
 	/**
@@ -684,33 +720,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @param array   $handlers Handlers.
 	 * @param WP_Post $post     Post. Deprecated.
 	 */
-	$sanitizers = apply_filters( 'amp_content_sanitizers',
-		array(
-			'AMP_Core_Theme_Sanitizer'        => array(
-				'template'   => get_template(),
-				'stylesheet' => get_stylesheet(),
-			),
-			'AMP_Img_Sanitizer'               => array(),
-			'AMP_Form_Sanitizer'              => array(),
-			'AMP_Comments_Sanitizer'          => array(),
-			'AMP_Video_Sanitizer'             => array(),
-			'AMP_O2_Player_Sanitizer'         => array(),
-			'AMP_Audio_Sanitizer'             => array(),
-			'AMP_Playbuzz_Sanitizer'          => array(),
-			'AMP_Embed_Sanitizer'             => array(),
-			'AMP_Iframe_Sanitizer'            => array(
-				'add_placeholder' => true,
-			),
-			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-				'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
-			),
-			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
-			'AMP_Script_Sanitizer'            => array(),
-			'AMP_Style_Sanitizer'             => array(),
-			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-		),
-		$post
-	);
+	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( array( 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ) as $class_name ) {
