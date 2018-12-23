@@ -1432,6 +1432,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			return home_url( '/favicon.png' );
 		} );
 
+		// Specify file paths for stylesheets not available in src.
+		foreach ( array( 'wp-block-library', 'wp-block-library-theme' ) as $src_style_handle ) {
+			if ( wp_style_is( $src_style_handle, 'registered' ) ) {
+				wp_styles()->registered[ $src_style_handle ]->src = amp_get_asset_url( 'css/amp-default.css' ); // A dummy path.
+			}
+		}
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
