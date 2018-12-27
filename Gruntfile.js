@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* jshint node:true */
 /* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
