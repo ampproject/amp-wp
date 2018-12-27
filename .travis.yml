@@ -22,6 +22,7 @@ install:
   - nvm install 8.11.4 && nvm use 8.11.4
   - export DEV_LIB_PATH=dev-lib
   - source $DEV_LIB_PATH/travis.install.sh
+  - npx grunt shell:webpack_production
 
 script:
   - source $DEV_LIB_PATH/travis.script.sh
