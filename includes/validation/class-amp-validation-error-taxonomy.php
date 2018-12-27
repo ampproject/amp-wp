@@ -852,7 +852,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-detail-toggle',
 					amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-					array( 'amp-validation-tooltips' ),
+					array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 					AMP__VERSION,
 					true
 				);
@@ -878,7 +878,7 @@ class AMP_Validation_Error_Taxonomy {
 				wp_enqueue_script(
 					'amp-validation-single-error-url-details',
 					amp_get_asset_url( 'js/amp-validation-single-error-url-details-compiled.js' ),
-					array(),
+					array( 'wp-dom-ready' ),
 					AMP__VERSION,
 					true
 				);

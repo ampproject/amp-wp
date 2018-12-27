@@ -1,9 +1,4 @@
 /**
- * WordPress dependencies
- */
-import domReady from '@wordpress/dom-ready';
-
-/**
  * Toggles the contents of a details element as an additional table tr.
  */
 class RowToggler {
@@ -154,6 +149,6 @@ class ErrorRows {
 	}
 }
 
-domReady( () => {
+wp.domReady( () => {
 	new ErrorRows().init();
 } );
