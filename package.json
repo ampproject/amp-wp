@@ -9,7 +9,6 @@
  "license": "GPL-2.0+",
  "private": true,
  "devDependencies": {
-  "@wordpress/i18n": "1.1.1",
   "babel-core": "6.26.3",
   "babel-loader": "7.1.5",
   "babel-plugin-transform-object-rest-spread": "6.26.0",
@@ -34,8 +33,5 @@
   "build": "grunt build && grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch"
- },
- "dependencies": {
-  "@wordpress/dom-ready": "2.0.0"
  }
 }
