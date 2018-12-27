@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2911b7c22bbd3e4d618b7e3eb26608b6",
+    "content-hash": "32c3c030503bbd4c1c85f9ea240b22d6",
     "packages": [
         {
             "name": "sabberworm/php-css-parser",
@@ -48,7 +48,7 @@
                 "stylesheet"
             ],
             "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/master"
+                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.1.1"
             },
             "time": "2018-11-25T04:50:29+00:00"
         }
@@ -224,28 +224,32 @@
                 "phpcs",
                 "standards"
             ],
+            "abandoned": "phpcompatibility/php-compatibility",
             "time": "2018-07-17T13:42:26+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
-            "version": "0.14.1",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git",
-                "reference": "cf6b310caad735816caef7573295f8a534374706"
+                "reference": "f328bcafd97377e8e5e5d7b244d5ddbf301a3a5c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress-Coding-Standards/WordPress-Coding-Standards/zipball/cf6b310caad735816caef7573295f8a534374706",
-                "reference": "cf6b310caad735816caef7573295f8a534374706",
+                "url": "https://api.github.com/repos/WordPress-Coding-Standards/WordPress-Coding-Standards/zipball/f328bcafd97377e8e5e5d7b244d5ddbf301a3a5c",
+                "reference": "f328bcafd97377e8e5e5d7b244d5ddbf301a3a5c",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3",
                 "squizlabs/php_codesniffer": "^2.9.0 || ^3.0.2"
             },
+            "require-dev": {
+                "phpcompatibility/php-compatibility": "^9.0"
+            },
             "suggest": {
-                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3"
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.4.3 || This Composer plugin will sort out the PHPCS 'installed_paths' automatically."
             },
             "type": "phpcodesniffer-standard",
             "notification-url": "https://packagist.org/downloads/",
@@ -264,7 +268,7 @@
                 "standards",
                 "wordpress"
             ],
-            "time": "2018-02-16T01:57:48+00:00"
+            "time": "2018-12-18T09:43:51+00:00"
         }
     ],
     "aliases": [],
