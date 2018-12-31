@@ -52,6 +52,10 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 == Changelog ==
 
+= 1.0.2 (Unreleased) =
+
+...
+
 = 1.0.1 (2018-12-12) =
 
 - Add check for required iconv extension. See [#1727](https://github.com/ampproject/amp-wp/pull/1727). Props westonruter.
