@@ -334,6 +334,16 @@ function amp_add_generator_metadata() {
  */
 function amp_register_default_scripts( $wp_scripts ) {
 
+	// Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
+	if ( ! has_action( 'wp_default_scripts', 'gutenberg_register_packages_scripts' ) ) {
+		$handles = array( 'wp-i18n', 'wp-dom-ready' );
+		foreach ( $handles as $handle ) {
+			if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+				$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );
+			}
+		}
+	}
+
 	// AMP Runtime.
 	$handle = 'amp-runtime';
 	$wp_scripts->add(
