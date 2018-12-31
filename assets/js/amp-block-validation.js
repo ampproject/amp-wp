@@ -212,6 +212,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
 					noticeMessage += ' ' + wp.i18n.sprintf(
+						/* translators: %s is the count of block errors. */
 						wp.i18n._n(
 							'And %s is directly due to content here.',
 							'And %s are directly due to content here.',
