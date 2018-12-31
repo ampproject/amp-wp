@@ -39,7 +39,7 @@ module.exports = function( grunt ) {
 			},
 			makepot: {
 				// TODO: The exclude argument to make-pot does not seem to actually exclude. Without including the --exclude argument, the generated amp-js.pot still includes references to the build/ directory.
-				command: 'wp i18n make-pot . languages/amp-js.pot --include="assets/**/*.js,blocks/**/*.js" --exclude="*.*,back-compat/,bin/,build/,dev-lib/,includes/,languages/,node_modules/,templates/,tests/,third_party/,vendor/,wpcom/" --file-comment="*/null/*"' // The --file-comment is a temporary workaround for <https://github.com/ampproject/amp-wp/issues/1416>.
+				command: 'vendor/bin/wp i18n make-pot . languages/amp-js.pot --include="assets/**/*.js,blocks/**/*.js" --exclude="*.*,back-compat/,bin/,build/,dev-lib/,includes/,languages/,node_modules/,templates/,tests/,third_party/,vendor/,wpcom/" --file-comment="*/null/*"' // The --file-comment is a temporary workaround for <https://github.com/ampproject/amp-wp/issues/1416>.
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
