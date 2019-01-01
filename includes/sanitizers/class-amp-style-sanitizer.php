@@ -543,6 +543,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$includes_url = $remove_url_scheme( includes_url( '/' ) );
 		$content_url  = $remove_url_scheme( content_url( '/' ) );
 		$admin_url    = $remove_url_scheme( get_admin_url( null, '/' ) );
+		$site_url     = $remove_url_scheme( site_url( '/' ) );
 
 		$allowed_hosts = array(
 			wp_parse_url( $includes_url, PHP_URL_HOST ),
@@ -566,8 +567,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
 		}
 
-		$base_path = null;
-		$file_path = null;
+		$base_path  = null;
+		$file_path  = null;
+		$wp_content = 'wp-content';
 		if ( 0 === strpos( $url, $content_url ) ) {
 			$base_path = WP_CONTENT_DIR;
 			$file_path = substr( $url, strlen( $content_url ) - 1 );
@@ -577,6 +579,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		} elseif ( 0 === strpos( $url, $admin_url ) ) {
 			$base_path = ABSPATH . 'wp-admin';
 			$file_path = substr( $url, strlen( $admin_url ) - 1 );
+		} elseif ( 0 === strpos( $url, $site_url . trailingslashit( $wp_content ) ) ) {
+			// Account for loading content from original wp-content directory not WP_CONTENT_DIR which can happen via register_theme_directory().
+			$base_path = ABSPATH . $wp_content;
+			$file_path = substr( $url, strlen( $site_url ) + strlen( $wp_content ) );
 		}
 
 		if ( ! $file_path || false !== strpos( $file_path, '../' ) || false !== strpos( $file_path, '..\\' ) ) {
