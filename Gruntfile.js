@@ -34,13 +34,6 @@ module.exports = function( grunt ) {
 			webpack_production: {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
-			pot_to_php: {
-				command: 'npm run pot-to-php && php -l languages/amp-translations.php'
-			},
-			makepot: {
-				// TODO: The exclude argument to make-pot does not seem to actually exclude. Without including the --exclude argument, the generated amp-js.pot still includes references to the build/ directory.
-				command: 'vendor/bin/wp i18n make-pot . languages/amp-js.pot --include="assets/**/*.js,blocks/**/*.js" --exclude="*.*,back-compat/,bin/,build/,dev-lib/,includes/,languages/,node_modules/,templates/,tests/,third_party/,vendor/,wpcom/" --file-comment="*/null/*"' // The --file-comment is a temporary workaround for <https://github.com/ampproject/amp-wp/issues/1416>.
-			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
@@ -81,8 +74,6 @@ module.exports = function( grunt ) {
 		stdout = [];
 
 		grunt.task.run( 'shell:webpack_production' );
-		grunt.task.run( 'shell:makepot' );
-		grunt.task.run( 'shell:pot_to_php' );
 
 		spawnQueue.push(
 			{
@@ -102,13 +93,12 @@ module.exports = function( grunt ) {
 			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*|languages\/README.*)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|webpack.*)/.test( file );
 			} );
 			paths.push( 'vendor/autoload.php' );
 			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-			paths.push( 'languages/amp-translations.php' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
