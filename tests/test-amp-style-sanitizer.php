@@ -1388,6 +1388,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers \AMP_DOM_Utils::get_content_from_dom_node()
 	 */
 	public function test_unicode_stylesheet() {
+		wp();
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
 		AMP_Theme_Support::finish_init();

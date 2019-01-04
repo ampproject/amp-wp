@@ -22,6 +22,7 @@ if ( class_exists( 'WP_Widget_Text' ) ) {
 		 * @return string $html The markup, unaltered.
 		 */
 		public function inject_video_max_width_style( $matches ) {
+			wp();
 			if ( is_amp_endpoint() ) {
 				return $matches[0];
 			}
