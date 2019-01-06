@@ -1022,6 +1022,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 		);
 
+		do_action( 'bar' ); // So that output buffering will be done.
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		AMP_Theme_Support::start_output_buffering();

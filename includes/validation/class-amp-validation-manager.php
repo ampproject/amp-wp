@@ -1476,10 +1476,12 @@ class AMP_Validation_Manager {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
+			$is_filter = isset( $callback['source']['hook'] ) && ! did_action( $callback['source']['hook'] );
+
 			// Wrap the markup output of (action) hooks in source comments.
 			AMP_Validation_Manager::$hook_source_stack[] = $callback['source'];
 			$has_buffer_started                          = false;
-			if ( AMP_Validation_Manager::can_output_buffer() ) {
+			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
