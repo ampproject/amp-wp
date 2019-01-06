@@ -1204,7 +1204,7 @@ class AMP_Validation_Manager {
 				$original_function = $callback['function'];
 				$wrapped_callback  = self::wrapped_callback( array_merge(
 					$callback,
-					compact( 'priority', 'source', 'hook' )
+					compact( 'priority', 'source' )
 				) );
 
 				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
