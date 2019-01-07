@@ -830,9 +830,12 @@ class AMP_Validation_Error_Taxonomy {
 
 		// Hide empty term addition form.
 		add_action( 'admin_enqueue_scripts', function() {
-			global $pagenow;
+			$current_screen = get_current_screen();
+			if ( ! $current_screen ) {
+				return;
+			}
 
-			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === get_current_screen()->taxonomy ) {
+			if ( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG === $current_screen->taxonomy ) {
 				wp_add_inline_style( 'common', '
 					#col-left { display: none; }
 					#col-right { float:none; width: auto; }
@@ -867,7 +870,7 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			}
 
-			if ( 'post.php' === $pagenow ) {
+			if ( 'post' === $current_screen->base && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === $current_screen->post_type ) {
 				wp_enqueue_style(
 					'amp-validation-single-error-url',
 					amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
