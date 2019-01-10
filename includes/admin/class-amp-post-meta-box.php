@@ -106,7 +106,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function sanitize_status( $status ) {
 		$status = strtolower( trim( $status ) );
-		if ( ! in_array( $status, array( 'enabled', 'disabled' ), true ) ) {
+		if ( ! in_array( $status, array( self::ENABLED_STATUS, self::DISABLED_STATUS ), true ) ) {
 			/*
 			 * In lieu of actual validation being available, clear the status entirely
 			 * so that the underlying default status will be used instead.
