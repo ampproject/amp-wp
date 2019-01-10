@@ -138,7 +138,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install && wp cli update`.
+0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
 2. Add changelog entry to readme.
 3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.

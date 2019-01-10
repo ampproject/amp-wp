@@ -52,6 +52,7 @@ class AMP_Options_Manager {
 		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
+		add_action( 'admin_notices', array( __CLASS__, 'render_php_css_parser_conflict_notice' ) );
 	}
 
 	/**
@@ -437,6 +438,44 @@ class AMP_Options_Manager {
 			esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ),
 			esc_html__( 'More details', 'amp' )
 		);
+	}
+
+	/**
+	 * Render PHP-CSS-Parser conflict notice.
+	 *
+	 * @return void
+	 */
+	public static function render_php_css_parser_conflict_notice() {
+		if ( 'toplevel_page_' . self::OPTION_NAME !== get_current_screen()->id ) {
+			return;
+		}
+
+		if ( AMP_Style_Sanitizer::has_required_php_css_parser() ) {
+			return;
+		}
+
+		try {
+			$reflection = new ReflectionClass( 'Sabberworm\CSS\CSSList\CSSList' );
+			$source_dir = str_replace(
+				trailingslashit( WP_CONTENT_DIR ),
+				'',
+				preg_replace( '#/vendor/sabberworm/.+#', '', $reflection->getFileName() )
+			);
+
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				sprintf(
+					/* translators: %s is location where conflicting lib was found */
+					esc_html__( "A conflicting version of PHP-CSS-Parser appears to be installed by another plugin/theme (located in '%s'). Because of this CSS processing will be limited, and tree shaking will not be available.", 'amp' ),
+					esc_html( $source_dir )
+				)
+			);
+		} catch ( ReflectionException $e ) {
+			printf(
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				esc_html__( 'PHP-CSS-Parser is not available so CSS processing will not be available.', 'amp' )
+			);
+		}
 	}
 
 	/**

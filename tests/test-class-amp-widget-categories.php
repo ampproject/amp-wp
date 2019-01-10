@@ -62,6 +62,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Categories::widget()
 	 */
 	public function test_widget() {
+		wp();
 		$this->assertTrue( is_amp_endpoint() );
 		$arguments = array(
 			'before_widget' => '<div>',

@@ -383,6 +383,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
+		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
@@ -1052,6 +1053,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_output_buffering()
 	 */
 	public function test_start_output_buffering() {
+		wp();
 		if ( ! function_exists( 'newrelic_disable_autorum ' ) ) {
 			/**
 			 * Define newrelic_disable_autorum to allow passing line.
@@ -1079,6 +1081,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::is_output_buffering()
 	 */
 	public function test_finish_output_buffering() {
+		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
@@ -1127,6 +1130,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::filter_customize_partial_render()
 	 */
 	public function test_filter_customize_partial_render() {
+		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
@@ -1175,6 +1179,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \amp_render_scripts()
 	 */
 	public function test_prepare_response() {
+		wp();
 		$prepare_response_args = array(
 			'enable_response_caching' => false,
 		);
@@ -1337,6 +1342,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_native_mode_non_amp() {
+		wp();
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
 
@@ -1351,6 +1357,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test post-processor cache effectiveness in AMP_Theme_Support::prepare_response().
 	 */
 	public function test_post_processor_cache_effectiveness() {
+		wp();
 		$original_html = $this->get_original_html();
 		$args          = array( 'enable_response_caching' => true );
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
@@ -1432,6 +1439,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			return home_url( '/favicon.png' );
 		} );
 
+		// Specify file paths for stylesheets not available in src.
+		foreach ( array( 'wp-block-library', 'wp-block-library-theme' ) as $src_style_handle ) {
+			if ( wp_style_is( $src_style_handle, 'registered' ) ) {
+				wp_styles()->registered[ $src_style_handle ]->src = amp_get_asset_url( 'css/amp-default.css' ); // A dummy path.
+			}
+		}
+
 		ob_start();
 		?>
 		<!DOCTYPE html>
@@ -1501,6 +1515,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_bad_html() {
+		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
@@ -1526,6 +1541,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
+		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();

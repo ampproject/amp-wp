@@ -85,7 +85,10 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 
 ## Changelog ##
 
-### 1.1 (unreleased) ###
+### 1.1 (Unreleased) ###
+...
+
+### 1.0.2 (Unreleased) ###
 ...
 
 ### 1.0.1 (2018-12-12) ###

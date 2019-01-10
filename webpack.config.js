@@ -5,6 +5,8 @@ const path = require( 'path' );
 module.exports = {
 	entry: {
 		'./assets/js/amp-blocks-compiled': './blocks/index.js',
+		'./assets/js/wp-i18n-compiled': './assets/js/wp-i18n',
+		'./assets/js/wp-dom-ready-compiled': './assets/js/wp-dom-ready',
 		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle',
 		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle',
 		'./assets/js/amp-validation-tooltips-compiled': './assets/src/amp-validation-tooltips',

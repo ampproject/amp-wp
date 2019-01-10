@@ -276,7 +276,7 @@ class AMP_Validated_URL_Post_Type {
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-			array( 'amp-validation-tooltips' ),
+			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
 		);
