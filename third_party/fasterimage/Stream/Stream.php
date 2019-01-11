@@ -25,14 +25,15 @@ class Stream implements StreamableInterface
     /**
      * Get characters from the string but don't move the pointer
      *
-     * @param $characters
+     * @param int $characters Number of characters to read.
+     * @param bool $check_length Throw exception if there are not enough bytes left in the stream.
      *
      * @return string
      * @throws StreamBufferTooSmallException
      */
-    public function peek($characters)
+    public function peek($characters, $check_length=true)
     {
-        if ( strlen($this->stream_string) < $this->strpos + $characters ) {
+        if ( $check_length && strlen($this->stream_string) < $this->strpos + $characters ) {
             throw new StreamBufferTooSmallException('Not enough of the stream available.');
         }
 
@@ -42,16 +43,22 @@ class Stream implements StreamableInterface
     /**
      * Get Characters from the string
      *
-     * @param $characters
+     * @param int  $characters   Number of characters to read.
+     * @param bool $check_length Throw exception if there are not enough bytes left in the stream.
      *
      * @return string
      * @throws StreamBufferTooSmallException
      */
-    public function read($characters)
+    public function read($characters, $check_length=true)
     {
-        $result = $this->peek($characters);
+        $size   = strlen($this->stream_string);
+        $result = $this->peek($characters, $check_length);
 
-        $this->strpos += $characters;
+        if ( strlen( $result ) + $characters > $size ) {
+            $this->strpos = $size;
+        } else {
+            $this->strpos += $characters;
+        }
 
         return $result;
     }

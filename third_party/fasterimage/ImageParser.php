@@ -136,7 +136,7 @@ class ImageParser
                     return $this->type = 'tiff';
                 default:
                     $this->stream->resetPointer();
-                    $markup = $this->stream->read( 1024 );
+                    $markup = $this->stream->read( 1024, false );
                     if ( false !== strpos( $markup, '<svg' ) ) {
                         $this->type = 'svg';
                     } else {
@@ -361,7 +361,7 @@ class ImageParser
     protected function parseSizeForSvg()
     {
         $this->stream->resetPointer();
-        $markup = $this->stream->read( 1024 );
+        $markup = $this->stream->read( 1024, false );
         if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
             return null;
         }
