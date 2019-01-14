@@ -1,0 +1,85 @@
+diff --git a/src/FasterImage/FasterImage.php b/src/FasterImage/FasterImage.php
+index c05c9d0..dd94cb8 100644
+--- a/src/FasterImage/FasterImage.php
++++ b/src/FasterImage/FasterImage.php
+@@ -122,9 +122,9 @@ class FasterImage
+         curl_setopt($ch, CURLOPT_URL, $url);
+         curl_setopt($ch, CURLOPT_HEADER, 0);
+         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+-        curl_setopt($ch, CURLOPT_BUFFERSIZE, 256);
+-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
++        curl_setopt($ch, CURLOPT_BUFFERSIZE, 1024);
++        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
++        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
+         curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+diff --git a/src/FasterImage/ImageParser.php b/src/FasterImage/ImageParser.php
+index 3b1dc3d..3e855dc 100644
+--- a/src/FasterImage/ImageParser.php
++++ b/src/FasterImage/ImageParser.php
+@@ -57,6 +57,8 @@ class ImageParser
+                 return $this->parseSizeForPSD();
+             case 'webp':
+                 return $this->parseSizeForWebp();
++            case 'svg':
++                return $this->parseSizeForSvg();
+         }
+
+         return null;
+@@ -133,7 +135,13 @@ class ImageParser
+                 case "MM":
+                     return $this->type = 'tiff';
+                 default:
+-                    return false;
++                    $this->stream->resetPointer();
++                    $markup = $this->stream->read( 1024 );
++                    if ( false !== strpos( $markup, '<svg' ) ) {
++                        $this->type = 'svg';
++                    } else {
++                        return false;
++                    }
+             }
+         }
+
+@@ -345,6 +353,39 @@ class ImageParser
+
+     }
+
++    /**
++     * Parse size for SVG.
++     *
++     * @return array|null Size or null.
++     */
++    protected function parseSizeForSvg()
++    {
++        $this->stream->resetPointer();
++        $markup = $this->stream->read( 1024 );
++        if ( ! preg_match( '#<svg.*?>#s', $markup, $matches ) ) {
++            return null;
++        }
++        $svg_start_tag = $matches[0];
++        $width = null;
++        $height = null;
++        if ( preg_match( '/\swidth=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
++            $width = floatval( $matches[2] );
++        }
++        if ( preg_match( '/\sheight=([\'"])(\d+(\.\d+)?)(px)?\1/', $svg_start_tag, $matches ) ) {
++            $height = floatval( $matches[2] );
++        }
++        if ( $width && $height ) {
++            return [ $width, $height ];
++        }
++        if ( preg_match( '/\sviewBox=([\'"])[^\1]*(?:,|\s)+(?P<width>\d+(?:\.\d+)?)(?:px)?(?:,|\s)+(?P<height>\d+(?:\.\d+)?)(?:px)?\s*\1/', $svg_start_tag, $matches ) ) {
++            return [
++                floatval( $matches['width'] ),
++                floatval( $matches['height'] )
++            ];
++        }
++        return null;
++    }
++
+     /**
+      * @return mixed
+      */
