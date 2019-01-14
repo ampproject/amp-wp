@@ -288,10 +288,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( function_exists( 'twentyseventeen_get_svg' ) ) {
-					$config['nav_menu_dropdown']['icon'] = twentyseventeen_get_svg( array(
-						'icon'     => 'angle-down',
-						'fallback' => true,
-					) );
+					$config['nav_menu_dropdown']['icon'] = twentyseventeen_get_svg(
+						array(
+							'icon'     => 'angle-down',
+							'fallback' => true,
+						)
+					);
 				}
 
 				return $config;
