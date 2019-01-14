@@ -11,7 +11,7 @@
         }
     ],
     "require": {
-        "php": "^5.3.6 || ^7.0",
+        "php": "^5.4 || ^7.0",
         "sabberworm/php-css-parser": "8.1.1"
     },
     "require-dev": {

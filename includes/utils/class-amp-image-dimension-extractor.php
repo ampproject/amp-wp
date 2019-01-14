@@ -172,38 +172,7 @@ class AMP_Image_Dimension_Extractor {
 	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images, $mode ) {
-		// Use FasterImage when for compatible PHP versions
-		if ( 'synchronous' === $mode ||
-			false === function_exists( 'curl_multi_exec' ) ||
-			version_compare( PHP_VERSION, '5.4.0' ) < 0
-		) {
-			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
-		} else {
-			self::fetch_images_via_faster_image( $urls_to_fetch, $images );
-		}
-	}
-
-	/**
-	 * Fetch images via FastImage library
-	 *
-	 * @param array $urls_to_fetch Image src urls to fetch.
-	 * @param array $images Array to populate with results of image/dimension inspection.
-	 */
-	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-
-		$image = new FastImage();
-		$urls  = array_keys( $urls_to_fetch );
-
-		foreach ( $urls as $url ) {
-			$result = $image->load( $url );
-			if ( false === $result ) {
-				$images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
-			} else {
-				$size = $image->getSize();
-
-				$images[ $url ]['size'] = $size;
-			}
-		}
+		self::fetch_images_via_faster_image( $urls_to_fetch, $images );
 	}
 
 	/**
