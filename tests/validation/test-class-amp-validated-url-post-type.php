@@ -22,7 +22,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	public function tearDown() {
 		global $current_screen;
 		parent::tearDown();
-		$current_screen = null; // WPCS: override ok.
+		$current_screen = null;
 	}
 
 	/**
@@ -67,7 +67,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
 
-		$pagenow           = 'edit.php'; // WPCS: override ok.
+		$pagenow           = 'edit.php';
 		$_GET['post_type'] = 'post';
 		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
 
@@ -127,7 +127,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		unset( $submenu[ AMP_Options_Manager::OPTION_NAME ] );
 		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
 
-		$submenu[ AMP_Options_Manager::OPTION_NAME ] = array( // WPCS: override ok.
+		$submenu[ AMP_Options_Manager::OPTION_NAME ] = array(
 			0 => array(
 				0 => 'General',
 				1 => 'manage_options',
@@ -1061,7 +1061,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			);
 		} );
 
-		$post = get_post( $invalid_url_post_id ); // WPCS: override ok.
+		$post = get_post( $invalid_url_post_id );
 
 		$errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post_id );
 
@@ -1215,7 +1215,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$initial_counts = array( 0, 22, 1000 );
 
 		// If 'post.php' === $pagenow, this method should return the same value, no matter what argument is passed to it.
-		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'post.php';
 		foreach ( $initial_counts as $initial_count ) {
 			$this->assertEquals(
 				PHP_INT_MAX,
@@ -1224,7 +1224,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		}
 
 		// If 'post.php' !== $pagenow, this method should return the same value that is passed to it.
-		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'edit-tags.php';
 		foreach ( $initial_counts as $initial_count ) {
 			$this->assertEquals(
 				$initial_count,
@@ -1242,24 +1242,24 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		// The 'pagenow' value is incorrect, so this should not add the taxonomy.
 		$GLOBALS['pagenow'] = 'edit.php';
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 
 		// Though the 'pagenow' value is correct, the $_REQUEST['post'] is not set, and this should not add the taxonomy.
 		$GLOBALS['pagenow'] = 'post.php';
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 
 		// Though the $_REQUEST['post'] is set, it is for a post of the wrong type.
 		$wrong_post_type  = $this->factory()->post->create();
 		$_REQUEST['post'] = $wrong_post_type;
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // WPCS: CSRF OK.
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 
 		// Now that the post type is correct, this should add the taxonomy to $_REQUEST.
 		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$_REQUEST['post']  = $correct_post_type;
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // WPCS: CSRF OK.
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 	}
 
 	/**
@@ -1300,7 +1300,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::register();
 		$post_correct_post_type = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$post_wrong_post_type   = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
-		$GLOBALS['hook_suffix'] = 'post.php'; // WPCS: Global override OK.
+		$GLOBALS['hook_suffix'] = 'post.php';
 		$this->go_to( admin_url( 'post.php' ) );
 		set_current_screen( 'post.php' );
 		$GLOBALS['current_screen']->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
@@ -1509,11 +1509,11 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$amp_validated_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 
 		// If $pagenow is not post.php, this should not filter the labels.
-		$GLOBALS['pagenow'] = 'edit.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'edit.php';
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
 
 		// If $pagenow is correct, but $_GET['post'] and $_GET['action'] are not set, so this should not filter the labels.
-		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'post.php';
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_single_url_page_heading() );
 
 		// Though $_GET['post'] and $_GET['action'] are now set, but the post type is 'post', so this should not filter the labels.

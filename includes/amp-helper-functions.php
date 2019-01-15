@@ -259,7 +259,7 @@ function is_amp_endpoint() {
 	}
 
 	$has_amp_query_var = (
-		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
+		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		||
 		false !== get_query_var( amp_get_slug(), false )
 	);
@@ -622,7 +622,7 @@ function amp_print_analytics( $analytics ) {
 			'type' => $analytics_entry['type'],
 		), $analytics_entry['attributes'] );
 
-		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 

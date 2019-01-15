@@ -221,13 +221,13 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		?>
 		<div class="wp-playlist wp-video-playlist wp-playlist-light">
 			<amp-state id="<?php echo esc_attr( $state_id ); ?>">
-				<script type="application/json"><?php echo wp_json_encode( $amp_state ); // WPCS: XSS ok. ?></script>
+				<script type="application/json"><?php echo wp_json_encode( $amp_state ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 			</amp-state>
 			<amp-video id="amp-video" src="<?php echo esc_url( $data['tracks'][0]['src'] ); ?>" [src]="<?php echo esc_attr( $src_bound ); ?>" width="<?php echo esc_attr( $width ); ?>" height="<?php echo esc_attr( $height ); ?>" controls></amp-video>
 			<?php $this->print_tracks( $state_id, $data['tracks'] ); ?>
 		</div>
 		<?php
-		return ob_get_clean(); // WPCS: XSS ok.
+		return ob_get_clean(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	/**

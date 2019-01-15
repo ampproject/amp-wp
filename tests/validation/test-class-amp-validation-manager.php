@@ -96,7 +96,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
-		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets; // WPCS: override ok.
+		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$_REQUEST = array();
 		unset( $GLOBALS['current_screen'] );
@@ -294,7 +294,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
 		$_SERVER['REQUEST_METHOD'] = 'POST';
-		$GLOBALS['pagenow']        = 'post.php'; // WPCS: override ok.
+		$GLOBALS['pagenow']        = 'post.php';
 
 		register_post_type( 'secret', array( 'public' => false ) );
 		$secret           = $this->factory()->post->create_and_get( array( 'post_type' => 'secret' ) );
@@ -737,7 +737,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		}
 
 		global $post;
-		$post = $this->factory()->post->create_and_get(); // WPCS: Override ok.
+		$post = $this->factory()->post->create_and_get();
 		$this->assertInstanceOf( 'WP_Post', get_post() );
 
 		$rendered_block = do_blocks( AMP_Validation_Manager::add_block_source_comments( $content ) );
@@ -790,7 +790,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			'id'           => $sidebar_id,
 			'after_widget' => '</li>',
 		) );
-		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id ); // WPCS: global override ok.
+		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id );
 
 		AMP_Theme_Support::start_output_buffering();
 		dynamic_sidebar( $sidebar_id );
@@ -814,7 +814,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_callback_wrappers() {
 		global $post;
 		$that = $this;
-		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post = $this->factory()->post->create_and_get();
 		$this->set_capability();
 		$action_no_tag_output     = 'foo_action';
 		$action_core_output       = 'core_action';
@@ -1012,7 +1012,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$test_string = "<b class='\nfoo\nbar\n'>Cool!</b>";
 		$callback    = array(
 			'function'      => function() use ( $test_string ) {
-				echo $test_string; // WPCS: XSS OK.
+				echo $test_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			'accepted_args' => 0,
 			'source'        => array(
@@ -1096,7 +1096,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_should_validate_response() {
 		global $post;
-		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		$post = $this->factory()->post->create();
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
@@ -1112,7 +1112,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_finalize_validation() {
 		global $post, $show_admin_bar;
 
-		$show_admin_bar = true; // WPCS: Global override OK.
+		$show_admin_bar = true;
 		$dom            = new DOMDocument( '1.0' );
 		$html           = '<html><body><div id="wp-admin-bar-amp-validity"><a href="#"></a></div><span id="amp-admin-bar-item-status-icon"></span><br></body></html>';
 		$dom->loadHTML( $html );
@@ -1132,7 +1132,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertNotContains( 'AMP_VALIDATION:{', $dom->documentElement->lastChild->nodeValue );
 
 		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION comment.
-		$post = $this->factory()->post->create(); // WPCS: global override ok.
+		$post = $this->factory()->post->create();
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->set_capability();
 		AMP_Validation_Manager::finalize_validation( $dom );
@@ -1148,7 +1148,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_filter_sanitizer_args() {
 		global $post;
-		$post       = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post       = $this->factory()->post->create_and_get();
 		$sanitizers = array(
 			'AMP_Img_Sanitizer'      => array(),
 			'AMP_Form_Sanitizer'     => array(),
@@ -1277,7 +1277,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::print_plugin_notice();
 		$output = ob_get_clean();
 		$this->assertEmpty( $output );
-		$pagenow          = 'plugins.php'; // WPCS: global override ok.
+		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
 
 		set_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, array(
@@ -1311,7 +1311,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		}
 
 		global $post;
-		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post = $this->factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();

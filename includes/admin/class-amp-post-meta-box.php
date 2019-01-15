@@ -370,9 +370,9 @@ class AMP_Post_Meta_Box {
 	 */
 	public function preview_post_link( $link ) {
 		$is_amp = (
-			isset( $_POST['amp-preview'] ) // WPCS: CSRF ok.
+			isset( $_POST['amp-preview'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // WPCS: CSRF ok.
+			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 
 		if ( $is_amp ) {

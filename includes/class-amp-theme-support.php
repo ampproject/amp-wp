@@ -230,7 +230,7 @@ class AMP_Theme_Support {
 		if ( ! is_amp_endpoint() ) {
 
 			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
-			if ( isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: csrf ok.
+			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 				self::redirect_ampless_url();
 			}
 
@@ -268,7 +268,7 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_proper_amp_location( $exit = true ) {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // WPCS: CSRF OK.
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 
 		if ( amp_is_canonical() ) {
 			/*
@@ -479,7 +479,7 @@ class AMP_Theme_Support {
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
-		$wp_query   = $query; // WPCS: override ok.
+		$wp_query   = $query;
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -511,7 +511,7 @@ class AMP_Theme_Support {
 		}
 
 		// Restore previous $wp_query (if any).
-		$wp_query = $prev_query; // WPCS: override ok.
+		$wp_query = $prev_query;
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -798,7 +798,7 @@ class AMP_Theme_Support {
 			echo '<style amp-custom></style>';
 		}, 0 );
 		add_action( 'wp_head', function() {
-			echo amp_get_boilerplate_code(); // WPCS: xss ok.
+			echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}, PHP_INT_MAX );
 
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
@@ -1807,7 +1807,7 @@ class AMP_Theme_Support {
 		}
 
 		AMP_Validation_Manager::finalize_validation( $dom, array(
-			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
+			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		) );
 
 		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.

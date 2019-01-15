@@ -426,7 +426,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $wp_query;
 
 		// Test no query available.
-		$wp_query     = null; // WPCS: override ok.
+		$wp_query     = null;
 		$availability = AMP_Theme_Support::get_template_availability();
 		$this->assertInternalType( 'array', $availability );
 		$this->assertEquals( array( 'no_query_available' ), $availability['errors'] );
@@ -505,7 +505,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test successful match when passing WP_Query and WP_Post into method.
 		$query        = $wp_query;
-		$wp_query     = null; // WPCS: override ok.
+		$wp_query     = null;
 		$availability = AMP_Theme_Support::get_template_availability( $query );
 		$this->assertTrue( $availability['supported'] );
 		$this->assertEquals( 'is_singular', $availability['template'] );
@@ -859,7 +859,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp->query_vars   = $added_query_vars;
 		$this->assertEquals( add_query_arg( $added_query_vars, $home_url ), AMP_Theme_Support::get_current_canonical_url() );
 
-		$post = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post = $this->factory()->post->create_and_get();
 		$this->go_to( get_permalink( $post ) );
 		$this->assertEquals( wp_get_canonical_url(), AMP_Theme_Support::get_current_canonical_url() );
 
@@ -884,7 +884,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_form_defaults() {
 		global $post;
-		$post     = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post     = $this->factory()->post->create_and_get();
 		$defaults = AMP_Theme_Support::filter_comment_form_defaults( array(
 			'title_reply_to'      => 'Reply To',
 			'title_reply'         => 'Reply',
@@ -903,7 +903,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_reply_link() {
 		global $post;
-		$post          = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post          = $this->factory()->post->create_and_get();
 		$comment       = $this->factory()->comment->create_and_get();
 		$link          = sprintf( '<a href="%s">', get_comment_link( $comment ) );
 		$respond_id    = '5234';
@@ -938,7 +938,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_cancel_comment_reply_link() {
 		global $post;
-		$post                   = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$post                   = $this->factory()->post->create_and_get();
 		$url                    = get_permalink( $post );
 		$_SERVER['REQUEST_URI'] = $url;
 		$this->factory()->comment->create_and_get();

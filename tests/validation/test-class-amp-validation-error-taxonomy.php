@@ -95,7 +95,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
-		$pagenow          = 'edit-tags.php'; // WPCS: override ok.
+		$pagenow          = 'edit-tags.php';
 		$_GET['taxonomy'] = 'post_tag';
 		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
 
@@ -1008,7 +1008,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function test_add_admin_menu_validation_error_item() {
 		global $submenu;
 
-		$submenu = array(); // WPCS: global override OK.
+		$submenu = array();
 		AMP_Validation_Error_Taxonomy::register();
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Error_Taxonomy::add_admin_menu_validation_error_item();
@@ -1037,7 +1037,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// This is now on the proper screen, but there is no post ID in $_GET['post'].
 		set_current_screen( 'post.php' );
-		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'post.php';
 		AMP_Validation_Error_Taxonomy::parse_post_php_term_query( $wp_term_query );
 		$this->assertEmpty( $wp_term_query->query_vars );
 
@@ -1109,12 +1109,12 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
 
 		// Test the 'status' block in the switch for the error taxonomy page.
-		$GLOBALS['pagenow'] = 'edit-tags.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'edit-tags.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
 		$this->assertContains( $initial_content . '<span class="status-text new rejected">New Rejected</span>', $filtered_content );
 
 		// Test the 'status' block switch for the single error page.
-		$GLOBALS['pagenow'] = 'post.php'; // WPCS: Global override OK.
+		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content   = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'status', $term_id );
 		$this->assertContains( '<select class="amp-validation-error-status" id="amp_validation_error_term_status', $filtered_content );
 
@@ -1296,7 +1296,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		} );
 		$post_id = AMP_Validated_URL_Post_Type::store_validation_errors( array( $this->get_mock_error() ), home_url( '/' ) );
 		wp_delete_post( $post_id, true );
-		$_REQUEST = &$_POST; // WPCS: csrf ok.
+		$_REQUEST = &$_POST; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 
 		// No-op.
 		AMP_Validation_Error_Taxonomy::handle_clear_empty_terms_request();

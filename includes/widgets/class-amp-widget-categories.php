@@ -71,7 +71,7 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 				$dropdown,
 				1
 			);
-			echo $dropdown; // WPCS: XSS OK.
+			echo $dropdown; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</form>';
 		else :
 			?>

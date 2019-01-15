@@ -205,9 +205,9 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_theme_support_forced() {
 		return (
-			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF OK.
+			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 	}
 
@@ -296,7 +296,7 @@ class AMP_Validation_Manager {
 		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
 		 */
 		if ( ! is_amp_endpoint() ) {
-			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
 			}
 			if ( $error_count < 0 ) {
@@ -417,7 +417,7 @@ class AMP_Validation_Manager {
 		) );
 
 		// Scrub the query var from the URL.
-		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // WPCS: CSRF OK.
+		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			add_action( 'wp_before_admin_bar_render', function() {
 				?>
 				<script>
@@ -446,20 +446,20 @@ class AMP_Validation_Manager {
 
 		// Capture overrides validation error status overrides from query var.
 		$can_override_validation_error_statuses = (
-			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // WPCS: CSRF ok.
+			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // WPCS: CSRF ok.
+			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // WPCS: CSRF ok.
+			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // WPCS: CSRF ok.
+			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 		if ( $can_override_validation_error_statuses ) {
 			/*
 			 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 			 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 			 */
-			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // WPCS: CSRF ok.
+			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 				$slug   = sanitize_key( $slug );
 				$status = intval( $status );
 				self::$validation_error_status_overrides[ $slug ] = $status;
@@ -510,9 +510,9 @@ class AMP_Validation_Manager {
 			&&
 			'post.php' === $pagenow
 			&&
-			isset( $_POST['post_ID'] ) // WPCS: csrf ok.
+			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 			&&
-			intval( $_POST['post_ID'] ) === (int) $post_id // WPCS: csrf ok.
+			intval( $_POST['post_ID'] ) === (int) $post_id // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 		);
 
 		$should_validate_post = (
@@ -891,7 +891,7 @@ class AMP_Validation_Manager {
 					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
 				}
 			}
-			echo implode( ', ', $items ); // WPCS: XSS OK.
+			echo implode( ', ', $items ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</p>';
 		}
 
@@ -1562,13 +1562,13 @@ class AMP_Validation_Manager {
 	 * @return boolean Whether to validate.
 	 */
 	public static function should_validate_response() {
-		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // WPCS: CSRF ok.
+		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			return false;
 		}
 		if ( self::has_cap() ) {
 			return true;
 		}
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // WPCS: CSRF ok.
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		return self::get_amp_validate_nonce() === $validate_key;
 	}
 
@@ -1887,7 +1887,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function print_plugin_notice() {
 		global $pagenow;
-		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // WPCS: CSRF ok.
+		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 			if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
 				return;
@@ -1916,7 +1916,7 @@ class AMP_Validation_Manager {
 					implode( ', ', $reported_plugins ),
 					$more_details_link,
 					esc_html__( 'Dismiss this notice.', 'amp' )
-				); // WPCS: XSS ok.
+				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			}
 		}
 	}
