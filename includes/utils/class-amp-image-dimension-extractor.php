@@ -96,17 +96,21 @@ class AMP_Image_Dimension_Extractor {
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
 	 * @param array  $dimensions Image urls mapped to dimensions.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
+	 * @param string $mode       Deprecated.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
-	public static function extract_by_downloading_images( $dimensions, $mode = 'concurrent' ) {
+	public static function extract_by_downloading_images( $dimensions, $mode = false ) {
+		if ( $mode ) {
+			_deprecated_argument( __METHOD__, 'AMP 1.1' );
+		}
+
 		$transient_expiration = 30 * DAY_IN_SECONDS;
 
 		$urls_to_fetch = array();
 		$images = array();
 
 		self::determine_which_images_to_fetch( $dimensions, $urls_to_fetch );
-		self::fetch_images( $urls_to_fetch, $images, $mode );
+		self::fetch_images( $urls_to_fetch, $images );
 		self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
 
 		return $dimensions;
@@ -169,19 +173,8 @@ class AMP_Image_Dimension_Extractor {
 	 *
 	 * @param array  $urls_to_fetch Image src urls to fetch.
 	 * @param array  $images Array to populate with results of image/dimension inspection.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
 	 */
-	private static function fetch_images( $urls_to_fetch, &$images, $mode ) {
-		self::fetch_images_via_faster_image( $urls_to_fetch, $images );
-	}
-
-	/**
-	 * Fetch images via FasterImage library
-	 *
-	 * @param array $urls_to_fetch Image src urls to fetch.
-	 * @param array $images Array to populate with results of image/dimension inspection.
-	 */
-	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
+	private static function fetch_images( $urls_to_fetch, &$images ) {
 		$urls       = array_keys( $urls_to_fetch );
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
 		$client     = new \FasterImage\FasterImage( $user_agent );
