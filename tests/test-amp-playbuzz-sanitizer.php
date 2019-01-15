@@ -52,25 +52,25 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 		);
 	}
 
-    /**
-     * @dataProvider get_data
-     */
-    public function test_converter( $source, $expected ) {
-        $dom = AMP_DOM_Utils::get_dom_from_content( $source );
-        $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
-        $sanitizer->sanitize();
-        $content = AMP_DOM_Utils::get_content_from_dom( $dom );
-        $this->assertEquals( $expected, $content );
-    }
+	/**
+	 * @dataProvider get_data
+	 */
+	public function test_converter( $source, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
+		$sanitizer->sanitize();
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$this->assertEquals( $expected, $content );
+	}
 
 
-    public function test_get_scripts__data_item_or_data_game_required(){
-        $source = '<div class="pb_feed"></div>';
-        $expected = array();
+	public function test_get_scripts__data_item_or_data_game_required() {
+		$source   = '<div class="pb_feed"></div>';
+		$expected = array();
 
-        $dom = AMP_DOM_Utils::get_dom_from_content( $source );
-        $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
-        $sanitizer->sanitize();
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
+		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
@@ -82,13 +82,13 @@ class AMP_Playbuzz_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $scripts );
 	}
 
-    public function test_get_scripts__didnt_convert(){
-        $source = '<h1>Im A Not Playbuzz Embed</h1>';
-        $expected = array();
+	public function test_get_scripts__didnt_convert() {
+		$source   = '<h1>Im A Not Playbuzz Embed</h1>';
+		$expected = array();
 
-        $dom = AMP_DOM_Utils::get_dom_from_content( $source );
-        $sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
-        $sanitizer->sanitize();
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Playbuzz_Sanitizer( $dom );
+		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();

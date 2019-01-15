@@ -62,18 +62,24 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Check update of supported_post_types but no change.
 		update_option( 'rewrite_rules', $dummy_rewrite_rules );
-		update_option( AMP_Options_Manager::OPTION_NAME, array(
-			array( 'supported_post_types' => array( 'page' ) ),
-			array( 'supported_post_types' => array( 'page' ) ),
-		) );
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			array(
+				array( 'supported_post_types' => array( 'page' ) ),
+				array( 'supported_post_types' => array( 'page' ) ),
+			)
+		);
 		$this->assertEquals( $dummy_rewrite_rules, get_option( 'rewrite_rules' ) );
 
 		// Check changing a different property.
 		update_option( 'rewrite_rules', array( 'previous' => true ) );
-		update_option( AMP_Options_Manager::OPTION_NAME, array(
-			array( 'foo' => 'new' ),
-			array( 'foo' => 'old' ),
-		) );
+		update_option(
+			AMP_Options_Manager::OPTION_NAME,
+			array(
+				array( 'foo' => 'new' ),
+				array( 'foo' => 'old' ),
+			)
+		);
 		$this->assertEquals( $dummy_rewrite_rules, get_option( 'rewrite_rules' ) );
 	}
 
@@ -122,40 +128,52 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		);
 
 		// Test analytics validation with missing fields.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'bad' => array(),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'bad' => array(),
+			)
+		);
 		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals( 'missing_analytics_vendor_or_config', $errors[0]['code'] );
 		$wp_settings_errors = array();
 
 		// Test analytics validation with bad JSON.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'__new__' => array(
-				'type'   => 'foo',
-				'config' => 'BAD',
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'__new__' => array(
+					'type'   => 'foo',
+					'config' => 'BAD',
+				),
+			)
+		);
 		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals( 'invalid_analytics_config_json', $errors[0]['code'] );
 		$wp_settings_errors = array();
 
 		// Test analytics validation with good fields.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'__new__' => array(
-				'type'   => 'foo',
-				'config' => '{"good":true}',
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'__new__' => array(
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				),
+			)
+		);
 		$this->assertEmpty( get_settings_errors( AMP_Options_Manager::OPTION_NAME ) );
 
 		// Test analytics validation with duplicate check.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'__new__' => array(
-				'type'   => 'foo',
-				'config' => '{"good":true}',
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'__new__' => array(
+					'type'   => 'foo',
+					'config' => '{"good":true}',
+				),
+			)
+		);
 		$errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals( 'duplicate_analytics_entry', $errors[0]['code'] );
 		$wp_settings_errors = array();
@@ -169,37 +187,46 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals( '{"good":true}', $entries[ $id ]['config'] );
 
 		// Confirm adding another entry works.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'__new__' => array(
-				'type'   => 'bar',
-				'config' => '{"good":true}',
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'__new__' => array(
+					'type'   => 'bar',
+					'config' => '{"good":true}',
+				),
+			)
+		);
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 2, AMP_Options_Manager::get_option( 'analytics' ) );
 		$this->assertArrayHasKey( $id, $entries );
 
 		// Confirm updating an entry works.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			$id => array(
-				'id'     => $id,
-				'type'   => 'foo',
-				'config' => '{"very_good":true}',
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				$id => array(
+					'id'     => $id,
+					'type'   => 'foo',
+					'config' => '{"very_good":true}',
+				),
+			)
+		);
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertEquals( 'foo', $entries[ $id ]['type'] );
 		$this->assertEquals( '{"very_good":true}', $entries[ $id ]['config'] );
 
 		// Confirm deleting an entry works.
-		AMP_Options_Manager::update_option( 'analytics', array(
-			$id => array(
-				'id'     => $id,
-				'type'   => 'foo',
-				'config' => '{"very_good":true}',
-				'delete' => true,
-			),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				$id => array(
+					'id'     => $id,
+					'type'   => 'foo',
+					'config' => '{"very_good":true}',
+					'delete' => true,
+				),
+			)
+		);
 		$entries = AMP_Options_Manager::get_option( 'analytics' );
 		$this->assertCount( 1, $entries );
 		$this->assertArrayNotHasKey( $id, $entries );
@@ -225,10 +252,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		global $wp_settings_errors;
 		$wp_settings_errors = array(); // clear any errors before starting.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		register_post_type( 'foo', array(
-			'public' => true,
-			'label'  => 'Foo',
-		) );
+		register_post_type(
+			'foo',
+			array(
+				'public' => true,
+				'label'  => 'Foo',
+			)
+		);
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Test when 'all_templates_supported' is selected.
@@ -477,10 +507,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
-		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'fields'    => 'ids',
-		) );
+		$invalid_url_posts = get_posts(
+			array(
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'fields'    => 'ids',
+			)
+		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
 		$this->assertContains( 'review 1 issue', $new_error['message'] );
@@ -512,10 +544,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
-		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'fields'    => 'ids',
-		) );
+		$invalid_url_posts = get_posts(
+			array(
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'fields'    => 'ids',
+			)
+		);
 		$this->assertCount( 0, $invalid_url_posts );
 		$this->assertEquals( 'error', $new_error['type'] );
 	}
@@ -560,10 +594,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$new_error           = end( $amp_settings_errors );
 		$this->assertStringStartsWith( 'Paired mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
-		$invalid_url_posts = get_posts( array(
-			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'fields'    => 'ids',
-		) );
+		$invalid_url_posts = get_posts(
+			array(
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'fields'    => 'ids',
+			)
+		);
 		$this->assertEquals( 'updated', $new_error['type'] );
 		$this->assertCount( 1, $invalid_url_posts );
 		$this->assertContains( 'review 2 issues', $new_error['message'] );

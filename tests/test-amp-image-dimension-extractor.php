@@ -45,14 +45,17 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		add_action(
 			'amp_extract_image_dimensions_batch_callbacks_registered',
 			function() {
-				add_filter( 'amp_extract_image_dimensions_batch', function() {
-					return array(
-						'https://example.com/image.png' => array(
-							100,
-							101,
-						),
-					);
-				} );
+				add_filter(
+					'amp_extract_image_dimensions_batch',
+					function() {
+						return array(
+							'https://example.com/image.png' => array(
+								100,
+								101,
+							),
+						);
+					}
+				);
 			},
 			9999 // Run after the `disable_downloads`.
 		);

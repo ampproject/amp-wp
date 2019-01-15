@@ -1,5 +1,11 @@
 <?php
 /**
+ * Class AMP_Template_Customizer
+ *
+ * @package AMP
+ */
+
+/**
  * AMP class that implements a template style editor in the Customizer.
  *
  * A direct, formed link to the AMP editor in the Customizer is added via
@@ -82,12 +88,15 @@ class AMP_Template_Customizer {
 	 * Sets up the AMP Customizer preview.
 	 */
 	public function register_ui() {
-		$this->wp_customize->add_panel( self::PANEL_ID, array(
-			'type'        => 'amp',
-			'title'       => __( 'AMP', 'amp' ),
-			/* translators: placeholder is URL to AMP project. */
-			'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
-		) );
+		$this->wp_customize->add_panel(
+			self::PANEL_ID,
+			array(
+				'type'        => 'amp',
+				'title'       => __( 'AMP', 'amp' ),
+				/* translators: placeholder is URL to AMP project. */
+				'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
+			)
+		);
 
 		/**
 		 * Fires after the AMP panel has been registered for plugins to add additional controls.
@@ -133,18 +142,25 @@ class AMP_Template_Customizer {
 				true
 			);
 
-			wp_add_inline_script( 'amp-customize-controls', sprintf( 'ampCustomizeControls.boot( %s );',
-				wp_json_encode( array(
-					'queryVar' => amp_get_slug(),
-					'panelId'  => self::PANEL_ID,
-					'ampUrl'   => amp_admin_get_preview_permalink(),
-					'l10n'     => array(
-						'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
-						'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-					),
-				) )
-			) );
+			wp_add_inline_script(
+				'amp-customize-controls',
+				sprintf(
+					'ampCustomizeControls.boot( %s );',
+					wp_json_encode(
+						array(
+							'queryVar' => amp_get_slug(),
+							'panelId'  => self::PANEL_ID,
+							'ampUrl'   => amp_admin_get_preview_permalink(),
+							'l10n'     => array(
+								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
+								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
+							),
+						)
+					)
+				)
+			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				'amp-customizer',
 				amp_get_asset_url( 'css/amp-customizer.css' )
@@ -199,12 +215,18 @@ class AMP_Template_Customizer {
 			$available = false;
 		}
 
-		wp_add_inline_script( 'amp-customize-preview', sprintf( 'ampCustomizePreview.boot( %s );',
-			wp_json_encode( array(
-				'available' => $available,
-				'enabled'   => is_amp_endpoint(),
-			) )
-		) );
+		wp_add_inline_script(
+			'amp-customize-preview',
+			sprintf(
+				'ampCustomizePreview.boot( %s );',
+				wp_json_encode(
+					array(
+						'available' => $available,
+						'enabled'   => is_amp_endpoint(),
+					)
+				)
+			)
+		);
 	}
 
 	/**

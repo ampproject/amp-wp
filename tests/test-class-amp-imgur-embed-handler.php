@@ -20,19 +20,24 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		// Mock the HTTP request.
-		add_filter( 'pre_http_request', function( $pre, $r, $url ) {
-			unset( $r );
-			if ( false === strpos( $url, 'f462IUj' ) ) {
-				return $pre;
-			}
-			return array(
-				'body'     => '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\\/\\/imgur.com","width":500,"height":750,"html":"<blockquote class=\\"imgur-embed-pub\\" lang=\\"en\\" data-id=\\"f462IUj\\"><a href=\\"https:\\/\\/imgur.com\\/f462IUj\\">Getting that beach body ready<\\/a><\\/blockquote><script async src=\\"\\/\\/s.imgur.com\\/min\\/embed.js\\" charset=\\"utf-8\\"><\\/script>"}', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+		add_filter(
+			'pre_http_request',
+			function( $pre, $r, $url ) {
+				unset( $r );
+				if ( false === strpos( $url, 'f462IUj' ) ) {
+					return $pre;
+				}
+				return array(
+					'body' => '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\\/\\/imgur.com","width":500,"height":750,"html":"<blockquote class=\\"imgur-embed-pub\\" lang=\\"en\\" data-id=\\"f462IUj\\"><a href=\\"https:\\/\\/imgur.com\\/f462IUj\\">Getting that beach body ready<\\/a><\\/blockquote><script async src=\\"\\/\\/s.imgur.com\\/min\\/embed.js\\" charset=\\"utf-8\\"><\\/script>"}', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'response' => array(
 					'code'    => 200,
 					'message' => 'OK',
 				),
-			);
-		}, 10, 3 );
+				);
+			},
+			10,
+			3
+		);
 
 		/*
 		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()

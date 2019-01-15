@@ -56,11 +56,14 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 					<?php
 
 					/** This filter is documented in wp-includes/widgets/class-wp-widget-archives.php */
-					$dropdown_args = apply_filters( 'widget_archives_dropdown_args', array(
-						'type'            => 'monthly',
-						'format'          => 'option',
-						'show_post_count' => $c,
-					) );
+					$dropdown_args = apply_filters(
+						'widget_archives_dropdown_args',
+						array(
+							'type'            => 'monthly',
+							'format'          => 'option',
+							'show_post_count' => $c,
+						)
+					);
 
 					switch ( $dropdown_args['type'] ) {
 						case 'yearly':
@@ -89,13 +92,18 @@ class AMP_Widget_Archives extends WP_Widget_Archives {
 				<?php
 
 				/** This filter is documented in wp-includes/widgets/class-wp-widget-archives.php */
-				wp_get_archives( apply_filters( 'widget_archives_args', array(
-					'type'            => 'monthly',
-					'show_post_count' => $c,
-				) ) );
+				wp_get_archives(
+					apply_filters(
+						'widget_archives_args',
+						array(
+							'type'            => 'monthly',
+							'show_post_count' => $c,
+						)
+					)
+				);
 				?>
 			</ul>
-		<?php
+			<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
 	}

@@ -60,18 +60,20 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			$cat_args['show_option_none'] = __( 'Select Category', 'default' );
 			$cat_args['id']               = $dropdown_id;
 
-			$dropdown = wp_dropdown_categories( array_merge(
-				/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
-				apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ),
-				array( 'echo' => false )
-			) );
+			$dropdown = wp_dropdown_categories(
+				array_merge(
+					/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
+					apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ),
+					array( 'echo' => false )
+				)
+			);
 			$dropdown = preg_replace(
 				'/(?<=<select\b)/',
 				sprintf( '<select on="change:%s.submit"', esc_attr( $form_id ) ),
 				$dropdown,
 				1
 			);
-			echo $dropdown; // WPCS: XSS OK.
+			echo $dropdown; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo '</form>';
 		else :
 			?>
@@ -83,7 +85,7 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 			wp_list_categories( apply_filters( 'widget_categories_args', $cat_args, $instance ) );
 			?>
 			</ul>
-		<?php
+			<?php
 		endif;
 		echo wp_kses_post( $args['after_widget'] );
 	}

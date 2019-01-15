@@ -128,11 +128,15 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', array(
-				'height' => $this->get_carousel_height( $node ),
-				'type'   => 'slides',
-				'layout' => 'fixed-height',
-			) );
+			$amp_carousel = AMP_DOM_Utils::create_node(
+				$this->dom,
+				'amp-carousel',
+				array(
+					'height' => $this->get_carousel_height( $node ),
+					'type'   => 'slides',
+					'layout' => 'fixed-height',
+				)
+			);
 			foreach ( $images as $image ) {
 				$amp_carousel->appendChild( $image );
 			}

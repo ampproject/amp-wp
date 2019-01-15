@@ -23,8 +23,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'add_blacklisted_protocols' => array(),
-		'add_blacklisted_tags' => array(),
+		'add_blacklisted_protocols'  => array(),
+		'add_blacklisted_tags'       => array(),
 		'add_blacklisted_attributes' => array(),
 	);
 
@@ -246,9 +246,12 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Protocols.
 	 */
 	private function get_blacklisted_protocols() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_protocols', array(
-			'javascript',
-		) );
+		return $this->merge_defaults_with_args(
+			'add_blacklisted_protocols',
+			array(
+				'javascript',
+			)
+		);
 	}
 
 	/**
@@ -257,31 +260,34 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Tags.
 	 */
 	private function get_blacklisted_tags() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_tags', array(
-			'script',
-			'noscript',
-			'style',
-			'frame',
-			'frameset',
-			'object',
-			'param',
-			'applet',
-			'form',
-			'label',
-			'input',
-			'textarea',
-			'select',
-			'option',
-			'link',
-			'picture',
+		return $this->merge_defaults_with_args(
+			'add_blacklisted_tags',
+			array(
+				'script',
+				'noscript',
+				'style',
+				'frame',
+				'frameset',
+				'object',
+				'param',
+				'applet',
+				'form',
+				'label',
+				'input',
+				'textarea',
+				'select',
+				'option',
+				'link',
+				'picture',
 
-			// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
-			'embed',
-			'embedvideo',
+				// Sanitizers run after embed handlers, so if anything wasn't matched, it needs to be removed.
+				'embed',
+				'embedvideo',
 
-			// Other weird ones.
-			'comments-count',
-		) );
+				// Other weird ones.
+				'comments-count',
+			)
+		);
 	}
 
 	/**
@@ -290,12 +296,15 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Attributes.
 	 */
 	private function get_blacklisted_attributes() {
-		return $this->merge_defaults_with_args( 'add_blacklisted_attributes', array(
-			'style',
-			'size',
-			'clear',
-			'align',
-			'valign',
-		) );
+		return $this->merge_defaults_with_args(
+			'add_blacklisted_attributes',
+			array(
+				'style',
+				'size',
+				'clear',
+				'align',
+				'valign',
+			)
+		);
 	}
 }

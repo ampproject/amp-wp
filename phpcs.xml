@@ -2,7 +2,9 @@
 <ruleset name="WordPress Coding Standards for AMP">
 
 	<rule ref="WordPress-Core" />
-	<rule ref="WordPress-Docs" />
+	<rule ref="WordPress-Docs">
+		<exclude-pattern>tests/*</exclude-pattern>
+	</rule>
 	<rule ref="WordPress-Extra" />
 
 	<rule ref="WordPress.WP.I18n">
@@ -13,6 +15,18 @@
 
 	<rule ref="WordPress.Files.FileName.InvalidClassFileName">
 		<exclude-pattern>tests/*</exclude-pattern>
+		<exclude-pattern>includes/admin/class-amp-customizer.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-dailymotion-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-facebook-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-gallery-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-instagram-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-pinterest-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-soundcloud-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-twitter-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
+		<exclude-pattern>includes/embeds/class-amp-youtube-embed.php</exclude-pattern>
+		<exclude-pattern>wpcom/class-amp-polldaddy-embed.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
@@ -21,7 +35,7 @@
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.AlternativeFunctions">
-		<exclude-pattern>bin/verify-version-consistency.php</exclude-pattern>
+		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.EnqueuedResources">
 		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>

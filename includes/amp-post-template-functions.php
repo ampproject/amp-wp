@@ -1,7 +1,20 @@
 <?php
+/**
+ * Post template functions and polyfills.
+ *
+ * @package AMP
+ */
 
-// Was only available in Customizer > 4.6
+// Was only available in Customizer > 4.6.
 if ( ! function_exists( 'sanitize_hex_color' ) ) {
+	/**
+	 * Sanitizes a hex color.
+	 *
+	 * Only used as polyfill for WordPress < 4.6.
+	 *
+	 * @param string $color Hex color.
+	 * @return string Sanitized hex color.
+	 */
 	function sanitize_hex_color( $color ) {
 		if ( '' === $color ) {
 			return '';

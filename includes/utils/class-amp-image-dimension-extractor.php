@@ -1,12 +1,27 @@
 <?php
+/**
+ * Class AMP_Image_Dimension_Extractor
+ *
+ * @package AMP
+ */
 
+/**
+ * Class with static methods to extract image dimensions.
+ */
 class AMP_Image_Dimension_Extractor {
-	static $callbacks_registered = false;
-	const STATUS_FAILED_LAST_ATTEMPT = 'failed';
+
+	const STATUS_FAILED_LAST_ATTEMPT     = 'failed';
 	const STATUS_IMAGE_EXTRACTION_FAILED = 'failed';
 
 	/**
-	 * Extract dimensions from image URLs.
+	 * Internal flag whether callbacks have been registered.
+	 *
+	 * @var bool
+	 */
+	private static $callbacks_registered = false;
+
+	/**
+	 * Extracts dimensions from image URLs.
 	 *
 	 * @since 0.2
 	 *
@@ -27,13 +42,13 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		// Normalize URLs and also track a map of normalized-to-original as we'll need it to reformat things when returning the data.
-		$url_map = array();
+		$url_map         = array();
 		$normalized_urls = array();
 		foreach ( $urls as $original_url ) {
 			$normalized_url = self::normalize_url( $original_url );
 			if ( false !== $normalized_url ) {
 				$url_map[ $original_url ] = $normalized_url;
-				$normalized_urls[] = $normalized_url;
+				$normalized_urls[]        = $normalized_url;
 			} else {
 				// This is not a URL we can extract dimensions from, so default to false.
 				$return_dimensions[ $original_url ] = false;
@@ -56,6 +71,14 @@ class AMP_Image_Dimension_Extractor {
 		return $return_dimensions;
 	}
 
+	/**
+	 * Normalizes the given URL.
+	 *
+	 * This method ensures the URL has a scheme and, if relative, is prepended the WordPress site URL.
+	 *
+	 * @param string $url URL to normalize.
+	 * @return string Normalized URL.
+	 */
 	public static function normalize_url( $url ) {
 		if ( empty( $url ) ) {
 			return false;
@@ -84,6 +107,9 @@ class AMP_Image_Dimension_Extractor {
 		return $url;
 	}
 
+	/**
+	 * Registers the necessary callbacks.
+	 */
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
@@ -107,7 +133,7 @@ class AMP_Image_Dimension_Extractor {
 		$transient_expiration = 30 * DAY_IN_SECONDS;
 
 		$urls_to_fetch = array();
-		$images = array();
+		$images        = array();
 
 		self::determine_which_images_to_fetch( $dimensions, $urls_to_fetch );
 		self::fetch_images( $urls_to_fetch, $images );
@@ -132,14 +158,14 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
-			$url_hash = md5( $url );
-			$transient_name = sprintf( 'amp_img_%s', $url_hash );
+			$url_hash          = md5( $url );
+			$transient_name    = sprintf( 'amp_img_%s', $url_hash );
 			$cached_dimensions = get_transient( $transient_name );
 
 			// If we're able to retrieve the dimensions from a transient, set them and move on.
 			if ( is_array( $cached_dimensions ) ) {
 				$dimensions[ $url ] = array(
-					'width' => $cached_dimensions[0],
+					'width'  => $cached_dimensions[0],
 					'height' => $cached_dimensions[1],
 				);
 				continue;
@@ -160,9 +186,9 @@ class AMP_Image_Dimension_Extractor {
 			}
 
 			// Include the image as a url to fetch.
-			$urls_to_fetch[ $url ] = array();
-			$urls_to_fetch[ $url ]['url'] = $url;
-			$urls_to_fetch[ $url ]['transient_name'] = $transient_name;
+			$urls_to_fetch[ $url ]                        = array();
+			$urls_to_fetch[ $url ]['url']                 = $url;
+			$urls_to_fetch[ $url ]['transient_name']      = $transient_name;
 			$urls_to_fetch[ $url ]['transient_lock_name'] = $transient_lock_name;
 			set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 		}
@@ -171,8 +197,8 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Fetch dimensions of remote images
 	 *
-	 * @param array  $urls_to_fetch Image src urls to fetch.
-	 * @param array  $images Array to populate with results of image/dimension inspection.
+	 * @param array $urls_to_fetch Image src urls to fetch.
+	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images ) {
 		$urls       = array_keys( $urls_to_fetch );
@@ -198,7 +224,7 @@ class AMP_Image_Dimension_Extractor {
 				set_transient( $url_data['transient_name'], self::STATUS_FAILED_LAST_ATTEMPT, $transient_expiration );
 			} else {
 				$dimensions[ $url_data['url'] ] = array(
-					'width' => $image_data['size'][0],
+					'width'  => $image_data['size'][0],
 					'height' => $image_data['size'][1],
 				);
 				set_transient(

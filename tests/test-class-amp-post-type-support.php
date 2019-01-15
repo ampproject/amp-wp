@@ -28,14 +28,20 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 * @covers AMP_Post_Type_Support::get_eligible_post_types()
 	 */
 	public function test_get_eligible_post_types() {
-		register_post_type( 'book', array(
-			'label'  => 'Book',
-			'public' => true,
-		) );
-		register_post_type( 'secret', array(
-			'label'  => 'Secret',
-			'public' => false,
-		) );
+		register_post_type(
+			'book',
+			array(
+				'label'  => 'Book',
+				'public' => true,
+			)
+		);
+		register_post_type(
+			'secret',
+			array(
+				'label'  => 'Secret',
+				'public' => false,
+			)
+		);
 
 		$this->assertEqualSets(
 			array(
@@ -55,14 +61,20 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 */
 	public function test_add_post_type_support() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		register_post_type( 'book', array(
-			'label'  => 'Book',
-			'public' => true,
-		) );
-		register_post_type( 'poem', array(
-			'label'  => 'Poem',
-			'public' => true,
-		) );
+		register_post_type(
+			'book',
+			array(
+				'label'  => 'Book',
+				'public' => true,
+			)
+		);
+		register_post_type(
+			'poem',
+			array(
+				'label'  => 'Poem',
+				'public' => true,
+			)
+		);
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'poem' ) );
 
 		AMP_Post_Type_Support::add_post_type_support();
@@ -78,10 +90,13 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	 */
 	public function test_get_support_error() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		register_post_type( 'book', array(
-			'label'  => 'Book',
-			'public' => true,
-		) );
+		register_post_type(
+			'book',
+			array(
+				'label'  => 'Book',
+				'public' => true,
+			)
+		);
 
 		// Post type support.
 		$book_id = $this->factory()->post->create( array( 'post_type' => 'book' ) );

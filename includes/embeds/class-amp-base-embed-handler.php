@@ -40,25 +40,28 @@ abstract class AMP_Base_Embed_Handler {
 	protected $did_convert_elements = false;
 
 	/**
-	 * Register embed.
+	 * Registers embed.
 	 */
 	abstract public function register_embed();
 
 	/**
-	 * Unregister embed.
+	 * Unregisters embed.
 	 */
 	abstract public function unregister_embed();
 
 	/**
-	 * AMP_Base_Embed_Handler constructor.
+	 * Constructor.
 	 *
 	 * @param array $args Height and width for embed.
 	 */
 	public function __construct( $args = array() ) {
-		$this->args = wp_parse_args( $args, array(
-			'width'  => $this->DEFAULT_WIDTH,
-			'height' => $this->DEFAULT_HEIGHT,
-		) );
+		$this->args = wp_parse_args(
+			$args,
+			array(
+				'width'  => $this->DEFAULT_WIDTH,
+				'height' => $this->DEFAULT_HEIGHT,
+			)
+		);
 	}
 
 	/**
