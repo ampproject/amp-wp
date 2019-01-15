@@ -24,7 +24,7 @@ $this->load_parts( array( 'html-start' ) );
 	<?php $this->load_parts( array( 'featured-image' ) ); ?>
 
 	<div class="amp-wp-article-content">
-		<?php echo $this->get( 'post_amp_content' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped Handled in AMP_Content::transform(). ?>
+		<?php echo $this->get( 'post_amp_content' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
 </article>
 

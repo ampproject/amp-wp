@@ -30,25 +30,37 @@ class Test_AMP extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'template_dir' => 'amp-templates',
-		) );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'template_dir' => 'amp-templates',
+			)
+		);
 		$this->assertFalse( amp_is_canonical() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'paired'       => false,
-			'template_dir' => 'amp-templates',
-		) );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'paired'       => false,
+				'template_dir' => 'amp-templates',
+			)
+		);
 		$this->assertTrue( amp_is_canonical() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'paired' => true,
-		) );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'paired' => true,
+			)
+		);
 		$this->assertFalse( amp_is_canonical() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'custom_prop' => 'something',
-		) );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'custom_prop' => 'something',
+			)
+		);
 		$this->assertTrue( amp_is_canonical() );
 	}
 }

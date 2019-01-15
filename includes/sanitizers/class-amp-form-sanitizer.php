@@ -90,7 +90,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$action_url = substr( $action_url, 5 );
 			}
 
-			/*
+			/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 			 * "For GET submissions, provide at least one of action or action-xhr".
 			 * "This attribute is required for method=GET. For method=POST, the
 			 * action attribute is invalid, use action-xhr instead".

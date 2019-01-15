@@ -177,14 +177,19 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$post = $this->factory()->post->create();
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
 
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
-			if ( 'accepted' === $error['code'] ) {
-				$sanitized = true;
-			} elseif ( 'rejected' === $error['code'] ) {
-				$sanitized = false;
-			}
-			return $sanitized;
-		}, 10, 2 );
+		add_filter(
+			'amp_validation_error_sanitized',
+			function( $sanitized, $error ) {
+				if ( 'accepted' === $error['code'] ) {
+					$sanitized = true;
+				} elseif ( 'rejected' === $error['code'] ) {
+					$sanitized = false;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
 
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
@@ -323,14 +328,19 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create_and_get();
 
-		add_filter( 'amp_validation_error_sanitized', function( $sanitized, $error ) {
-			if ( 'accepted' === $error['code'] ) {
-				$sanitized = true;
-			} elseif ( 'rejected' === $error['code'] ) {
-				$sanitized = false;
-			}
-			return $sanitized;
-		}, 10, 2 );
+		add_filter(
+			'amp_validation_error_sanitized',
+			function( $sanitized, $error ) {
+				if ( 'accepted' === $error['code'] ) {
+					$sanitized = true;
+				} elseif ( 'rejected' === $error['code'] ) {
+					$sanitized = false;
+				}
+				return $sanitized;
+			},
+			10,
+			2
+		);
 
 		$errors = array(
 			array(
@@ -526,14 +536,16 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			'cb' => '<input type="checkbox">',
 		);
 		$this->assertEquals(
-			array_keys( array_merge(
-				$initial_columns,
-				array(
-					AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status',
-					AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
-					AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+			array_keys(
+				array_merge(
+					$initial_columns,
+					array(
+						AMP_Validation_Error_Taxonomy::ERROR_STATUS => 'Status',
+						AMP_Validation_Error_Taxonomy::FOUND_ELEMENTS_AND_ATTRIBUTES => 'Invalid',
+						AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT => 'Sources',
+					)
 				)
-			) ),
+			),
 			array_keys( AMP_Validated_URL_Post_Type::add_post_columns( $initial_columns ) )
 		);
 	}
@@ -740,17 +752,19 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( array(
-						'results' => array_map(
-							function( $error ) {
-								return array_merge(
-									compact( 'error' ),
-									array( 'sanitized' => false )
-								);
-							},
-							$that->get_mock_errors()
-						),
-					) )
+					'AMP_VALIDATION:' . wp_json_encode(
+						array(
+							'results' => array_map(
+								function( $error ) {
+									return array_merge(
+										compact( 'error' ),
+										array( 'sanitized' => false )
+									);
+								},
+								$that->get_mock_errors()
+							),
+						)
+					)
 				),
 			);
 		};
@@ -768,11 +782,14 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		remove_filter( 'pre_http_request', $filter, 10 );
 
 		// Test error scenario.
-		add_filter( 'pre_http_request', function() {
-			return array(
-				'body' => '<html></html>',
-			);
-		} );
+		add_filter(
+			'pre_http_request',
+			function() {
+				return array(
+					'body' => '<html></html>',
+				);
+			}
+		);
 		$this->assertEquals(
 			add_query_arg(
 				array(
@@ -856,26 +873,33 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$_REQUEST['_wpnonce'] = wp_create_nonce( AMP_Validated_URL_Post_Type::NONCE_ACTION );
 
 		$exception = null;
-		add_filter( 'wp_redirect', function( $url, $status ) {
-			throw new Exception( $url, $status );
-		}, 10, 2 );
+		add_filter(
+			'wp_redirect',
+			function( $url, $status ) {
+				throw new Exception( $url, $status );
+			},
+			10,
+			2
+		);
 
 		$that   = $this;
 		$filter = function() use ( $that ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( array(
-						'results' => array_map(
-							function( $error ) {
-								return array_merge(
-									compact( 'error' ),
-									array( 'sanitized' => false )
-								);
-							},
-							$that->get_mock_errors()
-						),
-					) )
+					'AMP_VALIDATION:' . wp_json_encode(
+						array(
+							'results' => array_map(
+								function( $error ) {
+									return array_merge(
+										compact( 'error' ),
+										array( 'sanitized' => false )
+									);
+								},
+								$that->get_mock_errors()
+							),
+						)
+					)
 				),
 			);
 		};
@@ -986,29 +1010,34 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			),
 			home_url( '/' )
 		);
-		add_filter( 'pre_http_request', function() {
-			return array(
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( array(
-						'results' => array(
+		add_filter(
+			'pre_http_request',
+			function() {
+				return array(
+					'body' => sprintf(
+						'<html amp><head></head><body></body><!--%s--></html>',
+						'AMP_VALIDATION:' . wp_json_encode(
 							array(
-								'sanitized' => false,
-								'error'     => array(
-									'code' => 'bar',
+								'results' => array(
+									array(
+										'sanitized' => false,
+										'error'     => array(
+											'code' => 'bar',
+										),
+									),
+									array(
+										'sanitized' => false,
+										'error'     => array(
+											'code' => 'baz',
+										),
+									),
 								),
-							),
-							array(
-								'sanitized' => false,
-								'error'     => array(
-									'code' => 'baz',
-								),
-							),
-						),
-					) )
-				),
-			);
-		} );
+							)
+						)
+					),
+				);
+			}
+		);
 
 		$r = AMP_Validated_URL_Post_Type::recheck_post( $invalid_url_post_id );
 		$this->assertInternalType( 'array', $r );
@@ -1045,21 +1074,26 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			array( $error ),
 			home_url( '/' )
 		);
-		add_filter( 'pre_http_request', function() use ( $error ) {
-			return array(
-				'body' => sprintf(
-					'<html amp><head></head><body></body><!--%s--></html>',
-					'AMP_VALIDATION:' . wp_json_encode( array(
-						'results' => array(
+		add_filter(
+			'pre_http_request',
+			function() use ( $error ) {
+				return array(
+					'body' => sprintf(
+						'<html amp><head></head><body></body><!--%s--></html>',
+						'AMP_VALIDATION:' . wp_json_encode(
 							array(
-								'sanitized' => false,
-								'error'     => $error,
-							),
-						),
-					) )
-				),
-			);
-		} );
+								'results' => array(
+									array(
+										'sanitized' => false,
+										'error'     => $error,
+									),
+								),
+							)
+						)
+					),
+				);
+			}
+		);
 
 		$post = get_post( $invalid_url_post_id );
 
@@ -1069,9 +1103,14 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			$errors[0]['term']->slug => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 		);
 
-		add_filter( 'wp_redirect', function( $url, $status ) {
-			throw new Exception( $url, $status );
-		}, 10, 2 );
+		add_filter(
+			'wp_redirect',
+			function( $url, $status ) {
+				throw new Exception( $url, $status );
+			},
+			10,
+			2
+		);
 		$exception = null;
 		try {
 			AMP_Validated_URL_Post_Type::handle_validation_error_status_update();
@@ -1334,18 +1373,22 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEmpty( ob_get_clean() );
 
 		// The post type is correct, but it doesn't have a validation URL associated with it, so this shouldn't output anything.
-		$post_correct_post_type = $this->factory()->post->create_and_get( array(
-			'post-type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-		) );
+		$post_correct_post_type = $this->factory()->post->create_and_get(
+			array(
+				'post-type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			)
+		);
 		ob_start();
 		AMP_Validated_URL_Post_Type::print_url_as_title( $post_correct_post_type );
 		$this->assertEmpty( ob_get_clean() );
 
 		// The post has the correct type and a validation URL in the title, so this should output markup.
-		$post_correct_post_type = $this->factory()->post->create_and_get( array(
-			'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'post_title' => home_url(),
-		) );
+		$post_correct_post_type = $this->factory()->post->create_and_get(
+			array(
+				'post_type'  => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'post_title' => home_url(),
+			)
+		);
 		ob_start();
 		AMP_Validated_URL_Post_Type::print_url_as_title( $post_correct_post_type );
 		$output = ob_get_clean();
@@ -1376,9 +1419,11 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( $title, AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post->ID ) );
 
 		// The conditional should be true, and this should return the filtered $title.
-		$post_correct_post_type = $this->factory()->post->create_and_get( array(
-			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-		) );
+		$post_correct_post_type = $this->factory()->post->create_and_get(
+			array(
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+			)
+		);
 		$this->assertEquals( '/baz', AMP_Validated_URL_Post_Type::filter_the_title_in_post_list_table( $title, $post_correct_post_type ) );
 	}
 
@@ -1398,10 +1443,12 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		for ( $i = 0; $i < 40; $i++ ) {
 			$invalid_url_post      = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
-			$validation_error_term = $this->factory()->term->create( array(
-				'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-				'description' => wp_json_encode( array( 'code' => 'test' ), compact( 'i' ) ),
-			) );
+			$validation_error_term = $this->factory()->term->create(
+				array(
+					'taxonomy'    => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+					'description' => wp_json_encode( array( 'code' => 'test' ), compact( 'i' ) ),
+				)
+			);
 			if ( $i < 9 ) {
 				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS;
 			} elseif ( $i < 20 ) {
@@ -1411,9 +1458,13 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			} else {
 				$status = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
 			}
-			wp_update_term( $validation_error_term, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, array(
-				'term_group' => $status,
-			) );
+			wp_update_term(
+				$validation_error_term,
+				AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+				array(
+					'term_group' => $status,
+				)
+			);
 
 			// Associate the validation error term with a URL.
 			wp_set_post_terms(
@@ -1608,10 +1659,12 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			'delete' => '',
 		);
 
-		$post = $this->factory()->post->create_and_get( array(
-			'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'title'     => 'My Post',
-		) );
+		$post = $this->factory()->post->create_and_get(
+			array(
+				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'title'     => 'My Post',
+			)
+		);
 
 		$filtered_actions = AMP_Validated_URL_Post_Type::filter_post_row_actions( $actions, $post );
 
@@ -1655,11 +1708,14 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			'post' => array(),
 		);
 
-		$filtered_messages = AMP_Validated_URL_Post_Type::filter_bulk_post_updated_messages( $messages, array(
-			'deleted'   => 1,
-			'trashed'   => 99,
-			'untrashed' => 99,
-		) );
+		$filtered_messages = AMP_Validated_URL_Post_Type::filter_bulk_post_updated_messages(
+			$messages,
+			array(
+				'deleted'   => 1,
+				'trashed'   => 99,
+				'untrashed' => 99,
+			)
+		);
 
 		$this->assertEquals( '%s validated URL forgotten.', $filtered_messages['post']['deleted'] );
 		$this->assertEquals( '%s validated URLs forgotten.', $filtered_messages['post']['trashed'] );

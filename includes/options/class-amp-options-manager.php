@@ -528,12 +528,14 @@ class AMP_Options_Manager {
 			$validation = AMP_Validation_Manager::validate_url( $url );
 
 			if ( is_wp_error( $validation ) ) {
-				$review_messages[] = esc_html( sprintf(
-					/* translators: %1$s is the error message, %2$s is the error code */
-					__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
-					$validation->get_error_message(),
-					$validation->get_error_code()
-				) );
+				$review_messages[] = esc_html(
+					sprintf(
+						/* translators: %1$s is the error message, %2$s is the error code */
+						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
+						$validation->get_error_message(),
+						$validation->get_error_code()
+					)
+				);
 
 				$error_message = $validation->get_error_message();
 				if ( $error_message ) {

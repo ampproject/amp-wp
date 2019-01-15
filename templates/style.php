@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+
 /**
  * Context.
  *

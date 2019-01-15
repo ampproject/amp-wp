@@ -119,9 +119,11 @@ class Test_AMP_Comment_Walker extends WP_UnitTestCase {
 	public function get_comments() {
 		$comments = array();
 		for ( $i = 0; $i < 5; $i++ ) {
-			$comments[] = $this->factory()->comment->create_and_get( array(
-				'comment_date' => gmdate( 'Y-m-d H:i:s', ( time() + $i ) ), // Ensure each comment has a different date.
-			) );
+			$comments[] = $this->factory()->comment->create_and_get(
+				array(
+					'comment_date' => gmdate( 'Y-m-d H:i:s', ( time() + $i ) ), // Ensure each comment has a different date.
+				)
+			);
 		}
 		return $comments;
 	}

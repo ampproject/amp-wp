@@ -137,9 +137,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
-		AMP_Validation_Manager::init( array(
-			'should_locate_sources' => true,
-		) );
+		AMP_Validation_Manager::init(
+			array(
+				'should_locate_sources' => true,
+			)
+		);
 		$this->assertEquals( 10, has_action( 'wp', array( self::TESTED_CLASS, 'wrap_widget_callbacks' ) ) );
 		$this->assertFalse( has_filter( 'amp_validation_error_sanitized', array( self::TESTED_CLASS, 'filter_tree_shaking_validation_error_as_accepted' ) ) );
 	}
@@ -320,9 +322,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertEquals( 10, has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 
-		add_filter( 'pre_http_request', function() {
-			return new WP_Error( 'http_request_made' );
-		} );
+		add_filter(
+			'pre_http_request',
+			function() {
+				return new WP_Error( 'http_request_made' );
+			}
+		);
 		$results = AMP_Validation_Manager::validate_queued_posts_on_frontend();
 		$this->assertArrayHasKey( $post->ID, $results );
 		$this->assertInstanceOf( 'WP_Error', $results[ $post->ID ] );
@@ -340,9 +345,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::add_rest_api_fields();
 		$post_types_non_canonical = array_intersect(
 			get_post_types_by_support( 'amp' ),
-			get_post_types( array(
-				'show_in_rest' => true,
-			) )
+			get_post_types(
+				array(
+					'show_in_rest' => true,
+				)
+			)
 		);
 		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
@@ -384,11 +391,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Error_Taxonomy::register();
 
 		$id = $this->factory()->post->create();
-		$this->assertNull( AMP_Validation_Manager::get_amp_validity_rest_field(
-			compact( 'id' ),
-			'',
-			new WP_REST_Request( 'GET' )
-		) );
+		$this->assertNull(
+			AMP_Validation_Manager::get_amp_validity_rest_field(
+				compact( 'id' ),
+				'',
+				new WP_REST_Request( 'GET' )
+			)
+		);
 
 		// Create an error custom post for the ID, so this will return the errors in the field.
 		$errors = array(
@@ -402,11 +411,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		// Make sure capability check is honored.
-		$this->assertNull( AMP_Validation_Manager::get_amp_validity_rest_field(
-			compact( 'id' ),
-			'',
-			new WP_REST_Request( 'GET' )
-		) );
+		$this->assertNull(
+			AMP_Validation_Manager::get_amp_validity_rest_field(
+				compact( 'id' ),
+				'',
+				new WP_REST_Request( 'GET' )
+			)
+		);
 
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
@@ -435,15 +446,18 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		// PUT request.
-		add_filter( 'pre_http_request', function() {
-			return array(
-				'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
-				'response' => array(
-					'code'    => 200,
-					'message' => 'ok',
-				),
-			);
-		} );
+		add_filter(
+			'pre_http_request',
+			function() {
+				return array(
+					'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
+					'response' => array(
+						'code'    => 200,
+						'message' => 'ok',
+					),
+				);
+			}
+		);
 		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
 			compact( 'id' ),
 			'',
@@ -460,9 +474,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::has_cap()
 	 */
 	public function test_has_cap() {
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'subscriber',
-		) ) );
+		wp_set_current_user(
+			$this->factory()->user->create(
+				array(
+					'role' => 'subscriber',
+				)
+			)
+		);
 		$this->assertFalse( AMP_Validation_Manager::has_cap() );
 
 		$this->set_capability();
@@ -480,12 +498,17 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$that = $this;
 		$node = $this->node;
-		add_filter( 'amp_validation_error', function( $error, $context ) use ( $node, $that ) {
-			$error['filtered'] = true;
-			$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
-			$that->assertSame( $node, $context['node'] );
-			return $error;
-		}, 10, 2 );
+		add_filter(
+			'amp_validation_error',
+			function( $error, $context ) use ( $node, $that ) {
+				$error['filtered'] = true;
+				$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
+				$that->assertSame( $node, $context['node'] );
+				return $error;
+			},
+			10,
+			2
+		);
 
 		AMP_Validation_Manager::add_validation_error(
 			array(
@@ -532,9 +555,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::reset_validation_results()
 	 */
 	public function test_reset_validation_results() {
-		AMP_Validation_Manager::add_validation_error( array(
-			'code' => 'test',
-		) );
+		AMP_Validation_Manager::add_validation_error(
+			array(
+				'code' => 'test',
+			)
+		);
 		AMP_Validation_Manager::reset_validation_results();
 		$this->assertEquals( array(), AMP_Validation_Manager::$validation_results );
 	}
@@ -628,16 +653,18 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			'hook'     => 'something',
 		);
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( implode(
-			'',
-			array(
-				AMP_Validation_Manager::get_source_comment( $source1, true ),
-				AMP_Validation_Manager::get_source_comment( $source2, true ),
-				'<b id="test">Test</b>',
-				AMP_Validation_Manager::get_source_comment( $source2, false ),
-				AMP_Validation_Manager::get_source_comment( $source1, false ),
+		$dom = AMP_DOM_Utils::get_dom_from_content(
+			implode(
+				'',
+				array(
+					AMP_Validation_Manager::get_source_comment( $source1, true ),
+					AMP_Validation_Manager::get_source_comment( $source2, true ),
+					'<b id="test">Test</b>',
+					AMP_Validation_Manager::get_source_comment( $source2, false ),
+					AMP_Validation_Manager::get_source_comment( $source1, false ),
+				)
 			)
-		) );
+		);
 
 		/**
 		 * Comments.
@@ -786,10 +813,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertInstanceOf( 'Closure', $wp_registered_widgets[ $widget_id ]['callback'] );
 
 		$sidebar_id = 'amp-sidebar';
-		register_sidebar( array(
-			'id'           => $sidebar_id,
-			'after_widget' => '</li>',
-		) );
+		register_sidebar(
+			array(
+				'id'           => $sidebar_id,
+				'after_widget' => '</li>',
+			)
+		);
 		$_wp_sidebars_widgets[ $sidebar_id ] = array( $widget_id );
 
 		AMP_Theme_Support::start_output_buffering();
@@ -914,13 +943,16 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		do_action( 'outer_action' );
 		$output = ob_get_clean();
 		$this->assertEquals(
-			implode( '', array(
-				'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
-				'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
-				'<b>Hello</b>',
-				'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
-				'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
-			) ),
+			implode(
+				'',
+				array(
+					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
+					'<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
+					'<b>Hello</b>',
+					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"inner_action"}-->',
+					'<!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","hook":"outer_action"}-->',
+				)
+			),
 			$output
 		);
 	}
@@ -949,9 +981,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_decorate_shortcode_and_filter_source() {
 		AMP_Validation_Manager::add_validation_error_sourcing();
-		add_shortcode( 'test', function() {
-			return '<b>test</b>';
-		} );
+		add_shortcode(
+			'test',
+			function() {
+				return '<b>test</b>';
+			}
+		);
 
 		$filtered_content = apply_filters( 'the_content', 'before[test]after' );
 
@@ -963,11 +998,14 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			$source_json = '{"hook":"the_content","filter":true,"sources":[{"type":"core","name":"wp-includes","function":"WP_Embed::run_shortcode"},{"type":"core","name":"wp-includes","function":"WP_Embed::autoembed"},{"type":"core","name":"wp-includes","function":"wptexturize"},{"type":"core","name":"wp-includes","function":"wpautop"},{"type":"core","name":"wp-includes","function":"shortcode_unautop"},{"type":"core","name":"wp-includes","function":"prepend_attachment"},{"type":"core","name":"wp-includes","function":"wp_make_content_images_responsive"},{"type":"core","name":"wp-includes","function":"capital_P_dangit"},{"type":"core","name":"wp-includes","function":"do_shortcode"},{"type":"core","name":"wp-includes","function":"convert_smilies"}]}';
 		}
 
-		$expected_content = implode( '', array(
-			"<!--amp-source-stack $source_json-->",
-			'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
-			"<!--/amp-source-stack $source_json-->",
-		) );
+		$expected_content = implode(
+			'',
+			array(
+				"<!--amp-source-stack $source_json-->",
+				'<p>before<!--amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}--><b>test</b><!--/amp-source-stack {"type":"plugin","name":"amp","function":"{closure}","shortcode":"test"}-->after</p>' . "\n",
+				"<!--/amp-source-stack $source_json-->",
+			)
+		);
 
 		$this->assertEquals(
 			preg_split( '/(?=<)/', $expected_content ),
@@ -1280,17 +1318,20 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
 
-		set_transient( AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY, array(
+		set_transient(
+			AMP_Validation_Manager::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY,
 			array(
-				'code'    => 'example',
-				'sources' => array(
-					array(
-						'type' => 'plugin',
-						'name' => 'foo-bar',
+				array(
+					'code'    => 'example',
+					'sources' => array(
+						array(
+							'type' => 'plugin',
+							'name' => 'foo-bar',
+						),
 					),
 				),
-			),
-		) );
+			)
+		);
 		ob_start();
 		AMP_Validation_Manager::print_plugin_notice();
 		$output = ob_get_clean();
@@ -1399,9 +1440,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @return void
 	 */
 	public function set_capability() {
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		wp_set_current_user(
+			$this->factory()->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
 	}
 
 	/**

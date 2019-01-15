@@ -172,17 +172,23 @@ class AMP_Validation_Manager {
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
 		// Actions and filters involved in validation.
-		add_action( 'activate_plugin', function() {
-			if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
-				add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+		add_action(
+			'activate_plugin',
+			function() {
+				if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
+					add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+				}
 			}
-		} );
+		);
 
 		// Prevent query vars from persisting after redirect.
-		add_filter( 'removable_query_args', function( $query_vars ) {
-			$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-			return $query_vars;
-		} );
+		add_filter(
+			'removable_query_args',
+			function( $query_vars ) {
+				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+				return $query_vars;
+			}
+		);
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
@@ -384,12 +390,14 @@ class AMP_Validation_Manager {
 
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
 		if ( ! $first_item_is_validate ) {
-			$wp_admin_bar->add_menu( array(
-				'parent' => 'amp',
-				'id'     => 'amp-view',
-				'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
-				'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
-			) );
+			$wp_admin_bar->add_menu(
+				array(
+					'parent' => 'amp',
+					'id'     => 'amp-view',
+					'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+					'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
+				)
+			);
 		}
 
 		// Validate admin bar item.
@@ -409,17 +417,21 @@ class AMP_Validation_Manager {
 				)
 			);
 		}
-		$wp_admin_bar->add_menu( array(
-			'parent' => 'amp',
-			'id'     => 'amp-validity',
-			'title'  => esc_html( $title ),
-			'href'   => esc_url( $validate_url ),
-		) );
+		$wp_admin_bar->add_menu(
+			array(
+				'parent' => 'amp',
+				'id'     => 'amp-validity',
+				'title'  => esc_html( $title ),
+				'href'   => esc_url( $validate_url ),
+			)
+		);
 
 		// Scrub the query var from the URL.
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			add_action( 'wp_before_admin_bar_render', function() {
-				?>
+			add_action(
+				'wp_before_admin_bar_render',
+				function() {
+					?>
 				<script>
 				(function( queryVar ) {
 					var urlParser = document.createElement( 'a' );
@@ -432,8 +444,9 @@ class AMP_Validation_Manager {
 					}
 				})( <?php echo wp_json_encode( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ); ?> );
 				</script>
-				<?php
-			} );
+					<?php
+				}
+			);
 		}
 
 		self::$amp_admin_bar_item_added = true;
@@ -607,9 +620,11 @@ class AMP_Validation_Manager {
 		} else {
 			$object_types = array_intersect(
 				get_post_types_by_support( 'amp' ),
-				get_post_types( array(
-					'show_in_rest' => true,
-				) )
+				get_post_types(
+					array(
+						'show_in_rest' => true,
+					)
+				)
 			);
 		}
 
@@ -1013,11 +1028,13 @@ class AMP_Validation_Manager {
 				// Inline script.
 				$text = $node->textContent;
 				foreach ( $enqueued_script_handles as $enqueued_script_handle ) {
-					$inline_scripts = array_filter( array_merge(
-						(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
-						(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
-						(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
-					) );
+					$inline_scripts = array_filter(
+						array_merge(
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'data' ),
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'before' ),
+							(array) wp_scripts()->get_data( $enqueued_script_handle, 'after' )
+						)
+					);
 					foreach ( $inline_scripts as $inline_script ) {
 						/*
 						 * Check to see if the inline script is inside (or the same) as the script in the document.
@@ -1066,14 +1083,17 @@ class AMP_Validation_Manager {
 	public static function add_block_source_comments( $content ) {
 		self::$block_content_index = 0;
 
-		$start_block_pattern = implode( '', array(
-			'#<!--\s+',
-			'(?P<closing>/)?',
-			'wp:(?P<name>\S+)',
-			'(?:\s+(?P<attributes>\{.*?\}))?',
-			'\s+(?P<self_closing>\/)?',
-			'-->#s',
-		) );
+		$start_block_pattern = implode(
+			'',
+			array(
+				'#<!--\s+',
+				'(?P<closing>/)?',
+				'wp:(?P<name>\S+)',
+				'(?:\s+(?P<attributes>\{.*?\}))?',
+				'\s+(?P<self_closing>\/)?',
+				'-->#s',
+			)
+		);
 
 		return preg_replace_callback(
 			$start_block_pattern,
@@ -1202,10 +1222,12 @@ class AMP_Validation_Manager {
 
 				$source['hook']    = $hook;
 				$original_function = $callback['function'];
-				$wrapped_callback  = self::wrapped_callback( array_merge(
-					$callback,
-					compact( 'priority', 'source', 'hook' )
-				) );
+				$wrapped_callback  = self::wrapped_callback(
+					array_merge(
+						$callback,
+						compact( 'priority', 'source', 'hook' )
+					)
+				);
 
 				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
 					$callback['function'] = $original_function; // Restore original.
@@ -1252,11 +1274,14 @@ class AMP_Validation_Manager {
 		}
 		$source['shortcode'] = $tag;
 
-		$output = implode( '', array(
-			self::get_source_comment( $source, true ),
-			$output,
-			self::get_source_comment( $source, false ),
-		) );
+		$output = implode(
+			'',
+			array(
+				self::get_source_comment( $source, true ),
+				$output,
+				self::get_source_comment( $source, false ),
+			)
+		);
 		return $output;
 	}
 
@@ -1275,11 +1300,14 @@ class AMP_Validation_Manager {
 			'embed' => $url,
 			'attr'  => $attr,
 		);
-		return implode( '', array(
-			self::get_source_comment( $source, true ),
-			trim( $output ),
-			self::get_source_comment( $source, false ),
-		) );
+		return implode(
+			'',
+			array(
+				self::get_source_comment( $source, true ),
+				trim( $output ),
+				self::get_source_comment( $source, false ),
+			)
+		);
 	}
 
 	/**
@@ -1310,11 +1338,14 @@ class AMP_Validation_Manager {
 			array_pop( $sources ); // Remove self.
 			$source['sources'] = $sources;
 		}
-		return implode( '', array(
-			self::get_source_comment( $source, true ),
-			$value,
-			self::get_source_comment( $source, false ),
-		) );
+		return implode(
+			'',
+			array(
+				self::get_source_comment( $source, true ),
+				$value,
+				self::get_source_comment( $source, false ),
+			)
+		);
 	}
 
 	/**
@@ -1426,7 +1457,7 @@ class AMP_Validation_Manager {
 		// Check if any functions in call stack are output buffering display handlers.
 		$called_functions = array();
 		if ( defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' ) ) {
-			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.PHP.NewConstants.debug_backtrace_ignore_argsFound
+			$arg = DEBUG_BACKTRACE_IGNORE_ARGS; // phpcs:ignore PHPCompatibility.Constants.NewConstants.debug_backtrace_ignore_argsFound
 		} else {
 			$arg = false;
 		}
@@ -1536,11 +1567,14 @@ class AMP_Validation_Manager {
 
 		// Wrap output that contains HTML tags (as opposed to actions that trigger in HTML attributes).
 		if ( ! empty( $output ) && preg_match( '/<.+?>/s', $output ) ) {
-			$output = implode( '', array(
-				self::get_source_comment( $source, true ),
-				$output,
-				self::get_source_comment( $source, false ),
-			) );
+			$output = implode(
+				'',
+				array(
+					self::get_source_comment( $source, true ),
+					$output,
+					self::get_source_comment( $source, false ),
+				)
+			);
 		}
 		return $output;
 	}
@@ -1774,15 +1808,18 @@ class AMP_Validation_Manager {
 		/** This filter is documented in wp-includes/class-http.php */
 		$allowed_redirects = apply_filters( 'http_request_redirection_count', 5 );
 		for ( $redirect_count = 0; $redirect_count < $allowed_redirects; $redirect_count++ ) {
-			$r = wp_remote_get( $validation_url, array(
-				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-				'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
-				'sslverify'   => false,
-				'redirection' => 0, // Because we're in a loop for redirection.
-				'headers'     => array(
-					'Cache-Control' => 'no-cache',
-				),
-			) );
+			$r = wp_remote_get(
+				$validation_url,
+				array(
+					'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+					'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+					'sslverify'   => false,
+					'redirection' => 0, // Because we're in a loop for redirection.
+					'headers'     => array(
+						'Cache-Control' => 'no-cache',
+					),
+				)
+			);
 
 			// If the response is not a redirect, then break since $r is all we need.
 			$response_code   = wp_remote_retrieve_response_code( $r );
@@ -1903,20 +1940,23 @@ class AMP_Validation_Manager {
 
 				$more_details_link = sprintf(
 					'<a href="%s">%s</a>',
-					esc_url( add_query_arg(
-						'post_type',
-						AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-						admin_url( 'edit.php' )
-					) ),
+					esc_url(
+						add_query_arg(
+							'post_type',
+							AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+							admin_url( 'edit.php' )
+						)
+					),
 					__( 'More details', 'amp' )
 				);
+
 				printf(
 					'<div class="notice notice-warning is-dismissible"><p>%s %s %s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
 					esc_html( _n( 'Warning: The following plugin may be incompatible with AMP:', 'Warning: The following plugins may be incompatible with AMP:', count( $invalid_plugins ), 'amp' ) ),
-					implode( ', ', $reported_plugins ),
-					$more_details_link,
+					implode( ', ', $reported_plugins ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					$more_details_link, // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					esc_html__( 'Dismiss this notice.', 'amp' )
-				); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				);
 			}
 		}
 	}
