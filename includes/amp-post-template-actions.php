@@ -52,13 +52,16 @@ function amp_post_template_add_canonical( $amp_template ) {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_scripts( $amp_template ) {
-	echo amp_render_scripts( array_merge(
-		array(
-			// Just in case the runtime has been overridden by amp_post_template_data filter.
-			'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
-		),
-		$amp_template->get( 'amp_component_scripts', array() )
-	) ); // WPCS: xss ok.
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo amp_render_scripts(
+		array_merge(
+			array(
+				// Just in case the runtime has been overridden by amp_post_template_data filter.
+				'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
+			),
+			$amp_template->get( 'amp_component_scripts', array() )
+		)
+	);
 }
 
 /**
@@ -80,7 +83,7 @@ function amp_post_template_add_fonts( $amp_template ) {
  * @see amp_get_boilerplate_code()
  */
 function amp_post_template_add_boilerplate_css() {
-	echo amp_get_boilerplate_code(); // WPCS: xss ok.
+	echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }
 
 /**
@@ -101,16 +104,16 @@ function amp_post_template_add_schemaorg_metadata() {
 function amp_post_template_add_styles( $amp_template ) {
 	$stylesheets = $amp_template->get( 'post_amp_stylesheets' );
 	if ( ! empty( $stylesheets ) ) {
-		echo '/* Inline stylesheets */' . PHP_EOL; // WPCS: XSS OK.
-		echo implode( '', $stylesheets ); // WPCS: XSS OK.
+		echo '/* Inline stylesheets */' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo implode( '', $stylesheets ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 
 	$styles = $amp_template->get( 'post_amp_styles' );
 	if ( ! empty( $styles ) ) {
-		echo '/* Inline styles */' . PHP_EOL; // WPCS: XSS OK.
+		echo '/* Inline styles */' . PHP_EOL; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		foreach ( $styles as $selector => $declarations ) {
 			$declarations = implode( ';', $declarations ) . ';';
-			printf( '%1$s{%2$s}', $selector, $declarations ); // WPCS: XSS OK.
+			printf( '%1$s{%2$s}', $selector, $declarations ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 }

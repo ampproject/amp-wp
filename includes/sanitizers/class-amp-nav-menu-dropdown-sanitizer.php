@@ -64,65 +64,70 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 		 * @param object $item        Nav menu item.
 		 * @return string Modified nav menu item HTML.
 		 */
-		add_filter( 'walker_nav_menu_start_el', function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
-			unset( $depth );
+		add_filter(
+			'walker_nav_menu_start_el',
+			function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
+				unset( $depth );
 
-			// Skip adding buttons to nav menu widgets for now.
-			if ( empty( $nav_menu_args->theme_location ) ) {
-				return $item_output;
-			}
+				// Skip adding buttons to nav menu widgets for now.
+				if ( empty( $nav_menu_args->theme_location ) ) {
+					return $item_output;
+				}
 
-			if ( ! in_array( 'menu-item-has-children', $item->classes, true ) ) {
-				return $item_output;
-			}
+				if ( ! in_array( 'menu-item-has-children', $item->classes, true ) ) {
+					return $item_output;
+				}
 
-			static $nav_menu_item_number = 0;
-			$nav_menu_item_number++;
+				static $nav_menu_item_number = 0;
+				$nav_menu_item_number++;
 
-			$expanded = in_array( 'current-menu-ancestor', $item->classes, true );
+				$expanded = in_array( 'current-menu-ancestor', $item->classes, true );
 
-			$expanded_state_id = $args['nav_menu_item_state_id'] . $nav_menu_item_number;
+				$expanded_state_id = $args['nav_menu_item_state_id'] . $nav_menu_item_number;
 
-			// Create new state for managing storing the whether the sub-menu is expanded.
-			$item_output .= sprintf(
-				'<amp-state id="%s"><script type="application/json">%s</script></amp-state>',
-				esc_attr( $expanded_state_id ),
-				wp_json_encode( $expanded )
-			);
-
-			$dropdown_button  = '<button';
-			$dropdown_button .= sprintf(
-				' class="%s" [class]="%s"',
-				esc_attr( $args['sub_menu_button_class'] . ( $expanded ? ' ' . $args['sub_menu_button_toggle_class'] : '' ) ),
-				esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $args['sub_menu_button_class'] ), wp_json_encode( ' ' . $args['sub_menu_button_toggle_class'] ) ) )
-			);
-			$dropdown_button .= sprintf(
-				' aria-expanded="%s" [aria-expanded]="%s"',
-				esc_attr( wp_json_encode( $expanded ) ),
-				esc_attr( "$expanded_state_id ? 'true' : 'false'" )
-			);
-			$dropdown_button .= sprintf(
-				' on="%s"',
-				esc_attr( "tap:AMP.setState( { $expanded_state_id: ! $expanded_state_id } )" )
-			);
-			$dropdown_button .= '>';
-
-			if ( isset( $args['icon'] ) ) {
-				$dropdown_button .= $args['icon'];
-			}
-			if ( isset( $args['expand_text'] ) && isset( $args['collapse_text'] ) ) {
-				$dropdown_button .= sprintf(
-					'<span class="screen-reader-text" [text]="%s">%s</span>',
-					esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( $args['collapse_text'] ), wp_json_encode( $args['expand_text'] ) ) ),
-					esc_html( $expanded ? $args['collapse_text'] : $args['expand_text'] )
+				// Create new state for managing storing the whether the sub-menu is expanded.
+				$item_output .= sprintf(
+					'<amp-state id="%s"><script type="application/json">%s</script></amp-state>',
+					esc_attr( $expanded_state_id ),
+					wp_json_encode( $expanded )
 				);
-			}
 
-			$dropdown_button .= '</button>';
+				$dropdown_button  = '<button';
+				$dropdown_button .= sprintf(
+					' class="%s" [class]="%s"',
+					esc_attr( $args['sub_menu_button_class'] . ( $expanded ? ' ' . $args['sub_menu_button_toggle_class'] : '' ) ),
+					esc_attr( sprintf( "%s + ( $expanded_state_id ? %s : '' )", wp_json_encode( $args['sub_menu_button_class'] ), wp_json_encode( ' ' . $args['sub_menu_button_toggle_class'] ) ) )
+				);
+				$dropdown_button .= sprintf(
+					' aria-expanded="%s" [aria-expanded]="%s"',
+					esc_attr( wp_json_encode( $expanded ) ),
+					esc_attr( "$expanded_state_id ? 'true' : 'false'" )
+				);
+				$dropdown_button .= sprintf(
+					' on="%s"',
+					esc_attr( "tap:AMP.setState( { $expanded_state_id: ! $expanded_state_id } )" )
+				);
+				$dropdown_button .= '>';
 
-			$item_output .= $dropdown_button;
-			return $item_output;
-		}, 10, 4 );
+				if ( isset( $args['icon'] ) ) {
+					$dropdown_button .= $args['icon'];
+				}
+				if ( isset( $args['expand_text'] ) && isset( $args['collapse_text'] ) ) {
+					$dropdown_button .= sprintf(
+						'<span class="screen-reader-text" [text]="%s">%s</span>',
+						esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( $args['collapse_text'] ), wp_json_encode( $args['expand_text'] ) ) ),
+						esc_html( $expanded ? $args['collapse_text'] : $args['expand_text'] )
+					);
+				}
+
+				$dropdown_button .= '</button>';
+
+				$item_output .= $dropdown_button;
+				return $item_output;
+			},
+			10,
+			4
+		);
 	}
 
 	/**

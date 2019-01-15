@@ -81,7 +81,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://twitter.com/altjoen/status/987437752164737025' . PHP_EOL,
 				array( 'amp-twitter' => true ),
 			),

@@ -99,7 +99,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -108,13 +108,16 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test__https_required() {
-		$source = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
+		$source   = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
 		$expected = '';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Audio_Sanitizer( $dom, array(
-			'require_https_src' => true,
-		) );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer(
+			$dom,
+			array(
+				'require_https_src' => true,
+			)
+		);
 		$sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -122,10 +125,10 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__didnt_convert() {
-		$source = '<p>Hello World</p>';
+		$source   = '<p>Hello World</p>';
 		$expected = array();
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
@@ -140,10 +143,10 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__did_convert() {
-		$source = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
+		$source   = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
 		$expected = array( 'amp-audio' => true );
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

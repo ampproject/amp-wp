@@ -20,12 +20,17 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		// Mock the HTTP request.
-		add_filter( 'pre_oembed_result', function( $pre, $url ) {
-			if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
-				return $pre;
-			}
-			return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>';
-		}, 10, 2 );
+		add_filter(
+			'pre_oembed_result',
+			function( $pre, $url ) {
+				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
+					return $pre;
+				}
+				return '<iframe src=\'https://gfycat.com/ifr/tautwhoppingcougar\' frameborder=\'0\' scrolling=\'no\' width=\'500\' height=\'281.25\'  allowfullscreen></iframe>';
+			},
+			10,
+			2
+		);
 
 		/*
 		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()

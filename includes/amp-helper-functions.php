@@ -200,16 +200,18 @@ function amp_add_amphtml_link() {
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
 			echo "<!--\n";
-			echo esc_html( sprintf(
-				/* translators: %s is error count */
-				_n(
-					'There is %s validation error that is blocking the amphtml version from being available.',
-					'There are %s validation errors that are blocking the amphtml version from being available.',
-					$error_count,
-					'amp'
-				),
-				number_format_i18n( $error_count )
-			) );
+			echo esc_html(
+				sprintf(
+					/* translators: %s is error count */
+					_n(
+						'There is %s validation error that is blocking the amphtml version from being available.',
+						'There are %s validation errors that are blocking the amphtml version from being available.',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
+			);
 			echo "\n-->";
 			return;
 		}
@@ -259,7 +261,7 @@ function is_amp_endpoint() {
 	}
 
 	$has_amp_query_var = (
-		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
+		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		||
 		false !== get_query_var( amp_get_slug(), false )
 	);
@@ -359,9 +361,13 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
+	$wp_scripts->add_data(
+		$handle,
+		'amp_script_attributes',
+		array(
+			'async' => true,
+		)
+	);
 
 	// Shadow AMP API.
 	$handle = 'amp-shadow';
@@ -371,9 +377,13 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
+	$wp_scripts->add_data(
+		$handle,
+		'amp_script_attributes',
+		array(
+			'async' => true,
+		)
+	);
 
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
@@ -613,16 +623,23 @@ function amp_print_analytics( $analytics ) {
 			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
 			continue;
 		}
-		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
-			'type' => 'application/json',
-		), wp_json_encode( $analytics_entry['config_data'] ) );
+		$script_element = AMP_HTML_Utils::build_tag(
+			'script',
+			array(
+				'type' => 'application/json',
+			),
+			wp_json_encode( $analytics_entry['config_data'] )
+		);
 
-		$amp_analytics_attr = array_merge( array(
-			'id'   => $id,
-			'type' => $analytics_entry['type'],
-		), $analytics_entry['attributes'] );
+		$amp_analytics_attr = array_merge(
+			array(
+				'id'   => $id,
+				'type' => $analytics_entry['type'],
+			),
+			$analytics_entry['attributes']
+		);
 
-		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -650,7 +667,8 @@ function amp_get_content_embed_handlers( $post = null ) {
 	 * @param array   $handlers Handlers.
 	 * @param WP_Post $post     Post. Deprecated. It will be null when `amp_is_canonical()`.
 	 */
-	return apply_filters( 'amp_content_embed_handlers',
+	return apply_filters(
+		'amp_content_embed_handlers',
 		array(
 			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),

@@ -462,12 +462,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'node_with_whiteilsted_protocol_other_allowed' => array(
-				implode( '', array(
-					'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
-					'<a href="webcal:foo">Click me.</a>',
-					'<a href="whatsapp:foo">Click me.</a>',
-					'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
-				) ),
+				implode(
+					'',
+					array(
+						'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
+						'<a href="webcal:foo">Click me.</a>',
+						'<a href="whatsapp:foo">Click me.</a>',
+						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
+					)
+				),
 			),
 
 			'attribute_value_valid' => array(
@@ -890,15 +893,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-img-layout-allowed' => array(
-				implode( '', array(
-					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
-				) ),
+				implode(
+					'',
+					array(
+						'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+					)
+				),
 				null, // No change.
 				array(),
 			),
@@ -1155,9 +1161,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_html_sanitizer( $source, $expected = null, $scripts = array() ) {
 		$expected  = isset( $expected ) ? $expected : $source;
 		$dom       = AMP_DOM_Utils::get_dom( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
-			'use_document_element' => true,
-		) );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
@@ -1261,20 +1270,23 @@ EOB;
 		// Test validation error for nested invalid tags.
 		foreach ( $content as $dom_content ) {
 			$dom       = AMP_DOM_Utils::get_dom_from_content( $dom_content );
-			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
-				'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
-					$expected = $expected_errors[ $error_index ];
-					$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
-					$tag = $expected['node_name'];
-					$that->assertEquals( $expected, $error );
-					$that->assertInstanceOf( 'DOMElement', $context['node'] );
-					$that->assertEquals( $tag, $context['node']->tagName );
-					$that->assertEquals( $tag, $context['node']->nodeName );
-					$error_index++;
+			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+				$dom,
+				array(
+					'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
+						$expected = $expected_errors[ $error_index ];
+						$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
+						$tag = $expected['node_name'];
+						$that->assertEquals( $expected, $error );
+						$that->assertInstanceOf( 'DOMElement', $context['node'] );
+						$that->assertEquals( $tag, $context['node']->tagName );
+						$that->assertEquals( $tag, $context['node']->nodeName );
+						$error_index++;
 
-					return true;
-				},
-			) );
+						return true;
+					},
+				)
+			);
 			$sanitizer->sanitize();
 		}
 	}
