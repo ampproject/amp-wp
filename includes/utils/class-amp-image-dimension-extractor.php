@@ -121,8 +121,8 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
-	 * @param array  $dimensions Image urls mapped to dimensions.
-	 * @param string $mode       Deprecated.
+	 * @param array $dimensions Image urls mapped to dimensions.
+	 * @param false $mode       Deprecated.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
 	public static function extract_by_downloading_images( $dimensions, $mode = false ) {
@@ -136,8 +136,12 @@ class AMP_Image_Dimension_Extractor {
 		$images        = array();
 
 		self::determine_which_images_to_fetch( $dimensions, $urls_to_fetch );
-		self::fetch_images( $urls_to_fetch, $images );
-		self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		try {
+			self::fetch_images( $urls_to_fetch, $images );
+			self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		} catch ( \Exception $exception ) {
+			trigger_error( esc_html( $exception->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
 
 		return $dimensions;
 	}
@@ -197,13 +201,15 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Fetch dimensions of remote images
 	 *
+	 * @throws Exception When cURL handle cannot be added.
+	 *
 	 * @param array $urls_to_fetch Image src urls to fetch.
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images ) {
 		$urls       = array_keys( $urls_to_fetch );
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client     = new \FasterImage\FasterImage( $user_agent );
+		$client     = new \FasterImage\FasterImage( $user_agent ); // @todo The $user_agent is not actually able to be passed in this way to FasterImage. Needs another patch?
 		$images     = $client->batch( $urls );
 	}
 
