@@ -3,12 +3,12 @@
 class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
-			'no_embed' => array(
+			'no_embed'                      => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
 
-			'url_simple' => array(
+			'url_simple'                    => array(
 				'https://vimeo.com/172355597' . PHP_EOL,
 				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
 			),
@@ -18,12 +18,12 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 				'<amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo>' . PHP_EOL,
 			),
 
-			'shortcode_named_attr_url' => array(
+			'shortcode_named_attr_url'      => array(
 				'[vimeo url=https://vimeo.com/172355597]' . PHP_EOL,
 				'<amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo>' . PHP_EOL,
 			),
 
-			'shortcode_named_attr_id' => array(
+			'shortcode_named_attr_id'       => array(
 				'[vimeo id=172355597]' . PHP_EOL,
 				'<amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo>' . PHP_EOL,
 			),
@@ -48,7 +48,7 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://vimeo.com/172355597' . PHP_EOL,
 				array( 'amp-vimeo' => true ),
 			),

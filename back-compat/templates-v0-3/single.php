@@ -1,3 +1,11 @@
+<?php
+/**
+ * Legacy template for the AMP post.
+ *
+ * @package AMP
+ */
+
+?>
 <!doctype html>
 <html amp <?php language_attributes(); ?>>
 <head>
@@ -17,7 +25,7 @@
 	<ul class="amp-wp-meta">
 		<?php $this->load_parts( apply_filters( 'amp_post_template_meta_parts', array( 'meta-author', 'meta-time', 'meta-taxonomy' ) ) ); ?>
 	</ul>
-	<?php echo $this->get( 'post_amp_content' ); // amphtml content; no kses ?>
+	<?php echo $this->get( 'post_amp_content' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </div>
 <?php do_action( 'amp_post_template_footer', $this ); ?>
 </body>

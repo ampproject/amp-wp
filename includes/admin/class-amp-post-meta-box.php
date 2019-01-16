@@ -83,13 +83,17 @@ class AMP_Post_Meta_Box {
 	 * @since 0.6
 	 */
 	public function init() {
-		register_meta( 'post', self::STATUS_POST_META_KEY, array(
-			'sanitize_callback' => array( $this, 'sanitize_status' ),
-			'type'              => 'string',
-			'description'       => __( 'AMP status.', 'amp' ),
-			'show_in_rest'      => true,
-			'single'            => true,
-		) );
+		register_meta(
+			'post',
+			self::STATUS_POST_META_KEY,
+			array(
+				'sanitize_callback' => array( $this, 'sanitize_status' ),
+				'type'              => 'string',
+				'description'       => __( 'AMP status.', 'amp' ),
+				'show_in_rest'      => true,
+				'single'            => true,
+			)
+		);
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_assets' ) );
@@ -137,7 +141,6 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		// Styles.
 		wp_enqueue_style(
 			self::ASSETS_HANDLE,
 			amp_get_asset_url( 'css/amp-post-meta-box.css' ),
@@ -145,7 +148,7 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION
 		);
 
-		// Scripts.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			self::ASSETS_HANDLE,
 			amp_get_asset_url( 'js/amp-post-meta-box.js' ),
@@ -160,18 +163,24 @@ class AMP_Post_Meta_Box {
 			$support_errors = AMP_Post_Type_Support::get_support_errors( $post );
 		}
 
-		wp_add_inline_script( self::ASSETS_HANDLE, sprintf( 'ampPostMetaBox.boot( %s );',
-			wp_json_encode( array(
-				'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
-				'canonical'       => amp_is_canonical(),
-				'enabled'         => empty( $support_errors ),
-				'canSupport'      => 0 === count( array_diff( $support_errors, array( 'post-status-disabled' ) ) ),
-				'statusInputName' => self::STATUS_INPUT_NAME,
-				'l10n'            => array(
-					'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
-				),
-			) )
-		) );
+		wp_add_inline_script(
+			self::ASSETS_HANDLE,
+			sprintf(
+				'ampPostMetaBox.boot( %s );',
+				wp_json_encode(
+					array(
+						'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
+						'canonical'       => amp_is_canonical(),
+						'enabled'         => empty( $support_errors ),
+						'canSupport'      => 0 === count( array_diff( $support_errors, array( 'post-status-disabled' ) ) ),
+						'statusInputName' => self::STATUS_INPUT_NAME,
+						'l10n'            => array(
+							'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
+						),
+					)
+				)
+			)
+		);
 	}
 
 	/**
@@ -370,9 +379,9 @@ class AMP_Post_Meta_Box {
 	 */
 	public function preview_post_link( $link ) {
 		$is_amp = (
-			isset( $_POST['amp-preview'] ) // WPCS: CSRF ok.
+			isset( $_POST['amp-preview'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			&&
-			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // WPCS: CSRF ok.
+			'do-preview' === sanitize_key( wp_unslash( $_POST['amp-preview'] ) ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		);
 
 		if ( $is_amp ) {
