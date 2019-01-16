@@ -6,7 +6,7 @@ Tested up to: 5.0
 Stable tag: 1.0.1
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
-Requires PHP: 5.3.6
+Requires PHP: 5.4
 
 Enable AMP on your WordPress site, the WordPress way.
 
