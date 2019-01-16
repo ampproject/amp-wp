@@ -101,7 +101,7 @@ class AMP_Image_Dimension_Extractor {
 			if ( isset( $parsed['query'] ) ) {
 				$path .= '?' . $parsed['query'];
 			}
-			$url = site_url( $path );
+			$url = home_url( $path );
 		}
 
 		return $url;
@@ -284,6 +284,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @return string
 	 */
 	public static function get_default_user_agent() {
-		return 'amp-wp, v' . AMP__VERSION . ', ' . get_site_url();
+		return 'amp-wp, v' . AMP__VERSION . ', ' . home_url();
 	}
 }

@@ -317,7 +317,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$guessurl = site_url();
+		$guessurl = home_url();
 		if ( ! $guessurl ) {
 			$guessurl = wp_guess_url();
 		}
