@@ -48,9 +48,13 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_header()
 	 */
 	public function test_send_header_replace_arg() {
-		AMP_HTTP::send_header( 'Foo', 'Bar', array(
-			'replace' => false,
-		) );
+		AMP_HTTP::send_header(
+			'Foo',
+			'Bar',
+			array(
+				'replace' => false,
+			)
+		);
 		$this->assertContains(
 			array(
 				'name'        => 'Foo',
@@ -68,9 +72,13 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers \AMP_HTTP::send_header()
 	 */
 	public function test_send_header_status_code() {
-		AMP_HTTP::send_header( 'Foo', 'Bar', array(
-			'status_code' => 400,
-		) );
+		AMP_HTTP::send_header(
+			'Foo',
+			'Bar',
+			array(
+				'status_code' => 400,
+			)
+		);
 		$this->assertContains(
 			array(
 				'name'        => 'Foo',
@@ -136,10 +144,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 
 		remove_action( 'wp', 'amp_maybe_add_actions' );
 		$this->go_to( add_query_arg( $all_query_vars, home_url( '/foo/' ) ) );
-		$_REQUEST = $_GET;
+		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		foreach ( $all_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET );
-			$this->assertArrayHasKey( $key, $_REQUEST );
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
@@ -149,14 +157,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$this->assertEqualSets( AMP_HTTP::$purged_amp_query_vars, $bad_query_vars );
 
 		foreach ( $bad_query_vars as $key => $value ) {
-			$this->assertArrayNotHasKey( $key, $_GET );
-			$this->assertArrayNotHasKey( $key, $_REQUEST );
+			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET );
-			$this->assertArrayHasKey( $key, $_REQUEST );
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
@@ -369,9 +377,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$url = home_url( '', 'https' ) . ':443/?test=true#test';
 
 		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function () {
-			return '__return_false';
-		} );
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return '__return_false';
+			}
+		);
 
 		// Test redirecting to full URL with HTTPS protocol.
 		AMP_HTTP::$headers_sent = array();
@@ -476,9 +487,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_handle_wp_die() {
 		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function() {
-			return '__return_null';
-		} );
+		add_filter(
+			'wp_die_ajax_handler',
+			function() {
+				return '__return_null';
+			}
+		);
 
 		ob_start();
 		AMP_HTTP::handle_wp_die( 'string' );
@@ -497,15 +511,20 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_post_redirect() {
 		add_filter( 'wp_doing_ajax', '__return_true' );
-		add_filter( 'wp_die_ajax_handler', function() {
-			return '__return_null';
-		} );
+		add_filter(
+			'wp_die_ajax_handler',
+			function() {
+				return '__return_null';
+			}
+		);
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$post    = $this->factory()->post->create_and_get();
-		$comment = $this->factory()->comment->create_and_get( array(
-			'comment_post_ID' => $post->ID,
-		) );
+		$comment = $this->factory()->comment->create_and_get(
+			array(
+				'comment_post_ID' => $post->ID,
+			)
+		);
 		$url     = get_comment_link( $comment );
 
 		// Test without comments_live_list.
@@ -516,12 +535,20 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		);
 
 		// Test with comments_live_list.
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'comments_live_list' => true,
-		) );
-		add_filter( 'amp_comment_posted_message', function( $message, WP_Comment $filter_comment ) {
-			return sprintf( '(comment=%d,approved=%d)', $filter_comment->comment_ID, $filter_comment->comment_approved );
-		}, 10, 2 );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'comments_live_list' => true,
+			)
+		);
+		add_filter(
+			'amp_comment_posted_message',
+			function( $message, WP_Comment $filter_comment ) {
+				return sprintf( '(comment=%d,approved=%d)', $filter_comment->comment_ID, $filter_comment->comment_approved );
+			},
+			10,
+			2
+		);
 
 		// Test approved comment.
 		$comment->comment_approved = '1';

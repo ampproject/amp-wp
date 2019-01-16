@@ -227,20 +227,24 @@ function amp_get_test_data_entries() {
  * @return string|WP_CLI::error The media item ids separated by comma on success; error otherwise.
  */
 function amp_get_media_items_ids( $type, $image_count = 3 ) {
-	$query = new \WP_Query( array(
-		'post_type'      => 'attachment',
-		'post_mime_type' => $type,
-		'post_status'    => 'inherit',
-		'posts_per_page' => $image_count,
-		'fields'         => 'ids',
-	) );
+	$query = new \WP_Query(
+		array(
+			'post_type'      => 'attachment',
+			'post_mime_type' => $type,
+			'post_status'    => 'inherit',
+			'posts_per_page' => $image_count,
+			'fields'         => 'ids',
+		)
+	);
 	if ( $query->post_count < $image_count ) {
-		throw new Exception( sprintf(
-			'Please make sure at least %1$s "%2$s" attachments are accessible and run this script again. There are currently only %3$s.',
-			$image_count,
-			$type,
-			$query->found_posts
-		) );
+		throw new Exception(
+			sprintf(
+				'Please make sure at least %1$s "%2$s" attachments are accessible and run this script again. There are currently only %3$s.',
+				$image_count,
+				$type,
+				$query->found_posts
+			)
+		);
 	}
 	return implode( ',', $query->get_posts() );
 }
@@ -258,11 +262,13 @@ function amp_create_embed_test_post( $data_entries ) {
 	if ( $page ) {
 		$page_id = $page->ID;
 	} else {
-		$page_id = wp_insert_post( array(
-			'post_name'  => 'amp-test-embeds',
-			'post_title' => 'AMP Test Embeds',
-			'post_type'  => 'page',
-		) );
+		$page_id = wp_insert_post(
+			array(
+				'post_name'  => 'amp-test-embeds',
+				'post_title' => 'AMP Test Embeds',
+				'post_type'  => 'page',
+			)
+		);
 
 		if ( ! $page_id || is_wp_error( $page_id ) ) {
 			throw new Exception( 'The test page could not be added, please try again.' );
@@ -281,10 +287,14 @@ function amp_create_embed_test_post( $data_entries ) {
 		}
 	}
 
-	$update = wp_update_post( wp_slash( array(
-		'ID'           => $page_id,
-		'post_content' => $content,
-	) ) );
+	$update = wp_update_post(
+		wp_slash(
+			array(
+				'ID'           => $page_id,
+				'post_content' => $content,
+			)
+		)
+	);
 
 	if ( ! $update ) {
 		throw new Exception( 'The test page could not be updated, please try again.' );
@@ -295,7 +305,7 @@ function amp_create_embed_test_post( $data_entries ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() );
+		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
 		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );
