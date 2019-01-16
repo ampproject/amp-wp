@@ -1,8 +1,34 @@
 diff --git a/src/FasterImage/FasterImage.php b/src/FasterImage/FasterImage.php
-index c05c9d0..dd94cb8 100644
+index c05c9d0..3a52402 100644
 --- a/src/FasterImage/FasterImage.php
 +++ b/src/FasterImage/FasterImage.php
-@@ -122,9 +122,9 @@ class FasterImage
+@@ -32,6 +32,25 @@ class FasterImage
+      */
+     protected $includeContentLength = false;
+ 
++    /**
++     * The user agent to set for requests.
++     *
++     * @var string
++     */
++    protected $userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36';
++
++    /**
++     * Constructor.
++     *
++     * @param string $userAgent Optional. User agent to set for requests.
++     */
++    public function __construct($userAgent = '')
++    {
++        if ( ! empty( $userAgent ) ) {
++            $this->userAgent = $userAgent;
++        }
++    }
++
+     /**
+      * Get the size of each of the urls in a list
+      *
+@@ -122,15 +141,15 @@ class FasterImage
          curl_setopt($ch, CURLOPT_URL, $url);
          curl_setopt($ch, CURLOPT_HEADER, 0);
          curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -15,6 +41,13 @@ index c05c9d0..dd94cb8 100644
          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
          curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->timeout);
          curl_setopt($ch, CURLOPT_TIMEOUT, $this->timeout);
+ 
+         #  Some web servers require the useragent to be not a bot. So we are liars.
+-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.110 Safari/537.36');
++        curl_setopt($ch, CURLOPT_USERAGENT, $this->userAgent);
+         curl_setopt($ch, CURLOPT_HTTPHEADER, [
+             "Accept: image/webp,image/*,*/*;q=0.8",
+             "Cache-Control: max-age=0",
 diff --git a/src/FasterImage/ImageParser.php b/src/FasterImage/ImageParser.php
 index 3b1dc3d..3e855dc 100644
 --- a/src/FasterImage/ImageParser.php
@@ -26,7 +59,7 @@ index 3b1dc3d..3e855dc 100644
 +            case 'svg':
 +                return $this->parseSizeForSvg();
          }
-
+ 
          return null;
 @@ -133,7 +135,13 @@ class ImageParser
                  case "MM":
@@ -42,11 +75,11 @@ index 3b1dc3d..3e855dc 100644
 +                    }
              }
          }
-
+ 
 @@ -345,6 +353,39 @@ class ImageParser
-
+ 
      }
-
+ 
 +    /**
 +     * Parse size for SVG.
 +     *
