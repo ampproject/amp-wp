@@ -2196,7 +2196,7 @@ class AMP_Validated_URL_Post_Type {
 			$messages['post'] = array_merge(
 				$messages['post'],
 				array(
-					/* translators: %s is the number of posts permanently forgotten */
+					/* translators: %s is the number of posts forgotten */
 					'deleted'   => _n(
 						'%s validated URL forgotten.',
 						'%s validated URLs forgotten.',

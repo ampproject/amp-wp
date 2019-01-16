@@ -4,8 +4,108 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e3aa599562955e2116c84a9f496ef1fe",
+    "content-hash": "733cdfdecea0d0afe37d7807da8c801d",
     "packages": [
+        {
+            "name": "cweagans/composer-patches",
+            "version": "1.6.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/cweagans/composer-patches.git",
+                "reference": "2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3",
+                "reference": "2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0",
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "composer/composer": "~1.0",
+                "phpunit/phpunit": "~4.6"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "cweagans\\Composer\\Patches"
+            },
+            "autoload": {
+                "psr-4": {
+                    "cweagans\\Composer\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Cameron Eagans",
+                    "email": "me@cweagans.net"
+                }
+            ],
+            "description": "Provides a way to patch Composer packages.",
+            "time": "2018-05-11T18:00:16+00:00"
+        },
+        {
+            "name": "fasterimage/fasterimage",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/willwashburn/fasterimage.git",
+                "reference": "05af344dda4406476f50fae59fbb880ef68d2020"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/05af344dda4406476f50fae59fbb880ef68d2020",
+                "reference": "05af344dda4406476f50fae59fbb880ef68d2020",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0",
+                "willwashburn/stream": ">=1.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "~0.9",
+                "phpunit/phpunit": "~4.0"
+            },
+            "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Washburn",
+                    "email": "will@tailwindapp.com"
+                }
+            ],
+            "description": "FasterImage finds the size or type of a set of images given their uris by fetching as little as needed, in parallel. Originally ported by Tom Moor.",
+            "homepage": "https://github.com/willwashburn/fasterimage",
+            "keywords": [
+                "fast image",
+                "faster image",
+                "fasterimage",
+                "fastimage",
+                "getimagesize",
+                "image size",
+                "parallel"
+            ],
+            "time": "2018-03-07T06:46:48+00:00"
+        },
         {
             "name": "sabberworm/php-css-parser",
             "version": "8.1.1",
@@ -51,6 +151,53 @@
                 "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.1.1"
             },
             "time": "2018-11-25T04:50:29+00:00"
+        },
+        {
+            "name": "willwashburn/stream",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/willwashburn/stream.git",
+                "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/willwashburn/stream/zipball/345b3062493e3899d987dbdd1fec1c13ee28c903",
+                "reference": "345b3062493e3899d987dbdd1fec1c13ee28c903",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "~0.9",
+                "phpunit/phpunit": "~4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "WillWashburn\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Will Washburn",
+                    "email": "will.washburn@gmail.com"
+                }
+            ],
+            "description": "model a sequence of data elements made available over time ",
+            "homepage": "https://github.com/willwashburn/stream",
+            "keywords": [
+                "peek",
+                "read",
+                "stream",
+                "streamable"
+            ],
+            "time": "2016-03-15T10:54:35+00:00"
         }
     ],
     "packages-dev": [
@@ -281,7 +428,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^5.3.6 || ^7.0"
+        "php": "^5.4 || ^7.0"
     },
     "platform-dev": []
 }

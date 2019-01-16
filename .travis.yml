@@ -12,8 +12,9 @@ notifications:
 
 cache:
   directories:
-    - node_modules
-    - vendor
+    - $HOME/.composer/cache
+    - $HOME/.npm
+    - $HOME/.nvm/.cache
     - $HOME/phpunit-bin
     - $HOME/deployment-targets
 
@@ -35,8 +36,6 @@ jobs:
     - stage: test
       php: "7.3"
       env: WP_VERSION=5.0
-    - php: "5.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=composer,phpcs
     - php: "5.4"
       env: WP_VERSION=4.9    DEV_LIB_SKIP=composer,phpcs
     - php: "5.5"
