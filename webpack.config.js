@@ -9,7 +9,6 @@ module.exports = {
 		'./assets/js/wp-dom-ready-compiled': './assets/js/wp-dom-ready',
 		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle',
 		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle',
-		'./assets/js/amp-validation-tooltips-compiled': './assets/src/amp-validation-tooltips',
 		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details'
 	},
 	output: {
