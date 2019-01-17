@@ -5,11 +5,10 @@ services:
   wpdb:
     image: mysql:5.7
     volumes:
-       - wpdb_data:/var/lib/mysql/data
+       - wpdb_data:/var/lib/mysql
     environment:
-      MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wpdb
+      MYSQL_DATABASE: wordpress
 
   wp:
     image: wordpress
@@ -19,7 +18,7 @@ services:
       - wp_data:/var/www/html
       - .:/var/www/html/wp-content/plugins/amp-wp
     environment:
-      WORDPRESS_DB_HOST: wpdb:3306
+      WORDPRESS_DB_HOST: wpdb
       WORDPRESS_DB_USER: root
       WORDPRESS_DB_PASSWORD: root
     depends_on:
