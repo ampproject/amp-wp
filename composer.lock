@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "733cdfdecea0d0afe37d7807da8c801d",
+    "content-hash": "65def49e44a943d396564438418f26d8",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -420,6 +420,28 @@
                 "wordpress"
             ],
             "time": "2018-12-18T09:43:51+00:00"
+        },
+        {
+            "name": "wpsh/local",
+            "version": "0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/wpsh/wpsh-local.git",
+                "reference": "07f6d2d3432391e8dc1c01983efd080baa5009cc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/wpsh/wpsh-local/zipball/07f6d2d3432391e8dc1c01983efd080baa5009cc",
+                "reference": "07f6d2d3432391e8dc1c01983efd080baa5009cc",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "A Docker Compose development environment for any project.",
+            "time": "2019-01-02T12:47:46+00:00"
         }
     ],
     "aliases": [],
@@ -430,5 +452,8 @@
     "platform": {
         "php": "^5.4 || ^7.0"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "5.4"
+    }
 }

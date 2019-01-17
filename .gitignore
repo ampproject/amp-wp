@@ -6,3 +6,4 @@ wiki
 amp.zip
 **/*-compiled.js
 built
+/.vagrant
