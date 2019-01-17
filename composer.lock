@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2acfabf13987e7a26bf70a4fdc6ffda1",
+    "content-hash": "b5c8a0233426fe2cf20d57bd8e5ad351",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -423,16 +423,16 @@
         },
         {
             "name": "xwp/wp-dev-lib",
-            "version": "dev-feature/composer-first",
+            "version": "1.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/wp-dev-lib.git",
-                "reference": "e4266005d1d81da3821cc4d77f05f1a566be955f"
+                "reference": "90574b4e61c53a9b0e7f286812fe428d13c9ba7d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/e4266005d1d81da3821cc4d77f05f1a566be955f",
-                "reference": "e4266005d1d81da3821cc4d77f05f1a566be955f",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/90574b4e61c53a9b0e7f286812fe428d13c9ba7d",
+                "reference": "90574b4e61c53a9b0e7f286812fe428d13c9ba7d",
                 "shasum": ""
             },
             "type": "library",
@@ -457,14 +457,12 @@
             "keywords": [
                 "wordpress"
             ],
-            "time": "2019-01-17T04:29:25+00:00"
+            "time": "2019-01-17T05:00:30+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "xwp/wp-dev-lib": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
