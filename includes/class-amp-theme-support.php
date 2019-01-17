@@ -1116,7 +1116,7 @@ class AMP_Theme_Support {
 		$link = sprintf(
 			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
 			esc_attr( '#' . $args['respond_id'] ),
-			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) ) ),
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
