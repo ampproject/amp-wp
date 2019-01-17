@@ -15,4 +15,4 @@ else
 fi
 
 # Activate AMP WP plugin.
-wp plugin activate amp-wp
+wp plugin activate amp
