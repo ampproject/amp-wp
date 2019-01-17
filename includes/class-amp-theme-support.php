@@ -1654,8 +1654,21 @@ class AMP_Theme_Support {
 		 */
 		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
 
-		// Handle responses that are cached by the browser.
-		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+		/*
+		 * Handle responses that are cached by the browser, returning 304 response if the response cache key
+		 * matches any ETags mentioned in If-None-Match request header. Note that if the client request indicates a
+		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
+		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
+		 * response is returned.
+		 */
+		$has_matching_etag = (
+			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
+			&&
+			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
+			&&
+			in_array( $response_cache_key, $etag_match_candidates[0], true )
+		);
+		if ( $has_matching_etag ) {
 			status_header( 304 );
 			return '';
 		}
