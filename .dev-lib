@@ -4,7 +4,9 @@ PROJECT_SLUG=amp
 SKIP_ECHO_PATHS_SCOPE=1
 README_MD_TITLE="AMP Plugin for WordPress"
 DEV_LIB_SKIP="$DEV_LIB_SKIP,jshint"
-CHECK_SCOPE=all
+if [[ ! -z $TRAVIS ]]; then
+	CHECK_SCOPE=all
+fi
 
 function after_wp_install {
 	if [[ $WP_VERSION == 4.* ]]; then
