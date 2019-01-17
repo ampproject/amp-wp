@@ -6,8 +6,12 @@
   "license": "GPL-2.0-or-later",
   "repositories": [
     {
-      "type": "vcs",
+      "type": "git",
       "url": "https://github.com/xwp/PHP-CSS-Parser"
+    },
+    {
+      "type": "git",
+      "url": "https://github.com/wordpress/wordpress-develop"
     }
   ],
   "require": {
@@ -20,7 +24,9 @@
     "wp-coding-standards/wpcs": "1.2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
     "phpcompatibility/php-compatibility": "9.1.1",
-    "wpsh/local": "^0.1.1"
+    "wpsh/local": "^0.1.1",
+    "phpunit/phpunit": "^7",
+    "wordpress/wordpress": "5.0.3"
   },
   "extra": {
     "patches": {
