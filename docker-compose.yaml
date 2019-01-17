@@ -16,7 +16,8 @@ services:
       - "80:80"
     volumes:
       - wp_data:/var/www/html
-      - .:/var/www/html/wp-content/plugins/amp
+      - .:/var/www/html/wp-content/plugins/amp-src
+      - ./build:/var/www/html/wp-content/plugins/amp
     environment:
       WORDPRESS_DB_HOST: wpdb
       WORDPRESS_DB_USER: root
@@ -32,7 +33,8 @@ services:
       - wp
     volumes:
       - wp_data:/var/www/html
-      - .:/var/www/html/wp-content/plugins/amp
+      - .:/var/www/html/wp-content/plugins/amp-src
+      - ./build:/var/www/html/wp-content/plugins/amp
       - ./bin/docker/scripts/setup-wp.sh:/usr/local/bin/setup-wp.sh
     command:
       - setup-wp.sh

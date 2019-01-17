@@ -14,5 +14,5 @@ else
 	echo "WordPress already installed."
 fi
 
-# Activate AMP WP plugin.
-wp plugin activate amp
+# Activate the development version of the plugin.
+wp plugin activate amp-src
