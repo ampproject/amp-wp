@@ -981,9 +981,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Style_Sanitizer::process_link_element()
 	 */
 	public function test_external_stylesheet_handling() {
-		$test_case = $this; // For PHP 5.3.
-		$href      = 'https://stylesheets.example.com/style.css';
-		$count     = 0;
+		$href  = 'https://stylesheets.example.com/style.css';
+		$count = 0;
 		add_filter(
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $href, &$count ) {
@@ -1003,7 +1002,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheet = function() use ( $href, $test_case ) {
+		$sanitize_and_get_stylesheet = function() use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = AMP_DOM_Utils::get_dom( $html );
 
@@ -1016,7 +1015,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$sanitizer->sanitize();
 			AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 			$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-			$test_case->assertCount( 1, $actual_stylesheets );
+			$this->assertCount( 1, $actual_stylesheets );
 			return $actual_stylesheets[0];
 		};
 

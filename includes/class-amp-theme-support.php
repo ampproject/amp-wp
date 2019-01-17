@@ -133,7 +133,7 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
