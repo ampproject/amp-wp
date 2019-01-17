@@ -7,10 +7,6 @@ DEV_LIB_SKIP="$DEV_LIB_SKIP,jshint"
 CHECK_SCOPE=all
 
 function after_wp_install {
-	echo -n "Installing Jetpack..."
-	svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
-	echo "done"
-
 	if [[ $WP_VERSION == 4.* ]]; then
 		echo -n "Installing Gutenberg..."
 		svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
