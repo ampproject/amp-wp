@@ -4,6 +4,8 @@ services:
 
   wpdb:
     image: mysql:5.7
+    volumes:
+       - wpdb_data:/var/lib/mysql/data
     environment:
       MYSQL_USER: root
       MYSQL_ROOT_PASSWORD: root
@@ -37,3 +39,4 @@ services:
 
 volumes:
   wp_data:
+  wpdb_data:
