@@ -33,6 +33,7 @@ services:
       - wp
     volumes:
       - wp_data:/var/www/html
+      - .:/var/www/html/wp-content/plugins/amp-wp
       - ./bin/docker/scripts/setup-wp.sh:/usr/local/bin/setup-wp.sh
     command:
       - setup-wp.sh
