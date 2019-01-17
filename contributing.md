@@ -45,7 +45,20 @@ an explicit [Code of Conduct](https://github.com/ampproject/amp-wp/blob/develop/
 To start, clone this repository into your WordPress install being used for development:
 
 ```bash
-cd wp-content/plugins && git clone --recursive git@github.com:ampproject/amp-wp.git amp
+cd wp-content/plugins && git clone git@github.com:ampproject/amp-wp.git amp
+```
+
+Then install the packages:
+
+```bash
+composer install
+npm install
+```
+
+And lastly, do a build of the JavaScript:
+
+```bash
+npm run build
 ```
 
 Lastly, to get the plugin running in your WordPress install, run `composer install` and then activate the plugin via the WordPress dashboard or `wp plugin activate amp`.
@@ -63,7 +76,6 @@ To edit JavaScript code which is built/complied, run `npm run dev` to watch the 
 To create a build of the plugin for installing in WordPress as a ZIP package, do:
 
 ```bash
-git submodule update --init # (if you haven't done so yet)
 composer install # (if you haven't done so yet)
 npm install # (if you haven't done so yet)
 npm run build
@@ -136,7 +148,7 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install`.
+0. Do `npm install && composer selfupdate && composer install`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
 2. Add changelog entry to readme.
 3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
