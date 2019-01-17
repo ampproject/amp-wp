@@ -1652,7 +1652,7 @@ class AMP_Theme_Support {
 		 * not have been set yet during the WordPress template generation is
 		 * the ETag. The AMP plugin sends a Vary header at amp_init.
 		 */
-		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
 
 		// Handle responses that are cached by the browser.
 		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
