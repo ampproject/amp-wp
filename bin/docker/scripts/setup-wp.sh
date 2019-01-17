@@ -3,6 +3,7 @@
 set -ex
 
 if ! wp core is-installed; then
+	# Install WP core.
 	wp core install \
 		--url=ampwp.local \
 		--title="AMP for WP" \
@@ -12,3 +13,6 @@ if ! wp core is-installed; then
 else
 	echo "WordPress already installed."
 fi
+
+# Activate AMP WP plugin.
+wp plugin activate amp-wp
