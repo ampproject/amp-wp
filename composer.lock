@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "733cdfdecea0d0afe37d7807da8c801d",
+    "content-hash": "2acfabf13987e7a26bf70a4fdc6ffda1",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -420,15 +420,58 @@
                 "wordpress"
             ],
             "time": "2018-12-18T09:43:51+00:00"
+        },
+        {
+            "name": "xwp/wp-dev-lib",
+            "version": "dev-feature/composer-first",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/xwp/wp-dev-lib.git",
+                "reference": "e4266005d1d81da3821cc4d77f05f1a566be955f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/e4266005d1d81da3821cc4d77f05f1a566be955f",
+                "reference": "e4266005d1d81da3821cc4d77f05f1a566be955f",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Weston Ruter",
+                    "email": "weston@xwp.co",
+                    "homepage": "https://weston.ruter.net"
+                },
+                {
+                    "name": "XWP",
+                    "email": "engage@xwp.co",
+                    "homepage": "https://xwp.co"
+                }
+            ],
+            "description": "Common code used during development of WordPress plugins and themes",
+            "homepage": "https://github.com/xwp/wp-dev-lib",
+            "keywords": [
+                "wordpress"
+            ],
+            "time": "2019-01-17T04:29:25+00:00"
         }
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": [],
+    "stability-flags": {
+        "xwp/wp-dev-lib": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": "^5.4 || ^7.0"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "5.4"
+    }
 }

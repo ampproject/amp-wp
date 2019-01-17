@@ -1,5 +1,5 @@
 <phpunit
-	bootstrap="dev-lib/phpunit-plugin-bootstrap.php"
+	bootstrap="vendor/xwp/wp-dev-lib/sample-config/phpunit-plugin-bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"

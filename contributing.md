@@ -48,11 +48,9 @@ To start, clone this repository into your WordPress install being used for devel
 cd wp-content/plugins && git clone --recursive git@github.com:ampproject/amp-wp.git amp
 ```
 
-If you happened to have cloned without `--recursive` previously, please do `git submodule update --init` to ensure the [dev-lib](https://github.com/xwp/wp-dev-lib/) submodule is available for development.
-
 Lastly, to get the plugin running in your WordPress install, run `composer install` and then activate the plugin via the WordPress dashboard or `wp plugin activate amp`.
 
-To install the `pre-commit` hook, do `bash dev-lib/install-pre-commit-hook.sh`.
+To install the `pre-commit` hook, do `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`.
 
 Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
 
