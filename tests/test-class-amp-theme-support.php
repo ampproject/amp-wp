@@ -1355,6 +1355,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test that ETag allows response to short-circuit via If-None-Match request header.
 		$_SERVER['HTTP_IF_NONE_MATCH'] = $etag;
 		$this->assertEmpty( '', $call_prepare_response() );
+
+		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s"', $etag );
+		$this->assertEmpty( '', $call_prepare_response() );
+
+		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( 'W/"%s"', $etag );
+		$this->assertEmpty( '', $call_prepare_response() );
+
+		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", W/"%s"', md5( 'foo' ), $etag );
+		$this->assertEmpty( '', $call_prepare_response() );
+
+		$_SERVER['HTTP_IF_NONE_MATCH'] = sprintf( '"%s", "%s"', $etag, md5( 'bar' ) );
+		$this->assertEmpty( '', $call_prepare_response() );
+
+		// Test not match.
 		$_SERVER['HTTP_IF_NONE_MATCH'] = strrev( $etag );
 		$this->assertNotEmpty( $call_prepare_response() );
 		$this->assertNotEmpty( $this->get_etag_header_value( AMP_HTTP::$headers_sent ) );
