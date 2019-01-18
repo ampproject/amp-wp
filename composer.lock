@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "733cdfdecea0d0afe37d7807da8c801d",
+    "content-hash": "02c838299cd9fc77e3c0fdebbd13a803",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -73,11 +73,6 @@
                 "phpunit/phpunit": "~4.0"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
-                }
-            },
             "autoload": {
                 "classmap": [
                     "src"
@@ -430,5 +425,8 @@
     "platform": {
         "php": "^5.4 || ^7.0"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "5.4"
+    }
 }

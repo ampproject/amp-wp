@@ -14,7 +14,7 @@
     "php": "^5.4 || ^7.0",
     "sabberworm/php-css-parser": "8.1.1",
     "fasterimage/fasterimage": "1.2.0",
-    "cweagans/composer-patches": "~1.0"
+    "cweagans/composer-patches": "~1.6"
   },
   "require-dev": {
     "wp-coding-standards/wpcs": "1.2.1",
