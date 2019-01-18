@@ -8,7 +8,7 @@ Enable AMP on your WordPress site, the WordPress way.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.0  
-**Stable tag:** 1.0.1  
+**Stable tag:** 1.0.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 
@@ -88,8 +88,19 @@ If you are a developer, we encourage you to follow along or [contribute](https:/
 ### 1.1 (Unreleased) ###
 ...
 
-### 1.0.2 (Unreleased) ###
-...
+### 1.0.2 (2019-01-18) ###
+- Gracefully handle conflicting version of PHP-CSS-Parser being loaded. This issue was specifically noticed when the Mailpoet plugin is active. See [#1743](https://github.com/ampproject/amp-wp/pull/1743). Props westonruter.
+- Fix erroneous enqueueing of AMP validation screen JS/CSS assets on non-AMP admin screens. See [#1798](https://github.com/ampproject/amp-wp/pull/1798), [#1796](https://github.com/ampproject/amp-wp/issues/1796). Props westonruter, geminorum.
+- Fix content smooth scrolling in Twenty Seventeen theme. [#1777](https://github.com/ampproject/amp-wp/pull/1777), [#1830](https://github.com/ampproject/amp-wp/pull/1830). Props westonruter.
+- Update welcome prompt to point to Getting Started section on amp-wp.org. See [#1799](https://github.com/ampproject/amp-wp/pull/1799). Props westonruter.
+- Add `_doing_it_wrong()` when calling `is_amp_endpoint()` before queried object is available. This ensures that themes and plugins will get accurate responses when calling `is_amp_endpoint()` in paired/native modes. See [#1794](https://github.com/ampproject/amp-wp/pull/1794). Props westonruter, flixos90 (felixarntz).
+- Eliminate obsolete i18n code. See [#1789](https://github.com/ampproject/amp-wp/pull/1789). Props swissspidy, westonruter.
+- Prevent re-bundling WordPress packages which are shipped in 5.0.  See [#1781](https://github.com/ampproject/amp-wp/pull/1781), [#1828](https://github.com/ampproject/amp-wp/pull/1828). Props westonruter, flixos90 (felixarntz).
+- Fix handling of stylesheets for themes that are located in additional theme directories. See [#1790](https://github.com/ampproject/amp-wp/pull/1790). Props westonruter.
+- Improve checks for users who install the plugin from source on GitHub. See [#1774](https://github.com/ampproject/amp-wp/pull/1774). Props westonruter.
+- Improve reliability of phpunit test runs across environments. See [#1776](https://github.com/ampproject/amp-wp/pull/1776). Props westonruter.
+
+See [1.0.2 release](https://github.com/ampproject/amp-wp/releases/tag/1.0.2).
 
 ### 1.0.1 (2018-12-12) ###
 - Add check for required iconv extension. See [#1727](https://github.com/ampproject/amp-wp/pull/1727). Props westonruter.
