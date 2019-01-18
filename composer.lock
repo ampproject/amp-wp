@@ -1,7 +1,7 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
     "content-hash": "b8432d8f248557e2589567614d402586",
@@ -224,6 +224,7 @@
                 "phpcs",
                 "standards"
             ],
+            "abandoned": "phpcompatibility/php-compatibility",
             "time": "2018-07-17T13:42:26+00:00"
         },
         {

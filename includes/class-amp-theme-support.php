@@ -586,10 +586,12 @@ class AMP_Theme_Support {
 			 * @var WP_Post $queried_object
 			 */
 			$queried_object = $query->get_queried_object();
-			$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
-			if ( ! empty( $support_errors ) ) {
-				$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
-				$matching_template['supported'] = false;
+			if ( $queried_object instanceof WP_Post ) {
+				$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
+				if ( ! empty( $support_errors ) ) {
+					$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
+					$matching_template['supported'] = false;
+				}
 			}
 		}
 

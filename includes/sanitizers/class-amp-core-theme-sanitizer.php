@@ -491,6 +491,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->xpath->query( $link_xpath ) as $link ) {
 				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
 					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
+
+					// Prevent browser from jumping immediately to the link target.
+					$link->removeAttribute( 'href' );
+					$link->setAttribute( 'tabindex', '0' );
+					$link->setAttribute( 'role', 'button' );
 				}
 			}
 		}
@@ -680,6 +685,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				.navigation-top.site-navigation-fixed {
 					display: none;
+				}
+
+				/* This is needed by add_smooth_scrolling because it removes the [href] attribute. */
+				.menu-scroll-down {
+					cursor: pointer;
 				}
 
 				<?php if ( $is_front_page_layout && ! has_custom_header() ) : ?>

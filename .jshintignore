@@ -1,4 +1,0 @@
-**/*.min.js
-**/node_modules/**
-**/vendor/**
-**/assets/js/*-compiled.js

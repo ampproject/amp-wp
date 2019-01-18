@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.0.1
+ * Version: 1.0.2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -69,21 +69,21 @@ if ( ! function_exists( 'iconv' ) ) {
  *
  * @since 1.0
  */
-function _amp_print_composer_install_admin_notice() {
+function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
-	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
 	return;
 }
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0.1' );
+define( 'AMP__VERSION', '1.0.2' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
