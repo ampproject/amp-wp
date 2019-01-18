@@ -24,7 +24,6 @@ cache:
     - $HOME/deployment-targets
 
 install:
-  - if [[ $DEV_LIB_SKIP =~ composer ]]; then composer install --no-dev; fi
   - nvm install 8.11.4 && nvm use 8.11.4
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
