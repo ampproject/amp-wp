@@ -209,7 +209,7 @@ class AMP_HTTP {
 					/* In PHP 7.2/7.3 calling idn_to_* functions with default arguments throws a warning. Thus we must set the variant explicitely. This may be reverted when php 7.4 is commonly used and idn_to_utf8 can be used in its default mode without warnings. */
 					$variant = INTL_IDNA_VARIANT_UTS46;
 					$options = IDNA_DEFAULT;
-					$domain = idn_to_utf8( $domain, $options, $variant );
+					$domain  = idn_to_utf8( $domain, $options, $variant );
 				} else {
 					$domain = idn_to_utf8( $domain );
 				}
