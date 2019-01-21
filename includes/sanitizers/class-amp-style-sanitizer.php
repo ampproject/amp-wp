@@ -317,11 +317,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$guessurl = home_url();
+		$guessurl = site_url();
 		if ( ! $guessurl ) {
 			$guessurl = wp_guess_url();
 		}
-		$this->base_url    = $guessurl;
+		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
 		$this->xpath       = new DOMXPath( $dom );
 	}
@@ -530,7 +530,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			! ( $this->content_url && 0 === strpos( $url, $this->content_url ) )
 		);
 		if ( $needs_base_url ) {
-			$url = $this->base_url . $url;
+			$url = $this->base_url . '/' . ltrim( $url, '/' );
 		}
 
 		$remove_url_scheme = function( $schemed_url ) {
