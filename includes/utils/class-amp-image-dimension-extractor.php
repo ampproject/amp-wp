@@ -101,7 +101,12 @@ class AMP_Image_Dimension_Extractor {
 			if ( isset( $parsed['query'] ) ) {
 				$path .= '?' . $parsed['query'];
 			}
-			$url = home_url( $path );
+			$home      = home_url();
+			$home_path = wp_parse_url( $home, PHP_URL_PATH );
+			if ( ! empty( $home_path ) ) {
+				$home = substr( $home, 0, strlen( $home ) - strlen( $home_path ) );
+			}
+			$url = $home . $path;
 		}
 
 		return $url;
