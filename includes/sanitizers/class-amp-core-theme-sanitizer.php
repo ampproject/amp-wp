@@ -1145,7 +1145,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Arguments.
 	 */
 	public static function add_twentynineteen_image_styles( $args = array() ) {
-		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
+		add_action( 'wp_enqueue_scripts', function() {
 			ob_start();
 			?>
 			<style>
