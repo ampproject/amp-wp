@@ -137,7 +137,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			),
 			'query_only'        => array(
 				'?file=file.png',
-				$home_url . '/?file=file.png',
+				$home_url . '?file=file.png',
 			),
 			'path_and_query'    => array(
 				'/path/file.jpg?query=1',
