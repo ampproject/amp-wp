@@ -36,6 +36,9 @@ module.exports = function( grunt ) {
 			composer_production: {
 				command: 'rm -rf vendor && rm composer.lock && composer config platform.php 5.4 && composer install --no-dev && git checkout composer.*'
 			},
+			composer: {
+				command: 'composer install'
+			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
@@ -75,6 +78,8 @@ module.exports = function( grunt ) {
 		spawnQueue = [];
 		stdout = [];
 
+		// Run Composer and Webpack for production.
+		grunt.task.run( 'shell:composer_production' );
 		grunt.task.run( 'shell:webpack_production' );
 
 		spawnQueue.push(
@@ -97,10 +102,8 @@ module.exports = function( grunt ) {
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
 				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|patches|webpack.*)/.test( file );
 			} );
-			paths.push( 'vendor/autoload.php' );
+			paths.push( 'vendor/**' );
 			paths.push( 'assets/js/*-compiled.js' );
-			paths.push( 'vendor/composer/**' );
-			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
@@ -129,8 +132,15 @@ module.exports = function( grunt ) {
 					}
 				}
 			} );
-			grunt.task.run( 'readme' );
+
+			// Copy files first (including production Composer packages).
 			grunt.task.run( 'copy' );
+
+			// Install back regular development Composer packages.
+			grunt.task.run( 'shell:composer' );
+
+			// Generate markdown README.md, which is not in build anyways.
+			grunt.task.run( 'readme' );
 
 			done();
 		}
