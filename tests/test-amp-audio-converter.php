@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+
 /**
  * Class AMP_Audio_Converter_Test
  *
@@ -57,6 +59,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio>',
 			),
 
+			'audio_with_layout_from_editor_fixed_height' => array(
+				'<figure data-amp-layout="fixed-height"><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio></figure>',
+				'<figure data-amp-layout="fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"></amp-audio></figure>',
+			),
+
 			'multiple_same_audio' => array(
 				'<audio width="400" height="300">
 	<source src="https://example.com/foo.wav" type="audio/wav">
@@ -92,7 +99,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -101,13 +108,16 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test__https_required() {
-		$source = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
+		$source   = '<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>';
 		$expected = '';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Audio_Sanitizer( $dom, array(
-			'require_https_src' => true,
-		) );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Audio_Sanitizer(
+			$dom,
+			array(
+				'require_https_src' => true,
+			)
+		);
 		$sanitizer->sanitize();
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -115,10 +125,10 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__didnt_convert() {
-		$source = '<p>Hello World</p>';
+		$source   = '<p>Hello World</p>';
 		$expected = array();
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
@@ -133,10 +143,10 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__did_convert() {
-		$source = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
+		$source   = '<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>';
 		$expected = array( 'amp-audio' => true );
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

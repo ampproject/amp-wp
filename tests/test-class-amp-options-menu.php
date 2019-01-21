@@ -55,9 +55,13 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	public function test_add_menu_items() {
 		global $_parent_pages, $submenu, $wp_settings_sections, $wp_settings_fields;
 
-		wp_set_current_user( $this->factory->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		wp_set_current_user(
+			$this->factory->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
 
 		$this->instance->add_menu_items();
 		$this->assertArrayHasKey( 'amp-options', $_parent_pages );
@@ -72,12 +76,12 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
 		// Test add_setting_section().
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_sections );
-		$this->assertArrayHasKey( 'post_types', $wp_settings_sections['amp-options'] );
+		$this->assertArrayHasKey( 'general', $wp_settings_sections['amp-options'] );
 
 		// Test add_setting_field().
 		$this->assertArrayHasKey( 'amp-options', $wp_settings_fields );
-		$this->assertArrayHasKey( 'post_types', $wp_settings_fields['amp-options'] );
-		$this->assertArrayHasKey( 'supported_post_types', $wp_settings_fields['amp-options']['post_types'] );
+		$this->assertArrayHasKey( 'general', $wp_settings_fields['amp-options'] );
+		$this->assertArrayHasKey( 'supported_templates', $wp_settings_fields['amp-options']['general'] );
 	}
 
 	/**
@@ -86,9 +90,13 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	 * @covers AMP_Options_Menu::render_screen()
 	 */
 	public function test_render_screen_for_admin_user() {
-		wp_set_current_user( $this->factory->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		wp_set_current_user(
+			$this->factory->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
 
 		ob_start();
 		$this->instance->render_screen();

@@ -15,7 +15,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	/**
 	 * Instance of the widget.
 	 *
-	 * @var object.
+	 * @var AMP_Widget_Categories
 	 */
 	public $widget;
 
@@ -26,10 +26,20 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		add_theme_support( 'amp ' );
+		add_theme_support( AMP_Theme_Support::SLUG );
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
 		$this->widget = new AMP_Widget_Categories();
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		remove_theme_support( AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -52,6 +62,8 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Categories::widget()
 	 */
 	public function test_widget() {
+		wp();
+		$this->assertTrue( is_amp_endpoint() );
 		$arguments = array(
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',

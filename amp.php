@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: AMP
- * Description: Add AMP support to your WordPress site.
- * Plugin URI: https://github.com/automattic/amp-wp
+ * Description: Enable AMP on your WordPress site, the WordPress way.
+ * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
- * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
- * Version: 1.0-alpha
+ * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
+ * Version: 1.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -21,12 +21,46 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.4+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.2', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
+	return;
+}
+
+/**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.0
+ */
+function _amp_print_php_dom_document_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! class_exists( 'DOMDocument' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
+	return;
+}
+
+/**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.0.1
+ */
+function _amp_print_php_missing_iconv_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires iconv extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! function_exists( 'iconv' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_missing_iconv_notice' );
 	return;
 }
 
@@ -35,21 +69,49 @@ if ( version_compare( phpversion(), '5.3.2', '<' ) ) {
  *
  * @since 1.0
  */
-function _amp_print_composer_install_admin_notice() {
+function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
-	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
 	return;
 }
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0-alpha' );
+define( 'AMP__VERSION', '1.1-alpha' );
+
+/**
+ * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
+ *
+ * @since 1.0
+ */
+function _amp_incorrect_plugin_slug_admin_notice() {
+	$actual_slug = basename( AMP__DIR__ );
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %1$s is the current directory name, and %2$s is the required directory name */
+					__( 'You appear to have installed the AMP plugin incorrectly. It is currently installed in the <code>%1$s</code> directory, but it needs to be placed in a directory named <code>%2$s</code>. Please rename the directory. This is important for WordPress plugin auto-updates.', 'amp' ),
+					$actual_slug,
+					'amp'
+				)
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( 'amp' !== basename( AMP__DIR__ ) ) {
+	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
+}
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -102,6 +164,9 @@ add_action( 'wp_default_scripts', 'amp_register_default_scripts' );
 // Ensure async and custom-element/custom-template attributes are present on script tags.
 add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 );
 
+// Ensure crossorigin=anonymous is added to font links.
+add_filter( 'style_loader_tag', 'amp_filter_font_style_loader_tag_with_crossorigin_anonymous', 10, 4 );
+
 /**
  * Set up AMP.
  *
@@ -113,6 +178,13 @@ add_filter( 'script_loader_tag', 'amp_filter_script_loader_tag', PHP_INT_MAX, 2 
 function amp_after_setup_theme() {
 	amp_get_slug(); // Ensure AMP_QUERY_VAR is set.
 
+	/**
+	 * Filters whether AMP is enabled on the current site.
+	 *
+	 * Useful if the plugin is network activated and you want to turn it off on select sites.
+	 *
+	 * @since 0.2
+	 */
 	if ( false === apply_filters( 'amp_is_enabled', true ) ) {
 		return;
 	}
@@ -135,27 +207,56 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	load_plugin_textdomain( 'amp', false, plugin_basename( AMP__DIR__ ) . '/languages' );
-
 	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
 
+	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
+	AMP_HTTP::purge_amp_query_vars();
+	AMP_HTTP::send_cors_headers();
+	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
-	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Validation_Manager::init();
+	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		WP_CLI::add_command( 'amp', new AMP_CLI() );
+	}
+
 	add_filter( 'request', 'amp_force_query_var_value' );
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
+	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_admin_pointer' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
 
-	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) ) {
+	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) && version_compare( JETPACK__VERSION, '6.2-alpha', '<' ) ) {
 		require_once AMP__DIR__ . '/jetpack-helper.php';
 	}
 
 	// Add actions for legacy post templates.
 	add_action( 'wp', 'amp_maybe_add_actions' );
+
+	/*
+	 * Broadcast plugin updates.
+	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * version was new option added, and in that case default would never be used for a site
+	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
+	 */
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, array() );
+	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
+	if ( AMP__VERSION !== $old_version ) {
+		/**
+		 * Triggers when after amp_init when the plugin version has updated.
+		 *
+		 * @param string $old_version Old version.
+		 */
+		do_action( 'amp_plugin_update', $old_version );
+		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+	}
 }
 
 /**
@@ -181,6 +282,7 @@ function amp_force_query_var_value( $query_vars ) {
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
  *
+ * @deprecated This function is not used when 'amp' theme support is added.
  * @global WP_Query $wp_query
  * @since 0.2
  * @return void
@@ -188,7 +290,7 @@ function amp_force_query_var_value( $query_vars ) {
 function amp_maybe_add_actions() {
 
 	// Short-circuit when theme supports AMP, as everything is handled by AMP_Theme_Support.
-	if ( current_theme_supports( 'amp' ) ) {
+	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		return;
 	}
 
@@ -262,28 +364,62 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
 }
 
 /**
- * Whether this is in 'canonical mode.'
+ * Whether this is in 'canonical mode'.
  *
- * Themes can register support for this with `add_theme_support( 'amp' )`.
- * Then, this will change the plugin from 'paired mode,' and it won't use its own templates.
- * Nor output frontend markup like the 'rel' link. If the theme registers support for AMP with:
- * `add_theme_support( 'amp', array( 'template_dir' => 'my-amp-templates' ) )`
- * it will retain 'paired mode.
+ * Themes can register support for this with `add_theme_support( AMP_Theme_Support::SLUG )`:
  *
- * @return boolean Whether this is in AMP 'canonical mode'.
+ *      add_theme_support( AMP_Theme_Support::SLUG );
+ *
+ * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired' => true,
+ *      ) );
+ *
+ * Paired mode is also implied if you define a template_dir:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'paired'       => false,
+ *          'template_dir' => 'amp',
+ *      ) );
+ *
+ * If you want to force AMP to always be served on a given template, you can use the templates_supported arg,
+ * for example to always serve the Category template in AMP:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => array(
+ *              'is_category' => true,
+ *          ),
+ *      ) );
+ *
+ * Or if you want to force AMP to be used on all templates:
+ *
+ *      add_theme_support( AMP_Theme_Support::SLUG, array(
+ *          'templates_supported' => 'all',
+ *      ) );
+ *
+ * @see AMP_Theme_Support::read_theme_support()
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
-	$support = get_theme_support( 'amp' );
-	if ( true === $support ) {
-		return true;
+	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		return false;
 	}
-	if ( is_array( $support ) ) {
-		$args = array_shift( $support );
-		if ( empty( $args['template_dir'] ) ) {
-			return true;
-		}
+
+	$args = AMP_Theme_Support::get_theme_support_args();
+	if ( isset( $args['paired'] ) ) {
+		return empty( $args['paired'] );
 	}
-	return false;
+
+	// If there is a template_dir, then paired mode is implied.
+	return empty( $args['template_dir'] );
 }
 
 /**
@@ -302,16 +438,16 @@ function amp_load_classes() {
  * @since 0.2
  */
 function amp_add_frontend_actions() {
-	require_once AMP__DIR__ . '/includes/amp-frontend-actions.php';
+	add_action( 'wp_head', 'amp_add_amphtml_link' );
 }
 
 /**
  * Add post template actions.
  *
  * @since 0.2
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }
@@ -320,15 +456,18 @@ function amp_add_post_template_actions() {
  * Add action to do post template rendering at template_redirect action.
  *
  * @since 0.2
+ * @since 1.0 The amp_render() function is called at template_redirect action priority 11 instead of priority 10.
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_prepare_render() {
-	add_action( 'template_redirect', 'amp_render' );
+	add_action( 'template_redirect', 'amp_render', 11 );
 }
 
 /**
  * Render AMP for queried post.
  *
  * @since 0.1
+ * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_render() {
 	// Note that queried object is used instead of the ID so that the_preview for the queried post can apply.
@@ -343,6 +482,8 @@ function amp_render() {
  * Render AMP post template.
  *
  * @since 0.5
+ * @deprecated This function is not used when 'amp' theme support is added.
+ *
  * @param WP_Post|int $post Post.
  * @global WP_Query $wp_query
  */
@@ -375,6 +516,8 @@ function amp_render_post( $post ) {
 	/**
 	 * Fires before rendering a post in AMP.
 	 *
+	 * This action is not triggered when 'amp' theme support is present. Instead, you should use 'template_redirect' action and check if `is_amp_endpoint()`.
+	 *
 	 * @since 0.2
 	 *
 	 * @param int $post_id Post ID.
@@ -396,7 +539,7 @@ function amp_render_post( $post ) {
  * Uses the priority of 12 for the 'after_setup_theme' action.
  * Many themes run `add_theme_support()` on the 'after_setup_theme' hook, at the default priority of 10.
  * And that function's documentation suggests adding it to that action.
- * So this enables themes to `add_theme_support( 'amp' )`.
+ * So this enables themes to `add_theme_support( AMP_Theme_Support::SLUG )`.
  * And `amp_init_customizer()` will be able to recognize theme support by calling `amp_is_canonical()`.
  *
  * @since 0.4
@@ -408,16 +551,23 @@ add_action( 'plugins_loaded', '_amp_bootstrap_customizer', 9 ); // Should be hoo
 
 /**
  * Redirects the old AMP URL to the new AMP URL.
+ *
  * If post slug is updated the amp page with old post slug will be redirected to the updated url.
  *
- * @param  string $link New URL of the post.
+ * @since 0.5
+ * @deprecated This function is irrelevant when 'amp' theme support is added.
  *
- * @return string $link URL to be redirected.
+ * @param string $link New URL of the post.
+ * @return string URL to be redirected.
  */
 function amp_redirect_old_slug_to_new_url( $link ) {
 
-	if ( is_amp_endpoint() ) {
-		$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+	if ( is_amp_endpoint() && ! amp_is_canonical() ) {
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$link = add_query_arg( amp_get_slug(), '', $link );
+		} else {
+			$link = trailingslashit( trailingslashit( $link ) . amp_get_slug() );
+		}
 	}
 
 	return $link;

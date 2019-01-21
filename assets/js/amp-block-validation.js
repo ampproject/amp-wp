@@ -7,7 +7,7 @@
 
 /* exported ampBlockValidation */
 /* global wp, _ */
-var ampBlockValidation = ( function() {
+var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var module = {
@@ -19,7 +19,8 @@ var ampBlockValidation = ( function() {
 		 */
 		data: {
 			i18n: {},
-			ampValidityRestField: ''
+			ampValidityRestField: '',
+			isSanitizationAutoAccepted: false
 		},
 
 		/**
@@ -28,6 +29,18 @@ var ampBlockValidation = ( function() {
 		 * @param {string}
 		 */
 		storeName: 'amp/blockValidation',
+
+		/**
+		 * Holds the last states which are used for comparisons.
+		 *
+		 * @param {Object}
+		 */
+		lastStates: {
+			noticesAreReset: false,
+			validationErrors: [],
+			blockOrder: [],
+			blockValidationErrors: {}
+		},
 
 		/**
 		 * Boot module.
@@ -41,9 +54,10 @@ var ampBlockValidation = ( function() {
 			wp.i18n.setLocaleData( module.data.i18n, 'amp' );
 
 			wp.hooks.addFilter(
-				'blocks.BlockEdit',
+				'editor.BlockEdit',
 				'amp/add-notice',
-				module.conditionallyAddNotice
+				module.conditionallyAddNotice,
+				99 // eslint-disable-line
 			);
 
 			module.store = module.registerStore();
@@ -60,74 +74,130 @@ var ampBlockValidation = ( function() {
 			return wp.data.registerStore( module.storeName, {
 				reducer: function( _state, action ) {
 					var state = _state || {
-						blockValidationErrorsByUid: {}
+						blockValidationErrorsByClientId: {}
 					};
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
 							return _.extend( {}, state, {
-								blockValidationErrorsByUid: action.blockValidationErrorsByUid
+								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId
 							} );
 						default:
 							return state;
 					}
 				},
 				actions: {
-					updateBlocksValidationErrors: function( blockValidationErrorsByUid ) {
+					updateBlocksValidationErrors: function( blockValidationErrorsByClientId ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blockValidationErrorsByUid: blockValidationErrorsByUid
+							blockValidationErrorsByClientId: blockValidationErrorsByClientId
 						};
 					}
 				},
 				selectors: {
-					getBlockValidationErrors: function( state, uid ) {
-						return state.blockValidationErrorsByUid[ uid ] || [];
+					getBlockValidationErrors: function( state, clientId ) {
+						return state.blockValidationErrorsByClientId[ clientId ] || [];
 					}
 				}
 			} );
 		},
 
 		/**
+		 * Checks if AMP is enabled for this post.
+		 *
+		 * @return {boolean} Returns true when the AMP toggle is on; else, false is returned.
+		 */
+		isAMPEnabled: function isAMPEnabled() {
+			var meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
+				return 'enabled' === meta.amp_status;
+			}
+			return window.wpAmpEditor.defaultStatus;
+		},
+
+		/**
+		 * Checks if the validate errors state change handler should wait before processing.
+		 *
+		 * @return {boolean} Whether should wait.
+		 */
+		waitToHandleStateChange: function waitToHandleStateChange() {
+			var currentPost;
+
+			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
+			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
+			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || ( ! wp.data.select( 'core/editor' ).isEditedPostDirty() && wp.data.select( 'core/editor' ).isEditedPostNew() ) ) {
+				return true;
+			}
+
+			// Wait for the current post to be set up.
+			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
+				return true;
+			}
+
+			return false;
+		},
+
+		/**
 		 * Handle state change regarding validation errors.
+		 *
+		 * This is essentially a JS implementation of \AMP_Validation_Manager::print_edit_form_validation_status() in PHP.
 		 *
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity, rejectedErrors;
 
-			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
-			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() ) {
+			if ( ! module.isAMPEnabled() ) {
+				if ( ! module.lastStates.noticesAreReset ) {
+					module.lastStates.validationErrors = [];
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+					module.resetBlockNotices();
+				}
+				return;
+			}
+
+			if ( module.waitToHandleStateChange() ) {
 				return;
 			}
 
 			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
-			validationErrors = ampValidity.errors;
+
+			// Show all validation errors which have not been explicitly acknowledged as accepted.
+			validationErrors = _.map(
+				_.filter( ampValidity.results, function( result ) {
+					// @todo Show VALIDATION_ERROR_ACK_REJECTED_STATUS differently since moderated?
+					return (
+						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+						1 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS */ === result.status ||
+						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+					);
+				} ),
+				function( result ) {
+					return result.error;
+				}
+			);
 
 			// Short-circuit if there was no change to the validation errors.
-			if ( ! validationErrors || _.isEqual( module.lastValidationErrors, validationErrors ) ) {
+			if ( ! module.didValidationErrorsChange( validationErrors ) ) {
+				if ( ! validationErrors.length && ! module.lastStates.noticesAreReset ) {
+					module.lastStates.noticesAreReset = true;
+					module.resetWarningNotice();
+				}
 				return;
 			}
-			module.lastValidationErrors = validationErrors;
+			module.lastStates.validationErrors = validationErrors;
+			module.lastStates.noticesAreReset = false;
 
 			// Remove any existing notice.
-			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
-				module.validationWarningNoticeId = null;
-			}
-
-			// If there are no validation errors then just make sure the validation notices are cleared from the blocks.
-			if ( ! validationErrors.length ) {
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
-				return;
-			}
+			module.resetWarningNotice();
 
 			noticeMessage = wp.i18n.sprintf(
 				wp.i18n._n(
-					'There is %s issue from AMP validation.',
-					'There are %s issues from AMP validation.',
+					'There is %s issue from AMP validation which needs review.',
+					'There are %s issues from AMP validation which need review.',
 					validationErrors.length,
 					'amp'
 				),
@@ -136,11 +206,13 @@ var ampBlockValidation = ( function() {
 
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byUid );
+				module.lastStates.blockValidationErrors = blockValidationErrors.byClientId;
+				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
 					noticeMessage += ' ' + wp.i18n.sprintf(
+						/* translators: %s is the count of block errors. */
 						wp.i18n._n(
 							'And %s is directly due to content here.',
 							'And %s are directly due to content here.',
@@ -162,7 +234,7 @@ var ampBlockValidation = ( function() {
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+				module.resetBlockNotices();
 
 				noticeMessage += ' ' + wp.i18n._n(
 					'It may not be due to content here.',
@@ -172,17 +244,104 @@ var ampBlockValidation = ( function() {
 				);
 			}
 
-			noticeMessage += ' ' + wp.i18n.__( 'Invalid code is stripped when displaying AMP.', 'amp' );
-			noticeElement = wp.element.createElement( 'p', {}, [
-				noticeMessage + ' ',
-				ampValidity.link && wp.element.createElement(
-					'a',
-					{ key: 'details', href: ampValidity.link, target: '_blank' },
-					wp.i18n.__( 'Details', 'amp' )
-				)
-			] );
+			rejectedErrors = _.filter( ampValidity.results, function( result ) {
+				return (
+					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+				);
+			} );
 
-			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
+			noticeMessage += ' ';
+			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+			if ( module.data.isSanitizationAutoAccepted ) {
+				if ( 0 === rejectedErrors.length ) {
+					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+				} else {
+					noticeMessage += wp.i18n._n(
+						'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						validationErrors.length,
+						'amp'
+					);
+				}
+			} else {
+				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			}
+
+			noticeOptions = {
+				id: 'amp-errors-notice'
+			};
+			if ( ampValidity.review_link ) {
+				noticeOptions.actions = [
+					{
+						label: wp.i18n.__( 'Review issues', 'amp' ),
+						url: ampValidity.review_link
+					}
+				];
+			}
+
+			// Display notice if there were validation errors.
+			if ( validationErrors.length > 0 ) {
+				wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			}
+
+			module.validationWarningNoticeId = noticeOptions.id;
+		},
+
+		/**
+		 * Checks if the validation errors have changed.
+		 *
+		 * @param {Object[]} validationErrors A list of validation errors.
+		 * @return {boolean|*} Returns true when the validation errors change.
+		 */
+		didValidationErrorsChange: function didValidationErrorsChange( validationErrors ) {
+			if ( module.areBlocksOutOfSync() ) {
+				module.lastStates.validationErrors = [];
+			}
+
+			return (
+				module.lastStates.validationErrors.length !== validationErrors.length
+				||
+				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
+			);
+		},
+
+		/**
+		 * Checks if the block order is out of sync.
+		 *
+		 * Block change on page load and can get out of sync during normal editing and saving processes.  This method gives a check to determine if an "out of sync" condition occurred.
+		 *
+		 * @return {boolean} Whether out of sync.
+		 */
+		areBlocksOutOfSync: function areBlocksOutOfSync() {
+			var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
+			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
+				module.lastStates.blockOrder = blockOrder;
+				return true;
+			}
+
+			return false;
+		},
+
+		/**
+		 * Resets the validation warning notice.
+		 *
+		 * @return {void}
+		 */
+		resetWarningNotice: function resetWarningNotice() {
+			if ( module.validationWarningNoticeId ) {
+				wp.data.dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
+				module.validationWarningNoticeId = null;
+			}
+		},
+
+		/**
+		 * Resets the block level validation errors.
+		 *
+		 * @return {void}
+		 */
+		resetBlockNotices: function resetBlockNotices() {
+			wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
 		},
 
 		/**
@@ -194,7 +353,7 @@ var ampBlockValidation = ( function() {
 		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
 			var blockOrder = [];
 			_.each( blocks, function( block ) {
-				blockOrder.push( block.uid );
+				blockOrder.push( block.clientId );
 				if ( block.innerBlocks.length > 0 ) {
 					Array.prototype.push.apply( blockOrder, module.getFlattenedBlockOrder( block.innerBlocks ) );
 				}
@@ -208,20 +367,28 @@ var ampBlockValidation = ( function() {
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByUid, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var acceptedStatus, blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			acceptedStatus = 3; // eslint-disable-line no-magic-numbers
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
-			validationErrors = currentPost[ module.data.ampValidityRestField ].errors;
+			validationErrors = _.map(
+				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
+					return result.term_status !== acceptedStatus; // If not accepted by the user.
+				} ),
+				function( result ) {
+					return result.error;
+				}
+			);
 			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
 
 			otherValidationErrors = [];
-			blockValidationErrorsByUid = {};
-			_.each( blockOrder, function( uid ) {
-				blockValidationErrorsByUid[ uid ] = [];
+			blockValidationErrorsByClientId = {};
+			_.each( blockOrder, function( clientId ) {
+				blockValidationErrorsByClientId[ clientId ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
-				var i, source, uid, block, matched;
+				var i, source, clientId, block, matched;
 				if ( ! validationError.sources ) {
 					otherValidationErrors.push( validationError );
 					return;
@@ -238,13 +405,13 @@ var ampBlockValidation = ( function() {
 					}
 
 					// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
-					uid = blockOrder[ source.block_content_index ];
-					if ( _.isUndefined( uid ) ) {
+					clientId = blockOrder[ source.block_content_index ];
+					if ( _.isUndefined( clientId ) ) {
 						throw new Error( 'undefined_block_index' );
 					}
 
-					// Sanity check that block exists for uid.
-					block = editorSelect.getBlock( uid );
+					// Sanity check that block exists for clientId.
+					block = editorSelect.getBlock( clientId );
 					if ( ! block ) {
 						throw new Error( 'block_lookup_failure' );
 					}
@@ -254,7 +421,7 @@ var ampBlockValidation = ( function() {
 						throw new Error( 'ordered_block_alignment_mismatch' );
 					}
 
-					blockValidationErrorsByUid[ uid ].push( validationError );
+					blockValidationErrorsByClientId[ clientId ].push( validationError );
 					matched = true;
 
 					// Stop looking for sources, since we aren't looking for parent blocks.
@@ -267,7 +434,7 @@ var ampBlockValidation = ( function() {
 			} );
 
 			return {
-				byUid: blockValidationErrorsByUid,
+				byClientId: blockValidationErrorsByClientId,
 				other: otherValidationErrors
 			};
 		},
@@ -309,55 +476,64 @@ var ampBlockValidation = ( function() {
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			function AmpNoticeBlockEdit( props ) {
-				var edit, details;
-				edit = wp.element.createElement(
-					BlockEdit,
-					props
-				);
+			return function( ownProps ) {
+				var validationErrors,
+					mergedProps;
+				function AmpNoticeBlockEdit( props ) {
+					var edit, details;
+					edit = wp.element.createElement(
+						BlockEdit,
+						props
+					);
 
-				if ( 0 === props.ampBlockValidationErrors.length ) {
-					return edit;
+					if ( 0 === props.ampBlockValidationErrors.length ) {
+						return edit;
+					}
+
+					details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
+						wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
+							wp.i18n._n(
+								'There is %s issue from AMP validation.',
+								'There are %s issues from AMP validation.',
+								props.ampBlockValidationErrors.length,
+								'amp'
+							),
+							props.ampBlockValidationErrors.length
+						) ),
+						wp.element.createElement(
+							'ul',
+							{ key: 'list', className: 'amp-block-validation-errors__list' },
+							_.map( props.ampBlockValidationErrors, function( error, key ) {
+								return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
+							} )
+						)
+					] );
+
+					return wp.element.createElement(
+						wp.element.Fragment, {},
+						wp.element.createElement(
+							wp.components.Notice,
+							{
+								status: 'warning',
+								isDismissible: false
+							},
+							details
+						),
+						edit
+					);
 				}
 
-				details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
-					wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
-						wp.i18n._n(
-							'There is %s issue from AMP validation.',
-							'There are %s issues from AMP validation.',
-							props.ampBlockValidationErrors.length,
-							'amp'
-						),
-						props.ampBlockValidationErrors.length
-					) ),
-					wp.element.createElement(
-						'ul',
-						{ key: 'list', className: 'amp-block-validation-errors__list' },
-						_.map( props.ampBlockValidationErrors, function( error, key ) {
-							return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
-						} )
-					)
-				] );
+				if ( ! module.lastStates.blockValidationErrors[ ownProps.clientId ] ) {
+					validationErrors = wp.data.select( module.storeName ).getBlockValidationErrors( ownProps.clientId );
+					module.lastStates.blockValidationErrors[ ownProps.clientId ] = validationErrors;
+				}
 
-				return wp.element.createElement(
-					wp.element.Fragment, {},
-					wp.element.createElement(
-						wp.components.Notice,
-						{
-							status: 'warning',
-							isDismissible: false
-						},
-						details
-					),
-					edit
-				);
-			}
-
-			return wp.data.withSelect( function( select, ownProps ) {
-				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.id )
+				mergedProps = _.extend( {}, ownProps, {
+					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ]
 				} );
-			} )( AmpNoticeBlockEdit );
+
+				return AmpNoticeBlockEdit( mergedProps );
+			};
 		}
 	};
 

@@ -1,22 +1,36 @@
 {
-    "name": "automattic/amp-wp",
-    "description": "WordPress plugin for adding AMP support.",
-    "homepage": "https://github.com/Automattic/amp-wp",
-    "type": "wordpress-plugin",
-    "license": "GPL-2.0",
-    "version": "1.0.0",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/xwp/PHP-CSS-Parser"
-        }
-    ],
-    "require": {
-        "sabberworm/php-css-parser": "dev-master"
-    },
-    "require-dev": {
-        "wp-coding-standards/wpcs": "^0.14.0",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
-        "wimg/php-compatibility": "^8.1"
+  "name": "ampproject/amp-wp",
+  "description": "WordPress plugin for adding AMP support.",
+  "homepage": "https://github.com/ampproject/amp-wp",
+  "type": "wordpress-plugin",
+  "license": "GPL-2.0-or-later",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/xwp/PHP-CSS-Parser"
     }
+  ],
+  "require": {
+    "php": "^5.4 || ^7.0",
+    "sabberworm/php-css-parser": "8.1.1",
+    "fasterimage/fasterimage": "1.2.0",
+    "cweagans/composer-patches": "~1.6"
+  },
+  "require-dev": {
+    "wp-coding-standards/wpcs": "1.2.1",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
+    "phpcompatibility/php-compatibility": "9.1.1"
+  },
+  "config": {
+    "platform": {
+      "php": "5.4"
+    }
+  },
+  "extra": {
+    "patches": {
+      "fasterimage/fasterimage": {
+        "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
+      }
+    }
+  }
 }

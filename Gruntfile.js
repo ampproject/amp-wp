@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* jshint node:true */
 /* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
@@ -8,17 +7,6 @@ module.exports = function( grunt ) {
 	grunt.initConfig( {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
-
-		// JavaScript linting with JSHint.
-		jshint: {
-			options: {
-				jshintrc: '.jshintrc'
-			},
-			all: [
-				'Gruntfile.js',
-				'assets/**/*.js'
-			]
-		},
 
 		// Clean up the build.
 		clean: {
@@ -42,7 +30,10 @@ module.exports = function( grunt ) {
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php'
 			},
-			create_release_zip: {
+			webpack_production: {
+				command: 'cross-env BABEL_ENV=production webpack'
+			},
+			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}
 		},
@@ -63,7 +54,6 @@ module.exports = function( grunt ) {
 	// Load tasks.
 	grunt.loadNpmTasks( 'grunt-contrib-clean' );
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
-	grunt.loadNpmTasks( 'grunt-contrib-jshint' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
 
@@ -82,6 +72,8 @@ module.exports = function( grunt ) {
 		spawnQueue = [];
 		stdout = [];
 
+		grunt.task.run( 'shell:webpack_production' );
+
 		spawnQueue.push(
 			{
 				cmd: 'git',
@@ -97,12 +89,13 @@ module.exports = function( grunt ) {
 			var commitHash, lsOutput, versionAppend, paths;
 			commitHash = stdout.shift();
 			lsOutput = stdout.shift();
-			versionAppend = commitHash + '-' + new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' );
+			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|dev-lib|readme\.md|composer\..*|patches|webpack.*)/.test( file );
 			} );
 			paths.push( 'vendor/autoload.php' );
+			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 
@@ -136,8 +129,6 @@ module.exports = function( grunt ) {
 			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
 
-			grunt.task.run( 'shell:create_release_zip' );
-
 			done();
 		}
 
@@ -162,14 +153,11 @@ module.exports = function( grunt ) {
 		doNext();
 	} );
 
-	grunt.registerTask( 'create-release-zip', [
-		'build',
-		'shell:create_release_zip'
+	grunt.registerTask( 'create-build-zip', [
+		'shell:create_build_zip'
 	] );
 
 	grunt.registerTask( 'deploy', [
-		'build',
-		'jshint',
 		'shell:phpunit',
 		'shell:verify_matching_versions',
 		'wp_deploy'

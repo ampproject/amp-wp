@@ -1,6 +1,6 @@
 /* exported ampCustomizePreview */
 
-var ampCustomizePreview = ( function( api ) {
+var ampCustomizePreview = ( function( api ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var component = {};

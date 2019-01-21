@@ -36,17 +36,21 @@ class WPCOM_AMP_Polldaddy_Embed extends AMP_Base_Embed_Handler {
 	public function shortcode( $attr ) {
 		global $wp_embed;
 
-		$output = '';
-		$url    = 'https://polldaddy.com/';
+		$url = null;
 		if ( ! empty( $attr['poll'] ) ) {
-			$url .= 'poll/' . $attr['poll'] . '/';
+			$url = 'https://polldaddy.com/poll/' . $attr['poll'] . '/';
 		} elseif ( ! empty( $attr['survey'] ) ) {
-			$url .= 's/' . $attr['survey'] . '/';
+			$url = 'https://polldaddy.com/s/' . $attr['survey'] . '/';
+		}
+
+		// Short-circuit in the case of the ratings embed.
+		if ( ! $url ) {
+			return '';
 		}
 
 		if ( ! empty( $attr['title'] ) ) {
 			$output = $this->render_link( $url, $attr['title'] );
-		} elseif ( $url ) {
+		} else {
 			$output = $wp_embed->shortcode( $attr, $url );
 		}
 

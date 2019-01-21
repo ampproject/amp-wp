@@ -4,3 +4,5 @@ build
 node_modules
 wiki
 amp.zip
+**/*-compiled.js
+built

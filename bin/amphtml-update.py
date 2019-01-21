@@ -2,24 +2,14 @@
 This script is used to generate the 'class-amp-allowed-tags-generated.php'
 file that is used by the class AMP_Tag_And_Attribute_Sanitizer.
 
-Follow the steps below to generate a new version of the allowed tags class:
+A bash script, amphtml-update.sh, is provided to automatically run this script.  To run the bash script, type:
 
-- Download a copy of the latet AMPHTML repository from github:
+`bash amphtml-update.sh`
 
-	git clone git@github.com:ampproject/amphtml.git
+from within a Linux environment such as VVV.
 
-- Copy this file into the repo's validator subdirectory:
-
-	cp amp_wp_build.py amphtml/validator
-
-- Run the file from the validator subdirectory:
-	cd amphtml/validator;python amp_wp_build.py
-
-- The class-amp-allowed-tags-generated.php will be generated at:
-	amphtml/validator/amp_wp/class-amp-allowed-tags-generated.php
-
-- copy this file into the amp-wp plugin:
-	cp amp_wp/class-amp-allowed-tags-generated.php /path/to/wordpress/wp-content/plugins/amp-wp/includes/sanitizers/
+See the Updating Allowed Tags and Attributes section of the Contributing guide
+https://github.com/ampproject/amp-wp/blob/develop/contributing.md#updating-allowed-tags-and-attributes.
 
 Then have fun sanitizing your AMP posts!
 """
@@ -110,7 +100,7 @@ def GeneratePHP(out_dir):
 	logging.info('entering ...')
 	assert re.match(r'^[a-zA-Z_\-0-9]+$', out_dir), 'bad out_dir: %s' % out_dir
 
-	allowed_tags, attr_lists, versions = ParseRules(out_dir)
+	allowed_tags, attr_lists, reference_points, versions = ParseRules(out_dir)
 
 	#Generate the output
 	out = []
@@ -119,6 +109,7 @@ def GeneratePHP(out_dir):
 	GenerateAllowedTagsPHP(out, allowed_tags)
 	GenerateLayoutAttributesPHP(out, attr_lists)
 	GenerateGlobalAttributesPHP(out, attr_lists)
+	GenerateReferencePointsPHP(out, reference_points)
 	GenerateFooterPHP(out)
 
 	# join out array into a single string and remove unneeded whitespace
@@ -198,6 +189,15 @@ def GenerateGlobalAttributesPHP(out, attr_lists):
 	out.append('')
 	logging.info('... done')
 
+def GenerateReferencePointsPHP(out, reference_points):
+	logging.info('entering ...')
+
+	# Output the reference points.
+	out.append('')
+	out.append('\tprivate static $reference_points = %s;' % Phpize( reference_points, 1 ).lstrip() )
+	out.append('')
+	logging.info('... done')
+
 def GenerateFooterPHP(out):
 	logging.info('entering ...')
 
@@ -225,6 +225,20 @@ def GenerateFooterPHP(out):
 	public static function get_allowed_tag( $node_name ) {
 		if ( isset( self::$allowed_tags[ $node_name ] ) ) {
 			return self::$allowed_tags[ $node_name ];
+		}
+		return null;
+	}
+
+	/**
+	 * Get reference point spec.
+	 *
+	 * @since 1.0
+	 * @param string $tag_spec_name Tag spec name.
+	 * @return array|null Reference point spec, or null if does not exist.
+	 */
+	public static function get_reference_point_spec( $tag_spec_name ) {
+		if ( isset( self::$reference_points[ $tag_spec_name ] ) ) {
+			return self::$reference_points[ $tag_spec_name ];
 		}
 		return null;
 	}
@@ -268,6 +282,7 @@ def ParseRules(out_dir):
 
 	allowed_tags = {}
 	attr_lists = {}
+	reference_points = {}
 	versions = {}
 
 	specfile='%s/validator.protoascii' % out_dir
@@ -311,12 +326,13 @@ def ParseRules(out_dir):
 				if tag_spec.HasField('mandatory_parent') and tag_spec.mandatory_parent in mandatory_parent_blacklist and tag_spec.tag_name != 'HTML':
 					continue
 
-				# Ignore the special $REFERENCE_POINT tag
-				if '$REFERENCE_POINT' == tag_spec.tag_name:
-					continue
-
 				# Ignore deprecated tags
 				if tag_spec.HasField('deprecation'):
+					continue
+
+				# Handle the special $REFERENCE_POINT tag
+				if '$REFERENCE_POINT' == tag_spec.tag_name:
+					reference_points[ tag_spec.spec_name ] = GetTagSpec(tag_spec, attr_lists)
 					continue
 
 				# If we made it here, then start adding the tag_spec
@@ -332,7 +348,7 @@ def ParseRules(out_dir):
 					allowed_tags[UnicodeEscape(tag_spec.tag_name).lower()] = tag_list
 
 	logging.info('... done')
-	return allowed_tags, attr_lists, versions
+	return allowed_tags, attr_lists, reference_points, versions
 
 
 def GetTagSpec(tag_spec, attr_lists):
@@ -370,7 +386,7 @@ def GetTagSpec(tag_spec, attr_lists):
 						continue
 					css_spec['allowed_at_rules'].append( at_rule_spec.name )
 
-				for css_spec_field_name in ( 'allowed_declarations', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
+				for css_spec_field_name in ( 'allowed_declarations', 'declaration', 'font_url_spec', 'image_url_spec', 'validate_keyframes' ):
 					if not hasattr( field_value, css_spec_field_name ):
 						continue
 					css_spec_field_value = getattr( field_value, css_spec_field_name )
@@ -409,6 +425,16 @@ def GetTagRules(tag_spec):
 		for requires_extension in tag_spec.requires_extension:
 			requires_extension_list.append(requires_extension)
 		tag_rules['requires_extension'] = requires_extension_list
+
+	if hasattr(tag_spec, 'reference_points') and len( tag_spec.reference_points ) != 0:
+		tag_reference_points = {}
+		for reference_point_spec in tag_spec.reference_points:
+			tag_reference_points[ reference_point_spec.tag_spec_name ] = {
+				"mandatory": reference_point_spec.mandatory,
+				"unique": reference_point_spec.unique
+			}
+		if len( tag_reference_points ) > 0:
+			tag_rules['reference_points'] = tag_reference_points
 
 	if hasattr(tag_spec, 'also_requires_tag_warning') and len( tag_spec.also_requires_tag_warning ) != 0:
 		also_requires_tag_warning_list = []
@@ -522,12 +548,12 @@ def GetValues(attr_spec):
 		value_dict['mandatory'] = attr_spec.mandatory
 
 	# Add allowed value
-	if attr_spec.HasField('value'):
-		value_dict['value'] = attr_spec.value
+	if attr_spec.value:
+		value_dict['value'] = list( attr_spec.value )
 
 	# value_casei
-	if attr_spec.HasField('value_casei'):
-		value_dict['value_casei'] = attr_spec.value_casei
+	if attr_spec.value_casei:
+		value_dict['value_casei'] = list( attr_spec.value_casei )
 
 	# value_regex
 	if attr_spec.HasField('value_regex'):

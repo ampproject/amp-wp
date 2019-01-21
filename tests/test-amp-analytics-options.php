@@ -8,6 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	private $vendor = 'googleanalytics';
@@ -55,9 +56,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 	private function render_post() {
 		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array(
-			'post_author' => $user_id,
-		) );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_author' => $user_id,
+			)
+		);
 
 		// Need to use ob here since the method echos
 		ob_start();
@@ -74,9 +77,12 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * @param string $config Entry config (JSON).
 	 */
 	private function insert_one_option( $type, $config ) {
-		AMP_Options_Manager::update_option( 'analytics', array(
-			'__new__' => compact( 'type', 'config' ),
-		) );
+		AMP_Options_Manager::update_option(
+			'analytics',
+			array(
+				'__new__' => compact( 'type', 'config' ),
+			)
+		);
 	}
 
 	/**
@@ -143,7 +149,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
-		$scripts = $head->getElementsByTagName( 'script' );
+		$scripts            = $head->getElementsByTagName( 'script' );
 		$analytics_js_found = false;
 		foreach ( $scripts as $script ) {
 			if ( 'amp-analytics' === $script->getAttribute( 'custom-element' ) ) {
@@ -231,11 +237,14 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
 		$this->assertEquals( 'googleanalytics', $analytics[ $key ]['type'] );
 
-		add_theme_support( 'amp' );
-		add_filter( 'amp_analytics_entries', function( $analytics ) use ( $key ) {
-			$analytics[ $key ]['type'] = 'test';
-			return $analytics;
-		} );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		add_filter(
+			'amp_analytics_entries',
+			function( $analytics ) use ( $key ) {
+				$analytics[ $key ]['type'] = 'test';
+				return $analytics;
+			}
+		);
 		$analytics = amp_get_analytics();
 		$this->assertEquals( 'test', $analytics[ $key ]['type'] );
 	}

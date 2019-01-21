@@ -34,6 +34,17 @@ class Test_AMP_Widget_Text extends WP_UnitTestCase {
 		parent::setUp();
 		wp_maybe_load_widgets();
 		$this->widget = new $class();
+		add_theme_support( AMP_Theme_Support::SLUG );
+	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		remove_theme_support( AMP_Theme_Support::SLUG );
 	}
 
 	/**
@@ -42,7 +53,8 @@ class Test_AMP_Widget_Text extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Text::inject_video_max_width_style()
 	 */
 	public function test_inject_video_max_width_style() {
-		add_theme_support( 'amp' );
+		wp();
+		$this->assertTrue( is_amp_endpoint() );
 		$video            = '<video src="http://example.com" height="100" width="200"></video>';
 		$video_only_width = '<video src="http://example.com/this-video" width="500">';
 		$this->assertEquals( $video, $this->widget->inject_video_max_width_style( array( $video ) ) );

@@ -1,7 +1,7 @@
 /* exported ampCustomizeControls */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
-var ampCustomizeControls = ( function( api, $ ) {
+var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	var component = {
