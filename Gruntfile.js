@@ -33,6 +33,9 @@ module.exports = function( grunt ) {
 			webpack_production: {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
+			composer_production: {
+				command: 'rm -rf vendor && rm composer.lock && composer config platform.php 5.4 && composer install --no-dev && git checkout composer.*'
+			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"'
 			}

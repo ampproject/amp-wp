@@ -21,11 +21,6 @@
     "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
     "phpcompatibility/php-compatibility": "9.1.1"
   },
-  "config": {
-    "platform": {
-      "php": "5.4"
-    }
-  },
   "extra": {
     "patches": {
       "fasterimage/fasterimage": {
