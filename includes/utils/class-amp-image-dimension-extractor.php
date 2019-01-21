@@ -121,19 +121,27 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
-	 * @param array  $dimensions Image urls mapped to dimensions.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
+	 * @param array $dimensions Image urls mapped to dimensions.
+	 * @param false $mode       Deprecated.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
-	public static function extract_by_downloading_images( $dimensions, $mode = 'concurrent' ) {
+	public static function extract_by_downloading_images( $dimensions, $mode = false ) {
+		if ( $mode ) {
+			_deprecated_argument( __METHOD__, 'AMP 1.1' );
+		}
+
 		$transient_expiration = 30 * DAY_IN_SECONDS;
 
 		$urls_to_fetch = array();
 		$images        = array();
 
 		self::determine_which_images_to_fetch( $dimensions, $urls_to_fetch );
-		self::fetch_images( $urls_to_fetch, $images, $mode );
-		self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		try {
+			self::fetch_images( $urls_to_fetch, $images );
+			self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		} catch ( \Exception $exception ) {
+			trigger_error( esc_html( $exception->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
 
 		return $dimensions;
 	}
@@ -193,54 +201,15 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Fetch dimensions of remote images
 	 *
-	 * @param array  $urls_to_fetch Image src urls to fetch.
-	 * @param array  $images Array to populate with results of image/dimension inspection.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
-	 */
-	private static function fetch_images( $urls_to_fetch, &$images, $mode ) {
-		if ( 'synchronous' === $mode ||
-			false === function_exists( 'curl_multi_exec' ) ||
-			version_compare( PHP_VERSION, '5.4.0' ) < 0
-		) {
-			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
-		} else {
-			self::fetch_images_via_faster_image( $urls_to_fetch, $images );
-		}
-	}
-
-	/**
-	 * Fetch images via FastImage library
+	 * @throws Exception When cURL handle cannot be added.
 	 *
 	 * @param array $urls_to_fetch Image src urls to fetch.
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
-	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
-
-		$image = new FastImage();
-		$urls  = array_keys( $urls_to_fetch );
-
-		foreach ( $urls as $url ) {
-			$result = $image->load( $url );
-			if ( false === $result ) {
-				$images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
-			} else {
-				$size = $image->getSize();
-
-				$images[ $url ]['size'] = $size;
-			}
-		}
-	}
-
-	/**
-	 * Fetch images via FasterImage library
-	 *
-	 * @param array $urls_to_fetch Image src urls to fetch.
-	 * @param array $images Array to populate with results of image/dimension inspection.
-	 */
-	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
+	private static function fetch_images( $urls_to_fetch, &$images ) {
 		$urls       = array_keys( $urls_to_fetch );
 		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client     = new \FasterImage\FasterImage( $user_agent );
+		$client     = new \FasterImage\FasterImage( $user_agent ); // @todo The $user_agent is not actually able to be passed in this way to FasterImage. Needs another patch?
 		$images     = $client->batch( $urls );
 	}
 

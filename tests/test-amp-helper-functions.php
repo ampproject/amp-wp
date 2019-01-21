@@ -283,7 +283,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @param string $amphtml_url   The amphtml URL.
 	 */
 	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
-		$test = $this; // For PHP 5.3.
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		$get_amp_html_link = function() {
@@ -292,8 +291,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			return ob_get_clean();
 		};
 
-		$assert_amphtml_link_present = function() use ( $test, $amphtml_url, $get_amp_html_link ) {
-			$test->assertEquals(
+		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link ) {
+			$this->assertEquals(
 				sprintf( '<link rel="amphtml" href="%s">', esc_url( $amphtml_url ) ),
 				$get_amp_html_link()
 			);

@@ -133,7 +133,7 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
@@ -1116,7 +1116,7 @@ class AMP_Theme_Support {
 		$link = sprintf(
 			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
 			esc_attr( '#' . $args['respond_id'] ),
-			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) ) ),
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
@@ -1652,10 +1652,23 @@ class AMP_Theme_Support {
 		 * not have been set yet during the WordPress template generation is
 		 * the ETag. The AMP plugin sends a Vary header at amp_init.
 		 */
-		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
 
-		// Handle responses that are cached by the browser.
-		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+		/*
+		 * Handle responses that are cached by the browser, returning 304 response if the response cache key
+		 * matches any ETags mentioned in If-None-Match request header. Note that if the client request indicates a
+		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
+		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
+		 * response is returned.
+		 */
+		$has_matching_etag = (
+			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
+			&&
+			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
+			&&
+			in_array( $response_cache_key, $etag_match_candidates[0], true )
+		);
+		if ( $has_matching_etag ) {
 			status_header( 304 );
 			return '';
 		}

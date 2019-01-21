@@ -21,11 +21,11 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.4+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
 	return;
 }
@@ -448,7 +448,6 @@ function amp_add_frontend_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }
