@@ -206,7 +206,11 @@ class AMP_HTTP {
 				if ( version_compare( PHP_VERSION, '5.4', '>=' ) && defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
 					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.Constants.NewConstants.intl_idna_variant_uts46Found
 				} elseif ( version_compare( PHP_VERSION, '7.2', '>=' ) && version_compare( PHP_VERSION, '7.4', '<' ) ) {
-					/* In PHP 7.2/7.3 calling idn_to_* functions with default arguments throws a warning. Thus we must set the variant explicitely. This may be reverted when php 7.4 is commonly used and idn_to_utf8 can be used in its default mode without warnings. */
+					/*
+					 * In PHP 7.2/7.3 calling idn_to_* functions with default arguments throws a warning.
+					 * Thus we must set the variant explicitly. This may be reverted when PHP 7.4 is commonly used and
+					 * idn_to_utf8 can be used in its default mode without warnings.
+					 */
 					$variant = INTL_IDNA_VARIANT_UTS46;
 					$options = IDNA_DEFAULT;
 					$domain  = idn_to_utf8( $domain, $options, $variant );
