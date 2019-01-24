@@ -45,14 +45,25 @@ an explicit [Code of Conduct](https://github.com/ampproject/amp-wp/blob/develop/
 To start, clone this repository into your WordPress install being used for development:
 
 ```bash
-cd wp-content/plugins && git clone --recursive git@github.com:ampproject/amp-wp.git amp
+cd wp-content/plugins && git clone git@github.com:ampproject/amp-wp.git amp
 ```
 
-If you happened to have cloned without `--recursive` previously, please do `git submodule update --init` to ensure the [dev-lib](https://github.com/xwp/wp-dev-lib/) submodule is available for development.
+Then install the packages:
+
+```bash
+composer install
+npm install
+```
+
+And lastly, do a build of the JavaScript:
+
+```bash
+npm run build
+```
 
 Lastly, to get the plugin running in your WordPress install, run `composer install` and then activate the plugin via the WordPress dashboard or `wp plugin activate amp`.
 
-To install the `pre-commit` hook, do `bash dev-lib/install-pre-commit-hook.sh`.
+To install the `pre-commit` hook, do `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`.
 
 Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
 
@@ -65,7 +76,6 @@ To edit JavaScript code which is built/complied, run `npm run dev` to watch the 
 To create a build of the plugin for installing in WordPress as a ZIP package, do:
 
 ```bash
-git submodule update --init # (if you haven't done so yet)
 composer install # (if you haven't done so yet)
 npm install # (if you haven't done so yet)
 npm run build
@@ -138,11 +148,11 @@ When you push a commit to your PR, Travis CI will run the PHPUnit tests and snif
 
 Contributors who want to make a new release, follow these steps:
 
-0. Do `git submodule update --init --recursive && npm install && composer selfupdate && composer install`.
+0. Do `npm install && composer selfupdate && composer install`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
 2. Add changelog entry to readme.
 3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-4. Do sanity check by comparing the `build` directory with the previously-deployed plugin at http://plugins.svn.wordpress.org/amp/trunk
+4. Do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
 5. Draft blog post about the new release.
 6. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
 7. Run `npm run deploy` to commit the plugin to WordPress.org.

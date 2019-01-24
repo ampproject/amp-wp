@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "02c838299cd9fc77e3c0fdebbd13a803",
+    "content-hash": "5ca6658224635825ab3e508a20a81c4b",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -73,6 +73,11 @@
                 "phpunit/phpunit": "~4.0"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
+                }
+            },
             "autoload": {
                 "classmap": [
                     "src"
@@ -415,6 +420,44 @@
                 "wordpress"
             ],
             "time": "2018-12-18T09:43:51+00:00"
+        },
+        {
+            "name": "xwp/wp-dev-lib",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/xwp/wp-dev-lib.git",
+                "reference": "90574b4e61c53a9b0e7f286812fe428d13c9ba7d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/90574b4e61c53a9b0e7f286812fe428d13c9ba7d",
+                "reference": "90574b4e61c53a9b0e7f286812fe428d13c9ba7d",
+                "shasum": ""
+            },
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Weston Ruter",
+                    "email": "weston@xwp.co",
+                    "homepage": "https://weston.ruter.net"
+                },
+                {
+                    "name": "XWP",
+                    "email": "engage@xwp.co",
+                    "homepage": "https://xwp.co"
+                }
+            ],
+            "description": "Common code used during development of WordPress plugins and themes",
+            "homepage": "https://github.com/xwp/wp-dev-lib",
+            "keywords": [
+                "wordpress"
+            ],
+            "time": "2019-01-17T05:00:30+00:00"
         }
     ],
     "aliases": [],
