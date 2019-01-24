@@ -20,7 +20,7 @@
     "wp-coding-standards/wpcs": "1.2.1",
     "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
     "phpcompatibility/php-compatibility": "9.1.1",
-    "xwp/wp-dev-lib": "1.0.0"
+    "xwp/wp-dev-lib": "1.0.1"
   },
   "config": {
     "platform": {
