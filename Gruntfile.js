@@ -34,7 +34,7 @@ module.exports = function( grunt ) {
 				command: 'cross-env BABEL_ENV=production webpack'
 			},
 			composer_production: {
-				command: 'rm -rf vendor && rm composer.lock && composer config platform.php 5.4 && composer install --no-dev && git checkout composer.*'
+				command: 'rm -rf vendor && composer install --no-dev'
 			},
 			composer: {
 				command: 'composer install'
