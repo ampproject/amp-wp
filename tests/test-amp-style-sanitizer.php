@@ -1503,4 +1503,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
 		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
 	}
+
+	/**
+	 * Test style element with old-school XHTML CDATA.
+	 *
+	 * @covers \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	public function test_style_element_cdata() {
+		$html  = '<!DOCTYPE html><html amp><head><meta charset="utf-8">';
+		$html .= '<style><![CDATA[ body { color:red } ]]></style>';
+		$html .= '<style>/*<![CDATA[*/ body { color:green } /*]]>*/</style>';
+		$html .= '<style><!--/*--><![CDATA[/*><!--*/ body { color:blue } /*]]>*/--></style>';
+		$html .= '</head><body><p>Hello World</p></body></html>';
+
+		$dom       = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
+			'use_document_element' => true,
+		) );
+
+		$sanitizer->sanitize();
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $style );
+
+		$expected = "body{color:red}body{color:green}body{color:blue}\n\n/*# sourceURL=amp-custom.css */";
+		$this->assertEquals( $expected, $style->nodeValue );
+	}
 }
