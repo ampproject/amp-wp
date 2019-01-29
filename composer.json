@@ -12,7 +12,7 @@
   ],
   "require": {
     "php": "^5.4 || ^7.0",
-    "sabberworm/php-css-parser": "8.1.1",
+    "sabberworm/php-css-parser": "8.2.1",
     "fasterimage/fasterimage": "1.2.0",
     "cweagans/composer-patches": "~1.6"
   },
