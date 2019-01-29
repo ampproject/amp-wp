@@ -59,6 +59,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
+	 *      @type bool     $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element.
 	 * }
 	 */
 	protected $args;
@@ -79,6 +80,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
 		'accept_tree_shaking'       => false,
+		'include_manifest_comment'  => true,
 	);
 
 	/**
@@ -1982,8 +1984,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
 			}
+
 			$comment = '';
-			if ( ! empty( $included_sources ) && $included_original_size > 0 ) {
+			if ( ! empty( $this->args['include_manifest_comment'] ) && ! empty( $included_sources ) && $included_original_size > 0 ) {
 				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
 				if ( self::has_required_php_css_parser() ) {
 					$comment .= sprintf(
@@ -2003,7 +2006,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					) . "\n";
 				}
 			}
-			if ( ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
+			if ( ! empty( $this->args['include_manifest_comment'] ) && ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
@@ -2041,7 +2044,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			if ( ! self::has_required_php_css_parser() ) {
+			if ( ! empty( $this->args['include_manifest_comment'] ) && ! self::has_required_php_css_parser() ) {
 				$comment .= "\n" . esc_html__( '!!!WARNING!!! AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin/theme. Tree shaking is not available.', 'amp' ) . "\n";
 			}
 
