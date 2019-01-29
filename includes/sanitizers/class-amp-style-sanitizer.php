@@ -59,7 +59,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
-	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_css_excluded'.
+	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 * }
 	 */
 	protected $args;
@@ -1855,7 +1855,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_styles() {
-
 		$stylesheet_sets = array(
 			'custom'    => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
@@ -1986,9 +1985,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$include_manifest_comment = (
-				'always' === $this->args['include_manifest_comment']
-				||
-				( $excluded_size > 0 && 'when_css_excluded' === $this->args['include_manifest_comment'] )
+				'never' !== $this->args['include_manifest_comment']
+				&&
+				(
+					'always' === $this->args['include_manifest_comment']
+					||
+					( $excluded_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
+				)
 			);
 
 			$comment = '';
