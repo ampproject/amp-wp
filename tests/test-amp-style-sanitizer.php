@@ -759,7 +759,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'include_manifest_comment'  => AMP_Style_Sanitizer::INCLUDE_MANIFEST_COMMENT_WHEN_EXCESSIVE,
+				'include_manifest_comment'  => 'when_excessive',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -923,7 +923,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'include_manifest_comment'  => AMP_Style_Sanitizer::INCLUDE_MANIFEST_COMMENT_WHEN_EXCESSIVE,
+				'include_manifest_comment'  => 'when_excessive',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},

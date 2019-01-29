@@ -1985,13 +1985,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$include_manifest_comment = (
-				'never' !== $this->args['include_manifest_comment']
-				&&
-				(
-					'always' === $this->args['include_manifest_comment']
-					||
-					( $excluded_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
-				)
+				'always' === $this->args['include_manifest_comment']
+				||
+				( $excluded_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
 			);
 
 			$comment = '';
