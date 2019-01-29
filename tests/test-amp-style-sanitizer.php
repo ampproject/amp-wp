@@ -1517,9 +1517,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$html .= '</head><body><p>Hello World</p></body></html>';
 
 		$dom       = AMP_DOM_Utils::get_dom( $html );
-		$sanitizer = new AMP_Style_Sanitizer( $dom, array(
-			'use_document_element' => true,
-		) );
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
 
 		$sanitizer->sanitize();
 
