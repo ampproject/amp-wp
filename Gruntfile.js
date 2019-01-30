@@ -98,6 +98,8 @@ module.exports = function( grunt ) {
 			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
+			paths.push( 'vendor/willwashburn/stream/src/**' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
