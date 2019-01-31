@@ -317,6 +317,14 @@ function amp_maybe_add_actions() {
 	}
 
 	if ( $is_amp_endpoint ) {
+
+		// Prevent infinite URL space under /amp/ endpoint.
+		$endpoint = get_query_var( amp_get_slug(), false );
+		if ( ! isset( $_GET[ amp_get_slug() ] ) && false !== $endpoint && '1' !== (string) $endpoint && '' !== $endpoint ) {
+			wp_safe_redirect( amp_get_permalink( $post->ID ), 301 );
+			exit;
+		}
+
 		amp_prepare_render();
 	} else {
 		amp_add_frontend_actions();
