@@ -33,5 +33,19 @@
         "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
       }
     }
+  },
+  "scripts": {
+    "lint": [
+      "@php-l",
+      "phpcs"
+    ],
+    "test": [
+      "@phpunit"
+    ],
+    "php-l": "git ls-files -z -- '*.php' | xargs -0 -n 1 -P 4 php -l",
+    "phpcs": "phpcs",
+    "phpcbf": "phpcbf",
+    "phpunit": "phpunit",
+    "generate-readme": "@php ./vendor/xwp/wp-dev-lib/scripts/generate-markdown-readme"
   }
 }
