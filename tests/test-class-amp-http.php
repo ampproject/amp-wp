@@ -178,8 +178,20 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
 	 */
 	public function test_get_amp_cache_hosts() {
-		update_option( 'home', 'https://example.com' );
-		update_option( 'siteurl', 'https://example.org' );
+
+		// Note that filters are used instead of updating option because of WP_HOME and WP_SITEURL constants.
+		add_filter(
+			'home_url',
+			function () {
+				return 'https://example.com';
+			}
+		);
+		add_filter(
+			'site_url',
+			function () {
+				return 'https://example.org';
+			}
+		);
 
 		$hosts = AMP_HTTP::get_amp_cache_hosts();
 
