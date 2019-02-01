@@ -101,7 +101,12 @@ class AMP_Image_Dimension_Extractor {
 			if ( isset( $parsed['query'] ) ) {
 				$path .= '?' . $parsed['query'];
 			}
-			$url = site_url( $path );
+			$home      = home_url();
+			$home_path = wp_parse_url( $home, PHP_URL_PATH );
+			if ( ! empty( $home_path ) ) {
+				$home = substr( $home, 0, - strlen( $home_path ) );
+			}
+			$url = $home . $path;
 		}
 
 		return $url;
@@ -253,6 +258,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @return string
 	 */
 	public static function get_default_user_agent() {
-		return 'amp-wp, v' . AMP__VERSION . ', ' . get_site_url();
+		return 'amp-wp, v' . AMP__VERSION . ', ' . home_url();
 	}
 }

@@ -759,6 +759,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
+				'include_manifest_comment'  => 'when_excessive',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -776,12 +777,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
 
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be excluded.' );
+
 		// Test with rule-removal not forced, since dashicons alone is not larger than 50KB.
 		$dom         = AMP_DOM_Utils::get_dom( $html );
 		$error_codes = array();
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
+				'include_manifest_comment'  => 'never',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'sometimes',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -797,6 +803,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons,.dashicons-before:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be excluded because not excessive.' );
 	}
 
 	/**
@@ -836,6 +846,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
+				'include_manifest_comment'  => 'always',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -851,6 +862,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( '.sidebar2{visibility:hidden}', $actual_stylesheets[2] );
 		$this->assertEquals( '.sidebar2.visible{display:block}', $actual_stylesheets[3] );
 		$this->assertEmpty( $actual_stylesheets[4] );
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because always included.' );
+		$this->assertNotContains( 'The following stylesheets are too large to be included', $style->previousSibling->nodeValue );
+		$this->assertContains( 'The style[amp-custom] element is populated with', $style->previousSibling->nodeValue );
 	}
 
 	/**
@@ -906,6 +923,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
+				'include_manifest_comment'  => 'when_excessive',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
@@ -948,6 +966,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			array( 'excessive_css' ),
 			$error_codes
 		);
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
+		$this->assertContains( 'The style[amp-custom] element is populated with', $style->previousSibling->nodeValue );
+		$this->assertContains( 'The following stylesheets are too large to be included', $style->previousSibling->nodeValue );
 	}
 
 	/**
@@ -1478,5 +1502,35 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
 		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
+	}
+
+	/**
+	 * Test style element with old-school XHTML CDATA.
+	 *
+	 * @covers \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	public function test_style_element_cdata() {
+		$html  = '<!DOCTYPE html><html amp><head><meta charset="utf-8">';
+		$html .= '<style><![CDATA[ body { color:red } ]]></style>';
+		$html .= '<style>/*<![CDATA[*/ body { color:green } /*]]>*/</style>';
+		$html .= '<style><!--/*--><![CDATA[/*><!--*/ body { color:blue } /*]]>*/--></style>';
+		$html .= '</head><body><p>Hello World</p></body></html>';
+
+		$dom       = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
+
+		$sanitizer->sanitize();
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $style );
+
+		$expected = "body{color:red}body{color:green}body{color:blue}\n\n/*# sourceURL=amp-custom.css */";
+		$this->assertEquals( $expected, $style->nodeValue );
 	}
 }
