@@ -1000,24 +1000,46 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Return stylesheets that are to be fetched over HTTP.
+	 */
+	public function get_http_stylesheets() {
+		return array(
+			'external_file' => array(
+				'https://stylesheets.example.com/style.css',
+				'html{background-color:lightblue}',
+			),
+			'dynamic_file' => array(
+				set_url_scheme( add_query_arg( 'action', 'kirki-styles', home_url() ), 'http' ),
+				'body{color:red}',
+			),
+		);
+	}
+
+	/**
 	 * Test handling external stylesheet.
 	 *
+	 * @dataProvider get_http_stylesheets
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 *
+	 * @param string $href       Stylesheet URL.
+	 * @param string $stylesheet Stylesheet.
 	 */
-	public function test_external_stylesheet_handling() {
-		$href  = 'https://stylesheets.example.com/style.css';
-		$count = 0;
+	public function test_external_stylesheet_handling( $href, $stylesheet ) {
+		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$count ) {
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $stylesheet ) {
 				unset( $request );
-				if ( $url === $href ) {
-					$count++;
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
+					$request_count++;
 					$preempt = array(
 						'response' => array(
-							'code' => 200,
+							'code'    => 200,
+							'headers' => array(
+								'content-type' => 'text/css',
+							),
 						),
-						'body' => 'html { background-color:lightblue; }',
+						'body' => $stylesheet,
 					);
 				}
 				return $preempt;
@@ -1043,11 +1065,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			return $actual_stylesheets[0];
 		};
 
-		$this->assertEquals( 0, $count );
-		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
-		$this->assertEquals( 1, $count );
-		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
-		$this->assertEquals( 1, $count );
+		$this->assertEquals( 0, $request_count );
+
+		$this->assertEquals( $stylesheet, $sanitize_and_get_stylesheet() );
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
+
+		$this->assertEquals( $stylesheet, $sanitize_and_get_stylesheet() );
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
 	}
 
 	/**
