@@ -318,7 +318,6 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			},
 			10
 		);
-		update_option( 'home', home_url( '/', 'http' ) );
 		$this->assertEquals( 'http', wp_parse_url( AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
 		add_filter(
 			'home_url',

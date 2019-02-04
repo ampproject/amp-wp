@@ -1138,7 +1138,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_stylesheet_urls() {
 
 		// Make sure core-bundled themes are registered.
-		register_theme_directory( ABSPATH . 'wp-content/themes' );
+		if ( WP_CONTENT_DIR !== ABSPATH . 'wp-content/themes' ) {
+			register_theme_directory( ABSPATH . 'wp-content/themes' );
+		}
 
 		$theme = new WP_Theme( 'twentyseventeen', ABSPATH . 'wp-content/themes' );
 
