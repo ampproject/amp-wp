@@ -524,9 +524,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
+		if ( ! is_string( $url ) ) {
+			return new WP_Error( 'url_not_string' );
+		}
+
 		$needs_base_url = (
-			! is_bool( $url )
-			&&
 			! preg_match( '|^(https?:)?//|', $url )
 			&&
 			! ( $this->content_url && 0 === strpos( $url, $this->content_url ) )
@@ -535,12 +537,49 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$url = $this->base_url . '/' . ltrim( $url, '/' );
 		}
 
+		$parsed_url = wp_parse_url( $url );
+		if ( empty( $parsed_url['host'] ) ) {
+			/* translators: %s is the original URL */
+			return new WP_Error( 'no_url_host', sprintf( __( 'URL is missing host: %s', 'amp' ), $url ) );
+		}
+		if ( empty( $parsed_url['path'] ) ) {
+			/* translators: %s is the original URL */
+			return new WP_Error( 'no_url_path', sprintf( __( 'URL is missing path: %s', 'amp' ), $url ) );
+		}
+
+		// Eliminate current directory relative paths, like <foo/./bar/./baz.css> => <foo/bar/baz.css>.
+		do {
+			$parsed_url['path'] = preg_replace(
+				'#/\./#',
+				'/',
+				$parsed_url['path'],
+				-1,
+				$count
+			);
+		} while ( 0 !== $count );
+
+		// Collapse relative paths, like <foo/bar/../../baz.css> => <baz.css>.
+		do {
+			$parsed_url['path'] = preg_replace(
+				'#(?<=/)(?!\.\./)[^/]+/\.\./#',
+				'',
+				$parsed_url['path'],
+				1,
+				$count
+			);
+		} while ( 0 !== $count );
+
 		$remove_url_scheme = function( $schemed_url ) {
 			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
 		};
 
-		// Strip URL scheme, query, and fragment.
-		$url = $remove_url_scheme( preg_replace( ':[\?#].*$:', '', $url ) );
+		// Re-formulate URL without scheme, query, or fragment.
+		$url  = '//';
+		$url .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$url .= ':' . $parsed_url['port'];
+		}
+		$url .= $parsed_url['path'];
 
 		$includes_url = $remove_url_scheme( includes_url( '/' ) );
 		$content_url  = $remove_url_scheme( content_url( '/' ) );
@@ -553,8 +592,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			wp_parse_url( $admin_url, PHP_URL_HOST ),
 		);
 
-		$url_host = wp_parse_url( $url, PHP_URL_HOST );
-
 		// Validate file extensions.
 		if ( ! empty( $allowed_extensions ) ) {
 			$pattern = sprintf( '/\.(%s)$/i', implode( '|', $allowed_extensions ) );
@@ -564,9 +601,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
+		if ( ! in_array( $parsed_url['host'], $allowed_hosts, true ) ) {
 			/* translators: %s: the file URL */
-			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
+			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $parsed_url['host'] ) );
 		}
 
 		$base_path  = null;
@@ -712,7 +749,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		// @todo Try resolving relative paths like '../'.
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 		if ( ! is_wp_error( $css_file_path ) ) {
 			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
@@ -780,6 +816,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Fetch external stylesheet.
+	 *
+	 * @todo Use Cache-Control max-age for transient.
 	 *
 	 * @param string $url External stylesheet URL.
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
