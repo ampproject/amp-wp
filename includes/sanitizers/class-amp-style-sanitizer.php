@@ -712,35 +712,26 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		// @todo Try resolving relative paths like '../'.
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
-
-		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
+		if ( ! is_wp_error( $css_file_path ) ) {
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		} else {
+			// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
 			$contents = $this->fetch_external_stylesheet( $normalized_url );
-			if ( is_wp_error( $contents ) ) {
+			if ( ! is_wp_error( $contents ) ) {
+				$stylesheet = $contents;
+			} else {
 				$this->remove_invalid_child(
 					$element,
 					array(
-						'code'    => $css_file_path->get_error_code(),
-						'message' => $css_file_path->get_error_message(),
+						'code'    => $contents->get_error_code(),
+						'message' => $contents->get_error_message(),
 						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 					)
 				);
 				return;
-			} else {
-				$stylesheet = $contents;
 			}
-		} elseif ( is_wp_error( $css_file_path ) ) {
-			$this->remove_invalid_child(
-				$element,
-				array(
-					'code'    => $css_file_path->get_error_code(),
-					'message' => $css_file_path->get_error_message(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				)
-			);
-			return;
-		} else {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		}
 
 		if ( false === $stylesheet ) {
@@ -802,6 +793,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$contents = new WP_Error(
 					wp_remote_retrieve_response_code( $r ),
 					wp_remote_retrieve_response_message( $r )
+				);
+			} elseif ( ! preg_match( '#^text/css#', wp_remote_retrieve_header( $r, 'content-type' ) ) ) {
+				$contents = new WP_Error(
+					'no_css_content_type',
+					__( 'Response did not contain the expected text/css content type.', 'amp' )
 				);
 			} else {
 				$contents = wp_remote_retrieve_body( $r );

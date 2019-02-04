@@ -404,7 +404,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'response' => array(
 						'code' => 200,
 					),
-					'body' => sprintf( 'span:before { content: "Returned from: %s"; }', $url ),
+					'headers'  => array(
+						'content-type' => 'text/css',
+					),
+					'body'     => sprintf( 'span:before { content: "Returned from: %s"; }', $url ),
 				);
 				return $preempt;
 			},
@@ -430,6 +433,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitized_html     = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertEquals( $expected_errors, $error_codes );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
 			if ( empty( $expected_stylesheet ) ) {
@@ -446,7 +450,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
-		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
 	/**
@@ -1006,11 +1009,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'external_file' => array(
 				'https://stylesheets.example.com/style.css',
+				'text/css',
 				'html{background-color:lightblue}',
+				array(),
 			),
 			'dynamic_file' => array(
 				set_url_scheme( add_query_arg( 'action', 'kirki-styles', home_url() ), 'http' ),
+				'text/css',
 				'body{color:red}',
+				array(),
+			),
+			'local_css_file_outside_normal_dirs' => array(
+				home_url( '/style.css' ),
+				'text/css',
+				'body{color:green}',
+				array(),
+			),
+			'not_css_file' => array(
+				home_url( '/this.is.not.css' ),
+				'image/jpeg',
+				'JPEG...',
+				array( 'no_css_content_type' ),
 			),
 		);
 	}
@@ -1021,25 +1040,27 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_http_stylesheets
 	 * @covers AMP_Style_Sanitizer::process_link_element()
 	 *
-	 * @param string $href       Stylesheet URL.
-	 * @param string $stylesheet Stylesheet.
+	 * @param string $href                 Request URL.
+	 * @param string $content_type         Content type.
+	 * @param string $response_body        Response body.
+	 * @param array  $expected_error_codes Error codes when getting the stylesheet.
 	 */
-	public function test_external_stylesheet_handling( $href, $stylesheet ) {
+	public function test_external_stylesheet_handling( $href, $content_type, $response_body, $expected_error_codes ) {
 		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count, $stylesheet ) {
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
 				unset( $request );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = array(
 						'response' => array(
 							'code'    => 200,
-							'headers' => array(
-								'content-type' => 'text/css',
-							),
 						),
-						'body' => $stylesheet,
+						'headers' => array(
+							'content-type' => $content_type,
+						),
+						'body' => $response_body,
 					);
 				}
 				return $preempt;
@@ -1048,29 +1069,40 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheet = function() use ( $href ) {
+		$sanitize_and_get_stylesheets = function() use ( $href, $expected_error_codes ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = AMP_DOM_Utils::get_dom( $html );
+
+			$found_error_codes = array();
 
 			$sanitizer = new AMP_Style_Sanitizer(
 				$dom,
 				array(
-					'use_document_element' => true,
+					'use_document_element'      => true,
+					'validation_error_callback' => function( $error ) use ( &$found_error_codes ) {
+						$found_error_codes[] = $error['code'];
+					},
 				)
 			);
 			$sanitizer->sanitize();
 			AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-			$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-			$this->assertCount( 1, $actual_stylesheets );
-			return $actual_stylesheets[0];
+			return array( $found_error_codes, array_values( $sanitizer->get_stylesheets() ) );
 		};
 
 		$this->assertEquals( 0, $request_count );
 
-		$this->assertEquals( $stylesheet, $sanitize_and_get_stylesheet() );
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets();
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
 
-		$this->assertEquals( $stylesheet, $sanitize_and_get_stylesheet() );
+		if ( empty( $expected_error_codes ) ) {
+			$this->assertCount( 1, $actual_stylesheets ); // @todo Change
+			$this->assertEquals( $response_body, $actual_stylesheets[0] );
+		} else {
+			$this->assertEquals( $expected_error_codes, $found_error_codes );
+			$this->assertCount( 0, $actual_stylesheets );
+		}
+
+		$sanitize_and_get_stylesheets();
 		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
 	}
 
@@ -1335,14 +1367,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
 				array(),
 			),
-			'bad_ext'    => array(
-				home_url( '/bad.php' ),
-				array( 'disallowed_file_extension' ),
-			),
-			'bad_file'    => array(
-				home_url( '/bad.css' ),
-				array( 'file_path_not_allowed' ),
-			),
 		);
 	}
 
@@ -1439,19 +1463,23 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'pre_http_request',
 			function( $preempt, $request, $url ) use ( $import_css_url, $import_css_url2 ) {
 				unset( $request );
+				$response = array(
+					'response' => array(
+						'code' => 200,
+					),
+					'headers' => array(
+						'content-type' => 'text/css',
+					),
+				);
 				if ( $url === $import_css_url ) {
-					$preempt = array(
-						'response' => array(
-							'code' => 200,
-						),
-						'body' => 'html { background-color:lightblue; }',
+					$preempt = array_merge(
+						$response,
+						array( 'body' => 'html { background-color:lightblue; }' )
 					);
 				} elseif ( $url === $import_css_url2 ) {
-					$preempt = array(
-						'response' => array(
-							'code' => 200,
-						),
-						'body' => 'strong { background-color:red; }',
+					$preempt = array_merge(
+						$response,
+						array( 'body' => 'strong { background-color:red; }' )
 					);
 				}
 				return $preempt;
