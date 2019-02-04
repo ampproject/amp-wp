@@ -1136,14 +1136,22 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @returns array Stylesheet URL data.
 	 */
 	public function get_stylesheet_urls() {
+
+		// Make sure core-bundled themes are registered.
+		if ( WP_CONTENT_DIR !== ABSPATH . 'wp-content/themes' ) {
+			register_theme_directory( ABSPATH . 'wp-content/themes' );
+		}
+
+		$theme = new WP_Theme( 'twentyseventeen', ABSPATH . 'wp-content/themes' );
+
 		return array(
 			'theme_stylesheet_without_host' => array(
 				'/wp-content/themes/twentyseventeen/style.css',
-				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+				$theme->get_stylesheet_directory() . '/style.css',
 			),
 			'theme_stylesheet_with_host' => array(
-				WP_CONTENT_URL . '/themes/twentyseventeen/style.css',
-				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+				$theme->get_stylesheet_directory_uri() . '/style.css',
+				$theme->get_stylesheet_directory() . '/style.css',
 			),
 			'dashicons_without_host' => array(
 				'/wp-includes/css/dashicons.css',
@@ -1225,6 +1233,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertInstanceOf( 'WP_Error', $actual );
 			$this->assertEquals( $error_code, $actual->get_error_code() );
 		} else {
+			$this->assertInternalType( 'string', $actual );
 			$this->assertEquals( $expected, $actual );
 		}
 	}

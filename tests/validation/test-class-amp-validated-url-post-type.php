@@ -311,9 +311,21 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		);
 
 		// Check URL scheme.
-		update_option( 'home', home_url( '/', 'http' ) );
+		add_filter(
+			'home_url',
+			function ( $url ) {
+				return set_url_scheme( $url, 'http' );
+			},
+			10
+		);
 		$this->assertEquals( 'http', wp_parse_url( AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
-		update_option( 'home', home_url( '/', 'https' ) );
+		add_filter(
+			'home_url',
+			function ( $url ) {
+				return set_url_scheme( $url, 'https' );
+			},
+			10
+		);
 		$this->assertEquals( 'https', wp_parse_url( AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
 	}
 
