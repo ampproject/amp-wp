@@ -35,6 +35,10 @@ information on using pull requests.
 This project follows
 [Google's Open Source Community Guidelines](https://opensource.google.com/conduct/).
 
+## Security Disclosures
+
+The AMP Project accepts responsible security disclosures through the [Google Application Security program](https://www.google.com/about/appsecurity/).
+
 ## Code of Conduct
 
 In addition to the Community Guidelines, this project follows
