@@ -1264,7 +1264,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'amp_file_path_illegal_linux' => array(
 				content_url( '../../../../../../../../../../../../../../../bad.css' ),
 				null,
-				'file_path_not_allowed',
+				'remaining_relativity',
 			),
 			'amp_file_path_illegal_windows' => array(
 				content_url( '..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\bad.css' ),

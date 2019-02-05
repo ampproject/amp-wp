@@ -514,6 +514,74 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Eliminate relative segments (../ and ./) from a path.
+	 *
+	 * @param string $path Path with relative segments. This is not a URL, so no host and no query string.
+	 * @return string|WP_Error Unrelativized path or WP_Error if there is too much relativity.
+	 */
+	private function unrelativize_path( $path ) {
+		// Eliminate current directory relative paths, like <foo/./bar/./baz.css> => <foo/bar/baz.css>.
+		do {
+			$path = preg_replace(
+				'#/\./#',
+				'/',
+				$path,
+				-1,
+				$count
+			);
+		} while ( 0 !== $count );
+
+		// Collapse relative paths, like <foo/bar/../../baz.css> => <baz.css>.
+		do {
+			$path = preg_replace(
+				'#(?<=/)(?!\.\./)[^/]+/\.\./#',
+				'',
+				$path,
+				1,
+				$count
+			);
+		} while ( 0 !== $count );
+
+		if ( false !== strpos( $path, './' ) ) {
+			/* translators: %s is the path with the remaining relative segments. */
+			return new WP_Error( 'remaining_relativity', sprintf( __( 'There are remaining relative path segments: %s', 'amp' ), $path ) );
+		}
+
+		return $path;
+	}
+
+	/**
+	 * Construct a URL from a parsed one.
+	 *
+	 * @param array $parsed_url Parsed URL.
+	 * @return string Reconstructed URL.
+	 */
+	private function reconstruct_url( $parsed_url ) {
+		$url = '';
+		if ( ! empty( $parsed_url['host'] ) ) {
+			if ( ! empty( $parsed_url['scheme'] ) ) {
+				$url .= $parsed_url['scheme'] . ':';
+			}
+			$url .= '//';
+			$url .= $parsed_url['host'];
+
+			if ( ! empty( $parsed_url['port'] ) ) {
+				$url .= ':' . $parsed_url['port'];
+			}
+		}
+		if ( ! empty( $parsed_url['path'] ) ) {
+			$url .= $parsed_url['path'];
+		}
+		if ( ! empty( $parsed_url['query'] ) ) {
+			$url .= '?' . $parsed_url['query'];
+		}
+		if ( ! empty( $parsed_url['fragment'] ) ) {
+			$url .= '#' . $parsed_url['fragment'];
+		}
+		return $url;
+	}
+
+	/**
 	 * Generate a URL's fully-qualified file path.
 	 *
 	 * @since 0.7
@@ -547,39 +615,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return new WP_Error( 'no_url_path', sprintf( __( 'URL is missing path: %s', 'amp' ), $url ) );
 		}
 
-		// Eliminate current directory relative paths, like <foo/./bar/./baz.css> => <foo/bar/baz.css>.
-		do {
-			$parsed_url['path'] = preg_replace(
-				'#/\./#',
-				'/',
-				$parsed_url['path'],
-				-1,
-				$count
-			);
-		} while ( 0 !== $count );
-
-		// Collapse relative paths, like <foo/bar/../../baz.css> => <baz.css>.
-		do {
-			$parsed_url['path'] = preg_replace(
-				'#(?<=/)(?!\.\./)[^/]+/\.\./#',
-				'',
-				$parsed_url['path'],
-				1,
-				$count
-			);
-		} while ( 0 !== $count );
+		$path = $this->unrelativize_path( $parsed_url['path'] );
+		if ( is_wp_error( $path ) ) {
+			return $path;
+		}
+		$parsed_url['path'] = $path;
 
 		$remove_url_scheme = function( $schemed_url ) {
 			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
 		};
 
-		// Re-formulate URL without scheme, query, or fragment.
-		$url  = '//';
-		$url .= $parsed_url['host'];
-		if ( isset( $parsed_url['port'] ) ) {
-			$url .= ':' . $parsed_url['port'];
-		}
-		$url .= $parsed_url['path'];
+		unset( $parsed_url['scheme'], $parsed_url['query'], $parsed_url['fragment'] );
+		$url = $this->reconstruct_url( $parsed_url );
 
 		$includes_url = $remove_url_scheme( includes_url( '/' ) );
 		$content_url  = $remove_url_scheme( content_url( '/' ) );
@@ -1480,13 +1527,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
+			$parsed_url = wp_parse_url( $base_url . $url->getURL()->getString() );
 
 			// Resolve any relative parent directory paths.
-			$real_url = $base_url . $relative_url;
-			do {
-				$real_url = preg_replace( '#[^/]+/../#', '', $real_url, -1, $count );
-			} while ( 0 !== $count );
+			$path = $this->unrelativize_path( $parsed_url['path'] );
+			if ( is_wp_error( $path ) ) {
+				continue;
+			}
+			$parsed_url['path'] = $path;
+
+			$real_url = $this->reconstruct_url( $parsed_url );
 
 			$url->getURL()->setString( $real_url );
 		}
