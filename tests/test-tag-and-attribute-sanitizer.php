@@ -240,6 +240,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-lightbox-gallery' ),
 			),
 
+			'lightbox-with-amp-carousel' => array(
+				'<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides"><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img></amp-carousel>',
+				null,
+				array( 'amp-lightbox-gallery', 'amp-carousel' ),
+			),
+
 			'reference-points-amp-live-list' => array(
 				'<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"><button update on="tap:my-live-list.update">You have updates!</button><div items></div><div pagination></div></amp-live-list>',
 				null,
