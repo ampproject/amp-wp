@@ -237,7 +237,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'reference-point-lightbox-thumbnail-id' => array(
 				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
 				null,
-				array(),
+				array( 'amp-lightbox-gallery' ),
 			),
 
 			'reference-points-amp-live-list' => array(
