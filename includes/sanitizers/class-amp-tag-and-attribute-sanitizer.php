@@ -553,6 +553,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( 'lightbox' ) ) {
 				$this->script_components[] = 'amp-lightbox-gallery';
 			}
+			if ( $node->hasAttribute( 'amp-fx' ) ) {
+				$this->script_components[] = 'amp-fx-collection';
+			}
 
 			// Check if element needs amp-bind component.
 			if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {

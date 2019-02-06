@@ -1022,6 +1022,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-image-slider' ),
 			),
+
+			'amp-fx-collection' => array(
+				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
+				null,
+				array( 'amp-fx-collection' ),
+			),
 		);
 	}
 
