@@ -237,7 +237,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'reference-point-lightbox-thumbnail-id' => array(
 				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
 				null,
-				array(),
+				array( 'amp-lightbox-gallery' ),
+			),
+
+			'lightbox-with-amp-carousel' => array(
+				'<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides"><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img></amp-carousel>',
+				null,
+				array( 'amp-lightbox-gallery', 'amp-carousel' ),
 			),
 
 			'reference-points-amp-live-list' => array(
@@ -1015,6 +1021,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
 				null,
 				array( 'amp-image-slider' ),
+			),
+
+			'amp-fx-collection' => array(
+				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
+				null,
+				array( 'amp-fx-collection' ),
 			),
 		);
 	}
