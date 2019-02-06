@@ -1042,17 +1042,47 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test wrapped_callback
+	 * Test wrapped_callback for filters.
 	 *
 	 * @covers AMP_Validation_Manager::wrapped_callback()
 	 */
-	public function test_wrapped_callback() {
-		$test_string = "<b class='\nfoo\nbar\n'>Cool!</b>";
-		$callback    = array(
+	public function test_filter_wrapped_callback() {
+		$test_string     = 'Filter-amended Value';
+		$filter_callback = array(
+			'function'      => function ( $value ) use ( $test_string ) {
+				return $value . $test_string;
+			},
+			'accepted_args' => 1,
+			'source'        => array(
+				'type' => 'plugin',
+				'name' => 'amp',
+				'hook' => 'foo',
+			),
+		);
+
+		$value = 'Some Value';
+		apply_filters( 'foo', $value );
+		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
+		$this->assertTrue( $wrapped_callback instanceof Closure );
+		AMP_Theme_Support::start_output_buffering();
+		$filtered_value = call_user_func( $wrapped_callback, $value );
+		$output = ob_get_clean();
+		$this->assertEquals( $value . $test_string, $filtered_value );
+		$this->assertEmpty( $output, 'Expected no output since no action triggered.' );
+	}
+
+	/**
+	 * Test wrapped_callback for actions.
+	 *
+	 * @covers AMP_Validation_Manager::wrapped_callback()
+	 */
+	public function test_action_wrapped_callback() {
+		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
+		$action_callback = array(
 			'function'      => function() use ( $test_string ) {
 				echo $test_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
-			'accepted_args' => 0,
+			'accepted_args' => 1,
 			'source'        => array(
 				'type' => 'plugin',
 				'name' => 'amp',
@@ -1061,7 +1091,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		do_action( 'bar' ); // So that output buffering will be done.
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $callback );
+		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		AMP_Theme_Support::start_output_buffering();
 		call_user_func( $wrapped_callback );
@@ -1072,7 +1102,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 
-		$callback = array(
+		$action_callback = array(
 			'function'      => array( $this, 'get_string' ),
 			'accepted_args' => 0,
 			'source'        => array(
@@ -1082,7 +1112,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 		);
 
-		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $callback );
+		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
 		$this->assertTrue( $wrapped_callback instanceof Closure );
 		AMP_Theme_Support::start_output_buffering();
 		$result = call_user_func( $wrapped_callback );
