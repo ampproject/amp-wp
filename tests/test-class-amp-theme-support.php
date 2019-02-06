@@ -265,38 +265,52 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test redirect_ampless_url.
+	 * Test redirect_non_amp_url.
 	 *
-	 * @covers AMP_Theme_Support::redirect_ampless_url()
+	 * @covers AMP_Theme_Support::redirect_non_amp_url()
 	 */
-	public function test_redirect_ampless_url() {
+	public function test_redirect_non_amp_url() {
 		$e = null;
+
+		$redirect_status_code = null;
+		add_filter(
+			'wp_redirect_status',
+			function( $code ) use ( &$redirect_status_code ) {
+				$redirect_status_code = $code;
+				return $code;
+			},
+			PHP_INT_MAX
+		);
 
 		// Try AMP URL param.
 		$_SERVER['REQUEST_URI'] = add_query_arg( amp_get_slug(), '', '/foo/bar' );
 		try {
-			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+			$redirect_status_code = null;
+			$this->assertTrue( AMP_Theme_Support::redirect_non_amp_url( 302 ) );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) );
 		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertSame( 302, $redirect_status_code );
 		$e = null;
 
 		// Try AMP URL endpoint.
 		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
 		try {
-			$this->assertTrue( AMP_Theme_Support::redirect_ampless_url() );
+			$redirect_status_code = null;
+			$this->assertTrue( AMP_Theme_Support::redirect_non_amp_url( 301 ) );
 		} catch ( Exception $exception ) {
 			$e = $exception;
 		}
 		$this->assertTrue( isset( $e ) ); // wp_safe_redirect() modifies the headers, and causes an error.
 		$this->assertContains( 'headers already sent', $e->getMessage() );
+		$this->assertSame( 301, $redirect_status_code );
 		$e = null;
 
 		// Make sure that if the URL doesn't have AMP that there should be no redirect.
 		$_SERVER['REQUEST_URI'] = '/foo/bar';
-		$this->assertFalse( AMP_Theme_Support::redirect_ampless_url() );
+		$this->assertFalse( AMP_Theme_Support::redirect_non_amp_url() );
 	}
 
 	/**

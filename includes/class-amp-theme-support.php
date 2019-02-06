@@ -237,10 +237,14 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-
-			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
+			/*
+			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
+			 * Temporary redirect is used for admin users because implied paired mode and template support can be
+			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
+			 * without wrestling with the redirect cache.
+			 */
 			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-				self::redirect_ampless_url();
+				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, true );
 			}
 
 			amp_add_frontend_actions();
@@ -283,9 +287,12 @@ class AMP_Theme_Support {
 			/*
 			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
+			 * Permanent redirect is used for unauthenticated users since switching between modes
+			 * should happen infrequently. For admin users, this is kept temporary to allow them
+			 * to not be hampered by browser remembering permanent redirects and preventing test.
 			 */
 			if ( $has_query_var || $has_url_param ) {
-				return self::redirect_ampless_url( $exit );
+				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, $exit );
 			}
 		} else {
 			/*
@@ -298,7 +305,8 @@ class AMP_Theme_Support {
 				$old_url = amp_get_current_url();
 				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 				if ( $old_url !== $new_url ) {
-					wp_safe_redirect( $new_url, 302 );
+					// A temporary redirect is used for admin users to allow them to see changes between classic and paired modes.
+					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 					// @codeCoverageIgnoreStart
 					if ( $exit ) {
 						exit;
@@ -320,21 +328,18 @@ class AMP_Theme_Support {
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
 	 *
-	 * @param bool $exit Whether to exit after redirecting.
+	 * @param int  $status Status code (301 or 302).
+	 * @param bool $exit   Whether to exit after redirecting.
 	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
 	 */
-	public static function redirect_ampless_url( $exit = true ) {
+	public static function redirect_non_amp_url( $status = 302, $exit = true ) {
 		$current_url = amp_get_current_url();
-		$ampless_url = amp_remove_endpoint( $current_url );
-		if ( $ampless_url === $current_url ) {
+		$non_amp_url = amp_remove_endpoint( $current_url );
+		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
 
-		/*
-		 * Temporary redirect because AMP URL may return when blocking validation errors
-		 * occur or when a non-canonical AMP theme is used.
-		 */
-		wp_safe_redirect( $ampless_url, 302 );
+		wp_safe_redirect( $non_amp_url, $status );
 		// @codeCoverageIgnoreStart
 		if ( $exit ) {
 			exit;
@@ -1618,7 +1623,7 @@ class AMP_Theme_Support {
 		);
 
 		$current_url = amp_get_current_url();
-		$ampless_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = amp_remove_endpoint( $current_url );
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
@@ -1711,9 +1716,14 @@ class AMP_Theme_Support {
 				// Redirect to non-AMP version.
 				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
-						$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
-					wp_safe_redirect( $ampless_url );
+
+					/*
+					 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
+					 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
+					 */
+					wp_safe_redirect( $non_amp_url, 302 );
 				}
 				return $response_cache['body'];
 			}
@@ -1868,14 +1878,16 @@ class AMP_Theme_Support {
 					$cache_response( $response, $validation_results );
 				}
 
-				/*
-				 * Temporary redirect because AMP URL may return when blocking validation errors
-				 * occur or when a non-canonical AMP theme is used.
-				 */
+				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
 				if ( AMP_Validation_Manager::has_cap() ) {
-					$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 				}
-				wp_safe_redirect( $ampless_url, 302 );
+
+				/*
+				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
+				 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
+				 */
+				wp_safe_redirect( $non_amp_url, 302 );
 				return $response;
 			}
 		}
