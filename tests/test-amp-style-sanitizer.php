@@ -759,7 +759,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'include_manifest_comment'  => 'when_excessive',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -777,17 +776,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
 
-		$xpath = new DOMXPath( $dom );
-		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
-		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be excluded.' );
-
 		// Test with rule-removal not forced, since dashicons alone is not larger than 50KB.
 		$dom         = AMP_DOM_Utils::get_dom( $html );
 		$error_codes = array();
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'include_manifest_comment'  => 'never',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'sometimes',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -803,10 +797,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons,.dashicons-before:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
-
-		$xpath = new DOMXPath( $dom );
-		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
-		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be excluded because not excessive.' );
 	}
 
 	/**
@@ -846,7 +836,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'include_manifest_comment'  => 'always',
 				'use_document_element'      => true,
 				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
@@ -862,12 +851,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertEquals( '.sidebar2{visibility:hidden}', $actual_stylesheets[2] );
 		$this->assertEquals( '.sidebar2.visible{display:block}', $actual_stylesheets[3] );
 		$this->assertEmpty( $actual_stylesheets[4] );
-
-		$xpath = new DOMXPath( $dom );
-		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
-		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because always included.' );
-		$this->assertNotContains( 'The following stylesheets are too large to be included', $style->previousSibling->nodeValue );
-		$this->assertContains( 'The style[amp-custom] element is populated with', $style->previousSibling->nodeValue );
 	}
 
 	/**
@@ -923,7 +906,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'include_manifest_comment'  => 'when_excessive',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
@@ -966,12 +948,152 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			array( 'excessive_css' ),
 			$error_codes
 		);
+	}
 
-		$xpath = new DOMXPath( $dom );
-		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+	/**
+	 * Make sure that the manifest contains the expected values.
+	 *
+	 * @covers AMP_Style_Sanitizer::finalize_styles()
+	 */
+	public function test_css_manifest() {
+		$get_sanitized_dom = function ( $sanitizer_args, $add_excessive_css = false ) {
+			ob_start();
+			?>
+			<html amp>
+			<head>
+				<meta charset="utf-8">
+				<style class="body">body{color:red}</style>
+				<style class="foo1">.foo{color:green}</style>
+				<style class="foo2">.foo{color:green}</style>
+				<style class="foo3">.foo{color:green}</style>
+				<style class="bard">.bard{color:blue}</style>
+				<?php
+				if ( $add_excessive_css ) {
+					$custom_max_size = null;
+					foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+						if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+							$custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+							break;
+						}
+					}
+					if ( ! $custom_max_size ) {
+						throw new Exception( 'Could not find amp-custom max_bytes' );
+					}
+					echo '<style class="excessive">';
+					printf( 'body::after{content:"%s"}', str_repeat( 'a', $custom_max_size + 1 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo '</style>';
+				}
+				?>
+			</head>
+			<body><p class="foo">Hi</p></body>
+			</html>
+			<?php
+			$html = ob_get_clean();
+
+			$error_codes = array();
+			$dom         = AMP_DOM_Utils::get_dom( $html );
+			$sanitizer   = new AMP_Style_Sanitizer(
+				$dom,
+				array_merge(
+					array(
+						'use_document_element'      => true,
+						'accept_tree_shaking'       => true,
+						'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+							$error_codes[] = $error['code'];
+						},
+					),
+					$sanitizer_args
+				)
+			);
+			$sanitizer->sanitize();
+			$xpath = new DOMXPath( $dom );
+			$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+
+			return array( $style, $error_codes );
+		};
+
+		// Test that it contains the comment with duplicate styles removed without tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'never',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
+
+		// Test that it contains the comment with duplicate styles removed without tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'never',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
+
+		// Test that it contains the comment with duplicate styles removed without tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'always',
+				'remove_unused_rules'      => 'never',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling );
+		$comment = $style->previousSibling;
+		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
+		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
+		$this->assertContains( '15 B: style.body', $comment->nodeValue );
+		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '17 B: style.bard', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 49 bytes (100% of 49 total after tree shaking', $comment->nodeValue );
+
+		// Test that it contains the comment with duplicate styles removed with tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'always',
+				'remove_unused_rules'      => 'always',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
 		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
-		$this->assertContains( 'The style[amp-custom] element is populated with', $style->previousSibling->nodeValue );
-		$this->assertContains( 'The following stylesheets are too large to be included', $style->previousSibling->nodeValue );
+		$comment = $style->previousSibling;
+		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
+		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
+		$this->assertContains( '15 B: style.body', $comment->nodeValue );
+		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+
+		// Test that it contains the comment with duplicate styles removed with excessive CSS.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'when_excessive',
+				'remove_unused_rules'      => 'sometimes',
+			),
+			true
+		);
+		$this->assertEquals( array( 'excessive_css' ), $error_codes );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
+		$comment = $style->previousSibling;
+		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
+		$this->assertContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
+		$this->assertContains( '15 B: style.body', $comment->nodeValue );
+		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( '50024 B: style.excessive', $comment->nodeValue );
+		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,068 total after tree shaking)', $comment->nodeValue );
 	}
 
 	/**
