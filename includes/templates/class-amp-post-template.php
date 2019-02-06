@@ -131,9 +131,7 @@ class AMP_Post_Template {
 
 			'customizer_settings'   => array(),
 
-			'font_urls'             => array(
-				'merriweather' => 'https://fonts.googleapis.com/css?family=Merriweather:400,400italic,700,700italic',
-			),
+			'font_urls'             => array(),
 
 			'post_amp_stylesheets'  => array(),
 			'post_amp_styles'       => array(), // Deprecated.
@@ -366,7 +364,8 @@ class AMP_Post_Template {
 		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
-			'featured_image', array(
+			'featured_image',
+			array(
 				'amp_html' => $sanitized_html,
 				'caption'  => $featured_image->post_excerpt,
 			)

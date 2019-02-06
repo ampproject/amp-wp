@@ -42,15 +42,19 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attr['include'] = $attr['ids'];
 		}
 
-		$atts = shortcode_atts( array(
-			'order'   => 'ASC',
-			'orderby' => 'menu_order ID',
-			'id'      => $post ? $post->ID : 0,
-			'include' => '',
-			'exclude' => '',
-			'size'    => array( $this->args['width'], $this->args['height'] ),
-			'link'    => 'none',
-		), $attr, 'gallery' );
+		$atts = shortcode_atts(
+			array(
+				'order'   => 'ASC',
+				'orderby' => 'menu_order ID',
+				'id'      => $post ? $post->ID : 0,
+				'include' => '',
+				'exclude' => '',
+				'size'    => array( $this->args['width'], $this->args['height'] ),
+				'link'    => 'none',
+			),
+			$attr,
+			'gallery'
+		);
 
 		if ( ! empty( $attr['amp-lightbox'] ) ) {
 			$atts['lightbox'] = filter_var( $attr['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
@@ -59,36 +63,42 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		$id = intval( $atts['id'] );
 
 		if ( ! empty( $atts['include'] ) ) {
-			$attachments = get_posts( array(
-				'include'        => $atts['include'],
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_posts(
+				array(
+					'include'        => $atts['include'],
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		} elseif ( ! empty( $atts['exclude'] ) ) {
-			$attachments = get_children( array(
-				'post_parent'    => $id,
-				'exclude'        => $atts['exclude'],
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'exclude'        => $atts['exclude'],
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		} else {
-			$attachments = get_children( array(
-				'post_parent'    => $id,
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		}
 
 		if ( empty( $attachments ) ) {
@@ -183,9 +193,12 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$this->did_convert_elements = true;
 
-		$args = wp_parse_args( $args, array(
-			'images' => false,
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'images' => false,
+			)
+		);
 
 		if ( empty( $args['images'] ) ) {
 			return '';

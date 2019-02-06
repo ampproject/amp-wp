@@ -1,13 +1,17 @@
-PATH_EXCLUDES_PATTERN=third_party/
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
 PROJECT_SLUG=amp
 SKIP_ECHO_PATHS_SCOPE=1
 README_MD_TITLE="AMP Plugin for WordPress"
 DEV_LIB_SKIP="$DEV_LIB_SKIP,jshint"
+if [[ ! -z $TRAVIS ]]; then
+	CHECK_SCOPE=all
+fi
 
 function after_wp_install {
-    echo "Installing plugins..."
-    svn export -q https://plugins.svn.wordpress.org/jetpack/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/jetpack"
-    svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
+	if [[ $WP_VERSION == 4.* ]]; then
+		echo -n "Installing Gutenberg..."
+		svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
+		echo "done"
+	fi
 }

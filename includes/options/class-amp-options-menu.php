@@ -242,13 +242,17 @@ class AMP_Options_Menu {
 		?>
 		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php
-			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => 'non_existent',
-			) );
+			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => 'non_existent',
+				)
+			);
 			remove_filter( 'amp_validation_error_sanitized', array( 'AMP_Validation_Manager', 'filter_tree_shaking_validation_error_as_accepted' ) );
-			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
-			) );
+			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
+				)
+			);
 
 			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
 			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
@@ -304,7 +308,7 @@ class AMP_Options_Menu {
 						</label>
 					</p>
 					<p class="description">
-						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; if you have more, than it is a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
+						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; any more than this will cause a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -567,7 +571,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		if ( ! empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
+		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>

@@ -361,7 +361,7 @@ class AMP_Options_Manager {
 			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
-			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
+			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
 		</div>
 
 		<script>
@@ -528,12 +528,14 @@ class AMP_Options_Manager {
 			$validation = AMP_Validation_Manager::validate_url( $url );
 
 			if ( is_wp_error( $validation ) ) {
-				$review_messages[] = esc_html( sprintf(
-					/* translators: %1$s is the error message, %2$s is the error code */
-					__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
-					$validation->get_error_message(),
-					$validation->get_error_code()
-				) );
+				$review_messages[] = esc_html(
+					sprintf(
+						/* translators: %1$s is the error message, %2$s is the error code */
+						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
+						$validation->get_error_message(),
+						$validation->get_error_code()
+					)
+				);
 
 				$error_message = $validation->get_error_message();
 				if ( $error_message ) {
