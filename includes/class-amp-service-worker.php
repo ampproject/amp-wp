@@ -113,7 +113,7 @@ class AMP_Service_Worker {
 		}
 
 		$service_workers->caching_routes()->register(
-			'/wp-content/.*\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
+			'^' . preg_quote( set_url_scheme( content_url( '/' ), 'https' ), '/' ) . '[^\?]+?\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
 			array(
 				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 				'cacheName' => 'images', // @todo This needs to get the proper prefix in JS.
