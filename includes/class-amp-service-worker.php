@@ -29,8 +29,11 @@ class AMP_Service_Worker {
 		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
+
+		// @todo Some of these should be opt-in by amp theme mod?
 		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_amp_runtime_caching' ) );
 		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_runtime_caching' ) );
+		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_google_fonts_runtime_caching' ) );
 	}
 
 	/**
@@ -47,7 +50,7 @@ class AMP_Service_Worker {
 	/**
 	 * Configure the front service worker for AMP.
 	 *
-	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
+	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service worker registry.
 	 */
@@ -77,7 +80,7 @@ class AMP_Service_Worker {
 			}
 		);
 
-		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/a4d798cac6a534e0c46e78944a2718a8dab3c057/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
+		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
 		$service_workers->caching_routes()->register(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
 			array(
@@ -89,7 +92,7 @@ class AMP_Service_Worker {
 	/**
 	 * Configure the front service worker for AMP.
 	 *
-	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
+	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L60-L74
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
@@ -118,14 +121,57 @@ class AMP_Service_Worker {
 	}
 
 	/**
+	 * Add Google Fonts runtime caching.
+	 *
+	 * @link https://developers.google.com/web/tools/workbox/guides/common-recipes#google_fonts
+	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L76-L103
+	 * @link https://github.com/xwp/pwa-wp/blob/master/integrations/class-wp-service-worker-fonts-integration.php
+	 *
+	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
+	 */
+	public static function add_google_fonts_runtime_caching( $service_workers ) {
+
+		// The PWA plugin also automatically adds runtime caching for Google Fonts when WP_SERVICE_WORKER_INTEGRATIONS_ENABLED is set.
+		if ( class_exists( 'WP_Service_Worker_Fonts_Integration' ) ) {
+			return;
+		}
+
+		// Cache the Google Fonts stylesheets with a stale while revalidate strategy.
+		$service_workers->caching_routes()->register(
+			'^https:\/\/fonts\.googleapis\.com',
+			array(
+				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
+				'cacheName' => 'google-fonts-stylesheets',
+			)
+		);
+
+		// Cache the Google Fonts webfont files with a cache first strategy for 1 year.
+		$service_workers->caching_routes()->register(
+			'^https:\/\/fonts\.gstatic\.com',
+			array(
+				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
+				'cacheName' => 'google-fonts-webfonts',
+				'plugins'   => array(
+					'cacheableResponse' => array(
+						'statuses' => array( 0, 200 ),
+					),
+					'expiration'        => array(
+						'maxAgeSeconds' => YEAR_IN_SECONDS,
+						'maxEntries'    => 30,
+					),
+				),
+			)
+		);
+	}
+
+	/**
 	 * Register URLs that will be precached in the runtime cache. (Yes, this sounds somewhat strange.)
 	 *
 	 * Note that the PWA plugin handles the precaching of custom logo, custom header,
-	 * and custom background. The PWA plugin also automatically adds runtime caching
-	 * for Google Fonts. The PWA plugin also handles precaching & serving of the
-	 * offline/500 error pages, enabling navigation preload,
+	 * and custom background. The PWA plugin also handles precaching & serving of the
+	 * offline/500 error pages, and enabling navigation preload,
 	 *
-	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
+	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L9-L22
 	 *
 	 * @return array Runtime pre-cached URLs.
 	 */
