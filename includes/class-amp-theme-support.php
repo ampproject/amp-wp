@@ -128,9 +128,12 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// Ensure extra theme support for core themes is in place.
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
@@ -171,12 +174,18 @@ class AMP_Theme_Support {
 			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
-				_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-					/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
-					__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-					join( ', ', $keys ),
-					join( ', ', array_keys( $args ) )
-				) ), '1.0' );
+				_doing_it_wrong(
+					'add_theme_support',
+					esc_html(
+						sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+							/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
+							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
+							join( ', ', $keys ),
+							join( ', ', array_keys( $args ) )
+						)
+					),
+					'1.0'
+				);
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
@@ -184,9 +193,12 @@ class AMP_Theme_Support {
 			}
 			self::$support_added_via_option = false;
 		} elseif ( 'disabled' !== $theme_support_option ) {
-			add_theme_support( self::SLUG, array(
-				'paired' => ( 'paired' === $theme_support_option ),
-			) );
+			add_theme_support(
+				self::SLUG,
+				array(
+					'paired' => ( 'paired' === $theme_support_option ),
+				)
+			);
 			self::$support_added_via_option = true;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
 			add_theme_support( self::SLUG );
@@ -227,7 +239,7 @@ class AMP_Theme_Support {
 		if ( ! is_amp_endpoint() ) {
 
 			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
-			if ( isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: csrf ok.
+			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
 				self::redirect_ampless_url();
 			}
 
@@ -265,7 +277,7 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_proper_amp_location( $exit = true ) {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // WPCS: CSRF OK.
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 
 		if ( amp_is_canonical() ) {
 			/*
@@ -476,7 +488,7 @@ class AMP_Theme_Support {
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
-		$wp_query   = $query; // WPCS: override ok.
+		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -508,7 +520,7 @@ class AMP_Theme_Support {
 		}
 
 		// Restore previous $wp_query (if any).
-		$wp_query = $prev_query; // WPCS: override ok.
+		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -586,10 +598,12 @@ class AMP_Theme_Support {
 			 * @var WP_Post $queried_object
 			 */
 			$queried_object = $query->get_queried_object();
-			$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
-			if ( ! empty( $support_errors ) ) {
-				$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
-				$matching_template['supported'] = false;
+			if ( $queried_object instanceof WP_Post ) {
+				$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
+				if ( ! empty( $support_errors ) ) {
+					$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
+					$matching_template['supported'] = false;
+				}
 			}
 		}
 
@@ -753,6 +767,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
+		// Let the AMP plugin manage service worker streaming in the PWA plugin.
+		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
+
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -761,17 +778,27 @@ class AMP_Theme_Support {
 
 		// @todo The wp_mediaelement_fallback() should still run to be injected inside of the audio/video generated by wp_audio_shortcode()/wp_video_shortcode() respectively.
 		// Prevent MediaElement.js scripts/styles from being enqueued.
-		add_filter( 'wp_video_shortcode_library', function() {
-			return 'amp';
-		} );
-		add_filter( 'wp_audio_shortcode_library', function() {
-			return 'amp';
-		} );
+		add_filter(
+			'wp_video_shortcode_library',
+			function() {
+				return 'amp';
+			}
+		);
+		add_filter(
+			'wp_audio_shortcode_library',
+			function() {
+				return 'amp';
+			}
+		);
 
 		// Don't show loading indicator on custom logo since it makes most sense for larger images.
-		add_filter( 'get_custom_logo', function( $html ) {
-			return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
-		}, 1 );
+		add_filter(
+			'get_custom_logo',
+			function( $html ) {
+				return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
+			},
+			1
+		);
 
 		/*
 		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
@@ -786,12 +813,20 @@ class AMP_Theme_Support {
 		 *
 		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
 		 */
-		add_action( 'wp_head', function() {
-			echo '<style amp-custom></style>';
-		}, 0 );
-		add_action( 'wp_head', function() {
-			echo amp_get_boilerplate_code(); // WPCS: xss ok.
-		}, PHP_INT_MAX );
+		add_action(
+			'wp_head',
+			function() {
+				echo '<style amp-custom></style>';
+			},
+			0
+		);
+		add_action(
+			'wp_head',
+			function() {
+				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			},
+			PHP_INT_MAX
+		);
 
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
@@ -814,7 +849,7 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
 		// Commenting hooks.
@@ -826,12 +861,19 @@ class AMP_Theme_Support {
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
-		add_action( 'wp_print_footer_scripts', function() {
-			wp_dequeue_script( 'wp-custom-header' );
-		}, 0 );
-		add_action( 'wp_enqueue_scripts', function() {
-			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
-		} );
+		add_action(
+			'wp_print_footer_scripts',
+			function() {
+				wp_dequeue_script( 'wp-custom-header' );
+			},
+			0
+		);
+		add_action(
+			'wp_enqueue_scripts',
+			function() {
+				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
+			}
+		);
 
 		// @todo Add character conversion.
 	}
@@ -880,12 +922,14 @@ class AMP_Theme_Support {
 			 *
 			 * @type AMP_Base_Embed_Handler $embed_handler
 			 */
-			$embed_handler = new $embed_handler_class( array_merge(
-				array(
-					'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				),
-				$args
-			) );
+			$embed_handler = new $embed_handler_class(
+				array_merge(
+					array(
+						'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+					),
+					$args
+				)
+			);
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
 				/* translators: %s is embed handler */
@@ -1072,7 +1116,7 @@ class AMP_Theme_Support {
 		$link = sprintf(
 			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
 			esc_attr( '#' . $args['respond_id'] ),
-			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) ) ),
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
@@ -1132,20 +1176,27 @@ class AMP_Theme_Support {
 		wp_dequeue_script( 'admin-bar' );
 
 		// Remove customize support script since not valid AMP.
-		add_action( 'admin_bar_menu', function() {
-			remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
-		}, 41 );
+		add_action(
+			'admin_bar_menu',
+			function() {
+				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
+			},
+			41
+		);
 
 		// Emulate customize support script in PHP, to assume Customizer.
-		add_filter( 'body_class', function( $body_classes ) {
-			return array_merge(
-				array_diff(
-					$body_classes,
-					array( 'no-customize-support' )
-				),
-				array( 'customize-support' )
-			);
-		} );
+		add_filter(
+			'body_class',
+			function( $body_classes ) {
+				return array_merge(
+					array_diff(
+						$body_classes,
+						array( 'no-customize-support' )
+					),
+					array( 'customize-support' )
+				);
+			}
+		);
 	}
 
 	/**
@@ -1172,6 +1223,8 @@ class AMP_Theme_Support {
 		 * @var DOMElement $link
 		 */
 
+		$xpath = new DOMXPath( $dom );
+
 		// Make sure the HEAD element is in the doc.
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 		if ( ! $head ) {
@@ -1179,14 +1232,9 @@ class AMP_Theme_Support {
 			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
 		}
 
-		// Ensure there is a schema.org script.
-		$schema_org_meta_script = null;
-		foreach ( $head->getElementsByTagName( 'script' ) as $script ) {
-			if ( 'application/ld+json' === $script->getAttribute( 'type' ) && false !== strpos( $script->nodeValue, 'schema.org' ) ) {
-				$schema_org_meta_script = $script;
-				break;
-			}
-		}
+		// Ensure there is a schema.org script in the document.
+		// @todo Consider applying the amp_schemaorg_metadata filter on the contents when a script is already present.
+		$schema_org_meta_script = $xpath->query( '//script[ @type = "application/ld+json" ][ contains( ./text(), "schema.org" ) ]' )->item( 0 );
 		if ( ! $schema_org_meta_script ) {
 			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/ld+json' );
@@ -1204,10 +1252,14 @@ class AMP_Theme_Support {
 			}
 		}
 		if ( empty( $links['canonical'] ) ) {
-			$rel_canonical = AMP_DOM_Utils::create_node( $dom, 'link', array(
-				'rel'  => 'canonical',
-				'href' => self::get_current_canonical_url(),
-			) );
+			$rel_canonical = AMP_DOM_Utils::create_node(
+				$dom,
+				'link',
+				array(
+					'rel'  => 'canonical',
+					'href' => self::get_current_canonical_url(),
+				)
+			);
 			$head->appendChild( $rel_canonical );
 		}
 
@@ -1236,19 +1288,27 @@ class AMP_Theme_Support {
 		}
 		if ( ! $meta_charset ) {
 			// Warning: This probably means the character encoding needs to be converted.
-			$meta_charset = AMP_DOM_Utils::create_node( $dom, 'meta', array(
-				'charset' => 'utf-8',
-			) );
+			$meta_charset = AMP_DOM_Utils::create_node(
+				$dom,
+				'meta',
+				array(
+					'charset' => 'utf-8',
+				)
+			);
 		} else {
 			$head->removeChild( $meta_charset ); // So we can move it.
 		}
 		$head->insertBefore( $meta_charset, $head->firstChild );
 
 		if ( ! $meta_viewport ) {
-			$meta_viewport = AMP_DOM_Utils::create_node( $dom, 'meta', array(
-				'name'    => 'viewport',
-				'content' => 'width=device-width,minimum-scale=1',
-			) );
+			$meta_viewport = AMP_DOM_Utils::create_node(
+				$dom,
+				'meta',
+				array(
+					'name'    => 'viewport',
+					'content' => 'width=device-width',
+				)
+			);
 		} else {
 			$head->removeChild( $meta_viewport ); // So we can move it.
 		}
@@ -1330,22 +1390,30 @@ class AMP_Theme_Support {
 			$links['preload'] = array();
 		}
 
-		$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
-			'rel'  => 'preload',
-			'as'   => 'script',
-			'href' => $runtime_src,
-		) );
+		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
+			$dom,
+			'link',
+			array(
+				'rel'  => 'preload',
+				'as'   => 'script',
+				'href' => $runtime_src,
+			)
+		);
 
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, $render_delaying_extensions, true ) ) {
 				continue;
 			}
-			$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
-				'rel'  => 'preload',
-				'as'   => 'script',
-				'href' => $amp_scripts[ $script_handle ]->getAttribute( 'src' ),
-			) );
+			$prioritized_preloads[] = AMP_DOM_Utils::create_node(
+				$dom,
+				'link',
+				array(
+					'rel'  => 'preload',
+					'as'   => 'script',
+					'href' => $amp_scripts[ $script_handle ]->getAttribute( 'src' ),
+				)
+			);
 		}
 		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
 
@@ -1524,6 +1592,12 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
+		// Dependencies on the PWA plugin for service worker streaming.
+		$stream_fragment = null;
+		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
+			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
+		}
+
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
@@ -1538,6 +1612,7 @@ class AMP_Theme_Support {
 					! is_customize_preview()
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
+				'stream_fragment'         => $stream_fragment,
 			),
 			$args
 		);
@@ -1556,13 +1631,17 @@ class AMP_Theme_Support {
 		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
 		 * This is also used as the ETag.
 		 */
-		$response_cache_key = md5( wp_json_encode( array(
-			$args,
-			$response,
-			self::$sanitizer_classes,
-			self::$embed_handlers,
-			AMP__VERSION,
-		) ) );
+		$response_cache_key = md5(
+			wp_json_encode(
+				array(
+					$args,
+					$response,
+					self::$sanitizer_classes,
+					self::$embed_handlers,
+					AMP__VERSION,
+				)
+			)
+		);
 
 		/*
 		 * Per rfc7232:
@@ -1573,10 +1652,23 @@ class AMP_Theme_Support {
 		 * not have been set yet during the WordPress template generation is
 		 * the ETag. The AMP plugin sends a Vary header at amp_init.
 		 */
-		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
 
-		// Handle responses that are cached by the browser.
-		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+		/*
+		 * Handle responses that are cached by the browser, returning 304 response if the response cache key
+		 * matches any ETags mentioned in If-None-Match request header. Note that if the client request indicates a
+		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
+		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
+		 * response is returned.
+		 */
+		$has_matching_etag = (
+			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
+			&&
+			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
+			&&
+			in_array( $response_cache_key, $etag_match_candidates[0], true )
+		);
+		if ( $has_matching_etag ) {
 			status_header( 304 );
 			return '';
 		}
@@ -1669,6 +1761,21 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
+		// Remove scripts that are being added for PWA service worker streaming for restoration later.
+		$stream_combine_script_define_element     = null;
+		$stream_combine_script_define_placeholder = null;
+		$stream_combine_script_invoke_element     = null;
+		$stream_combine_script_invoke_placeholder = null;
+		if ( 'header' === $stream_fragment ) {
+			$stream_combine_script_define_element = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+			if ( $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
+				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
+			}
+		} elseif ( 'body' === $stream_fragment ) {
+			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
+		}
+
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( $body ) {
@@ -1693,7 +1800,7 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// Ensure the mandatory amp attribute is present on the html element, as otherwise it will be stripped entirely.
+		// Ensure the mandatory amp attribute is present on the html element.
 		if ( ! $dom->documentElement->hasAttribute( 'amp' ) && ! $dom->documentElement->hasAttribute( '⚡️' ) ) {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
@@ -1779,12 +1886,48 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation( $dom, array(
-			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
-		) );
+		AMP_Validation_Manager::finalize_validation(
+			$dom,
+			array(
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			)
+		);
+
+		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
+		$truncate_after_comment  = null;
+		$truncate_before_comment = null;
+		if ( $stream_fragment ) {
+			if ( $stream_combine_script_define_placeholder && $stream_combine_script_define_element ) {
+				$stream_combine_script_define_placeholder->parentNode->replaceChild( $stream_combine_script_define_element, $stream_combine_script_define_placeholder );
+				$truncate_after_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_HEADER' );
+				$stream_combine_script_define_element->parentNode->insertBefore( $truncate_after_comment, $stream_combine_script_define_element->nextSibling );
+			}
+			if ( $stream_combine_script_invoke_placeholder ) {
+				$stream_combine_script_invoke_element = WP_Service_Worker_Navigation_Routing_Component::get_header_combine_invoke_script( $dom, false );
+				$stream_combine_script_invoke_placeholder->parentNode->replaceChild( $stream_combine_script_invoke_element, $stream_combine_script_invoke_placeholder );
+				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
+				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
+			}
+		}
 
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
+
+		// For service worker streaming, make sure that the header response doesn't contain closing tags, and that the body fragment starts with the required script tag.
+		if ( $truncate_after_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, 0, $position );
+			}
+		}
+		if ( $truncate_before_comment ) {
+			$search   = sprintf( '<!--%s-->', $truncate_before_comment->nodeValue );
+			$position = strpos( $response, $search );
+			if ( false !== $position ) {
+				$response = substr( $response, $position + strlen( $search ) );
+			}
+		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 

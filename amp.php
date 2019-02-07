@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: AMP
- * Description: Add AMP support to your WordPress site.
- * Plugin URI: https://github.com/automattic/amp-wp
+ * Description: Enable AMP on your WordPress site, the WordPress way.
+ * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
- * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
+ * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
  * Version: 1.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
@@ -21,12 +21,46 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.4+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
+	return;
+}
+
+/**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.0
+ */
+function _amp_print_php_dom_document_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! class_exists( 'DOMDocument' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
+	return;
+}
+
+/**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.0.1
+ */
+function _amp_print_php_missing_iconv_notice() {
+	?>
+	<div class="notice notice-error">
+		<p><?php esc_html_e( 'The AMP plugin requires iconv extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+	</div>
+	<?php
+}
+if ( ! function_exists( 'iconv' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_missing_iconv_notice' );
 	return;
 }
 
@@ -35,21 +69,49 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
  *
  * @since 1.0
  */
-function _amp_print_composer_install_admin_notice() {
+function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
-	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
 	return;
 }
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '1.1-alpha' );
+
+/**
+ * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
+ *
+ * @since 1.0
+ */
+function _amp_incorrect_plugin_slug_admin_notice() {
+	$actual_slug = basename( AMP__DIR__ );
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %1$s is the current directory name, and %2$s is the required directory name */
+					__( 'You appear to have installed the AMP plugin incorrectly. It is currently installed in the <code>%1$s</code> directory, but it needs to be placed in a directory named <code>%2$s</code>. Please rename the directory. This is important for WordPress plugin auto-updates.', 'amp' ),
+					$actual_slug,
+					'amp'
+				)
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( 'amp' !== basename( AMP__DIR__ ) ) {
+	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
+}
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -156,7 +218,7 @@ function amp_init() {
 	AMP_Service_Workers::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
-	if ( defined( 'WP_CLI' ) ) {
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
 
@@ -178,6 +240,24 @@ function amp_init() {
 
 	// Add actions for legacy post templates.
 	add_action( 'wp', 'amp_maybe_add_actions' );
+
+	/*
+	 * Broadcast plugin updates.
+	 * Note that AMP_Options_Manager::get_option( 'version', '0.0' ) cannot be used because
+	 * version was new option added, and in that case default would never be used for a site
+	 * upgrading from a version prior to 1.0. So this is why get_option() is currently used.
+	 */
+	$options     = get_option( AMP_Options_Manager::OPTION_NAME, array() );
+	$old_version = isset( $options['version'] ) ? $options['version'] : '0.0';
+	if ( AMP__VERSION !== $old_version ) {
+		/**
+		 * Triggers when after amp_init when the plugin version has updated.
+		 *
+		 * @param string $old_version Old version.
+		 */
+		do_action( 'amp_plugin_update', $old_version );
+		AMP_Options_Manager::update_option( 'version', AMP__VERSION );
+	}
 }
 
 /**
@@ -369,7 +449,6 @@ function amp_add_frontend_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }

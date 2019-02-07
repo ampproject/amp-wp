@@ -1,6 +1,0 @@
-**/*.min.js
-**/node_modules/**
-**/vendor/**
-**/assets/js/*-compiled.js
-blocks/**/*.js
-assets/src/**.js

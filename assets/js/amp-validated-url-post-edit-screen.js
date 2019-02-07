@@ -1,6 +1,6 @@
-/* exported ampInvalidUrlPostEditScreen */
+/* exported ampValidatedUrlPostEditScreen */
 
-const ampInvalidUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
+const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
 	let component = {
 		data: {
 			l10n: {

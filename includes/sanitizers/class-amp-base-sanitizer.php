@@ -573,11 +573,15 @@ abstract class AMP_Base_Sanitizer {
 			return;
 		}
 		$body_node          = $nodes->item( 0 );
-		$amp_image_lightbox = AMP_DOM_Utils::create_node( $this->dom, 'amp-image-lightbox', array(
-			'id'                           => self::AMP_IMAGE_LIGHTBOX_ID,
-			'layout'                       => 'nodisplay',
-			'data-close-button-aria-label' => __( 'Close', 'amp' ),
-		) );
+		$amp_image_lightbox = AMP_DOM_Utils::create_node(
+			$this->dom,
+			'amp-image-lightbox',
+			array(
+				'id'                           => self::AMP_IMAGE_LIGHTBOX_ID,
+				'layout'                       => 'nodisplay',
+				'data-close-button-aria-label' => __( 'Close', 'amp' ),
+			)
+		);
 		$body_node->appendChild( $amp_image_lightbox );
 	}
 }

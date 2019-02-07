@@ -1,4 +1,12 @@
-<?php $post_author = $this->get( 'post_author' ); ?>
+<?php
+/**
+ * Post author template part.
+ *
+ * @package AMP
+ */
+
+$post_author = $this->get( 'post_author' );
+?>
 <?php if ( $post_author ) : ?>
 	<div class="amp-wp-meta amp-wp-byline">
 		<?php if ( function_exists( 'get_avatar_url' ) ) : ?>

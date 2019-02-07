@@ -188,10 +188,12 @@ class AMP_HTTP {
 		$hosts[] = 'cdn.ampproject.org';
 
 		// From the publisher’s own origins.
-		$domains = array_unique( array(
-			wp_parse_url( site_url(), PHP_URL_HOST ),
-			wp_parse_url( home_url(), PHP_URL_HOST ),
-		) );
+		$domains = array_unique(
+			array(
+				wp_parse_url( site_url(), PHP_URL_HOST ),
+				wp_parse_url( home_url(), PHP_URL_HOST ),
+			)
+		);
 
 		/*
 		 * From AMP docs:
@@ -202,7 +204,7 @@ class AMP_HTTP {
 		foreach ( $domains as $domain ) {
 			if ( function_exists( 'idn_to_utf8' ) ) {
 				if ( version_compare( PHP_VERSION, '5.4', '>=' ) && defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
-					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.PHP.NewConstants.intl_idna_variant_uts46Found
+					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.Constants.NewConstants.intl_idna_variant_uts46Found
 				} else {
 					$domain = idn_to_utf8( $domain );
 				}
@@ -215,6 +217,9 @@ class AMP_HTTP {
 
 			// Cloudflare AMP Cache.
 			$hosts[] = sprintf( '%s.amp.cloudflare.com', $subdomain );
+
+			// Bing AMP Cache.
+			$hosts[] = sprintf( '%s.bing-amp.com', $subdomain );
 		}
 
 		return $hosts;
@@ -299,9 +304,12 @@ class AMP_HTTP {
 		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
 
 		// Add die handler for AMP error display, most likely due to problem with comment.
-		add_filter( 'wp_die_handler', function () {
-			return array( __CLASS__, 'handle_wp_die' );
-		} );
+		add_filter(
+			'wp_die_handler',
+			function () {
+				return array( __CLASS__, 'handle_wp_die' );
+			}
+		);
 	}
 
 	/**
@@ -383,9 +391,11 @@ class AMP_HTTP {
 		}
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
-		wp_send_json( array(
-			'error' => amp_wp_kses_mustache( $error ),
-		) );
+		wp_send_json(
+			array(
+				'error' => amp_wp_kses_mustache( $error ),
+			)
+		);
 	}
 
 	/**
@@ -429,9 +439,11 @@ class AMP_HTTP {
 		$message = apply_filters( 'amp_comment_posted_message', $message, $comment );
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
-		wp_send_json( array(
-			'message' => amp_wp_kses_mustache( $message ),
-		) );
+		wp_send_json(
+			array(
+				'message' => amp_wp_kses_mustache( $message ),
+			)
+		);
 
 		return null;
 	}

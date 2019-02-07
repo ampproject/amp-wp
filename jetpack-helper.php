@@ -2,7 +2,7 @@
 /**
  * Jetpack bits.
  *
- * @todo Move this into Jetpack. See https://github.com/Automattic/amp-wp/issues/1021
+ * @todo Move this into Jetpack. See https://github.com/ampproject/amp-wp/issues/1021
  * @package AMP
  */
 

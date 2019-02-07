@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 734;
+	private static $spec_file_revision = 767;
 	private static $minimum_validator_revision_required = 348;
 
 	private static $allowed_tags = array(
@@ -34,6 +34,7 @@ class AMP_Allowed_Tags_Generated {
 								'https',
 								'mailto',
 								'maps',
+								'bip',
 								'bbmi',
 								'fb-messenger',
 								'intent',
@@ -920,6 +921,7 @@ class AMP_Allowed_Tags_Generated {
 					'[data-player-id]' => array(),
 					'[data-player]' => array(),
 					'[data-playlist-id]' => array(),
+					'[data-referrer]' => array(),
 					'[data-video-id]' => array(),
 					'autoplay' => array(
 						'value' => array(
@@ -1035,9 +1037,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'autoplay' => array(
-						'value' => array(
-							'',
-						),
+						'value_regex' => '(|[0-9]+)',
 					),
 					'controls' => array(),
 					'delay' => array(
@@ -1292,6 +1292,10 @@ class AMP_Allowed_Tags_Generated {
 					'offset-seconds' => array(
 						'value_regex' => '-?\\d+',
 					),
+					'template' => array(),
+					'timeleft-ms' => array(
+						'value_regex' => '\\d+',
+					),
 					'timestamp-ms' => array(
 						'value_regex' => '\\d{13}',
 					),
@@ -1325,6 +1329,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-date-picker' => array(
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1410,6 +1416,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1464,6 +1472,11 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'touch-keyboard-editable' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'type' => array(
 						'value_casei' => array(
 							'single',
@@ -1486,6 +1499,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1577,6 +1592,8 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[max]' => array(),
+					'[min]' => array(),
 					'allow-blocked-ranges' => array(
 						'value' => array(
 							'',
@@ -1636,6 +1653,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 					'start-date' => array(),
 					'start-input-selector' => array(),
+					'touch-keyboard-editable' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'type' => array(
 						'mandatory' => true,
 						'value_casei' => array(
@@ -1655,6 +1677,36 @@ class AMP_Allowed_Tags_Generated {
 						'amp-date-picker',
 					),
 					'spec_name' => 'amp-date-picker[type=range][mode=overlay]',
+				),
+			),
+		),
+		'amp-delight-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'data-content-id' => array(
+						'mandatory' => true,
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-delight-player',
+					),
 				),
 			),
 		),
@@ -2914,6 +2966,36 @@ class AMP_Allowed_Tags_Generated {
 					'unique' => true,
 				),
 			),
+			array(
+				'attr_spec_list' => array(
+					'data-client' => array(
+						'mandatory' => true,
+					),
+					'data-slot' => array(
+						'mandatory' => true,
+					),
+					'type' => array(
+						'mandatory' => true,
+						'value' => array(
+							'adsense',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'reference_points' => array(
+						'AMP-NEXT-PAGE > [separator]' => array(
+							'mandatory' => false,
+							'unique' => true,
+						),
+					),
+					'requires_extension' => array(
+						'amp-next-page',
+					),
+					'spec_name' => 'amp-next-page [type=adsense]',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-next-page',
+					'unique' => true,
+				),
+			),
 		),
 		'amp-nexxtv-player' => array(
 			array(
@@ -3268,6 +3350,48 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-powr-player' => array(
+			array(
+				'attr_spec_list' => array(
+					'[data-referrer]' => array(),
+					'autoplay' => array(),
+					'data-account' => array(
+						'mandatory' => true,
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'data-player' => array(
+						'mandatory' => true,
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'data-terms' => array(),
+					'data-video' => array(
+						'value_regex' => '[0-9a-zA-Z-]+',
+					),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'requires_extension' => array(
+						'amp-powr-player',
+					),
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-powr-player',
+				),
+			),
+		),
 		'amp-reach-player' => array(
 			array(
 				'attr_spec_list' => array(
@@ -3462,6 +3586,43 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_parent' => 'body',
 					'requires_extension' => array(
 						'amp-sidebar',
+					),
+				),
+			),
+		),
+		'amp-skimlinks' => array(
+			array(
+				'attr_spec_list' => array(
+					'custom-tracking-id' => array(
+						'value_regex_casei' => '^.{0,50}$',
+					),
+					'excluded-domains' => array(),
+					'link-selector' => array(),
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'publisher-code' => array(
+						'mandatory' => true,
+						'value_regex_casei' => '^[0-9]+X[0-9]+$',
+					),
+					'tracking' => array(
+						'value' => array(
+							'false',
+							'true',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'requires_extension' => array(
+						'amp-skimlinks',
 					),
 				),
 			),
@@ -3888,6 +4049,8 @@ class AMP_Allowed_Tags_Generated {
 		'amp-timeago' => array(
 			array(
 				'attr_spec_list' => array(
+					'[datetime]' => array(),
+					'[title]' => array(),
 					'cutoff' => array(
 						'value_regex' => '\\d+',
 					),
@@ -4056,6 +4219,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'dock' => array(),
 					'lightbox' => array(),
 					'lightbox-thumbnail-id' => array(
 						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
@@ -4162,6 +4326,7 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'dock' => array(),
 					'loop' => array(
 						'value' => array(
 							'',
@@ -4759,6 +4924,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -4850,6 +5016,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -4974,6 +5141,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5257,6 +5425,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5347,6 +5516,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5432,6 +5602,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5521,6 +5692,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5604,6 +5776,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5688,6 +5861,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5790,6 +5964,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -5900,6 +6075,7 @@ class AMP_Allowed_Tags_Generated {
 					'filterunits' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6130,6 +6306,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6213,6 +6390,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6299,6 +6477,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6475,21 +6654,10 @@ class AMP_Allowed_Tags_Generated {
 		),
 		'html' => array(
 			array(
-				'attr_spec_list' => array(
-					'\\u26a1' => array(
-						'alternative_names' => array(
-							'amp',
-						),
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-				),
+				'attr_spec_list' => array(),
 				'tag_spec' => array(
 					'mandatory' => true,
 					'mandatory_parent' => '!doctype',
-					'spec_name' => 'html \\u26a1 for top-level html',
 					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#required-markup',
 					'unique' => true,
 				),
@@ -6571,6 +6739,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -6657,7 +6826,15 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'alt' => array(),
+					'attribution' => array(),
 					'border' => array(),
+					'decoding' => array(
+						'value' => array(
+							'async',
+							'auto',
+							'sync',
+						),
+					),
 					'height' => array(),
 					'ismap' => array(),
 					'longdesc' => array(
@@ -6669,6 +6846,7 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
+					'sizes' => array(),
 					'src' => array(
 						'alternative_names' => array(
 							'srcset',
@@ -6735,6 +6913,11 @@ class AMP_Allowed_Tags_Generated {
 					'name' => array(
 						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
+					'no-verify' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'pattern' => array(),
 					'placeholder' => array(),
 					'readonly' => array(),
@@ -6794,6 +6977,11 @@ class AMP_Allowed_Tags_Generated {
 					'multiple' => array(),
 					'name' => array(
 						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
+					),
+					'no-verify' => array(
+						'value' => array(
+							'',
+						),
 					),
 					'pattern' => array(),
 					'placeholder' => array(),
@@ -6886,6 +7074,80 @@ class AMP_Allowed_Tags_Generated {
 					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-form',
 				),
 			),
+			array(
+				'attr_spec_list' => array(
+					'[accept]' => array(),
+					'[accesskey]' => array(),
+					'[autocomplete]' => array(),
+					'[checked]' => array(),
+					'[disabled]' => array(),
+					'[height]' => array(),
+					'[inputmode]' => array(),
+					'[max]' => array(),
+					'[maxlength]' => array(),
+					'[min]' => array(),
+					'[minlength]' => array(),
+					'[multiple]' => array(),
+					'[pattern]' => array(),
+					'[placeholder]' => array(),
+					'[readonly]' => array(),
+					'[required]' => array(),
+					'[selectiondirection]' => array(),
+					'[size]' => array(),
+					'[spellcheck]' => array(),
+					'[step]' => array(),
+					'[type]' => array(),
+					'[value]' => array(),
+					'[width]' => array(),
+					'accept' => array(),
+					'accesskey' => array(),
+					'autocomplete' => array(),
+					'autofocus' => array(),
+					'checked' => array(),
+					'disabled' => array(),
+					'height' => array(),
+					'inputmode' => array(),
+					'list' => array(),
+					'mask' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+					),
+					'mask-output' => array(),
+					'max' => array(),
+					'maxlength' => array(),
+					'min' => array(),
+					'minlength' => array(),
+					'multiple' => array(),
+					'name' => array(
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
+					),
+					'pattern' => array(),
+					'placeholder' => array(),
+					'readonly' => array(),
+					'required' => array(),
+					'selectiondirection' => array(),
+					'size' => array(),
+					'spellcheck' => array(),
+					'step' => array(),
+					'tabindex' => array(),
+					'type' => array(
+						'value' => array(
+							'text',
+							'tel',
+							'search',
+						),
+					),
+					'value' => array(),
+					'width' => array(),
+				),
+				'tag_spec' => array(
+					'requires_extension' => array(
+						'amp-inputmask',
+					),
+					'spec_name' => 'input [mask]',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-inputmask',
+				),
+			),
 		),
 		'ins' => array(
 			array(
@@ -6962,6 +7224,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7049,6 +7312,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7420,6 +7684,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7507,6 +7772,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -7596,10 +7862,7 @@ class AMP_Allowed_Tags_Generated {
 							'height' => array(),
 							'initial-scale' => array(),
 							'maximum-scale' => array(),
-							'minimum-scale' => array(
-								'mandatory' => true,
-								'value_double' => 1.0,
-							),
+							'minimum-scale' => array(),
 							'shrink-to-fit' => array(),
 							'user-scalable' => array(),
 							'viewport-fit' => array(),
@@ -8210,6 +8473,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8294,6 +8558,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8377,6 +8642,15 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'picture' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'mandatory_parent' => 'noscript',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-img',
+				),
+			),
+		),
 		'polygon' => array(
 			array(
 				'attr_spec_list' => array(
@@ -8402,6 +8676,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8486,6 +8761,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8604,6 +8880,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -8713,6 +8990,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -9785,6 +10063,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-delight-player',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-dynamic-css-classes',
 						'requires_usage' => 3,
@@ -10405,6 +10708,32 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-inputmask',
+						'requires_usage' => 3,
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-instagram',
 						'requires_usage' => 2,
@@ -10977,6 +11306,31 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'name' => 'amp-powr-player',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-reach-player',
 						'requires_usage' => 2,
@@ -11084,6 +11438,31 @@ class AMP_Allowed_Tags_Generated {
 						'deprecated_allow_duplicates' => true,
 						'name' => 'amp-sidebar',
 						'requires_usage' => 2,
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-skimlinks',
 						'version' => array(
 							'0.1',
 							'latest',
@@ -11277,6 +11656,25 @@ class AMP_Allowed_Tags_Generated {
 							'latest',
 						),
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-story-bookend',
+					'requires_extension' => array(
+						'amp-story',
+					),
+					'spec_name' => 'amp-story-bookend extension .json script',
+					'unique' => true,
 				),
 			),
 			array(
@@ -11744,6 +12142,11 @@ class AMP_Allowed_Tags_Generated {
 					'name' => array(
 						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
+					'no-verify' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'required' => array(),
 					'size' => array(),
 				),
@@ -11790,6 +12193,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -11846,6 +12250,29 @@ class AMP_Allowed_Tags_Generated {
 			),
 		),
 		'source' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'sizes' => array(),
+					'srcset' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'value_url' => array(
+							'allow_relative' => true,
+							'protocol' => array(
+								'data',
+								'http',
+								'https',
+							),
+						),
+					),
+					'type' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'picture',
+					'spec_name' => 'picture > source',
+					'spec_url' => 'https://www.ampproject.org/docs/reference/components/amp-img',
+				),
+			),
 			array(
 				'attr_spec_list' => array(
 					'[src]' => array(),
@@ -12043,6 +12470,7 @@ class AMP_Allowed_Tags_Generated {
 							'font-face',
 							'keyframes',
 							'media',
+							'page',
 							'supports',
 						),
 						'declaration' => array(),
@@ -12102,7 +12530,7 @@ class AMP_Allowed_Tags_Generated {
 					'nonce' => array(),
 				),
 				'cdata' => array(
-					'cdata_regex' => '\\s*body{-webkit-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-moz-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;-ms-animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both;animation:-amp-start\\s+8s\\s+steps\\(1,end\\)\\s+0s\\s+1\\s+normal\\s+both}@-webkit-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes\\s+-amp-start{from{visibility:hidden}to{visibility:visible}}\\s*',
+					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*',
 				),
 				'tag_spec' => array(
 					'mandatory_alternatives' => 'head > style[amp-boilerplate]',
@@ -12124,7 +12552,7 @@ class AMP_Allowed_Tags_Generated {
 					'nonce' => array(),
 				),
 				'cdata' => array(
-					'cdata_regex' => '\\s*body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}\\s*',
+					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*',
 				),
 				'tag_spec' => array(
 					'mandatory_alternatives' => 'noscript > style[amp-boilerplate]',
@@ -12212,6 +12640,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12304,6 +12733,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12385,6 +12815,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12608,6 +13039,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -12697,6 +13129,11 @@ class AMP_Allowed_Tags_Generated {
 					'name' => array(
 						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
 					),
+					'no-verify' => array(
+						'value' => array(
+							'',
+						),
+					),
 					'placeholder' => array(),
 					'readonly' => array(),
 					'required' => array(),
@@ -12737,6 +13174,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13229,6 +13667,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13330,6 +13769,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13434,6 +13874,7 @@ class AMP_Allowed_Tags_Generated {
 					'filter' => array(),
 					'flood-color' => array(),
 					'flood-opacity' => array(),
+					'focusable' => array(),
 					'font-family' => array(),
 					'font-size' => array(),
 					'font-size-adjust' => array(),
@@ -13983,6 +14424,20 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'data-tooltip-icon' => array(
+					'value_url' => array(
+						'protocol' => array(
+							'http',
+							'https',
+							'data',
+						),
+					),
+				),
+				'target' => array(
+					'value' => array(
+						'_blank',
+					),
+				),
 			),
 			'tag_spec' => array(
 				'reference_points' => array(
@@ -14049,6 +14504,15 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'data-tooltip-icon' => array(
+					'value_url' => array(
+						'protocol' => array(
+							'http',
+							'https',
+							'data',
+						),
+					),
+				),
 				'grid-area' => array(),
 				'justify-content' => array(
 					'value' => array(
@@ -14075,6 +14539,11 @@ class AMP_Allowed_Tags_Generated {
 						'end',
 						'start',
 						'stretch',
+					),
+				),
+				'target' => array(
+					'value' => array(
+						'_blank',
 					),
 				),
 			),

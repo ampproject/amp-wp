@@ -256,7 +256,7 @@ class AMP_CLI {
 
 		$url_more_details = add_query_arg(
 			'post_type',
-			AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG,
+			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
 		);
 		/* translators: %s is the URL to the admin */
@@ -266,7 +266,7 @@ class AMP_CLI {
 	/**
 	 * Reset all validation data on a site.
 	 *
-	 * This deletes all amp_invalid_url posts and all amp_validation_error terms.
+	 * This deletes all amp_validated_url posts and all amp_validation_error terms.
 	 *
 	 * ## OPTIONS
 	 *
@@ -285,16 +285,16 @@ class AMP_CLI {
 	public function reset_site_validation( $args, $assoc_args ) {
 		unset( $args );
 		global $wpdb;
-		WP_CLI::confirm( 'Are you sure you want to empty all amp_invalid_url posts and amp_validation_error taxonomy terms?', $assoc_args );
+		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
 		// Delete all posts.
-		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG ) );
-		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Invalid_URL_Post_Type::POST_TYPE_SLUG );
+		$count = $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
+		$query = $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = %s", AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
 			/* translators: %d is the number of posts */
-			sprintf( __( 'Deleting %d amp_invalid_url posts...', 'amp' ), $count ),
+			sprintf( __( 'Deleting %d amp_validated_url posts...', 'amp' ), $count ),
 			$count
 		);
 		while ( $posts->valid() ) {
@@ -350,11 +350,13 @@ class AMP_CLI {
 
 		// Count all public taxonomy terms.
 		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query = new WP_Term_Query( array(
-				'taxonomy' => $taxonomy,
-				'fields'   => 'ids',
-				'number'   => self::$limit_type_validate_count,
-			) );
+			$term_query = new WP_Term_Query(
+				array(
+					'taxonomy' => $taxonomy,
+					'fields'   => 'ids',
+					'number'   => self::$limit_type_validate_count,
+				)
+			);
 
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
 			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
@@ -640,22 +642,24 @@ class AMP_CLI {
 		}
 
 		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		AMP_Invalid_URL_Post_Type::store_validation_errors(
+		AMP_Validated_URL_Post_Type::store_validation_errors(
 			$validation_errors,
 			$validity['url'],
 			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
 		);
-		$unaccepted_error_count = count( array_filter(
-			$validation_errors,
-			function( $error ) {
-				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-				return (
+		$unaccepted_error_count = count(
+			array_filter(
+				$validation_errors,
+				function( $error ) {
+					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+					return (
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
 					&&
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
-				);
-			}
-		) );
+					);
+				}
+			)
+		);
 
 		if ( count( $validation_errors ) > 0 ) {
 			self::$total_errors++;

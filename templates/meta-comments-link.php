@@ -1,4 +1,10 @@
 <?php
+/**
+ * Post comments link template part.
+ *
+ * @package AMP
+ */
+
 $comments_link_url = $this->get( 'comments_link_url' );
 ?>
 <?php if ( $comments_link_url ) : ?>

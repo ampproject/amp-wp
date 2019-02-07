@@ -17,6 +17,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function register_embed() {
 		add_filter( 'post_gallery', array( $this, 'maybe_override_gallery' ), 10, 2 );
+		add_action( 'wp_print_styles', array( $this, 'print_styles' ) );
 	}
 
 	/**
@@ -41,15 +42,19 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attr['include'] = $attr['ids'];
 		}
 
-		$atts = shortcode_atts( array(
-			'order'   => 'ASC',
-			'orderby' => 'menu_order ID',
-			'id'      => $post ? $post->ID : 0,
-			'include' => '',
-			'exclude' => '',
-			'size'    => array( $this->args['width'], $this->args['height'] ),
-			'link'    => 'none',
-		), $attr, 'gallery' );
+		$atts = shortcode_atts(
+			array(
+				'order'   => 'ASC',
+				'orderby' => 'menu_order ID',
+				'id'      => $post ? $post->ID : 0,
+				'include' => '',
+				'exclude' => '',
+				'size'    => array( $this->args['width'], $this->args['height'] ),
+				'link'    => 'none',
+			),
+			$attr,
+			'gallery'
+		);
 
 		if ( ! empty( $attr['amp-lightbox'] ) ) {
 			$atts['lightbox'] = filter_var( $attr['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
@@ -58,36 +63,42 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		$id = intval( $atts['id'] );
 
 		if ( ! empty( $atts['include'] ) ) {
-			$attachments = get_posts( array(
-				'include'        => $atts['include'],
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_posts(
+				array(
+					'include'        => $atts['include'],
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		} elseif ( ! empty( $atts['exclude'] ) ) {
-			$attachments = get_children( array(
-				'post_parent'    => $id,
-				'exclude'        => $atts['exclude'],
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'exclude'        => $atts['exclude'],
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		} else {
-			$attachments = get_children( array(
-				'post_parent'    => $id,
-				'post_status'    => 'inherit',
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image',
-				'order'          => $atts['order'],
-				'orderby'        => $atts['orderby'],
-				'fields'         => 'ids',
-			) );
+			$attachments = get_children(
+				array(
+					'post_parent'    => $id,
+					'post_status'    => 'inherit',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image',
+					'order'          => $atts['order'],
+					'orderby'        => $atts['orderby'],
+					'fields'         => 'ids',
+				)
+			);
 		}
 
 		if ( empty( $attachments ) ) {
@@ -160,6 +171,15 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			return $html;
+		} elseif ( isset( $attributes['size'] ) && 'thumbnail' === $attributes['size'] ) {
+			/*
+			 * If the 'gallery' shortcode has a 'size' attribute of 'thumbnail', prevent outputting an <amp-carousel>.
+			 * That will often get thumbnail images around 150 x 150,
+			 * while the <amp-carousel> usually has a width of 600 and a height of 480.
+			 * That often means very low-resolution images.
+			 * So fall back to the normal 'gallery' shortcode callback, gallery_shortcode().
+			 */
+			return '';
 		}
 		return $this->shortcode( $attributes );
 	}
@@ -173,9 +193,12 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$this->did_convert_elements = true;
 
-		$args = wp_parse_args( $args, array(
-			'images' => false,
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'images' => false,
+			)
+		);
 
 		if ( empty( $args['images'] ) ) {
 			return '';
@@ -223,5 +246,26 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			),
 			implode( PHP_EOL, $images )
 		);
+	}
+
+	/**
+	 * Prints the Gallery block styling.
+	 *
+	 * It would be better to print this in AMP_Gallery_Block_Sanitizer,
+	 * but by the time that runs, it's too late.
+	 * This rule is copied exactly from block-library/style.css, but the selector here has amp-img >.
+	 * The image sanitizer normally converts the <img> from that original stylesheet <amp-img>,
+	 * but that doesn't have the same effect as applying it to the <img>.
+	 *
+	 * @return void
+	 */
+	public function print_styles() {
+		?>
+		<style>
+			.wp-block-gallery.is-cropped .blocks-gallery-item amp-img > img {
+				object-fit: cover;
+			}
+		</style>
+		<?php
 	}
 }

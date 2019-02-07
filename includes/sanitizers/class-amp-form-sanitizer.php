@@ -25,6 +25,17 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'form';
 
 	/**
+	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
+	 *
+	 * @return array Mapping.
+	 */
+	public function get_selector_conversion_mapping() {
+		return array(
+			'form' => array( 'amp-form' ),
+		);
+	}
+
+	/**
 	 * Sanitize the <form> elements from the HTML contained in this instance's DOMDocument.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form
@@ -64,7 +75,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			 * https URL and must not be a link to a CDN".
 			 */
 			if ( ! $node->getAttribute( 'action' ) ) {
-				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) ); // WPCS: ignore. input var okay, sanitization ok.
+				$action_url = esc_url_raw( '//' . $_SERVER['HTTP_HOST'] . wp_unslash( $_SERVER['REQUEST_URI'] ) );
 			} else {
 				$action_url = $node->getAttribute( 'action' );
 				// Check if action_url is a relative path and add the host to it.
@@ -80,9 +91,10 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * "For GET submissions, provide at least one of action or action-xhr".
-			 * "This attribute is required for method=GET. For method=POST, the
-			 * action attribute is invalid, use action-xhr instead".
+			 * According to the AMP spec:
+			 * For GET submissions, provide at least one of action or action-xhr.
+			 * This attribute is required for method=GET. For method=POST, the
+			 * action attribute is invalid, use action-xhr instead.
 			 */
 			if ( 'get' === $method ) {
 				if ( $action_url !== $node->getAttribute( 'action' ) ) {

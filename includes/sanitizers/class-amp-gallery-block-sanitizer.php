@@ -33,10 +33,20 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Tag.
 	 *
-	 * @var string Ul tag to identify wrapper around gallery block.
 	 * @since 1.0
+	 *
+	 * @var string Ul tag to identify wrapper around gallery block.
 	 */
 	public static $tag = 'ul';
+
+	/**
+	 * Expected class of the wrapper around the gallery block.
+	 *
+	 * @since 1.0
+	 *
+	 * @var string
+	 */
+	public static $class = 'wp-block-gallery';
 
 	/**
 	 * Array of flags used to control sanitization.
@@ -72,8 +82,8 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
-			// We're looking for <ul> elements that at least one child.
-			if ( 0 === count( $node->childNodes ) ) {
+			// We're looking for <ul> elements that have at least one child and the proper class.
+			if ( 0 === count( $node->childNodes ) || false === strpos( $node->getAttribute( 'class' ), self::$class ) ) {
 				continue;
 			}
 
@@ -118,11 +128,15 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$amp_carousel = AMP_DOM_Utils::create_node( $this->dom, 'amp-carousel', array(
-				'height' => $this->get_carousel_height( $node ),
-				'type'   => 'slides',
-				'layout' => 'fixed-height',
-			) );
+			$amp_carousel = AMP_DOM_Utils::create_node(
+				$this->dom,
+				'amp-carousel',
+				array(
+					'height' => $this->get_carousel_height( $node ),
+					'type'   => 'slides',
+					'layout' => 'fixed-height',
+				)
+			);
 			foreach ( $images as $image ) {
 				$amp_carousel->appendChild( $image );
 			}

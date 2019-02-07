@@ -40,39 +40,33 @@ export default registerBlockType(
 				attribute: 'data-delay-ad-request'
 			},
 			dataTag: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-ima-video',
 				attribute: 'data-tag'
 			},
 			dataSrc: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-ima-video',
 				attribute: 'data-src'
 			},
 			dataPoster: {
-				type: 'string',
 				source: 'attribute',
 				selector: 'amp-ima-video',
 				attribute: 'data-poster'
 			},
 			ampLayout: {
-				type: 'string',
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-ima-video',
 				attribute: 'layout'
 			},
 			width: {
-				type: 'number',
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-ima-video',
 				attribute: 'width'
 			},
 			height: {
-				type: 'number',
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-ima-video',

@@ -297,18 +297,23 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				AMP_Rule_Spec::MANDATORY => true,
 			);
 
-			$versions = array_unique( array_merge(
-				isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
-				isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
-			) );
+			$versions = array_unique(
+				array_merge(
+					isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
+					isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
+				)
+			);
 
 			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
-				AMP_Rule_Spec::VALUE_REGEX => implode( '', array(
-					'^',
-					preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ),
-					'(' . implode( '|', $versions ) . ')',
-					'\.js$',
-				) ),
+				AMP_Rule_Spec::VALUE_REGEX => implode(
+					'',
+					array(
+						'^',
+						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
+						'(' . implode( '|', $versions ) . ')',
+						'\.js$',
+					)
+				),
 			);
 		}
 
@@ -542,6 +547,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 			if ( ! empty( $tag_spec['requires_extension'] ) ) {
 				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
+			}
+
+			// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
+			if ( $node->hasAttribute( 'lightbox' ) ) {
+				$this->script_components[] = 'amp-lightbox-gallery';
+			}
+			if ( $node->hasAttribute( 'amp-fx' ) ) {
+				$this->script_components[] = 'amp-fx-collection';
 			}
 
 			// Check if element needs amp-bind component.
@@ -1373,13 +1386,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * unless the commas are URL-encoded.
 		 */
 		if ( 'srcset' === $attribute_node->nodeName || 'srcset' === $spec_attr_name ) {
-			return array_filter( array_map(
-				function ( $srcset_part ) {
-					// Remove descriptors for width and pixel density.
-					return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
-				},
-				preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
-			) );
+			return array_filter(
+				array_map(
+					function ( $srcset_part ) {
+						// Remove descriptors for width and pixel density.
+						return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
+					},
+					preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
+				)
+			);
 		} else {
 			return array( $attribute_node->nodeValue );
 		}
@@ -1579,7 +1594,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$required_value = $property_spec['value'];
 				} elseif ( isset( $property_spec['value_double'] ) ) {
 					$required_value = $property_spec['value_double'];
-					$prop_value     = (double) $prop_value;
+					$prop_value     = (float) $prop_value;
 				}
 				if ( isset( $required_value ) && $prop_value !== $required_value ) {
 					return AMP_Rule_Spec::FAIL;
@@ -1601,7 +1616,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function is_amp_allowed_attribute( $attr_node, $attr_spec_list ) {
 		$attr_name = $attr_node->nodeName;
-		if ( isset( $attr_spec_list[ $attr_name ] ) || 'data-' === substr( $attr_name, 0, 5 ) ) {
+		if (
+			isset( $attr_spec_list[ $attr_name ] )
+			||
+			'data-' === substr( $attr_name, 0, 5 )
+			||
+			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
+			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )
+		) {
 			return true;
 		}
 
@@ -1794,7 +1816,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @since 0.3.3
 	 * @since 1.0 Fix silently removing unrecognized elements.
-	 * @see https://github.com/Automattic/amp-wp/issues/1100
+	 * @see https://github.com/ampproject/amp-wp/issues/1100
 	 *
 	 * @param DOMNode $node Node.
 	 */

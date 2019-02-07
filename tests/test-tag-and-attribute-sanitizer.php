@@ -237,7 +237,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'reference-point-lightbox-thumbnail-id' => array(
 				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
 				null,
-				array(),
+				array( 'amp-lightbox-gallery' ),
+			),
+
+			'lightbox-with-amp-carousel' => array(
+				'<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides"><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img></amp-carousel>',
+				null,
+				array( 'amp-lightbox-gallery', 'amp-carousel' ),
 			),
 
 			'reference-points-amp-live-list' => array(
@@ -462,12 +468,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'node_with_whiteilsted_protocol_other_allowed' => array(
-				implode( '', array(
-					'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
-					'<a href="webcal:foo">Click me.</a>',
-					'<a href="whatsapp:foo">Click me.</a>',
-					'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
-				) ),
+				implode(
+					'',
+					array(
+						'<a href="fb-messenger://example.com/path/to/content">Click me.</a>',
+						'<a href="webcal:foo">Click me.</a>',
+						'<a href="whatsapp:foo">Click me.</a>',
+						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
+					)
+				),
 			),
 
 			'attribute_value_valid' => array(
@@ -883,16 +892,25 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
 
+			'amp-delight-player' => array(
+				'<amp-delight-player data-content-id="-987521" layout="responsive" width="400" height="300"></amp-delight-player>',
+				null, // No change.
+				array( 'amp-delight-player' ),
+			),
+
 			'amp-img-layout-allowed' => array(
-				implode( '', array(
-					'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
-					'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
-				) ),
+				implode(
+					'',
+					array(
+						'<amp-img src="/img1.png" width="50" height="50" layout="fill"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="fixed"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="fixed-height"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="flex-item"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="intrinsic"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="nodisplay"></amp-img>',
+						'<amp-img src="/img1.png" width="50" height="50" layout="responsive"></amp-img>',
+					)
+				),
 				null, // No change.
 				array(),
 			),
@@ -958,7 +976,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-pan-zoom' => array(
-				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg> ... </svg></amp-pan-zoom></amp-layout>',
+				'<amp-layout layout="responsive" width="4" height="3"><amp-pan-zoom layout="fill" disable-double-tap><svg focusable="false"> ... </svg></amp-pan-zoom></amp-layout>',
 				null,
 				array( 'amp-pan-zoom' ),
 			),
@@ -981,10 +999,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-lightbox', 'amp-bind' ),
 			),
 
-			'amp-fom-messages' => array(
-				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
+			'amp-form-messages' => array(
+				'<form action-xhr="https://example.com/" method="post"><fieldset><input type="text" name="do-not-verify" no-verify><input type="text" name="firstName"></fieldset><div verify-error=""><template type="amp-mustache">There is a mistake in the form!{{#verifyErrors}}{{message}}{{/verifyErrors}}</template></div><div submitting=""><template type="amp-mustache">Form submitting... Thank you for waiting {{name}}.</template></div><div submit-success=""><template type="amp-mustache">Success! Thanks {{name}} for subscribing! Please make sure to check your email {{email}}to confirm! After that we\'ll start sending you weekly articles on {{#interests}}<b>{{name}}</b> {{/interests}}.</template></div><div submit-error><template type="amp-mustache">Oops! {{name}}, {{message}}.</template></div></form>',
 				null,
 				array( 'amp-form', 'amp-mustache' ),
+			),
+
+			'amp-input-mask' => array(
+				'<form method="post" class="p2" action-xhr="/components/amp-inputmask/postal" target="_top"><label>Postal code: <input name="code" mask="L0L_0L0" placeholder="A1A 1A1"></label><input type="submit"><div submit-success><template type="amp-mustache"><p>You submitted: {{code}}</p></template></div></form>',
+				null,
+				array( 'amp-form', 'amp-inputmask', 'amp-mustache' ),
 			),
 
 			'amp-viqeo-player' => array(
@@ -997,6 +1021,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
 				null,
 				array( 'amp-image-slider' ),
+			),
+
+			'amp-fx-collection' => array(
+				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
+				null,
+				array( 'amp-fx-collection' ),
 			),
 		);
 	}
@@ -1093,7 +1123,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta><title>Mojibake?</title></head><body></body></html>', // Note the charset attribute is removed because it violates the attribute spec, but the entire element is not removed because charset is not mandatory.
 			),
 			'bad_meta_viewport'                       => array(
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="maximum-scale=1.0"></head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'edge_meta_ua_compatible'                 => array(
@@ -1101,7 +1131,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null, // No change.
 			),
 			'meta_viewport_extras'                    => array(
-				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=1.0,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,height=device-height,initial-scale=2,maximum-scale=3,minimum-scale=0.5,shrink-to-fit=yes,user-scalable=yes,viewport-fit=cover"></head><body></body></html>',
 				null, // No change.
 			),
 			'meta_og_property'                        => array(
@@ -1143,9 +1173,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_html_sanitizer( $source, $expected = null, $scripts = array() ) {
 		$expected  = isset( $expected ) ? $expected : $source;
 		$dom       = AMP_DOM_Utils::get_dom( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
-			'use_document_element' => true,
-		) );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
@@ -1249,20 +1282,23 @@ EOB;
 		// Test validation error for nested invalid tags.
 		foreach ( $content as $dom_content ) {
 			$dom       = AMP_DOM_Utils::get_dom_from_content( $dom_content );
-			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, array(
-				'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
-					$expected = $expected_errors[ $error_index ];
-					$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
-					$tag = $expected['node_name'];
-					$that->assertEquals( $expected, $error );
-					$that->assertInstanceOf( 'DOMElement', $context['node'] );
-					$that->assertEquals( $tag, $context['node']->tagName );
-					$that->assertEquals( $tag, $context['node']->nodeName );
-					$error_index++;
+			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+				$dom,
+				array(
+					'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
+						$expected = $expected_errors[ $error_index ];
+						$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
+						$tag = $expected['node_name'];
+						$that->assertEquals( $expected, $error );
+						$that->assertInstanceOf( 'DOMElement', $context['node'] );
+						$that->assertEquals( $tag, $context['node']->tagName );
+						$that->assertEquals( $tag, $context['node']->nodeName );
+						$error_index++;
 
-					return true;
-				},
-			) );
+						return true;
+					},
+				)
+			);
 			$sanitizer->sanitize();
 		}
 	}

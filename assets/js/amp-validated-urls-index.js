@@ -1,6 +1,6 @@
-/* exported ampInvalidUrlsIndex */
+/* exported ampValidatedUrlsIndex */
 
-const ampInvalidUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
+const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
 	let component = {
 		classes: {}
 	};
