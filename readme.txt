@@ -35,7 +35,7 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 To learn more about the plugin and start leveraging its capabilities to power your AMP content creation workflow check [the official AMP plugin product site](https://amp-wp.org).
 
-If you are a developer, we encourage you to follow along or [contribute](https://github.com/ampproject/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
+If you are a developer, we encourage you to [follow along](https://github.com/ampproject/amp-wp) or [contribute](https://github.com/ampproject/amp-wp/blob/develop/contributing.md) to the development of this plugin on GitHub.
 
 == Screenshots ==
 
