@@ -3,15 +3,13 @@
  * AMP Service Workers.
  *
  * @package AMP
- * @since 1.0
+ * @since 1.1
  */
 
 /**
- * Class AMP_Service_Workers.
- *
- * @todo Rename to AMP_Service_Worker.
+ * Class AMP_Service_Worker.
  */
-class AMP_Service_Workers {
+class AMP_Service_Worker {
 
 	/**
 	 * Query var that is used to signal a request to install the service worker in an iframe.
@@ -28,11 +26,7 @@ class AMP_Service_Workers {
 			return;
 		}
 
-		add_filter( 'query_vars', function( $vars ) {
-			$vars[] = AMP_Service_Workers::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR;
-			return $vars;
-		} );
-
+		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
 		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_amp_runtime_caching' ) );
@@ -40,39 +34,55 @@ class AMP_Service_Workers {
 	}
 
 	/**
+	 * Add query var for iframe service worker request.
+	 *
+	 * @param array $vars Query vars.
+	 * @return array Amended query vars.
+	 */
+	public static function add_query_var( $vars ) {
+		$vars[] = self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR;
+		return $vars;
+	}
+
+	/**
 	 * Configure the front service worker for AMP.
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
-	 * @param WP_Service_Worker_Cache_Registry $service_worker_registry Service worker registry.
+	 * @param WP_Service_Worker_Scripts $service_workers Service worker registry.
 	 */
-	public static function add_amp_runtime_caching( $service_worker_registry ) {
-		if ( ! ( $service_worker_registry instanceof WP_Service_Worker_Cache_Registry ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.0' );
+	public static function add_amp_runtime_caching( $service_workers ) {
+		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.1' );
 			return;
 		}
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
-		wp_service_workers()->register_script( 'amp-cdn-runtime-cache', function() {
-			$urls = AMP_Service_Workers::get_runtime_precache_urls();
-			if ( empty( $urls ) ) {
-				return '';
-			}
+		$service_workers->register(
+			'amp-cdn-runtime-cache',
+			function() {
+				$urls = AMP_Service_Worker::get_runtime_precache_urls();
+				if ( empty( $urls ) ) {
+					return '';
+				}
 
-			$js = file_get_contents( AMP__DIR__ . '/assets/js/amp-service-worker-runtime-precaching.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
-			$js = preg_replace( '#/\*\s*global.+?\*/#', '', $js );
-			$js = str_replace(
-				'URLS',
-				wp_json_encode( $urls ),
-				$js
-			);
-			return $js;
-		} );
+				$js = file_get_contents( AMP__DIR__ . '/assets/js/amp-service-worker-runtime-precaching.js' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents
+				$js = preg_replace( '#/\*\s*global.+?\*/#', '', $js );
+				$js = str_replace(
+					'URLS',
+					wp_json_encode( $urls ),
+					$js
+				);
+				return $js;
+			}
+		);
 
 		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/a4d798cac6a534e0c46e78944a2718a8dab3c057/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
-		$service_worker_registry->register_cached_route(
+		$service_workers->caching_routes()->register(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
-			WP_Service_Worker_Cache_Registry::STRATEGY_STALE_WHILE_REVALIDATE
+			array(
+				'strategy' => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
+			)
 		);
 	}
 
@@ -81,19 +91,19 @@ class AMP_Service_Workers {
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/master/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
-	 * @param WP_Service_Worker_Cache_Registry $service_worker_registry Service workers.
+	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
-	public static function add_image_runtime_caching( $service_worker_registry ) {
-		if ( ! ( $service_worker_registry instanceof WP_Service_Worker_Cache_Registry ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.0' );
+	public static function add_image_runtime_caching( $service_workers ) {
+		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.1' );
 			return;
 		}
 
-		$service_worker_registry->register_cached_route(
+		$service_workers->caching_routes()->register(
 			'/wp-content/.*\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
-			WP_Service_Worker_Cache_Registry::STRATEGY_CACHE_FIRST,
 			array(
-				'cacheName' => 'images',
+				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
+				'cacheName' => 'images', // @todo This needs to get the proper prefix in JS.
 				'plugins'   => array(
 					'cacheableResponse' => array(
 						'statuses' => array( 0, 200 ),
@@ -126,6 +136,7 @@ class AMP_Service_Workers {
 			'amp-runtime',
 			'amp-bind', // Used by comments.
 			'amp-form', // Used by comments.
+			'amp-install-serviceworker',
 		);
 
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
@@ -166,25 +177,13 @@ class AMP_Service_Workers {
 	/**
 	 * Install service worker(s).
 	 *
-	 * @since 1.0
+	 * @since 1.1
 	 * @see wp_print_service_workers()
 	 * @link https://github.com/xwp/pwa-wp
 	 */
 	public static function install_service_worker() {
 		if ( ! function_exists( 'wp_service_workers' ) || ! function_exists( 'wp_get_service_worker_url' ) ) {
 			return;
-		}
-
-		// Get the frontend-scoped service worker scripts.
-		$front_handles = array();
-		foreach ( wp_service_workers()->registered as $handle => $item ) {
-			if ( $item->args['scope'] & WP_Service_Workers::SCOPE_FRONT ) { // Yes, bitwise AND intended.
-				$front_handles[] = $handle;
-			}
-		}
-
-		if ( empty( $front_handles ) ) {
-			return; // No service worker scripts are installed.
 		}
 
 		$src        = wp_get_service_worker_url( WP_Service_Workers::SCOPE_FRONT );
@@ -246,11 +245,15 @@ class AMP_Service_Workers {
 		<?php
 
 		// Die in a way that can be unit tested.
-		add_filter( 'wp_die_handler', function() {
-			return function() {
-				die();
-			};
-		}, 1 );
+		add_filter(
+			'wp_die_handler',
+			function() {
+				return function() {
+					die();
+				};
+			},
+			1
+		);
 		wp_die();
 	}
 }
