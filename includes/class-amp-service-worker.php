@@ -26,14 +26,24 @@ class AMP_Service_Worker {
 			return;
 		}
 
+		$theme_support = AMP_Theme_Support::get_theme_support_args();
+		if ( empty( $theme_support['service_worker'] ) ) {
+			return;
+		}
+
 		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
 		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
 		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
 
-		// @todo Some of these should be opt-in by amp theme mod?
-		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_amp_runtime_caching' ) );
-		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_runtime_caching' ) );
-		add_action( 'wp_front_service_worker', array( __CLASS__, 'add_google_fonts_runtime_caching' ) );
+		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['cdn_script_caching'] ) ) {
+			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_cdn_script_caching' ) );
+		}
+		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['image_caching'] ) ) {
+			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_caching' ) );
+		}
+		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['google_fonts_caching'] ) ) {
+			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_google_fonts_caching' ) );
+		}
 	}
 
 	/**
@@ -48,13 +58,13 @@ class AMP_Service_Worker {
 	}
 
 	/**
-	 * Configure the front service worker for AMP.
+	 * Add runtime caching for scripts loaded from the AMP CDN with a stale-while-revalidate strategy.
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service worker registry.
 	 */
-	public static function add_amp_runtime_caching( $service_workers ) {
+	public static function add_cdn_script_caching( $service_workers ) {
 		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
 			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.1' );
 			return;
@@ -62,9 +72,9 @@ class AMP_Service_Worker {
 
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
 		$service_workers->register(
-			'amp-cdn-runtime-cache',
+			'amp-cdn-runtime-caching',
 			function() {
-				$urls = AMP_Service_Worker::get_runtime_precache_urls();
+				$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 				if ( empty( $urls ) ) {
 					return '';
 				}
@@ -90,13 +100,13 @@ class AMP_Service_Worker {
 	}
 
 	/**
-	 * Configure the front service worker for AMP.
+	 * Add runtime image caching from the origin with a cache-first strategy.
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L60-L74
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
-	public static function add_image_runtime_caching( $service_workers ) {
+	public static function add_image_caching( $service_workers ) {
 		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
 			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.1' );
 			return;
@@ -121,7 +131,7 @@ class AMP_Service_Worker {
 	}
 
 	/**
-	 * Add Google Fonts runtime caching.
+	 * Add runtime caching of Google Fonts with stale-while-revalidate strategy for stylesheets and cache-first strategy for webfont files.
 	 *
 	 * @link https://developers.google.com/web/tools/workbox/guides/common-recipes#google_fonts
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L76-L103
@@ -129,7 +139,7 @@ class AMP_Service_Worker {
 	 *
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
-	public static function add_google_fonts_runtime_caching( $service_workers ) {
+	public static function add_google_fonts_caching( $service_workers ) {
 
 		// The PWA plugin also automatically adds runtime caching for Google Fonts when WP_SERVICE_WORKER_INTEGRATIONS_ENABLED is set.
 		if ( class_exists( 'WP_Service_Worker_Fonts_Integration' ) ) {
@@ -169,13 +179,14 @@ class AMP_Service_Worker {
 	 *
 	 * Note that the PWA plugin handles the precaching of custom logo, custom header,
 	 * and custom background. The PWA plugin also handles precaching & serving of the
-	 * offline/500 error pages, and enabling navigation preload,
+	 * offline/500 error pages and enabling navigation preload.
 	 *
 	 * @link https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L9-L22
+	 * @see AMP_Service_Worker::add_cdn_script_caching()
 	 *
 	 * @return array Runtime pre-cached URLs.
 	 */
-	public static function get_runtime_precache_urls() {
+	public static function get_precached_script_cdn_urls() {
 
 		// List of AMP scripts that we know will be used in WordPress always.
 		$precached_handles = array(
