@@ -1795,12 +1795,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $node->hasChildNodes() ) {
 			return;
 		}
-		foreach ( $node->childNodes as $child ) {
-			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) ) {
-				$this->remove_invalid_child( $child );
-				continue;
+		for ( $i = 0; $i < $node->childNodes->length; ) {
+			$child = $node->childNodes->item( $i );
+			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) && $this->remove_invalid_child( $child ) ) {
+				continue; // Since node was removed, the next item is now at $i.
 			}
 			$this->remove_disallowed_descendants( $child, $allowed_descendants );
+			$i++;
 		}
 	}
 

@@ -59,6 +59,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-ad' ),
 			),
 
+			'amp-sticky-ad' => array(
+				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
+				'<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>',
+				array( 'amp-ad', 'amp-sticky-ad' ),
+			),
+
 			'amp-animation' => array(
 				'<amp-animation layout="nodisplay"><span>bad</span><script type="application/json">{}</script><strong>very bad</strong></amp-animation>',
 				'<amp-animation layout="nodisplay"><script type="application/json">{}</script></amp-animation>',
@@ -281,7 +287,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1>The End</h1>
-									' . /* TODO: A <button> should be bad here. */ '
+									<button>bad</button>
 								</amp-story-grid-layer>
 								<amp-story-cta-layer>
 									<a href="https://example.com">Click me.</a>
