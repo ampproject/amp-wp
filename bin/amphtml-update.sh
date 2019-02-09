@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 
 BIN_PATH="$(pwd)"
 PROJECT_PATH=$(dirname $PWD)
-VENDOR_PATH=$PROJECT_PATH/vendor
+VENDOR_PATH="$PROJECT_PATH/vendor"
 
 if ! command -v apt-get >/dev/null 2>&1; then
 	echo "The AMP HTML uses apt-get, make sure to run this script in a Linux environment"
@@ -14,7 +14,9 @@ if ! command -v apt-get >/dev/null 2>&1; then
 fi
 
 # Install dependencies.
-sudo apt-get install git python protobuf-compiler python-protobuf
+if ! dpkg -s python >/dev/null 2>&1 || ! dpkg -s protobuf-compiler >/dev/null 2>&1 || ! dpkg -s python-protobuf >/dev/null 2>&1; then
+	sudo apt-get install python protobuf-compiler python-protobuf
+fi
 
 # Create and go to vendor.
 if [[ ! -e $VENDOR_PATH/ampproject/amphtml ]]; then
@@ -22,13 +24,5 @@ if [[ ! -e $VENDOR_PATH/ampproject/amphtml ]]; then
 	exit 1
 fi
 
-# Copy script to location and go there.
-cp $BIN_PATH/amphtml-update.py $VENDOR_PATH/ampproject/amphtml/validator
-cd $VENDOR_PATH/ampproject/amphtml/validator
-
 # Run script.
-python amphtml-update.py
-mv amp_wp/class-amp-allowed-tags-generated.php ../../../includes/sanitizers/
-rm -r amp_wp
-
-echo "Generated from tag $LATEST_TAG"
+python amphtml-update.py > "$PROJECT_PATH/includes/sanitizers/class-amp-allowed-tags-generated.php"
