@@ -517,10 +517,42 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array(), // No scripts because removed.
 			),
 
-			'attribute_amp_accordion_value' => array(
-				'<amp-accordion disable-session-states=""><p>Not allowed</p><section>test</section><div>Disallowed</div></amp-accordion>',
-				'<amp-accordion disable-session-states=""><section>test</section></amp-accordion>',
-				array( 'amp-accordion' ),
+			'attribute_amp_accordion_value' => call_user_func(
+				function() {
+					// TODO: Blindly including first_child_tag_name_oneof as an alias of child_tag_name_oneof is incorrectly causing non-h4 elements to be removed.
+					$html = str_replace(
+						array( "\n", "\t" ),
+						'',
+						'
+						<amp-accordion class="sample" disable-session-states="">
+							<p>bad</p>
+							<section expanded>
+								<h4>Section 1</h4>
+								<p>Bunch of awesome content.</p>
+							</section>
+							<section>
+								<h4>Section 2</h4>
+								<div>Bunch of even more awesome content. This time in a
+									<code>&lt;div&gt;</code>.</div>
+							</section>
+							<section>
+								<h4>Section 3</h4>
+								<figure>
+									<amp-img src="/img/clean-1.jpg" layout="intrinsic" width="400" height="710"></amp-img>
+									<figcaption>Images work as well.</figcaption>
+								</figure>
+							</section>
+							<div>bad</div>
+						</amp-accordion>
+						'
+					);
+
+					return array(
+						$html,
+						preg_replace( '#<\w+>bad</\w+>#', '', $html ),
+						array( 'amp-accordion' ),
+					);
+				}
 			),
 
 			'attribute_value_with_blacklisted_regex_removed' => array(
