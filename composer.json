@@ -9,15 +9,15 @@
       "type": "package",
       "package": {
         "name": "ampproject/amphtml",
-        "version": "1811091519050",
+        "version": "1811202257200",
         "dist": {
-          "url": "https://github.com/ampproject/amphtml/archive/1811091519050.zip",
+          "url": "https://github.com/ampproject/amphtml/archive/1811202257200.zip",
           "type": "zip"
         },
         "source": {
           "url": "git@github.com:ampproject/amphtml.git",
           "type": "git",
-          "reference": "tags/1811091519050"
+          "reference": "tags/1811202257200"
         }
       }
     },
@@ -37,7 +37,7 @@
     "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
     "phpcompatibility/php-compatibility": "9.1.1",
     "xwp/wp-dev-lib": "1.0.1",
-    "ampproject/amphtml": "1811091519050"
+    "ampproject/amphtml": "1811202257200"
   },
   "config": {
     "platform": {

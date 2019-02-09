@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7856fc7dc18ef031f3737ca28a197800",
+    "content-hash": "6c06613407aa3d9876191540de84b935",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -203,15 +203,15 @@
     "packages-dev": [
         {
             "name": "ampproject/amphtml",
-            "version": "1811091519050",
+            "version": "1811202257200",
             "source": {
                 "type": "git",
                 "url": "git@github.com:ampproject/amphtml.git",
-                "reference": "tags/1811091519050"
+                "reference": "tags/1811202257200"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/ampproject/amphtml/archive/1811091519050.zip",
+                "url": "https://github.com/ampproject/amphtml/archive/1811202257200.zip",
                 "reference": null,
                 "shasum": null
             },
