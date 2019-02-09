@@ -402,6 +402,11 @@ def GetTagSpec(tag_spec, attr_lists):
 		for (field_descriptor, field_value) in tag_spec.cdata.ListFields():
 			if isinstance(field_value, (unicode, str, bool, int)):
 				cdata_dict[ field_descriptor.name ] = field_value
+			elif isinstance( field_value, google.protobuf.pyext._message.RepeatedCompositeContainer ):
+				cdata_dict[ field_descriptor.name ] = {}
+				for value in field_value:
+					for (key,val) in value.ListFields():
+						cdata_dict[ field_descriptor.name ][ key.name ] = val
 			elif hasattr( field_value, '_values' ):
 				cdata_dict[ field_descriptor.name ] = {}
 				for _value in field_value._values:
@@ -420,12 +425,12 @@ def GetTagSpec(tag_spec, attr_lists):
 					if not hasattr( field_value, css_spec_field_name ):
 						continue
 					css_spec_field_value = getattr( field_value, css_spec_field_name )
-					if isinstance(css_spec_field_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+					if isinstance(css_spec_field_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 						css_spec[ css_spec_field_name ] = [ val for val in css_spec_field_value ]
 					elif hasattr( css_spec_field_value, 'ListFields' ):
 						css_spec[ css_spec_field_name ] = {}
 						for (css_spec_field_item_descriptor, css_spec_field_item_value) in getattr( field_value, css_spec_field_name ).ListFields():
-							if isinstance(css_spec_field_item_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+							if isinstance(css_spec_field_item_value, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = [ val for val in css_spec_field_item_value ]
 							else:
 								css_spec[ css_spec_field_name ][ css_spec_field_item_descriptor.name ] = css_spec_field_item_value
@@ -490,7 +495,7 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('extension_spec'):
 		extension_spec = {}
 		for field in tag_spec.extension_spec.ListFields():
-			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer,google.protobuf.pyext._message.RepeatedScalarContainer)):
+			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 				extension_spec[ field[0].name ] = []
 				for val in field[1]:
 					extension_spec[ field[0].name ].append( val )
@@ -528,7 +533,8 @@ def GetTagRules(tag_spec):
 	if tag_spec.HasField('child_tags'):
 		child_tags = []
 		for field in tag_spec.child_tags.ListFields():
-			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
+				# TODO: first_child_tag_name_oneof
 				if 'child_tag_name_oneof' == field[0].name:
 					for val in field[1]:
 						child_tags.append( val.lower() )
@@ -624,7 +630,7 @@ def GetValues(attr_spec):
 	if attr_spec.HasField('value_url'):
 		value_url_dict = {}
 		for (value_url_key, value_url_val) in attr_spec.value_url.ListFields():
-			if isinstance(value_url_val, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer)):
+			if isinstance(value_url_val, (list, collections.Sequence, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
 				value_url_val_val = []
 				for val in value_url_val:
 					value_url_val_val.append(UnicodeEscape(val))
