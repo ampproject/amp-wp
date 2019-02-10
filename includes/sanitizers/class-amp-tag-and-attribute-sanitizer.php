@@ -1796,13 +1796,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		for ( $i = 0; $i < $node->childNodes->length; ) {
+		$child_elements = array();
+		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
 			$child = $node->childNodes->item( $i );
-			if ( $child instanceof DOMElement && ! in_array( $child->nodeName, $allowed_descendants, true ) && $this->remove_invalid_child( $child ) ) {
-				continue; // Since node was removed, the next item is now at $i.
+			if ( $child instanceof DOMElement ) {
+				$child_elements[] = $child;
 			}
-			$this->remove_disallowed_descendants( $child, $allowed_descendants );
-			$i++;
+		}
+
+		foreach ( $child_elements as $child_element ) {
+			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
+				$this->remove_invalid_child( $child_element );
+			} else {
+				$this->remove_disallowed_descendants( $child, $allowed_descendants );
+			}
 		}
 	}
 
