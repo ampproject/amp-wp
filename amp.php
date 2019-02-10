@@ -310,7 +310,11 @@ function amp_maybe_add_actions() {
 	$post = get_queried_object();
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
+			/*
+			 * Temporary redirect is used for admin users because classic mode and AMP support can be enabled by user at any time,
+			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
+			 */
+			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );
 			exit;
 		}
 		return;
