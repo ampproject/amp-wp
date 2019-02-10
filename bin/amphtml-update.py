@@ -26,6 +26,7 @@ import tempfile
 import collections
 import json
 import google
+from collections import defaultdict
 import imp
 
 def Die(msg):
@@ -531,13 +532,13 @@ def GetTagRules(tag_spec):
 		tag_rules['unique_warning'] = tag_spec.unique_warning
 
 	if tag_spec.HasField('child_tags'):
-		child_tags = []
+		child_tags = defaultdict( lambda: [] )
 		for field in tag_spec.child_tags.ListFields():
-			if isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
-				# TODO: first_child_tag_name_oneof
-				if 'child_tag_name_oneof' == field[0].name:
-					for val in field[1]:
-						child_tags.append( val.lower() )
+			if isinstance(field[1], (int)):
+				child_tags[ field[0].name ] = field[1]
+			elif isinstance(field[1], (list, google.protobuf.internal.containers.RepeatedScalarFieldContainer, google.protobuf.pyext._message.RepeatedScalarContainer)):
+				for val in field[1]:
+					child_tags[ field[0].name ].append( val.lower() )
 		tag_rules['child_tags'] = child_tags
 
 	if tag_spec.HasField('descendant_tag_list'):

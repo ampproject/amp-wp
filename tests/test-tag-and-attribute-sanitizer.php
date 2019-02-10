@@ -60,9 +60,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-sticky-ad' => array(
-				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
 				'<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>',
+				null,
 				array( 'amp-ad', 'amp-sticky-ad' ),
+			),
+
+			'amp-sticky-ad-bad-children' => array(
+				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
+				'',
+				array(),
 			),
 
 			'amp-animation' => array(
@@ -72,8 +78,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-call-tracking' => array(
-				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b><a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i></amp-call-tracking>',
-				'<amp-call-tracking config="https://example.com/calltracking.json"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
+				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
+				'<amp-call-tracking config="https://example.com/calltracking.json">--and not great: <a href="tel:123456789">+1 (23) 456-789</a>not great</amp-call-tracking>',
 				array( 'amp-call-tracking' ),
 			),
 
@@ -287,7 +293,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1>The End</h1>
-									<button>bad</button>
+									<button class="baddie">bad</button>
 								</amp-story-grid-layer>
 								<amp-story-cta-layer>
 									<a href="https://example.com">Click me.</a>
@@ -303,7 +309,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 					return array(
 						$html,
-						preg_replace( '#<\w+>bad</\w+>#', '', $html ),
+						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
 						array( 'amp-story', 'amp-analytics' ),
 					);
 				}
@@ -519,12 +525,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_amp_accordion_value' => call_user_func(
 				function() {
-					// TODO: Blindly including first_child_tag_name_oneof as an alias of child_tag_name_oneof is incorrectly causing non-h4 elements to be removed.
 					$html = str_replace(
 						array( "\n", "\t" ),
 						'',
 						'
 						<amp-accordion class="sample" disable-session-states="">
+							ok
 							<p>bad</p>
 							<section expanded>
 								<h4>Section 1</h4>
@@ -532,8 +538,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							</section>
 							<section>
 								<h4>Section 2</h4>
-								<div>Bunch of even more awesome content. This time in a
-									<code>&lt;div&gt;</code>.</div>
+								<div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
 							</section>
 							<section>
 								<h4>Section 3</h4>
@@ -542,7 +547,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<figcaption>Images work as well.</figcaption>
 								</figure>
 							</section>
+							ok
 							<div>bad</div>
+							ok
 						</amp-accordion>
 						'
 					);
@@ -879,6 +886,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind' ),
 			),
 
+			'amp-state' => array(
+				'<amp-state id="someNumber"><script type="application/json">4</script></amp-state>',
+				null,
+				array( 'amp-bind' ),
+			),
+
+			'amp-state-bad' => array(
+				'<amp-state id="someNumber"><i>bad</i><script type="application/json">4</script></amp-state>',
+				'',
+				array(),
+			),
+
 			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
 			'reference-points-amp_selector_and_carousel_with_boolean_attributes' => array(
 				str_replace(
@@ -1002,6 +1021,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-geo' ),
 			),
 
+			'amp-geo-bad-children' => array(
+				'<amp-geo layout="nodisplay"><div>bad</div><script type="application/json">{ "AmpBind": true, "ISOCountryGroups": { "nafta": [ "ca", "mx", "us", "unknown" ], "waldo": [ "unknown" ], "anz": [ "au", "nz" ] } }</script></amp-geo>',
+				'',
+				array(),
+			),
+
 			'amp-addthis' => array(
 				'<amp-addthis width="320" height="92" data-pub-id="ra-59c2c366435ef478" data-widget-id="0fyg"></amp-addthis>',
 				null,
@@ -1080,6 +1105,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-image-slider' ),
 			),
 
+			'amp-image-slider-bad-children' => array(
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
+				'',
+				array(),
+			),
+
 			'amp-fx-collection' => array(
 				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
 				null,
@@ -1130,13 +1161,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		preg_match_all( '#<.+?>#', $expected, $expected_matches );
-		preg_match_all( '#<.+?>#', $content, $content_matches );
 		$this->assertEquals(
-			$expected_matches,
-			$content_matches
+			preg_split( '/(?<=>)|(?=<)/', $expected ),
+			preg_split( '/(?<=>)|(?=<)/', $content )
 		);
-		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
 

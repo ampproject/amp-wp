@@ -669,15 +669,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
-			$this->remove_disallowed_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] );
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
+			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+			if ( ! empty( $allowed_tags ) ) {
+				$this->remove_disallowed_descendants( $node, $allowed_tags );
+			}
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
-			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( AMP_Rule_Spec::DESCENDANT_TAG_LIST );
-			if ( ! empty( $allowed_tags ) ) {
-				$this->remove_disallowed_descendants( $node, $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
-			}
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
+			return false;
 		}
 
 		return true;
@@ -1795,9 +1795,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $node->hasChildNodes() ) {
 			return;
 		}
+
 		for ( $i = 0; $i < $node->childNodes->length; ) {
 			$child = $node->childNodes->item( $i );
-			if ( ! in_array( $child->nodeName, $allowed_descendants, true ) && $this->remove_invalid_child( $child ) ) {
+			if ( $child instanceof DOMElement && ! in_array( $child->nodeName, $allowed_descendants, true ) && $this->remove_invalid_child( $child ) ) {
 				continue; // Since node was removed, the next item is now at $i.
 			}
 			$this->remove_disallowed_descendants( $child, $allowed_descendants );
@@ -1809,19 +1810,52 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * Loop through node's children and remove the ones that are not whitelisted.
 	 *
 	 * @param DOMNode $node Node.
-	 * @param array   $allowed_children List of allowed child tags.
+	 * @param array   $child_tags {
+	 *     List of allowed child tags.
+	 *
+	 *     @type array $first_child_tag_name_oneof   List of tag names that are allowed as the first element child.
+	 *     @type array $child_tag_name_oneof         List of tag names that are allowed as children.
+	 *     @type int   $mandatory_num_child_tags     Mandatory number of child tags.
+	 *     @type int   $mandatory_min_num_child_tags Mandatory minimum number of child tags.
+	 * }
+	 * @return bool Whether the element satisfies the requirements, or else it should be removed.
 	 */
-	private function remove_disallowed_children( $node, $allowed_children ) {
-		if ( ! $node->hasChildNodes() ) {
-			return;
-		}
-		for ( $i = 0; $i < $node->childNodes->length; ) {
+	private function check_valid_children( $node, $child_tags ) {
+		$child_elements = array();
+		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
 			$child = $node->childNodes->item( $i );
-			if ( ! in_array( $child->nodeName, $allowed_children, true ) && $this->remove_invalid_child( $child ) ) {
-				continue; // Since node was removed, the next item is now at $i.
+			if ( $child instanceof DOMElement ) {
+				$child_elements[] = $child;
 			}
-			$i++;
 		}
+
+		// If the first element is not of the required type, invalidate the entire element.
+		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ( empty( $child_elements[0] ) || ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) ) {
+			return false;
+		}
+
+		// Verify that all of the child are among the set of allowed elements.
+		$removed_count = 0;
+		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
+			foreach ( $child_elements as $child_element ) {
+				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
+					$removed_count++;
+					$this->remove_invalid_child( $child_element );
+				}
+			}
+		}
+
+		// If there aren't the exact number of elements, then mark this $node as being invalid.
+		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
+			return ( count( $child_elements ) - $removed_count ) === $child_tags['mandatory_num_child_tags'];
+		}
+
+		// If there aren't enough elements, then mark this $node as being invalid.
+		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
+			return ( count( $child_elements ) - $removed_count ) >= $child_tags['mandatory_min_num_child_tags'];
+		}
+
+		return true;
 	}
 
 	/**
