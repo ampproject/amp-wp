@@ -1958,7 +1958,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_original_size = 0;
 			$included_sources       = array();
 			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
-				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
+				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
 				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
@@ -2316,9 +2316,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Skip considering stylesheet if an identical one has already been processed.
 			$hash = md5( $stylesheet );
 			if ( isset( $stylesheet_set['final_stylesheets'][ $hash ] ) ) {
-				$pending_stylesheet['included'] = true;
+				$pending_stylesheet['included']  = true;
+				$pending_stylesheet['duplicate'] = true;
 				continue;
 			}
+			$pending_stylesheet['duplicate'] = false;
 
 			// Report validation error if size is now too big.
 			if ( $final_size + $sheet_size > $max_bytes ) {
