@@ -45,14 +45,17 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		add_action(
 			'amp_extract_image_dimensions_batch_callbacks_registered',
 			function() {
-				add_filter( 'amp_extract_image_dimensions_batch', function() {
-					return array(
-						'https://example.com/image.png' => array(
-							100,
-							101,
-						),
-					);
-				} );
+				add_filter(
+					'amp_extract_image_dimensions_batch',
+					function() {
+						return array(
+							'https://example.com/image.png' => array(
+								100,
+								101,
+							),
+						);
+					}
+				);
 			},
 			9999 // Run after the `disable_downloads`.
 		);
@@ -70,10 +73,12 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test__should_return_both_urls() {
 		$source_urls = array(
+			home_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ),
 			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ),
 			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg',
 		);
 		$expected    = array(
+			home_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ) => false,
 			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ) => false,
 			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg'             => false,
 		);
@@ -111,7 +116,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
-		$site_url = site_url();
+		$home_url = home_url();
 
 		return array(
 			'empty_url'         => array(
@@ -128,15 +133,15 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			),
 			'path_only'         => array(
 				'/path/to/file.png',
-				$site_url . '/path/to/file.png',
+				$home_url . '/path/to/file.png',
 			),
 			'query_only'        => array(
 				'?file=file.png',
-				$site_url . '/?file=file.png',
+				$home_url . '?file=file.png',
 			),
 			'path_and_query'    => array(
 				'/path/file.jpg?query=1',
-				$site_url . '/path/file.jpg?query=1',
+				$home_url . '/path/file.jpg?query=1',
 			),
 			'normal_url'        => array(
 				'https://example.com/path/to/file.jpg',
@@ -182,25 +187,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test a valid image file synchronously.
-	 */
-	public function test__valid_image_file_synchronous() {
-		$sources  = array(
-			IMG_350 => false,
-		);
-		$expected = array(
-			IMG_350 => array(
-				'width'  => 350,
-				'height' => 150,
-			),
-		);
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	/**
 	 * Test multiple valid image files.
 	 */
 	public function test__multiple_valid_image_files() {
@@ -235,40 +221,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test multiple valid image files synchronously.
-	 */
-	public function test__multiple_valid_image_files_synchronous() {
-		$sources  = array(
-			IMG_350          => false,
-			IMG_1024         => false,
-			IMG_SVG          => false,
-			IMG_SVG_VIEWPORT => false,
-		);
-		$expected = array(
-			IMG_350          => array(
-				'width'  => 350,
-				'height' => 150,
-			),
-			IMG_1024         => array(
-				'width'  => 1024,
-				'height' => 768,
-			),
-			IMG_SVG          => array(
-				'width'  => 175,
-				'height' => 60,
-			),
-			IMG_SVG_VIEWPORT => array(
-				'width'  => 251,
-				'height' => 80,
-			),
-		);
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	/**
 	 * Test an invalid image file.
 	 */
 	public function test__invalid_image_file() {
@@ -280,22 +232,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		);
 
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	/**
-	 * Test an invalid image file synchronously.
-	 */
-	public function test__invalid_image_file_synchronous() {
-		$sources  = array(
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-		);
-		$expected = array(
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-		);
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}
@@ -322,32 +258,6 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 		);
 
 		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources );
-
-		$this->assertEquals( $expected, $dimensions );
-	}
-
-	/**
-	 * Test a mix of valid and invalid image files synchronously.
-	 */
-	public function test__mix_of_valid_and_invalid_image_file_synchronous() {
-		$sources  = array(
-			IMG_350                             => false,
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-			IMG_1024                            => false,
-		);
-		$expected = array(
-			IMG_350                             => array(
-				'width'  => 350,
-				'height' => 150,
-			),
-			AMP_IMG_DIMENSION_TEST_INVALID_FILE => false,
-			IMG_1024                            => array(
-				'width'  => 1024,
-				'height' => 768,
-			),
-		);
-
-		$dimensions = AMP_Image_Dimension_Extractor::extract_by_downloading_images( $sources, 'synchronous' );
 
 		$this->assertEquals( $expected, $dimensions );
 	}

@@ -53,7 +53,7 @@ class AMP_Editor_Blocks {
 			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
 			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
 			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
-			 * as much as possible. For more, see <https://github.com/Automattic/amp-wp/issues/1192>.
+			 * as much as possible. For more, see <https://github.com/ampproject/amp-wp/issues/1192>.
 			 */
 			if ( amp_is_canonical() ) {
 				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
@@ -132,6 +132,7 @@ class AMP_Editor_Blocks {
 				AMP__VERSION
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				'amp-editor-blocks-build',
 				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
@@ -154,9 +155,14 @@ class AMP_Editor_Blocks {
 
 		wp_add_inline_script(
 			'amp-editor-blocks',
-			sprintf( 'ampEditorBlocks.boot( %s );', wp_json_encode( array(
-				'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
-			) ) )
+			sprintf(
+				'ampEditorBlocks.boot( %s );',
+				wp_json_encode(
+					array(
+						'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
+					)
+				)
+			)
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {

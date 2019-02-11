@@ -31,7 +31,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/button': 'div.wp-block-button',
 				'core/code': 'pre',
 				'core/embed': 'figure',
-				'core/image': 'figure.wp-block-image',
+				'core/image': '.wp-block-image',
 				'core/paragraph': 'p',
 				'core/preformatted': 'pre',
 				'core/pullquote': 'blockquote',
@@ -158,7 +158,89 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'pan-up': 1000,
 				'zoom-in': 1000,
 				'zoom-out': 1000
-			}
+			},
+			ampStoryFonts: [
+				{
+					value: '',
+					label: __( 'None', 'amp' )
+				},
+				{
+					value: 'arial',
+					label: __( 'Arial', 'amp' )
+				},
+				{
+					value: 'arial-black',
+					label: __( 'Arial Black', 'amp' )
+				},
+				{
+					value: 'arial-narrow',
+					label: __( 'Arial Narrow', 'amp' )
+				},
+				{
+					value: 'baskerville',
+					label: __( 'Baskerville', 'amp' )
+				},
+				{
+					value: 'brush-script-mt',
+					label: __( 'Brush Script MT', 'amp' )
+				},
+				{
+					value: 'copperplate',
+					label: __( 'Copperplate', 'amp' )
+				},
+				{
+					value: 'courier-new',
+					label: __( 'Courier New', 'amp' )
+				},
+				{
+					value: 'century-gothic',
+					label: __( 'Century Gothic', 'amp' )
+				},
+				{
+					value: 'garamond',
+					label: __( 'Garamond', 'amp' )
+				},
+				{
+					value: 'georgia',
+					label: __( 'Georgia', 'amp' )
+				},
+				{
+					value: 'gill-sans',
+					label: __( 'Gill Sans', 'amp' )
+				},
+				{
+					value: 'lucida-bright',
+					label: __( 'Lucida Bright', 'amp' )
+				},
+				{
+					value: 'lucida-sans-typewriter',
+					label: __( 'Lucida Sans Typewriter', 'amp' )
+				},
+				{
+					value: 'papyrus',
+					label: __( 'Papyrus', 'amp' )
+				},
+				{
+					value: 'palatino',
+					label: __( 'Palatino', 'amp' )
+				},
+				{
+					value: 'tahoma',
+					label: __( 'Tahoma', 'amp' )
+				},
+				{
+					value: 'times-new-roman',
+					label: __( 'Times New Roman', 'amp' )
+				},
+				{
+					value: 'trebuchet-ms',
+					label: __( 'Trebuchet MS', 'amp' )
+				},
+				{
+					value: 'verdana',
+					label: __( 'Verdana', 'amp' )
+				}
+			]
 		}
 	};
 
@@ -214,89 +296,80 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		return props;
 	};
 
+	component.wrapperWithSelect = wp.compose.compose(
+		wp.data.withSelect( ( select, props ) => {
+			var parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId ),
+				attributes;
+			if ( props.block && props.block.attributes ) {
+				attributes = props.block.attributes;
+			} else if ( select( 'core/editor' ).getBlockAttributes ) {
+				attributes = select( 'core/editor' ).getBlockAttributes( props.clientId );
+			}
+			return {
+				blockName: select( 'core/editor' ).getBlockName( props.clientId ),
+				attributes: attributes,
+				hasSelectedInnerBlock: select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ),
+				parentBlock: select( 'core/editor' ).getBlock( parentClientId ),
+				props: props
+			};
+		} )
+	);
+
 	/**
 	 * Add wrapper props to the blocks within AMP Story Thirds layer.
 	 *
 	 * @param {Object} BlockListBlock BlockListBlock element.
 	 * @return {Function} Handler.
 	 */
-	component.addWrapperProps = function( BlockListBlock ) {
-		var el = wp.element.createElement,
-			select = wp.data.select( 'core/editor' );
-		return function( props ) {
-			var parentClientId,
-				parentBlock,
-				ampStoryPosition,
-				newProps;
+	component.addWrapperProps = wp.compose.createHigherOrderComponent( ( BlockListBlock ) => {
+		return component.wrapperWithSelect( ( {
+			blockName,
+			attributes,
+			hasSelectedInnerBlock,
+			parentBlock,
+			props
+		} ) => {
+			var newProps = lodash.assign(
+					{},
+					props,
+					{
+						wrapperProps: lodash.assign(
+							{},
+							props.wrapperProps
+						)
+					}
+				),
+				el = wp.element.createElement;
+
+			// If we have an inner block selected lets add 'data-amp-selected=parent' to the wrapper.
+			if (
+				hasSelectedInnerBlock &&
+				(
+					'amp/amp-story-cta-layer' === blockName ||
+					'amp/amp-story-page' === blockName
+				)
+			) {
+				newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
+				return el(
+					BlockListBlock,
+					newProps
+				);
+			}
 
 			// In case of any grid layer lets add data-amp-type for styling purposes.
-			if ( -1 !== component.data.gridBlocks.indexOf( props.block.name ) ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-type': 'grid'
-							}
-						)
-					}
-				);
-
-				if ( wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
+			if ( -1 !== component.data.gridBlocks.indexOf( blockName ) ) {
+				newProps.wrapperProps[ 'data-amp-type' ] = 'grid';
+				if ( hasSelectedInnerBlock ) {
 					newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
 				}
-
 				return el(
 					BlockListBlock,
 					newProps
 				);
 			}
 
-			if ( 'amp/amp-story-cta-layer' === props.block.name && wp.data.select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ) ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-selected': 'parent'
-							}
-						)
-					}
-				);
-
-				return el(
-					BlockListBlock,
-					newProps
-				);
-			}
-
-			if ( 'core/image' === props.block.name && ! props.block.attributes.ampShowImageCaption ) {
-				newProps = lodash.assign(
-					{},
-					props,
-					{
-						wrapperProps: lodash.assign(
-							{},
-							props.wrapperProps,
-							{
-								'data-amp-image-caption': 'noCaption'
-							}
-						)
-					}
-				);
-				return el(
-					BlockListBlock,
-					newProps
-				);
-			}
-
-			if ( -1 === component.data.allowedBlocks.indexOf( props.block.name ) || ! props.block.attributes.ampStoryPosition ) {
+			// If we got this far and it's not an allowed inner block then lets return original.
+			if ( -1 === component.data.allowedBlocks.indexOf( blockName ) ) {
 				return [
 					el( BlockListBlock, _.extend( {
 						key: 'original'
@@ -304,38 +377,26 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				];
 			}
 
-			parentClientId = select.getBlockRootClientId( props.block.clientId );
-			parentBlock = select.getBlock( parentClientId );
-			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
-				return [
-					el( BlockListBlock, _.extend( {
-						key: 'original'
-					}, props ) )
-				];
+			// If it's an image block and doesn't have "show image caption" set
+			if ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) {
+				newProps.wrapperProps[ 'data-amp-image-caption' ] = 'noCaption';
 			}
 
-			ampStoryPosition = props.block.attributes.ampStoryPosition;
+			if ( attributes.ampFontFamily ) {
+				newProps.wrapperProps[ 'data-font-family' ] = attributes.ampFontFamily;
+			}
 
-			newProps = lodash.assign(
-				{},
-				props,
-				{
-					wrapperProps: lodash.assign(
-						{},
-						props.wrapperProps,
-						{
-							'data-amp-position': ampStoryPosition
-						}
-					)
-				}
-			);
+			// If we have the thirds layer as parent and the thirds position set.
+			if ( 'amp/amp-story-grid-layer-thirds' === parentBlock.name && attributes.ampStoryPosition ) {
+				newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
+			}
 
 			return el(
 				BlockListBlock,
 				newProps
 			);
-		};
-	};
+		} );
+	}, 'addWrapperProps' );
 
 	/**
 	 * Add extra attributes to save to DB.
@@ -365,6 +426,9 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 		}
 
+		if ( attributes.ampFontFamily ) {
+			ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
+		}
 		return _.extend( ampAttributes, props );
 	};
 
@@ -421,9 +485,17 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes.fontSize.default = 'large';
 			}
 
+			// Lets add font family to the text blocks.
+			if ( 'core/paragraph' === name || 'core/heading' === name ) {
+				settings.attributes.ampFontFamily = {
+					type: 'string'
+				};
+			}
+
 			if ( 'core/image' === name ) {
 				settings.attributes.ampShowImageCaption = {
-					type: 'boolean'
+					type: 'boolean',
+					default: false
 				};
 			}
 		}
@@ -551,19 +623,33 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				}
 			} )
 		];
+
+		// Lets add font family select to the text blocks.
+		if ( 'core/paragraph' === name || 'core/heading' === name ) {
+			ampStorySettings.push(
+				el( SelectControl, {
+					key: 'font-family',
+					label: __( 'Font family', 'amp' ),
+					value: attributes.ampFontFamily,
+					options: component.data.ampStoryFonts,
+					onChange: function( value ) {
+						props.setAttributes( { ampFontFamily: value } );
+					}
+				} )
+			);
+		}
 		if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
-			const ToggleControl = wp.components.ToggleControl,
-				ampShowImageCaption = !! attributes.ampShowImageCaption;
+			const ToggleControl = wp.components.ToggleControl;
+
 			ampStorySettings.push( el( ToggleControl, {
 				key: 'position',
 				label: __( 'Show or hide the caption', 'amp' ),
-				checked: ampShowImageCaption,
+				checked: attributes.ampShowImageCaption,
 				onChange: function() {
-					const showCaption = ! ampShowImageCaption;
-					if ( ! showCaption ) {
+					props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
+					if ( ! attributes.ampShowImageCaption ) {
 						props.setAttributes( { caption: '' } );
 					}
-					props.setAttributes( { ampShowImageCaption: showCaption } );
 				},
 				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
 			} ) );

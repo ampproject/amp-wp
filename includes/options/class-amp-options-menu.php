@@ -139,8 +139,8 @@ class AMP_Options_Menu {
 	 */
 	public function render_theme_support() {
 		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
-		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. The canonical URLs for your site will not have AMP. If there are AMP validation errors encountered in the AMP response and the validation errors are not accepted for sanitization, then the AMP version will redirect to the non-AMP version.', 'amp' );
-		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. Your canonical URLs are AMP. AMP-specific blocks are available for inserting into content. Any AMP validation errors are automatically sanitized.', 'amp' );
+		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
+		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -151,10 +151,10 @@ class AMP_Options_Menu {
 			<p>
 				<?php if ( amp_is_canonical() ) : ?>
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
-					<?php echo esc_html( $native_description ); ?>
+					<?php echo wp_kses_post( $native_description ); ?>
 				<?php else : ?>
 					<strong><?php esc_html_e( 'Paired:', 'amp' ); ?></strong>
-					<?php echo esc_html( $paired_description ); ?>
+					<?php echo wp_kses_post( $paired_description ); ?>
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
@@ -172,7 +172,7 @@ class AMP_Options_Menu {
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $native_description ); ?>
+						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
@@ -181,7 +181,7 @@ class AMP_Options_Menu {
 						</label>
 					</dt>
 					<dd>
-						<?php echo esc_html( $paired_description ); ?>
+						<?php echo wp_kses_post( $paired_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
@@ -242,13 +242,17 @@ class AMP_Options_Menu {
 		?>
 		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php
-			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => 'non_existent',
-			) );
+			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => 'non_existent',
+				)
+			);
 			remove_filter( 'amp_validation_error_sanitized', array( 'AMP_Validation_Manager', 'filter_tree_shaking_validation_error_as_accepted' ) );
-			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
-			) );
+			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
+				)
+			);
 
 			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
 			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
@@ -304,7 +308,7 @@ class AMP_Options_Menu {
 						</label>
 					</p>
 					<p class="description">
-						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; if you have more, than it is a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
+						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; any more than this will cause a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -487,7 +491,7 @@ class AMP_Options_Menu {
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
 					<p><?php esc_html_e( 'Randomly generated content was detected on this web page.  To avoid filling up the cache with unusable content, the AMP plugin\'s post-processor cache was automatically disabled.', 'amp' ); ?>
-						<a href="<?php echo esc_url( 'https://github.com/Automattic/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
+						<a href="<?php echo esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ); ?>"><?php esc_html_e( 'Read more', 'amp' ); ?></a>.</p>
 				</div>
 			<?php endif; ?>
 			<p>
@@ -567,7 +571,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		if ( ! empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
+		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>

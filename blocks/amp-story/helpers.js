@@ -20,7 +20,6 @@ const {
 } = wp.editor;
 
 const {
-	hasSelectedInnerBlock,
 	getBlockRootClientId
 } = wp.data.select( 'core/editor' );
 
@@ -68,16 +67,6 @@ export const BLOCK_ICONS = {
 	'amp/amp-story-grid-layer-background-image': <svg id="image-fill-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path id="mountains" d="M8.2 14.1L10 11l1.4 2 1.9-3.1 2.3 4.2H8.2z"/></g></svg>,
 	'amp/amp-story-grid-layer-background-video': <svg id="video-fill-layer-icon" viewBox="0 0 24 24"><g id="icon_1_" fill="#181D21"><path id="page_1_" d="M18.4 21H5.6V3h12.8v18zM7.1 19.5h9.8v-15H7.1v15z"/><path id="arrow_1_" d="M12 8.8c-1.8 0-3.2 1.4-3.2 3.2s1.4 3.2 3.2 3.2 3.2-1.4 3.2-3.2-1.4-3.2-3.2-3.2zm-1.3 4.8v-3.2l3.2 1.7c.1 0-3.2 1.5-3.2 1.5z"/></g></svg>
 };
-
-/**
- * Maybe return is-selected-parent class.
- *
- * @param {string} clientId Block ID.
- * @return {string} Class name.
- */
-export function maybeIsSelectedParentClass( clientId ) {
-	return hasSelectedInnerBlock( clientId, true ) ? 'is-selected-parent' : '';
-}
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -337,7 +326,7 @@ export function editGridLayer( props, type ) {
 		isSelected && (
 			getLayerBreadCrumb( props.clientId, rootClientId )
 		),
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type + ' ' + maybeIsSelectedParentClass( props.clientId ) }>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-' + type }>
 			<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 		</div>
 	];
@@ -367,7 +356,7 @@ export function editFillLayer( props, template ) {
 		isSelected && (
 			getLayerBreadCrumb( props.clientId, getBlockRootClientId( props.clientId ) )
 		),
-		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill ' + maybeIsSelectedParentClass( props.clientId ) }>
+		<div key='contents' style={{ opacity: attributes.opacity, backgroundColor: attributes.backgroundColor }} className={ 'amp-grid-template amp-grid-template-fill' }>
 			<InnerBlocks template={ template } templateLock='all' />
 		</div>
 	];

@@ -64,7 +64,7 @@ div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-bloc
 	outline: 1px solid #007cba;
 }
 
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
 	outline: 1px solid #007cba;
 }
 
@@ -208,11 +208,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Hide elements above the currently selected layer.
  */
 
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block {
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block {
 	z-index: 0;
 }
 
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not(.is-selected-parent) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
 	display: none;
 }
 
@@ -233,14 +233,14 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	transition-property: opacity, filter;
 }
 
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
 	opacity: 0.3;
 	filter: blur(8px);
 	-webkit-filter: blur(8px);
 }
 
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
-div[data-type="amp/amp-story-page"] > div > div > .is-selected-parent > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
 	opacity: 1;
 	filter: none;
 	-webkit-filter: none;

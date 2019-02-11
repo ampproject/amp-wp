@@ -386,7 +386,9 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'child_tags' => array(
-						'section',
+						'child_tag_name_oneof' => array(
+							'section',
+						),
 					),
 					'requires_extension' => array(
 						'amp-accordion',
@@ -707,7 +709,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'child_tags' => array(
-						'script',
+						'child_tag_name_oneof' => array(
+							'script',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-animation',
@@ -1188,7 +1193,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'child_tags' => array(
-						'a',
+						'child_tag_name_oneof' => array(
+							'a',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-call-tracking',
@@ -2292,7 +2300,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
-					'child_tags' => array(),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'script',
+						),
+					),
 					'requires_extension' => array(
 						'amp-geo',
 					),
@@ -2613,8 +2625,11 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'child_tags' => array(
-						'amp-img',
-						'div',
+						'child_tag_name_oneof' => array(
+							'amp-img',
+							'div',
+						),
+						'mandatory_min_num_child_tags' => 2,
 					),
 					'requires_extension' => array(
 						'amp-image-slider',
@@ -3966,7 +3981,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'child_tags' => array(),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'script',
+						),
+					),
 					'requires_extension' => array(
 						'amp-bind',
 					),
@@ -3991,7 +4010,12 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
-					'child_tags' => array(),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'amp-ad',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
 					'disallowed_ancestor' => array(
 						'amp-app-banner',
 					),
@@ -4070,14 +4094,17 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'child_tags' => array(
-						'amp-analytics',
-						'amp-consent',
-						'amp-geo',
-						'amp-pixel',
-						'amp-story-access',
-						'amp-story-auto-ads',
-						'amp-story-bookend',
-						'amp-story-page',
+						'child_tag_name_oneof' => array(
+							'amp-analytics',
+							'amp-consent',
+							'amp-geo',
+							'amp-pixel',
+							'amp-story-access',
+							'amp-story-auto-ads',
+							'amp-story-bookend',
+							'amp-story-page',
+						),
+						'mandatory_min_num_child_tags' => 1,
 					),
 					'mandatory_parent' => 'body',
 					'requires_extension' => array(
@@ -4161,7 +4188,10 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'child_tags' => array(
-						'script',
+						'child_tag_name_oneof' => array(
+							'script',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'mandatory_parent' => 'amp-consent',
 					'requires_extension' => array(
@@ -4233,10 +4263,13 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'child_tags' => array(
-						'amp-analytics',
-						'amp-pixel',
-						'amp-story-cta-layer',
-						'amp-story-grid-layer',
+						'child_tag_name_oneof' => array(
+							'amp-analytics',
+							'amp-pixel',
+							'amp-story-cta-layer',
+							'amp-story-grid-layer',
+						),
+						'mandatory_min_num_child_tags' => 1,
 					),
 					'mandatory_parent' => 'amp-story',
 					'requires_extension' => array(
@@ -8534,7 +8567,10 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'child_tags' => array(
-						'ul',
+						'child_tag_name_oneof' => array(
+							'ul',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'mandatory_parent' => 'amp-sidebar',
 					'spec_name' => 'amp-sidebar > nav',
@@ -12325,7 +12361,18 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
-					'child_tags' => array(),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'h1',
+							'h2',
+							'h3',
+							'h4',
+							'h5',
+							'h6',
+							'header',
+						),
+						'mandatory_num_child_tags' => 2,
+					),
 					'mandatory_parent' => 'amp-accordion',
 					'spec_name' => 'amp-accordion > section',
 				),
@@ -14360,6 +14407,7 @@ class AMP_Allowed_Tags_Generated {
 				'',
 			),
 		),
+		'grid-area' => array(),
 		'hidden' => array(
 			'value' => array(
 				'',
@@ -14852,3 +14900,4 @@ class AMP_Allowed_Tags_Generated {
 	}
 
 }
+

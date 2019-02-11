@@ -6,7 +6,7 @@
  */
 
 /**
- * Class AMP_WP_Utils
+ * Class with static WordPress utility methods.
  *
  * @since 0.5
  *
@@ -57,7 +57,7 @@ class AMP_WP_Utils {
 	 *               doesn't exist in the given URL; a string or - in the case of
 	 *               PHP_URL_PORT - integer when it does. See parse_url()'s return values.
 	 */
-	protected static function _get_component_from_parsed_url_array( $url_parts, $component = -1 ) {
+	protected static function _get_component_from_parsed_url_array( $url_parts, $component = -1 ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 		if ( -1 === $component ) {
 			return $url_parts;
 		}
@@ -81,7 +81,7 @@ class AMP_WP_Utils {
 	 *
 	 * @deprecated 0.7
 	 */
-	protected static function _wp_translate_php_url_constant_to_key( $constant ) {
+	protected static function _wp_translate_php_url_constant_to_key( $constant ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
 		$translation = array(
 			PHP_URL_SCHEME   => 'scheme',
 			PHP_URL_HOST     => 'host',

@@ -17,17 +17,20 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		add_filter( 'amp_extract_image_dimensions_batch', function( $urls ) {
-			$dimensions = array();
-			foreach ( array_keys( $urls ) as $url ) {
-				if ( preg_match( '#/(?P<width>\d+)x(?P<height>\d+)$#', $url, $matches ) ) {
-					$dimensions[ $url ] = array_map( 'intval', wp_array_slice_assoc( $matches, array( 'width', 'height' ) ) );
-				} else {
-					$dimensions[ $url ] = false;
+		add_filter(
+			'amp_extract_image_dimensions_batch',
+			function( $urls ) {
+				$dimensions = array();
+				foreach ( array_keys( $urls ) as $url ) {
+					if ( preg_match( '#/(?P<width>\d+)x(?P<height>\d+)$#', $url, $matches ) ) {
+						$dimensions[ $url ] = array_map( 'intval', wp_array_slice_assoc( $matches, array( 'width', 'height' ) ) );
+					} else {
+						$dimensions[ $url ] = false;
+					}
 				}
+				return $dimensions;
 			}
-			return $dimensions;
-		} );
+		);
 	}
 
 	/**
