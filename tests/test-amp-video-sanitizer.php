@@ -74,26 +74,35 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'multiple_same_video' => array(
-				implode( '', array(
-					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
-					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
-					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
-					'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
-				) ),
+				implode(
+					'',
+					array(
+						'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+						'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+						'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+						'<video src="https://example.com/video.mp4" width="480" height="300"></video>',
+					)
+				),
 				'<amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video><amp-video src="https://example.com/video.mp4" width="480" height="300" layout="responsive"></amp-video>',
 			),
 
 			'multiple_different_videos' => array(
-				implode( '', array(
-					'<video src="https://example.com/video1.mp4" width="480" height="300"></video>',
-					'<video src="https://example.com/video2.ogv" width="300" height="480"></video>',
-					'<video src="https://example.com/video3.webm" height="100" width="200"></video>',
-				) ),
-				implode( '', array(
-					'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video>',
-					'<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video>',
-					'<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
-				) ),
+				implode(
+					'',
+					array(
+						'<video src="https://example.com/video1.mp4" width="480" height="300"></video>',
+						'<video src="https://example.com/video2.ogv" width="300" height="480"></video>',
+						'<video src="https://example.com/video3.webm" height="100" width="200"></video>',
+					)
+				),
+				implode(
+					'',
+					array(
+						'<amp-video src="https://example.com/video1.mp4" width="480" height="300" layout="responsive"></amp-video>',
+						'<amp-video src="https://example.com/video2.ogv" width="300" height="480" layout="responsive"></amp-video>',
+						'<amp-video src="https://example.com/video3.webm" height="100" width="200" layout="responsive"></amp-video>',
+					)
+				),
 			),
 
 			'https_not_required' => array(
@@ -112,7 +121,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	 * @dataProvider get_data
 	 */
 	public function test_converter( $source, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
@@ -124,13 +133,16 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test__https_required() {
-		$source = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
+		$source   = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
 		$expected = '';
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
-			'require_https_src' => true,
-		) );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$sanitizer = new AMP_Video_Sanitizer(
+			$dom,
+			array(
+				'require_https_src' => true,
+			)
+		);
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
@@ -141,10 +153,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__didnt_convert() {
-		$source = '<p>Hello World</p>';
+		$source   = '<p>Hello World</p>';
 		$expected = array();
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
@@ -159,10 +171,10 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	}
 
 	public function test_get_scripts__did_convert() {
-		$source = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
+		$source   = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
 		$expected = array( 'amp-video' => true );
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 

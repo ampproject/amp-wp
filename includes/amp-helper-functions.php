@@ -200,16 +200,18 @@ function amp_add_amphtml_link() {
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
 			echo "<!--\n";
-			echo esc_html( sprintf(
-				/* translators: %s is error count */
-				_n(
-					'There is %s validation error that is blocking the amphtml version from being available.',
-					'There are %s validation errors that are blocking the amphtml version from being available.',
-					$error_count,
-					'amp'
-				),
-				number_format_i18n( $error_count )
-			) );
+			echo esc_html(
+				sprintf(
+					/* translators: %s is error count */
+					_n(
+						'There is %s validation error that is blocking the amphtml version from being available.',
+						'There are %s validation errors that are blocking the amphtml version from being available.',
+						$error_count,
+						'amp'
+					),
+					number_format_i18n( $error_count )
+				)
+			);
 			echo "\n-->";
 			return;
 		}
@@ -264,7 +266,7 @@ function is_amp_endpoint() {
 	}
 
 	$has_amp_query_var = (
-		isset( $_GET[ amp_get_slug() ] ) // WPCS: CSRF OK.
+		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
 		||
 		false !== get_query_var( amp_get_slug(), false )
 	);
@@ -292,8 +294,15 @@ function is_amp_endpoint() {
 		return true;
 	}
 
-	$availability = AMP_Theme_Support::get_template_availability();
-	return amp_is_canonical() ? $availability['supported'] : ( $has_amp_query_var && $availability['supported'] );
+	if ( ! did_action( 'wp' ) ) {
+		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'wp' action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the amp_skip_post filter nor the AMP enabled publish metabox toggle will not be considered.", 'amp' ) ), '1.0.2' );
+		$supported = true;
+	} else {
+		$availability = AMP_Theme_Support::get_template_availability();
+		$supported    = $availability['supported'];
+	}
+
+	return amp_is_canonical() ? $supported : ( $has_amp_query_var && $supported );
 }
 
 /**
@@ -342,6 +351,16 @@ function amp_add_generator_metadata() {
  * @param WP_Scripts $wp_scripts Scripts.
  */
 function amp_register_default_scripts( $wp_scripts ) {
+	/*
+	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
+	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
+	 */
+	$handles = array( 'wp-i18n', 'wp-dom-ready' );
+	foreach ( $handles as $handle ) {
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );
+		}
+	}
 
 	// AMP Runtime.
 	$handle = 'amp-runtime';
@@ -351,9 +370,13 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
+	$wp_scripts->add_data(
+		$handle,
+		'amp_script_attributes',
+		array(
+			'async' => true,
+		)
+	);
 
 	// Shadow AMP API.
 	$handle = 'amp-shadow';
@@ -363,9 +386,13 @@ function amp_register_default_scripts( $wp_scripts ) {
 		array(),
 		null
 	);
-	$wp_scripts->add_data( $handle, 'amp_script_attributes', array(
-		'async' => true,
-	) );
+	$wp_scripts->add_data(
+		$handle,
+		'amp_script_attributes',
+		array(
+			'async' => true,
+		)
+	);
 
 	// Get all AMP components as defined in the spec.
 	$extensions = array();
@@ -605,16 +632,23 @@ function amp_print_analytics( $analytics ) {
 			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
 			continue;
 		}
-		$script_element = AMP_HTML_Utils::build_tag( 'script', array(
-			'type' => 'application/json',
-		), wp_json_encode( $analytics_entry['config_data'] ) );
+		$script_element = AMP_HTML_Utils::build_tag(
+			'script',
+			array(
+				'type' => 'application/json',
+			),
+			wp_json_encode( $analytics_entry['config_data'] )
+		);
 
-		$amp_analytics_attr = array_merge( array(
-			'id'   => $id,
-			'type' => $analytics_entry['type'],
-		), $analytics_entry['attributes'] );
+		$amp_analytics_attr = array_merge(
+			array(
+				'id'   => $id,
+				'type' => $analytics_entry['type'],
+			),
+			$analytics_entry['attributes']
+		);
 
-		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // WPCS: XSS OK.
+		echo AMP_HTML_Utils::build_tag( 'amp-analytics', $amp_analytics_attr, $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }
 
@@ -642,7 +676,8 @@ function amp_get_content_embed_handlers( $post = null ) {
 	 * @param array   $handlers Handlers.
 	 * @param WP_Post $post     Post. Deprecated. It will be null when `amp_is_canonical()`.
 	 */
-	return apply_filters( 'amp_content_embed_handlers',
+	return apply_filters(
+		'amp_content_embed_handlers',
 		array(
 			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),
@@ -673,15 +708,53 @@ function amp_get_content_embed_handlers( $post = null ) {
  * Get content sanitizers.
  *
  * @since 0.7
+ * @since 1.1 Added AMP_Nav_Menu_Toggle_Sanitizer and AMP_Nav_Menu_Dropdown_Sanitizer.
  *
  * @param WP_Post $post Post that the content belongs to. Deprecated when theme supports AMP, as sanitizers apply
  *                      to non-post data (e.g. Text widget).
  * @return array Embed handlers.
  */
 function amp_get_content_sanitizers( $post = null ) {
-	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
+	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
+
+	if ( is_array( $theme_support_args ) && $post ) {
 		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
 		$post = null;
+	}
+
+	$sanitizers = array(
+		'AMP_Core_Theme_Sanitizer'        => array(
+			'template'   => get_template(),
+			'stylesheet' => get_stylesheet(),
+		),
+		'AMP_Img_Sanitizer'               => array(),
+		'AMP_Form_Sanitizer'              => array(),
+		'AMP_Comments_Sanitizer'          => array(),
+		'AMP_Video_Sanitizer'             => array(),
+		'AMP_O2_Player_Sanitizer'         => array(),
+		'AMP_Audio_Sanitizer'             => array(),
+		'AMP_Playbuzz_Sanitizer'          => array(),
+		'AMP_Embed_Sanitizer'             => array(),
+		'AMP_Iframe_Sanitizer'            => array(
+			'add_placeholder' => true,
+		),
+		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
+		),
+		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+		'AMP_Script_Sanitizer'            => array(),
+		'AMP_Style_Sanitizer'             => array(
+			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
+		),
+		'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+	);
+
+	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
+		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
+	}
+
+	if ( ! empty( $theme_support_args['nav_menu_dropdown'] ) ) {
+		$sanitizers['AMP_Nav_Menu_Dropdown_Sanitizer'] = $theme_support_args['nav_menu_dropdown'];
 	}
 
 	/**
@@ -693,33 +766,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @param array   $handlers Handlers.
 	 * @param WP_Post $post     Post. Deprecated.
 	 */
-	$sanitizers = apply_filters( 'amp_content_sanitizers',
-		array(
-			'AMP_Core_Theme_Sanitizer'        => array(
-				'template'   => get_template(),
-				'stylesheet' => get_stylesheet(),
-			),
-			'AMP_Img_Sanitizer'               => array(),
-			'AMP_Form_Sanitizer'              => array(),
-			'AMP_Comments_Sanitizer'          => array(),
-			'AMP_Video_Sanitizer'             => array(),
-			'AMP_O2_Player_Sanitizer'         => array(),
-			'AMP_Audio_Sanitizer'             => array(),
-			'AMP_Playbuzz_Sanitizer'          => array(),
-			'AMP_Embed_Sanitizer'             => array(),
-			'AMP_Iframe_Sanitizer'            => array(
-				'add_placeholder' => true,
-			),
-			'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
-				'carousel_required' => ! current_theme_supports( AMP_Theme_Support::SLUG ), // For back-compat.
-			),
-			'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
-			'AMP_Script_Sanitizer'            => array(),
-			'AMP_Style_Sanitizer'             => array(),
-			'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-		),
-		$post
-	);
+	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( array( 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ) as $class_name ) {

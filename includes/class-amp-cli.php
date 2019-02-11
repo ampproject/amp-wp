@@ -350,11 +350,13 @@ class AMP_CLI {
 
 		// Count all public taxonomy terms.
 		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query = new WP_Term_Query( array(
-				'taxonomy' => $taxonomy,
-				'fields'   => 'ids',
-				'number'   => self::$limit_type_validate_count,
-			) );
+			$term_query = new WP_Term_Query(
+				array(
+					'taxonomy' => $taxonomy,
+					'fields'   => 'ids',
+					'number'   => self::$limit_type_validate_count,
+				)
+			);
 
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
 			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
@@ -645,17 +647,19 @@ class AMP_CLI {
 			$validity['url'],
 			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
 		);
-		$unaccepted_error_count = count( array_filter(
-			$validation_errors,
-			function( $error ) {
-				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-				return (
+		$unaccepted_error_count = count(
+			array_filter(
+				$validation_errors,
+				function( $error ) {
+					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+					return (
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
 					&&
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
-				);
-			}
-		) );
+					);
+				}
+			)
+		);
 
 		if ( count( $validation_errors ) > 0 ) {
 			self::$total_errors++;

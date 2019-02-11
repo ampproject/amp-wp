@@ -61,9 +61,12 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Embed.
 	 */
 	public function render( $args ) {
-		$args = wp_parse_args( $args, array(
-			'url' => false,
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'url' => false,
+			)
+		);
 
 		if ( empty( $args['url'] ) ) {
 			return '';

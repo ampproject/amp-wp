@@ -16,6 +16,167 @@ class AMP_Allowed_Tags_Generated {
 	private static $spec_file_revision = 767;
 	private static $minimum_validator_revision_required = 348;
 
+	private static $descendant_tag_lists = array(
+		'amp-story-bookend-allowed-descendants' => array(
+			'script',
+		),
+		'amp-story-cta-layer-allowed-descendants' => array(
+			'a',
+			'abbr',
+			'address',
+			'amp-call-tracking',
+			'amp-fit-text',
+			'amp-font',
+			'amp-img',
+			'amp-timeago',
+			'b',
+			'bdi',
+			'bdo',
+			'blockquote',
+			'br',
+			'button',
+			'caption',
+			'cite',
+			'code',
+			'data',
+			'del',
+			'dfn',
+			'div',
+			'em',
+			'figcaption',
+			'figure',
+			'footer',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'header',
+			'hgroup',
+			'hr',
+			'i',
+			'ins',
+			'kbd',
+			'li',
+			'main',
+			'mark',
+			'nav',
+			'noscript',
+			'ol',
+			'p',
+			'pre',
+			'q',
+			'rp',
+			'rt',
+			'rtc',
+			'ruby',
+			's',
+			'samp',
+			'section',
+			'small',
+			'span',
+			'strong',
+			'sub',
+			'sup',
+			'time',
+			'tr',
+			'u',
+			'ul',
+			'var',
+			'wbr',
+		),
+		'amp-story-grid-layer-allowed-descendants' => array(
+			'a',
+			'abbr',
+			'address',
+			'amp-analytics',
+			'amp-audio',
+			'amp-experiment',
+			'amp-fit-text',
+			'amp-font',
+			'amp-gfycat',
+			'amp-gist',
+			'amp-google-vrview-image',
+			'amp-img',
+			'amp-install-serviceworker',
+			'amp-list',
+			'amp-live-list',
+			'amp-pixel',
+			'amp-video',
+			'article',
+			'aside',
+			'b',
+			'bdi',
+			'bdo',
+			'blockquote',
+			'br',
+			'caption',
+			'cite',
+			'code',
+			'col',
+			'colgroup',
+			'data',
+			'dd',
+			'del',
+			'dfn',
+			'div',
+			'dl',
+			'dt',
+			'em',
+			'figcaption',
+			'figure',
+			'footer',
+			'h1',
+			'h2',
+			'h3',
+			'h4',
+			'h5',
+			'h6',
+			'header',
+			'hgroup',
+			'hr',
+			'i',
+			'ins',
+			'kbd',
+			'li',
+			'main',
+			'mark',
+			'nav',
+			'noscript',
+			'ol',
+			'p',
+			'pre',
+			'q',
+			'rp',
+			'rt',
+			'rtc',
+			'ruby',
+			's',
+			'samp',
+			'section',
+			'small',
+			'source',
+			'span',
+			'strong',
+			'sub',
+			'sup',
+			'table',
+			'tbody',
+			'td',
+			'tfoot',
+			'th',
+			'thead',
+			'time',
+			'tr',
+			'track',
+			'u',
+			'ul',
+			'var',
+			'wbr',
+		),
+	);
+
 	private static $allowed_tags = array(
 		'a' => array(
 			array(
@@ -222,6 +383,11 @@ class AMP_Allowed_Tags_Generated {
 					'amp_layout' => array(
 						'supported_layouts' => array(
 							5,
+						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'section',
 						),
 					),
 					'requires_extension' => array(
@@ -541,6 +707,12 @@ class AMP_Allowed_Tags_Generated {
 						'supported_layouts' => array(
 							1,
 						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'script',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-animation',
@@ -1019,6 +1191,12 @@ class AMP_Allowed_Tags_Generated {
 							7,
 							4,
 						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'a',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'requires_extension' => array(
 						'amp-call-tracking',
@@ -2122,6 +2300,11 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'script',
+						),
+					),
 					'requires_extension' => array(
 						'amp-geo',
 					),
@@ -2440,6 +2623,13 @@ class AMP_Allowed_Tags_Generated {
 							1,
 							4,
 						),
+					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'amp-img',
+							'div',
+						),
+						'mandatory_min_num_child_tags' => 2,
 					),
 					'requires_extension' => array(
 						'amp-image-slider',
@@ -3791,6 +3981,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'script',
+						),
+					),
 					'requires_extension' => array(
 						'amp-bind',
 					),
@@ -3814,6 +4009,12 @@ class AMP_Allowed_Tags_Generated {
 						'supported_layouts' => array(
 							1,
 						),
+					),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'amp-ad',
+						),
+						'mandatory_num_child_tags' => 1,
 					),
 					'disallowed_ancestor' => array(
 						'amp-app-banner',
@@ -3892,6 +4093,19 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'amp-analytics',
+							'amp-consent',
+							'amp-geo',
+							'amp-pixel',
+							'amp-story-access',
+							'amp-story-auto-ads',
+							'amp-story-bookend',
+							'amp-story-page',
+						),
+						'mandatory_min_num_child_tags' => 1,
+					),
 					'mandatory_parent' => 'body',
 					'requires_extension' => array(
 						'amp-story',
@@ -3955,6 +4169,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'descendant_tag_list' => 'amp-story-bookend-allowed-descendants',
 					'mandatory_ancestor' => 'amp-story',
 				),
 			),
@@ -3972,6 +4187,12 @@ class AMP_Allowed_Tags_Generated {
 							1,
 						),
 					),
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'script',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
 					'mandatory_parent' => 'amp-consent',
 					'requires_extension' => array(
 						'amp-consent',
@@ -3984,6 +4205,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
+					'descendant_tag_list' => 'amp-story-cta-layer-allowed-descendants',
 					'mandatory_ancestor' => 'amp-story-page',
 					'reference_points' => array(
 						'AMP-STORY-CTA-LAYER animate-in' => array(
@@ -4008,6 +4230,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'descendant_tag_list' => 'amp-story-grid-layer-allowed-descendants',
 					'mandatory_ancestor' => 'amp-story-page',
 					'reference_points' => array(
 						'AMP-STORY-GRID-LAYER animate-in' => array(
@@ -4039,6 +4262,15 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'amp-analytics',
+							'amp-pixel',
+							'amp-story-cta-layer',
+							'amp-story-grid-layer',
+						),
+						'mandatory_min_num_child_tags' => 1,
+					),
 					'mandatory_parent' => 'amp-story',
 					'requires_extension' => array(
 						'amp-story',
@@ -8334,6 +8566,12 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'child_tags' => array(
+						'child_tag_name_oneof' => array(
+							'ul',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
 					'mandatory_parent' => 'amp-sidebar',
 					'spec_name' => 'amp-sidebar > nav',
 				),
@@ -12123,6 +12361,18 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'h1',
+							'h2',
+							'h3',
+							'h4',
+							'h5',
+							'h6',
+							'header',
+						),
+						'mandatory_num_child_tags' => 2,
+					),
 					'mandatory_parent' => 'amp-accordion',
 					'spec_name' => 'amp-accordion > section',
 				),
@@ -12994,6 +13244,7 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'tag_spec' => array(
+					'descendant_tag_list' => 'amp-story-grid-layer-allowed-descendants',
 					'mandatory_parent' => 'amp-story-auto-ads',
 					'reference_points' => array(
 						'AMP-STORY-GRID-LAYER animate-in' => array(
@@ -14589,6 +14840,32 @@ class AMP_Allowed_Tags_Generated {
 	}
 
 	/**
+	 * Get descendant tag lists.
+	 *
+	 * @since 1.1
+	 * @return array Descendant tags list.
+	 */
+	public static function get_descendant_tag_lists() {
+		return self::$descendant_tag_lists;
+	}
+
+	/**
+	 * Get allowed descendant tag list for a tag.
+	 *
+	 * Get the descendant rules for a single tag so that the entire data structure needn't be passed around.
+	 *
+	 * @since 1.1
+	 * @param string $name Name for the descendants list.
+	 * @return array|bool Allowed tags list, or false if there are no restrictions.
+	 */
+	public static function get_descendant_tag_list( $name ) {
+		if ( isset( self::$descendant_tag_lists[ $name ] ) ) {
+			return self::$descendant_tag_lists[ $name ];
+		}
+		return false;
+	}
+
+	/**
 	 * Get reference point spec.
 	 *
 	 * @since 1.0
@@ -14623,3 +14900,4 @@ class AMP_Allowed_Tags_Generated {
 	}
 
 }
+

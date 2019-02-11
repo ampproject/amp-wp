@@ -21,11 +21,11 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.4+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
 	return;
 }
@@ -69,15 +69,15 @@ if ( ! function_exists( 'iconv' ) ) {
  *
  * @since 1.0
  */
-function _amp_print_composer_install_admin_notice() {
+function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
 	</div>
 	<?php
 }
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
-	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
 	return;
 }
 
@@ -219,7 +219,7 @@ function amp_init() {
 	AMP_Story_Post_Type::register();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
-	if ( defined( 'WP_CLI' ) ) {
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
 
@@ -316,7 +316,11 @@ function amp_maybe_add_actions() {
 	$post = get_queried_object();
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
+			/*
+			 * Temporary redirect is used for admin users because classic mode and AMP support can be enabled by user at any time,
+			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
+			 */
+			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );
 			exit;
 		}
 		return;
@@ -454,7 +458,6 @@ function amp_add_frontend_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }
