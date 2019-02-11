@@ -46,7 +46,9 @@ the_post();
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
-			poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
+			<?php if ( ! empty( $poster_portrait_src ) ) : ?>
+				poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
+			<?php endif; ?>
 		>
 			<?php the_content(); ?>
 		</amp-story>

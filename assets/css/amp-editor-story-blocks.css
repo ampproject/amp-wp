@@ -148,6 +148,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	width: 100%;
 }
 
+.editor-block-list__layout div[data-amp-type="grid"] .components-toolbar button[aria-label="Link"] {
+	display: none;
+}
+
 .editor-block-list__layout div[data-amp-selected="parent"] {
 	z-index: 1;
 }
