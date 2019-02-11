@@ -88,7 +88,8 @@ class AMP_Story_Post_Type {
 
 		// Forcibly sanitize all validation errors.
 		add_action(
-			'wp', function() {
+			'wp',
+			function() {
 				if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 					add_filter( 'amp_validation_error_sanitized', '__return_true' );
 				}
@@ -188,7 +189,8 @@ class AMP_Story_Post_Type {
 			'amp-story-editor-blocks',
 			amp_get_asset_url( 'js/amp-story-editor-blocks.js' ),
 			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
-			AMP__VERSION
+			AMP__VERSION,
+			false
 		);
 
 		wp_add_inline_script(
@@ -200,7 +202,8 @@ class AMP_Story_Post_Type {
 			'amp-editor-story-blocks-build',
 			amp_get_asset_url( 'js/amp-story-blocks-compiled.js' ),
 			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-			AMP__VERSION
+			AMP__VERSION,
+			false
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
