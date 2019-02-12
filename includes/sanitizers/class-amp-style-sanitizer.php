@@ -542,7 +542,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		} while ( 0 !== $count );
 
-		if ( false !== strpos( $path, './' ) ) {
+		if ( preg_match( '#(^|/)\.+/#', $path ) ) {
 			/* translators: %s is the path with the remaining relative segments. */
 			return new WP_Error( 'remaining_relativity', sprintf( __( 'There are remaining relative path segments: %s', 'amp' ), $path ) );
 		}

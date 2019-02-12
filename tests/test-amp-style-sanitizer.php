@@ -1223,6 +1223,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				$theme->get_stylesheet_directory_uri() . '/foo/./bar/baz/../../../style.css',
 				$theme->get_stylesheet_directory() . '/style.css',
 			),
+			'theme_stylesheet_with_trailing_dot' => array(
+				$theme->get_stylesheet_directory_uri() . '/foo./bar.css',
+				null,
+				'file_path_not_found',
+			),
 			'dashicons_without_host' => array(
 				'/wp-includes/css/dashicons.css',
 				ABSPATH . WPINC . '/css/dashicons.css',
