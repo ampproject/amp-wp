@@ -46,7 +46,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
-			// Allow video in fallbacks.
+			// Allow audio in fallbacks.
 			if ( 'noscript' === $node->parentNode->nodeName ) {
 				continue;
 			}
@@ -110,7 +110,12 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					$new_node->setAttribute( 'width', 'auto' );
 				}
 
+				$noscript = $this->dom->createElement( 'noscript' );
+				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
+				$noscript->appendChild( $node );
+				$node->removeAttribute( 'height' );
+				$node->removeAttribute( 'width' );
 			}
 
 			$this->did_convert_elements = true;

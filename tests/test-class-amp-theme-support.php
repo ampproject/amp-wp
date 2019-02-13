@@ -1338,7 +1338,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<noscript><img', $sanitized_html );
 		$this->assertContains( '<amp-img', $sanitized_html );
 
-		$this->assertNotContains( '<audio', $sanitized_html ); // This will likely need to change if we add noscript audio fallbacks.
+		$this->assertContains( '<noscript><audio', $sanitized_html );
 		$this->assertContains( '<amp-audio', $sanitized_html );
 
 		$removed_nodes = array();

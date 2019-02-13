@@ -30,73 +30,73 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'simple_audio' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
 			),
 
 			'autoplay_attribute' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay=""></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay=""><noscript><audio src="https://example.com/audio/file.ogg" autoplay></audio></noscript></amp-audio>',
 			),
 
 			'autoplay_attribute__false' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" autoplay="false"></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg" autoplay="false"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes__enabled' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="" muted=""></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="" muted=""><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes__disabled' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test"></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg" class="test"><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_blacklisted_attribute' => array(
 				'<audio width="400" height="300" src="https://example.com/audio/file.ogg" style="border-color: red;"></audio>',
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio>',
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg" style="border-color: red;"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_children' => array(
-				'<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio>',
+				'<audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></audio>',
+				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_layout_from_editor_fixed_height' => array(
 				'<figure data-amp-layout="fixed-height"><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio></figure>',
-				'<figure data-amp-layout="fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"></amp-audio></figure>',
+				'<figure data-amp-layout="fixed-height"><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100" layout="fixed-height"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio></figure>',
 			),
 
 			'multiple_same_audio' => array(
-				'<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>
-<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>
-<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio><amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio><amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio>',
+				'
+					<audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></audio>
+					<audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></audio>
+					<audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></audio>
+				',
+				'
+					<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+				',
 			),
 
 			'multiple_different_audio' => array(
-				'<audio width="400" height="300">
-	<source src="https://example.com/foo.wav" type="audio/wav">
-</audio>
-<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>
-<audio height="500" width="300">
-	<source src="https://example.com/foo2.wav" type="audio/wav">
-</audio>',
-				'<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></amp-audio><amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"></amp-audio><amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></amp-audio>',
+				'
+					<audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"></audio>
+					<audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio>
+					<audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"></audio>
+				',
+				'
+					<amp-audio width="400" height="300"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>
+					<amp-audio height="500" width="300"><source src="https://example.com/foo2.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo2.wav" type="audio/wav"></audio></noscript></amp-audio>
+				',
 			),
 
 			'https_not_required' => array(
 				'<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>',
-				'<amp-audio width="400" height="300" src="http://example.com/audio/file.ogg"></amp-audio>',
+				'<amp-audio width="400" height="300" src="http://example.com/audio/file.ogg"><noscript><audio src="http://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_fallback' => array(
@@ -121,8 +121,9 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
+		$content  = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content  = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $content ) );
+		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
 		$this->assertEquals( $expected, $content );
 	}
 
