@@ -270,7 +270,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						array( "\n", "\t" ),
 						'',
 						'
-						<amp-story standalone title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+						<amp-story standalone supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
 							<i>bad</i>
 							<amp-story-page id="my-first-page">
 								<i>bad</i>
@@ -963,7 +963,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp_date_picker_range' => array(
-				'<amp-date-picker type="range" minimum-nights="2" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
+				'<amp-date-picker type="range" minimum-nights="2" maximum-nights="4" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
 				null, // No change.
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
@@ -1115,6 +1115,77 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
 				null,
 				array( 'amp-fx-collection' ),
+			),
+
+			'amp-date-display' => array(
+				'<amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20"><template type="amp-mustache"><div>{{dayName}} {{day}} {{monthName}} {{year}} {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}</div></template></amp-date-display>',
+				null,
+				array( 'amp-date-display', 'amp-mustache' ),
+			),
+
+			'amp-list' => array(
+				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
+				null,
+				array( 'amp-list', 'amp-mustache' ),
+			),
+
+			'amp-list-load-more' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+							<amp-list-load-more load-more-button>
+								<template type="amp-mustache">
+									Showing {{#count}} out of {{#total}} items
+									<button>Click here to see more!</button>
+								</template>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-loading>
+								<svg>...</svg>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-failed>
+								<button>Unable to Load More</button>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-end>
+								Congratulations! You reached the end.
+							</amp-list-load-more>
+						</amp-list>
+					'
+				),
+				null,
+				array( 'amp-list', 'amp-mustache' ),
+			),
+
+			'amp-recaptcha-input' => array(
+				'<form action-xhr="/" target="_top" method="post"><amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey="reCAPTCHA_site_key" data-action="reCAPTCHA_example_action"></amp-recaptcha-input></form>',
+				null,
+				array( 'amp-form', 'amp-recaptcha-input' ),
+			),
+
+			// @todo The poster should not be allowed if there is a placeholder.
+			'amp-video-iframe' => array(
+				'<amp-video-iframe src="https://example.com/video/" width="500" height="500" poster="https://example.com/poster.jpg" autoplay dock implements-media-session implements-rotate-to-fullscreen referrerpolicy></amp-video-iframe>',
+				null,
+				array( 'amp-video-iframe', 'amp-video-docking' ),
+			),
+
+			'amp-youtube' => array(
+				'<amp-youtube id="myLiveChannel" data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q" width="358" height="204" layout="responsive" dock><amp-img src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg" placeholder layout="fill"></amp-img></amp-youtube>',
+				null,
+				array( 'amp-youtube', 'amp-video-docking' ),
+			),
+
+			'details' => array(
+				'<details open [open]="foo.state"><summary>Learn more</summary><p>You are educated</p></details>',
+				null,
+				array( 'amp-bind' ),
+			),
+
+			'amp-plain-text-script-template' => array(
+				'<script type="text/plain" template="amp-mustache">Hello {{world}}!</script>',
+				null,
+				array( 'amp-mustache' ),
 			),
 		);
 	}
