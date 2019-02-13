@@ -51,6 +51,8 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$old_node = $node->cloneNode( true );
+
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
@@ -61,19 +63,20 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 			foreach ( $node->childNodes as $child_node ) {
 
+				if ( ! ( $child_node instanceof DOMElement ) ) {
+					continue;
+				}
+
 				/**
 				 * Child node.
 				 *
 				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
 				 *
-				 * @var DOMNode $child_node
+				 * @var DOMElement $child_node
+				 * @var DOMElement $new_child_node
 				 */
 
-				$new_child_node = $child_node->cloneNode( true );
-				if ( ! $new_child_node instanceof DOMElement ) {
-					continue;
-				}
-
+				$new_child_node       = $child_node->cloneNode( true );
 				$old_child_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $new_child_node );
 				$new_child_attributes = $this->filter_attributes( $old_child_attributes );
 
@@ -113,7 +116,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 				$noscript = $this->dom->createElement( 'noscript' );
 				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
-				$noscript->appendChild( $node );
+				$noscript->appendChild( $old_node );
 				$node->removeAttribute( 'height' );
 				$node->removeAttribute( 'width' );
 			}

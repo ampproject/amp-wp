@@ -78,6 +78,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
+
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
 			$child_nodes = array();
@@ -111,7 +118,15 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Make sure poster and artwork attributes are HTTPS.
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 			foreach ( $child_nodes as $child_node ) {
+				$old_node->appendChild( $child_node->cloneNode( true ) );
 				$new_node->appendChild( $child_node );
+			}
+
+			// Make sure the updated src and poster are applied to the original.
+			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+				if ( $new_node->hasAttribute( $attr_name ) ) {
+					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
+				}
 			}
 
 			/*
@@ -124,7 +139,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			if ( 0 === $sources_count ) {
 				$this->remove_invalid_child( $node );
 			} else {
+				$noscript = $this->dom->createElement( 'noscript' );
+				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
+				$noscript->appendChild( $old_node );
 			}
 
 			$this->did_convert_elements = true;
