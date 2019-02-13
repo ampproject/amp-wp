@@ -15,6 +15,12 @@
  * @method void assertEquals( mixed $expected, mixed $actual, string $errorMessage=null )
  */
 class AMP_Audio_Converter_Test extends WP_UnitTestCase {
+
+	/**
+	 * Get data.
+	 *
+	 * @return array
+	 */
 	public function get_data() {
 		return array(
 			'no_audios' => array(
@@ -92,13 +98,26 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<audio width="400" height="300" src="http://example.com/audio/file.ogg"></audio>',
 				'<amp-audio width="400" height="300" src="http://example.com/audio/file.ogg"></amp-audio>',
 			),
+
+			'audio_with_fallback' => array(
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
+				null
+			),
 		);
 	}
 
 	/**
+	 * Test converter.
+	 *
 	 * @dataProvider get_data
+	 *
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
-	public function test_converter( $source, $expected ) {
+	public function test_converter( $source, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $source;
+		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$sanitizer->sanitize();

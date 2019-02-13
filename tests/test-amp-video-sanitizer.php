@@ -3,6 +3,12 @@
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
+
+	/**
+	 * Get data.
+	 *
+	 * @return array
+	 */
 	public function get_data() {
 		return array(
 			'no_videos' => array(
@@ -114,13 +120,26 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<video width="480" height="300" poster="https://example.com/poster.jpeg"><source src="http://example.com/video.mp4" type="video/mp4"><source src="http://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt" /><a href="http://example.com/video.mp4">http://example.com/video.mp4</a></video>',
 				'<amp-video width="480" height="300" poster="https://example.com/poster.jpeg" layout="responsive"><source src="https://example.com/video.mp4" type="video/mp4"><source src="https://example.com/video.ogv" type="video/ogg"><track srclang="en" label="English" kind="subtitles" src="https://example.com/test-en.vtt"><a href="http://example.com/video.mp4" fallback="">http://example.com/video.mp4</a></amp-video>',
 			),
+
+			'amp_video_with_fallback' => array(
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
+				null,
+			),
 		);
 	}
 
 	/**
+	 * Test converter.
+	 *
 	 * @dataProvider get_data
+	 *
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
-	public function test_converter( $source, $expected ) {
+	public function test_converter( $source, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $source;
+		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();

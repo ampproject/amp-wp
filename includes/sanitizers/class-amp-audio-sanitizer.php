@@ -44,7 +44,13 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node           = $nodes->item( $i );
+			$node = $nodes->item( $i );
+
+			// Allow video in fallbacks.
+			if ( 'noscript' === $node->parentNode->nodeName ) {
+				continue;
+			}
+
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
