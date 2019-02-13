@@ -549,12 +549,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
 			}
 
+			// Add required AMP components for attributes.
+			foreach ( $node->attributes as $attribute ) {
+				if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
+					$this->script_components = array_merge( $this->script_components, $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] );
+				}
+			}
+
 			// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
 			if ( $node->hasAttribute( 'lightbox' ) ) {
 				$this->script_components[] = 'amp-lightbox-gallery';
-			}
-			if ( $node->hasAttribute( 'amp-fx' ) ) {
-				$this->script_components[] = 'amp-fx-collection';
 			}
 
 			// Check if element needs amp-bind component.

@@ -640,6 +640,12 @@ def GetValues(attr_spec):
 			value_url_dict[value_url_key.name] = value_url_val_val
 		value_dict['value_url'] = value_url_dict
 
+	if hasattr(attr_spec, 'requires_extension') and len( attr_spec.requires_extension ) != 0:
+		requires_extension_list = []
+		for requires_extension in attr_spec.requires_extension:
+			requires_extension_list.append(requires_extension)
+		value_dict['requires_extension'] = requires_extension_list
+
 	logging.info('... done')
 	return value_dict
 

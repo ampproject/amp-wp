@@ -1108,7 +1108,11 @@ class AMP_Allowed_Tags_Generated {
 					'data-account' => array(
 						'mandatory' => true,
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
@@ -4749,7 +4753,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'lightbox' => array(),
 					'lightbox-thumbnail-id' => array(
 						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
@@ -4856,7 +4864,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'loop' => array(
 						'value' => array(
 							'',
@@ -4939,7 +4951,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'implements-media-session' => array(
 						'value' => array(
 							'',
@@ -5011,7 +5027,11 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'implements-media-session' => array(
 						'value' => array(
 							'',
@@ -5373,7 +5393,11 @@ class AMP_Allowed_Tags_Generated {
 					'data-videoid' => array(
 						'value_regex' => '[^=/?:]+',
 					),
-					'dock' => array(),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
+						),
+					),
 					'lightbox' => array(),
 					'lightbox-thumbnail-id' => array(
 						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
@@ -15386,6 +15410,9 @@ class AMP_Allowed_Tags_Generated {
 		'amp-access-style' => array(),
 		'amp-access-template' => array(),
 		'amp-fx' => array(
+			'requires_extension' => array(
+				'amp-fx-collection',
+			),
 			'value_regex_casei' => '(fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax)(\\s|fade-in|fade-in-scroll|fly-in-bottom|fly-in-left|fly-in-right|fly-in-top|parallax)*',
 		),
 		'aria-activedescendant' => array(),
@@ -15470,20 +15497,41 @@ class AMP_Allowed_Tags_Generated {
 		'style' => array(
 			'blacklisted_value_regex' => '(!important|<!--)',
 		),
-		'subscriptions-action' => array(),
+		'subscriptions-action' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
+		),
 		'subscriptions-actions' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
 			'value' => array(
 				'',
 			),
 		),
-		'subscriptions-decorate' => array(),
+		'subscriptions-decorate' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
+		),
 		'subscriptions-dialog' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
 			'value' => array(
 				'',
 			),
 		),
-		'subscriptions-display' => array(),
+		'subscriptions-display' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
+		),
 		'subscriptions-section' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
 			'value_casei' => array(
 				'actions',
 				'content',
@@ -15491,7 +15539,11 @@ class AMP_Allowed_Tags_Generated {
 				'loading',
 			),
 		),
-		'subscriptions-service' => array(),
+		'subscriptions-service' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
+		),
 		'tabindex' => array(),
 		'title' => array(),
 		'translate' => array(),
