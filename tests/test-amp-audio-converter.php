@@ -100,8 +100,8 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'audio_with_fallback' => array(
-				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio width="400" height="300" src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
-				null
+				'<amp-audio width="400" height="300" src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
+				null,
 			),
 		);
 	}
