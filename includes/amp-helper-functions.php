@@ -690,7 +690,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'0.7',
 			sprintf(
 				/* translators: %s: $post */
-				__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
 				'$post'
 			)
 		);
@@ -753,7 +753,7 @@ function amp_get_content_sanitizers( $post = null ) {
 			'0.7',
 			sprintf(
 				/* translators: %s: $post */
-				__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
 				'$post'
 			)
 		);
