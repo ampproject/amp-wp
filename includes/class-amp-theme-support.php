@@ -189,7 +189,16 @@ class AMP_Theme_Support {
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'The available_callback is deprecated when adding amp theme support in favor of declaratively setting the supported_templates.', 'amp' ), '1.0' );
+				_doing_it_wrong(
+					'add_theme_support',
+					sprintf(
+						/* translators: 1: available_callback. 2: supported_templates */
+						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
+						'available_callback',
+						'supported_templates'
+					),
+					'1.0'
+				);
 			}
 			self::$support_added_via_option = false;
 		} elseif ( 'disabled' !== $theme_support_option ) {

@@ -391,7 +391,7 @@ class AMP_Options_Menu {
 					<?php
 					printf(
 						/* translators: %s: available_callback */
-						__( 'Your theme is using the deprecated %s argument for AMP theme support.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+						esc_html__( 'Your theme is using the deprecated %s argument for AMP theme support.', 'amp' ),
 						'available_callback'
 					);
 					?>
