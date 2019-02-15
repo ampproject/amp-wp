@@ -465,9 +465,9 @@ class AMP_Options_Manager {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
 				sprintf(
-					/* translators: %s is location where conflicting lib was found */
-					esc_html__( "A conflicting version of PHP-CSS-Parser appears to be installed by another plugin/theme (located in '%s'). Because of this CSS processing will be limited, and tree shaking will not be available.", 'amp' ),
-					esc_html( $source_dir )
+					/* translators: %s: path to the conflicting library */
+					__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					'<code>' . esc_html( $source_dir ) . '</code>'
 				)
 			);
 		} catch ( ReflectionException $e ) {

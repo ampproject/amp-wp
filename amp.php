@@ -21,7 +21,15 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.4+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p>
+			<?php
+			sprintf(
+				/* translators: %s: required PHP version */
+				esc_html_e( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
+				'5.4+'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -38,7 +46,15 @@ if ( version_compare( phpversion(), '5.4', '<' ) ) {
 function _amp_print_php_dom_document_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					'DOM'
+				);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -55,7 +71,15 @@ if ( ! class_exists( 'DOMDocument' ) ) {
 function _amp_print_php_missing_iconv_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires iconv extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					'iconv'
+				);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -72,7 +96,15 @@ if ( ! function_exists( 'iconv' ) ) {
 function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: %s: composer install && npm install && npm run build */
+				__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				'<code>composer install && npm install && npm run build</code>'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }

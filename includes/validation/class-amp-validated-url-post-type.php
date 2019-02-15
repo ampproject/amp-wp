@@ -1628,11 +1628,17 @@ class AMP_Validated_URL_Post_Type {
 			),
 		);
 
-		// Only the %d is interpolated by PHP, as the JS file will replace %% with the errors that are displaying, based on filtering.
+		// Only the second number is interpolated by PHP, as the JS file will dynamically replace %1$s with the errors being displayed.
 		$data['l10n']['showing_number_errors'] = sprintf(
-			/* translators: %% is the errors that are displaying, %d is the total number of errors found */
-			__( 'Showing %% of %d validation errors', 'amp' ),
-			self::$total_errors_for_url
+			/* translators: 1: number of errors being displayed. 2: total number of errors found. */
+			_n(
+				'Showing %1$s of %2$s validation error',
+				'Showing %1$s of %2$s validation errors',
+				self::$total_errors_for_url,
+				'amp'
+			),
+			'%1$s',
+			number_format_i18n( self::$total_errors_for_url )
 		);
 
 		wp_add_inline_script(
@@ -1691,7 +1697,7 @@ class AMP_Validated_URL_Post_Type {
 						/* translators: %s: The date this was published */
 						wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
 						/* translators: Meta box date format */
-						esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
+						esc_html( date_i18n( __( 'M j, Y @ H:i', 'amp' ), strtotime( $post->post_date ) ) )
 					);
 					?>
 					</span>
@@ -1703,7 +1709,7 @@ class AMP_Validated_URL_Post_Type {
 						</a>
 					</div>
 					<div id="preview-action">
-						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'amp' ); ?></button>
 					</div>
 					<div class="clear"></div>
 				</div>
@@ -1773,7 +1779,7 @@ class AMP_Validated_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'amp' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1821,7 +1827,7 @@ class AMP_Validated_URL_Post_Type {
 		$taxonomy        = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$taxonomy_object = get_taxonomy( $taxonomy );
 		if ( ! $taxonomy_object ) {
-			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
+			wp_die( esc_html__( 'Invalid taxonomy.', 'amp' ) );
 		}
 
 		/**
@@ -2038,7 +2044,7 @@ class AMP_Validated_URL_Post_Type {
 							$query->found_posts,
 							'amp'
 						),
-						$query->found_posts
+						number_format_i18n( $query->found_posts )
 					)
 				)
 			);

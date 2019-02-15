@@ -628,7 +628,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var ampCarousel = props.attributes.ampCarousel,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Display as AMP carousel' );
+			label = __( 'Display as carousel' );
 
 		return el( ToggleControl, {
 			label: label,
