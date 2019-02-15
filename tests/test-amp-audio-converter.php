@@ -28,42 +28,42 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'simple_audio' => array(
 				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><noscript><audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio></noscript></amp-audio>',
 			),
 
 			'autoplay_attribute' => array(
 				'<audio src="https://example.com/audio/file.ogg" autoplay></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" autoplay="" width="auto"><noscript><audio src="https://example.com/audio/file.ogg" autoplay></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" autoplay="" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" autoplay></audio></noscript></amp-audio>',
 			),
 
 			'autoplay_attribute__false' => array(
 				'<audio src="https://example.com/audio/file.ogg" autoplay="false"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" width="auto"><noscript><audio src="https://example.com/audio/file.ogg" autoplay="false"></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" autoplay="false"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes__enabled' => array(
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" class="test" loop="" muted="" width="auto"><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" class="test" loop="" muted="" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="loop" muted></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_whitelisted_attributes__disabled' => array(
 				'<audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" class="test" width="auto"><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" class="test" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" class="test" loop="false" muted="false"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_children' => array(
 				'<audio><source src="https://example.com/foo.wav" type="audio/wav"></audio>',
-				'<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>',
+				'<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_http_children' => array(
 				'<audio><source src="http://example.com/foo.wav" type="audio/wav"></audio>',
-				'<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>',
+				'<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>',
 			),
 
 			'audio_with_layout_from_editor_fixed_height' => array(
 				'<figure><audio src="https://example.com/audio/file.ogg" width="100" height="100"></audio><figcaption>Caption</figcaption></figure>',
-				'<figure><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio><figcaption>Caption</figcaption></figure>',
+				'<figure><amp-audio src="https://example.com/audio/file.ogg" width="auto" height="100"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio><figcaption>Caption</figcaption></figure>',
 			),
 
 			'multiple_same_audio' => array(
@@ -73,9 +73,9 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					<audio><source src="https://example.com/foo.wav" type="audio/wav"></audio>
 				',
 				'
-					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
-					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
-					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
 				',
 			),
 
@@ -86,9 +86,9 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					<audio><source src="https://example.com/foo2.wav" type="audio/wav"></audio>
 				',
 				'
-					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
-					<amp-audio src="https://example.com/audio/file.ogg" width="auto"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>
-					<amp-audio width="auto"><source src="https://example.com/foo2.wav" type="audio/wav"><noscript><audio><source src="https://example.com/foo2.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio width="auto"><source src="https://example.com/foo.wav" type="audio/wav"><a href="https://example.com/foo.wav" fallback="">https://example.com/foo.wav</a><noscript><audio><source src="https://example.com/foo.wav" type="audio/wav"></audio></noscript></amp-audio>
+					<amp-audio src="https://example.com/audio/file.ogg" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>
+					<amp-audio width="auto"><source src="https://example.com/foo2.wav" type="audio/wav"><a href="https://example.com/foo2.wav" fallback="">https://example.com/foo2.wav</a><noscript><audio><source src="https://example.com/foo2.wav" type="audio/wav"></audio></noscript></amp-audio>
 				',
 			),
 
@@ -101,6 +101,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-audio src="https://example.com/audio/file.ogg" width="auto">
 						<track kind="chapters" srclang="en" src="https://example.com/media/examples/friday.vtt">
+						<a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a>
 						<noscript>
 							<audio src="https://example.com/audio/file.ogg">
 								<track kind="chapters" srclang="en" src="https://example.com/media/examples/friday.vtt">
@@ -121,10 +122,48 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					<amp-audio width="auto">
 						<source src="https://example.com/audio/file.ogg" type="audio/mp3">
 						<track kind="chapters" srclang="en" src="https://example.com/media/examples/friday.vtt">
+						<a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a>
 						<noscript>
 							<audio>
 								<source src="https://example.com/audio/file.ogg" type="audio/mp3">
 								<track kind="chapters" srclang="en" src="https://example.com/media/examples/friday.vtt">
+							</audio>
+						</noscript>
+					</amp-audio>
+				',
+			),
+
+			'audio_block_and_shortcode_output' => array(
+				'
+					<figure class="wp-block-audio">
+						<audio controls src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3"></audio>
+						<figcaption>Caption</figcaption>
+					</figure>
+
+					<!--[if lt IE 9]><script>document.createElement(\'audio\');</script><![endif]-->
+					<audio class="wp-audio-shortcode" id="audio-87-1" preload="none" style="width: 100%;" controls="controls">
+						<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1"/>
+						<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
+					</audio>
+				',
+				'
+					<figure class="wp-block-audio">
+						<amp-audio controls="" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" width="auto">
+							<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" fallback="">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
+							<noscript>
+								<audio controls src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3"></audio>
+							</noscript>
+						</amp-audio>
+						<figcaption>Caption</figcaption>
+					</figure>
+
+					<!--[if lt IE 9]><script>document.createElement(\'audio\');</script><![endif]-->
+					<amp-audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls" width="auto">
+						<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
+						<a href="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3" fallback="">https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3</a>
+						<noscript>
+							<audio class="wp-audio-shortcode amp-wp-199b6f0" id="audio-87-1" preload="none" controls="controls">
+								<source type="audio/mpeg" src="https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3?_=1">
 							</audio>
 						</noscript>
 					</amp-audio>

@@ -54,10 +54,10 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			// For amp-audio, the default width and height are inferred from browser.
-			$sources_count  = 0;
+			$sources = array();
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			if ( ! empty( $new_attributes['src'] ) ) {
-				$sources_count++;
+				$sources[] = $new_attributes['src'];
 			}
 
 			/**
@@ -78,7 +78,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 						// @todo $this->remove_invalid_child( $child_node ), but this will require refactoring the while loop since it uses firstChild.
 						continue; // Skip adding source.
 					}
-					$sources_count++;
+					$sources[] = $src;
 					$child_node->setAttribute( 'src', $src );
 					$new_attributes = $this->filter_attributes( $new_attributes );
 				}
@@ -92,6 +92,18 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
+			 * Add fallback for audio shortcode which is not present by default since wp_mediaelement_fallback()
+			 * is not called when wp_audio_shortcode_library is filtered from mediaelement to amp.
+			 */
+			if ( ! $fallback && ! empty( $sources ) ) {
+				$fallback = $this->dom->createElement( 'a' );
+				$fallback->setAttribute( 'href', $sources[0] );
+				$fallback->setAttribute( 'fallback', '' );
+				$fallback->appendChild( $this->dom->createTextNode( $sources[0] ) );
+				$child_nodes[] = $fallback;
+			}
+
+			/*
 			 * Audio in WordPress is responsive with 100% width, so this infers fixed-layout.
 			 * In AMP, the amp-audio's default height is inferred from the browser.
 			 */
@@ -100,8 +112,10 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			// @todo Make sure poster and artwork attributes are HTTPS.
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
 			foreach ( $child_nodes as $child_node ) {
-				$old_node->appendChild( $child_node->cloneNode( true ) );
 				$new_node->appendChild( $child_node );
+				if ( ! ( $child_node instanceof DOMElement ) || ! $child_node->hasAttribute( 'fallback' ) ) {
+					$old_node->appendChild( $child_node->cloneNode( true ) );
+				}
 			}
 
 			// Make sure the updated src and poster are applied to the original.
@@ -115,10 +129,10 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			 * If the node has at least one valid source, replace the old node with it.
 			 * Otherwise, just remove the node.
 			 *
-			 * TODO: Add a fallback handler.
+			 * @todo Add a fallback handler.
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( 0 === $sources_count ) {
+			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
 				$noscript = $this->dom->createElement( 'noscript' );
