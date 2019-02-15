@@ -1,7 +1,17 @@
 <?php
+/**
+ * Class AMP_Video_Converter_Test.
+ *
+ * @package AMP
+ */
 
 // phpcs:disable WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
 
+/**
+ * Class AMP_Video_Converter_Test
+ *
+ * @covers AMP_Video_Sanitizer
+ */
 class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 	/**
@@ -172,19 +182,22 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			$expected = $source;
 		}
 
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
 
-		$content  = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$content  = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $content ) );
-		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
-		$this->assertEquals( $expected, $content );
+		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+
+		$this->assertEqualMarkup( $expected, $content );
 	}
 
+	/**
+	 * Test that HTTPS is enforced.
+	 */
 	public function test__https_required() {
 		$source   = '<video width="300" height="300" src="http://example.com/video.mp4"></video>';
 		$expected = '';
@@ -205,6 +218,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/**
+	 * Test that scripts don't picked up as expected.
+	 */
 	public function test_get_scripts__didnt_convert() {
 		$source   = '<p>Hello World</p>';
 		$expected = array();
@@ -223,6 +239,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $scripts );
 	}
 
+	/**
+	 * Test that scripts get picked up.
+	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<video width="300" height="300" src="https://example.com/video.mp4"></video>';
 		$expected = array( 'amp-video' => true );
@@ -239,5 +258,21 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			$whitelist_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
+	}
+
+	/**
+	 * Assert markup is equal.
+	 *
+	 * @param string $expected Expected markup.
+	 * @param string $actual   Actual markup.
+	 */
+	public function assertEqualMarkup( $expected, $actual ) {
+		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
+		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
+
+		$this->assertEquals(
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
+		);
 	}
 }
