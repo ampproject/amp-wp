@@ -50,7 +50,7 @@ function _amp_print_php_dom_document_notice() {
 			<?php
 				printf(
 					/* translators: %s: PHP extension name */
-					__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
 					'DOM'
 				);
 			?>
@@ -75,7 +75,7 @@ function _amp_print_php_missing_iconv_notice() {
 			<?php
 				printf(
 					/* translators: %s: PHP extension name */
-					__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
 					'iconv'
 				);
 			?>
