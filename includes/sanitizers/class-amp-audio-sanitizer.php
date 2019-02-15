@@ -51,74 +51,80 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$old_node = $node->cloneNode( true );
-
-			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
+			// For amp-audio, the default width and height are inferred from browser.
+			$sources_count  = 0;
 			$new_attributes = $this->filter_attributes( $old_attributes );
-
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
-
-			foreach ( $node->childNodes as $child_node ) {
-
-				if ( ! ( $child_node instanceof DOMElement ) ) {
-					continue;
-				}
-
-				/**
-				 * Child node.
-				 *
-				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
-				 *
-				 * @var DOMElement $child_node
-				 * @var DOMElement $new_child_node
-				 */
-
-				$new_child_node       = $child_node->cloneNode( true );
-				$old_child_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $new_child_node );
-				$new_child_attributes = $this->filter_attributes( $old_child_attributes );
-
-				if ( empty( $new_child_attributes['src'] ) ) {
-					continue;
-				}
-				if ( 'source' !== $new_child_node->tagName ) {
-					continue;
-				}
-
-				// The textContent is invalid for `source` nodes.
-				$new_child_node->textContent = null;
-
-				// Only append source tags with a valid src attribute.
-				$new_node->appendChild( $new_child_node );
-
+			if ( ! empty( $new_attributes['src'] ) ) {
+				$sources_count++;
 			}
 
 			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
+
+			// Gather all child nodes and supply empty video dimensions from sources.
+			$fallback    = null;
+			$child_nodes = array();
+			while ( $node->firstChild ) {
+				$child_node = $node->removeChild( $node->firstChild );
+				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
+					$src = $this->maybe_enforce_https_src( $child_node->getAttribute( 'src' ), true );
+					if ( ! $src ) {
+						// @todo $this->remove_invalid_child( $child_node ), but this will require refactoring the while loop since it uses firstChild.
+						continue; // Skip adding source.
+					}
+					$sources_count++;
+					$child_node->setAttribute( 'src', $src );
+					$new_attributes = $this->filter_attributes( $new_attributes );
+				}
+
+				if ( ! $fallback && $child_node instanceof DOMElement && ! ( 'source' === $child_node->nodeName || 'track' === $child_node->nodeName ) ) {
+					$fallback = $child_node;
+					$fallback->setAttribute( 'fallback', '' );
+				}
+
+				$child_nodes[] = $child_node;
+			}
+
+			/*
+			 * Audio in WordPress is responsive with 100% width, so this infers fixed-layout.
+			 * In AMP, the amp-audio's default height is inferred from the browser.
+			 */
+			$new_attributes['width'] = 'auto';
+
+			// @todo Make sure poster and artwork attributes are HTTPS.
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
+			foreach ( $child_nodes as $child_node ) {
+				$old_node->appendChild( $child_node->cloneNode( true ) );
+				$new_node->appendChild( $child_node );
+			}
+
+			// Make sure the updated src and poster are applied to the original.
+			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+				if ( $new_node->hasAttribute( $attr_name ) ) {
+					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
+				}
+			}
+
+			/*
 			 * If the node has at least one valid source, replace the old node with it.
 			 * Otherwise, just remove the node.
 			 *
-			 * @todo: Add a fallback handler.
-			 * @see: https://github.com/ampproject/amphtml/issues/2261
+			 * TODO: Add a fallback handler.
+			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
+			if ( 0 === $sources_count ) {
 				$this->remove_invalid_child( $node );
 			} else {
-
-				$layout = isset( $new_attributes['layout'] ) ? $new_attributes['layout'] : false;
-
-				// The width has to be unset / auto in case of fixed-height.
-				if ( 'fixed-height' === $layout ) {
-					$new_node->setAttribute( 'width', 'auto' );
-				}
-
 				$noscript = $this->dom->createElement( 'noscript' );
 				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
 				$noscript->appendChild( $old_node );
-				$node->removeAttribute( 'height' );
-				$node->removeAttribute( 'width' );
 			}
 
 			$this->did_convert_elements = true;
@@ -177,7 +183,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
-					break;
+					$out[ $name ] = $value;
 			}
 		}
 

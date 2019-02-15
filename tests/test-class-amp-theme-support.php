@@ -1575,7 +1575,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
 		<img width="100" height="100" src="https://example.com/test.png">
-		<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
+		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
 				width="300"
 				height="250"
