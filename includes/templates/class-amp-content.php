@@ -180,7 +180,7 @@ class AMP_Content {
 						sprintf(
 							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
 							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
-							$embed_handler_class,
+							esc_html( $embed_handler_class ),
 							'AMP_Embed_Handler'
 						)
 					),
