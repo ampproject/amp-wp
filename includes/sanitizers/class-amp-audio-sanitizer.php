@@ -54,7 +54,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			// For amp-audio, the default width and height are inferred from browser.
-			$sources = array();
+			$sources        = array();
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			if ( ! empty( $new_attributes['src'] ) ) {
 				$sources[] = $new_attributes['src'];
