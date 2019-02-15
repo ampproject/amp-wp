@@ -79,7 +79,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			defaultHeight: 400,
 			mediaBlocks: [
 				'core/image',
-				'core/video',
+				'core/video'
 			],
 			textBlocks: [
 				'core/paragraph',
