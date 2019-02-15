@@ -60,6 +60,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-img src="http://placehold.it/100x100" layout="fill" width="100" height="100" class="amp-wp-enforced-sizes"><noscript><img src="http://placehold.it/100x100" data-amp-layout="fill" width="100" height="100"></noscript></amp-img>',
 			),
 
+			'image_with_noloading'                     => array(
+				'<img src="http://placehold.it/100x100" data-amp-noloading="" width="100" height="100">',
+				'<amp-img src="http://placehold.it/100x100" noloading="" width="100" height="100" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="http://placehold.it/100x100" data-amp-noloading="" width="100" height="100"></noscript></amp-img>',
+			),
+
 			'image_with_layout_from_editor'            => array(
 				'<figure data-amp-layout="fill"><img src="http://placehold.it/300x300" height="300" width="300" /></figure>',
 				'<figure data-amp-layout="fill" style="position:relative; width: 100%; height: 300px;"><amp-img src="http://placehold.it/300x300" layout="fill" class="amp-wp-enforced-sizes"><noscript><img src="http://placehold.it/300x300" height="300" width="300"></noscript></amp-img></figure>',
