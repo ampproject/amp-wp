@@ -46,6 +46,13 @@
 		</properties>
 	</rule>
 
+	<!-- Prevent false positives for translator comments by adjusting the threshold for commented out code. -->
+	<rule ref="Squiz.PHP.CommentedOutCode">
+		<properties>
+			<property name="maxPercentage" value="50" />
+		</properties>
+	</rule>
+
 	<!-- Include sniffs for PHP cross-version compatibility. -->
 	<config name="testVersion" value="5.4-99.0"/>
 	<rule ref="PHPCompatibility">
