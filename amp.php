@@ -25,7 +25,7 @@ function _amp_print_php_version_admin_notice() {
 			<?php
 			sprintf(
 				/* translators: %s: required PHP version */
-				esc_html_e( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
+				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
 				'5.4+'
 			);
 			?>
