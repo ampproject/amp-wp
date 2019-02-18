@@ -281,7 +281,7 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_proper_amp_location( $exit = true ) {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( amp_is_canonical() ) {
 			/*
@@ -493,7 +493,7 @@ class AMP_Theme_Support {
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
-		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -525,7 +525,7 @@ class AMP_Theme_Support {
 		}
 
 		// Restore previous $wp_query (if any).
-		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -854,7 +854,7 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
 		// Commenting hooks.
@@ -1901,7 +1901,7 @@ class AMP_Theme_Support {
 		AMP_Validation_Manager::finalize_validation(
 			$dom,
 			array(
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			)
 		);
 

@@ -1293,24 +1293,24 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		// The 'pagenow' value is incorrect, so this should not add the taxonomy.
 		$GLOBALS['pagenow'] = 'edit.php';
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// Though the 'pagenow' value is correct, the $_REQUEST['post'] is not set, and this should not add the taxonomy.
 		$GLOBALS['pagenow'] = 'post.php';
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// Though the $_REQUEST['post'] is set, it is for a post of the wrong type.
 		$wrong_post_type  = $this->factory()->post->create();
 		$_REQUEST['post'] = $wrong_post_type;
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$this->assertFalse( isset( $_REQUEST['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// Now that the post type is correct, this should add the taxonomy to $_REQUEST.
 		$correct_post_type = $this->factory()->post->create( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$_REQUEST['post']  = $correct_post_type;
 		AMP_Validated_URL_Post_Type::add_taxonomy();
-		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$this->assertEquals( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, $_REQUEST['taxonomy'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
