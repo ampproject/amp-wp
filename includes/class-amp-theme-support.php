@@ -578,10 +578,12 @@ class AMP_Theme_Support {
 		if ( count( $matching_templates ) > 1 ) {
 			_doing_it_wrong(
 				__METHOD__,
-				sprintf(
-					/* translators: %s: amp_supportable_templates */
-					__( 'Did not expect there to be more than one matching template. Did you filter %s to not honor the template hierarchy?', 'amp' ),
-					'amp_supportable_templates'
+				esc_html(
+					sprintf(
+						/* translators: %s: amp_supportable_templates */
+						__( 'Did not expect there to be more than one matching template. Did you filter %s to not honor the template hierarchy?', 'amp' ),
+						'amp_supportable_templates'
+					)
 				),
 				'1.0'
 			);
