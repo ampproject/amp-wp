@@ -577,7 +577,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>

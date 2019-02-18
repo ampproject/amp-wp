@@ -271,7 +271,7 @@ function is_amp_endpoint() {
 	}
 
 	$has_amp_query_var = (
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
 		false !== get_query_var( amp_get_slug(), false )
 	);
