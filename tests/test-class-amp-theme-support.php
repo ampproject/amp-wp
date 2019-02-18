@@ -1837,7 +1837,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 }
 
-// phpcs:disable Generic.Files.OneClassPerFile.MultipleFound
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 
 /**
  * Class AMP_Theme_Support_Sanitizer_Counter
