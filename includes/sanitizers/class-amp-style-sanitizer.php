@@ -1019,8 +1019,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'wp_enqueue_style',
 				esc_html(
 					sprintf(
-						/* translators: %s is URL to font CDN */
-						__( 'It is not a best practice to use @import to load font CDN stylesheets. Please use wp_enqueue_style() to enqueue %s as its own separate script.', 'amp' ),
+						/* translators: 1: @import. 2: wp_enqueue_style(). 3: font CDN URL. */
+						__( 'It is not a best practice to use %1$s to load font CDN stylesheets. Please use %2$s to enqueue %3$s as its own separate script.', 'amp' ),
+						'@import',
+						'wp_enqueue_style()',
 						$import_stylesheet_url
 					)
 				),
@@ -2082,7 +2084,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$comment = '';
 			if ( $include_manifest_comment && ! empty( $included_sources ) && $included_original_size > 0 ) {
-				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
+				$comment .= sprintf(
+					/* translators: %s: style[amp-custom] */
+					esc_html__( 'The %s element is populated with:', 'amp' ),
+					'style[amp-custom]'
+				) . "\n" . implode( "\n", $included_sources ) . "\n";
 				if ( self::has_required_php_css_parser() ) {
 					$comment .= sprintf(
 						/* translators: %1$d is number of included bytes, %2$d is percentage of total CSS actually included after tree shaking, %3$d is total included size */
@@ -2105,11 +2111,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
-				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n" . implode( "\n", $excluded_sources ) . "\n";
+				$comment .= sprintf(
+					/* translators: %s: style[amp-custom] */
+					esc_html__( 'The following stylesheets are too large to be included in %s:', 'amp' ),
+					'style[amp-custom]'
+				) . "\n" . implode( "\n", $excluded_sources ) . "\n";
 
 				if ( self::has_required_php_css_parser() ) {
 					$comment .= sprintf(
-						/* translators: %1$d is number of excluded bytes, %2$d is percentage of total CSS actually excluded even after tree shaking, %3$d is total excluded size */
+						/* translators: 1: number of excluded bytes. 2: percentage of total CSS actually excluded even after tree shaking. 3: total excluded size. */
 						esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
 						number_format_i18n( $excluded_size ),
 						$excluded_size / $excluded_original_size * 100,
@@ -2117,11 +2127,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					) . "\n";
 				} else {
 					$comment .= sprintf(
-						/* translators: %1$d is number of excluded bytes */
-						esc_html__( 'Total excluded size: %1$s bytes', 'amp' ),
-						number_format_i18n( $excluded_size ),
-						$excluded_size / $excluded_original_size * 100,
-						number_format_i18n( $excluded_original_size )
+						/* translators: %s: number of excluded bytes. */
+						esc_html__( 'Total excluded size: %s bytes', 'amp' ),
+						number_format_i18n( $excluded_size )
 					) . "\n";
 				}
 
@@ -2130,7 +2138,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				if ( $total_size !== $total_original_size ) {
 					$comment .= "\n";
 					$comment .= sprintf(
-						/* translators: %1$d is total combined bytes, %2$d is percentage of CSS after tree shaking, %3$d is total before tree shaking */
+						/* translators: 1: total combined bytes. 2: is percentage of CSS after tree shaking. 3: is total before tree shaking. */
 						esc_html__( 'Total combined size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
 						number_format_i18n( $total_size ),
 						( $total_size / $total_original_size ) * 100,
@@ -2140,7 +2148,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			if ( $include_manifest_comment && ! self::has_required_php_css_parser() ) {
-				$comment .= "\n" . esc_html__( '!!!WARNING!!! AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin/theme. Tree shaking is not available.', 'amp' ) . "\n";
+				$comment .= "\n" . esc_html__( 'Warning! AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ) . "\n";
 			}
 
 			if ( $comment ) {

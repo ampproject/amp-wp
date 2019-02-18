@@ -1906,16 +1906,24 @@ class AMP_Validation_Manager {
 			case 'white_screen_of_death':
 				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error. Please check your server\'s PHP error logs.', 'amp' );
 			case '404':
-				return __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' );
 			case '500':
 				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' );
 			case 'response_comment_absent':
-				return __( 'URL validation failed to due to the absence of the expected JSON-containing AMP_VALIDATION comment after the body.', 'amp' );
+				return sprintf(
+					/* translators: %s: AMP_VALIDATION */
+					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body.', 'amp' ),
+					'AMP_VALIDATION'
+				);
 			case 'malformed_json_validation_errors':
-				return __( 'URL validation failed to due to unexpected JSON in the AMP_VALIDATION comment after the body.', 'amp' );
+				return sprintf(
+					/* translators: %s: AMP_VALIDATION */
+					__( 'URL validation failed to due to unexpected JSON in the %s comment after the body.', 'amp' ),
+					'AMP_VALIDATION'
+				);
 			default:
 				/* translators: %s is error code */
-				return sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
 		};
 	}
 

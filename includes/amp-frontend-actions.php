@@ -6,7 +6,17 @@
  * @package AMP
  */
 
-_deprecated_file( __FILE__, '1.0', null, esc_html__( 'Use amp_add_amphtml_link() function which is already included from amp-helper-functions.php', 'amp' ) );
+_deprecated_file(
+	__FILE__,
+	'1.0',
+	null,
+	sprintf(
+		/* translators: 1: amp_add_amphtml_link(). 2: amp-helper-functions.php */
+		esc_html__( 'Use %1$s function which is already included from %2$s', 'amp' ),
+		'amp_add_amphtml_link()',
+		'amp-helper-functions.php'
+	)
+);
 
 /**
  * Add amphtml link to frontend.

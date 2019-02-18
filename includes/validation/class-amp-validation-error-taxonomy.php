@@ -1859,9 +1859,14 @@ class AMP_Validation_Error_Taxonomy {
 				} else {
 					$time_ago = sprintf(
 						'<abbr title="%s">%s</abbr>',
-						esc_attr( $created_datetime->format( __( 'Y/m/d g:i:s a', 'default' ) ) ),
-						/* translators: %s is relative time */
-						esc_html( sprintf( __( '%s ago', 'default' ), human_time_diff( $created_datetime->getTimestamp() ) ) )
+						esc_attr(
+							$created_datetime->format(
+								/* translators: localized date and time format, see http://php.net/date */
+								__( 'F j, Y g:i a', 'amp' )
+							)
+						),
+						/* translators: %s: human readable timestamp */
+						esc_html( sprintf( __( '%s ago', 'amp' ), human_time_diff( $created_datetime->getTimestamp() ) ) )
 					);
 				}
 
@@ -2257,7 +2262,11 @@ class AMP_Validation_Error_Taxonomy {
 		} elseif ( 'excessive_css' === $error_code ) {
 			$error_title = __( 'Excessive CSS', 'amp' );
 		} elseif ( 'illegal_css_at_rule' === $error_code ) {
-			$error_title = __( 'Illegal CSS @ rule', 'amp' );
+			$error_title = sprintf(
+				/* translators: %s: @ */
+				__( 'Illegal CSS %s rule', 'amp' ),
+				'@'
+			);
 		} elseif ( 'disallowed_file_extension' === $error_code ) {
 			$error_title = __( 'Disallowed file extension', 'amp' );
 		} elseif ( 'file_path_not_allowed' === $error_code ) {
