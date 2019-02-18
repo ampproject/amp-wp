@@ -435,7 +435,7 @@ class AMP_Options_Manager {
 		}
 
 		printf(
-			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
+			'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
 			sprintf(
 				/* translators: %s: post-processor cache support URL */
 				__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
