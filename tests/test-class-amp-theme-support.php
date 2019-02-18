@@ -1335,10 +1335,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertNotContains( '<img', $sanitized_html );
+		$this->assertContains( '<noscript><img', $sanitized_html );
 		$this->assertContains( '<amp-img', $sanitized_html );
 
-		$this->assertNotContains( '<audio', $sanitized_html );
+		$this->assertContains( '<noscript><audio', $sanitized_html );
 		$this->assertContains( '<amp-audio', $sanitized_html );
 
 		$removed_nodes = array();
@@ -1575,7 +1575,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
 		<img width="100" height="100" src="https://example.com/test.png">
-		<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
+		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
 				width="300"
 				height="250"

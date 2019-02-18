@@ -819,7 +819,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'get_custom_logo',
 			function( $html ) {
-				return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
+				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
 		);
