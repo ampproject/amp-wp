@@ -1022,6 +1022,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						/* translators: 1: @import. 2: wp_enqueue_style(). 3: font CDN URL. */
 						__( 'It is not a best practice to use %1$s to load font CDN stylesheets. Please use %2$s to enqueue %3$s as its own separate script.', 'amp' ),
 						'@import',
+						'wp_enqueue_style()',
 						$import_stylesheet_url
 					)
 				),
