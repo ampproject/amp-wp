@@ -397,6 +397,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_amp_template_filters() {
 		foreach ( self::$template_types as $template_type ) {
+			// See get_query_template().
+			$template_type = preg_replace( '|[^a-z0-9-]+|', '', $template_type );
+
 			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
 	}

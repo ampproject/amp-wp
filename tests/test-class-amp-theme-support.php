@@ -398,16 +398,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_add_amp_template_filters() {
-		$template_types = array(
-			'paged',
-			'index',
-			'404',
-			'archive',
-			'author',
-			'category',
-		);
+		$reflection = new ReflectionClass( 'AMP_Theme_Support' );
+		$property   = $reflection->getProperty( 'template_types' );
+		$property->setAccessible( true );
+		$template_types = $property->getValue();
+
 		AMP_Theme_Support::add_amp_template_filters();
+
 		foreach ( $template_types as $template_type ) {
+			$template_type = preg_replace( '|[^a-z0-9-]+|', '', $template_type );
+
 			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_amp_template_hierarchy' ) ) );
 		}
 	}
