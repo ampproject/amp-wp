@@ -988,8 +988,19 @@ class AMP_Theme_Support {
 	 * @return array Args to return.
 	 */
 	public static function set_comments_walker( $args ) {
-		$amp_walker     = new AMP_Comment_Walker();
-		$args['walker'] = $amp_walker;
+		/**
+		 * Filters the AMP comments walker.
+		 *
+		 * @since 1.1.0
+		 *
+		 * @param string $walker Comments walker class name. Defaults to AMP_Comment_Walker.
+		 */
+		$amp_walker = apply_filters( 'amp_comment_walker', 'AMP_Comment_Walker' );
+
+		if ( class_exists( $amp_walker ) ) {
+			$args['walker'] =  new $amp_walker();
+		}
+
 		return $args;
 	}
 
