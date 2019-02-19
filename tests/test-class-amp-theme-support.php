@@ -398,9 +398,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_add_amp_template_filters() {
-		$reflection = new ReflectionClass('AMP_Theme_Support');
-		$property = $reflection->getProperty('template_types');
-		$property->setAccessible(true);
+		$reflection = new ReflectionClass( 'AMP_Theme_Support' );
+		$property   = $reflection->getProperty( 'template_types' );
+		$property->setAccessible( true );
 		$template_types = $property->getValue();
 
 		AMP_Theme_Support::add_amp_template_filters();
