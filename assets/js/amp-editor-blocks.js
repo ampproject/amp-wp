@@ -37,7 +37,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'responsive',
 					label: __( 'Responsive', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -50,7 +49,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'fill',
 					label: __( 'Fill', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -58,7 +56,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'flex-item',
 					label: __( 'Flex Item', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -67,7 +64,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'intrinsic',
 					label: __( 'Intrinsic', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/youtube',
 						'core-embed/facebook',
 						'core-embed/instagram',
@@ -83,8 +79,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			defaultHeight: 400,
 			mediaBlocks: [
 				'core/image',
-				'core/video',
-				'core/audio'
+				'core/video'
 			],
 			textBlocks: [
 				'core/paragraph',

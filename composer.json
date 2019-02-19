@@ -33,7 +33,7 @@
     "cweagans/composer-patches": "~1.6"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "1.2.1",
+    "wp-coding-standards/wpcs": "2.0.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.4.4",
     "phpcompatibility/php-compatibility": "9.1.1",
     "xwp/wp-dev-lib": "1.0.1",
