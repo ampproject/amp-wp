@@ -998,7 +998,7 @@ class AMP_Theme_Support {
 		$amp_walker = apply_filters( 'amp_comment_walker', 'AMP_Comment_Walker' );
 
 		if ( class_exists( $amp_walker ) ) {
-			$args['walker'] =  new $amp_walker();
+			$args['walker'] = new $amp_walker();
 		}
 
 		return $args;
