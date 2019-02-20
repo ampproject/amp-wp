@@ -1,3 +1,13 @@
+<?php
+/**
+ * Legacy template for the AMP stylesheet.
+ *
+ * @package AMP
+ */
+
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+?>
 /* Merriweather fonts */
 @font-face {
 	font-family:'Merriweather';

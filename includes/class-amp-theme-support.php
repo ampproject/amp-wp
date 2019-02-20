@@ -128,9 +128,12 @@ class AMP_Theme_Support {
 			return;
 		}
 
+		// Ensure extra theme support for core themes is in place.
+		AMP_Core_Theme_Sanitizer::extend_theme_support();
+
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
+		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
 		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
 
@@ -171,22 +174,40 @@ class AMP_Theme_Support {
 			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
-				_doing_it_wrong( 'add_theme_support', esc_html( sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
-					/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
-					__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-					join( ', ', $keys ),
-					join( ', ', array_keys( $args ) )
-				) ), '1.0' );
+				_doing_it_wrong(
+					'add_theme_support',
+					esc_html(
+						sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+							/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
+							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
+							join( ', ', $keys ),
+							join( ', ', array_keys( $args ) )
+						)
+					),
+					'1.0'
+				);
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'The available_callback is deprecated when adding amp theme support in favor of declaratively setting the supported_templates.', 'amp' ), '1.0' );
+				_doing_it_wrong(
+					'add_theme_support',
+					sprintf(
+						/* translators: 1: available_callback. 2: supported_templates */
+						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
+						'available_callback',
+						'supported_templates'
+					),
+					'1.0'
+				);
 			}
 			self::$support_added_via_option = false;
 		} elseif ( 'disabled' !== $theme_support_option ) {
-			add_theme_support( self::SLUG, array(
-				'paired' => ( 'paired' === $theme_support_option ),
-			) );
+			add_theme_support(
+				self::SLUG,
+				array(
+					'paired' => ( 'paired' === $theme_support_option ),
+				)
+			);
 			self::$support_added_via_option = true;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
 			add_theme_support( self::SLUG );
@@ -225,10 +246,14 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( ! is_amp_endpoint() ) {
-
-			// Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
-			if ( isset( $_GET[ amp_get_slug() ] ) ) { // WPCS: csrf ok.
-				self::redirect_ampless_url();
+			/*
+			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
+			 * Temporary redirect is used for admin users because implied paired mode and template support can be
+			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
+			 * without wrestling with the redirect cache.
+			 */
+			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, true );
 			}
 
 			amp_add_frontend_actions();
@@ -265,15 +290,18 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_proper_amp_location( $exit = true ) {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // WPCS: CSRF OK.
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( amp_is_canonical() ) {
 			/*
 			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
+			 * Permanent redirect is used for unauthenticated users since switching between modes
+			 * should happen infrequently. For admin users, this is kept temporary to allow them
+			 * to not be hampered by browser remembering permanent redirects and preventing test.
 			 */
 			if ( $has_query_var || $has_url_param ) {
-				return self::redirect_ampless_url( $exit );
+				return self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, $exit );
 			}
 		} else {
 			/*
@@ -286,7 +314,8 @@ class AMP_Theme_Support {
 				$old_url = amp_get_current_url();
 				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 				if ( $old_url !== $new_url ) {
-					wp_safe_redirect( $new_url, 302 );
+					// A temporary redirect is used for admin users to allow them to see changes between classic and paired modes.
+					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 					// @codeCoverageIgnoreStart
 					if ( $exit ) {
 						exit;
@@ -308,21 +337,18 @@ class AMP_Theme_Support {
 	 * @since 1.0 Added $exit param.
 	 * @since 1.0 Renamed from redirect_canonical_amp().
 	 *
-	 * @param bool $exit Whether to exit after redirecting.
+	 * @param int  $status Status code (301 or 302).
+	 * @param bool $exit   Whether to exit after redirecting.
 	 * @return bool Whether redirection was done. Naturally this is irrelevant if $exit is true.
 	 */
-	public static function redirect_ampless_url( $exit = true ) {
+	public static function redirect_non_amp_url( $status = 302, $exit = true ) {
 		$current_url = amp_get_current_url();
-		$ampless_url = amp_remove_endpoint( $current_url );
-		if ( $ampless_url === $current_url ) {
+		$non_amp_url = amp_remove_endpoint( $current_url );
+		if ( $non_amp_url === $current_url ) {
 			return false;
 		}
 
-		/*
-		 * Temporary redirect because AMP URL may return when blocking validation errors
-		 * occur or when a non-canonical AMP theme is used.
-		 */
-		wp_safe_redirect( $ampless_url, 302 );
+		wp_safe_redirect( $non_amp_url, $status );
 		// @codeCoverageIgnoreStart
 		if ( $exit ) {
 			exit;
@@ -371,6 +397,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_amp_template_filters() {
 		foreach ( self::$template_types as $template_type ) {
+			// See get_query_template().
+			$template_type = preg_replace( '|[^a-z0-9-]+|', '', $template_type );
+
 			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
 	}
@@ -476,7 +505,7 @@ class AMP_Theme_Support {
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
-		$wp_query   = $query; // WPCS: override ok.
+		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -508,7 +537,7 @@ class AMP_Theme_Support {
 		}
 
 		// Restore previous $wp_query (if any).
-		$wp_query = $prev_query; // WPCS: override ok.
+		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -550,7 +579,17 @@ class AMP_Theme_Support {
 		 * Template conditions need to be set up properly to prevent this from happening.
 		 */
 		if ( count( $matching_templates ) > 1 ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html(
+					sprintf(
+						/* translators: %s: amp_supportable_templates */
+						__( 'Did not expect there to be more than one matching template. Did you filter %s to not honor the template hierarchy?', 'amp' ),
+						'amp_supportable_templates'
+					)
+				),
+				'1.0'
+			);
 		}
 
 		$matching_template = array_shift( $matching_templates );
@@ -586,10 +625,12 @@ class AMP_Theme_Support {
 			 * @var WP_Post $queried_object
 			 */
 			$queried_object = $query->get_queried_object();
-			$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
-			if ( ! empty( $support_errors ) ) {
-				$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
-				$matching_template['supported'] = false;
+			if ( $queried_object instanceof WP_Post ) {
+				$support_errors = AMP_Post_Type_Support::get_support_errors( $queried_object );
+				if ( ! empty( $support_errors ) ) {
+					$matching_template['errors']    = array_merge( $matching_template['errors'], $support_errors );
+					$matching_template['supported'] = false;
+				}
 			}
 		}
 
@@ -615,7 +656,7 @@ class AMP_Theme_Support {
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_on_front' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
 				/* translators: %s: the URL to the edit post screen. */
-				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
+				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
 			}
 
 			// In other words, same as is_posts_page, *but* it not is_singular.
@@ -624,7 +665,7 @@ class AMP_Theme_Support {
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_for_posts' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
 				/* translators: %s: the URL to the edit post screen. */
-				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
+				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
 			}
 		} else {
 			$templates['is_home'] = array(
@@ -764,17 +805,27 @@ class AMP_Theme_Support {
 
 		// @todo The wp_mediaelement_fallback() should still run to be injected inside of the audio/video generated by wp_audio_shortcode()/wp_video_shortcode() respectively.
 		// Prevent MediaElement.js scripts/styles from being enqueued.
-		add_filter( 'wp_video_shortcode_library', function() {
-			return 'amp';
-		} );
-		add_filter( 'wp_audio_shortcode_library', function() {
-			return 'amp';
-		} );
+		add_filter(
+			'wp_video_shortcode_library',
+			function() {
+				return 'amp';
+			}
+		);
+		add_filter(
+			'wp_audio_shortcode_library',
+			function() {
+				return 'amp';
+			}
+		);
 
 		// Don't show loading indicator on custom logo since it makes most sense for larger images.
-		add_filter( 'get_custom_logo', function( $html ) {
-			return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
-		}, 1 );
+		add_filter(
+			'get_custom_logo',
+			function( $html ) {
+				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
+			},
+			1
+		);
 
 		/*
 		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
@@ -789,12 +840,20 @@ class AMP_Theme_Support {
 		 *
 		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
 		 */
-		add_action( 'wp_head', function() {
-			echo '<style amp-custom></style>';
-		}, 0 );
-		add_action( 'wp_head', function() {
-			echo amp_get_boilerplate_code(); // WPCS: xss ok.
-		}, PHP_INT_MAX );
+		add_action(
+			'wp_head',
+			function() {
+				echo '<style amp-custom></style>';
+			},
+			0
+		);
+		add_action(
+			'wp_head',
+			function() {
+				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			},
+			PHP_INT_MAX
+		);
 
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ) );
@@ -817,7 +876,7 @@ class AMP_Theme_Support {
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
 		 * instead of template_include.
 		 */
-		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.PHP.NewConstants.php_int_minFound
+		$priority = defined( 'PHP_INT_MIN' ) ? PHP_INT_MIN : ~PHP_INT_MAX; // phpcs:ignore PHPCompatibility.Constants.NewConstants.php_int_minFound
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
 		// Commenting hooks.
@@ -829,12 +888,19 @@ class AMP_Theme_Support {
 		remove_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' );
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'whitelist_layout_in_wp_kses_allowed_html' ), 10 );
 		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
-		add_action( 'wp_print_footer_scripts', function() {
-			wp_dequeue_script( 'wp-custom-header' );
-		}, 0 );
-		add_action( 'wp_enqueue_scripts', function() {
-			wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
-		} );
+		add_action(
+			'wp_print_footer_scripts',
+			function() {
+				wp_dequeue_script( 'wp-custom-header' );
+			},
+			0
+		);
+		add_action(
+			'wp_enqueue_scripts',
+			function() {
+				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
+			}
+		);
 
 		// @todo Add character conversion.
 	}
@@ -883,16 +949,28 @@ class AMP_Theme_Support {
 			 *
 			 * @type AMP_Base_Embed_Handler $embed_handler
 			 */
-			$embed_handler = new $embed_handler_class( array_merge(
-				array(
-					'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				),
-				$args
-			) );
+			$embed_handler = new $embed_handler_class(
+				array_merge(
+					array(
+						'content_max_width' => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+					),
+					$args
+				)
+			);
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
-				/* translators: %s is embed handler */
-				_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Embed Handler (%s) must extend `AMP_Embed_Handler`', 'amp' ), $embed_handler_class ) ), '0.1' );
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html(
+						sprintf(
+							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
+							esc_html( $embed_handler_class ),
+							'AMP_Embed_Handler'
+						)
+					),
+					'0.1'
+				);
 				continue;
 			}
 
@@ -1075,7 +1153,7 @@ class AMP_Theme_Support {
 		$link = sprintf(
 			'<a rel="nofollow" class="comment-reply-link" href="%s" on="%s" aria-label="%s">%s</a>',
 			esc_attr( '#' . $args['respond_id'] ),
-			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) ) ),
 			esc_attr( sprintf( $args['reply_to_text'], $comment->comment_author ) ),
 			$args['reply_text']
 		);
@@ -1135,20 +1213,27 @@ class AMP_Theme_Support {
 		wp_dequeue_script( 'admin-bar' );
 
 		// Remove customize support script since not valid AMP.
-		add_action( 'admin_bar_menu', function() {
-			remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
-		}, 41 );
+		add_action(
+			'admin_bar_menu',
+			function() {
+				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
+			},
+			41
+		);
 
 		// Emulate customize support script in PHP, to assume Customizer.
-		add_filter( 'body_class', function( $body_classes ) {
-			return array_merge(
-				array_diff(
-					$body_classes,
-					array( 'no-customize-support' )
-				),
-				array( 'customize-support' )
-			);
-		} );
+		add_filter(
+			'body_class',
+			function( $body_classes ) {
+				return array_merge(
+					array_diff(
+						$body_classes,
+						array( 'no-customize-support' )
+					),
+					array( 'customize-support' )
+				);
+			}
+		);
 	}
 
 	/**
@@ -1204,10 +1289,14 @@ class AMP_Theme_Support {
 			}
 		}
 		if ( empty( $links['canonical'] ) ) {
-			$rel_canonical = AMP_DOM_Utils::create_node( $dom, 'link', array(
-				'rel'  => 'canonical',
-				'href' => self::get_current_canonical_url(),
-			) );
+			$rel_canonical = AMP_DOM_Utils::create_node(
+				$dom,
+				'link',
+				array(
+					'rel'  => 'canonical',
+					'href' => self::get_current_canonical_url(),
+				)
+			);
 			$head->appendChild( $rel_canonical );
 		}
 
@@ -1236,19 +1325,27 @@ class AMP_Theme_Support {
 		}
 		if ( ! $meta_charset ) {
 			// Warning: This probably means the character encoding needs to be converted.
-			$meta_charset = AMP_DOM_Utils::create_node( $dom, 'meta', array(
-				'charset' => 'utf-8',
-			) );
+			$meta_charset = AMP_DOM_Utils::create_node(
+				$dom,
+				'meta',
+				array(
+					'charset' => 'utf-8',
+				)
+			);
 		} else {
 			$head->removeChild( $meta_charset ); // So we can move it.
 		}
 		$head->insertBefore( $meta_charset, $head->firstChild );
 
 		if ( ! $meta_viewport ) {
-			$meta_viewport = AMP_DOM_Utils::create_node( $dom, 'meta', array(
-				'name'    => 'viewport',
-				'content' => 'width=device-width',
-			) );
+			$meta_viewport = AMP_DOM_Utils::create_node(
+				$dom,
+				'meta',
+				array(
+					'name'    => 'viewport',
+					'content' => 'width=device-width',
+				)
+			);
 		} else {
 			$head->removeChild( $meta_viewport ); // So we can move it.
 		}
@@ -1330,22 +1427,30 @@ class AMP_Theme_Support {
 			$links['preload'] = array();
 		}
 
-		$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
-			'rel'  => 'preload',
-			'as'   => 'script',
-			'href' => $runtime_src,
-		) );
+		$prioritized_preloads[] = AMP_DOM_Utils::create_node(
+			$dom,
+			'link',
+			array(
+				'rel'  => 'preload',
+				'as'   => 'script',
+				'href' => $runtime_src,
+			)
+		);
 
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, $render_delaying_extensions, true ) ) {
 				continue;
 			}
-			$prioritized_preloads[] = AMP_DOM_Utils::create_node( $dom, 'link', array(
-				'rel'  => 'preload',
-				'as'   => 'script',
-				'href' => $amp_scripts[ $script_handle ]->getAttribute( 'src' ),
-			) );
+			$prioritized_preloads[] = AMP_DOM_Utils::create_node(
+				$dom,
+				'link',
+				array(
+					'rel'  => 'preload',
+					'as'   => 'script',
+					'href' => $amp_scripts[ $script_handle ]->getAttribute( 'src' ),
+				)
+			);
 		}
 		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
 
@@ -1550,7 +1655,7 @@ class AMP_Theme_Support {
 		);
 
 		$current_url = amp_get_current_url();
-		$ampless_url = amp_remove_endpoint( $current_url );
+		$non_amp_url = amp_remove_endpoint( $current_url );
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
@@ -1563,13 +1668,17 @@ class AMP_Theme_Support {
 		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
 		 * This is also used as the ETag.
 		 */
-		$response_cache_key = md5( wp_json_encode( array(
-			$args,
-			$response,
-			self::$sanitizer_classes,
-			self::$embed_handlers,
-			AMP__VERSION,
-		) ) );
+		$response_cache_key = md5(
+			wp_json_encode(
+				array(
+					$args,
+					$response,
+					self::$sanitizer_classes,
+					self::$embed_handlers,
+					AMP__VERSION,
+				)
+			)
+		);
 
 		/*
 		 * Per rfc7232:
@@ -1580,10 +1689,23 @@ class AMP_Theme_Support {
 		 * not have been set yet during the WordPress template generation is
 		 * the ETag. The AMP plugin sends a Vary header at amp_init.
 		 */
-		AMP_HTTP::send_header( 'ETag', $response_cache_key );
+		AMP_HTTP::send_header( 'ETag', '"' . $response_cache_key . '"' );
 
-		// Handle responses that are cached by the browser.
-		if ( isset( $_SERVER['HTTP_IF_NONE_MATCH'] ) && $_SERVER['HTTP_IF_NONE_MATCH'] === $response_cache_key ) {
+		/*
+		 * Handle responses that are cached by the browser, returning 304 response if the response cache key
+		 * matches any ETags mentioned in If-None-Match request header. Note that if the client request indicates a
+		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
+		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
+		 * response is returned.
+		 */
+		$has_matching_etag = (
+			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
+			&&
+			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
+			&&
+			in_array( $response_cache_key, $etag_match_candidates[0], true )
+		);
+		if ( $has_matching_etag ) {
 			status_header( 304 );
 			return '';
 		}
@@ -1626,9 +1748,14 @@ class AMP_Theme_Support {
 				// Redirect to non-AMP version.
 				if ( ! amp_is_canonical() && $blocking_error_count > 0 ) {
 					if ( AMP_Validation_Manager::has_cap() ) {
-						$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+						$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 					}
-					wp_safe_redirect( $ampless_url );
+
+					/*
+					 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
+					 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
+					 */
+					wp_safe_redirect( $non_amp_url, 302 );
 				}
 				return $response_cache['body'];
 			}
@@ -1783,14 +1910,16 @@ class AMP_Theme_Support {
 					$cache_response( $response, $validation_results );
 				}
 
-				/*
-				 * Temporary redirect because AMP URL may return when blocking validation errors
-				 * occur or when a non-canonical AMP theme is used.
-				 */
+				// Indicate the number of validation errors detected at runtime in a query var on the non-AMP page for display in the admin bar.
 				if ( AMP_Validation_Manager::has_cap() ) {
-					$ampless_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $ampless_url );
+					$non_amp_url = add_query_arg( AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR, $blocking_error_count, $non_amp_url );
 				}
-				wp_safe_redirect( $ampless_url, 302 );
+
+				/*
+				 * Temporary redirect because AMP page may return with blocking validation errors when auto-accepting sanitization
+				 * is not enabled. A 302 will allow the errors to be fixed without needing to bust any redirect caches.
+				 */
+				wp_safe_redirect( $non_amp_url, 302 );
 				return $response;
 			}
 		}
@@ -1801,9 +1930,12 @@ class AMP_Theme_Support {
 			trigger_error( esc_html( sprintf( __( 'The database has the %s encoding when it needs to be utf-8 to work with AMP.', 'amp' ), get_bloginfo( 'charset' ) ) ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 
-		AMP_Validation_Manager::finalize_validation( $dom, array(
-			'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // WPCS: CSRF.
-		) );
+		AMP_Validation_Manager::finalize_validation(
+			$dom,
+			array(
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			)
+		);
 
 		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
 		$truncate_after_comment  = null;

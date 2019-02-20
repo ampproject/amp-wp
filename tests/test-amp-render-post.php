@@ -36,9 +36,11 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	 */
 	public function test__is_amp_endpoint() {
 		$user_id = $this->factory()->user->create();
-		$post_id = $this->factory()->post->create( array(
-			'post_author' => $user_id,
-		) );
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_author' => $user_id,
+			)
+		);
 
 		$before_is_amp_endpoint = is_amp_endpoint();
 

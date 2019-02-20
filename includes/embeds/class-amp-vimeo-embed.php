@@ -122,17 +122,20 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function render( $args ) {
 		$args = wp_parse_args(
-			$args, array(
+			$args,
+			array(
 				'video_id' => false,
 			)
 		);
 
 		if ( empty( $args['video_id'] ) ) {
 			return AMP_HTML_Utils::build_tag(
-				'a', array(
+				'a',
+				array(
 					'href'  => esc_url( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
-				), esc_html( $args['url'] )
+				),
+				esc_html( $args['url'] )
 			);
 		}
 

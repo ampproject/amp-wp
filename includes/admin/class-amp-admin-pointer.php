@@ -91,7 +91,7 @@ class AMP_Admin_Pointer {
 
 		wp_register_script(
 			self::TOOLTIP_SLUG,
-			amp_get_asset_url( 'js/' . self::TOOLTIP_SLUG . '-compiled.js' ),
+			amp_get_asset_url( 'js/' . self::TOOLTIP_SLUG . '.js' ),
 			array( 'jquery', 'wp-pointer' ),
 			AMP__VERSION,
 			true

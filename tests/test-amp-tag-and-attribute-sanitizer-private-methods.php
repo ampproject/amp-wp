@@ -67,8 +67,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
-
-
 			'test_attr_spec_rule_value_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -105,9 +103,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
-
 
 			'test_attr_spec_rule_value_casei_lower_pass' => array(
 				array(
@@ -158,8 +153,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
 
-
-
 			'test_attr_spec_rule_value_regex_pass' => array(
 				array(
 					'rule_spec_index' => 0,
@@ -196,8 +189,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
 
 			'test_attr_spec_rule_value_regex_casei_lower_pass' => array(
 				array(
@@ -283,8 +274,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 				),
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
 			),
-
-
 
 			'test_attr_spec_rule_disallowed_empty_pass' => array(
 				array(
@@ -394,10 +383,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$source = '<' . $data['tag_name'] . ' ' . $attribute . '>Some test content</' . $data['tag_name'] . '>';
 
-		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][$data['rule_spec_index']]['attr_spec_list'];
-		foreach( $attr_spec_list as $attr_name => $attr_val ) {
-			if ( isset( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] ) ) {
-				foreach( $attr_spec_list[ $attr_name ][AMP_Rule_Spec::ALTERNATIVE_NAMES] as $attr_alt_name ) {
+		$attr_spec_list = $this->allowed_tags[ $data['tag_name'] ][ $data['rule_spec_index'] ]['attr_spec_list'];
+		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
+			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+				foreach ( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $attr_alt_name ) {
 					$attr_spec_list[ $attr_alt_name ] = $attr_spec_list[ $attr_name ];
 				}
 			}
@@ -405,9 +394,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 		$attr_spec_rule = $attr_spec_list[ $data['attribute_name'] ];
 
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
 		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
 
@@ -650,9 +639,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_remove_node( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
 		$this->invoke_method( $sanitizer, 'remove_node', array( $node ) );
 
@@ -784,9 +773,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_replace_node_with_children( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
 		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
 
@@ -1063,9 +1052,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_validate_attr_spec_list_for_node( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 
 		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
 
@@ -1185,8 +1174,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_check_attr_spec_rule_value( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
@@ -1332,8 +1321,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_check_attr_spec_rule_value_casei( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
@@ -1421,8 +1410,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_check_attr_spec_rule_blacklisted_value_regex( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
@@ -1551,8 +1540,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_check_attr_spec_rule_allowed_protocol( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
@@ -1607,7 +1596,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 							'allow_relative' => false,
 						),
 						'alternative_names' => array(
-							'attribute1_alternative1'
+							'attribute1_alternative1',
 						),
 					),
 				),
@@ -1623,7 +1612,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 							'allow_relative' => false,
 						),
 						'alternative_names' => array(
-							'attribute1_alternative1'
+							'attribute1_alternative1',
 						),
 					),
 				),
@@ -1665,7 +1654,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 							'allow_relative' => false,
 						),
 						'alternative_names' => array(
-							'attribute1_alternative1'
+							'attribute1_alternative1',
 						),
 					),
 				),
@@ -1695,8 +1684,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @group allowed-tags-private-methods
 	 */
 	public function test_check_attr_spec_rule_disallowed_relative( $data, $expected ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
-		$node = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
 		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
