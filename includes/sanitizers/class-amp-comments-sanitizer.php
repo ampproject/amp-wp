@@ -34,10 +34,10 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$xpath = new DOMXPath( $this->dom );
-		$comments = $xpath->query('//*[starts-with(@id,\'comment-\')]' );
+		$xpath    = new DOMXPath( $this->dom );
+		$comments = $xpath->query( '//*[starts-with(@id,\'comment-\')]' );
 
-		foreach( $comments as $comment ) {
+		foreach ( $comments as $comment ) {
 			$this->process_comment( $comment );
 		}
 	}
@@ -179,7 +179,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$comment->setAttribute( 'data-sort-time', strtotime( $comment_object->comment_date ) );
 
 		$update_time = $comment_object->comment_date;
-		$children    = $comment_object->get_children( array( 'hierarchical' => 'flat', 'orderby' => 'comment_date' ) );
+		$children    = $comment_object->get_children(
+			array(
+				'hierarchical' => 'flat',
+				'orderby'      => 'comment_date',
+			)
+		);
 
 		if ( ! empty( $children ) ) {
 			$update_time = $children[0]->comment_date;

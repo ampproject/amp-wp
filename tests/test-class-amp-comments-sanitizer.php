@@ -114,10 +114,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		$this->create_comments_list( $comment_objects );
 		$this->instance->sanitize();
 
-		$xpath = new DOMXPath( $this->dom );
-		$comments = $xpath->query('//*[starts-with(@id,\'comment-\')]' );
+		$xpath    = new DOMXPath( $this->dom );
+		$comments = $xpath->query( '//*[starts-with(@id,\'comment-\')]' );
 
-		foreach( $comments as $comment ) {
+		foreach ( $comments as $comment ) {
 			/** @var DOMElement $comment */
 
 			$comment_id = (int) str_replace( 'comment-', '', $comment->getAttribute( 'id' ) );
@@ -133,7 +133,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 			$children = $comment_object->get_children(
 				array(
 					'hierarchical' => 'flat',
-					'orderby'      => 'comment_date'
+					'orderby'      => 'comment_date',
 				)
 			);
 
