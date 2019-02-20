@@ -163,7 +163,7 @@ class AMP_Validated_URL_Post_Type {
 		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
-		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -200,7 +200,7 @@ class AMP_Validated_URL_Post_Type {
 					'admin_head-edit.php',
 					function() {
 						global $mode;
-						$mode = 'list'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+						$mode = 'list'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 				);
 			}
@@ -863,7 +863,7 @@ class AMP_Validated_URL_Post_Type {
 			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
-		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			unset( $columns['error_status'], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] );
 			$columns[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] = esc_html__( 'Sources', 'amp' );
 			$columns['date']  = esc_html__( 'Last Checked', 'amp' );
@@ -1172,12 +1172,12 @@ class AMP_Validated_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_admin_notice() {
-		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		if ( isset( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			foreach ( $error_codes as $error_code ) {
 				printf(
 					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
@@ -1187,9 +1187,9 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors_remain ) {
 				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'notice-warning';
@@ -1206,7 +1206,7 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $count > 0 ) {
 			$class = 'updated';
 			printf(
@@ -1267,8 +1267,8 @@ class AMP_Validated_URL_Post_Type {
 		 * 1. Notice with detailed error information in an expanding box.
 		 * 2. Notice with accept and reject buttons.
 		 */
-		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			$error = AMP_Validation_Error_Taxonomy::get_term( $error_id );
 			if ( ! $error ) {
@@ -1628,11 +1628,17 @@ class AMP_Validated_URL_Post_Type {
 			),
 		);
 
-		// Only the %d is interpolated by PHP, as the JS file will replace %% with the errors that are displaying, based on filtering.
+		// Only the second number is interpolated by PHP, as the JS file will dynamically replace %1$s with the errors being displayed.
 		$data['l10n']['showing_number_errors'] = sprintf(
-			/* translators: %% is the errors that are displaying, %d is the total number of errors found */
-			__( 'Showing %% of %d validation errors', 'amp' ),
-			self::$total_errors_for_url
+			/* translators: 1: number of errors being displayed. 2: total number of errors found. */
+			_n(
+				'Showing %1$s of %2$s validation error',
+				'Showing %1$s of %2$s validation errors',
+				self::$total_errors_for_url,
+				'amp'
+			),
+			'%1$s',
+			number_format_i18n( self::$total_errors_for_url )
 		);
 
 		wp_add_inline_script(
@@ -1691,7 +1697,7 @@ class AMP_Validated_URL_Post_Type {
 						/* translators: %s: The date this was published */
 						wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
 						/* translators: Meta box date format */
-						esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
+						esc_html( date_i18n( __( 'M j, Y @ H:i', 'amp' ), strtotime( $post->post_date ) ) )
 					);
 					?>
 					</span>
@@ -1703,7 +1709,7 @@ class AMP_Validated_URL_Post_Type {
 						</a>
 					</div>
 					<div id="preview-action">
-						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'amp' ); ?></button>
 					</div>
 					<div class="clear"></div>
 				</div>
@@ -1773,7 +1779,7 @@ class AMP_Validated_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'amp' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1821,7 +1827,7 @@ class AMP_Validated_URL_Post_Type {
 		$taxonomy        = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$taxonomy_object = get_taxonomy( $taxonomy );
 		if ( ! $taxonomy_object ) {
-			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
+			wp_die( esc_html__( 'Invalid taxonomy.', 'amp' ) );
 		}
 
 		/**
@@ -1897,12 +1903,12 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_taxonomy() {
 		global $pagenow;
 
-		if ( 'post.php' !== $pagenow || ! isset( $_REQUEST['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( 'post.php' !== $pagenow || ! isset( $_REQUEST['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
 		$post_id = intval( $_REQUEST['post'] );
-		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$_REQUEST['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		}
 	}
@@ -2038,7 +2044,7 @@ class AMP_Validated_URL_Post_Type {
 							$query->found_posts,
 							'amp'
 						),
-						$query->found_posts
+						number_format_i18n( $query->found_posts )
 					)
 				)
 			);
@@ -2078,9 +2084,9 @@ class AMP_Validated_URL_Post_Type {
 		if (
 			'post.php' !== $pagenow
 			||
-			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
-			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		) {
 			return null;
 		}

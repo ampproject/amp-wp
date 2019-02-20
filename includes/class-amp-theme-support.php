@@ -189,7 +189,16 @@ class AMP_Theme_Support {
 			}
 
 			if ( isset( $args['available_callback'] ) ) {
-				_doing_it_wrong( 'add_theme_support', esc_html__( 'The available_callback is deprecated when adding amp theme support in favor of declaratively setting the supported_templates.', 'amp' ), '1.0' );
+				_doing_it_wrong(
+					'add_theme_support',
+					sprintf(
+						/* translators: 1: available_callback. 2: supported_templates */
+						esc_html__( 'The %1$s is deprecated when adding amp theme support in favor of declaratively setting the %2$s.', 'amp' ),
+						'available_callback',
+						'supported_templates'
+					),
+					'1.0'
+				);
 			}
 			self::$support_added_via_option = false;
 		} elseif ( 'disabled' !== $theme_support_option ) {
@@ -281,7 +290,7 @@ class AMP_Theme_Support {
 	 */
 	public static function ensure_proper_amp_location( $exit = true ) {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
-		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
@@ -388,6 +397,9 @@ class AMP_Theme_Support {
 	 */
 	public static function add_amp_template_filters() {
 		foreach ( self::$template_types as $template_type ) {
+			// See get_query_template().
+			$template_type = preg_replace( '|[^a-z0-9-]+|', '', $template_type );
+
 			add_filter( "{$template_type}_template_hierarchy", array( __CLASS__, 'filter_amp_template_hierarchy' ) );
 		}
 	}
@@ -493,7 +505,7 @@ class AMP_Theme_Support {
 
 		// Make sure global $wp_query is set in case of conditionals that unfortunately look at global scope.
 		$prev_query = $wp_query;
-		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$wp_query   = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$matching_templates    = array();
 		$supportable_templates = self::get_supportable_templates();
@@ -525,7 +537,7 @@ class AMP_Theme_Support {
 		}
 
 		// Restore previous $wp_query (if any).
-		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$wp_query = $prev_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// Make sure children override their parents.
 		$matching_template_ids = array_keys( $matching_templates );
@@ -567,7 +579,17 @@ class AMP_Theme_Support {
 		 * Template conditions need to be set up properly to prevent this from happening.
 		 */
 		if ( count( $matching_templates ) > 1 ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Did not expect there to be more than one matching template. Did you filter amp_supportable_templates to not honor the template hierarchy?', 'amp' ), '1.0' );
+			_doing_it_wrong(
+				__METHOD__,
+				esc_html(
+					sprintf(
+						/* translators: %s: amp_supportable_templates */
+						__( 'Did not expect there to be more than one matching template. Did you filter %s to not honor the template hierarchy?', 'amp' ),
+						'amp_supportable_templates'
+					)
+				),
+				'1.0'
+			);
 		}
 
 		$matching_template = array_shift( $matching_templates );
@@ -634,7 +656,7 @@ class AMP_Theme_Support {
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_on_front' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
 				/* translators: %s: the URL to the edit post screen. */
-				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
+				$templates['is_front_page']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_on_front' ) ) ) );
 			}
 
 			// In other words, same as is_posts_page, *but* it not is_singular.
@@ -643,7 +665,7 @@ class AMP_Theme_Support {
 			);
 			if ( AMP_Post_Meta_Box::DISABLED_STATUS === get_post_meta( get_option( 'page_for_posts' ), AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) ) {
 				/* translators: %s: the URL to the edit post screen. */
-				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s" target="_blank">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
+				$templates['is_home']['description'] = sprintf( __( 'Currently disabled at the <a href="%s">page level</a>.', 'amp' ), esc_url( get_edit_post_link( get_option( 'page_for_posts' ) ) ) );
 			}
 		} else {
 			$templates['is_home'] = array(
@@ -800,7 +822,7 @@ class AMP_Theme_Support {
 		add_filter(
 			'get_custom_logo',
 			function( $html ) {
-				return preg_replace( '/(?<=<img\s)/', ' noloading ', $html );
+				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
 		);
@@ -937,8 +959,18 @@ class AMP_Theme_Support {
 			);
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
-				/* translators: %s is embed handler */
-				_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Embed Handler (%s) must extend `AMP_Embed_Handler`', 'amp' ), $embed_handler_class ) ), '0.1' );
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html(
+						sprintf(
+							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
+							esc_html( $embed_handler_class ),
+							'AMP_Embed_Handler'
+						)
+					),
+					'0.1'
+				);
 				continue;
 			}
 
@@ -1901,7 +1933,7 @@ class AMP_Theme_Support {
 		AMP_Validation_Manager::finalize_validation(
 			$dom,
 			array(
-				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+				'remove_source_comments' => ! isset( $_GET['amp_preserve_source_comments'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			)
 		);
 

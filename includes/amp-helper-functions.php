@@ -202,7 +202,7 @@ function amp_add_amphtml_link() {
 			echo "<!--\n";
 			echo esc_html(
 				sprintf(
-					/* translators: %s is error count */
+					/* translators: %s: error count */
 					_n(
 						'There is %s validation error that is blocking the amphtml version from being available.',
 						'There are %s validation errors that are blocking the amphtml version from being available.',
@@ -257,7 +257,17 @@ function is_amp_endpoint() {
 	$did_parse_query = did_action( 'parse_query' );
 
 	if ( ! $did_parse_query ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'parse_query' hook was called. This function will always return 'false' before the 'parse_query' hook is called.", 'amp' ) ), '0.4.2' );
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: is_amp_endpoint(), 2: parse_query, 3: false */
+				esc_html__( '%1$s was called before the %2$s hook was called. This function will always return %3$s before the %2$s hook is called.', 'amp' ),
+				'is_amp_endpoint()',
+				'parse_query',
+				'false'
+			),
+			'0.4.2'
+		);
 	}
 
 	// AMP Stories are always an AMP endpoint.
@@ -266,7 +276,7 @@ function is_amp_endpoint() {
 	}
 
 	$has_amp_query_var = (
-		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
 		false !== get_query_var( amp_get_slug(), false )
 	);
@@ -295,7 +305,17 @@ function is_amp_endpoint() {
 	}
 
 	if ( ! did_action( 'wp' ) ) {
-		_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( "is_amp_endpoint() was called before the 'wp' action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the amp_skip_post filter nor the AMP enabled publish metabox toggle will not be considered.", 'amp' ) ), '1.0.2' );
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: is_amp_endpoint(). 2: wp. 3: amp_skip_post */
+				esc_html__( '%1$s was called before the %2$s action which means it will not have access to the queried object to determine if it is an AMP response, thus neither the %3$s filter nor the AMP enabled publish metabox toggle will be considered.', 'amp' ),
+				'is_amp_endpoint()',
+				'wp',
+				'amp_skip_post'
+			),
+			'1.0.2'
+		);
 		$supported = true;
 	} else {
 		$availability = AMP_Theme_Support::get_template_availability();
@@ -628,8 +648,19 @@ function amp_print_analytics( $analytics ) {
 	// Can enter multiple configs within backend.
 	foreach ( $analytics_entries as $id => $analytics_entry ) {
 		if ( ! isset( $analytics_entry['type'], $analytics_entry['attributes'], $analytics_entry['config_data'] ) ) {
-			/* translators: 1: the analytics entry ID, 2: comma-separated list of the actual entry keys. */
-			_doing_it_wrong( __FUNCTION__, sprintf( esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `type`, `attributes`, or `config_data` (array keys: %2$s)', 'amp' ), esc_html( $id ), esc_html( implode( ', ', array_keys( $analytics_entry ) ) ) ), '0.3.2' );
+			_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					/* translators: 1: the analytics entry ID. 2: type. 3: attributes. 4: config_data. 5: comma-separated list of the actual entry keys. */
+					esc_html__( 'Analytics entry for %1$s is missing one of the following keys: `%2$s`, `%3$s`, or `%4$s` (array keys: %5$s)', 'amp' ),
+					esc_html( $id ),
+					'type',
+					'attributes',
+					'config_data',
+					esc_html( implode( ', ', array_keys( $analytics_entry ) ) )
+				),
+				'0.3.2'
+			);
 			continue;
 		}
 		$script_element = AMP_HTML_Utils::build_tag(
@@ -663,7 +694,15 @@ function amp_print_analytics( $analytics ) {
  */
 function amp_get_content_embed_handlers( $post = null ) {
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) && $post ) {
-		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
+		_deprecated_argument(
+			__FUNCTION__,
+			'0.7',
+			sprintf(
+				/* translators: %s: $post */
+				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
+				'$post'
+			)
+		);
 		$post = null;
 	}
 
@@ -718,7 +757,15 @@ function amp_get_content_sanitizers( $post = null ) {
 	$theme_support_args = AMP_Theme_Support::get_theme_support_args();
 
 	if ( is_array( $theme_support_args ) && $post ) {
-		_deprecated_argument( __FUNCTION__, '0.7', esc_html__( 'The $post argument is deprecated when theme supports AMP.', 'amp' ) );
+		_deprecated_argument(
+			__FUNCTION__,
+			'0.7',
+			sprintf(
+				/* translators: %s: $post */
+				esc_html__( 'The %s argument is deprecated when theme supports AMP.', 'amp' ),
+				'$post'
+			)
+		);
 		$post = null;
 	}
 

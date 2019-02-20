@@ -398,16 +398,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::add_amp_template_filters()
 	 */
 	public function test_add_amp_template_filters() {
-		$template_types = array(
-			'paged',
-			'index',
-			'404',
-			'archive',
-			'author',
-			'category',
-		);
+		$reflection = new ReflectionClass( 'AMP_Theme_Support' );
+		$property   = $reflection->getProperty( 'template_types' );
+		$property->setAccessible( true );
+		$template_types = $property->getValue();
+
 		AMP_Theme_Support::add_amp_template_filters();
+
 		foreach ( $template_types as $template_type ) {
+			$template_type = preg_replace( '|[^a-z0-9-]+|', '', $template_type );
+
 			$this->assertEquals( 10, has_filter( "{$template_type}_template_hierarchy", array( self::TESTED_CLASS, 'filter_amp_template_hierarchy' ) ) );
 		}
 	}
@@ -1335,10 +1335,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$prev_ordered_contain = $ordered_contain;
 		}
 
-		$this->assertNotContains( '<img', $sanitized_html );
+		$this->assertContains( '<noscript><img', $sanitized_html );
 		$this->assertContains( '<amp-img', $sanitized_html );
 
-		$this->assertNotContains( '<audio', $sanitized_html );
+		$this->assertContains( '<noscript><audio', $sanitized_html );
 		$this->assertContains( '<amp-audio', $sanitized_html );
 
 		$removed_nodes = array();
@@ -1575,7 +1575,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		<body><!-- </body></html> -->
 		<div id="dynamic-id-0"></div>
 		<img width="100" height="100" src="https://example.com/test.png">
-		<audio width="400" height="300" src="https://example.com/audios/myaudio.mp3"></audio>
+		<audio src="https://example.com/audios/myaudio.mp3"></audio>
 		<amp-ad type="a9"
 				width="300"
 				height="250"
@@ -1837,7 +1837,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 }
 
-// phpcs:disable Generic.Files.OneClassPerFile.MultipleFound
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
 
 /**
  * Class AMP_Theme_Support_Sanitizer_Counter

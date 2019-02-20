@@ -10,7 +10,7 @@
 		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php" />
 	</php>
 	<testsuites>
-		<testsuite>
+		<testsuite name="amp-wp">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>
