@@ -78,7 +78,7 @@ module.exports = {
 		path: path.resolve( __dirname ),
 		filename: '[name].js',
 		library: 'AMP',
-		libraryTarget: 'this',
+		libraryTarget: 'this'
 	},
 	externals,
 	devtool: isProduction ? undefined : 'cheap-eval-source-map',
