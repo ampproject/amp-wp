@@ -13,7 +13,7 @@ import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
-	Placeholder,
+	Placeholder
 } from '@wordpress/components';
 
 /**

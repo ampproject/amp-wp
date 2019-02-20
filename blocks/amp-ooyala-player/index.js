@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	ToggleControl
+	SelectControl
 } from '@wordpress/components';
 
 /**
