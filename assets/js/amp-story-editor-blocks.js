@@ -3,9 +3,10 @@
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, -1 ] } ] */
 
 var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
-	var component, __;
+	var component, __, _x;
 
 	__ = wp.i18n.__;
+	_x = wp.i18n._x;
 
 	component = {
 
@@ -166,79 +167,159 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				},
 				{
 					value: 'arial',
-					label: __( 'Arial', 'amp' )
+					label: _x( 'Arial', 'font name', 'amp' )
 				},
 				{
 					value: 'arial-black',
-					label: __( 'Arial Black', 'amp' )
+					label: _x( 'Arial Black', 'font name', 'amp' )
 				},
 				{
 					value: 'arial-narrow',
-					label: __( 'Arial Narrow', 'amp' )
+					label: _x( 'Arial Narrow', 'font name', 'amp' )
+				},
+				{
+					value: 'arimo',
+					label: _x( 'Arimo', 'font name', 'amp' )
 				},
 				{
 					value: 'baskerville',
-					label: __( 'Baskerville', 'amp' )
+					label: _x( 'Baskerville', 'font name', 'amp' )
 				},
 				{
 					value: 'brush-script-mt',
-					label: __( 'Brush Script MT', 'amp' )
+					label: _x( 'Brush Script MT', 'font name', 'amp' )
 				},
 				{
 					value: 'copperplate',
-					label: __( 'Copperplate', 'amp' )
+					label: _x( 'Copperplate', 'font name', 'amp' )
 				},
 				{
 					value: 'courier-new',
-					label: __( 'Courier New', 'amp' )
+					label: _x( 'Courier New', 'font name', 'amp' )
 				},
 				{
 					value: 'century-gothic',
-					label: __( 'Century Gothic', 'amp' )
+					label: _x( 'Century Gothic', 'font name', 'amp' )
 				},
 				{
 					value: 'garamond',
-					label: __( 'Garamond', 'amp' )
+					label: _x( 'Garamond', 'font name', 'amp' )
 				},
 				{
 					value: 'georgia',
-					label: __( 'Georgia', 'amp' )
+					label: _x( 'Georgia', 'font name', 'amp' )
 				},
 				{
 					value: 'gill-sans',
-					label: __( 'Gill Sans', 'amp' )
+					label: _x( 'Gill Sans', 'font name', 'amp' )
+				},
+				{
+					value: 'lato',
+					label: _x( 'Lato', 'font name', 'amp' )
+				},
+				{
+					value: 'lora',
+					label: _x( 'Lora', 'font name', 'amp' )
 				},
 				{
 					value: 'lucida-bright',
-					label: __( 'Lucida Bright', 'amp' )
+					label: _x( 'Lucida Bright', 'font name', 'amp' )
 				},
 				{
 					value: 'lucida-sans-typewriter',
-					label: __( 'Lucida Sans Typewriter', 'amp' )
+					label: _x( 'Lucida Sans Typewriter', 'font name', 'amp' )
+				},
+				{
+					value: 'merriweather',
+					label: _x( 'Merriweather', 'font name', 'amp' )
+				},
+				{
+					value: 'montserrat',
+					label: _x( 'Montserrat', 'font name', 'amp' )
+				},
+				{
+					value: 'noto-sans',
+					label: _x( 'Noto Sans', 'font name', 'amp' )
+				},
+				{
+					value: 'open-sans',
+					label: _x( 'Open Sans', 'font name', 'amp' )
+				},
+				{
+					value: 'open-sans-condensed',
+					label: _x( 'Open Sans Condensed', 'font name', 'amp' )
+				},
+				{
+					value: 'oswald',
+					label: _x( 'Oswald', 'font name', 'amp' )
 				},
 				{
 					value: 'papyrus',
-					label: __( 'Papyrus', 'amp' )
+					label: _x( 'Papyrus', 'font name', 'amp' )
 				},
 				{
 					value: 'palatino',
-					label: __( 'Palatino', 'amp' )
+					label: _x( 'Palatino', 'font name', 'amp' )
+				},
+				{
+					value: 'playfair-display',
+					label: _x( 'Playfair Display', 'font name', 'amp' )
+				},
+				{
+					value: 'pt-sans',
+					label: _x( 'PT Sans', 'font name', 'amp' )
+				},
+				{
+					value: 'pt-sans-narrow',
+					label: _x( 'PT Sans Narrow', 'font name', 'amp' )
+				},
+				{
+					value: 'pt-serif',
+					label: _x( 'PT Serif', 'font name', 'amp' )
+				},
+				{
+					value: 'raleway',
+					label: _x( 'Raleway', 'font name', 'amp' )
+				},
+				{
+					value: 'roboto',
+					label: _x( 'Roboto', 'font name', 'amp' )
+				},
+				{
+					value: 'roboto-condensed',
+					label: _x( 'Roboto Condensed', 'font name', 'amp' )
+				},
+				{
+					value: 'roboto-slab',
+					label: _x( 'Roboto Slab', 'font name', 'amp' )
+				},
+				{
+					value: 'slabo-27',
+					label: _x( 'Slabo 27px', 'font name', 'amp' )
+				},
+				{
+					value: 'source-sans-pro',
+					label: _x( 'Source Sans Pro', 'font name', 'amp' )
 				},
 				{
 					value: 'tahoma',
-					label: __( 'Tahoma', 'amp' )
+					label: _x( 'Tahoma', 'font name', 'amp' )
 				},
 				{
 					value: 'times-new-roman',
-					label: __( 'Times New Roman', 'amp' )
+					label: _x( 'Times New Roman', 'font name', 'amp' )
 				},
 				{
 					value: 'trebuchet-ms',
-					label: __( 'Trebuchet MS', 'amp' )
+					label: _x( 'Trebuchet MS', 'font name', 'amp' )
+				},
+				{
+					value: 'ubuntu',
+					label: _x( 'Ubuntu', 'font name', 'amp' )
 				},
 				{
 					value: 'verdana',
-					label: __( 'Verdana', 'amp' )
+					label: _x( 'Verdana', 'font name', 'amp' )
 				}
 			]
 		}
