@@ -6,18 +6,16 @@ import {
 	BLOCK_ICONS
 } from './helpers';
 
-const { __ } = wp.i18n;
-const {
-	registerBlockType
-} = wp.blocks;
-const {
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import {
 	InnerBlocks,
 	PanelColorSettings,
 	InspectorControls,
 	Inserter
-} = wp.editor;
-
-const { Component } = wp.element;
+} from '@wordpress/editor';
+import { Component } from '@wordpress/element';
+import { select } from '@wordpress/data';
 
 const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer-vertical',
@@ -30,7 +28,7 @@ const {
 	hasSelectedInnerBlock,
 	getSelectedBlockClientId,
 	getBlockIndex
-} = wp.data.select( 'core/editor' );
+} = select( 'core/editor' );
 
 const TEMPLATE = [
 	[ 'amp/amp-story-grid-layer-background-image' ],

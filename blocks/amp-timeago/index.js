@@ -8,21 +8,15 @@ import { getLayoutControls } from '../utils.js';
 /**
  * Internal block libraries.
  */
-const { __ } = wp.i18n;
-const {
-	registerBlockType
-} = wp.blocks;
-const {
-	InspectorControls,
-	BlockAlignmentToolbar,
-	BlockControls
-} = wp.editor;
-const {
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls, BlockAlignmentToolbar, BlockControls } from '@wordpress/editor';
+import {
 	DateTimePicker,
 	PanelBody,
 	TextControl
-} = wp.components;
-const { Fragment } = wp.element;
+} from '@wordpress/components';
+import { Fragment } from '@wordpress/element';
 import timeago from 'timeago.js';
 
 /**

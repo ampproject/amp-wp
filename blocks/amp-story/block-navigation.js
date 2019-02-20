@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-const { withSelect, withDispatch } = wp.data;
-const { Button, NavigableMenu } = wp.components;
-const { getBlockType } = wp.blocks;
-const { compose } = wp.compose;
-const { __ } = wp.i18n;
-const { BlockIcon } = wp.editor;
+import { withSelect, withDispatch } from '@wordpress/data';
+import { Button, NavigableMenu } from '@wordpress/components';
+import { getBlockType } from '@wordpress/blocks';
+import { compose } from '@wordpress/compose';
+import { __ } from '@wordpress/i18n';
+import { BlockIcon } from '@wordpress/editor';
 
 function BlockNavigationList( {
 	blocks,

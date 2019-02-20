@@ -1,10 +1,10 @@
-const { __ } = wp.i18n;
-const {
+import { __, sprintf } from '@wordpress/i18n';
+import {
 	TextControl,
 	SelectControl,
 	Notice,
 	Placeholder
-} = wp.components;
+} from '@wordpress/components';
 
 /**
  * Display media placeholder.
@@ -47,7 +47,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 		showWidthNotice && (
 			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
 				{
-					wp.i18n.sprintf(
+					sprintf(
 						/* translators: %s is the layout name */
 						__( 'Width is required for %s layout', 'amp' ),
 						ampLayout
@@ -65,7 +65,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 		showHeightNotice && (
 			<Notice key="showHeightNotice" status="error" isDismissible={ false }>
 				{
-					wp.i18n.sprintf(
+					sprintf(
 						/* translators: %s is the layout name */
 						__( 'Height is required for %s layout', 'amp' ),
 						ampLayout

@@ -2,13 +2,9 @@
 /**
  * Internal block libraries.
  */
-const { __ } = wp.i18n;
-const {
-	registerBlockType
-} = wp.blocks;
-const {
-	PlainText
-} = wp.editor;
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { PlainText } from '@wordpress/editor';
 
 /**
  * Register block.

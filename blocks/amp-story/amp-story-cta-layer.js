@@ -3,24 +3,16 @@ import {
 	BLOCK_ICONS
 } from './helpers';
 
-const { __ } = wp.i18n;
-const {
-	registerBlockType
-} = wp.blocks;
-const {
-	InspectorControls,
-	InnerBlocks
-} = wp.editor;
-const {
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls, InnerBlocks } from '@wordpress/editor';
+import {
 	Notice,
 	PanelBody
-} = wp.components;
-const { Component } = wp.element;
+} from '@wordpress/components';
+import { Component } from '@wordpress/element';
+import { select, dispatch } from '@wordpress/data';
 
-const {
-	select,
-	dispatch
-} = wp.data;
 const {
 	moveBlockToPosition,
 	removeBlock
@@ -29,7 +21,8 @@ const {
 const {
 	getBlock,
 	getBlockRootClientId,
-	getBlockOrder
+	getBlockOrder,
+	getBlockIndex
 } = select( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
@@ -107,7 +100,7 @@ export default registerBlockType(
 
 			componentDidMount() {
 				const rootClientID = getBlockRootClientId( this.props.clientId );
-				const blockIndex = wp.data.select( 'core/editor' ).getBlockIndex( rootClientID );
+				const blockIndex = getBlockIndex( rootClientID );
 				let noticeMessage = null;
 				const noticeOptions = {
 					id: 'amp-errors-notice-removed-cta'
