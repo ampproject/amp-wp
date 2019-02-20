@@ -376,6 +376,7 @@ class AMP_Story_Post_Type {
 				$fonts_url
 			);
 
+			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				sprintf( '%s-font', sanitize_title( $font['name'] ) ),
 				$src
