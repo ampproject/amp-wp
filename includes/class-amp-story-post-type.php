@@ -370,8 +370,8 @@ class AMP_Story_Post_Type {
 		foreach ( $fonts as $font ) {
 			$src = add_query_arg(
 				array(
-					'family' => urlencode( $font['family'] ),
-					'subset' => urlencode( implode( ',', $subsets ) ),
+					'family' => rawurlencode( $font['family'] ),
+					'subset' => rawurlencode( implode( ',', $subsets ) ),
 				),
 				$fonts_url
 			);
