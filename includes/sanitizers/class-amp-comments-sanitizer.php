@@ -13,7 +13,7 @@
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Placeholder for default args, to be set in child classes.
+	 * Default args.
 	 *
 	 * @since 1.1
 	 *
@@ -57,6 +57,8 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Comment form.
+	 *
+	 * @since 0.7
 	 *
 	 * @param DOMElement $comment_form Comment form.
 	 */
@@ -178,6 +180,8 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
+	 *
+	 * @since 1.1
 	 *
 	 * @param DOMElement $comment_element Comment element.
 	 */

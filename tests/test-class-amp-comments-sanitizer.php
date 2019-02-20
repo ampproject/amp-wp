@@ -101,7 +101,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test AMP_Comment_Walker::paged_walk.
+	 * Test AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes.
 	 *
 	 * @covers AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes()
 	 */
@@ -192,7 +192,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Create comments list.
+	 * Populate the DOM with comments list.
 	 *
 	 * @param WP_Comment[] $comments Comments.
 	 */
