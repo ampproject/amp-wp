@@ -843,20 +843,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test set_comments_walker.
-	 *
-	 * @covers AMP_Theme_Support::set_comments_walker()
-	 */
-	public function test_set_comments_walker() {
-		$args = AMP_Theme_Support::set_comments_walker(
-			array(
-				'walker' => null,
-			)
-		);
-		$this->assertInstanceOf( 'AMP_Comment_Walker', $args['walker'] );
-	}
-
-	/**
 	 * Test amend_comment_form().
 	 *
 	 * @covers AMP_Theme_Support::amend_comment_form()
