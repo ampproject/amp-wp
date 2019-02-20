@@ -59,6 +59,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
+	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 * }
 	 */
 	protected $args;
@@ -79,6 +80,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
 		'accept_tree_shaking'       => false,
+		'include_manifest_comment'  => 'always',
 	);
 
 	/**
@@ -251,6 +253,43 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Determine whether the version of PHP-CSS-Parser loaded has all required features for tree shaking and CSS processing.
+	 *
+	 * @since 1.0.2
+	 *
+	 * @return bool Returns true if the plugin's forked version of PHP-CSS-Parser is loaded by Composer.
+	 */
+	public static function has_required_php_css_parser() {
+		$has_required_methods = (
+			method_exists( 'Sabberworm\CSS\CSSList\Document', 'splice' )
+			&&
+			method_exists( 'Sabberworm\CSS\CSSList\Document', 'replace' )
+		);
+		if ( ! $has_required_methods ) {
+			return false;
+		}
+
+		$reflection = new ReflectionClass( 'Sabberworm\CSS\OutputFormat' );
+
+		$has_output_format_extensions = (
+			$reflection->hasProperty( 'sBeforeAtRuleBlock' )
+			&&
+			$reflection->hasProperty( 'sAfterAtRuleBlock' )
+			&&
+			$reflection->hasProperty( 'sBeforeDeclarationBlock' )
+			&&
+			$reflection->hasProperty( 'sAfterDeclarationBlockSelectors' )
+			&&
+			$reflection->hasProperty( 'sAfterDeclarationBlock' )
+		);
+		if ( ! $has_output_format_extensions ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * AMP_Base_Sanitizer constructor.
 	 *
 	 * @since 0.7
@@ -284,7 +323,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! $guessurl ) {
 			$guessurl = wp_guess_url();
 		}
-		$this->base_url    = $guessurl;
+		$this->base_url    = untrailingslashit( $guessurl );
 		$this->content_url = WP_CONTENT_URL;
 		$this->xpath       = new DOMXPath( $dom );
 	}
@@ -475,6 +514,74 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Eliminate relative segments (../ and ./) from a path.
+	 *
+	 * @param string $path Path with relative segments. This is not a URL, so no host and no query string.
+	 * @return string|WP_Error Unrelativized path or WP_Error if there is too much relativity.
+	 */
+	private function unrelativize_path( $path ) {
+		// Eliminate current directory relative paths, like <foo/./bar/./baz.css> => <foo/bar/baz.css>.
+		do {
+			$path = preg_replace(
+				'#/\./#',
+				'/',
+				$path,
+				-1,
+				$count
+			);
+		} while ( 0 !== $count );
+
+		// Collapse relative paths, like <foo/bar/../../baz.css> => <baz.css>.
+		do {
+			$path = preg_replace(
+				'#(?<=/)(?!\.\./)[^/]+/\.\./#',
+				'',
+				$path,
+				1,
+				$count
+			);
+		} while ( 0 !== $count );
+
+		if ( preg_match( '#(^|/)\.+/#', $path ) ) {
+			/* translators: %s is the path with the remaining relative segments. */
+			return new WP_Error( 'remaining_relativity', sprintf( __( 'There are remaining relative path segments: %s', 'amp' ), $path ) );
+		}
+
+		return $path;
+	}
+
+	/**
+	 * Construct a URL from a parsed one.
+	 *
+	 * @param array $parsed_url Parsed URL.
+	 * @return string Reconstructed URL.
+	 */
+	private function reconstruct_url( $parsed_url ) {
+		$url = '';
+		if ( ! empty( $parsed_url['host'] ) ) {
+			if ( ! empty( $parsed_url['scheme'] ) ) {
+				$url .= $parsed_url['scheme'] . ':';
+			}
+			$url .= '//';
+			$url .= $parsed_url['host'];
+
+			if ( ! empty( $parsed_url['port'] ) ) {
+				$url .= ':' . $parsed_url['port'];
+			}
+		}
+		if ( ! empty( $parsed_url['path'] ) ) {
+			$url .= $parsed_url['path'];
+		}
+		if ( ! empty( $parsed_url['query'] ) ) {
+			$url .= '?' . $parsed_url['query'];
+		}
+		if ( ! empty( $parsed_url['fragment'] ) ) {
+			$url .= '#' . $parsed_url['fragment'];
+		}
+		return $url;
+	}
+
+	/**
 	 * Generate a URL's fully-qualified file path.
 	 *
 	 * @since 0.7
@@ -485,35 +592,52 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return string|WP_Error Style's absolute validated filesystem path, or WP_Error when error.
 	 */
 	public function get_validated_url_file_path( $url, $allowed_extensions = array() ) {
+		if ( ! is_string( $url ) ) {
+			return new WP_Error( 'url_not_string' );
+		}
+
 		$needs_base_url = (
-			! is_bool( $url )
-			&&
 			! preg_match( '|^(https?:)?//|', $url )
 			&&
 			! ( $this->content_url && 0 === strpos( $url, $this->content_url ) )
 		);
 		if ( $needs_base_url ) {
-			$url = $this->base_url . $url;
+			$url = $this->base_url . '/' . ltrim( $url, '/' );
 		}
+
+		$parsed_url = wp_parse_url( $url );
+		if ( empty( $parsed_url['host'] ) ) {
+			/* translators: %s is the original URL */
+			return new WP_Error( 'no_url_host', sprintf( __( 'URL is missing host: %s', 'amp' ), $url ) );
+		}
+		if ( empty( $parsed_url['path'] ) ) {
+			/* translators: %s is the original URL */
+			return new WP_Error( 'no_url_path', sprintf( __( 'URL is missing path: %s', 'amp' ), $url ) );
+		}
+
+		$path = $this->unrelativize_path( $parsed_url['path'] );
+		if ( is_wp_error( $path ) ) {
+			return $path;
+		}
+		$parsed_url['path'] = $path;
 
 		$remove_url_scheme = function( $schemed_url ) {
 			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
 		};
 
-		// Strip URL scheme, query, and fragment.
-		$url = $remove_url_scheme( preg_replace( ':[\?#].*$:', '', $url ) );
+		unset( $parsed_url['scheme'], $parsed_url['query'], $parsed_url['fragment'] );
+		$url = $this->reconstruct_url( $parsed_url );
 
 		$includes_url = $remove_url_scheme( includes_url( '/' ) );
 		$content_url  = $remove_url_scheme( content_url( '/' ) );
 		$admin_url    = $remove_url_scheme( get_admin_url( null, '/' ) );
+		$site_url     = $remove_url_scheme( site_url( '/' ) );
 
 		$allowed_hosts = array(
 			wp_parse_url( $includes_url, PHP_URL_HOST ),
 			wp_parse_url( $content_url, PHP_URL_HOST ),
 			wp_parse_url( $admin_url, PHP_URL_HOST ),
 		);
-
-		$url_host = wp_parse_url( $url, PHP_URL_HOST );
 
 		// Validate file extensions.
 		if ( ! empty( $allowed_extensions ) ) {
@@ -524,13 +648,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! in_array( $url_host, $allowed_hosts, true ) ) {
+		if ( ! in_array( $parsed_url['host'], $allowed_hosts, true ) ) {
 			/* translators: %s: the file URL */
-			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $url_host ) );
+			return new WP_Error( 'external_file_url', sprintf( __( 'URL is located on an external domain: %s.', 'amp' ), $parsed_url['host'] ) );
 		}
 
-		$base_path = null;
-		$file_path = null;
+		$base_path  = null;
+		$file_path  = null;
+		$wp_content = 'wp-content';
 		if ( 0 === strpos( $url, $content_url ) ) {
 			$base_path = WP_CONTENT_DIR;
 			$file_path = substr( $url, strlen( $content_url ) - 1 );
@@ -540,6 +665,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		} elseif ( 0 === strpos( $url, $admin_url ) ) {
 			$base_path = ABSPATH . 'wp-admin';
 			$file_path = substr( $url, strlen( $admin_url ) - 1 );
+		} elseif ( 0 === strpos( $url, $site_url . trailingslashit( $wp_content ) ) ) {
+			// Account for loading content from original wp-content directory not WP_CONTENT_DIR which can happen via register_theme_directory().
+			$base_path = ABSPATH . $wp_content;
+			$file_path = substr( $url, strlen( $site_url ) + strlen( $wp_content ) );
 		}
 
 		if ( ! $file_path || false !== strpos( $file_path, '../' ) || false !== strpos( $file_path, '..\\' ) ) {
@@ -592,11 +721,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet = sprintf( '@media %s { %s }', $media, $stylesheet );
 		}
 
-		$processed = $this->process_stylesheet( $stylesheet, array(
-			'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $cdata_spec['css_spec']['declaration'],
-			'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
-		) );
+		$processed = $this->process_stylesheet(
+			$stylesheet,
+			array(
+				'allowed_at_rules'   => $cdata_spec['css_spec']['allowed_at_rules'],
+				'property_whitelist' => $cdata_spec['css_spec']['declaration'],
+				'validate_keyframes' => $cdata_spec['css_spec']['validate_keyframes'],
+			)
+		);
 
 		$this->pending_stylesheets[] = array_merge(
 			array(
@@ -650,46 +782,49 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				0 === $this->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->head )->length
 			);
 			if ( $needs_preconnect_link ) {
-				$link = AMP_DOM_Utils::create_node( $this->dom, 'link', array(
-					'rel'         => 'preconnect',
-					'href'        => 'https://fonts.gstatic.com/',
-					'crossorigin' => '',
-				) );
+				$link = AMP_DOM_Utils::create_node(
+					$this->dom,
+					'link',
+					array(
+						'rel'         => 'preconnect',
+						'href'        => 'https://fonts.gstatic.com/',
+						'crossorigin' => '',
+					)
+				);
 				$this->head->insertBefore( $link ); // Note that \AMP_Theme_Support::ensure_required_markup() will put this in the optimal order.
 			}
 			return;
 		}
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
-
-		if ( is_wp_error( $css_file_path ) && ( 'disallowed_file_extension' === $css_file_path->get_error_code() || 'external_file_url' === $css_file_path->get_error_code() ) ) {
-			$contents = $this->fetch_external_stylesheet( $normalized_url );
-			if ( is_wp_error( $contents ) ) {
-				$this->remove_invalid_child( $element, array(
-					'code'    => $css_file_path->get_error_code(),
-					'message' => $css_file_path->get_error_message(),
-					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				) );
-				return;
-			} else {
-				$stylesheet = $contents;
-			}
-		} elseif ( is_wp_error( $css_file_path ) ) {
-			$this->remove_invalid_child( $element, array(
-				'code'    => $css_file_path->get_error_code(),
-				'message' => $css_file_path->get_error_message(),
-				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-			) );
-			return;
-		} else {
+		if ( ! is_wp_error( $css_file_path ) ) {
 			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+		} else {
+			// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
+			$contents = $this->fetch_external_stylesheet( $normalized_url );
+			if ( ! is_wp_error( $contents ) ) {
+				$stylesheet = $contents;
+			} else {
+				$this->remove_invalid_child(
+					$element,
+					array(
+						'code'    => $contents->get_error_code(),
+						'message' => $contents->get_error_message(),
+						'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					)
+				);
+				return;
+			}
 		}
 
 		if ( false === $stylesheet ) {
-			$this->remove_invalid_child( $element, array(
-				'code' => 'stylesheet_file_missing',
-				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-			) );
+			$this->remove_invalid_child(
+				$element,
+				array(
+					'code' => 'stylesheet_file_missing',
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				)
+			);
 			return;
 		}
 
@@ -701,12 +836,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
-		$processed = $this->process_stylesheet( $stylesheet, array(
-			'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
-			'stylesheet_url'     => $href,
-			'stylesheet_path'    => $css_file_path,
-		) );
+		$processed = $this->process_stylesheet(
+			$stylesheet,
+			array(
+				'allowed_at_rules'   => $this->style_custom_cdata_spec['css_spec']['allowed_at_rules'],
+				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
+				'stylesheet_url'     => $href,
+				'stylesheet_path'    => $css_file_path,
+			)
+		);
 
 		$this->pending_stylesheets[] = array_merge(
 			array(
@@ -726,6 +864,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Fetch external stylesheet.
 	 *
+	 * @todo Use Cache-Control max-age for transient.
+	 *
 	 * @param string $url External stylesheet URL.
 	 * @return string|WP_Error Stylesheet contents or WP_Error.
 	 */
@@ -738,6 +878,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$contents = new WP_Error(
 					wp_remote_retrieve_response_code( $r ),
 					wp_remote_retrieve_response_message( $r )
+				);
+			} elseif ( ! preg_match( '#^text/css#', wp_remote_retrieve_header( $r, 'content-type' ) ) ) {
+				$contents = new WP_Error(
+					'no_css_content_type',
+					__( 'Response did not contain the expected text/css content type.', 'amp' )
 				);
 			} else {
 				$contents = wp_remote_retrieve_body( $r );
@@ -872,11 +1017,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$css_list->remove( $item );
 			_doing_it_wrong(
 				'wp_enqueue_style',
-				esc_html( sprintf(
-					/* translators: %s is URL to font CDN */
-					__( 'It is not a best practice to use @import to load font CDN stylesheets. Please use wp_enqueue_style() to enqueue %s as its own separate script.', 'amp' ),
-					$import_stylesheet_url
-				) ),
+				esc_html(
+					sprintf(
+						/* translators: 1: @import. 2: wp_enqueue_style(). 3: font CDN URL. */
+						__( 'It is not a best practice to use %1$s to load font CDN stylesheets. Please use %2$s to enqueue %3$s as its own separate script.', 'amp' ),
+						'@import',
+						'wp_enqueue_style()',
+						$import_stylesheet_url
+					)
+				),
 				'1.0'
 			);
 			return array();
@@ -937,7 +1086,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$css_document = $parsed_stylesheet['css_document'];
 
-		if ( ! empty( $parsed_stylesheet['css_document'] ) ) {
+		if ( ! empty( $parsed_stylesheet['css_document'] ) && method_exists( $css_list, 'replace' ) ) {
 			$css_list->replace( $item, $css_document->getContents() );
 		} else {
 			$css_list->remove( $item );
@@ -1049,6 +1198,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		// Strip the dreaded UTF-8 byte order mark (BOM, \uFEFF). This should ideally get handled by PHP-CSS-Parser <https://github.com/sabberworm/PHP-CSS-Parser/issues/150>.
 		$stylesheet_string = preg_replace( '/^\xEF\xBB\xBF/', '', $stylesheet_string );
 
+		// Strip obsolete CDATA sections and HTML comments which were used for old school XHTML.
+		$stylesheet_string = preg_replace( '#^\s*<!--#', '', $stylesheet_string );
+		$stylesheet_string = preg_replace( '#^\s*<!\[CDATA\[#', '', $stylesheet_string );
+		$stylesheet_string = preg_replace( '#\]\]>\s*$#', '', $stylesheet_string );
+		$stylesheet_string = preg_replace( '#-->\s*$#', '', $stylesheet_string );
+
 		$stylesheet         = array();
 		$parsed_stylesheet  = $this->parse_stylesheet( $stylesheet_string, $options );
 		$validation_results = $parsed_stylesheet['validation_results'];
@@ -1065,12 +1220,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_at_rule                    = '/*AMP_WP_BEFORE_AT_RULE*/';
 			$after_at_rule                     = '/*AMP_WP_AFTER_AT_RULE*/';
 
-			$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
-			$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
-			$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
-			$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
-			$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
-			$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
+			// Add comments to stylesheet if PHP-CSS-Parser has the required extensions for tree shaking.
+			if ( self::has_required_php_css_parser() ) {
+				$output_format->set( 'BeforeDeclarationBlock', $before_declaration_block );
+				$output_format->set( 'SpaceBeforeSelectorSeparator', $between_selectors );
+				$output_format->set( 'AfterDeclarationBlockSelectors', $after_declaration_block_selectors );
+				$output_format->set( 'AfterDeclarationBlock', $after_declaration_block );
+				$output_format->set( 'BeforeAtRuleBlock', $before_at_rule );
+				$output_format->set( 'AfterAtRuleBlock', $after_at_rule );
+			}
 
 			$stylesheet_string = $css_document->render( $output_format );
 
@@ -1088,12 +1246,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			$dynamic_selector_pattern = null;
 			if ( ! empty( $this->args['dynamic_element_selectors'] ) ) {
-				$dynamic_selector_pattern = implode( '|', array_map(
-					function( $selector ) {
-						return preg_quote( $selector, '#' );
-					},
-					$this->args['dynamic_element_selectors']
-				) );
+				$dynamic_selector_pattern = implode(
+					'|',
+					array_map(
+						function( $selector ) {
+							return preg_quote( $selector, '#' );
+						},
+						$this->args['dynamic_element_selectors']
+					)
+				);
 			}
 
 			$split_stylesheet = preg_split( $pattern, $stylesheet_string, -1, PREG_SPLIT_DELIM_CAPTURE );
@@ -1368,13 +1529,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$relative_url = preg_replace( '#^\./#', '', $url->getURL()->getString() );
+			$parsed_url = wp_parse_url( $base_url . $url->getURL()->getString() );
 
 			// Resolve any relative parent directory paths.
-			$real_url = $base_url . $relative_url;
-			do {
-				$real_url = preg_replace( '#[^/]+/../#', '', $real_url, -1, $count );
-			} while ( 0 !== $count );
+			$path = $this->unrelativize_path( $parsed_url['path'] );
+			if ( is_wp_error( $path ) ) {
+				continue;
+			}
+			$parsed_url['path'] = $path;
+
+			$real_url = $this->reconstruct_url( $parsed_url );
 
 			$url->getURL()->setString( $real_url );
 		}
@@ -1674,42 +1838,44 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$important_ruleset = clone $ruleset;
-		$important_ruleset->setSelectors( array_map(
-			/**
-			 * Modify selectors to be more specific to roughly match the effect of !important.
-			 *
-			 * @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
-			 *
-			 * @param Selector $old_selector Original selector.
-			 * @return Selector The new more-specific selector.
-			 */
-			function( Selector $old_selector ) {
-				// Calculate the specificity multiplier for the placeholder.
-				$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
-				if ( $old_selector->getSpecificity() % 100 > 0 ) {
-					$specificity_multiplier++;
-				}
-				if ( $old_selector->getSpecificity() % 10 > 0 ) {
-					$specificity_multiplier++;
-				}
-				$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
+		$important_ruleset->setSelectors(
+			array_map(
+				/**
+				* Modify selectors to be more specific to roughly match the effect of !important.
+				*
+				* @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
+				*
+				* @param Selector $old_selector Original selector.
+				* @return Selector The new more-specific selector.
+				*/
+				function( Selector $old_selector ) {
+					// Calculate the specificity multiplier for the placeholder.
+					$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
+					if ( $old_selector->getSpecificity() % 100 > 0 ) {
+						$specificity_multiplier++;
+					}
+					if ( $old_selector->getSpecificity() % 10 > 0 ) {
+						$specificity_multiplier++;
+					}
+					$selector_mod = str_repeat( ':not(#_)', $specificity_multiplier ); // Here "_" is just a short single-char ID.
 
-				$new_selector = $old_selector->getSelector();
+					$new_selector = $old_selector->getSelector();
 
-				// Amend the selector mod to the first element in selector if it is already the root; otherwise add new root ancestor.
-				if ( preg_match( '/^\s*(html|:root)\b/i', $new_selector, $matches ) ) {
-					$new_selector = substr( $new_selector, 0, strlen( $matches[0] ) ) . $selector_mod . substr( $new_selector, strlen( $matches[0] ) );
-				} else {
-					$new_selector = sprintf( ':root%s %s', $selector_mod, $new_selector );
-				}
-				return new Selector( $new_selector );
-			},
-			$ruleset->getSelectors()
-		) );
+					// Amend the selector mod to the first element in selector if it is already the root; otherwise add new root ancestor.
+					if ( preg_match( '/^\s*(html|:root)\b/i', $new_selector, $matches ) ) {
+						$new_selector = substr( $new_selector, 0, strlen( $matches[0] ) ) . $selector_mod . substr( $new_selector, strlen( $matches[0] ) );
+					} else {
+						$new_selector = sprintf( ':root%s %s', $selector_mod, $new_selector );
+					}
+					return new Selector( $new_selector );
+				},
+				$ruleset->getSelectors()
+			)
+		);
 		$important_ruleset->setRules( $importants );
 
 		$i = array_search( $ruleset, $css_list->getContents(), true );
-		if ( false !== $i ) {
+		if ( false !== $i && method_exists( $css_list, 'splice' ) ) {
 			$css_list->splice( $i + 1, 0, array( $important_ruleset ) );
 		} else {
 			$css_list->append( $important_ruleset );
@@ -1744,10 +1910,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->set_current_node( $element ); // And sources when needing to be located.
 
-		$processed = $this->process_stylesheet( $rule, array(
-			'allowed_at_rules'   => array(),
-			'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
-		) );
+		$processed = $this->process_stylesheet(
+			$rule,
+			array(
+				'allowed_at_rules'   => array(),
+				'property_whitelist' => $this->style_custom_cdata_spec['css_spec']['declaration'],
+			)
+		);
 
 		$element->removeAttribute( 'style' );
 
@@ -1778,7 +1947,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_styles() {
-
 		$stylesheet_sets = array(
 			'custom'    => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
@@ -1876,7 +2044,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_original_size = 0;
 			$included_sources       = array();
 			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
-				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) ) {
+				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
 				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
@@ -1907,43 +2075,80 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$excluded_original_size += $pending_stylesheet['original_size'];
 				}
 			}
+
+			$include_manifest_comment = (
+				'always' === $this->args['include_manifest_comment']
+				||
+				( $excluded_size > 0 && 'when_excessive' === $this->args['include_manifest_comment'] )
+			);
+
 			$comment = '';
-			if ( ! empty( $included_sources ) && $included_original_size > 0 ) {
-				$comment .= esc_html__( 'The style[amp-custom] element is populated with:', 'amp' ) . "\n" . implode( "\n", $included_sources ) . "\n";
+			if ( $include_manifest_comment && ! empty( $included_sources ) && $included_original_size > 0 ) {
 				$comment .= sprintf(
-					/* translators: %1$d is number of included bytes, %2$d is percentage of total CSS actually included after tree shaking, %3$d is total included size */
-					esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-					number_format_i18n( $included_size ),
-					$included_size / $included_original_size * 100,
-					number_format_i18n( $included_original_size )
-				) . "\n";
+					/* translators: %s: style[amp-custom] */
+					esc_html__( 'The %s element is populated with:', 'amp' ),
+					'style[amp-custom]'
+				) . "\n" . implode( "\n", $included_sources ) . "\n";
+				if ( self::has_required_php_css_parser() ) {
+					$comment .= sprintf(
+						/* translators: %1$d is number of included bytes, %2$d is percentage of total CSS actually included after tree shaking, %3$d is total included size */
+						esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
+						number_format_i18n( $included_size ),
+						$included_size / $included_original_size * 100,
+						number_format_i18n( $included_original_size )
+					) . "\n";
+				} else {
+					$comment .= sprintf(
+						/* translators: %1$d is number of included bytes */
+						esc_html__( 'Total included size: %1$s bytes', 'amp' ),
+						number_format_i18n( $included_size ),
+						$included_size / $included_original_size * 100,
+						number_format_i18n( $included_original_size )
+					) . "\n";
+				}
 			}
-			if ( ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
+			if ( $include_manifest_comment && ! empty( $excluded_sources ) && $excluded_original_size > 0 ) {
 				if ( $comment ) {
 					$comment .= "\n";
 				}
-				$comment .= esc_html__( 'The following stylesheets are too large to be included in style[amp-custom]:', 'amp' ) . "\n" . implode( "\n", $excluded_sources ) . "\n";
-
 				$comment .= sprintf(
-					/* translators: %1$d is number of excluded bytes, %2$d is percentage of total CSS actually excluded even after tree shaking, %3$d is total excluded size */
-					esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
-					number_format_i18n( $excluded_size ),
-					$excluded_size / $excluded_original_size * 100,
-					number_format_i18n( $excluded_original_size )
-				) . "\n";
+					/* translators: %s: style[amp-custom] */
+					esc_html__( 'The following stylesheets are too large to be included in %s:', 'amp' ),
+					'style[amp-custom]'
+				) . "\n" . implode( "\n", $excluded_sources ) . "\n";
+
+				if ( self::has_required_php_css_parser() ) {
+					$comment .= sprintf(
+						/* translators: 1: number of excluded bytes. 2: percentage of total CSS actually excluded even after tree shaking. 3: total excluded size. */
+						esc_html__( 'Total excluded size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
+						number_format_i18n( $excluded_size ),
+						$excluded_size / $excluded_original_size * 100,
+						number_format_i18n( $excluded_original_size )
+					) . "\n";
+				} else {
+					$comment .= sprintf(
+						/* translators: %s: number of excluded bytes. */
+						esc_html__( 'Total excluded size: %s bytes', 'amp' ),
+						number_format_i18n( $excluded_size )
+					) . "\n";
+				}
 
 				$total_size          = $included_size + $excluded_size;
 				$total_original_size = $included_original_size + $excluded_original_size;
 				if ( $total_size !== $total_original_size ) {
 					$comment .= "\n";
 					$comment .= sprintf(
-						/* translators: %1$d is total combined bytes, %2$d is percentage of CSS after tree shaking, %3$d is total before tree shaking */
+						/* translators: 1: total combined bytes. 2: is percentage of CSS after tree shaking. 3: is total before tree shaking. */
 						esc_html__( 'Total combined size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
 						number_format_i18n( $total_size ),
 						( $total_size / $total_original_size ) * 100,
 						number_format_i18n( $total_original_size )
 					) . "\n";
 				}
+			}
+
+			if ( $include_manifest_comment && ! self::has_required_php_css_parser() ) {
+				$comment .= "\n" . esc_html__( 'Warning! AMP CSS processing is limited because a conflicting version of PHP-CSS-Parser has been loaded by another plugin or theme. Tree shaking is not available.', 'amp' ) . "\n";
 			}
 
 			if ( $comment ) {
@@ -1971,10 +2176,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( ! empty( $stylesheet_sets['keyframes']['final_stylesheets'] ) ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
-				$this->should_sanitize_validation_error( array(
-					'code' => 'missing_body_element',
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				) );
+				$this->should_sanitize_validation_error(
+					array(
+						'code' => 'missing_body_element',
+						'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					)
+				);
 			} else {
 				$css  = implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] );
 				$css .= $stylesheet_sets['keyframes']['source_map_comment'];
@@ -2076,10 +2283,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
-			$should_tree_shake = $this->should_sanitize_validation_error( array(
-				'code' => self::TREE_SHAKING_ERROR_CODE,
-				'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-			) );
+			$should_tree_shake = $this->should_sanitize_validation_error(
+				array(
+					'code' => self::TREE_SHAKING_ERROR_CODE,
+					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				)
+			);
 		}
 
 		$stylesheet_set['processed_nodes'] = array();
@@ -2113,9 +2322,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 								(
 									empty( $parsed_selector['ids'] )
 									||
-									0 === count( array_filter( $parsed_selector['ids'], function( $id ) use ( $dom ) {
-										return ! $dom->getElementById( $id );
-									} ) )
+									0 === count(
+										array_filter(
+											$parsed_selector['ids'],
+											function( $id ) use ( $dom ) {
+												return ! $dom->getElementById( $id );
+											}
+										)
+									)
 								)
 								&&
 								// If tag names are present in the doc.
@@ -2194,9 +2408,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Skip considering stylesheet if an identical one has already been processed.
 			$hash = md5( $stylesheet );
 			if ( isset( $stylesheet_set['final_stylesheets'][ $hash ] ) ) {
-				$pending_stylesheet['included'] = true;
+				$pending_stylesheet['included']  = true;
+				$pending_stylesheet['duplicate'] = true;
 				continue;
 			}
+			$pending_stylesheet['duplicate'] = false;
 
 			// Report validation error if size is now too big.
 			if ( $final_size + $sheet_size > $max_bytes ) {

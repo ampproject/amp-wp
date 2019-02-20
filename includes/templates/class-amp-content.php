@@ -133,7 +133,7 @@ class AMP_Content {
 		$content = $this->content;
 
 		// First, embeds + the_content filter.
-		$content        = apply_filters( 'the_content', $content );
+		$content = apply_filters( 'the_content', $content );
 		$this->unregister_embed_handlers( $this->embed_handlers );
 
 		// Then, sanitize to strip and/or convert non-amp content.
@@ -174,8 +174,18 @@ class AMP_Content {
 			$embed_handler = new $embed_handler_class( array_merge( $this->args, $args ) );
 
 			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
-				/* translators: %s is embed handler */
-				_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Embed Handler (%s) must extend `AMP_Embed_Handler`', 'amp' ), $embed_handler_class ) ), '0.1' );
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html(
+						sprintf(
+							/* translators: 1: embed handler. 2: AMP_Embed_Handler */
+							__( 'Embed Handler (%1$s) must extend `%2$s`', 'amp' ),
+							esc_html( $embed_handler_class ),
+							'AMP_Embed_Handler'
+						)
+					),
+					'0.1'
+				);
 				continue;
 			}
 

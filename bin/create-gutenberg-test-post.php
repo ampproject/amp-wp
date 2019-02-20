@@ -116,12 +116,14 @@ function get_test_block_permutations() {
  * @return int|\WP_Error $post_id The post ID where the reusable block is stored, and 0 or WP_Error in case of failure.
  */
 function create_test_reusable_block() {
-	return wp_insert_post( array(
-		'post_type'    => 'wp_block',
-		'post_title'   => 'Test Reusable Block',
-		'post_content' => '<!-- wp:core/video --><figure class="wp-block-video"><video src="https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4" controls=""></video></figure><!-- /wp:core/video -->',
-		'post_status'  => 'publish',
-	) );
+	return wp_insert_post(
+		array(
+			'post_type'    => 'wp_block',
+			'post_title'   => 'Test Reusable Block',
+			'post_content' => '<!-- wp:core/video --><figure class="wp-block-video"><video src="https://videos.files.wordpress.com/DK5mLrbr/video-ca6dc0ab4a_hd.mp4" controls=""></video></figure><!-- /wp:core/video -->',
+			'post_status'  => 'publish',
+		)
+	);
 }
 
 /**
@@ -139,21 +141,25 @@ function create_gutenberg_test_post( $content ) {
 	if ( $page ) {
 		$page_id = $page->ID;
 	} else {
-		$page_id = wp_insert_post( array(
-			'post_name'  => $slug,
-			'post_title' => $title,
-			'post_type'  => 'page',
-		) );
+		$page_id = wp_insert_post(
+			array(
+				'post_name'  => $slug,
+				'post_title' => $title,
+				'post_type'  => 'page',
+			)
+		);
 
 		if ( ! $page_id || is_wp_error( $page_id ) ) {
 			throw new \Exception( $failure_message );
 		}
 	}
 
-	$update = wp_update_post( array(
-		'ID'           => $page_id,
-		'post_content' => $content,
-	) );
+	$update = wp_update_post(
+		array(
+			'ID'           => $page_id,
+			'post_content' => $content,
+		)
+	);
 
 	if ( ! $update ) {
 		throw new \Exception( $failure_message );
@@ -164,7 +170,7 @@ function create_gutenberg_test_post( $content ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = create_gutenberg_test_post( get_test_block_fixtures() );
+		$post_id = create_gutenberg_test_post( get_test_block_fixtures() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		\WP_CLI::success( sprintf( 'The test page is at: %s', \amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( \Exception $e ) {
 		\WP_CLI::error( $e->getMessage() );

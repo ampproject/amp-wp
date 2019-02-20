@@ -9,33 +9,40 @@
  "license": "GPL-2.0+",
  "private": true,
  "devDependencies": {
-  "@wordpress/i18n": "1.1.1",
+  "@wordpress/dom-ready": "2.0.2",
+  "@wordpress/i18n": "3.1.1",
   "babel-core": "6.26.3",
+  "babel-eslint": "10.0.1",
   "babel-loader": "7.1.5",
   "babel-plugin-transform-object-rest-spread": "6.26.0",
   "babel-plugin-transform-react-jsx": "6.24.1",
   "babel-plugin-transform-runtime": "6.23.0",
   "babel-preset-env": "1.7.0",
   "cross-env": "5.2.0",
-  "eslint": "4.19.1",
+  "eslint": "5.14.0",
   "eslint-config-wordpress": "2.0.0",
-  "eslint-plugin-react": "7.11.1",
-  "grunt": "1.0.2",
+  "eslint-plugin-react": "7.12.4",
+  "grunt": "1.0.3",
   "grunt-contrib-clean": "2.0.0",
   "grunt-contrib-copy": "1.0.0",
   "grunt-shell": "2.1.0",
-  "grunt-wp-deploy": "1.2.1",
+  "grunt-wp-deploy": "2.0.0",
+  "npm-run-all": "^4.1.5",
   "timeago.js": "3.0.2",
-  "webpack": "3.12.0"
+  "webpack": "4.29.5",
+  "webpack-cli": "3.2.3"
  },
  "main": "blocks/index.js",
  "scripts": {
-  "pot-to-php": "pot-to-php languages/amp-js.pot languages/amp-translations.php amp",
-  "build": "grunt build && grunt create-build-zip",
+  "build": "npm-run-all build:*",
+  "build:prepare": "grunt build",
+  "build:zip": "grunt create-build-zip",
   "deploy": "grunt deploy",
-  "dev": "cross-env BABEL_ENV=default webpack --watch"
- },
- "dependencies": {
-  "@wordpress/dom-ready": "2.0.0"
+  "dev": "cross-env BABEL_ENV=default webpack --watch",
+  "lint": "npm-run-all --parallel lint:*",
+  "lint:js": "eslint .",
+  "lint:php": "vendor/bin/phpcs",
+  "test": "npm-run-all --parallel test:*",
+  "test:php": "phpunit"
  }
 }

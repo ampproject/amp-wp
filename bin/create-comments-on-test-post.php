@@ -18,13 +18,15 @@ function amp_create_comments_test_post() {
 		$post    = $q->next_post();
 		$post_id = $post->ID;
 	} else {
-		$post_id = wp_insert_post( array(
-			'post_name'    => 'amp-test-comments',
-			'post_title'   => 'AMP Test Comments',
-			'post_type'    => 'post',
-			'post_status'  => 'publish',
-			'post_content' => amp_get_test_random_content( 200 ),
-		) );
+		$post_id = wp_insert_post(
+			array(
+				'post_name'    => 'amp-test-comments',
+				'post_title'   => 'AMP Test Comments',
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+				'post_content' => amp_get_test_random_content( 200 ),
+			)
+		);
 
 		if ( ! $post_id || is_wp_error( $post_id ) ) {
 			throw new Exception( 'The test post could not be added, please try again.' );
@@ -111,7 +113,7 @@ function amp_get_test_random_content( $num_words = 55, $more = '.' ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = amp_create_comments_test_post();
+		$post_id = amp_create_comments_test_post(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );

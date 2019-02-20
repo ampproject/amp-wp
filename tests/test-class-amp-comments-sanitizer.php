@@ -33,7 +33,7 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		$GLOBALS['post'] = $this->factory()->post->create_and_get(); // WPCS: global override ok.
+		$GLOBALS['post'] = $this->factory()->post->create_and_get();
 		$this->dom       = new DOMDocument();
 		$this->instance  = new AMP_Comments_Sanitizer( $this->dom );
 	}

@@ -39,7 +39,7 @@ if ( ! ( $this instanceof AMP_Post_Meta_Box ) ) {
 			</fieldset>
 		<?php else : ?>
 			<div class="inline notice notice-warning notice-alt">
-				<p><?php echo implode( ' ', $error_messages ); // WPCS: xss ok. ?></p>
+				<p><?php echo implode( ' ', $error_messages ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></p>
 			</div>
 		<?php endif; ?>
 		<div class="amp-status-actions">

@@ -43,7 +43,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	private $amp_tag = 'amp-twitter';
 
 	/**
-	 * Register embed.
+	 * Registers embed.
 	 */
 	public function register_embed() {
 		add_shortcode( 'tweet', array( $this, 'shortcode' ) ); // Note: This is a Jetpack shortcode.
@@ -52,7 +52,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	}
 
 	/**
-	 * Unregister embed.
+	 * Unregisters embed.
 	 */
 	public function unregister_embed() {
 		remove_shortcode( 'tweet' ); // Note: This is a Jetpack shortcode.
@@ -69,9 +69,12 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Twitter shortcode markup.
 	 */
 	public function shortcode( $attr ) {
-		$attr = wp_parse_args( $attr, array(
-			'tweet' => false,
-		) );
+		$attr = wp_parse_args(
+			$attr,
+			array(
+				'tweet' => false,
+			)
+		);
 
 		if ( empty( $attr['tweet'] ) && ! empty( $attr[0] ) ) {
 			$attr['tweet'] = $attr[0];
@@ -226,12 +229,16 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
-		$new_node = AMP_DOM_Utils::create_node( $dom, $this->amp_tag, array(
-			'width'        => $this->DEFAULT_WIDTH,
-			'height'       => $this->DEFAULT_HEIGHT,
-			'layout'       => 'responsive',
-			'data-tweetid' => $tweet_id,
-		) );
+		$new_node = AMP_DOM_Utils::create_node(
+			$dom,
+			$this->amp_tag,
+			array(
+				'width'        => $this->DEFAULT_WIDTH,
+				'height'       => $this->DEFAULT_HEIGHT,
+				'layout'       => 'responsive',
+				'data-tweetid' => $tweet_id,
+			)
+		);
 
 		$this->sanitize_embed_script( $node );
 
