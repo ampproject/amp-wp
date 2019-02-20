@@ -18,7 +18,6 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 */
 	public function sanitize() {
-
 		foreach ( $this->dom->getElementsByTagName( 'form' ) as $comment_form ) {
 			/**
 			 * Comment form.
@@ -33,6 +32,13 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			if ( preg_match( '#/wp-comments-post\.php$#', $action_path ) ) {
 				$this->process_comment_form( $comment_form );
 			}
+		}
+
+		$xpath = new DOMXPath( $this->dom );
+		$comments = $xpath->query('//*[starts-with(@id,\'comment-\')]' );
+
+		foreach( $comments as $comment ) {
+			$this->process_comment( $comment );
 		}
 	}
 
@@ -155,5 +161,30 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			),
 		);
 		$comment_form->setAttribute( 'on', implode( ';', $on ) );
+	}
+
+	/**
+	 * Comment.
+	 *
+	 * @param DOMElement $comment Comment.
+	 */
+	protected function process_comment( $comment ) {
+		$comment_id     = (int) str_replace( 'comment-', '', $comment->getAttribute( 'id' ) );
+		$comment_object = get_comment( $comment_id );
+
+		if ( ! $comment_object instanceof wp_comment ) {
+			return;
+		}
+
+		$comment->setAttribute( 'data-sort-time', strtotime( $comment_object->comment_date ) );
+
+		$update_time = $comment_object->comment_date;
+		$children    = $comment_object->get_children( array( 'hierarchical' => 'flat', 'orderby' => 'comment_date' ) );
+
+		if ( ! empty( $children ) ) {
+			$update_time = $children[0]->comment_date;
+		}
+
+		$comment->setAttribute( 'data-update-time', strtotime( $update_time ) );
 	}
 }

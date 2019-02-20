@@ -9,6 +9,8 @@
  * Class AMP_Comment_Walker
  *
  * Walker to wrap comments in mustache tags for amp-template.
+ *
+ * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
  */
 class AMP_Comment_Walker extends Walker_Comment {
 
