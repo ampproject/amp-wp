@@ -257,6 +257,11 @@ class AMP_Story_Post_Type {
 		$wp_styles->do_items();
 	}
 
+	/**
+	 * Enqueues all the Google Fonts that can be used in an AMP story.
+	 *
+	 * @see /assets/css/amp-stories.css
+	 */
 	public static function enqueue_google_fonts() {
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = array( 'latin', 'latin-ext' );
