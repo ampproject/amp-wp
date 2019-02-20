@@ -49,9 +49,11 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$number_new_posts = AMP_CLI::$limit_type_validate_count / 2;
 		$post_ids         = array();
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
-			$post_ids[] = $this->factory()->post->create( array(
-				'tax_input' => array( 'category' => $category ),
-			) );
+			$post_ids[] = $this->factory()->post->create(
+				array(
+					'tax_input' => array( 'category' => $category ),
+				)
+			);
 		}
 
 		/*
@@ -66,9 +68,11 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$taxonomy                   = 'category';
 		$terms_for_current_taxonomy = array();
 		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
-			$terms_for_current_taxonomy[] = $this->factory()->term->create( array(
-				'taxonomy' => $taxonomy,
-			) );
+			$terms_for_current_taxonomy[] = $this->factory()->term->create(
+				array(
+					'taxonomy' => $taxonomy,
+				)
+			);
 		}
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
@@ -121,9 +125,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
 		// In Paired Mode, the IDs should also include all of the newly-created posts.
-		add_theme_support( AMP_Theme_Support::SLUG, array(
-			'paired' => true,
-		) );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array(
+				'paired' => true,
+			)
+		);
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
 		/*
@@ -221,16 +228,23 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 		foreach ( $post_types as $post_type ) {
 			// Start the expected posts with the existing post(s).
-			$query          = new WP_Query( array(
-				'fields'    => 'ids',
-				'post_type' => $post_type,
-			) );
+			$query          = new WP_Query(
+				array(
+					'fields'    => 'ids',
+					'post_type' => $post_type,
+				)
+			);
 			$expected_posts = $query->posts;
 
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
-				array_unshift( $expected_posts, $this->factory()->post->create( array(
-					'post_type' => $post_type,
-				) ) );
+				array_unshift(
+					$expected_posts,
+					$this->factory()->post->create(
+						array(
+							'post_type' => $post_type,
+						)
+					)
+				);
 			}
 
 			$actual_posts = AMP_CLI::get_posts_by_type( $post_type );
@@ -250,18 +264,22 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function test_get_taxonomy_links() {
 		$number_links_each_taxonomy = 20;
-		$taxonomies                 = get_taxonomies( array(
-			'public' => true,
-		) );
+		$taxonomies                 = get_taxonomies(
+			array(
+				'public' => true,
+			)
+		);
 
 		foreach ( $taxonomies as $taxonomy ) {
 			// Begin the expected links with the term links that already exist.
 			$expected_links             = array_map( 'get_term_link', get_terms( array( 'taxonomy' => $taxonomy ) ) );
 			$terms_for_current_taxonomy = array();
 			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
-				$terms_for_current_taxonomy[] = $this->factory()->term->create( array(
-					'taxonomy' => $taxonomy,
-				) );
+				$terms_for_current_taxonomy[] = $this->factory()->term->create(
+					array(
+						'taxonomy' => $taxonomy,
+					)
+				);
 			}
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
@@ -433,10 +451,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$post_query   = new WP_Query( array( 'post_type' => get_post_types( array( 'public' => true ), 'names' ) ) );
 		$total_count += $post_query->found_posts;
 
-		$term_query = new WP_Term_Query( array(
-			'taxonomy' => get_taxonomies( array( 'public' => true ) ),
-			'fields'   => 'ids',
-		) );
+		$term_query = new WP_Term_Query(
+			array(
+				'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+				'fields'   => 'ids',
+			)
+		);
 
 		$total_count += count( $term_query->terms );
 		$total_count += count( AMP_CLI::get_author_page_urls() );
@@ -452,11 +472,13 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @return string[] $urls The validated URLs.
 	 */
 	public function get_validated_urls() {
-		$query = new WP_Query( array(
-			'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			'posts_per_page' => 100,
-			'fields'         => 'ids',
-		) );
+		$query = new WP_Query(
+			array(
+				'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
+				'posts_per_page' => 100,
+				'fields'         => 'ids',
+			)
+		);
 
 		return array_map(
 			function( $post ) {

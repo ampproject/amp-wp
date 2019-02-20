@@ -109,11 +109,14 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Update the state in response to changing the input.
-				$element->setAttribute( 'on', sprintf(
-					'change:AMP.setState( { %s: { values: { %s: event.value } } } )',
-					$state_id,
-					wp_json_encode( $name )
-				) );
+				$element->setAttribute(
+					'on',
+					sprintf(
+						'change:AMP.setState( { %s: { values: { %s: event.value } } } )',
+						$state_id,
+						wp_json_encode( $name )
+					)
+				);
 			}
 		}
 

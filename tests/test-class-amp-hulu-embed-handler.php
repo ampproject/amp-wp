@@ -20,19 +20,24 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		// Mock the HTTP request.
-		add_filter( 'pre_http_request', function( $pre, $r, $url ) {
-			unset( $r );
-			if ( false === strpos( $url, '771496' ) ) {
-				return $pre;
-			}
-			return array(
-				'body'     => '{"title":"Out of the Box / Run Down Race Car (Doc McStuffins)","author_name":"Disney Junior","type":"video","provider_name":"Hulu","air_date":"Fri Mar 23 00:00:00 UTC 2012","embed_url":"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw","thumbnail_url":"http://ib.huluim.com/video/60528019?size=240x180&caller=h1o&img=i","width":500,"thumbnail_width":500,"provider_url":"//www.hulu.com/","thumbnail_height":375,"cache_age":3600,"version":"1.0","large_thumbnail_url":"http://ib.huluim.com/video/60528019?size=512x288&caller=h1o&img=i","height":289,"large_thumbnail_width":512,"html":"<iframe width=\\"500\\" height=\\"289\\" src=\\"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw\\" frameborder=\\"0\\" scrolling=\\"no\\" webkitAllowFullScreen mozallowfullscreen allowfullscreen> </iframe>","duration":1446.25,"large_thumbnail_height":288}',
-				'response' => array(
-					'code'    => 200,
-					'message' => 'OK',
-				),
-			);
-		}, 10, 3 );
+		add_filter(
+			'pre_http_request',
+			function( $pre, $r, $url ) {
+				unset( $r );
+				if ( false === strpos( $url, '771496' ) ) {
+					return $pre;
+				}
+				return array(
+					'body'     => '{"title":"Out of the Box / Run Down Race Car (Doc McStuffins)","author_name":"Disney Junior","type":"video","provider_name":"Hulu","air_date":"Fri Mar 23 00:00:00 UTC 2012","embed_url":"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw","thumbnail_url":"http://ib.huluim.com/video/60528019?size=240x180&caller=h1o&img=i","width":500,"thumbnail_width":500,"provider_url":"//www.hulu.com/","thumbnail_height":375,"cache_age":3600,"version":"1.0","large_thumbnail_url":"http://ib.huluim.com/video/60528019?size=512x288&caller=h1o&img=i","height":289,"large_thumbnail_width":512,"html":"<iframe width=\\"500\\" height=\\"289\\" src=\\"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw\\" frameborder=\\"0\\" scrolling=\\"no\\" webkitAllowFullScreen mozallowfullscreen allowfullscreen> </iframe>","duration":1446.25,"large_thumbnail_height":288}',
+					'response' => array(
+						'code'    => 200,
+						'message' => 'OK',
+					),
+				);
+			},
+			10,
+			3
+		);
 
 		/*
 		 * As #34115 in 4.9 a post is not needed for context to run oEmbeds. Prior ot 4.9, the WP_Embed::shortcode()

@@ -228,7 +228,8 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		$this->assertEquals( $child, $parent->firstChild );
 		$sanitizer = new AMP_Iframe_Sanitizer(
-			$dom_document, array(
+			$dom_document,
+			array(
 				'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
 			)
 		);
@@ -277,54 +278,60 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Test sanitizing.
 		$dom       = AMP_DOM_Utils::get_dom_from_content( '<amp-video id="bar" onload="someFunc()"></amp-video>' );
-		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
-			'validation_error_callback' => function( $error, $context ) use ( $that ) {
-				$that->assertEquals(
-					array(
-						'node_name'          => 'onload',
-						'parent_name'        => 'amp-video',
-						'code'               => 'invalid_attribute',
-						'element_attributes' =>
-							array(
-								'id'     => 'bar',
-								'onload' => 'someFunc()',
-							),
-						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
-					),
-					$error
-				);
-				$that->assertInstanceOf( 'DOMAttr', $context['node'] );
-				$that->assertEquals( 'onload', $context['node']->nodeName );
-				return true;
-			},
-		) );
+		$sanitizer = new AMP_Video_Sanitizer(
+			$dom,
+			array(
+				'validation_error_callback' => function( $error, $context ) use ( $that ) {
+					$that->assertEquals(
+						array(
+							'node_name'          => 'onload',
+							'parent_name'        => 'amp-video',
+							'code'               => 'invalid_attribute',
+							'element_attributes' =>
+								array(
+									'id'     => 'bar',
+									'onload' => 'someFunc()',
+								),
+							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+						),
+						$error
+					);
+					$that->assertInstanceOf( 'DOMAttr', $context['node'] );
+					$that->assertEquals( 'onload', $context['node']->nodeName );
+					return true;
+				},
+			)
+		);
 		$element   = $dom->getElementsByTagName( 'amp-video' )->item( 0 );
 		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, 'onload' ) );
 		$this->assertFalse( $element->hasAttribute( 'onload' ) );
 
 		// Test not sanitizing.
 		$dom       = AMP_DOM_Utils::get_dom_from_content( '<amp-video id="bar" onload="someFunc()"></amp-video>' );
-		$sanitizer = new AMP_Video_Sanitizer( $dom, array(
-			'validation_error_callback' => function( $error, $context ) use ( $that ) {
-				$that->assertEquals(
-					array(
-						'node_name'          => 'onload',
-						'parent_name'        => 'amp-video',
-						'code'               => 'invalid_attribute',
-						'element_attributes' =>
-							array(
-								'id'     => 'bar',
-								'onload' => 'someFunc()',
-							),
-						'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
-					),
-					$error
-				);
-				$that->assertInstanceOf( 'DOMAttr', $context['node'] );
-				$that->assertEquals( 'onload', $context['node']->nodeName );
-				return false;
-			},
-		) );
+		$sanitizer = new AMP_Video_Sanitizer(
+			$dom,
+			array(
+				'validation_error_callback' => function( $error, $context ) use ( $that ) {
+					$that->assertEquals(
+						array(
+							'node_name'          => 'onload',
+							'parent_name'        => 'amp-video',
+							'code'               => 'invalid_attribute',
+							'element_attributes' =>
+								array(
+									'id'     => 'bar',
+									'onload' => 'someFunc()',
+								),
+							'type'               => AMP_Validation_Error_Taxonomy::JS_ERROR_TYPE,
+						),
+						$error
+					);
+					$that->assertInstanceOf( 'DOMAttr', $context['node'] );
+					$that->assertEquals( 'onload', $context['node']->nodeName );
+					return false;
+				},
+			)
+		);
 		$element   = $dom->getElementsByTagName( 'amp-video' )->item( 0 );
 		$this->assertFalse( $sanitizer->remove_invalid_attribute( $element, 'onload' ) );
 		$this->assertTrue( $element->hasAttribute( 'onload' ) );

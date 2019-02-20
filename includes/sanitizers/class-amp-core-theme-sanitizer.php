@@ -288,10 +288,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				);
 
 				if ( function_exists( 'twentyseventeen_get_svg' ) ) {
-					$config['nav_menu_dropdown']['icon'] = twentyseventeen_get_svg( array(
-						'icon'     => 'angle-down',
-						'fallback' => true,
-					) );
+					$config['nav_menu_dropdown']['icon'] = twentyseventeen_get_svg(
+						array(
+							'icon'     => 'angle-down',
+							'fallback' => true,
+						)
+					);
 				}
 
 				return $config;
@@ -385,16 +387,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/f4580c122b7d0d2d66d22f806c6fe6e11023c6f0/src/wp-content/themes/twentyseventeen/assets/js/global.js#L105-L108
 	 */
 	public static function set_twentyseventeen_quotes_icon() {
-		add_filter( 'the_content', function ( $content ) {
+		add_filter(
+			'the_content',
+			function ( $content ) {
 
-			// Why isn't Twenty Seventeen doing this to begin with? Why is it using JS to add the quote icon?
-			if ( function_exists( 'twentyseventeen_get_svg' ) && 'quote' === get_post_format() ) {
-				$icon    = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
-				$content = preg_replace( '#(<blockquote.*?>)#s', '$1' . $icon, $content );
+				// Why isn't Twenty Seventeen doing this to begin with? Why is it using JS to add the quote icon?
+				if ( function_exists( 'twentyseventeen_get_svg' ) && 'quote' === get_post_format() ) {
+					$icon    = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
+					$content = preg_replace( '#(<blockquote.*?>)#s', '$1' . $icon, $content );
+				}
+
+				return $content;
 			}
-
-			return $content;
-		} );
+		);
 	}
 
 	/**
@@ -408,13 +413,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public static function remove_twentynineteen_thumbnail_image_sizes() {
-		add_filter( 'wp_get_attachment_image_attributes', function( $attr ) {
-			if ( isset( $attr['class'] ) && false !== strpos( $attr['class'], 'attachment-post-thumbnail' ) ) {
-				unset( $attr['sizes'] );
-			}
+		add_filter(
+			'wp_get_attachment_image_attributes',
+			function( $attr ) {
+				if ( isset( $attr['class'] ) && false !== strpos( $attr['class'], 'attachment-post-thumbnail' ) ) {
+					unset( $attr['sizes'] );
+				}
 
-			return $attr;
-		}, 11 );
+				return $attr;
+			},
+			11
+		);
 	}
 
 	/**
@@ -426,8 +435,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes() {
-		add_filter( 'wp_get_attachment_image_attributes', function ( $attr, $attachment, $size ) {
-			if (
+		add_filter(
+			'wp_get_attachment_image_attributes',
+			function ( $attr, $attachment, $size ) {
+				if (
 				isset( $attr['class'] )
 				&&
 				(
@@ -435,46 +446,52 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					||
 					false !== strpos( $attr['class'], 'attachment-twentyseventeen-featured-image' )
 				)
-			) {
-				/*
-				 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
-				 * For example, <amp-img style="width:100%">.
-				 * Removing the 'sizes' attribute is only a workaround, as it looks like it's not possible to override that inline style.
-				 *
-				 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
-				 */
-				unset( $attr['sizes'] );
-			} elseif ( is_attachment() ) {
-				$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
-				if ( false !== $sizes ) {
-					$attr['sizes'] = $sizes;
+				) {
+					/*
+					 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
+					 * For example, <amp-img style="width:100%">.
+					 * Removing the 'sizes' attribute is only a workaround, as it looks like it's not possible to override that inline style.
+					 *
+					 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
+					 */
+					unset( $attr['sizes'] );
+				} elseif ( is_attachment() ) {
+					$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+					if ( false !== $sizes ) {
+						$attr['sizes'] = $sizes;
+					}
 				}
-			}
-			return $attr;
-		}, 11, 3 );
+				return $attr;
+			},
+			11,
+			3
+		);
 
 		/*
 		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless
 		 * there is header media in which case it is 200px. Issues related to vertically-squashed
 		 * images can be avoided if we just make sure that the image has this height to begin with.
 		 */
-		add_filter( 'get_custom_logo', function( $html ) {
-			$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
-			if ( ! $src ) {
+		add_filter(
+			'get_custom_logo',
+			function( $html ) {
+				$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
+				if ( ! $src ) {
+					return $html;
+				}
+
+				if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
+					$height = 200;
+				} else {
+					$height = 80;
+				}
+				$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
+
+				$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
+				$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
 				return $html;
 			}
-
-			if ( 'blank' === get_header_textcolor() && has_custom_header() ) {
-				$height = 200;
-			} else {
-				$height = 80;
-			}
-			$width = $height * ( $src[1] / $src[2] ); // Note that float values are allowed.
-
-			$html = preg_replace( '/(?<=width=")\d+(?=")/', $width, $html );
-			$html = preg_replace( '/(?<=height=")\d+(?=")/', $height, $html );
-			return $html;
-		} );
+		);
 	}
 
 	/**
@@ -506,11 +523,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param string[] $handles Handles, where each item value is the script handle.
 	 */
 	public static function dequeue_scripts( $handles = array() ) {
-		add_action( 'wp_enqueue_scripts', function() use ( $handles ) {
-			foreach ( $handles as $handle ) {
-				wp_dequeue_script( $handle );
-			}
-		}, PHP_INT_MAX );
+		add_action(
+			'wp_enqueue_scripts',
+			function() use ( $handles ) {
+				foreach ( $handles as $handle ) {
+					wp_dequeue_script( $handle );
+				}
+			},
+			PHP_INT_MAX
+		);
 	}
 
 	/**
@@ -543,6 +564,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->xpath->query( $link_xpath ) as $link ) {
 				if ( $link instanceof DOMElement && preg_match( '/#(.+)/', $link->getAttribute( 'href' ), $matches ) ) {
 					$link->setAttribute( 'on', sprintf( 'tap:%s.scrollTo(duration=600)', $matches[1] ) );
+
+					// Prevent browser from jumping immediately to the link target.
+					$link->removeAttribute( 'href' );
+					$link->setAttribute( 'tabindex', '0' );
+					$link->setAttribute( 'role', 'button' );
 				}
 			}
 		}
@@ -598,12 +624,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$args
 		);
 
-		add_filter( 'body_class', function( $body_classes ) use ( $args ) {
-			if ( has_header_video() ) {
-				$body_classes[] = $args['class_name'];
+		add_filter(
+			'body_class',
+			function( $body_classes ) use ( $args ) {
+				if ( has_header_video() ) {
+					$body_classes[] = $args['class_name'];
+				}
+				return $body_classes;
 			}
-			return $body_classes;
-		} );
+		);
 	}
 
 	/**
@@ -629,9 +658,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public static function add_twentynineteen_masthead_styles() {
-		add_action( 'wp_enqueue_scripts', function() {
-			ob_start();
-			?>
+		add_action(
+			'wp_enqueue_scripts',
+			function() {
+				ob_start();
+				?>
 			<style>
 			.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
 				height: auto;
@@ -658,10 +689,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 			</style>
-			<?php
-			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-			wp_add_inline_style( get_template() . '-style', $styles );
-		}, 11 );
+				<?php
+				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 
 	/**
@@ -679,10 +712,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * and the CSS parser will then convert the selectors to amp-img and amp-video respectively.
 		 * Nevertheless, object-fit does not apply on amp-img and it needs to apply on an actual img.
 		 */
-		add_action( 'wp_enqueue_scripts', function() {
-			$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
-			ob_start();
-			?>
+		add_action(
+			'wp_enqueue_scripts',
+			function() {
+				$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
+				ob_start();
+				?>
 			<style>
 				.has-header-image .custom-header-media amp-img > img,
 				.has-header-video .custom-header-media amp-video > video{
@@ -732,6 +767,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					display: none;
 				}
 
+				/* This is needed by add_smooth_scrolling because it removes the [href] attribute. */
+				.menu-scroll-down {
+					cursor: pointer;
+				}
+
 				<?php if ( $is_front_page_layout && ! has_custom_header() ) : ?>
 					/* https://github.com/WordPress/wordpress-develop/blob/fd5ba80c5c3d9cf62348567073945e246285fbca/src/wp-content/themes/twentyseventeen/assets/js/global.js#L92-L94 */
 					.site-branding {
@@ -755,10 +795,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			</style>
-			<?php
-			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-			wp_add_inline_style( get_template() . '-style', $styles );
-		}, 11 );
+				<?php
+				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 
 	/**
@@ -769,9 +811,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/1af1f65a21a1a697fb5f33027497f9e5ae638453/src/wp-content/themes/twentyseventeen/style.css#L2100
 	 */
 	public static function add_twentyseventeen_image_styles() {
-		add_action( 'wp_enqueue_scripts', function() {
-			ob_start();
-			?>
+		add_action(
+			'wp_enqueue_scripts',
+			function() {
+				ob_start();
+				?>
 			<style>
 				/* Override the display: block in twentyseventeen/style.css, as <amp-img> is usually inline-block. */
 				.single-featured-image-header amp-img {
@@ -783,10 +827,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					text-align: center;
 				}
 			</style>
-			<?php
-			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-			wp_add_inline_style( get_template() . '-style', $styles );
-		}, 11 );
+				<?php
+				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 
 	/**
@@ -827,10 +873,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$attributes = array(
 			'layout'              => 'nodisplay',
 			'intersection-ratios' => 1,
-			'on'                  => implode( ';', array(
-				'exit:navigationTopShow.start',
-				'enter:navigationTopHide.start',
-			) ),
+			'on'                  => implode(
+				';',
+				array(
+					'exit:navigationTopShow.start',
+					'enter:navigationTopHide.start',
+				)
+			),
 		);
 		if ( is_admin_bar_showing() ) {
 			$attributes['viewport-margins'] = '32px 0';
@@ -866,10 +915,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		);
 
 		foreach ( $animations as $animation_id => $animation ) {
-			$amp_animation   = AMP_DOM_Utils::create_node( $this->dom, 'amp-animation', array(
-				'id'     => $animation_id,
-				'layout' => 'nodisplay',
-			) );
+			$amp_animation   = AMP_DOM_Utils::create_node(
+				$this->dom,
+				'amp-animation',
+				array(
+					'id'     => $animation_id,
+					'layout' => 'nodisplay',
+				)
+			);
 			$position_script = $this->dom->createElement( 'script' );
 			$position_script->setAttribute( 'type', 'application/json' );
 			$position_script->appendChild( $this->dom->createTextNode( wp_json_encode( $animation ) ) );
@@ -886,9 +939,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Args.
 	 */
 	public static function add_nav_menu_styles( $args = array() ) {
-		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
-			ob_start();
-			?>
+		add_action(
+			'wp_enqueue_scripts',
+			function() use ( $args ) {
+				ob_start();
+				?>
 			<style>
 				/* Override no-js selector in parent theme. */
 				.no-js .main-navigation ul ul {
@@ -1014,10 +1069,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 				<?php endif; ?>
 			</style>
-			<?php
-			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-			wp_add_inline_style( get_template() . '-style', $styles );
-		}, 11 );
+				<?php
+				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 
 	/**
@@ -1031,17 +1088,21 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array $args Arguments.
 	 */
 	public static function add_twentynineteen_image_styles( $args = array() ) {
-		add_action( 'wp_enqueue_scripts', function() use ( $args ) {
-			ob_start();
-			?>
+		add_action(
+			'wp_enqueue_scripts',
+			function() use ( $args ) {
+				ob_start();
+				?>
 			<style>
 				figure.aligncenter {
 					text-align: center
 				}
 			</style>
-			<?php
-			$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-			wp_add_inline_style( get_template() . '-style', $styles );
-		}, 11 );
+				<?php
+				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				wp_add_inline_style( get_template() . '-style', $styles );
+			},
+			11
+		);
 	}
 }
