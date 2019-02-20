@@ -13,13 +13,6 @@
 class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 
 	/**
-	 * The tested instance.
-	 *
-	 * @var AMP_Comments_Sanitizer
-	 */
-	public $instance;
-
-	/**
 	 * Representation of the DOM.
 	 *
 	 * @var DOMDocument
@@ -35,7 +28,6 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		parent::setUp();
 		$GLOBALS['post'] = self::factory()->post->create_and_get();
 		$this->dom       = new DOMDocument();
-		$this->instance  = new AMP_Comments_Sanitizer( $this->dom );
 	}
 
 	/**
@@ -44,8 +36,10 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Comments_Sanitizer::sanitize()
 	 */
 	public function test_sanitize_incorrect_action() {
+		$instance = new AMP_Comments_Sanitizer( $this->dom );
+
 		$form = $this->create_form( 'incorrect-action.php' );
-		$this->instance->sanitize();
+		$instance->sanitize();
 		$on = $form->getAttribute( 'on' );
 		$this->assertNotContains( 'submit:AMP.setState(', $on );
 		$this->assertNotContains( 'submit-error:AMP.setState(', $on );
@@ -60,9 +54,11 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Comments_Sanitizer::sanitize()
 	 */
 	public function test_sanitize_allowed_action() {
+		$instance = new AMP_Comments_Sanitizer( $this->dom );
+
 		// Use an allowed action.
 		$form = $this->create_form( '/wp-comments-post.php' );
-		$this->instance->sanitize();
+		$instance->sanitize();
 		$on = $form->getAttribute( 'on' );
 		$this->assertContains( 'submit:AMP.setState(', $on );
 		$this->assertContains( 'submit-error:AMP.setState(', $on );
@@ -77,11 +73,13 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Comments_Sanitizer::process_comment_form()
 	 */
 	public function test_process_comment_form() {
+		$instance = new AMP_Comments_Sanitizer( $this->dom );
+
 		$form          = $this->create_form( '/wp-comments-post.php' );
-		$reflection    = new ReflectionObject( $this->instance );
+		$reflection    = new ReflectionObject( $instance );
 		$tested_method = $reflection->getMethod( 'process_comment_form' );
 		$tested_method->setAccessible( true );
-		$tested_method->invoke( $this->instance, $form );
+		$tested_method->invoke( $instance, $form );
 		$on        = $form->getAttribute( 'on' );
 		$amp_state = $this->dom->getElementsByTagName( 'amp-state' )->item( 0 );
 
@@ -105,20 +103,31 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	/**
 	 * Test AMP_Comment_Walker::paged_walk.
 	 *
-	 * @covers AMP_Comments_Sanitizer::process_comment()
+	 * @covers AMP_Comments_Sanitizer::add_amp_live_list_comment_attributes()
 	 */
-	public function test_process_comment() {
+	public function test_add_amp_live_list_comment_attributes() {
+		$instance = new AMP_Comments_Sanitizer(
+			$this->dom,
+			array(
+				'comments_live_list' => true,
+			)
+		);
+
 		$GLOBALS['post'] = self::factory()->post->create();
 
 		$comment_objects = $this->get_comments();
 		$this->create_comments_list( $comment_objects );
-		$this->instance->sanitize();
+		$instance->sanitize();
 
 		$xpath    = new DOMXPath( $this->dom );
-		$comments = $xpath->query( '//*[starts-with(@id,\'comment-\')]' );
+		$comments = $xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
 
 		foreach ( $comments as $comment ) {
-			/** @var DOMElement $comment */
+			/**
+			 * Comment element.
+			 *
+			 * @var DOMElement $comment
+			 */
 
 			$comment_id = (int) str_replace( 'comment-', '', $comment->getAttribute( 'id' ) );
 
@@ -126,22 +135,26 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 
 			$comment_object = $comment_objects[ $comment_id ];
 
-			$this->assertEquals( strtotime( $comment_object->comment_date ), $comment->getAttribute( 'data-sort-time' ) );
+			if ( $comment_object->comment_parent ) {
+				$this->assertFalse( $comment->hasAttribute( 'data-sort-time' ) );
+				$this->assertFalse( $comment->hasAttribute( 'data-update-time' ) );
+			} else {
+				$this->assertEquals( strtotime( $comment_object->comment_date ), $comment->getAttribute( 'data-sort-time' ) );
 
-			$update_time = $comment_object->comment_date;
+				$update_time = strtotime( $comment_object->comment_date );
+				$children    = $comment_object->get_children(
+					array(
+						'format'       => 'flat',
+						'hierarchical' => 'flat',
+						'orderby'      => 'none',
+					)
+				);
+				foreach ( $children as $child_comment ) {
+					$update_time = max( strtotime( $child_comment->comment_date ), $update_time );
+				}
 
-			$children = $comment_object->get_children(
-				array(
-					'hierarchical' => 'flat',
-					'orderby'      => 'comment_date',
-				)
-			);
-
-			if ( ! empty( $children ) ) {
-				$update_time = $children[0]->comment_date;
+				$this->assertEquals( $update_time, $comment->getAttribute( 'data-update-time' ) );
 			}
-
-			$this->assertEquals( strtotime( $update_time ), $comment->getAttribute( 'data-update-time' ) );
 		}
 	}
 
@@ -178,20 +191,29 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		);
 	}
 
+	/**
+	 * Create comments list.
+	 *
+	 * @param WP_Comment[] $comments Comments.
+	 */
 	public function create_comments_list( $comments = array() ) {
 		ob_start();
+
+		echo '<amp-live-list><ol items>';
 		wp_list_comments(
 			array(),
 			$comments
 		);
+		echo '</ol></amp-live-list>';
+		$html = ob_get_clean();
 
-		$this->dom->loadHTML( ob_get_clean() );
+		@$this->dom->loadHTML( $html ); // phpcs:ignore
 	}
 
 	/**
 	 * Gets comments for tests.
 	 *
-	 * @return array $comments An array of WP_Comment instances.
+	 * @return WP_Comment[] $comments An array of WP_Comment instances.
 	 */
 	public function get_comments() {
 		$comments = array();

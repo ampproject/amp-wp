@@ -989,6 +989,7 @@ class AMP_Theme_Support {
 	 * @return array Args to return.
 	 */
 	public static function set_comments_walker( $args ) {
+		_deprecated_function( __METHOD__, '1.1' );
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
 		return $args;

@@ -13,6 +13,17 @@
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Placeholder for default args, to be set in child classes.
+	 *
+	 * @since 1.1
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'comment_live_list' => false,
+	);
+
+	/**
 	 * Pre-process the comment form and comment list for AMP.
 	 *
 	 * @since 0.7
@@ -34,11 +45,13 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$xpath    = new DOMXPath( $this->dom );
-		$comments = $xpath->query( '//*[starts-with(@id,\'comment-\')]' );
+		if ( ! empty( $this->args['comments_live_list'] ) ) {
+			$xpath    = new DOMXPath( $this->dom );
+			$comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
 
-		foreach ( $comments as $comment ) {
-			$this->process_comment( $comment );
+			foreach ( $comments as $comment ) {
+				$this->add_amp_live_list_comment_attributes( $comment );
+			}
 		}
 	}
 
@@ -164,32 +177,38 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Comment.
+	 * Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
 	 *
-	 * @param DOMElement $comment Comment.
+	 * @param DOMElement $comment_element Comment element.
 	 */
-	protected function process_comment( $comment ) {
-		$comment_id     = (int) str_replace( 'comment-', '', $comment->getAttribute( 'id' ) );
+	protected function add_amp_live_list_comment_attributes( $comment_element ) {
+		$comment_id = (int) str_replace( 'comment-', '', $comment_element->getAttribute( 'id' ) );
+		if ( ! $comment_id ) {
+			return;
+		}
 		$comment_object = get_comment( $comment_id );
 
-		if ( ! $comment_object instanceof wp_comment ) {
+		// Skip if the comment is not valid or the comment has a parent, since in that case it is not relevant for amp-live-list.
+		if ( ! ( $comment_object instanceof WP_Comment ) || $comment_object->comment_parent ) {
 			return;
 		}
 
-		$comment->setAttribute( 'data-sort-time', strtotime( $comment_object->comment_date ) );
+		$comment_element->setAttribute( 'data-sort-time', strtotime( $comment_object->comment_date ) );
 
-		$update_time = $comment_object->comment_date;
-		$children    = $comment_object->get_children(
+		$update_time = strtotime( $comment_object->comment_date );
+
+		// Ensure the top-level data-update-time reflects the max time of the comments in the thread.
+		$children = $comment_object->get_children(
 			array(
+				'format'       => 'flat',
 				'hierarchical' => 'flat',
-				'orderby'      => 'comment_date',
+				'orderby'      => 'none',
 			)
 		);
-
-		if ( ! empty( $children ) ) {
-			$update_time = $children[0]->comment_date;
+		foreach ( $children as $child_comment ) {
+			$update_time = max( strtotime( $child_comment->comment_date ), $update_time );
 		}
 
-		$comment->setAttribute( 'data-update-time', strtotime( $update_time ) );
+		$comment_element->setAttribute( 'data-update-time', $update_time );
 	}
 }
