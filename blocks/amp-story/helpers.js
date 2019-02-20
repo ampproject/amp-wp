@@ -1,27 +1,24 @@
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 100 ] } ] */
 
-const { __ } = wp.i18n;
-const {
+import { __ } from '@wordpress/i18n';
+import {
 	SelectControl,
 	RangeControl,
 	PanelBody,
 	Toolbar
-} = wp.components;
-
-const {
-	Fragment
-} = wp.element;
-
-const {
+} from '@wordpress/components';
+import { Fragment } from '@wordpress/element';
+import {
 	PanelColorSettings,
 	InspectorControls,
 	InnerBlocks,
 	BlockTitle
-} = wp.editor;
+} from '@wordpress/editor';
+import { select } from '@wordpress/data';
 
 const {
 	getBlockRootClientId
-} = wp.data.select( 'core/editor' );
+} = select( 'core/editor' );
 
 const ANIMATION_DEFAULTS = {
 	drop: 1600,

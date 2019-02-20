@@ -6,15 +6,16 @@ import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
 /**
  * Internal block libraries.
  */
-const { __ } = wp.i18n;
-const { registerBlockType } = wp.blocks;
-const { InspectorControls } = wp.editor;
-const { Fragment } = wp.element;
-const {
+import { __ } from '@wordpress/i18n';
+import { registerBlockType } from '@wordpress/blocks';
+import { InspectorControls } from '@wordpress/editor';
+import { Fragment } from '@wordpress/element';
+import {
 	PanelBody,
 	TextControl,
-	Placeholder
-} = wp.components;
+	Placeholder,
+	ToggleControl
+} from '@wordpress/components';
 
 /**
  * Register block.
