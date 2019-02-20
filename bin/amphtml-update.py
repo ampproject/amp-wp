@@ -356,6 +356,10 @@ def ParseRules(out_dir):
 				if tag_spec.HasField('deprecation'):
 					continue
 
+				# Ignore transformed AMP for now.
+				if '(transformed)' in tag_spec.spec_name:
+					continue
+
 				# Handle the special $REFERENCE_POINT tag
 				if '$REFERENCE_POINT' == tag_spec.tag_name:
 					reference_points[ tag_spec.spec_name ] = GetTagSpec(tag_spec, attr_lists)

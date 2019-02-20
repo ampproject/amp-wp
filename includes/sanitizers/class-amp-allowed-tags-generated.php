@@ -9652,15 +9652,6 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(),
 				'tag_spec' => array(
-					'mandatory_parent' => 'head',
-					'spec_name' => 'noscript enclosure for boilerplate (transformed)',
-					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(),
-				'tag_spec' => array(
 					'disallowed_ancestor' => array(
 						'noscript',
 					),
@@ -13981,65 +13972,6 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
-					'amp-custom' => array(
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-					'type' => array(
-						'value_casei' => array(
-							'text/css',
-						),
-					),
-				),
-				'cdata' => array(
-					'blacklisted_cdata_regex' => array(
-						'error_message' => 'CSS !important',
-						'regex' => '!important',
-					),
-					'css_spec' => array(
-						'allowed_at_rules' => array(
-							'font-face',
-							'keyframes',
-							'media',
-							'page',
-							'supports',
-						),
-						'declaration' => array(),
-						'font_url_spec' => array(
-							'allow_empty' => true,
-							'protocol' => array(
-								'https',
-								'http',
-								'data',
-							),
-						),
-						'image_url_spec' => array(
-							'allow_empty' => true,
-							'protocol' => array(
-								'https',
-								'http',
-								'data',
-								'absolute',
-							),
-						),
-						'validate_keyframes' => false,
-					),
-					'max_bytes' => 50000,
-					'max_bytes_spec_url' => 'https://www.ampproject.org/docs/reference/spec#maximum-size',
-					'url_bytes_included' => false,
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'head',
-					'spec_name' => 'style amp-custom (transformed)',
-					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#stylesheets',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
 					'amp-boilerplate' => array(
 						'dispatch_key' => 3,
 						'mandatory' => true,
@@ -14072,27 +14004,6 @@ class AMP_Allowed_Tags_Generated {
 					'nonce' => array(),
 				),
 				'cdata' => array(
-					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-moz-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*-ms-animation:\\s*-amp-start\\s+8s\\s+steps\\s*\\(1\\s*,\\s*end\\s*\\)\\s+0s\\s+1\\s+normal\\s+both;\\s*animation:\\s*-amp-start\\s+8s\\s+steps\\(1,\\s*end\\)\\s+0s\\s+1\\s+normal\\s+both;?\\s*}\\s*@-webkit-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-moz-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-ms-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@-o-keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*@keyframes\\s+-amp-start\\s*{\\s*from\\s*{\\s*visibility:\\s*hidden;?\\s*}\\s*to\\s*{\\s*visibility:\\s*visible;?\\s*}\\s*}\\s*',
-				),
-				'tag_spec' => array(
-					'mandatory_parent' => 'head',
-					'spec_name' => 'head > style[amp-boilerplate] (transformed)',
-					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'amp-boilerplate' => array(
-						'dispatch_key' => 3,
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-				),
-				'cdata' => array(
 					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*',
 				),
 				'tag_spec' => array(
@@ -14100,28 +14011,6 @@ class AMP_Allowed_Tags_Generated {
 					'mandatory_ancestor' => 'head',
 					'mandatory_parent' => 'noscript',
 					'spec_name' => 'noscript > style[amp-boilerplate]',
-					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'amp-boilerplate' => array(
-						'dispatch_key' => 3,
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'nonce' => array(),
-				),
-				'cdata' => array(
-					'cdata_regex' => '\\s*body\\s*{\\s*-webkit-animation:\\s*none;\\s*-moz-animation:\\s*none;\\s*-ms-animation:\\s*none;\\s*animation:\\s*none;?\\s*}\\s*',
-				),
-				'tag_spec' => array(
-					'mandatory_ancestor' => 'head',
-					'mandatory_parent' => 'noscript',
-					'spec_name' => 'noscript > style[amp-boilerplate] (transformed)',
 					'spec_url' => 'https://github.com/ampproject/amphtml/blob/master/spec/amp-boilerplate.md',
 					'unique' => true,
 				),
@@ -14160,28 +14049,6 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'body',
 					'spec_name' => 'style[amp-keyframes]',
-					'unique' => true,
-				),
-			),
-			array(
-				'attr_spec_list' => array(
-					'amp-runtime' => array(
-						'dispatch_key' => 3,
-						'mandatory' => true,
-						'value' => array(
-							'',
-						),
-					),
-					'i-amphtml-version' => array(
-						'mandatory' => true,
-						'value_regex' => '^\\d{15}|latest$',
-					),
-				),
-				'tag_spec' => array(
-					'mandatory' => true,
-					'mandatory_parent' => 'head',
-					'spec_name' => 'style[amp-runtime] (transformed)',
-					'spec_url' => 'https://www.ampproject.org/docs/reference/spec#stylesheets',
 					'unique' => true,
 				),
 			),
