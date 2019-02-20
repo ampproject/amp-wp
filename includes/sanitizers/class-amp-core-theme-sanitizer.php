@@ -1158,57 +1158,70 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						opacity: 0;
 					}
 
-					/*
-					 * Styles for slider carousel.
-					 */
-					.featured-content-inner > amp-carousel {
-						position: relative;
-					}
-					body.slider amp-carousel > .amp-carousel-button {
-						-webkit-font-smoothing: antialiased;
-						background-color: black;
-						background-image: none;
-						border-radius: 0;
-						border: 0;
-						bottom: 0;
-						box-sizing: border-box;
-						cursor: pointer;
-						display: inline-block;
-						font: normal 16px/1 Genericons;
-						height: 48px;
-						left: auto;
-						opacity: 1;
-						text-align: center;
-						text-decoration: inherit;
-						top: auto;
-						transform: none;
-						width: 48px;
-					}
-					body.slider amp-carousel > .amp-carousel-button:focus {
-						outline: white thin dotted;
-					}
-					body.slider amp-carousel > .amp-carousel-button:hover {
-						background-color: #24890d;
-						outline: none;
-					}
-					body.slider amp-carousel > .amp-carousel-button-prev {
-						right: 50px;
-					}
-					body.slider amp-carousel > .amp-carousel-button-prev:before {
-						color: #fff;
-						content: "\f430";
-						font-size: 32px;
-						line-height: 46px;
-					}
-					body.slider amp-carousel > .amp-carousel-button-next {
-						right: 0;
-					}
-					body.slider amp-carousel > .amp-carousel-button-next:before {
-						color: #fff;
-						content: "\f429";
-						font-size: 32px;
-						line-height: 46px;
-					}
+					<?php if ( 'slider' === get_theme_mod( 'featured_content_layout' ) ) : ?>
+
+						/*
+						 * Styles for slider carousel.
+						 */
+						.featured-content-inner > amp-carousel {
+							position: relative;
+						}
+						body.slider amp-carousel > .amp-carousel-button {
+							-webkit-font-smoothing: antialiased;
+							background-color: black;
+							background-image: none;
+							border-radius: 0;
+							border-color: #fff;
+							border-style: solid;
+							border-width: 2px 1px 0 0;
+							box-sizing: border-box;
+							cursor: pointer;
+							display: inline-block;
+							font: normal 16px/1 Genericons;
+							height: 48px;
+							left: auto;
+							opacity: 1;
+							text-align: center;
+							text-decoration: inherit;
+							top: auto;
+							width: 50%;
+							transform: none;
+						}
+						body.slider amp-carousel > .amp-carousel-button:focus {
+							outline: white thin dotted;
+						}
+						body.slider amp-carousel > .amp-carousel-button:hover {
+							background-color: #24890d;
+							outline: none;
+						}
+						body.slider amp-carousel > .amp-carousel-button-prev:before {
+							color: #fff;
+							content: "\f430";
+							font-size: 32px;
+							line-height: 46px;
+						}
+						body.slider amp-carousel > .amp-carousel-button-next:before {
+							color: #fff;
+							content: "\f429";
+							font-size: 32px;
+							line-height: 46px;
+						}
+
+						@media screen and (min-width: 673px) {
+							body.slider amp-carousel > .amp-carousel-button {
+								width: 48px;
+								border: 0;
+								bottom: 0;
+							}
+							body.slider amp-carousel > .amp-carousel-button-prev {
+								right: 50px;
+							}
+							body.slider amp-carousel > .amp-carousel-button-next {
+								right: 0;
+							}
+						}
+
+					<?php endif; ?>
 				</style>
 				<?php
 			}
@@ -1221,6 +1234,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1
 	 */
 	public function add_twentyfourteen_slider_carousel() {
+		if ( 'slider' !== get_theme_mod( 'featured_content_layout' ) ) {
+			return;
+		}
+
 		$featured_content = $this->dom->getElementById( 'featured-content' );
 		if ( ! $featured_content ) {
 			return;
