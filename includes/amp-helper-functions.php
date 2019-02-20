@@ -270,6 +270,11 @@ function is_amp_endpoint() {
 		);
 	}
 
+	// AMP Stories are always an AMP endpoint.
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		return true;
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
@@ -292,6 +297,10 @@ function is_amp_endpoint() {
 	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
 	 */
 	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return true;
 	}
 

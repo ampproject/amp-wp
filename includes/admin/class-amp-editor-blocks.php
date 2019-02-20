@@ -124,7 +124,7 @@ class AMP_Editor_Blocks {
 	public function enqueue_block_editor_assets() {
 
 		// Enqueue script and style for AMP-specific blocks.
-		if ( amp_is_canonical() ) {
+		if ( amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			wp_enqueue_style(
 				'amp-editor-blocks-style',
 				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
@@ -148,7 +148,7 @@ class AMP_Editor_Blocks {
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			array( 'wp-editor', 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);

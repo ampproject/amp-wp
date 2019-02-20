@@ -15463,6 +15463,7 @@ class AMP_Allowed_Tags_Generated {
 				'',
 			),
 		),
+		'grid-area' => array(),
 		'hidden' => array(
 			'value' => array(
 				'',

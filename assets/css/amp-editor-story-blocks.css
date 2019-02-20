@@ -1,0 +1,651 @@
+/*------------------------------------------------------------------
+[Table of contents]
+
+	1. Style story pages wrapper
+	2. Selected state
+		2.1 Selected label
+	3. Story page dimensions
+	4. Layers stacking
+		4.1 Hide layers above
+		4.2 Blur layers above
+		4.3 Stroke text for legibility.
+	5. Layers Styling
+		5.1 Thirds Layer
+		5.2 Fill layer
+		5.3 CTA layer
+	6. Inserter customisations.
+		6.1 Ghosted page inserter
+	7. Block navigator
+	8. Block mover
+	100. Shame
+		100.1 Gutenberg - Warning div not clickable
+
+-------------------------------------------------------------------*/
+
+
+/*
+ * 1. Style story pages wrapper.
+ * - Add thicker border around the pages
+ * - Change background to light gray
+ */
+
+div[data-type="amp/amp-story-page"] {
+	border: 10px solid #eff0f1;
+}
+
+div[data-type="amp/amp-story-page"]::after {
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 0;
+	width: 100%;
+	height: 10px;
+	background: #eff0f1;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
+	background: #f9f9f9;
+}
+
+/*
+ * 2. Selected state outlines.
+ * Change default gray selected highlights into blue,
+ * as gray was not visible in a multi-layer setup.
+ */
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
+div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
+{
+	outline: 1px solid #007cba;
+}
+
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+	outline: 1px solid #007cba;
+}
+
+/* Remove one default outline as it was unnecessary with the above implementation. */
+
+.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
+	outline: none;
+}
+
+/*
+ * 2.1 Selected label
+ * Show label while the layer is selected
+ */
+
+ .post-type-amp_story .editor-block-list__breadcrumb {
+	 z-index: 6;
+	 pointer-events: none;
+ }
+
+ .post-type-amp_story .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
+	 opacity: 1;
+	 animation: none;
+ }
+
+/*
+ * 3. Story page dimensions.
+ * Fix the page editor size to the ratio of the stories.
+ */
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"] {
+	padding: 0;
+	margin: 60px auto 0;
+}
+
+@media (min-width: 600px) {
+	div[data-type="amp/amp-story-page"] .editor-block-list__block {
+		margin: 0;
+		padding: 0;
+	}
+}
+
+div[data-type="amp/amp-story-page"],
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
+	margin: auto;
+	width: 100%;
+	max-width: 338px;
+	height: 553px;
+}
+
+div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
+	width: 316px;
+}
+
+/* Also override needed core inline styles. */
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
+	min-height: initial !important;
+}
+
+/*
+ * 4. Layers stacking.
+ * Setup on top of each other layering on the story children.
+ */
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block:first-child .editor-block-list__block-edit {
+	margin: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit,
+.editor-block-list__layout .editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit {
+	margin: 0;
+}
+
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__layout {
+	background-color: initial;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"] {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"] .components-toolbar button[aria-label="Link"] {
+	display: none;
+}
+
+.editor-block-list__layout div[data-amp-selected="parent"] {
+	z-index: 1;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type {
+	display: grid;
+	padding: 68px 32px 32px;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type > .wp-block {
+	margin-top: 17px;
+	margin-bottom: 17px;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type > .wp-block:first-of-type {
+	margin-top: 0;
+}
+
+.amp-grid-template .editor-block-list__layout:first-of-type *:not(.editor-block-toolbar) {
+	box-sizing: border-box;
+}
+
+.amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
+	grid-auto-flow: column !important;
+	grid-template-rows: 100% !important;
+	-ms-flex-line-pack: stretch;
+	align-content: stretch;
+	-webkit-box-align: start;
+	-ms-flex-align: start;
+	align-items: start;
+	grid-gap: 16px;
+	-webkit-box-pack: start;
+	-ms-flex-pack: start;
+	justify-content: start;
+}
+
+.amp-grid-template-vertical .editor-block-list__layout:first-of-type {
+	grid-auto-flow: row;
+	grid-template-columns: 100%;
+	align-content: start;
+	grid-gap: 16px;
+	-webkit-box-pack: stretch;
+	-ms-flex-pack: stretch;
+	justify-content: stretch;
+	justify-items: start;
+}
+
+.amp-grid-template-vertical .editor-block-list__block {
+	width: 100%;
+}
+
+/*
+ * 4.1 Hide layers above
+ * Hide elements above the currently selected layer.
+ */
+
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block {
+	z-index: 0;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
+	display: none;
+}
+
+.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
+.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-amp-type="grid"],
+.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
+.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-type="amp/amp-story-cta-layer"]{
+	display: none;
+}
+
+/*
+ * 4.2 Blur layers above
+ * Layers - Blur and fade out the layers beneath the currently selected layer.
+ */
+
+.editor-block-list__layout > div {
+	transition: .3s;
+	transition-property: opacity, filter;
+}
+
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
+	opacity: 0.3;
+	filter: blur(8px);
+	-webkit-filter: blur(8px);
+}
+
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
+	opacity: 1;
+	filter: none;
+	-webkit-filter: none;
+}
+
+/*
+ * 4.3 Stroke text for legibility.
+ * Add white stroke to text in layers in order to be legible
+ * while editing on top of varying colored background.
+ */
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
+.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
+	opacity: 0.9;
+	text-shadow:
+		0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+		0 -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+}
+
+/*
+ * 5. Layers Styling
+ */
+
+/*
+ * 5.1 Thirds layer.
+ */
+
+.amp-grid-template-thirds .editor-block-list__layout:first-of-type {
+	grid-template-rows: 1fr 1fr 1fr;
+	grid-template-areas: "upper-third" "middle-third" "lower-third";
+}
+
+div[data-amp-position="upper-third"] {
+	grid-area: upper-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="middle-third"] {
+	grid-area: middle-third / lower-third / lower-third / lower-third;
+}
+
+div[data-amp-position="lower-third"] {
+	grid-area: lower-third / lower-third / lower-third / lower-third;
+}
+
+/*
+ * 5.2 Fill layer.
+ * Style the fill image & fill video type layers.
+ */
+
+.amp-grid-template-fill .editor-block-list__layout > :first-child {
+	bottom: 0;
+	display: block;
+	height: auto;
+	left: 0;
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: auto;
+	display: flex;
+}
+
+.amp-grid-template-fill .editor-block-list__block-edit {
+	display: flex;
+	flex-direction: column;
+}
+
+.amp-grid-template-fill .editor-block-list__block-edit > div:last-child {
+	display: flex;
+	flex: 1;
+}
+
+.amp-grid-template-fill .components-resizable-box__container {
+	width: 318px;
+	height: 533px;
+}
+
+.amp-grid-template-fill .components-disabled {
+	width: 318px;
+	max-height: 533px;
+	overflow: hidden;
+}
+
+.amp-grid-template-fill .wp-block-image,
+.amp-grid-template-fill .wp-block-video {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
+.amp-grid-template-fill .components-resizable-box__container img {
+	object-fit: cover;
+	width: 318px !important;
+	height: 533px !important;
+}
+
+div[data-amp-type="grid"] .block-library-image__resizer {
+	max-width: 318px !important;
+	max-height: 533px !important;
+}
+
+.amp-grid-template-fill > :not(:first-child) {
+	display: none;
+}
+
+/*
+ * 5.3 CTA layer.
+ */
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
+	position: absolute;
+	height: 20%;
+	width: 318px;
+	bottom: 38px;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__block-edit {
+	max-height: 100%;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
+	height: auto !important;
+}
+
+/*
+ * 6. Inserter customisations.
+ */
+
+ .components-popover.editor-inserter__amp .components-popover__content {
+	height: 200px;
+}
+
+/* Fade out CTA Layer in inserter when it's already present */
+.editor-inserter__popover .amp-story-has-cta-layer .editor-block-list-item-amp-amp-story-cta-layer {
+	opacity: 0.5;
+}
+
+/* Hide CTA button when inserting on the first page */
+.amp-story-page-first .editor-block-types-list .editor-block-list-item-amp-amp-story-cta-layer {
+	display: none;
+}
+
+/* Hide inserter inside of the page when block navigator is visible */
+@media (min-width: 961px) {
+	div[data-type="amp/amp-story-page"] .block-list-appender {
+		display: none;
+	}
+
+	.post-type-amp_story .amp-grid-template .editor-block-list__layout:first-of-type {
+		padding-top: 24px;
+	}
+}
+
+/*
+ * 6.1 Ghosted page inserter
+ * Change the last inserter into a ghosted page.
+ * Shame disclaimer: long selectors needed because the classes are quite common.
+ */
+
+.post-type-amp_story .editor-default-block-appender {
+	max-width: 318px;
+}
+
+.post-type-amp_story .editor-default-block-appender .editor-inserter {
+	position: relative;
+	margin: 0 auto;
+	left: 0;
+	top: 0;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender {
+	position: static;
+	margin-top: 38px;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter {
+	opacity: 1;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button {
+	background-color: #FAFAFA;
+	background-image: url( '../images/add-page-inserter.svg' );
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: 86px 96px;
+	border: 10px solid #eff0f1;
+	border-radius: 0;
+	height: 533px;
+	width: 338px;
+	margin: 0 auto;
+	outline: none;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
+	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg,
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button svg {
+	display: none;
+}
+
+.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__block-edit {
+	display: none;
+}
+
+/*
+ * 7. Block navigator
+ * Hides the toggler and shows the navigator by default on large screens.
+ */
+
+@media( max-width: 960px) {
+	.editor-block-list__block-edit > div > .editor-selectors {
+		display: none;
+	}
+}
+
+@media (min-width: 961px) {
+	.post-type-amp_story .editor-post-title__input {
+		text-align: center;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
+		padding-left: 15px;
+		padding-right: 15px;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div {
+		display: grid;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div::before {
+		content: '';
+		grid-column: 1 / 1;
+		grid-row: 1 / 2;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > div:first-child {
+		grid-column: 2 / 2;
+		grid-row: 1 / 1;
+	}
+
+	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
+		grid-column: 2 / 2;
+		grid-row: 2 / 2;
+	}
+
+	.components-icon-button.editor-block-navigation {
+			display: none;
+	}
+
+	#amp-root-navigation {
+			position: absolute;
+			left: 5px;
+			top: 218px;
+			width: 300px;
+			z-index: 80;
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+	}
+
+	#amp-root-navigation .editor-inserter {
+		position: absolute;
+		bottom: 100%;
+		left: 0;
+		width: 100%;
+	}
+
+	#amp-root-navigation .editor-inserter__toggle::after {
+		content: 'Add Layer';
+	}
+
+	.post-type-amp_story #amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {
+		transform: translateX( -13% );
+	}
+
+	.post-type-amp_story.folded #amp-root-navigation .components-popover:not(.is-mobile):not(.is-middle).is-right .components-popover__content {
+		margin-left: -50px;
+	}
+
+	/*
+		Legend of the magic numbers:
+		Sidebar
+			Expanded - 160px wide
+			Folded - 36px wide
+		Settings
+			Shown - 280px wide
+		Content - 383px (including 15px padding)
+		Block Navigation - <= 300px
+	*/
+
+	/* Navigator in the context of the open sidebar, settings hidden. */
+	.post-type-amp_story .edit-post-layout #amp-root-navigation {
+		max-width: calc( 100vw - 160px - 383px );
+	}
+
+	.post-type-amp_story .edit-post-layout .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 160px - 315px ) );
+	}
+
+	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-root-navigation {
+		max-width: calc( 100vw - 280px - 160px - 383px );
+	}
+
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 280px - 160px - 315px ) );
+	}
+
+	/* Navigator in the context of folded sidebar, settings hidden. */
+	.post-type-amp_story.folded #amp-root-navigation {
+		max-width: calc( 100vw - 36px - 383px );
+	}
+
+	.post-type-amp_story.folded .edit-post-visual-editor .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 315px ) );
+	}
+
+	/* Navigator in the context of folded sidebar, settings shown. */
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-root-navigation {
+		max-width: calc( 100vw - 36px - 280px - 383px );
+	}
+
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
+		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 280px - 315px ) );
+	}
+
+	#amp-root-navigation .editor-block-navigation__list {
+		list-style-type: none;
+	}
+
+	#amp-root-navigation .components-icon-button .dashicon {
+		margin-right: 5px;
+	}
+
+	.editor-selectors .component-editor__selector button {
+		background: no-repeat left top;
+		padding-left: 37px;
+		height: 40px;
+		margin: 1px 0 1px 4px;
+	}
+
+	.editor-selectors .component-editor__selector .components-button:focus {
+		box-shadow: none;
+	}
+
+	.post-type-amp_story .components-range-control__number {
+		width: 60px;
+	}
+}
+
+/*
+ * 8. Block mover
+ * Show the block mover by default.
+ */
+
+.post-type-amp_story .is-selected .editor-block-mover {
+	opacity: 0.7;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.post-type-amp_story .is-selected .editor-block-mover.is-visible {
+	opacity: 1;
+}
+
+/*
+ * 100. Shame
+ */
+
+/*
+ * 100.1 Gutenberg - Warning div not clickable
+ * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
+ */
+
+.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
+	pointer-events: all;
+}
+
+.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
+	pointer-events: none;
+}
+
+div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
+    display: none;
+}

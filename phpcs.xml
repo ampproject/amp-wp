@@ -40,6 +40,9 @@
 	<rule ref="WordPress.WP.EnqueuedResources">
 		<exclude-pattern>includes/actions/class-amp-paired-post-actions.php</exclude-pattern>
 	</rule>
+	<rule ref="WordPress.Files.FileName.NotHyphenatedLowercase">
+		<exclude-pattern>includes/templates/single-amp_story.php</exclude-pattern>
+	</rule>
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
 			<property name="customPropertiesWhitelist" type="array">

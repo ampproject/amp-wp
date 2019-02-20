@@ -153,7 +153,8 @@ class AMP_Post_Meta_Box {
 			self::ASSETS_HANDLE,
 			amp_get_asset_url( 'js/amp-post-meta-box.js' ),
 			array( 'jquery' ),
-			AMP__VERSION
+			AMP__VERSION,
+			false
 		);
 
 		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
