@@ -27,15 +27,22 @@
   "grunt-contrib-copy": "1.0.0",
   "grunt-shell": "2.1.0",
   "grunt-wp-deploy": "1.2.1",
+  "npm-run-all": "^4.1.5",
   "timeago.js": "3.0.2",
   "webpack": "4.29.5",
   "webpack-cli": "3.2.3"
  },
  "main": "blocks/index.js",
  "scripts": {
-  "build": "grunt build && grunt create-build-zip",
+  "build": "npm-run-all build:*",
+  "build:prepare": "grunt build",
+  "build:zip": "grunt create-build-zip",
   "deploy": "grunt deploy",
   "dev": "cross-env BABEL_ENV=default webpack --watch",
-  "lint": "eslint ."
+  "lint": "npm-run-all --parallel lint:*",
+  "lint:js": "eslint .",
+  "lint:php": "vendor/bin/phpcs",
+  "test": "npm-run-all --parallel test:*",
+  "test:php": "phpunit"
  }
 }
