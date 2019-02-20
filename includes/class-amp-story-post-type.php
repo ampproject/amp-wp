@@ -177,6 +177,8 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
+		self::enqueue_google_fonts();
+
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
 			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
@@ -248,5 +250,131 @@ class AMP_Story_Post_Type {
 		$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
 		$css_contents = file_get_contents( $css_src ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		wp_add_inline_style( 'wp-block-library', $css_contents );
+
+		self::enqueue_google_fonts();
+
+		$wp_styles = wp_styles();
+		$wp_styles->do_items();
+	}
+
+	public static function enqueue_google_fonts() {
+		$fonts_url = 'https://fonts.googleapis.com/css';
+		$subsets   = array( 'latin', 'latin-ext' );
+
+		/*
+		 * Translators: To add an additional character subset specific to your language,
+		 * translate this to 'greek', 'cyrillic', 'devanagari' or 'vietnamese'. Do not translate into your own language.
+		 */
+		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'amp' );
+
+		if ( 'cyrillic' === $subset ) {
+			$subsets[] = 'cyrillic';
+			$subsets[] = 'cyrillic-ext';
+		} elseif ( 'greek' === $subset ) {
+			$subsets[] = 'greek';
+			$subsets[] = 'greek-ext';
+		} elseif ( 'devanagari' === $subset ) {
+			$subsets[] = 'devanagari';
+		} elseif ( 'vietnamese' === $subset ) {
+			$subsets[] = 'vietnamese';
+		}
+
+		$fonts = array(
+			array(
+				'name'   => 'Arimo',
+				'family' => 'Arimo:400,700',
+			),
+			array(
+				'name'   => 'Lato',
+				'family' => 'Lato:400,700',
+			),
+			array(
+				'name'   => 'Lora',
+				'family' => 'Lora:400,700',
+			),
+			array(
+				'name'   => 'Merriweather',
+				'family' => 'Merriweather:400,700',
+			),
+			array(
+				'name'   => 'Montserrat',
+				'family' => 'Montserrat:400,700',
+			),
+			array(
+				'name'   => 'Noto Sans',
+				'family' => 'Noto Sans:400,700',
+			),
+			array(
+				'name'   => 'Open Sans',
+				'family' => 'Open Sans:400,700',
+			),
+			array(
+				'name'   => 'Open Sans Condensed',
+				'family' => 'Open Sans Condensed:400,700',
+			),
+			array(
+				'name'   => 'Oswald',
+				'family' => 'Oswald:400,700',
+			),
+			array(
+				'name'   => 'Playfair Display',
+				'family' => 'Playfair Display:400,700',
+			),
+			array(
+				'name'   => 'PT Sans',
+				'family' => 'PT Sans:400,700',
+			),
+			array(
+				'name'   => 'PT Sans Narrow',
+				'family' => 'PT Sans Narrow:400,700',
+			),
+			array(
+				'name'   => 'PT Serif',
+				'family' => 'PT Serif:400,700',
+			),
+			array(
+				'name'   => 'Raleway',
+				'family' => 'Raleway:400,700',
+			),
+			array(
+				'name'   => 'Roboto',
+				'family' => 'Roboto:400,700',
+			),
+			array(
+				'name'   => 'Roboto Condensed',
+				'family' => 'Roboto Condensed:400,700',
+			),
+			array(
+				'name'   => 'Roboto Slab',
+				'family' => 'Roboto Slab:400,700',
+			),
+			array(
+				'name'   => 'Slabo 27px',
+				'family' => 'Slabo 27px:400,700',
+			),
+			array(
+				'name'   => 'Source Sans Pro',
+				'family' => 'Source Sans Pro:400,700',
+			),
+			array(
+				'name'   => 'Ubuntu',
+				'family' => 'Ubuntu:400,700',
+			),
+		);
+
+		foreach ( $fonts as $font ) {
+			$src = add_query_arg(
+				array(
+					'family' => urlencode( $font['family'] ),
+					'subset' => urlencode( implode( ',', $subsets ) ),
+				),
+				$fonts_url
+			);
+
+			wp_enqueue_style(
+				sprintf( '%s-font', sanitize_title( $font['name'] ) ),
+				$src
+			);
+		}
 	}
 }
