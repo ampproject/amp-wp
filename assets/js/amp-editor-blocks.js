@@ -1,12 +1,12 @@
+/* global _ */
 /* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0, 4 ] } ] */
 
-var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
-	var component, __;
+const ampEditorBlocks = ( function() {
+	const __ = wp.i18n.__;
+	const _x = wp.i18n._x;
 
-	__ = wp.i18n.__;
-
-	component = {
+	const component = {
 
 		/**
 		 * Holds data.
@@ -21,43 +21,43 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						'core-embed/dailymotion',
 						'core-embed/hulu',
 						'core-embed/reddit',
-						'core-embed/soundcloud'
-					]
+						'core-embed/soundcloud',
+					],
 				},
 				{
 					// Not supported by amp-audio and amp-pixel.
 					value: 'fixed',
 					label: __( 'Fixed', 'amp' ),
 					notAvailable: [
-						'core-embed/soundcloud'
-					]
+						'core-embed/soundcloud',
+					],
 				},
 				{
 					// To ensure your AMP element displays, you must specify a width and height for the containing element.
 					value: 'responsive',
 					label: __( 'Responsive', 'amp' ),
 					notAvailable: [
-						'core-embed/soundcloud'
-					]
+						'core-embed/soundcloud',
+					],
 				},
 				{
 					value: 'fixed-height',
 					label: __( 'Fixed height', 'amp' ),
-					notAvailable: []
+					notAvailable: [],
 				},
 				{
 					value: 'fill',
 					label: __( 'Fill', 'amp' ),
 					notAvailable: [
-						'core-embed/soundcloud'
-					]
+						'core-embed/soundcloud',
+					],
 				},
 				{
 					value: 'flex-item',
 					label: __( 'Flex Item', 'amp' ),
 					notAvailable: [
-						'core-embed/soundcloud'
-					]
+						'core-embed/soundcloud',
+					],
 				},
 				{
 					// Not supported by video.
@@ -71,32 +71,32 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						'core-embed/dailymotion',
 						'core-embed/hulu',
 						'core-embed/reddit',
-						'core-embed/soundcloud'
-					]
-				}
+						'core-embed/soundcloud',
+					],
+				},
 			],
 			defaultWidth: 608, // Max-width in the editor.
 			defaultHeight: 400,
 			mediaBlocks: [
 				'core/image',
-				'core/video'
+				'core/video',
 			],
 			textBlocks: [
 				'core/paragraph',
 				'core/heading',
 				'core/code',
 				'core/quote',
-				'core/subhead'
+				'core/subhead',
 			],
-			ampSettingsLabel: __( 'AMP Settings' ),
+			ampSettingsLabel: __( 'AMP Settings', 'amp' ),
 			fontSizes: {
 				small: 14,
-				larger: 48
+				larger: 48,
 			},
-			ampPanelLabel: __( 'AMP Settings' )
+			ampPanelLabel: __( 'AMP Settings', 'amp' ),
 		},
 		hasThemeSupport: true,
-		isCanonical: false
+		isCanonical: false,
 	};
 
 	/**
@@ -133,18 +133,18 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {[*]} Options.
 	 */
 	component.getLayoutOptions = function getLayoutOptions( blockName ) {
-		var layoutOptions = [
+		const layoutOptions = [
 			{
 				value: '',
-				label: __( 'Default', 'amp' )
-			}
+				label: __( 'Default', 'amp' ),
+			},
 		];
 
 		_.each( component.data.ampLayoutOptions, function( option ) {
 			if ( component.isLayoutAvailable( blockName, option ) ) {
 				layoutOptions.push( {
 					value: option.value,
-					label: option.label
+					label: option.label,
 				} );
 			}
 		} );
@@ -161,7 +161,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
-		var ampAttributes = {};
+		const ampAttributes = {};
 
 		// Shortcode props are handled differently.
 		if ( 'core/shortcode' === blockType.name ) {
@@ -203,10 +203,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampCarousel = {
-				type: 'boolean'
+				type: 'boolean',
 			};
 			settings.attributes.ampLightbox = {
-				type: 'boolean'
+				type: 'boolean',
 			};
 		}
 
@@ -216,7 +216,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampLightbox = {
-				type: 'boolean'
+				type: 'boolean',
 			};
 		}
 
@@ -226,25 +226,25 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampFitText = {
-				default: false
+				default: false,
 			};
 			settings.attributes.minFont = {
 				default: component.data.fontSizes.small,
 				source: 'attribute',
 				selector: 'amp-fit-text',
-				attribute: 'min-font-size'
+				attribute: 'min-font-size',
 			};
 			settings.attributes.maxFont = {
 				default: component.data.fontSizes.larger,
 				source: 'attribute',
 				selector: 'amp-fit-text',
-				attribute: 'max-font-size'
+				attribute: 'max-font-size',
 			};
 			settings.attributes.height = {
 				default: 50,
 				source: 'attribute',
 				selector: 'amp-fit-text',
-				attribute: 'height'
+				attribute: 'height',
 			};
 		}
 
@@ -254,10 +254,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampLayout = {
-				type: 'string'
+				type: 'string',
 			};
 			settings.attributes.ampNoLoading = {
-				type: 'boolean'
+				type: 'boolean',
 			};
 		}
 		return settings;
@@ -270,15 +270,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Function} Edit function.
 	 */
 	component.filterBlocksEdit = function filterBlocksEdit( BlockEdit ) {
-		var el = wp.element.createElement;
+		const el = wp.element.createElement;
 
 		return function( props ) {
-			var attributes = props.attributes,
-				name = props.name,
-				ampLayout,
-				inspectorControls;
+			const attributes = props.attributes;
+			const name = props.name;
 
-			ampLayout = attributes.ampLayout;
+			let inspectorControls;
+
+			const ampLayout = attributes.ampLayout;
 
 			if ( 'core/shortcode' === name ) {
 				// Lets remove amp-carousel from edit view.
@@ -295,8 +295,8 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					// Return original.
 					return [
 						el( BlockEdit, _.extend( {
-							key: 'original'
-						}, props ) )
+							key: 'original',
+						}, props ) ),
 					];
 				}
 			} else if ( 'core/gallery' === name ) {
@@ -312,15 +312,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			// Return just inspector controls in case of 'nodisplay'.
 			if ( ampLayout && 'nodisplay' === ampLayout ) {
 				return [
-					inspectorControls
+					inspectorControls,
 				];
 			}
 
 			return [
 				el( BlockEdit, _.extend( {
-					key: 'original'
+					key: 'original',
 				}, props ) ),
-				inspectorControls
+				inspectorControls,
 			];
 		};
 	};
@@ -332,7 +332,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @param {string} layout Layout.
 	 */
 	component.setImageBlockLayoutAttributes = function setImageBlockLayoutAttributes( props, layout ) {
-		var attributes = props.attributes;
+		const attributes = props.attributes;
 		switch ( layout ) {
 			case 'fixed-height':
 				if ( ! attributes.height ) {
@@ -362,7 +362,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpInspectorControls = function setUpInspectorControls( props ) {
-		var isSelected = props.isSelected,
+		const isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
@@ -384,14 +384,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Element.
 	 */
 	component.getAmpLayoutControl = function getAmpLayoutControl( props ) {
-		var ampLayout = props.attributes.ampLayout,
-			el = wp.element.createElement,
-			SelectControl = wp.components.SelectControl,
-			name = props.name,
-			label = __( 'AMP Layout' );
+		const ampLayout = props.attributes.ampLayout;
+		const el = wp.element.createElement;
+		const SelectControl = wp.components.SelectControl;
+		const name = props.name;
+
+		let label = __( 'AMP Layout', 'amp' );
 
 		if ( 'core/image' === name ) {
-			label = __( 'AMP Layout (modifies width/height)' );
+			label = __( 'AMP Layout (modifies width/height)', 'amp' );
 		}
 
 		return el( SelectControl, {
@@ -403,7 +404,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				if ( 'core/image' === props.name ) {
 					component.setImageBlockLayoutAttributes( props, value );
 				}
-			}
+			},
 		} );
 	};
 
@@ -414,17 +415,17 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Element.
 	 */
 	component.getAmpNoloadingToggle = function getAmpNoloadingToggle( props ) {
-		var ampNoLoading = props.attributes.ampNoLoading,
+		const ampNoLoading = props.attributes.ampNoLoading,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = __( 'AMP Noloading' );
+			label = __( 'AMP Noloading', 'amp' );
 
 		return el( ToggleControl, {
 			label: label,
 			checked: ampNoLoading,
 			onChange: function() {
 				props.setAttributes( { ampNoLoading: ! ampNoLoading } );
-			}
+			},
 		} );
 	};
 
@@ -437,47 +438,48 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpTextBlocksInspectorControls = function setUpInspectorControls( props ) {
-		var inspectorPanelBodyArgs,
-			ampFitText = props.attributes.ampFitText,
-			minFont = props.attributes.minFont,
+		const ampFitText = props.attributes.ampFitText;
+		const isSelected = props.isSelected;
+		const el = wp.element.createElement;
+		const InspectorControls = wp.editor.InspectorControls;
+		const TextControl = wp.components.TextControl;
+		const FontSizePicker = wp.components.FontSizePicker;
+		const ToggleControl = wp.components.ToggleControl;
+		const PanelBody = wp.components.PanelBody;
+
+		let minFont = props.attributes.minFont,
 			maxFont = props.attributes.maxFont,
-			height = props.attributes.height,
-			isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			TextControl = wp.components.TextControl,
-			FontSizePicker = wp.components.FontSizePicker,
-			ToggleControl = wp.components.ToggleControl,
-			PanelBody = wp.components.PanelBody,
-			label = __( 'Automatically fit text to container', 'amp' ),
-			FONT_SIZES = [
-				{
-					name: 'small',
-					shortName: __( 'S' ),
-					size: 14
-				},
-				{
-					name: 'regular',
-					shortName: __( 'M' ),
-					size: 16
-				},
-				{
-					name: 'large',
-					shortName: __( 'L' ),
-					size: 36
-				},
-				{
-					name: 'larger',
-					shortName: __( 'XL' ),
-					size: 48
-				}
-			];
+			height = props.attributes.height;
+
+		const label = __( 'Automatically fit text to container', 'amp' );
+		const FONT_SIZES = [
+			{
+				name: 'small',
+				shortName: _x( 'S', 'font size', 'amp' ),
+				size: 14,
+			},
+			{
+				name: 'regular',
+				shortName: _x( 'M', 'font size', 'amp' ),
+				size: 16,
+			},
+			{
+				name: 'large',
+				shortName: _x( 'L', 'font size', 'amp' ),
+				size: 36,
+			},
+			{
+				name: 'larger',
+				shortName: _x( 'XL', 'font size', 'amp' ),
+				size: 48,
+			},
+		];
 
 		if ( ! isSelected ) {
 			return null;
 		}
 
-		inspectorPanelBodyArgs = [
+		const inspectorPanelBodyArgs = [
 			PanelBody,
 			{ title: component.data.ampSettingsLabel, className: ampFitText ? 'is-amp-fit-text' : '' },
 			el( ToggleControl, {
@@ -485,8 +487,8 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				checked: ampFitText,
 				onChange: function() {
 					props.setAttributes( { ampFitText: ! ampFitText } );
-				}
-			} )
+				},
+			} ),
 		];
 
 		if ( ampFitText ) {
@@ -495,22 +497,22 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			minFont = parseInt( minFont, 10 );
 			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
 				el( TextControl, {
-					label: __( 'Height' ),
+					label: __( 'Height', 'amp' ),
 					value: height,
 					min: 1,
 					onChange: function( nextHeight ) {
 						props.setAttributes( { height: nextHeight } );
-					}
+					},
 				} ),
 				maxFont > height && el(
 					wp.components.Notice,
 					{
 						status: 'error',
-						isDismissible: false
+						isDismissible: false,
 					},
-					__( 'The height must be greater than the max font size.' )
+					__( 'The height must be greater than the max font size.', 'amp' )
 				),
-				el( PanelBody, { title: __( 'Minimum font size' ) },
+				el( PanelBody, { title: __( 'Minimum font size', 'amp' ) },
 					el( FontSizePicker, {
 						fallbackFontSize: 14,
 						value: minFont,
@@ -522,18 +524,18 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							if ( parseInt( nextMinFont, 10 ) <= maxFont ) {
 								props.setAttributes( { minFont: nextMinFont } );
 							}
-						}
+						},
 					} )
 				),
 				minFont > maxFont && el(
 					wp.components.Notice,
 					{
 						status: 'error',
-						isDismissible: false
+						isDismissible: false,
 					},
-					__( 'The min font size must less than the max font size.' )
+					__( 'The min font size must less than the max font size.', 'amp' )
 				),
-				el( PanelBody, { title: __( 'Maximum font size' ) },
+				el( PanelBody, { title: __( 'Maximum font size', 'amp' ) },
 					el( FontSizePicker, {
 						value: maxFont,
 						fallbackFontSize: 48,
@@ -544,11 +546,11 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							}
 							props.setAttributes( {
 								maxFont: nextMaxFont,
-								height: Math.max( nextMaxFont, height )
+								height: Math.max( nextMaxFont, height ),
 							} );
-						}
+						},
 					} )
-				)
+				),
 			] );
 		}
 
@@ -567,7 +569,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Inspector controls.
 	 */
 	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
-		var isSelected = props.isSelected,
+		const isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
@@ -593,10 +595,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Element.
 	 */
 	component.getAmpLightboxToggle = function getAmpLightboxToggle( props ) {
-		var ampLightbox = props.attributes.ampLightbox,
+		const ampLightbox = props.attributes.ampLightbox,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Add lightbox effect' );
+			label = __( 'Add lightbox effect', 'amp' );
 
 		return el( ToggleControl, {
 			label: label,
@@ -613,7 +615,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						props.setAttributes( { linkTo: 'none' } );
 					}
 				}
-			}
+			},
 		} );
 	};
 
@@ -624,17 +626,17 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Element.
 	 */
 	component.getAmpCarouselToggle = function getAmpCarouselToggle( props ) {
-		var ampCarousel = props.attributes.ampCarousel,
+		const ampCarousel = props.attributes.ampCarousel,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Display as carousel' );
+			label = __( 'Display as carousel', 'amp' );
 
 		return el( ToggleControl, {
 			label: label,
 			checked: ampCarousel,
 			onChange: function() {
 				props.setAttributes( { ampCarousel: ! ampCarousel } );
-			}
+			},
 		} );
 	};
 
@@ -645,7 +647,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Inspector Controls.
 	 */
 	component.setUpImageInpsectorControls = function setUpImageInpsectorControls( props ) {
-		var isSelected = props.isSelected,
+		const isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
@@ -669,7 +671,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Inspector controls.
 	 */
 	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
-		var isSelected = props.isSelected,
+		const isSelected = props.isSelected,
 			el = wp.element.createElement,
 			InspectorControls = wp.editor.InspectorControls,
 			PanelBody = wp.components.PanelBody;
@@ -693,11 +695,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
-		var text = attributes.text || '',
-			content = '',
-			fitTextProps = {
-				layout: 'fixed-height'
-			};
+		let text = attributes.text || '',
+			content = '';
+
+		const fitTextProps = {
+			layout: 'fixed-height',
+		};
 
 		if ( 'core/shortcode' === blockType.name && component.isGalleryShortcode( attributes ) ) {
 			if ( ! attributes.ampLightbox ) {
@@ -749,7 +752,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					element,
 					{
 						key: 'new',
-						value: content
+						value: content,
 					}
 				);
 			}
@@ -770,7 +773,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			 * "The expected content for amp-fit-text is text or other inline content, but it can also contain non-inline content."
 			 */
 			if ( 'core/paragraph' === blockType.name ) {
-				var ampFitTextContent = '<amp-fit-text';
+				let ampFitTextContent = '<amp-fit-text';
 				_.each( fitTextProps, function( value, att ) {
 					ampFitTextContent += ' ' + att + '="' + value + '"';
 				} );
@@ -780,7 +783,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					element,
 					{
 						key: 'new',
-						value: ampFitTextContent
+						value: ampFitTextContent,
 					}
 				);
 			}
@@ -798,13 +801,15 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {string} Modified content.
 	 */
 	component.getAmpFitTextContent = function getAmpFitTextContent( content ) {
-		var contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/,
-			match, newContent;
-		match = contentRegex.exec( content );
-		newContent = content;
+		const contentRegex = /<amp-fit-text\b[^>]*>(.*?)<\/amp-fit-text>/;
+		const match = contentRegex.exec( content );
+
+		let newContent = content;
+
 		if ( match && match[ 1 ] ) {
 			newContent = match[ 1 ];
 		}
+
 		return newContent;
 	};
 
@@ -900,3 +905,5 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 	return component;
 }() );
+
+window.ampEditorBlocks = ampEditorBlocks;

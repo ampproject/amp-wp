@@ -12,7 +12,7 @@ function BlockNavigationList( {
 	blocks,
 	selectedBlockClientId,
 	selectBlock,
-	showNestedBlocks
+	showNestedBlocks,
 } ) {
 	return (
 		/*
@@ -20,8 +20,8 @@ function BlockNavigationList( {
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<ul key='navigation-list' className="editor-block-navigation__list" role="list">
-			{ _.map( blocks, ( block ) => {
+		<ul key="navigation-list" className="editor-block-navigation__list" role="list">
+			{ blocks.map( ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
 				let className = 'editor-block-navigation__item-button';
@@ -103,21 +103,21 @@ export default compose(
 			getSelectedBlockClientId,
 			getBlockHierarchyRootClientId,
 			getBlock,
-			getBlocks
+			getBlocks,
 		} = select( 'core/editor' );
 		const selectedBlockClientId = getSelectedBlockClientId();
 		return {
 			rootBlocks: getBlocks(),
 			rootBlock: selectedBlockClientId ? getBlock( getBlockHierarchyRootClientId( selectedBlockClientId ) ) : null,
-			selectedBlockClientId
+			selectedBlockClientId,
 		};
 	} ),
-	withDispatch( ( dispatch, { onSelect = _.noop } ) => {
+	withDispatch( ( dispatch, { onSelect = () => undefined } ) => {
 		return {
 			selectBlock( clientId ) {
 				dispatch( 'core/editor' ).selectBlock( clientId );
 				onSelect( clientId );
-			}
+			},
 		};
 	} )
 )( BlockNavigation );

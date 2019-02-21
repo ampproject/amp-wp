@@ -13,7 +13,7 @@ import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
-	Placeholder
+	Placeholder,
 } from '@wordpress/components';
 
 /**
@@ -27,43 +27,43 @@ export default registerBlockType(
 		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed', 'amp' )
+			__( 'Embed', 'amp' ),
 		],
 
 		attributes: {
 			dataPlayerId: {
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'data-player-id'
+				attribute: 'data-player-id',
 			},
 			dataMediaId: {
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'data-media-id'
+				attribute: 'data-media-id',
 			},
 			dataPlaylistId: {
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'data-playlist-id'
+				attribute: 'data-playlist-id',
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-jwplayer',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -75,35 +75,35 @@ export default registerBlockType(
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
 				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
-				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) },
 
 			];
 			let url = false;
 			if ( dataPlayerId && ( dataMediaId || dataPlaylistId ) ) {
 				if ( dataPlaylistId ) {
-					url = `https://content.jwplatform.com/players/${dataPlaylistId}-${dataPlayerId}`;
+					url = `https://content.jwplatform.com/players/${ dataPlaylistId }-${ dataPlayerId }`;
 				} else {
-					url = `https://content.jwplatform.com/players/${dataMediaId}-${dataPlayerId}`;
+					url = `https://content.jwplatform.com/players/${ dataMediaId }-${ dataPlayerId }`;
 				}
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'JW Player Settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'Player ID (required)', 'amp' ) }
 								value={ dataPlayerId }
-								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlayerId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Media ID (required if playlist ID not set)', 'amp' ) }
 								value={ dataMediaId }
-								onChange={ value => ( setAttributes( { dataMediaId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataMediaId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Playlist ID (required if media ID not set)', 'amp' ) }
 								value={ dataPlaylistId }
-								onChange={ value => ( setAttributes( { dataPlaylistId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlaylistId: value } ) ) }
 							/>
 							{
 								getLayoutControls( props, ampLayoutOptions )
@@ -125,10 +125,10 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let jwProps = {
+			const jwProps = {
 				layout: attributes.ampLayout,
 				height: attributes.height,
-				'data-player-id': attributes.dataPlayerId
+				'data-player-id': attributes.dataPlayerId,
 			};
 			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				jwProps.width = attributes.width;
@@ -142,6 +142,6 @@ export default registerBlockType(
 			return (
 				<amp-jwplayer { ...jwProps }></amp-jwplayer>
 			);
-		}
+		},
 	}
 );

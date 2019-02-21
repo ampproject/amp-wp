@@ -3,7 +3,7 @@ import {
 	TextControl,
 	SelectControl,
 	Notice,
-	Placeholder
+	Placeholder,
 } from '@wordpress/components';
 
 /**
@@ -42,7 +42,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			label={ __( 'Layout', 'amp' ) }
 			value={ ampLayout }
 			options={ ampLayoutOptions }
-			onChange={ value => ( setAttributes( { ampLayout: value } ) ) }
+			onChange={ ( value ) => ( setAttributes( { ampLayout: value } ) ) }
 		/>,
 		showWidthNotice && (
 			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
@@ -60,7 +60,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			type="number"
 			label={ __( 'Width (px)', 'amp' ) }
 			value={ width !== undefined ? width : '' }
-			onChange={ value => ( setAttributes( { width: value } ) ) }
+			onChange={ ( value ) => ( setAttributes( { width: value } ) ) }
 		/>,
 		showHeightNotice && (
 			<Notice key="showHeightNotice" status="error" isDismissible={ false }>
@@ -78,7 +78,7 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			type="number"
 			label={ __( 'Height (px)', 'amp' ) }
 			value={ height }
-			onChange={ value => ( setAttributes( { height: value } ) ) }
-		/>
+			onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
+		/>,
 	];
 }

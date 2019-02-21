@@ -1,16 +1,16 @@
 /* exported ampValidatedUrlPostEditScreen */
 
 const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
-	let component = {
+	const component = {
 		data: {
 			l10n: {
 				unsaved_changes: '',
 				showing_number_errors: '',
 				page_heading: '',
 				show_all: '',
-				amp_enabled: false
-			}
-		}
+				amp_enabled: false,
+			},
+		},
 	};
 
 	/**

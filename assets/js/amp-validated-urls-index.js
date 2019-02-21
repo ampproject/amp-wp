@@ -1,8 +1,8 @@
 /* exported ampValidatedUrlsIndex */
 
 const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
-	let component = {
-		classes: {}
+	const component = {
+		classes: {},
 	};
 
 	/**

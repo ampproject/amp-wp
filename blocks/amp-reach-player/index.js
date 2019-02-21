@@ -13,7 +13,7 @@ import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
-	Placeholder
+	Placeholder,
 } from '@wordpress/components';
 
 /**
@@ -28,33 +28,33 @@ export default registerBlockType(
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),
-			__( 'Beachfront Reach video', 'amp' )
+			__( 'Beachfront Reach video', 'amp' ),
 		],
 
 		attributes: {
 			dataEmbedId: {
 				source: 'attribute',
 				selector: 'amp-reach-player',
-				attribute: 'data-embed-id'
+				attribute: 'data-embed-id',
 			},
 			ampLayout: {
 				default: 'fixed-height',
 				source: 'attribute',
 				selector: 'amp-reach-player',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-reach-player',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-reach-player',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -65,7 +65,7 @@ export default registerBlockType(
 				{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
-				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
 
 			];
 			let url = false;
@@ -74,12 +74,12 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'Reach settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'The Reach player embed id (required)', 'amp' ) }
 								value={ dataEmbedId }
-								onChange={ value => ( setAttributes( { dataEmbedId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataEmbedId: value } ) ) }
 							/>
 							{
 								getLayoutControls( props, ampLayoutOptions )
@@ -103,10 +103,10 @@ export default registerBlockType(
 		save( { attributes } ) {
 			const { dataEmbedId, ampLayout, height, width } = attributes;
 
-			let reachProps = {
+			const reachProps = {
 				layout: ampLayout,
 				height: height,
-				'data-embed-id': dataEmbedId
+				'data-embed-id': dataEmbedId,
 			};
 			if ( 'fixed-height' !== ampLayout && width ) {
 				reachProps.width = width;
@@ -114,6 +114,6 @@ export default registerBlockType(
 			return (
 				<amp-reach-player { ...reachProps }></amp-reach-player>
 			);
-		}
+		},
 	}
 );

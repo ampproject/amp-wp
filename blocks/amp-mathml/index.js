@@ -17,15 +17,15 @@ export default registerBlockType(
 		icon: 'welcome-learn-more',
 		keywords: [
 			__( 'Mathematical formula', 'amp' ),
-			__( 'Scientific content ', 'amp' )
+			__( 'Scientific content ', 'amp' ),
 		],
 
 		attributes: {
 			dataFormula: {
 				source: 'attribute',
 				selector: 'amp-mathml',
-				attribute: 'data-formula'
-			}
+				attribute: 'data-formula',
+			},
 		},
 
 		edit( { attributes, setAttributes } ) {
@@ -33,7 +33,7 @@ export default registerBlockType(
 
 			return (
 				<PlainText
-					key='formula'
+					key="formula"
 					value={ dataFormula }
 					placeholder={ __( 'Insert formula', 'amp' ) }
 					onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
@@ -42,13 +42,13 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let mathmlProps = {
+			const mathmlProps = {
 				'data-formula': attributes.dataFormula,
-				layout: 'container'
+				layout: 'container',
 			};
 			return (
 				<amp-mathml { ...mathmlProps }></amp-mathml>
 			);
-		}
+		},
 	}
 );

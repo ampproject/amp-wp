@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	ToggleControl
+	ToggleControl,
 } from '@wordpress/components';
 
 /**
@@ -28,7 +28,7 @@ export default registerBlockType(
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),
-			__( 'AOL O2Player', 'amp' )
+			__( 'AOL O2Player', 'amp' ),
 		],
 
 		// @todo Add other useful macro toggles, e.g. showing relevant content.
@@ -36,44 +36,44 @@ export default registerBlockType(
 			dataPid: {
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'data-pid'
+				attribute: 'data-pid',
 			},
 			dataVid: {
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'data-vid'
+				attribute: 'data-vid',
 			},
 			dataBcid: {
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'data-bcid'
+				attribute: 'data-bcid',
 			},
 			dataBid: {
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'data-bid'
+				attribute: 'data-bid',
 			},
 			autoPlay: {
-				default: false
+				default: false,
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-o2-player',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -85,36 +85,36 @@ export default registerBlockType(
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
 				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
-				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) },
 
 			];
 			let url = false;
 			if ( dataPid && ( dataBcid || dataVid ) ) {
-				url = `https://delivery.vidible.tv/htmlembed/pid=${dataPid}/`;
+				url = `https://delivery.vidible.tv/htmlembed/pid=${ dataPid }/`;
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'Player ID (required)', 'amp' ) }
 								value={ dataPid }
-								onChange={ value => ( setAttributes( { dataPid: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPid: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Buyer Company ID (either buyer or video ID is required)', 'amp' ) }
 								value={ dataBcid }
-								onChange={ value => ( setAttributes( { dataBcid: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataBcid: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Video ID (either buyer or video ID is required)', 'amp' ) }
 								value={ dataVid }
-								onChange={ value => ( setAttributes( { dataVid: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataVid: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Playlist ID', 'amp' ) }
 								value={ dataBid }
-								onChange={ value => ( setAttributes( { dataBid: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataBid: value } ) ) }
 							/>
 							<ToggleControl
 								label={ __( 'Autoplay', 'amp' ) }
@@ -141,10 +141,10 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let o2Props = {
+			const o2Props = {
 				layout: attributes.ampLayout,
 				height: attributes.height,
-				'data-pid': attributes.dataPid
+				'data-pid': attributes.dataPid,
 			};
 			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				o2Props.width = attributes.width;
@@ -163,6 +163,6 @@ export default registerBlockType(
 			return (
 				<amp-o2-player { ...o2Props }></amp-o2-player>
 			);
-		}
+		},
 	}
 );

@@ -8,7 +8,7 @@ const externals = {
 	jquery: 'jQuery',
 	lodash: 'lodash',
 	react: 'React',
-	'react-dom': 'ReactDOM'
+	'react-dom': 'ReactDOM',
 };
 
 // Define WordPress dependencies
@@ -37,7 +37,7 @@ const wpDependencies = [
 	'core-data',
 	'plugins',
 	'edit-post',
-	'keycodes'
+	'keycodes',
 ];
 
 /**
@@ -59,7 +59,7 @@ function camelCaseDash( string ) {
 
 wpDependencies.forEach( ( name ) => {
 	externals[ `@wordpress/${ name }` ] = {
-		this: [ 'wp', camelCaseDash( name ) ]
+		this: [ 'wp', camelCaseDash( name ) ],
 	};
 } );
 
@@ -72,13 +72,13 @@ module.exports = {
 		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle.js',
 		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle.js',
 		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details.js',
-		'./assets/js/amp-story-blocks-compiled': './blocks/stories.js'
+		'./assets/js/amp-story-blocks-compiled': './blocks/stories.js',
 	},
 	output: {
 		path: path.resolve( __dirname ),
 		filename: '[name].js',
 		library: 'AMP',
-		libraryTarget: 'this'
+		libraryTarget: 'this',
 	},
 	externals,
 	devtool: isProduction ? undefined : 'cheap-eval-source-map',
@@ -88,9 +88,9 @@ module.exports = {
 				test: /\.js$/,
 				exclude: /node_modules/,
 				use: {
-					loader: 'babel-loader'
-				}
-			}
-		]
-	}
+					loader: 'babel-loader',
+				},
+			},
+		],
+	},
 };

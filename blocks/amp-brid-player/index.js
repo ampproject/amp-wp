@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	ToggleControl
+	ToggleControl,
 } from '@wordpress/components';
 
 /**
@@ -28,54 +28,54 @@ export default registerBlockType(
 		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed', 'amp' )
+			__( 'Embed', 'amp' ),
 		],
 
 		attributes: {
 			autoPlay: {
-				type: 'boolean'
+				type: 'boolean',
 			},
 			dataPartner: {
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'data-partner'
+				attribute: 'data-partner',
 			},
 			dataPlayer: {
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'data-player'
+				attribute: 'data-player',
 			},
 			dataVideo: {
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'data-video'
+				attribute: 'data-video',
 			},
 			dataPlaylist: {
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'data-playlist'
+				attribute: 'data-playlist',
 			},
 			dataOutstream: {
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'data-outstream'
+				attribute: 'data-outstream',
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				type: 'number',
-				default: 600
+				default: 600,
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-brid-player',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -87,41 +87,41 @@ export default registerBlockType(
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
 				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
-				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) }
+				{ value: 'nodisplay', label: __( 'No Display', 'amp' ) },
 
 			];
 			let url = false;
 			if ( dataPartner && dataPlayer && ( dataVideo || dataPlaylist || dataOutstream ) ) {
-				url = `http://cdn.brid.tv/live/partners/${dataPartner}`;
+				url = `http://cdn.brid.tv/live/partners/${ dataPartner }`;
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
 								value={ dataPartner }
-								onChange={ value => ( setAttributes( { dataPartner: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPartner: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Brid.tv player ID (required)', 'amp' ) }
 								value={ dataPlayer }
-								onChange={ value => ( setAttributes( { dataPlayer: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlayer: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Video ID (one of video / playlist / outstream ID is required)', 'amp' ) }
 								value={ dataVideo }
-								onChange={ value => ( setAttributes( { dataVideo: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataVideo: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Outstream unit ID (one of video / playlist / outstream ID is required)', 'amp' ) }
 								value={ dataOutstream }
-								onChange={ value => ( setAttributes( { dataOutstream: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataOutstream: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Playlist ID (one of video / playlist / outstream ID is required)', 'amp' ) }
 								value={ dataPlaylist }
-								onChange={ value => ( setAttributes( { dataPlaylist: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlaylist: value } ) ) }
 							/>
 							<ToggleControl
 								label={ __( 'Autoplay', 'amp' ) }
@@ -148,11 +148,11 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let bridProps = {
+			const bridProps = {
 				layout: attributes.ampLayout,
 				height: attributes.height,
 				'data-player': attributes.dataPlayer,
-				'data-partner': attributes.dataPartner
+				'data-partner': attributes.dataPartner,
 			};
 			if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
 				bridProps.width = attributes.width;
@@ -172,6 +172,6 @@ export default registerBlockType(
 			return (
 				<amp-brid-player { ...bridProps }></amp-brid-player>
 			);
-		}
+		},
 	}
 );

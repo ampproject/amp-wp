@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	SelectControl
+	SelectControl,
 } from '@wordpress/components';
 
 /**
@@ -29,7 +29,7 @@ export default registerBlockType(
 		icon: 'embed-generic',
 		keywords: [
 			__( 'Embed', 'amp' ),
-			__( 'Ooyala video', 'amp' )
+			__( 'Ooyala video', 'amp' ),
 		],
 
 		// @todo Add data-config attribute?
@@ -37,42 +37,42 @@ export default registerBlockType(
 			dataEmbedCode: {
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'data-embedcode'
+				attribute: 'data-embedcode',
 			},
 			dataPlayerId: {
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'data-playerid'
+				attribute: 'data-playerid',
 			},
 			dataPcode: {
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'data-pcode'
+				attribute: 'data-pcode',
 			},
 			dataPlayerVersion: {
 				default: 'v3',
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'data-playerversion'
+				attribute: 'data-playerversion',
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-ooyala-player',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -82,40 +82,40 @@ export default registerBlockType(
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
-				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
 
 			];
 			let url = false;
 			if ( dataEmbedCode && dataPlayerId && dataPcode ) {
-				url = `http://cf.c.ooyala.com/${dataEmbedCode}`;
+				url = `http://cf.c.ooyala.com/${ dataEmbedCode }`;
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'Video embed code (required)', 'amp' ) }
 								value={ dataEmbedCode }
-								onChange={ value => ( setAttributes( { dataEmbedCode: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataEmbedCode: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Player ID (required)', 'amp' ) }
 								value={ dataPlayerId }
-								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlayerId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Provider code for the account (required)', 'amp' ) }
 								value={ dataPcode }
-								onChange={ value => ( setAttributes( { dataPcode: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPcode: value } ) ) }
 							/>
 							<SelectControl
 								label={ __( 'Player version', 'amp' ) }
 								value={ dataPlayerVersion }
 								options={ [
 									{ value: 'v3', label: __( 'V3', 'amp' ) },
-									{ value: 'v4', label: __( 'V4', 'amp' ) }
+									{ value: 'v4', label: __( 'V4', 'amp' ) },
 								] }
-								onChange={ value => ( setAttributes( { dataPlayerVersion: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlayerVersion: value } ) ) }
 							/>
 							{
 								getLayoutControls( props, ampLayoutOptions )
@@ -139,13 +139,13 @@ export default registerBlockType(
 		save( { attributes } ) {
 			const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, ampLayout, height, width } = attributes;
 
-			let ooyalaProps = {
+			const ooyalaProps = {
 				layout: ampLayout,
 				height: height,
 				'data-embedcode': dataEmbedCode,
 				'data-playerid': dataPlayerId,
 				'data-pcode': dataPcode,
-				'data-playerversion': dataPlayerVersion
+				'data-playerversion': dataPlayerVersion,
 			};
 			if ( 'fixed-height' !== ampLayout && width ) {
 				ooyalaProps.width = width;
@@ -153,6 +153,6 @@ export default registerBlockType(
 			return (
 				<amp-ooyala-player { ...ooyalaProps }></amp-ooyala-player>
 			);
-		}
+		},
 	}
 );

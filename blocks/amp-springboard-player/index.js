@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	SelectControl
+	SelectControl,
 } from '@wordpress/components';
 
 /**
@@ -28,60 +28,60 @@ export default registerBlockType(
 		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed', 'amp' )
+			__( 'Embed', 'amp' ),
 		],
 
 		attributes: {
 			dataSiteId: {
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-site-id'
+				attribute: 'data-site-id',
 			},
 			dataContentId: {
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-content-id'
+				attribute: 'data-content-id',
 			},
 			dataPlayerId: {
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-player-id'
+				attribute: 'data-player-id',
 			},
 			dataDomain: {
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-domain'
+				attribute: 'data-domain',
 			},
 			dataMode: {
 				default: 'video',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-mode'
+				attribute: 'data-mode',
 			},
 			dataItems: {
 				default: 1,
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'data-items'
+				attribute: 'data-items',
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-springboard-player',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -91,7 +91,7 @@ export default registerBlockType(
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 				{ value: 'fill', label: __( 'Fill', 'amp' ) },
-				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) }
+				{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
 
 			];
 			let url = false;
@@ -100,42 +100,42 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'SprintBoard site ID (required)', 'amp' ) }
 								value={ dataSiteId }
-								onChange={ value => ( setAttributes( { dataSiteId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataSiteId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Player content ID (required)', 'amp' ) }
 								value={ dataContentId }
-								onChange={ value => ( setAttributes( { dataContentId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataContentId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Player ID', 'amp' ) }
 								value={ dataPlayerId }
-								onChange={ value => ( setAttributes( { dataPlayerId: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPlayerId: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Springboard partner domain', 'amp' ) }
 								value={ dataDomain }
-								onChange={ value => ( setAttributes( { dataDomain: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataDomain: value } ) ) }
 							/>
 							<SelectControl
 								label={ __( 'Mode (required)', 'amp' ) }
 								value={ dataMode }
 								options={ [
 									{ value: 'video', label: __( 'Video', 'amp' ) },
-									{ value: 'playlist', label: __( 'Playlist', 'amp' ) }
+									{ value: 'playlist', label: __( 'Playlist', 'amp' ) },
 								] }
-								onChange={ value => ( setAttributes( { dataMode: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataMode: value } ) ) }
 							/>
 							<TextControl
 								type="number"
 								label={ __( 'Number of video is playlist (required)', 'amp' ) }
 								value={ dataItems }
-								onChange={ value => ( setAttributes( { dataItems: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataItems: value } ) ) }
 							/>
 							{
 								getLayoutControls( props, ampLayoutOptions )
@@ -158,7 +158,7 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, ampLayout, height, width } = attributes;
-			let springboardProps = {
+			const springboardProps = {
 				layout: ampLayout,
 				height: height,
 				'data-site-id': dataSiteId,
@@ -166,7 +166,7 @@ export default registerBlockType(
 				'data-content-id': dataContentId,
 				'data-player-id': dataPlayerId,
 				'data-domain': dataDomain,
-				'data-items': dataItems
+				'data-items': dataItems,
 			};
 			if ( 'fixed-height' !== ampLayout && width ) {
 				springboardProps.width = attributes.width;
@@ -174,6 +174,6 @@ export default registerBlockType(
 			return (
 				<amp-springboard-player { ...springboardProps }></amp-springboard-player>
 			);
-		}
+		},
 	}
 );
