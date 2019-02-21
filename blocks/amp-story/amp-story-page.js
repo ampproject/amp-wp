@@ -3,7 +3,7 @@
 import uuid from 'uuid/v4';
 import BlockNavigation from './block-navigation';
 import {
-	BLOCK_ICONS
+	BLOCK_ICONS,
 } from './helpers';
 
 import { __ } from '@wordpress/i18n';
@@ -12,7 +12,7 @@ import {
 	InnerBlocks,
 	PanelColorSettings,
 	InspectorControls,
-	Inserter
+	Inserter,
 } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 import { select } from '@wordpress/data';
@@ -21,13 +21,13 @@ const ALLOWED_BLOCKS = [
 	'amp/amp-story-grid-layer-vertical',
 	'amp/amp-story-grid-layer-fill',
 	'amp/amp-story-grid-layer-thirds',
-	'amp/amp-story-cta-layer'
+	'amp/amp-story-cta-layer',
 ];
 
 const {
 	hasSelectedInnerBlock,
 	getSelectedBlockClientId,
-	getBlockIndex
+	getBlockIndex,
 } = select( 'core/editor' );
 
 const TEMPLATE = [
@@ -38,11 +38,11 @@ const TEMPLATE = [
 			[
 				'core/paragraph',
 				{
-					placeholder: __( 'Add content to layer.', 'amp' )
-				}
-			]
-		]
-	]
+					placeholder: __( 'Add content to layer.', 'amp' ),
+				},
+			],
+		],
+	],
 ];
 
 /**
@@ -58,11 +58,11 @@ export default registerBlockType(
 			id: {
 				source: 'attribute',
 				selector: 'amp-story-page',
-				attribute: 'id'
+				attribute: 'id',
 			},
 			backgroundColor: {
-				default: '#ffffff'
-			}
+				default: '#ffffff',
+			},
 		},
 
 		/*
@@ -94,7 +94,7 @@ export default registerBlockType(
 					if ( editLayout.length ) {
 						const blockNav = document.getElementById( 'amp-root-navigation' );
 						if ( ! blockNav ) {
-							let navWrapper = document.createElement( 'div' );
+							const navWrapper = document.createElement( 'div' );
 							navWrapper.id = 'amp-root-navigation';
 							editLayout[ 0 ].appendChild( navWrapper );
 						}
@@ -105,13 +105,13 @@ export default registerBlockType(
 								className += ' amp-story-page-first';
 							}
 							navList =
-								<div key='layerManager' className={ className }>
+								<div key="layerManager" className={ className }>
 									<Inserter rootClientId={ this.props.clientId } />
 									<BlockNavigation />
 								</div>;
 						} else {
 							navList =
-								<div key='layerManager' className='editor-selectors'>
+								<div key="layerManager" className="editor-selectors">
 									<BlockNavigation />
 								</div>;
 						}
@@ -132,12 +132,12 @@ export default registerBlockType(
 			render() {
 				const props = this.props;
 				const { setAttributes, attributes } = props;
-				const onChangeBackgroundColor = newBackgroundColor => {
+				const onChangeBackgroundColor = ( newBackgroundColor ) => {
 					setAttributes( { backgroundColor: newBackgroundColor } );
 				};
 
 				return [
-					<InspectorControls key='controls'>
+					<InspectorControls key="controls">
 						<PanelColorSettings
 							title={ __( 'Background Color Settings', 'amp' ) }
 							initialOpen={ false }
@@ -145,24 +145,24 @@ export default registerBlockType(
 								{
 									value: attributes.backgroundColor,
 									onChange: onChangeBackgroundColor,
-									label: __( 'Background Color', 'amp' )
-								}
+									label: __( 'Background Color', 'amp' ),
+								},
 							] }
 						/>
 					</InspectorControls>,
-					<div key="contents" style={{ backgroundColor: attributes.backgroundColor }}>
+					<div key="contents" style={ { backgroundColor: attributes.backgroundColor } }>
 						<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
-					</div>
+					</div>,
 				];
 			}
 		},
 
 		save( { attributes } ) {
 			return (
-				<amp-story-page style={{ backgroundColor: attributes.backgroundColor }} id={ attributes.id }>
+				<amp-story-page style={ { backgroundColor: attributes.backgroundColor } } id={ attributes.id }>
 					<InnerBlocks.Content />
 				</amp-story-page>
 			);
-		}
+		},
 	}
 );

@@ -2,7 +2,7 @@ import {
 	getGridLayerAttributes,
 	saveGridLayer,
 	editGridLayer,
-	BLOCK_ICONS
+	BLOCK_ICONS,
 } from './helpers';
 
 import { __ } from '@wordpress/i18n';
@@ -27,6 +27,6 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			return saveGridLayer( attributes, 'thirds' );
-		}
+		},
 	}
 );

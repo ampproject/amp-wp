@@ -21,10 +21,10 @@ class RowToggler {
 			this.createNewTr();
 			const togglers = [
 				...this.tr.querySelectorAll( '.single-url-detail-toggle' ),
-				this.details.querySelector( 'summary' )
+				this.details.querySelector( 'summary' ),
 			];
 
-			togglers.forEach( el => {
+			togglers.forEach( ( el ) => {
 				el.addEventListener( 'click', () => {
 					this.toggle( el );
 				} );
@@ -59,7 +59,7 @@ class RowToggler {
 	 */
 	getRowColspan() {
 		return [ ...this.tr.childNodes ]
-			.filter( childNode => [ 'TD', 'TH' ].includes( childNode.tagName ) )
+			.filter( ( childNode ) => [ 'TD', 'TH' ].includes( childNode.tagName ) )
 			.length;
 	}
 
@@ -116,7 +116,7 @@ class ErrorRows {
 				rowHandler.init();
 				return rowHandler;
 			} )
-			.filter( row => row.details );
+			.filter( ( row ) => row.details );
 	}
 
 	init() {
@@ -132,7 +132,7 @@ class ErrorRows {
 
 		const onButtonClick = ( target ) => {
 			open = ! open;
-			this.rows.forEach( row => {
+			this.rows.forEach( ( row ) => {
 				if ( open ) {
 					row.onOpen( target );
 				} else {
@@ -141,7 +141,7 @@ class ErrorRows {
 			} );
 		};
 
-		window.addEventListener( 'click', event => {
+		window.addEventListener( 'click', ( event ) => {
 			if ( toggleButtons.includes( event.target ) ) {
 				onButtonClick( event.target );
 			}

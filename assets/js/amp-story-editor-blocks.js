@@ -1,13 +1,11 @@
 /* exported ampStoryEditorBlocks */
-/* global lodash */
+/* global lodash, _ */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, -1 ] } ] */
 
-var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
-	var component, __;
+const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
+	const __ = wp.i18n.__;
 
-	__ = wp.i18n.__;
-
-	component = {
+	const component = {
 
 		/**
 		 * Holds data.
@@ -25,7 +23,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/quote',
 				'core/table',
 				'core/verse',
-				'core/video'
+				'core/video',
 			],
 			blockTagMapping: {
 				'core/button': 'div.wp-block-button',
@@ -38,106 +36,106 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'core/quote': 'blockquote',
 				'core/table': 'table',
 				'core/verse': 'pre',
-				'core/video': 'figure'
+				'core/video': 'figure',
 			},
 			gridBlocks: [
 				'amp/amp-story-grid-layer-horizontal',
 				'amp/amp-story-grid-layer-vertical',
 				'amp/amp-story-grid-layer-thirds',
 				'amp/amp-story-grid-layer-background-image',
-				'amp/amp-story-grid-layer-background-video'
+				'amp/amp-story-grid-layer-background-video',
 			],
 			ampStoryPositionOptions: [
 				{
 					value: 'upper-third',
-					label: __( 'Upper Third', 'amp' )
+					label: __( 'Upper Third', 'amp' ),
 				},
 				{
 					value: 'middle-third',
-					label: __( 'Middle Third', 'amp' )
+					label: __( 'Middle Third', 'amp' ),
 				},
 				{
 					value: 'lower-third',
-					label: __( 'Lower Third', 'amp' )
-				}
+					label: __( 'Lower Third', 'amp' ),
+				},
 			],
 			ampAnimationTypeOptions: [
 				{
 					value: '',
-					label: __( 'None', 'amp' )
+					label: __( 'None', 'amp' ),
 				},
 				{
 					value: 'drop',
-					label: __( 'Drop', 'amp' )
+					label: __( 'Drop', 'amp' ),
 				},
 				{
 					value: 'fade-in',
-					label: __( 'Fade In', 'amp' )
+					label: __( 'Fade In', 'amp' ),
 				},
 				{
 					value: 'fly-in-bottom',
-					label: __( 'Fly In Bottom', 'amp' )
+					label: __( 'Fly In Bottom', 'amp' ),
 				},
 				{
 					value: 'fly-in-left',
-					label: __( 'Fly In Left', 'amp' )
+					label: __( 'Fly In Left', 'amp' ),
 				},
 				{
 					value: 'fly-in-right',
-					label: __( 'Fly In Right', 'amp' )
+					label: __( 'Fly In Right', 'amp' ),
 				},
 				{
 					value: 'fly-in-top',
-					label: __( 'Fly In Top', 'amp' )
+					label: __( 'Fly In Top', 'amp' ),
 				},
 				{
 					value: 'pulse',
-					label: __( 'Pulse', 'amp' )
+					label: __( 'Pulse', 'amp' ),
 				},
 				{
 					value: 'rotate-in-left',
-					label: __( 'Rotate In Left', 'amp' )
+					label: __( 'Rotate In Left', 'amp' ),
 				},
 				{
 					value: 'rotate-in-right',
-					label: __( 'Rotate In Right', 'amp' )
+					label: __( 'Rotate In Right', 'amp' ),
 				},
 				{
 					value: 'twirl-in',
-					label: __( 'Twirl In', 'amp' )
+					label: __( 'Twirl In', 'amp' ),
 				},
 				{
 					value: 'whoosh-in-left',
-					label: __( 'Whoosh In Left', 'amp' )
+					label: __( 'Whoosh In Left', 'amp' ),
 				},
 				{
 					value: 'whoosh-in-right',
-					label: __( 'Whoosh In Right', 'amp' )
+					label: __( 'Whoosh In Right', 'amp' ),
 				},
 				{
 					value: 'pan-left',
-					label: __( 'Pan Left', 'amp' )
+					label: __( 'Pan Left', 'amp' ),
 				},
 				{
 					value: 'pan-right',
-					label: __( 'Pan Right', 'amp' )
+					label: __( 'Pan Right', 'amp' ),
 				},
 				{
 					value: 'pan-down',
-					label: __( 'Pan Down', 'amp' )
+					label: __( 'Pan Down', 'amp' ),
 				},
 				{
 					value: 'pan-up',
-					label: __( 'Pan Up', 'amp' )
+					label: __( 'Pan Up', 'amp' ),
 				},
 				{
 					value: 'zoom-in',
-					label: __( 'Zoom In', 'amp' )
+					label: __( 'Zoom In', 'amp' ),
 				},
 				{
 					value: 'zoom-out',
-					label: __( 'Zoom Out', 'amp' )
-				}
+					label: __( 'Zoom Out', 'amp' ),
+				},
 			],
 			animationDurationDefaults: {
 				drop: 1600,
@@ -157,91 +155,91 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				'pan-down': 1000,
 				'pan-up': 1000,
 				'zoom-in': 1000,
-				'zoom-out': 1000
+				'zoom-out': 1000,
 			},
 			ampStoryFonts: [
 				{
 					value: '',
-					label: __( 'None', 'amp' )
+					label: __( 'None', 'amp' ),
 				},
 				{
 					value: 'arial',
-					label: __( 'Arial', 'amp' )
+					label: __( 'Arial', 'amp' ),
 				},
 				{
 					value: 'arial-black',
-					label: __( 'Arial Black', 'amp' )
+					label: __( 'Arial Black', 'amp' ),
 				},
 				{
 					value: 'arial-narrow',
-					label: __( 'Arial Narrow', 'amp' )
+					label: __( 'Arial Narrow', 'amp' ),
 				},
 				{
 					value: 'baskerville',
-					label: __( 'Baskerville', 'amp' )
+					label: __( 'Baskerville', 'amp' ),
 				},
 				{
 					value: 'brush-script-mt',
-					label: __( 'Brush Script MT', 'amp' )
+					label: __( 'Brush Script MT', 'amp' ),
 				},
 				{
 					value: 'copperplate',
-					label: __( 'Copperplate', 'amp' )
+					label: __( 'Copperplate', 'amp' ),
 				},
 				{
 					value: 'courier-new',
-					label: __( 'Courier New', 'amp' )
+					label: __( 'Courier New', 'amp' ),
 				},
 				{
 					value: 'century-gothic',
-					label: __( 'Century Gothic', 'amp' )
+					label: __( 'Century Gothic', 'amp' ),
 				},
 				{
 					value: 'garamond',
-					label: __( 'Garamond', 'amp' )
+					label: __( 'Garamond', 'amp' ),
 				},
 				{
 					value: 'georgia',
-					label: __( 'Georgia', 'amp' )
+					label: __( 'Georgia', 'amp' ),
 				},
 				{
 					value: 'gill-sans',
-					label: __( 'Gill Sans', 'amp' )
+					label: __( 'Gill Sans', 'amp' ),
 				},
 				{
 					value: 'lucida-bright',
-					label: __( 'Lucida Bright', 'amp' )
+					label: __( 'Lucida Bright', 'amp' ),
 				},
 				{
 					value: 'lucida-sans-typewriter',
-					label: __( 'Lucida Sans Typewriter', 'amp' )
+					label: __( 'Lucida Sans Typewriter', 'amp' ),
 				},
 				{
 					value: 'papyrus',
-					label: __( 'Papyrus', 'amp' )
+					label: __( 'Papyrus', 'amp' ),
 				},
 				{
 					value: 'palatino',
-					label: __( 'Palatino', 'amp' )
+					label: __( 'Palatino', 'amp' ),
 				},
 				{
 					value: 'tahoma',
-					label: __( 'Tahoma', 'amp' )
+					label: __( 'Tahoma', 'amp' ),
 				},
 				{
 					value: 'times-new-roman',
-					label: __( 'Times New Roman', 'amp' )
+					label: __( 'Times New Roman', 'amp' ),
 				},
 				{
 					value: 'trebuchet-ms',
-					label: __( 'Trebuchet MS', 'amp' )
+					label: __( 'Trebuchet MS', 'amp' ),
 				},
 				{
 					value: 'verdana',
-					label: __( 'Verdana', 'amp' )
-				}
-			]
-		}
+					label: __( 'Verdana', 'amp' ),
+				},
+			],
+		},
 	};
 
 	/**
@@ -266,7 +264,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		if ( component.data.allowedBlocks.includes( props.name ) ) {
 			// Allow CTA as the parent for all the blocks.
 			let parent = [
-				'amp/amp-story-cta-layer'
+				'amp/amp-story-cta-layer',
 			];
 
 			// In case of other allowed blocks except for button also add other grid layers as parents.
@@ -274,7 +272,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				parent = parent.concat( [
 					'amp/amp-story-grid-layer-horizontal',
 					'amp/amp-story-grid-layer-vertical',
-					'amp/amp-story-grid-layer-thirds'
+					'amp/amp-story-grid-layer-thirds',
 				] );
 			}
 			if ( props.parent ) {
@@ -298,8 +296,8 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 
 	component.wrapperWithSelect = wp.compose.compose(
 		wp.data.withSelect( ( select, props ) => {
-			var parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId ),
-				attributes;
+			const parentClientId = select( 'core/editor' ).getBlockRootClientId( props.clientId );
+			let attributes;
 			if ( props.block && props.block.attributes ) {
 				attributes = props.block.attributes;
 			} else if ( select( 'core/editor' ).getBlockAttributes ) {
@@ -310,7 +308,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				attributes: attributes,
 				hasSelectedInnerBlock: select( 'core/editor' ).hasSelectedInnerBlock( props.clientId, true ),
 				parentBlock: select( 'core/editor' ).getBlock( parentClientId ),
-				props: props
+				props: props,
 			};
 		} )
 	);
@@ -327,16 +325,16 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			attributes,
 			hasSelectedInnerBlock,
 			parentBlock,
-			props
+			props,
 		} ) => {
-			var newProps = lodash.assign(
+			const newProps = lodash.assign(
 					{},
 					props,
 					{
 						wrapperProps: lodash.assign(
 							{},
 							props.wrapperProps
-						)
+						),
 					}
 				),
 				el = wp.element.createElement;
@@ -372,8 +370,8 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			if ( -1 === component.data.allowedBlocks.indexOf( blockName ) ) {
 				return [
 					el( BlockListBlock, _.extend( {
-						key: 'original'
-					}, props ) )
+						key: 'original',
+					}, props ) ),
 				];
 			}
 
@@ -407,7 +405,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Object} Props.
 	 */
 	component.addAMPExtraProps = function addAMPExtraProps( props, blockType, attributes ) {
-		var ampAttributes = {};
+		const ampAttributes = {};
 		if ( -1 === component.data.allowedBlocks.indexOf( blockType.name ) ) {
 			return props;
 		}
@@ -446,7 +444,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampStoryPosition = {
-				type: 'string'
+				type: 'string',
 			};
 
 			// Define selector according to mappings.
@@ -454,30 +452,30 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes.ampAnimationType = {
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in'
+					attribute: 'animate-in',
 				};
 				settings.attributes.ampAnimationDelay = {
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
 					attribute: 'animate-in-delay',
-					default: '0ms'
+					default: '0ms',
 				};
 				settings.attributes.ampAnimationDuration = {
 					source: 'attribute',
 					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in-duration'
+					attribute: 'animate-in-duration',
 				};
 			} else if ( 'core/list' === name ) {
 				settings.attributes.ampAnimationType = {
-					type: 'string'
+					type: 'string',
 				};
 				settings.attributes.ampAnimationDelay = {
 					type: 'number',
-					default: 0
+					default: 0,
 				};
 				settings.attributes.ampAnimationDuration = {
 					type: 'number',
-					default: 0
+					default: 0,
 				};
 			}
 
@@ -488,14 +486,14 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			// Lets add font family to the text blocks.
 			if ( 'core/paragraph' === name || 'core/heading' === name ) {
 				settings.attributes.ampFontFamily = {
-					type: 'string'
+					type: 'string',
 				};
 			}
 
 			if ( 'core/image' === name ) {
 				settings.attributes.ampShowImageCaption = {
 					type: 'boolean',
-					default: false
+					default: false,
 				};
 			}
 		}
@@ -509,25 +507,26 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 	 * @return {Function} Edit function.
 	 */
 	component.filterBlocksEdit = function filterBlocksEdit( BlockEdit ) {
-		var el = wp.element.createElement,
+		const el = wp.element.createElement,
 			select = wp.data.select( 'core/editor' );
 
 		return function( props ) {
-			var attributes = props.attributes,
-				name = props.name,
-				inspectorControls,
-				InspectorControls = wp.editor.InspectorControls,
-				PanelBody = wp.components.PanelBody,
-				SelectControl = wp.components.SelectControl,
-				parentClientId = select.getBlockRootClientId( props.clientId ),
-				parentBlock = select.getBlock( parentClientId );
+			const attributes = props.attributes;
+			const name = props.name;
+			const InspectorControls = wp.editor.InspectorControls;
+			const PanelBody = wp.components.PanelBody;
+			const SelectControl = wp.components.SelectControl;
+			const parentClientId = select.getBlockRootClientId( props.clientId );
+			const parentBlock = select.getBlock( parentClientId );
+
+			let inspectorControls;
 
 			if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
 				// Return original.
 				return [
 					el( BlockEdit, _.extend( {
-						key: 'original'
-					}, props ) )
+						key: 'original',
+					}, props ) ),
 				];
 			}
 
@@ -535,8 +534,8 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				// Return original.
 				return [
 					el( BlockEdit, _.extend( {
-						key: 'original'
-					}, props ) )
+						key: 'original',
+					}, props ) ),
 				];
 			}
 
@@ -557,7 +556,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							options: component.data.ampStoryPositionOptions,
 							onChange: function( value ) {
 								props.setAttributes( { ampStoryPosition: value } );
-							}
+							},
 						} ),
 						component.getAmpStorySettings( props )
 					)
@@ -567,8 +566,8 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			return [
 				inspectorControls,
 				el( BlockEdit, _.extend( {
-					key: 'original'
-				}, props ) )
+					key: 'original',
+				}, props ) ),
 			];
 		};
 	};
@@ -582,13 +581,11 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			parentClientId = select.getBlockRootClientId( props.clientId ),
 			parentBlock = select.getBlock( parentClientId );
 
-		let placeHolder,
-			ampStorySettings,
-			name = props.name;
+		const name = props.name;
 
-		placeHolder = component.data.animationDurationDefaults[ attributes.ampAnimationType ] || 0;
+		const placeHolder = component.data.animationDurationDefaults[ attributes.ampAnimationType ] || 0;
 
-		ampStorySettings = [
+		const ampStorySettings = [
 			el( SelectControl, {
 				key: 'animation-type',
 				label: __( 'Animation type', 'amp' ),
@@ -596,7 +593,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				options: component.data.ampAnimationTypeOptions,
 				onChange: function( value ) {
 					props.setAttributes( { ampAnimationType: value } );
-				}
+				},
 			} ),
 			el( RangeControl, {
 				key: 'animation-duration',
@@ -605,11 +602,11 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				min: 0,
 				max: 5000,
 				onChange: function( value ) {
-					var msValue = value + 'ms';
+					const msValue = value + 'ms';
 					props.setAttributes( { ampAnimationDuration: msValue } );
 				},
 				placeholder: placeHolder,
-				initialPosition: placeHolder
+				initialPosition: placeHolder,
 			} ),
 			el( RangeControl, {
 				key: 'animation-delay',
@@ -618,10 +615,10 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				min: 0,
 				max: 5000,
 				onChange: function( value ) {
-					var msValue = value + 'ms';
+					const msValue = value + 'ms';
 					props.setAttributes( { ampAnimationDelay: msValue } );
-				}
-			} )
+				},
+			} ),
 		];
 
 		// Lets add font family select to the text blocks.
@@ -634,7 +631,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					options: component.data.ampStoryFonts,
 					onChange: function( value ) {
 						props.setAttributes( { ampFontFamily: value } );
-					}
+					},
 				} )
 			);
 		}
@@ -651,7 +648,7 @@ var ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 						props.setAttributes( { caption: '' } );
 					}
 				},
-				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' )
+				help: __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ),
 			} ) );
 		}
 		return ampStorySettings;

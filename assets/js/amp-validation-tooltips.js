@@ -1,3 +1,5 @@
+/* global jQuery */
+
 // WIP Pointer function
 function sourcesPointer() {
 	jQuery( document ).on( 'click', '.tooltip-button', function() {
@@ -5,9 +7,9 @@ function sourcesPointer() {
 			content: jQuery( this ).next( '.tooltip' ).attr( 'data-content' ),
 			position: {
 				edge: 'left',
-				align: 'center'
+				align: 'center',
 			},
-			pointerClass: 'wp-pointer wp-pointer--tooltip'
+			pointerClass: 'wp-pointer wp-pointer--tooltip',
 		} ).pointer( 'open' );
 	} );
 }

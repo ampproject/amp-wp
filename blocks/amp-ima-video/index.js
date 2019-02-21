@@ -14,7 +14,7 @@ import {
 	PanelBody,
 	TextControl,
 	Placeholder,
-	ToggleControl
+	ToggleControl,
 } from '@wordpress/components';
 
 /**
@@ -28,7 +28,7 @@ export default registerBlockType(
 		category: 'embed',
 		icon: 'embed-generic',
 		keywords: [
-			__( 'Embed', 'amp' )
+			__( 'Embed', 'amp' ),
 		],
 
 		// @todo Perhaps later add subtitles option and additional source options?
@@ -37,41 +37,41 @@ export default registerBlockType(
 				default: false,
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'data-delay-ad-request'
+				attribute: 'data-delay-ad-request',
 			},
 			dataTag: {
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'data-tag'
+				attribute: 'data-tag',
 			},
 			dataSrc: {
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'data-src'
+				attribute: 'data-src',
 			},
 			dataPoster: {
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'data-poster'
+				attribute: 'data-poster',
 			},
 			ampLayout: {
 				default: 'responsive',
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				default: 600,
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 400,
 				source: 'attribute',
 				selector: 'amp-ima-video',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		edit( props ) {
@@ -79,7 +79,7 @@ export default registerBlockType(
 			const { dataDelayAdRequest, dataTag, dataSrc, dataPoster } = attributes;
 			const ampLayoutOptions = [
 				{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-				{ value: 'fixed', label: __( 'Fixed', 'amp' ) }
+				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 
 			];
 			let dataSet = false;
@@ -88,22 +88,22 @@ export default registerBlockType(
 			}
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 							<TextControl
 								label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
 								value={ dataTag }
-								onChange={ value => ( setAttributes( { dataTag: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataTag: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Https URL of your video content (required)', 'amp' ) }
 								value={ dataSrc }
-								onChange={ value => ( setAttributes( { dataSrc: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataSrc: value } ) ) }
 							/>
 							<TextControl
 								label={ __( 'Https URL to preview image', 'amp' ) }
 								value={ dataPoster }
-								onChange={ value => ( setAttributes( { dataPoster: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { dataPoster: value } ) ) }
 							/>
 							<ToggleControl
 								label={ __( 'Delay Ad Request', 'amp' ) }
@@ -130,12 +130,12 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let imaProps = {
+			const imaProps = {
 				layout: attributes.ampLayout,
 				height: attributes.height,
 				width: attributes.width,
 				'data-tag': attributes.dataTag,
-				'data-src': attributes.dataSrc
+				'data-src': attributes.dataSrc,
 			};
 			if ( attributes.dataPoster ) {
 				imaProps[ 'data-poster' ] = attributes.dataPoster;
@@ -146,6 +146,6 @@ export default registerBlockType(
 			return (
 				<amp-ima-video { ...imaProps }></amp-ima-video>
 			);
-		}
+		},
 	}
 );

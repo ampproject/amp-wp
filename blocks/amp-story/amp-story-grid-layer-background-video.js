@@ -2,7 +2,7 @@ import {
 	getGridLayerAttributes,
 	saveGridLayer,
 	editFillLayer,
-	BLOCK_ICONS
+	BLOCK_ICONS,
 } from './helpers';
 
 import { __ } from '@wordpress/i18n';
@@ -13,9 +13,9 @@ const TEMPLATE = [
 		'core/video',
 		{
 			ampLayout: 'fill',
-			autoplay: true
-		}
-	]
+			autoplay: true,
+		},
+	],
 ];
 
 /**
@@ -37,6 +37,6 @@ export default registerBlockType(
 
 		save( { attributes } ) {
 			return saveGridLayer( attributes, 'fill' );
-		}
+		},
 	}
 );

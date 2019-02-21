@@ -4,7 +4,7 @@
 
 /* exported ampAdminPointer */
 /* global ajaxurl, jQuery */
-var ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
+const ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	return {
@@ -16,7 +16,7 @@ var ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		load: function load( data ) {
-			var options = $.extend(
+			const options = $.extend(
 				data.pointer.options,
 				{
 					/**
@@ -25,13 +25,13 @@ var ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
 					close: function() {
 						$.post( ajaxurl, {
 							pointer: data.pointer.pointer_id,
-							action: 'dismiss-wp-pointer'
+							action: 'dismiss-wp-pointer',
 						} );
-					}
+					},
 				}
 			);
 
 			$( data.pointer.target ).pointer( options ).pointer( 'open' );
-		}
+		},
 	};
 }( jQuery ) );

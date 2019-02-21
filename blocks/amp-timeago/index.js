@@ -14,7 +14,7 @@ import { InspectorControls, BlockAlignmentToolbar, BlockControls } from '@wordpr
 import {
 	DateTimePicker,
 	PanelBody,
-	TextControl
+	TextControl,
 } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import timeago from 'timeago.js';
@@ -31,40 +31,40 @@ export default registerBlockType(
 		keywords: [
 			__( 'Time difference' ),
 			__( 'Time ago' ),
-			__( 'Date' )
+			__( 'Date' ),
 		],
 
 		attributes: {
 			align: {
-				type: 'string'
+				type: 'string',
 			},
 			cutoff: {
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'cutoff'
+				attribute: 'cutoff',
 			},
 			dateTime: {
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'datetime'
+				attribute: 'datetime',
 			},
 			ampLayout: {
 				default: 'fixed-height',
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'layout'
+				attribute: 'layout',
 			},
 			width: {
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'width'
+				attribute: 'width',
 			},
 			height: {
 				default: 20,
 				source: 'attribute',
 				selector: 'amp-timeago',
-				attribute: 'height'
-			}
+				attribute: 'height',
+			},
 		},
 
 		getEditWrapperProps( attributes ) {
@@ -92,15 +92,15 @@ export default registerBlockType(
 			const ampLayoutOptions = [
 				{ value: '', label: __( 'Responsive', 'amp' ) },
 				{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) }
+				{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
 			];
 
 			return (
 				<Fragment>
-					<InspectorControls key='inspector'>
+					<InspectorControls key="inspector">
 						<PanelBody title={ __( 'AMP Timeago Settings' ) }>
 							<DateTimePicker
-								locale='en'
+								locale="en"
 								currentDate={ attributes.dateTime || moment() }
 								onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
 							/>
@@ -112,11 +112,11 @@ export default registerBlockType(
 								className="blocks-amp-timeout__cutoff"
 								label={ __( 'Cutoff (seconds)' ) }
 								value={ cutoff !== undefined ? cutoff : '' }
-								onChange={ value => ( setAttributes( { cutoff: value } ) ) }
+								onChange={ ( value ) => ( setAttributes( { cutoff: value } ) ) }
 							/>
 						</PanelBody>
 					</InspectorControls>
-					<BlockControls key='controls'>
+					<BlockControls key="controls">
 						<BlockAlignmentToolbar
 							value={ align }
 							onChange={ ( nextAlign ) => {
@@ -125,17 +125,17 @@ export default registerBlockType(
 							controls={ [ 'left', 'center', 'right' ] }
 						/>
 					</BlockControls>
-					<time key='timeago' dateTime={ attributes.dateTime }>{ timeAgo }</time>
+					<time key="timeago" dateTime={ attributes.dateTime }>{ timeAgo }</time>
 				</Fragment>
 			);
 		},
 
 		save( { attributes } ) {
-			let timeagoProps = {
+			const timeagoProps = {
 				layout: 'responsive',
 				className: 'align' + ( attributes.align || 'none' ),
 				datetime: attributes.dateTime,
-				locale: 'en'
+				locale: 'en',
 			};
 			if ( attributes.cutoff ) {
 				timeagoProps.cutoff = attributes.cutoff;
@@ -160,6 +160,6 @@ export default registerBlockType(
 			return (
 				<amp-timeago { ...timeagoProps }>{ moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' ) }</amp-timeago>
 			);
-		}
+		},
 	}
 );

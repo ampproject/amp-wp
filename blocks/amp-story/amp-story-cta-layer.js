@@ -1,28 +1,34 @@
-import {
-	getAmpStoryAnimationControls,
-	BLOCK_ICONS
-} from './helpers';
-
+/**
+ * WordPress dependencies
+ */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
 import { InspectorControls, InnerBlocks } from '@wordpress/editor';
 import {
 	Notice,
-	PanelBody
+	PanelBody,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { select, dispatch } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
+import {
+	getAmpStoryAnimationControls,
+	BLOCK_ICONS,
+} from './helpers';
+
 const {
 	moveBlockToPosition,
-	removeBlock
+	removeBlock,
 } = dispatch( 'core/editor' );
 
 const {
 	getBlock,
 	getBlockRootClientId,
 	getBlockOrder,
-	getBlockIndex
+	getBlockIndex,
 } = select( 'core/editor' );
 
 const ALLOWED_BLOCKS = [
@@ -37,11 +43,11 @@ const ALLOWED_BLOCKS = [
 	'core/quote',
 	'core/table',
 	'core/verse',
-	'core/video'
+	'core/video',
 ];
 
 const TEMPLATE = [
-	[ 'core/button', { placeholder: __( 'CTA layer', 'amp' ) } ]
+	[ 'core/button', { placeholder: __( 'CTA layer', 'amp' ) } ],
 ];
 
 /**
@@ -59,19 +65,19 @@ export default registerBlockType(
 			animationType: {
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
-				attribute: 'animate-in'
+				attribute: 'animate-in',
 			},
 			animationDuration: {
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
-				attribute: 'animate-in-duration'
+				attribute: 'animate-in-duration',
 			},
 			animationDelay: {
 				source: 'attribute',
 				selector: 'amp-story-cta-layer',
 				attribute: 'animate-in-delay',
-				default: '0ms'
-			}
+				default: '0ms',
+			},
 		},
 
 		inserter: false,
@@ -103,7 +109,7 @@ export default registerBlockType(
 				const blockIndex = getBlockIndex( rootClientID );
 				let noticeMessage = null;
 				const noticeOptions = {
-					id: 'amp-errors-notice-removed-cta'
+					id: 'amp-errors-notice-removed-cta',
 				};
 
 				if ( this.props.attributes.hasMultipleCtaBlocks ) {
@@ -125,7 +131,7 @@ export default registerBlockType(
 				const order = getBlockOrder( rootClientID );
 
 				// If the CTA is not the last block, move it there.
-				if ( _.last( order ) !== this.props.clientId ) {
+				if ( order[ order.length - 1 ] !== this.props.clientId ) {
 					moveBlockToPosition( this.props.clientId, rootClientID, rootClientID, this.props.attributes.layout, order.length - 1 );
 				}
 			}
@@ -138,14 +144,14 @@ export default registerBlockType(
 					);
 				}
 				return [
-					<InspectorControls key='controls'>
-						<PanelBody key='animation' title={ __( 'CTA Layer Animation', 'amp' ) }>
+					<InspectorControls key="controls">
+						<PanelBody key="animation" title={ __( 'CTA Layer Animation', 'amp' ) }>
 							{
 								getAmpStoryAnimationControls( this.props.setAttributes, this.props.attributes )
 							}
 						</PanelBody>
 					</InspectorControls>,
-					<InnerBlocks key='contents' allowedBlocks={ ALLOWED_BLOCKS } template={TEMPLATE} />
+					<InnerBlocks key="contents" allowedBlocks={ ALLOWED_BLOCKS } template={ TEMPLATE } />,
 				];
 			}
 
@@ -155,7 +161,7 @@ export default registerBlockType(
 					return false;
 				}
 				let ctaBlocks = 0;
-				_.each( parentBlock.innerBlocks, function( child ) {
+				parentBlock.innerBlocks.map( ( child ) => {
 					if ( 'amp/amp-story-cta-layer' === child.name ) {
 						ctaBlocks++;
 					}
@@ -165,7 +171,7 @@ export default registerBlockType(
 		},
 
 		save( { attributes } ) {
-			let layerProps = {};
+			const layerProps = {};
 			if ( attributes.animationType ) {
 				layerProps[ 'animate-in' ] = attributes.animationType;
 
@@ -181,6 +187,6 @@ export default registerBlockType(
 					<InnerBlocks.Content />
 				</amp-story-cta-layer>
 			);
-		}
+		},
 	}
 );
