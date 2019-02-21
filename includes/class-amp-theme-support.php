@@ -880,7 +880,6 @@ class AMP_Theme_Support {
 		add_action( 'template_redirect', array( __CLASS__, 'start_output_buffering' ), $priority );
 
 		// Commenting hooks.
-		add_filter( 'wp_list_comments_args', array( __CLASS__, 'set_comments_walker' ), PHP_INT_MAX );
 		add_filter( 'comment_form_defaults', array( __CLASS__, 'filter_comment_form_defaults' ) );
 		add_filter( 'comment_reply_link', array( __CLASS__, 'filter_comment_reply_link' ), 10, 4 );
 		add_filter( 'cancel_comment_reply_link', array( __CLASS__, 'filter_cancel_comment_reply_link' ), 10, 3 );
@@ -984,10 +983,13 @@ class AMP_Theme_Support {
 	/**
 	 * Add the comments template placeholder marker
 	 *
-	 * @param array $args the args for the comments list..
+	 * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
+	 *
+	 * @param array $args the args for the comments list.
 	 * @return array Args to return.
 	 */
 	public static function set_comments_walker( $args ) {
+		_deprecated_function( __METHOD__, '1.1' );
 		$amp_walker     = new AMP_Comment_Walker();
 		$args['walker'] = $amp_walker;
 		return $args;
