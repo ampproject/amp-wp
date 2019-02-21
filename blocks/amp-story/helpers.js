@@ -46,7 +46,7 @@ export const ALLOWED_BLOCKS = [
 	'core/embed',
 	'core/image',
 	'core/list',
-	'core/paragraph',
+	'amp/amp-story-text',
 	'core/preformatted',
 	'core/pullquote',
 	'core/quote',

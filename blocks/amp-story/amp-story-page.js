@@ -36,7 +36,7 @@ const TEMPLATE = [
 		'amp/amp-story-grid-layer-vertical',
 		[
 			[
-				'core/paragraph',
+				'amp/amp-story-text',
 				{
 					placeholder: __( 'Add content to layer.', 'amp' )
 				}
