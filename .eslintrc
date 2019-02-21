@@ -6,5 +6,8 @@
       "pragma": "wp",
       "version": "16.6"
     }
+  },
+  "globals": {
+    "wp": true,
   }
 }
