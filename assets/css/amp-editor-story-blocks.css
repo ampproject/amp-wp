@@ -58,8 +58,7 @@ div[data-type="amp/amp-story-page"]::after {
 }
 
 .amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
-div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before
 {
 	outline: 1px solid #007cba;
 }
@@ -118,12 +117,6 @@ div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-app
 	width: 316px;
 }
 
-/* Also override needed core inline styles. */
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
-	min-height: initial !important;
-}
-
 /*
  * 4. Layers stacking.
  * Setup on top of each other layering on the story children.
@@ -140,16 +133,6 @@ div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-app
 
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__layout {
 	background-color: initial;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"] {
-	position: absolute;
-	height: 100%;
-	width: 100%;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"] .components-toolbar button[aria-label="Link"] {
-	display: none;
 }
 
 .editor-block-list__layout div[data-amp-selected="parent"] {
@@ -201,49 +184,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .amp-grid-template-vertical .editor-block-list__block {
 	width: 100%;
-}
-
-/*
- * 4.1 Hide layers above
- * Hide elements above the currently selected layer.
- */
-
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block {
-	z-index: 0;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
-	display: none;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-type="amp/amp-story-cta-layer"]{
-	display: none;
-}
-
-/*
- * 4.2 Blur layers above
- * Layers - Blur and fade out the layers beneath the currently selected layer.
- */
-
-.editor-block-list__layout > div {
-	transition: .3s;
-	transition-property: opacity, filter;
-}
-
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
-	opacity: 0.3;
-	filter: blur(8px);
-	-webkit-filter: blur(8px);
-}
-
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
-	opacity: 1;
-	filter: none;
-	-webkit-filter: none;
 }
 
 /*
@@ -354,50 +294,16 @@ div[data-amp-position="lower-third"] {
 	height: 533px !important;
 }
 
-div[data-amp-type="grid"] .block-library-image__resizer {
-	max-width: 318px !important;
-	max-height: 533px !important;
-}
-
 .amp-grid-template-fill > :not(:first-child) {
 	display: none;
-}
-
-/*
- * 5.3 CTA layer.
- */
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
-	position: absolute;
-	height: 20%;
-	width: 318px;
-	bottom: 38px;
-}
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__block-edit {
-	max-height: 100%;
-}
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
-	height: auto !important;
 }
 
 /*
  * 6. Inserter customisations.
  */
 
- .components-popover.editor-inserter__amp .components-popover__content {
+.components-popover.editor-inserter__amp .components-popover__content {
 	height: 200px;
-}
-
-/* Fade out CTA Layer in inserter when it's already present */
-.editor-inserter__popover .amp-story-has-cta-layer .editor-block-list-item-amp-amp-story-cta-layer {
-	opacity: 0.5;
-}
-
-/* Hide CTA button when inserting on the first page */
-.amp-story-page-first .editor-block-types-list .editor-block-list-item-amp-amp-story-cta-layer {
-	display: none;
 }
 
 /* Hide inserter inside of the page when block navigator is visible */
@@ -529,10 +435,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 		bottom: 100%;
 		left: 0;
 		width: 100%;
-	}
-
-	#amp-root-navigation .editor-inserter__toggle::after {
-		content: 'Add Layer';
 	}
 
 	.post-type-amp_story #amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {

@@ -11,6 +11,8 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 		 * Holds data.
 		 */
 		data: {
+			// @todo Need to prevent inserting inserting non-page blocks at root.
+			// @todo Duplicate with ALLOWED_BLOCKS in helpers.js
 			allowedBlocks: [
 				'core/button',
 				'core/code',
@@ -38,27 +40,6 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 				'core/verse': 'pre',
 				'core/video': 'figure',
 			},
-			gridBlocks: [
-				'amp/amp-story-grid-layer-horizontal',
-				'amp/amp-story-grid-layer-vertical',
-				'amp/amp-story-grid-layer-thirds',
-				'amp/amp-story-grid-layer-background-image',
-				'amp/amp-story-grid-layer-background-video',
-			],
-			ampStoryPositionOptions: [
-				{
-					value: 'upper-third',
-					label: __( 'Upper Third', 'amp' ),
-				},
-				{
-					value: 'middle-third',
-					label: __( 'Middle Third', 'amp' ),
-				},
-				{
-					value: 'lower-third',
-					label: __( 'Lower Third', 'amp' ),
-				},
-			],
 			ampAnimationTypeOptions: [
 				{
 					value: '',
@@ -248,7 +229,6 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 	component.boot = function boot() {
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', component.addAMPAttributes );
 		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', component.setBlockParent );
-		wp.hooks.addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', component.addWrapperProps );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 	};
@@ -256,34 +236,13 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 	/**
 	 * Filter layer properties to define the parent block.
 	 *
+	 * @todo This is not successfully blocking insertion of non-page blocks at the root.
+	 *
 	 * @param {Object} props Block properties.
 	 * @return {Object} Properties.
 	 */
 	component.setBlockParent = function( props ) {
-		// Note that `parent` setting gets priority over `allowedBlocks`.
-		if ( component.data.allowedBlocks.includes( props.name ) ) {
-			// Allow CTA as the parent for all the blocks.
-			let parent = [
-				'amp/amp-story-cta-layer',
-			];
-
-			// In case of other allowed blocks except for button also add other grid layers as parents.
-			if ( 'core/button' !== props.name ) {
-				parent = parent.concat( [
-					'amp/amp-story-grid-layer-horizontal',
-					'amp/amp-story-grid-layer-vertical',
-					'amp/amp-story-grid-layer-thirds',
-				] );
-			}
-			if ( props.parent ) {
-				parent = parent.concat( props.parent );
-			}
-			return Object.assign(
-				{},
-				props,
-				{ parent: parent }
-			);
-		} else if ( -1 === props.name.indexOf( 'amp/amp-story-' ) ) {
+		if ( 0 === props.name.indexOf( 'amp/amp-story-page' ) ) {
 			// Do not allow inserting any of the blocks if they're not AMP Story blocks.
 			return Object.assign(
 				{},
@@ -314,7 +273,7 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 	);
 
 	/**
-	 * Add wrapper props to the blocks within AMP Story Thirds layer.
+	 * Add wrapper props to the blocks.
 	 *
 	 * @param {Object} BlockListBlock BlockListBlock element.
 	 * @return {Function} Handler.
@@ -324,7 +283,6 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 			blockName,
 			attributes,
 			hasSelectedInnerBlock,
-			parentBlock,
 			props,
 		} ) => {
 			const newProps = lodash.assign(
@@ -343,23 +301,10 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 			if (
 				hasSelectedInnerBlock &&
 				(
-					'amp/amp-story-cta-layer' === blockName ||
 					'amp/amp-story-page' === blockName
 				)
 			) {
 				newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
-				return el(
-					BlockListBlock,
-					newProps
-				);
-			}
-
-			// In case of any grid layer lets add data-amp-type for styling purposes.
-			if ( -1 !== component.data.gridBlocks.indexOf( blockName ) ) {
-				newProps.wrapperProps[ 'data-amp-type' ] = 'grid';
-				if ( hasSelectedInnerBlock ) {
-					newProps.wrapperProps[ 'data-amp-selected' ] = 'parent';
-				}
 				return el(
 					BlockListBlock,
 					newProps
@@ -384,11 +329,6 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 				newProps.wrapperProps[ 'data-font-family' ] = attributes.ampFontFamily;
 			}
 
-			// If we have the thirds layer as parent and the thirds position set.
-			if ( 'amp/amp-story-grid-layer-thirds' === parentBlock.name && attributes.ampStoryPosition ) {
-				newProps.wrapperProps[ 'data-amp-position' ] = attributes.ampStoryPosition;
-			}
-
 			return el(
 				BlockListBlock,
 				newProps
@@ -410,9 +350,6 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 			return props;
 		}
 
-		if ( attributes.ampStoryPosition ) {
-			ampAttributes[ 'grid-area' ] = attributes.ampStoryPosition;
-		}
 		if ( attributes.ampAnimationType ) {
 			ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
@@ -438,148 +375,83 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 	 * @return {Object} Settings.
 	 */
 	component.addAMPAttributes = function addAMPAttributes( settings, name ) {
-		// Add the "thirds" template position option and animation settings.
-		if ( -1 !== component.data.allowedBlocks.indexOf( name ) ) {
-			if ( ! settings.attributes ) {
-				settings.attributes = {};
-			}
-			settings.attributes.ampStoryPosition = {
+		if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
+			return settings;
+		}
+
+		const addedAttributes = {};
+
+		// Define selector according to mappings.
+		if ( _.has( component.data.blockTagMapping, name ) ) {
+			addedAttributes.ampAnimationType = {
+				source: 'attribute',
+				selector: component.data.blockTagMapping[ name ],
+				attribute: 'animate-in',
+			};
+			addedAttributes.ampAnimationDelay = {
+				source: 'attribute',
+				selector: component.data.blockTagMapping[ name ],
+				attribute: 'animate-in-delay',
+				default: '0ms',
+			};
+			addedAttributes.ampAnimationDuration = {
+				source: 'attribute',
+				selector: component.data.blockTagMapping[ name ],
+				attribute: 'animate-in-duration',
+			};
+		} else if ( 'core/list' === name ) {
+			addedAttributes.ampAnimationType = {
 				type: 'string',
 			};
-
-			// Define selector according to mappings.
-			if ( _.has( component.data.blockTagMapping, name ) ) {
-				settings.attributes.ampAnimationType = {
-					source: 'attribute',
-					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in',
-				};
-				settings.attributes.ampAnimationDelay = {
-					source: 'attribute',
-					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in-delay',
-					default: '0ms',
-				};
-				settings.attributes.ampAnimationDuration = {
-					source: 'attribute',
-					selector: component.data.blockTagMapping[ name ],
-					attribute: 'animate-in-duration',
-				};
-			} else if ( 'core/list' === name ) {
-				settings.attributes.ampAnimationType = {
-					type: 'string',
-				};
-				settings.attributes.ampAnimationDelay = {
-					type: 'number',
-					default: 0,
-				};
-				settings.attributes.ampAnimationDuration = {
-					type: 'number',
-					default: 0,
-				};
-			}
-
-			if ( 'core/paragraph' === name ) {
-				settings.attributes.fontSize.default = 'large';
-			}
-
-			// Lets add font family to the text blocks.
-			if ( 'core/paragraph' === name || 'core/heading' === name ) {
-				settings.attributes.ampFontFamily = {
-					type: 'string',
-				};
-			}
-
-			if ( 'core/image' === name ) {
-				settings.attributes.ampShowImageCaption = {
-					type: 'boolean',
-					default: false,
-				};
-			}
+			addedAttributes.ampAnimationDelay = {
+				type: 'number',
+				default: 0,
+			};
+			addedAttributes.ampAnimationDuration = {
+				type: 'number',
+				default: 0,
+			};
 		}
+
+		// Lets add font family to the text blocks.
+		if ( 'core/paragraph' === name || 'core/heading' === name ) {
+			addedAttributes.ampFontFamily = {
+				type: 'string',
+			};
+		}
+
+		if ( 'core/image' === name ) {
+			addedAttributes.ampShowImageCaption = {
+				type: 'boolean',
+				default: false,
+			};
+		}
+
+		settings.attributes = Object.assign(
+			{},
+			settings.attributes || {},
+			addedAttributes
+		);
+
+		// @todo This is causing an error: Block validation: Block validation failed for `core/paragraph`. Expected:
+		//
+		// <p class="is-large-text">Test block</p>
+		//
+		// Actual:
+		//
+		// <p>Test block</p>
+		if ( 'core/paragraph' === name ) {
+			settings.attributes.fontSize.default = 'large';
+		}
+
 		return settings;
-	};
-
-	/**
-	 * Filters blocks edit function of all blocks.
-	 *
-	 * @param {Function} BlockEdit Edit function.
-	 * @return {Function} Edit function.
-	 */
-	component.filterBlocksEdit = function filterBlocksEdit( BlockEdit ) {
-		const el = wp.element.createElement,
-			select = wp.data.select( 'core/editor' );
-
-		return function( props ) {
-			const attributes = props.attributes;
-			const name = props.name;
-			const InspectorControls = wp.editor.InspectorControls;
-			const PanelBody = wp.components.PanelBody;
-			const SelectControl = wp.components.SelectControl;
-			const parentClientId = select.getBlockRootClientId( props.clientId );
-			const parentBlock = select.getBlock( parentClientId );
-
-			let inspectorControls;
-
-			if ( -1 === component.data.allowedBlocks.indexOf( name ) ) {
-				// Return original.
-				return [
-					el( BlockEdit, _.extend( {
-						key: 'original',
-					}, props ) ),
-				];
-			}
-
-			if ( ! parentBlock || ( -1 === component.data.gridBlocks.indexOf( parentBlock.name ) && 'amp/amp-story-cta-layer' !== parentBlock.name ) ) {
-				// Return original.
-				return [
-					el( BlockEdit, _.extend( {
-						key: 'original',
-					}, props ) ),
-				];
-			}
-
-			if ( 'amp/amp-story-grid-layer-thirds' !== parentBlock.name ) {
-				inspectorControls = el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
-						component.getAmpStorySettings( props )
-					)
-				);
-			} else {
-				// In case of children of the thirds grid layer we need to add the placement on the thirds control.
-				inspectorControls = el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: __( 'AMP Story Settings', 'amp' ), key: 'amp-story' },
-						el( SelectControl, {
-							key: 'position',
-							label: __( 'Placement', 'amp' ),
-							value: attributes.ampStoryPosition,
-							options: component.data.ampStoryPositionOptions,
-							onChange: function( value ) {
-								props.setAttributes( { ampStoryPosition: value } );
-							},
-						} ),
-						component.getAmpStorySettings( props )
-					)
-				);
-			}
-
-			return [
-				inspectorControls,
-				el( BlockEdit, _.extend( {
-					key: 'original',
-				}, props ) ),
-			];
-		};
 	};
 
 	component.getAmpStorySettings = function getAmpStorySettings( props ) {
 		const RangeControl = wp.components.RangeControl,
 			el = wp.element.createElement,
 			SelectControl = wp.components.SelectControl,
-			attributes = props.attributes,
-			select = wp.data.select( 'core/editor' ),
-			parentClientId = select.getBlockRootClientId( props.clientId ),
-			parentBlock = select.getBlock( parentClientId );
+			attributes = props.attributes;
 
 		const name = props.name;
 
@@ -635,7 +507,7 @@ const ampStoryEditorBlocks = ( function() { // eslint-disable-line no-unused-var
 				} )
 			);
 		}
-		if ( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) {
+		if ( 'core/image' === name ) {
 			const ToggleControl = wp.components.ToggleControl;
 
 			ampStorySettings.push( el( ToggleControl, {

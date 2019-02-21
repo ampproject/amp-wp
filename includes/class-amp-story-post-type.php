@@ -61,19 +61,12 @@ class AMP_Story_Post_Type {
 				'template'     => array(
 					array(
 						'amp/amp-story-page',
+						array(),
 						array(
 							array(
-								'amp/amp-story-grid-layer-background-image',
-							),
-							array(
-								'amp/amp-story-grid-layer-vertical',
+								'core/paragraph',
 								array(
-									array(
-										'core/paragraph',
-										array(
-											'placeholder' => __( 'This is the story\'s first page\'s first layer.', 'amp' ),
-										),
-									),
+									'placeholder' => __( 'Write something!', 'amp' ),
 								),
 							),
 						),

@@ -4,6 +4,7 @@ import uuid from 'uuid/v4';
 import BlockNavigation from './block-navigation';
 import {
 	BLOCK_ICONS,
+	ALLOWED_BLOCKS,
 } from './helpers';
 
 import { __ } from '@wordpress/i18n';
@@ -12,38 +13,14 @@ import {
 	InnerBlocks,
 	PanelColorSettings,
 	InspectorControls,
-	Inserter,
 } from '@wordpress/editor';
 import { Component } from '@wordpress/element';
 import { select } from '@wordpress/data';
 
-const ALLOWED_BLOCKS = [
-	'amp/amp-story-grid-layer-vertical',
-	'amp/amp-story-grid-layer-fill',
-	'amp/amp-story-grid-layer-thirds',
-	'amp/amp-story-cta-layer',
-];
-
 const {
 	hasSelectedInnerBlock,
 	getSelectedBlockClientId,
-	getBlockIndex,
 } = select( 'core/editor' );
-
-const TEMPLATE = [
-	[ 'amp/amp-story-grid-layer-background-image' ],
-	[
-		'amp/amp-story-grid-layer-vertical',
-		[
-			[
-				'core/paragraph',
-				{
-					placeholder: __( 'Add content to layer.', 'amp' ),
-				},
-			],
-		],
-	],
-];
 
 /**
  * Register block.
@@ -98,24 +75,12 @@ export default registerBlockType(
 							navWrapper.id = 'amp-root-navigation';
 							editLayout[ 0 ].appendChild( navWrapper );
 						}
-						let navList;
-						if ( hasSelectedInnerBlock( this.props.clientId, true ) || this.props.isSelected ) {
-							let className = 'editor-selectors';
-							if ( 0 === getBlockIndex( this.props.clientId ) ) {
-								className += ' amp-story-page-first';
-							}
-							navList =
-								<div key="layerManager" className={ className }>
-									<Inserter rootClientId={ this.props.clientId } />
-									<BlockNavigation />
-								</div>;
-						} else {
-							navList =
-								<div key="layerManager" className="editor-selectors">
-									<BlockNavigation />
-								</div>;
-						}
-						ReactDOM.render( navList, document.getElementById( 'amp-root-navigation' ) );
+						ReactDOM.render(
+							<div key="layerManager" className="editor-selectors">
+								<BlockNavigation />
+							</div>,
+							document.getElementById( 'amp-root-navigation' )
+						);
 					}
 				}
 			}
@@ -151,7 +116,7 @@ export default registerBlockType(
 						/>
 					</InspectorControls>,
 					<div key="contents" style={ { backgroundColor: attributes.backgroundColor } }>
-						<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
+						<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
 					</div>,
 				];
 			}
@@ -160,7 +125,11 @@ export default registerBlockType(
 		save( { attributes } ) {
 			return (
 				<amp-story-page style={ { backgroundColor: attributes.backgroundColor } } id={ attributes.id }>
-					<InnerBlocks.Content />
+					{ /* @todo Add fill layer for image/video */ }
+					<amp-story-grid-layer template="vertical">
+						<InnerBlocks.Content />
+					</amp-story-grid-layer>
+					{ /* @todo Add amp-story-cta-layer */ }
 				</amp-story-page>
 			);
 		},
