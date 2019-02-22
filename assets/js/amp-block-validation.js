@@ -21,6 +21,8 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			i18n: {},
 			ampValidityRestField: '',
 			isSanitizationAutoAccepted: false,
+			possibleStati: [],
+			defaultStatus: '',
 		},
 
 		/**
@@ -110,10 +112,10 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		isAMPEnabled: function isAMPEnabled() {
 			const meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
+			if ( meta && meta.amp_status && module.data.possibleStati.includes( meta.amp_status ) ) {
 				return 'enabled' === meta.amp_status;
 			}
-			return window.wpAmpEditor.defaultStatus;
+			return module.data.defaultStatus;
 		},
 
 		/**
