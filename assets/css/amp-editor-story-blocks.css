@@ -282,63 +282,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
- * 6.1 Ghosted page inserter
- * Change the last inserter into a ghosted page.
- * Shame disclaimer: long selectors needed because the classes are quite common.
- */
-
-.post-type-amp_story .editor-default-block-appender {
-	max-width: 318px;
-}
-
-.post-type-amp_story .editor-default-block-appender .editor-inserter {
-	position: relative;
-	margin: 0 auto;
-	left: 0;
-	top: 0;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender {
-	position: static;
-	margin-top: 38px;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter {
-	opacity: 1;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button {
-	background-color: #FAFAFA;
-	background-image: url( '../images/add-page-inserter.svg' );
-	background-position: center center;
-	background-repeat: no-repeat;
-	background-size: 86px 96px;
-	border: 10px solid #eff0f1;
-	border-radius: 0;
-	height: 533px;
-	width: 338px;
-	margin: 0 auto;
-	outline: none;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
-	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button svg {
-	display: none;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__block-edit {
-	display: none;
-}
-
-/*
  * 7. Block navigator
  * Hides the toggler and shows the navigator by default on large screens.
  */
