@@ -191,7 +191,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! is_post_type_viewable( $post->post_type ) || AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
 			return;
 		}
 
