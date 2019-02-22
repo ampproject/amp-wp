@@ -13,12 +13,6 @@ import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerblo
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 
 domReady( () => {
-	addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
-	addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
-	addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
-	addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
-	addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
-
 	/**
 	 * Change the default block type to amp/amp-story-page.
 	 *
@@ -220,3 +214,9 @@ const addWrapperProps = createHigherOrderComponent(
 	'addWrapperProps'
 );
 
+// These do not reliably work at domReady.
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
+addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
+addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
