@@ -28,6 +28,15 @@ const {
 	getSelectedBlockClientId,
 } = select( 'core/editor' );
 
+const TEMPLATE = [
+	[
+		'core/paragraph',
+		{
+			placeholder: __( 'Add content to layer.', 'amp' ),
+		},
+	],
+];
+
 export default class EditPage extends Component {
 	constructor( props ) {
 		// Call parent constructor.
@@ -94,7 +103,7 @@ export default class EditPage extends Component {
 					/>
 				</InspectorControls>
 				<div key="contents" style={ { backgroundColor: attributes.backgroundColor } }>
-					<InnerBlocks allowedBlocks={ ALLOWED_BLOCKS } />
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			</Fragment>
 		);
