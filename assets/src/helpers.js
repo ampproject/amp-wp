@@ -62,21 +62,6 @@ export const GRID_BLOCKS = [
 	'amp/amp-story-grid-layer-background-video',
 ];
 
-export const AMP_STORY_POSITION_OPTIONS = [
-	{
-		value: 'upper-third',
-		label: __( 'Upper Third', 'amp' ),
-	},
-	{
-		value: 'middle-third',
-		label: __( 'Middle Third', 'amp' ),
-	},
-	{
-		value: 'lower-third',
-		label: __( 'Lower Third', 'amp' ),
-	},
-];
-
 export const AMP_ANIMATION_TYPE_OPTIONS = [
 	{
 		value: '',

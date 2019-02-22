@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, AMP_STORY_FONTS, AMP_STORY_POSITION_OPTIONS, GRID_BLOCKS } from '../helpers';
+import { ALLOWED_BLOCKS, AMP_STORY_FONTS, GRID_BLOCKS } from '../helpers';
 import { AnimationControls, withParentBlock } from './';
 
 export default createHigherOrderComponent(
