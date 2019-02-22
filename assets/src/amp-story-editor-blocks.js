@@ -159,7 +159,16 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
  * @return {Object} Properties.
  */
 const setBlockParent = ( props ) => {
-	if ( 0 === props.name.indexOf( 'amp/amp-story-page' ) ) {
+	const { name } = props;
+	if ( -1 !== ALLOWED_BLOCKS.indexOf( name ) ) {
+		// Only amp/amp-story-page blocks can be on the top level.
+		return {
+			...props,
+			parent: [ 'amp/amp-story-page' ],
+		};
+	}
+
+	if ( -1 === name.indexOf( 'amp/amp-story-page' ) ) {
 		// Do not allow inserting any of the blocks if they're not AMP Story blocks.
 		return {
 			...props,
