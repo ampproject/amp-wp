@@ -105,9 +105,11 @@ export default compose(
 			getBlock,
 			getBlocks,
 		} = select( 'core/editor' );
+
 		const selectedBlockClientId = getSelectedBlockClientId();
+
 		return {
-			rootBlocks: getBlocks(),
+			rootBlocks: getBlocks().filter( ( block ) => block.name === 'amp/amp-story-page' ),
 			rootBlock: selectedBlockClientId ? getBlock( getBlockHierarchyRootClientId( selectedBlockClientId ) ) : null,
 			selectedBlockClientId,
 		};
