@@ -4,6 +4,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
+import { setDefaultBlockName } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -17,6 +18,18 @@ domReady( () => {
 	addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
 	addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
 	addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+
+	/**
+	 * Change the default block type to amp/amp-story-page.
+	 *
+	 * This way no paragraph blocks gets inserted when pressing enter in the <PostTitle> component.
+	 *
+	 * Ideally we could override the post title so that pressing enter results in a new block inserted
+	 * inside the first page block.
+	 *
+	 * Todo: set default block name to text block when already inside
+	 */
+	setDefaultBlockName( 'amp/amp-story-page' );
 } );
 
 /**
