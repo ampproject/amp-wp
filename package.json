@@ -34,7 +34,6 @@
     "webpack": "4.29.5",
     "webpack-cli": "3.2.3"
   },
-  "main": "blocks/index.js",
   "scripts": {
     "build": "npm-run-all build:*",
     "build:prepare": "grunt build",
