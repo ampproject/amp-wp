@@ -136,6 +136,8 @@ class AMP_Post_Meta_Box {
 			'post' === $screen->base
 			&&
 			is_post_type_viewable( $post->post_type )
+			&&
+			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		);
 		if ( ! $validate ) {
 			return;
