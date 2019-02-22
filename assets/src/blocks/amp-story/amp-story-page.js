@@ -5,7 +5,7 @@ import BlockNavigation from './block-navigation';
 import {
 	BLOCK_ICONS,
 	ALLOWED_BLOCKS,
-} from './helpers';
+} from '../../helpers';
 
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
