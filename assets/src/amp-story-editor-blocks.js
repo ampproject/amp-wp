@@ -106,17 +106,6 @@ const addAMPAttributes = ( settings, name ) => {
 		...addedAttributes,
 	};
 
-	// @todo This is causing an error: Block validation: Block validation failed for `core/paragraph`. Expected:
-	//
-	// <p class="is-large-text">Test block</p>
-	//
-	// Actual:
-	//
-	// <p>Test block</p>
-	if ( 'core/paragraph' === name ) {
-		settings.attributes.fontSize.default = 'large';
-	}
-
 	return settings;
 };
 
