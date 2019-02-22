@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 
 export const ALLOWED_BLOCKS = [
+	'core/audio',
 	'core/code',
 	'core/embed',
 	'core/image',
