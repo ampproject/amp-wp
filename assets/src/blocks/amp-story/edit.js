@@ -29,12 +29,7 @@ const {
 } = select( 'core/editor' );
 
 const TEMPLATE = [
-	[
-		'core/paragraph',
-		{
-			placeholder: __( 'Add content to layer.', 'amp' ),
-		},
-	],
+	[ 'core/paragraph' ],
 ];
 
 export default class EditPage extends Component {

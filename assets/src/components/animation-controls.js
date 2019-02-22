@@ -75,7 +75,7 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 			<RangeControl
 				key="delay"
 				label={ __( 'Delay (ms)', 'amp' ) }
-				value={ parseInt( attributes.ampAnimationDelay ) }
+				value={ attributes.ampAnimationDelay ? parseInt( attributes.ampAnimationDelay ) : '' }
 				onChange={ ( value ) => {
 					value = value + 'ms';
 					setAttributes( { ampAnimationDelay: value } );
