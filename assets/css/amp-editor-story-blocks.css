@@ -10,7 +10,6 @@
 		4.2 Blur layers above
 		4.3 Stroke text for legibility.
 	5. Layers Styling
-		5.1 Thirds Layer
 		5.2 Fill layer
 		5.3 CTA layer
 	6. Inserter customisations.
@@ -157,20 +156,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	box-sizing: border-box;
 }
 
-.amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
-	grid-auto-flow: column !important;
-	grid-template-rows: 100% !important;
-	-ms-flex-line-pack: stretch;
-	align-content: stretch;
-	-webkit-box-align: start;
-	-ms-flex-align: start;
-	align-items: start;
-	grid-gap: 16px;
-	-webkit-box-pack: start;
-	-ms-flex-pack: start;
-	justify-content: start;
-}
-
 .amp-grid-template-vertical .editor-block-list__layout:first-of-type {
 	grid-auto-flow: row;
 	grid-template-columns: 100%;
@@ -222,27 +207,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 /*
  * 5. Layers Styling
  */
-
-/*
- * 5.1 Thirds layer.
- */
-
-.amp-grid-template-thirds .editor-block-list__layout:first-of-type {
-	grid-template-rows: 1fr 1fr 1fr;
-	grid-template-areas: "upper-third" "middle-third" "lower-third";
-}
-
-div[data-amp-position="upper-third"] {
-	grid-area: upper-third / lower-third / lower-third / lower-third;
-}
-
-div[data-amp-position="middle-third"] {
-	grid-area: middle-third / lower-third / lower-third / lower-third;
-}
-
-div[data-amp-position="lower-third"] {
-	grid-area: lower-third / lower-third / lower-third / lower-third;
-}
 
 /*
  * 5.2 Fill layer.

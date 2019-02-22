@@ -124,10 +124,6 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
-	if ( attributes.ampStoryPosition ) {
-		ampAttributes[ 'grid-area' ] = attributes.ampStoryPosition;
-	}
-
 	if ( attributes.ampAnimationType ) {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 

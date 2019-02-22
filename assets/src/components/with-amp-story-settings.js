@@ -35,18 +35,6 @@ export default createHigherOrderComponent(
 						<PanelBody
 							title={ __( 'AMP Story Settings', 'amp' ) }
 						>
-							{
-								( 'amp/amp-story-grid-layer-thirds' === parentBlock.name ) && (
-									<SelectControl
-										label={ __( 'Placement', 'amp' ) }
-										value={ attributes.ampStoryPosition }
-										options={ AMP_STORY_POSITION_OPTIONS }
-										onChange={ function( value ) {
-											props.setAttributes( { ampStoryPosition: value } );
-										} }
-									/>
-								)
-							}
 							<AnimationControls
 								setAttributes={ setAttributes }
 								attributes={ attributes }
