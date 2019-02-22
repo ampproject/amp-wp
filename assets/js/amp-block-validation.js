@@ -148,7 +148,7 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
 				return;
 			}
-			if ( ! 'amp_story' === currentPost.type ) {
+			if ( 'amp_story' !== currentPost.type ) {
 				return;
 			}
 			if ( ! module.hasPortraitSrcNotice && ! currentPost.featured_media ) {
