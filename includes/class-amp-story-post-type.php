@@ -182,7 +182,8 @@ class AMP_Story_Post_Type {
 			'amp-story-editor-blocks',
 			amp_get_asset_url( 'js/amp-story-editor-blocks-compiled.js' ),
 			array( 'wp-dom-ready', 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
-			AMP__VERSION
+			AMP__VERSION,
+			false
 		);
 
 		wp_enqueue_script(
