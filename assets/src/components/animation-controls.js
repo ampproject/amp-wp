@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { RangeControl, SelectControl } from '@wordpress/components';
-import { Fragment, renderToString } from '@wordpress/element';
+import { Fragment } from '@wordpress/element';
 import { withSelect } from '@wordpress/data';
 import { __, sprintf } from '@wordpress/i18n';
 
