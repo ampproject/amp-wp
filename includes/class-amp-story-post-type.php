@@ -132,6 +132,7 @@ class AMP_Story_Post_Type {
 		$story_components = array(
 			'amp-story-page',
 			'amp-story-grid-layer',
+			'amp-story-cta-layer',
 		);
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
@@ -144,7 +145,6 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['grid-area']           = true;
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;

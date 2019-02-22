@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, AMP_STORY_FONTS, GRID_BLOCKS } from '../helpers';
+import { ALLOWED_BLOCKS, AMP_STORY_FONTS } from '../helpers';
 import { AnimationControls, withParentBlock } from './';
 
 export default createHigherOrderComponent(
@@ -18,11 +18,7 @@ export default createHigherOrderComponent(
 		return withParentBlock( ( props ) => {
 			const { attributes, setAttributes, name, parentBlock } = props;
 
-			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) ) {
-				return <BlockEdit { ...props } />;
-			}
-
-			if ( ! parentBlock || ( -1 === GRID_BLOCKS.indexOf( parentBlock.name ) && 'amp/amp-story-page' !== parentBlock.name ) ) {
+			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -53,7 +49,7 @@ export default createHigherOrderComponent(
 								)
 							}
 							{
-								( 'core/image' === name && ( parentBlock && 'amp/amp-story-grid-layer-background-image' !== parentBlock.name ) ) && (
+								( 'core/image' === name ) && (
 									<ToggleControl
 										key={ 'position' }
 										label={ __( 'Show or hide the caption', 'amp' ) }

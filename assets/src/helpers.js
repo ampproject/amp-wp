@@ -54,14 +54,6 @@ export const BLOCK_TAG_MAPPING = {
 	'core/video': 'figure',
 };
 
-export const GRID_BLOCKS = [
-	'amp/amp-story-grid-layer-horizontal',
-	'amp/amp-story-grid-layer-vertical',
-	'amp/amp-story-grid-layer-thirds',
-	'amp/amp-story-grid-layer-background-image',
-	'amp/amp-story-grid-layer-background-video',
-];
-
 export const AMP_ANIMATION_TYPE_OPTIONS = [
 	{
 		value: '',
