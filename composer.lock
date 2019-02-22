@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2327159aac831082b7b6403c5bb2b510",
+    "content-hash": "0d886df95916e62aeea97f8c6d1e84dd",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -52,16 +52,16 @@
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "05af344dda4406476f50fae59fbb880ef68d2020"
+                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/05af344dda4406476f50fae59fbb880ef68d2020",
-                "reference": "05af344dda4406476f50fae59fbb880ef68d2020",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/e267dcb6d273075b85cef34258fc8c34d2f7deff",
+                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff",
                 "shasum": ""
             },
             "require": {
@@ -99,7 +99,7 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2018-03-07T06:46:48+00:00"
+            "time": "2019-02-18T21:02:17+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
