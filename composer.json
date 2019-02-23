@@ -20,15 +20,11 @@
           "reference": "tags/1902072121410"
         }
       }
-    },
-    {
-      "type": "vcs",
-      "url": "https://github.com/xwp/PHP-CSS-Parser"
     }
   ],
   "require": {
     "php": "^5.4 || ^7.0",
-    "sabberworm/php-css-parser": "8.2.1",
+    "sabberworm/php-css-parser": "8.3.0",
     "fasterimage/fasterimage": "1.2.1",
     "cweagans/composer-patches": "~1.6"
   },

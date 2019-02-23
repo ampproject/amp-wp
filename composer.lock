@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a535110aa3cfc018f459957c9ee3c4e1",
+    "content-hash": "94440d8d2118a55fbabe62fd28eec4d5",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -108,16 +108,16 @@
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.2.1",
+            "version": "8.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "cc0af9d69de030bcbb288725b48c2462ed69f3fa"
+                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/cc0af9d69de030bcbb288725b48c2462ed69f3fa",
-                "reference": "cc0af9d69de030bcbb288725b48c2462ed69f3fa",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
+                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
                 "shasum": ""
             },
             "require": {
@@ -133,6 +133,7 @@
                     "Sabberworm\\CSS": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -148,10 +149,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.2.1"
-            },
-            "time": "2019-01-29T18:59:15+00:00"
+            "time": "2019-02-22T07:42:52+00:00"
         },
         {
             "name": "willwashburn/stream",
@@ -213,7 +211,7 @@
             "dist": {
                 "type": "zip",
                 "url": "https://github.com/ampproject/amphtml/archive/1902072121410.zip",
-                "reference": null,
+                "reference": "tags/1902072121410",
                 "shasum": null
             },
             "type": "library"
