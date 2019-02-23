@@ -428,7 +428,7 @@ class AMP_HTTP {
 		if ( '1' === (string) $comment->comment_approved ) {
 			$message = __( 'Your comment has been posted.', 'amp' );
 		} else {
-			$message = __( 'Your comment is awaiting moderation.', 'default' ); // Note core string re-use.
+			$message = __( 'Your comment is awaiting moderation.', 'amp' );
 		}
 
 		/**

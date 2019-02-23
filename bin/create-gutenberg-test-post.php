@@ -170,7 +170,7 @@ function create_gutenberg_test_post( $content ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = create_gutenberg_test_post( get_test_block_fixtures() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$post_id = create_gutenberg_test_post( get_test_block_fixtures() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		\WP_CLI::success( sprintf( 'The test page is at: %s', \amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( \Exception $e ) {
 		\WP_CLI::error( $e->getMessage() );

@@ -388,7 +388,13 @@ class AMP_Options_Menu {
 		<?php else : ?>
 			<div class="notice notice-warning notice-alt inline">
 				<p>
-					<?php esc_html_e( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ); ?>
+					<?php
+					printf(
+						/* translators: %s: available_callback */
+						esc_html__( 'Your theme is using the deprecated %s argument for AMP theme support.', 'amp' ),
+						'available_callback'
+					);
+					?>
 				</p>
 			</div>
 		<?php endif; ?>
@@ -571,7 +577,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>

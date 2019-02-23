@@ -59,15 +59,27 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-ad' ),
 			),
 
+			'amp-sticky-ad' => array(
+				'<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>',
+				null,
+				array( 'amp-ad', 'amp-sticky-ad' ),
+			),
+
+			'amp-sticky-ad-bad-children' => array(
+				'<amp-sticky-ad layout="nodisplay"><span>not allowed</span><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad><i>not ok</i></amp-sticky-ad>',
+				'',
+				array(),
+			),
+
 			'amp-animation' => array(
+				'<amp-animation layout="nodisplay"><span>bad</span><script type="application/json">{}</script><strong>very bad</strong></amp-animation>',
 				'<amp-animation layout="nodisplay"><script type="application/json">{}</script></amp-animation>',
-				null, // No change.
 				array( 'amp-animation' ),
 			),
 
 			'amp-call-tracking' => array(
-				'<amp-call-tracking config="https://example.com/calltracking.json"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
-				null,
+				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
+				'<amp-call-tracking config="https://example.com/calltracking.json">--and not great: <a href="tel:123456789">+1 (23) 456-789</a>not great</amp-call-tracking>',
 				array( 'amp-call-tracking' ),
 			),
 
@@ -237,7 +249,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'reference-point-lightbox-thumbnail-id' => array(
 				'<amp-img src="/awesome.png" width="300" height="300" lightbox lightbox-thumbnail-id="a"></amp-img>',
 				null,
-				array(),
+				array( 'amp-lightbox-gallery' ),
+			),
+
+			'lightbox-with-amp-carousel' => array(
+				'<amp-carousel lightbox width="1600" height="900" layout="responsive" type="slides"><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img><amp-img src="image1" width="200" height="100"></amp-img></amp-carousel>',
+				null,
+				array( 'amp-lightbox-gallery', 'amp-carousel' ),
 			),
 
 			'reference-points-amp-live-list' => array(
@@ -246,36 +264,55 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-live-list' ),
 			),
 
-			'reference-points-amp-story' => array(
-				str_replace(
-					array( "\n", "\t" ),
-					'',
-					'
-					<amp-story standalone title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
-						<amp-story-page id="my-first-page">
-							<amp-story-grid-layer template="fill">
-								<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
-								</amp-img>
-							</amp-story-grid-layer>
-							<amp-story-grid-layer template="vertical">
-								<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
-							</amp-story-grid-layer>
-						</amp-story-page>
-						<amp-story-page id="my-second-page">
-							<amp-story-grid-layer template="thirds">
-								<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
-								</amp-img>
-							</amp-story-grid-layer>
-							<amp-story-grid-layer template="vertical">
-								<h1>The End</h1>
-							</amp-story-grid-layer>
-						</amp-story-page>
-						<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
-					</amp-story>
-					'
-				),
-				null,
-				array( 'amp-story' ),
+			'reference-points-amp-story' => call_user_func(
+				function () {
+					$html = str_replace(
+						array( "\n", "\t" ),
+						'',
+						'
+						<amp-story standalone supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+							<i>bad</i>
+							<amp-story-page id="my-first-page">
+								<i>bad</i>
+								<amp-story-grid-layer template="fill">
+									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
+									</amp-img>
+								</amp-story-grid-layer>
+								<amp-story-grid-layer template="vertical">
+									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
+								</amp-story-grid-layer>
+								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
+							</amp-story-page>
+							<i>bad</i>
+							<amp-story-page id="my-second-page">
+								<i>bad</i>
+								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
+								<amp-story-grid-layer template="thirds">
+									<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
+									</amp-img>
+								</amp-story-grid-layer>
+								<amp-story-grid-layer template="vertical">
+									<h1>The End</h1>
+									<button class="baddie">bad</button>
+								</amp-story-grid-layer>
+								<amp-story-cta-layer>
+									<a href="https://example.com">Click me.</a>
+									<button>Hello</button>
+								</amp-story-cta-layer>
+							</amp-story-page>
+							<i>bad</i>
+							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
+							<i>bad</i>
+						</amp-story>
+						'
+					);
+
+					return array(
+						$html,
+						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
+						array( 'amp-story', 'amp-analytics' ),
+					);
+				}
 			),
 
 			'reference-points-bad' => array(
@@ -486,10 +523,43 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array(), // No scripts because removed.
 			),
 
-			'attribute_amp_accordion_value' => array(
-				'<amp-accordion disable-session-states="">test</amp-accordion>',
-				null, // No change.
-				array( 'amp-accordion' ),
+			'attribute_amp_accordion_value' => call_user_func(
+				function() {
+					$html = str_replace(
+						array( "\n", "\t" ),
+						'',
+						'
+						<amp-accordion class="sample" disable-session-states="">
+							ok
+							<p>bad</p>
+							<section expanded>
+								<h4>Section 1</h4>
+								<p>Bunch of awesome content.</p>
+							</section>
+							<section>
+								<h4>Section 2</h4>
+								<div>Bunch of even more awesome content. This time in a <code>&lt;div&gt;</code>.</div>
+							</section>
+							<section>
+								<h4>Section 3</h4>
+								<figure>
+									<amp-img src="/img/clean-1.jpg" layout="intrinsic" width="400" height="710"></amp-img>
+									<figcaption>Images work as well.</figcaption>
+								</figure>
+							</section>
+							ok
+							<div>bad</div>
+							ok
+						</amp-accordion>
+						'
+					);
+
+					return array(
+						$html,
+						preg_replace( '#<\w+>bad</\w+>#', '', $html ),
+						array( 'amp-accordion' ),
+					);
+				}
 			),
 
 			'attribute_value_with_blacklisted_regex_removed' => array(
@@ -622,9 +692,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a border=""></a>',
 			),
 
-			'remove_node_with_disallowed_ancestor' => array(
-				'<amp-sidebar>The sidebar<amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
-				'<amp-sidebar>The sidebar</amp-sidebar>',
+			'remove_node_with_disallowed_ancestor_and_disallowed_child_nodes' => array(
+				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><i>bad</i><ul><li>Hello</li></ul><i>bad</i></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
+				'<amp-sidebar><nav><ul><li>Hello</li></ul></nav></amp-sidebar>',
 				array( 'amp-sidebar' ),
 			),
 
@@ -816,6 +886,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind' ),
 			),
 
+			'amp-state' => array(
+				'<amp-state id="someNumber"><script type="application/json">4</script></amp-state>',
+				null,
+				array( 'amp-bind' ),
+			),
+
+			'amp-state-bad' => array(
+				'<amp-state id="someNumber"><i>bad</i><script type="application/json">4</script></amp-state>',
+				'',
+				array(),
+			),
+
 			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
 			'reference-points-amp_selector_and_carousel_with_boolean_attributes' => array(
 				str_replace(
@@ -881,7 +963,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp_date_picker_range' => array(
-				'<amp-date-picker type="range" minimum-nights="2" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
+				'<amp-date-picker type="range" minimum-nights="2" maximum-nights="4" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
 				null, // No change.
 				array( 'amp-date-picker', 'amp-bind', 'amp-mustache' ),
 			),
@@ -937,6 +1019,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-geo layout="nodisplay"><script type="application/json">{ "AmpBind": true, "ISOCountryGroups": { "nafta": [ "ca", "mx", "us", "unknown" ], "waldo": [ "unknown" ], "anz": [ "au", "nz" ] } }</script></amp-geo>',
 				null,
 				array( 'amp-geo' ),
+			),
+
+			'amp-geo-bad-children' => array(
+				'<amp-geo layout="nodisplay"><div>bad</div><script type="application/json">{ "AmpBind": true, "ISOCountryGroups": { "nafta": [ "ca", "mx", "us", "unknown" ], "waldo": [ "unknown" ], "anz": [ "au", "nz" ] } }</script></amp-geo>',
+				'',
+				array(),
 			),
 
 			'amp-addthis' => array(
@@ -1012,9 +1100,92 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-image-slider' => array(
+				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
-				null,
 				array( 'amp-image-slider' ),
+			),
+
+			'amp-image-slider-bad-children' => array(
+				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
+				'',
+				array(),
+			),
+
+			'amp-fx-collection' => array(
+				'<h1 amp-fx="parallax" data-parallax-factor="1.5">A title that moves faster than other content.</h1>',
+				null,
+				array( 'amp-fx-collection' ),
+			),
+
+			'amp-date-display' => array(
+				'<amp-date-display datetime="2017-08-02T15:05:05.000" layout="fixed" width="360" height="20"><template type="amp-mustache"><div>{{dayName}} {{day}} {{monthName}} {{year}} {{hourTwoDigit}}:{{minuteTwoDigit}}:{{secondTwoDigit}}</div></template></amp-date-display>',
+				null,
+				array( 'amp-date-display', 'amp-mustache' ),
+			),
+
+			'amp-list' => array(
+				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
+				null,
+				array( 'amp-list', 'amp-mustache' ),
+			),
+
+			'amp-list-load-more' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+						<amp-list load-more="auto" src="https://www.load.more.example.com/" width="400" height="800">
+							<amp-list-load-more load-more-button>
+								<template type="amp-mustache">
+									Showing {{#count}} out of {{#total}} items
+									<button>Click here to see more!</button>
+								</template>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-loading>
+								<svg>...</svg>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-failed>
+								<button>Unable to Load More</button>
+							</amp-list-load-more>
+							<amp-list-load-more load-more-end>
+								Congratulations! You reached the end.
+							</amp-list-load-more>
+						</amp-list>
+					'
+				),
+				null,
+				array( 'amp-list', 'amp-mustache' ),
+			),
+
+			'amp-recaptcha-input' => array(
+				'<form action-xhr="/" target="_top" method="post"><amp-recaptcha-input layout="nodisplay" name="reCAPTCHA_body_key" data-sitekey="reCAPTCHA_site_key" data-action="reCAPTCHA_example_action"></amp-recaptcha-input></form>',
+				null,
+				array( 'amp-form', 'amp-recaptcha-input' ),
+			),
+
+			// @todo The poster should not be allowed if there is a placeholder.
+			'amp-video-iframe' => array(
+				'<amp-video-iframe src="https://example.com/video/" width="500" height="500" poster="https://example.com/poster.jpg" autoplay dock implements-media-session implements-rotate-to-fullscreen referrerpolicy></amp-video-iframe>',
+				null,
+				array( 'amp-video-iframe', 'amp-video-docking' ),
+			),
+
+			'amp-youtube' => array(
+				'<amp-youtube id="myLiveChannel" data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q" width="358" height="204" layout="responsive" dock><amp-img src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg" placeholder layout="fill"></amp-img></amp-youtube>',
+				null,
+				array( 'amp-youtube', 'amp-video-docking' ),
+			),
+
+			'details' => array(
+				'<details open [open]="foo.state"><summary>Learn more</summary><p>You are educated</p></details>',
+				null,
+				array( 'amp-bind' ),
+			),
+
+			'amp-plain-text-script-template' => array(
+				'<script type="text/plain" template="amp-mustache">Hello {{world}}!</script>',
+				null,
+				array( 'amp-mustache' ),
 			),
 		);
 	}
@@ -1061,13 +1232,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		preg_match_all( '#<.+?>#', $expected, $expected_matches );
-		preg_match_all( '#<.+?>#', $content, $content_matches );
 		$this->assertEquals(
-			$expected_matches,
-			$content_matches
+			preg_split( '/(?<=>)|(?=<)/', $expected ),
+			preg_split( '/(?<=>)|(?=<)/', $content )
 		);
-		$this->assertEquals( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
 
@@ -1207,6 +1375,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'parent_name'     => 'body',
 			'code'            => 'invalid_element',
 			'node_attributes' => array( 'class' => 'baz-invalid' ),
+		);
+		$content[]         = '<amp-story-grid-layer class="a-invalid"><a href="">Invalid a tag.</a></amp-story-grid-layer>';
+		$expected_errors[] = array(
+			'node_name'       => 'amp-story-grid-layer',
+			'parent_name'     => 'body',
+			'code'            => 'invalid_element',
+			'node_attributes' => array( 'class' => 'a-invalid' ),
 		);
 		$content[]         = '<foo class="foo-invalid">Invalid foo tag.</foo>';
 		$expected_errors[] = array(

@@ -361,7 +361,7 @@ class AMP_Options_Manager {
 			<h1><?php esc_html_e( 'Welcome to AMP for WordPress', 'amp' ); ?></h1>
 			<h3><?php esc_html_e( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', 'amp' ); ?></h3>
 			<h3><?php esc_html_e( 'From granular controls that help you create AMP content, to Core Gutenberg support, to a sanitizer that only shows visitors error-free pages, to a full error workflow for developers, this release enables rich, performant experiences for your WordPress site.', 'amp' ); ?></h3>
-			<a href="https://www.ampproject.org/docs/getting_started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
+			<a href="https://amp-wp.org/getting-started/" target="_blank" class="button button-primary"><?php esc_html_e( 'Learn More', 'amp' ); ?></a>
 		</div>
 
 		<script>
@@ -410,10 +410,12 @@ class AMP_Options_Manager {
 	public static function persistent_object_caching_notice() {
 		if ( ! wp_using_ext_object_cache() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
-				'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
-				esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
-				esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
-				esc_html__( 'More details', 'amp' )
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				sprintf(
+					/* translators: %s: Persistent object cache support URL */
+					__( 'The AMP plugin performs at its best when persistent object cache is enabled. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) )
+				)
 			);
 		}
 	}
@@ -433,10 +435,12 @@ class AMP_Options_Manager {
 		}
 
 		printf(
-			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
-			esc_html__( "The AMP plugin's post-processor cache disabled due to the detection of highly-variable content.", 'amp' ),
-			esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ),
-			esc_html__( 'More details', 'amp' )
+			'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
+			sprintf(
+				/* translators: %s: post-processor cache support URL */
+				__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) )
+			)
 		);
 	}
 
@@ -465,9 +469,9 @@ class AMP_Options_Manager {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
 				sprintf(
-					/* translators: %s is location where conflicting lib was found */
-					esc_html__( "A conflicting version of PHP-CSS-Parser appears to be installed by another plugin/theme (located in '%s'). Because of this CSS processing will be limited, and tree shaking will not be available.", 'amp' ),
-					esc_html( $source_dir )
+					/* translators: %s: path to the conflicting library */
+					__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					'<code>' . esc_html( $source_dir ) . '</code>'
 				)
 			);
 		} catch ( ReflectionException $e ) {

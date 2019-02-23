@@ -92,12 +92,14 @@ module.exports = function( grunt ) {
 			versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src)/.test( file );
 			} );
 			paths.push( 'vendor/autoload.php' );
 			paths.push( 'assets/js/*-compiled.js' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
+			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
+			paths.push( 'vendor/willwashburn/stream/src/**' );
 
 			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {

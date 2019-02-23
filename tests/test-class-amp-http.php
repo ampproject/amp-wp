@@ -144,10 +144,10 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 
 		remove_action( 'wp', 'amp_maybe_add_actions' );
 		$this->go_to( add_query_arg( $all_query_vars, home_url( '/foo/' ) ) );
-		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		foreach ( $all_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
@@ -157,14 +157,14 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		$this->assertEqualSets( AMP_HTTP::$purged_amp_query_vars, $bad_query_vars );
 
 		foreach ( $bad_query_vars as $key => $value ) {
-			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayNotHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->assertArrayNotHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertNotContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertNotContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
 		foreach ( $ok_query_vars as $key => $value ) {
-			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			$this->assertArrayHasKey( $key, $_GET ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->assertArrayHasKey( $key, $_REQUEST ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$this->assertContains( "$key=$value", $_SERVER['QUERY_STRING'] );
 			$this->assertContains( "$key=$value", $_SERVER['REQUEST_URI'] );
 		}
@@ -178,8 +178,20 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers AMP_HTTP::filter_allowed_redirect_hosts()
 	 */
 	public function test_get_amp_cache_hosts() {
-		update_option( 'home', 'https://example.com' );
-		update_option( 'siteurl', 'https://example.org' );
+
+		// Note that filters are used instead of updating option because of WP_HOME and WP_SITEURL constants.
+		add_filter(
+			'home_url',
+			function () {
+				return 'https://example.com';
+			}
+		);
+		add_filter(
+			'site_url',
+			function () {
+				return 'https://example.org';
+			}
+		);
 
 		$hosts = AMP_HTTP::get_amp_cache_hosts();
 
