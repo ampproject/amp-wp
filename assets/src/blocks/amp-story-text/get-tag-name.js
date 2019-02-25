@@ -21,7 +21,7 @@ export default function( attributes ) {
 		return 'h1';
 	}
 
-	if ( 'large' === fontSize || ( customFontSize && customFontSize > H2_FONT_SIZE )  ) {
+	if ( 'large' === fontSize || ( customFontSize && customFontSize > H2_FONT_SIZE ) ) {
 		return 'h2';
 	}
 
