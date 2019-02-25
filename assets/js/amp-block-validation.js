@@ -7,10 +7,10 @@
 
 /* exported ampBlockValidation */
 /* global wp, _ */
-var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
+const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
-	var module = {
+	const module = {
 
 		/**
 		 * Data exported from server.
@@ -20,7 +20,9 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		data: {
 			i18n: {},
 			ampValidityRestField: '',
-			isSanitizationAutoAccepted: false
+			isSanitizationAutoAccepted: false,
+			possibleStati: [],
+			defaultStatus: '',
 		},
 
 		/**
@@ -39,7 +41,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			noticesAreReset: false,
 			validationErrors: [],
 			blockOrder: [],
-			blockValidationErrors: {}
+			blockValidationErrors: {},
 		},
 
 		/**
@@ -74,14 +76,14 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		registerStore: function registerStore() {
 			return wp.data.registerStore( module.storeName, {
 				reducer: function( _state, action ) {
-					var state = _state || {
-						blockValidationErrorsByClientId: {}
+					const state = _state || {
+						blockValidationErrorsByClientId: {},
 					};
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
 							return _.extend( {}, state, {
-								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId
+								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId,
 							} );
 						default:
 							return state;
@@ -91,15 +93,15 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					updateBlocksValidationErrors: function( blockValidationErrorsByClientId ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blockValidationErrorsByClientId: blockValidationErrorsByClientId
+							blockValidationErrorsByClientId: blockValidationErrorsByClientId,
 						};
-					}
+					},
 				},
 				selectors: {
 					getBlockValidationErrors: function( state, clientId ) {
 						return state.blockValidationErrorsByClientId[ clientId ] || [];
-					}
-				}
+					},
+				},
 			} );
 		},
 
@@ -109,11 +111,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {boolean} Returns true when the AMP toggle is on; else, false is returned.
 		 */
 		isAMPEnabled: function isAMPEnabled() {
-			var meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-			if ( meta && meta.amp_status && window.wpAmpEditor.possibleStati.includes( meta.amp_status ) ) {
+			const meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+			if ( meta && meta.amp_status && module.data.possibleStati.includes( meta.amp_status ) ) {
 				return 'enabled' === meta.amp_status;
 			}
-			return window.wpAmpEditor.defaultStatus;
+			return module.data.defaultStatus;
 		},
 
 		/**
@@ -122,8 +124,6 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {boolean} Whether should wait.
 		 */
 		waitToHandleStateChange: function waitToHandleStateChange() {
-			var currentPost;
-
 			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
 			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || ( ! wp.data.select( 'core/editor' ).isEditedPostDirty() && wp.data.select( 'core/editor' ).isEditedPostNew() ) ) {
@@ -131,7 +131,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			// Wait for the current post to be set up.
-			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
 			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
 				return true;
 			}
@@ -143,12 +143,12 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * Handles admin notices for AMP Stories.
 		 */
 		handleAMPStoryChange: function handleAMPStoryChange() {
-			var currentPost = wp.data.select( 'core/editor' ).getCurrentPost(),
+			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost(),
 				storyPortraitErrorNoticeId = 'amp-story-portrait-errors-notice';
 			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
 				return;
 			}
-			if ( ! 'amp_story' === currentPost.type ) {
+			if ( 'amp_story' !== currentPost.type ) {
 				return;
 			}
 			if ( ! module.hasPortraitSrcNotice && ! currentPost.featured_media ) {
@@ -157,7 +157,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					'warning',
 					wp.i18n.__( 'Featured image is used as poster-portrait-src and is mandatory', 'amp' ),
 					{
-						id: storyPortraitErrorNoticeId
+						id: storyPortraitErrorNoticeId,
 					}
 				);
 			} else if ( module.hasPortraitSrcNotice && currentPost.featured_media ) {
@@ -174,7 +174,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity, rejectedErrors;
+			let blockValidationErrors, noticeMessage, blockErrorCount;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -190,11 +190,11 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				return;
 			}
 
-			currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-			ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
+			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			const ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 
 			// Show all validation errors which have not been explicitly acknowledged as accepted.
-			validationErrors = _.map(
+			const validationErrors = _.map(
 				_.filter( ampValidity.results, function( result ) {
 					// @todo Show VALIDATION_ERROR_ACK_REJECTED_STATUS differently since moderated?
 					return (
@@ -266,7 +266,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 			}
 
-			rejectedErrors = _.filter( ampValidity.results, function( result ) {
+			const rejectedErrors = _.filter( ampValidity.results, function( result ) {
 				return (
 					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
 					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
@@ -290,15 +290,15 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
 
-			noticeOptions = {
-				id: 'amp-errors-notice'
+			const noticeOptions = {
+				id: 'amp-errors-notice',
 			};
 			if ( ampValidity.review_link ) {
 				noticeOptions.actions = [
 					{
 						label: wp.i18n.__( 'Review issues', 'amp' ),
-						url: ampValidity.review_link
-					}
+						url: ampValidity.review_link,
+					},
 				];
 			}
 
@@ -322,8 +322,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return (
-				module.lastStates.validationErrors.length !== validationErrors.length
-				||
+				module.lastStates.validationErrors.length !== validationErrors.length				||
 				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
 			);
 		},
@@ -336,7 +335,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {boolean} Whether out of sync.
 		 */
 		areBlocksOutOfSync: function areBlocksOutOfSync() {
-			var blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
+			const blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
 			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
 				module.lastStates.blockOrder = blockOrder;
 				return true;
@@ -373,7 +372,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {string[]} Block IDs in flattened order.
 		 */
 		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
-			var blockOrder = [];
+			const blockOrder = [];
 			_.each( blocks, function( block ) {
 				blockOrder.push( block.clientId );
 				if ( block.innerBlocks.length > 0 ) {
@@ -389,11 +388,10 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var acceptedStatus, blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
-			acceptedStatus = 3; // eslint-disable-line no-magic-numbers
-			editorSelect = wp.data.select( 'core/editor' );
-			currentPost = editorSelect.getCurrentPost();
-			validationErrors = _.map(
+			const acceptedStatus = 3; // eslint-disable-line no-magic-numbers
+			const editorSelect = wp.data.select( 'core/editor' );
+			const currentPost = editorSelect.getCurrentPost();
+			const validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
 					return result.term_status !== acceptedStatus; // If not accepted by the user.
 				} ),
@@ -401,16 +399,16 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					return result.error;
 				}
 			);
-			blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
+			const blockOrder = module.getFlattenedBlockOrder( editorSelect.getBlocks() );
+			const otherValidationErrors = [];
+			const blockValidationErrorsByClientId = {};
 
-			otherValidationErrors = [];
-			blockValidationErrorsByClientId = {};
 			_.each( blockOrder, function( clientId ) {
 				blockValidationErrorsByClientId[ clientId ] = [];
 			} );
 
 			_.each( validationErrors, function( validationError ) {
-				var i, source, clientId, block, matched;
+				let i, source, clientId, block, matched;
 				if ( ! validationError.sources ) {
 					otherValidationErrors.push( validationError );
 					return;
@@ -457,7 +455,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			return {
 				byClientId: blockValidationErrorsByClientId,
-				other: otherValidationErrors
+				other: otherValidationErrors,
 			};
 		},
 
@@ -477,17 +475,17 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			if ( 'invalid_element' === validationError.code && validationError.node_name ) {
 				return [
 					wp.i18n.__( 'Invalid element: ' ),
-					wp.element.createElement( 'code', { key: 'name' }, validationError.node_name )
+					wp.element.createElement( 'code', { key: 'name' }, validationError.node_name ),
 				];
 			} else if ( 'invalid_attribute' === validationError.code && validationError.node_name ) {
 				return [
 					wp.i18n.__( 'Invalid attribute: ' ),
-					wp.element.createElement( 'code', { key: 'name' }, validationError.parent_name ? wp.i18n.sprintf( '%s[%s]', validationError.parent_name, validationError.node_name ) : validationError.node_name )
+					wp.element.createElement( 'code', { key: 'name' }, validationError.parent_name ? wp.i18n.sprintf( '%s[%s]', validationError.parent_name, validationError.node_name ) : validationError.node_name ),
 				];
 			}
 			return [
 				wp.i18n.__( 'Error code: ', 'amp' ),
-				wp.element.createElement( 'code', { key: 'name' }, validationError.code || wp.i18n.__( 'unknown' ) )
+				wp.element.createElement( 'code', { key: 'name' }, validationError.code || wp.i18n.__( 'unknown' ) ),
 			];
 		},
 
@@ -499,11 +497,10 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
 			return function( ownProps ) {
-				var validationErrors,
-					mergedProps;
+				let validationErrors;
+
 				function AmpNoticeBlockEdit( props ) {
-					var edit, details;
-					edit = wp.element.createElement(
+					const edit = wp.element.createElement(
 						BlockEdit,
 						props
 					);
@@ -512,7 +509,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						return edit;
 					}
 
-					details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
+					const details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
 						wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
 							wp.i18n._n(
 								'There is %s issue from AMP validation.',
@@ -528,7 +525,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 							_.map( props.ampBlockValidationErrors, function( error, key ) {
 								return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
 							} )
-						)
+						),
 					] );
 
 					return wp.element.createElement(
@@ -537,7 +534,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 							wp.components.Notice,
 							{
 								status: 'warning',
-								isDismissible: false
+								isDismissible: false,
 							},
 							details
 						),
@@ -550,13 +547,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					module.lastStates.blockValidationErrors[ ownProps.clientId ] = validationErrors;
 				}
 
-				mergedProps = _.extend( {}, ownProps, {
-					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ]
+				const mergedProps = _.extend( {}, ownProps, {
+					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ],
 				} );
 
 				return AmpNoticeBlockEdit( mergedProps );
 			};
-		}
+		},
 	};
 
 	return module;

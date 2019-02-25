@@ -136,6 +136,8 @@ class AMP_Post_Meta_Box {
 			'post' === $screen->base
 			&&
 			is_post_type_viewable( $post->post_type )
+			&&
+			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		);
 		if ( ! $validate ) {
 			return;
@@ -191,7 +193,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function enqueue_block_assets() {
 		$post = get_post();
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! is_post_type_viewable( $post->post_type ) || AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
 			return;
 		}
 
@@ -203,7 +205,7 @@ class AMP_Post_Meta_Box {
 			true
 		);
 
-		$status_and_errors = $this->get_status_and_errors( $post );
+		$status_and_errors = self::get_status_and_errors( $post );
 		$enabled_status    = $status_and_errors['status'];
 		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
 		$script_data       = array(
@@ -246,7 +248,7 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
-		$status_and_errors = $this->get_status_and_errors( $post );
+		$status_and_errors = self::get_status_and_errors( $post );
 		$status            = $status_and_errors['status'];
 		$errors            = $status_and_errors['errors'];
 		$error_messages    = $this->get_error_messages( $status, $errors );
@@ -272,7 +274,7 @@ class AMP_Post_Meta_Box {
 	 *     @type string[]  $errors AMP errors.
 	 * }
 	 */
-	public function get_status_and_errors( $post ) {
+	public static function get_status_and_errors( $post ) {
 		/*
 		 * When theme support is present then theme templates can be served in AMP and we check first if the template is available.
 		 * Checking for template availability will include a check for get_support_errors. Otherwise, if theme support is not present

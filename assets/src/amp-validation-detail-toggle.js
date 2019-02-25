@@ -25,7 +25,7 @@ function addToggleButtons( containerSelector, ariaLabel ) {
 		return button;
 	};
 
-	return [ ...document.querySelectorAll( containerSelector ) ].map( container => addButton( container ) );
+	return [ ...document.querySelectorAll( containerSelector ) ].map( ( container ) => addButton( container ) );
 }
 
 function addToggleAllListener( { btn, toggleAllButtonSelector = null, targetDetailsSelector } ) {
@@ -40,11 +40,11 @@ function addToggleAllListener( { btn, toggleAllButtonSelector = null, targetDeta
 
 	const onButtonClick = () => {
 		open = ! open;
-		toggleAllButtons.forEach( toggleAllButton => {
+		toggleAllButtons.forEach( ( toggleAllButton ) => {
 			toggleAllButton.classList.toggle( OPEN_CLASS );
 		} );
 
-		targetDetails.forEach( detail => {
+		targetDetails.forEach( ( detail ) => {
 			if ( open ) {
 				detail.setAttribute( 'open', true );
 			} else {
@@ -80,7 +80,7 @@ wp.domReady( () => {
 			addToggleAllListener( {
 				btn,
 				toggleAllButtonSelector: '.column-details button.error-details-toggle',
-				targetDetailsSelector: '.column-details details'
+				targetDetailsSelector: '.column-details details',
 			} );
 		} );
 
@@ -89,7 +89,7 @@ wp.domReady( () => {
 			addToggleAllListener( {
 				btn,
 				toggleAllButtonSelector: '.column-sources_with_invalid_output button.error-details-toggle',
-				targetDetailsSelector: 'details.source'
+				targetDetailsSelector: 'details.source',
 			} );
 		} );
 

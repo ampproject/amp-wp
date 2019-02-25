@@ -1390,7 +1390,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		$script                = wp_scripts()->registered[ $slug ];
 		$inline_script         = $script->extra['after'][1];
-		$expected_dependencies = array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE );
+		$expected_dependencies = array();
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			$expected_dependencies[] = 'wp-i18n';
 		}

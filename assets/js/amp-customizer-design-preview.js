@@ -1,4 +1,4 @@
-/* global amp_customizer_design, console */
+/* global amp_customizer_design, console, jQuery */
 
 ( function( $ ) {
 	'use strict';
