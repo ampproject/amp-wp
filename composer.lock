@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f880c9c8776a328f2b0fde3cdbadfa67",
+    "content-hash": "dd3f64eacf6ebce4c7df6acdaa8070e0",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -103,22 +103,23 @@
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.1.1",
+            "version": "8.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b"
+                "reference": "cc0af9d69de030bcbb288725b48c2462ed69f3fa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/22311fa3d67217c5fcd0b839670be39a768eda7b",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b",
+                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/cc0af9d69de030bcbb288725b48c2462ed69f3fa",
+                "reference": "cc0af9d69de030bcbb288725b48c2462ed69f3fa",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
             },
             "require-dev": {
+                "codacy/coverage": "^1.4",
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
@@ -143,9 +144,9 @@
                 "stylesheet"
             ],
             "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.1.1"
+                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.2.1"
             },
-            "time": "2018-11-25T04:50:29+00:00"
+            "time": "2019-01-29T18:59:15+00:00"
         },
         {
             "name": "willwashburn/stream",
