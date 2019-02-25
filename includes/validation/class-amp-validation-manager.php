@@ -1982,14 +1982,19 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
+			array(),
 			AMP__VERSION,
 			true
 		);
 
+		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
+		$enabled_status    = $status_and_errors['status'];
+
 		$data = array(
 			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'possibleStati'              => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
+			'defaultStatus'              => $enabled_status,
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {

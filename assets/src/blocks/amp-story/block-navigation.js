@@ -38,7 +38,7 @@ function BlockNavigationList( {
 							>
 								<BlockIcon icon={ blockType.icon } showColors />
 								{ blockType.title }
-								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)' ) }</span> }
+								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)', 'amp' ) }</span> }
 							</Button>
 						</div>
 						{ showNestedBlocks && !! block.innerBlocks && !! block.innerBlocks.length && (
@@ -70,7 +70,7 @@ function BlockNavigation( { rootBlock, rootBlocks, selectedBlockClientId, select
 			role="presentation"
 			className="editor-block-navigation__container"
 		>
-			<p className="editor-block-navigation__label">{ __( 'Block Navigation' ) }</p>
+			<p className="editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
 			{ hasHierarchy && (
 				<BlockNavigationList
 					blocks={ [ rootBlock ] }
@@ -90,7 +90,7 @@ function BlockNavigation( { rootBlock, rootBlocks, selectedBlockClientId, select
 				// If there are no blocks in this document, don't render a list of blocks.
 				// Instead: inform the user no blocks exist yet.
 				<p className="editor-block-navigation__paragraph">
-					{ __( 'No blocks created yet.' ) }
+					{ __( 'No blocks created yet.', 'amp' ) }
 				</p>
 			) }
 		</NavigableMenu>
@@ -105,9 +105,11 @@ export default compose(
 			getBlock,
 			getBlocks,
 		} = select( 'core/editor' );
+
 		const selectedBlockClientId = getSelectedBlockClientId();
+
 		return {
-			rootBlocks: getBlocks(),
+			rootBlocks: getBlocks().filter( ( block ) => block.name === 'amp/amp-story-page' ),
 			rootBlock: selectedBlockClientId ? getBlock( getBlockHierarchyRootClientId( selectedBlockClientId ) ) : null,
 			selectedBlockClientId,
 		};

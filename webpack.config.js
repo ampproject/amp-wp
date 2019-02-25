@@ -68,11 +68,12 @@ const isProduction = process.env.NODE_ENV === 'production';
 module.exports = {
 	mode: isProduction ? 'production' : 'development',
 	entry: {
-		'./assets/js/amp-blocks-compiled': './blocks/index.js',
+		'./assets/js/amp-blocks-compiled': './assets/src/blocks/index.js',
 		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle.js',
 		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle.js',
 		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details.js',
-		'./assets/js/amp-story-blocks-compiled': './blocks/stories.js',
+		'./assets/js/amp-story-editor-blocks-compiled': './assets/src/amp-story-editor-blocks.js',
+		'./assets/js/amp-story-blocks-compiled': './assets/src/blocks/stories.js',
 	},
 	output: {
 		path: path.resolve( __dirname ),
