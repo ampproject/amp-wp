@@ -1,8 +1,0 @@
-{
-  "extends": [
-    "config:base"
-  ],
-  "ignoreDeps": [
-    "sabberworm/php-css-parser"
-  ]
-}
