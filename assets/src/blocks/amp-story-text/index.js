@@ -9,7 +9,7 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import edit from './edit';
-import getTagName from './getTagName';
+import getTagName from './get-tag-name';
 
 export const name = 'amp/amp-story-text';
 
@@ -34,6 +34,9 @@ export const settings = {
 	},
 
 	attributes: {
+		placeholder: {
+			type: 'string',
+		},
 		content: {
 			type: 'string',
 			source: 'html',
@@ -50,6 +53,9 @@ export const settings = {
 		customFontSize: {
 			type: 'number',
 		},
+		ampFontFamily: {
+			type: 'string',
+		},
 	},
 
 	edit,
@@ -58,9 +64,7 @@ export const settings = {
 		const { content, fontSize, customFontSize } = attributes;
 
 		const tagName = getTagName( attributes );
-
 		const fontSizeClass = fontSize && `is-${ fontSize }-text`;
-
 		const className = fontSizeClass ? fontSizeClass : null;
 
 		const styles = {

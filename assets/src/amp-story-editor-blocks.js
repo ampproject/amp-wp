@@ -18,7 +18,7 @@ domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
 } );
 subscribe( () => {
-	setDefaultBlockName( getSelectedBlockClientId() ? 'core/paragraph' : 'amp/amp-story-page' );
+	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
 } );
 
 /**
@@ -71,13 +71,6 @@ const addAMPAttributes = ( settings, name ) => {
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			type: 'string',
-		};
-	}
-
-	// Lets add font family to the text blocks.
-	if ( 'core/paragraph' === name || 'core/heading' === name ) {
-		addedAttributes.ampFontFamily = {
 			type: 'string',
 		};
 	}

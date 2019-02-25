@@ -3,33 +3,24 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl, withFallbackStyles } from '@wordpress/components';
+import { PanelBody, SelectControl } from '@wordpress/components';
 import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wordpress/editor';
 import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import getTagName from './getTagName';
+import getTagName from './get-tag-name';
 import { AMP_STORY_FONTS } from '../../helpers';
-
-const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
-	const { fontSize, customFontSize } = ownProps.attributes;
-
-	return {
-		fallbackFontSize: fontSize || customFontSize || undefined,
-	};
-} );
 
 function TextBlock( {
 	attributes,
 	setAttributes,
 	className,
-	fallbackFontSize,
 	fontSize,
 	setFontSize,
 } ) {
-	const { content, type, ampFontFamily } = attributes;
+	const { placeholder, content, type, ampFontFamily } = attributes;
 	const tagName = getTagName( attributes );
 
 	const fontSizeClass = fontSize.class || undefined;
@@ -48,7 +39,6 @@ function TextBlock( {
 						} }
 					/>
 					<FontSizePicker
-						fallbackFontSize={ fallbackFontSize }
 						value={ fontSize.size }
 						onChange={ setFontSize }
 					/>
@@ -75,7 +65,7 @@ function TextBlock( {
 					fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 				} }
 				className={ `${ className } ${ fontSizeClass }` }
-				placeholder={ __( 'Write text…', 'amp' ) }
+				placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 			/>
 		</Fragment>
 	);
@@ -83,7 +73,6 @@ function TextBlock( {
 
 const TextEdit = compose( [
 	withFontSizes( 'fontSize' ),
-	applyFallbackStyles,
 ] )( TextBlock );
 
 export default TextEdit;
