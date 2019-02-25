@@ -7,8 +7,6 @@ import { PanelBody, SelectControl, withFallbackStyles } from '@wordpress/compone
 import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wordpress/editor';
 import { compose } from '@wordpress/compose';
 
-const { getComputedStyle } = window;
-
 /**
  * Internal dependencies
  */
@@ -17,12 +15,9 @@ import { AMP_STORY_FONTS } from '../../helpers';
 
 const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 	const { fontSize, customFontSize } = ownProps.attributes;
-	const editableNode = node.querySelector( '[contenteditable="true"]' );
-	//verify if editableNode is available, before using getComputedStyle.
-	const computedStyles = editableNode ? getComputedStyle( editableNode ) : null;
 
 	return {
-		fallbackFontSize: fontSize || customFontSize || ! computedStyles ? undefined : parseInt( computedStyles.fontSize ) || undefined,
+		fallbackFontSize: fontSize || customFontSize || undefined,
 	};
 } );
 
