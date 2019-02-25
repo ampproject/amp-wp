@@ -11,14 +11,18 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS } from '../helpers';
-import { AnimationControls, withParentBlock } from './';
+import { withParentBlock } from './';
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return withParentBlock( ( props ) => {
-			const { attributes, setAttributes, name, parentBlock } = props;
+			const { attributes, name, parentBlock } = props;
 
 			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
+				return <BlockEdit { ...props } />;
+			}
+
+			if ( 'core/image' !== name ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -29,12 +33,9 @@ export default createHigherOrderComponent(
 					<BlockEdit { ...props } />
 					<InspectorControls>
 						<PanelBody
-							title={ __( 'AMP Story Settings', 'amp' ) }
+							title={ __( 'Story Settings', 'amp' ) }
 						>
-							<AnimationControls
-								setAttributes={ setAttributes }
-								attributes={ attributes }
-							/>
+
 							{
 								( 'core/image' === name ) && (
 									<ToggleControl
@@ -59,5 +60,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'filterBlocksEdit'
+	'withAmpStorySettings'
 );
