@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0d66be8b7dd9e2aba1a7239a468b5643",
+    "content-hash": "fb4a5f333a175b102d33e31b5d6922ac",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -205,22 +205,6 @@
         }
     ],
     "packages-dev": [
-        {
-            "name": "ampproject/amphtml",
-            "version": "1902081532110",
-            "source": {
-                "type": "git",
-                "url": "git@github.com:ampproject/amphtml.git",
-                "reference": "tags/1902081532110"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://github.com/ampproject/amphtml/archive/1902081532110.zip",
-                "reference": null,
-                "shasum": null
-            },
-            "type": "library"
-        },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
             "version": "v0.5.0",
