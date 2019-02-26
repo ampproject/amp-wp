@@ -13,8 +13,8 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 816;
-	private static $minimum_validator_revision_required = 370;
+	private static $spec_file_revision = 822;
+	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
 		'amp-story-bookend-allowed-descendants' => array(
@@ -2892,6 +2892,11 @@ class AMP_Allowed_Tags_Generated {
 							'protocol' => array(
 								'https',
 							),
+						),
+					),
+					'dock' => array(
+						'requires_extension' => array(
+							'amp-video-docking',
 						),
 					),
 					'media' => array(),
@@ -15610,6 +15615,7 @@ class AMP_Allowed_Tags_Generated {
 		'aria-valuemin' => array(),
 		'aria-valuenow' => array(),
 		'aria-valuetext' => array(),
+		'autoscroll' => array(),
 		'class' => array(
 			'blacklisted_value_regex' => '(^|\\W)i-amphtml-',
 		),

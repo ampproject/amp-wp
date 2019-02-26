@@ -698,6 +698,56 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-sidebar' ),
 			),
 
+			'amp_story_with_amp_sidebar' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+						<amp-story standalone title="Stories in AMP - Hello World" publisher="AMP Project" publisher-logo-src="https://ampbyexample.com/favicons/coast-228x228.png" poster-portrait-src="https://ampbyexample.com/img/story_dog2_portrait.jpg">
+							<amp-sidebar id="sidebar1" layout="nodisplay">
+								<ul>
+									<li><a href="https://www.ampproject.org"> External Link </a></li>
+									<li>Nav item 2</li>
+									<li>Nav item 3</li>
+								</ul>
+							</amp-sidebar>
+							<amp-story-page id="cover">
+								<amp-story-grid-layer template="fill">
+									<h1>Hello World</h1>
+									<p>This is the cover page of this story.</p>
+								</amp-story-grid-layer>
+							</amp-story-page>
+						</amp-story>
+					'
+				),
+				null,
+				array( 'amp-sidebar', 'amp-story' ),
+			),
+
+			'amp_sidebar_with_autoscroll' => array(
+				str_replace(
+					array( "\n", "\t" ),
+					'',
+					'
+						<amp-sidebar id="sidebar1" layout="nodisplay" side="right">
+							<nav toolbar="(max-width: 767px)" toolbar-target="target-element">
+								<ul>
+									<li>Nav item 1</li>
+									<li>Nav item 2</li>
+									<li>Nav item 3</li>
+									<li autoscroll class="currentPage">Nav item 4</li>
+									<li>Nav item 5</li>
+									<li>Nav item 6</li>
+								</ul>
+							</nav>
+						</amp-sidebar>
+						<div id="target-element"></div>
+					'
+				),
+				null,
+				array( 'amp-sidebar' ),
+			),
+
 			'remove_node_without_mandatory_ancestor' => array(
 				'<div>All I have is this div, when all you want is a noscript tag.<audio>Sweet tunes</audio></div>',
 				'<div>All I have is this div, when all you want is a noscript tag.</div>',

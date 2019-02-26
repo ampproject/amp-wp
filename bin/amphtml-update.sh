@@ -56,3 +56,9 @@ python "$BIN_PATH/amphtml-update.py" "$AMPHTML_LOCATION" > "$PROJECT_PATH/includ
 if [[ $CLEANUP == 1 ]]; then
 	rm -r "$AMPHTML_LOCATION"
 fi
+
+if [[ ! -z "$AMPHTML_VERSION" ]]; then
+	echo ""
+	echo "Please review the diff before committing:"
+	echo "Update allowed tags/attributes from spec in amphtml $AMPHTML_VERSION"
+fi
