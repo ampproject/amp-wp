@@ -65,7 +65,7 @@ export const settings = {
 
 		const tagName = getTagName( attributes );
 		const fontSizeClass = fontSize && `is-${ fontSize }-text`;
-		const className = fontSizeClass ? fontSizeClass : null;
+		const className = fontSizeClass ? fontSizeClass : undefined;
 
 		const styles = {
 			fontSize: fontSizeClass ? undefined : customFontSize,
@@ -75,7 +75,7 @@ export const settings = {
 			<RichText.Content
 				tagName={ tagName }
 				style={ styles }
-				className={ className ? className : undefined }
+				className={ className }
 				value={ content }
 			/>
 		);
