@@ -91,15 +91,13 @@ This will create an `amp.zip` in the plugin directory which you can install. The
 
 The file `class-amp-allowed-tags-generated.php` has the AMP specification's allowed tags and attributes. It's used in sanitization.
 
-To update that file, perform the following steps (which need to be improved):
+To update that file, perform the following steps:
 
 1. `cd` to the root of this plugin
-2. Find the most recent stable release of AMP at https://github.com/ampproject/amphtml/releases (e.g. 1902081532110)
-3. Update `composer.json` replacing the old tag references for `ampproject/amphtml` to the latest version.
-4. Run `rm composer.lock && composer install`.
-5. Run `bash bin/amphtml-update.sh` (or `lando ssh -c 'bash bin/amphtml-update.sh'` if using Lando)
-6. Update tests based on changes to the spec.
-7. Commit changes.
+2. Run `./bin/amphtml-update.sh` (or `lando ssh -c './bin/amphtml-update.sh'` if using Lando).
+3. Review the diff.
+4. Update tests based on changes to the spec.
+5. Commit changes.
 
 This script is intended for a Linux environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV) or [Lando wordpressdev](https://github.com/felixarntz/wordpressdev).
 

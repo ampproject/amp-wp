@@ -704,7 +704,11 @@ def Main( validator_directory, out_dir ):
 	GeneratePHP(out_dir)
 
 if __name__ == '__main__':
-	project_repo_absolute_path = os.path.realpath( os.path.join( os.path.dirname( __file__ ), '..' ) )
-	validator_directory = os.path.join( project_repo_absolute_path, 'vendor/ampproject/amphtml/validator' )
+	if len( sys.argv ) == 0:
+		Die( "Error: Must supply amphtml directory as first argument" )
+	validator_directory = os.path.join( sys.argv[1], 'validator' )
+	if not os.path.exists( validator_directory ):
+		Die( "Error: The amphtml directory does not exist: %s" % validator_directory )
+	validator_directory = os.path.realpath( validator_directory )
 	out_dir = os.path.join( tempfile.gettempdir(), 'amp_wp' )
 	Main( validator_directory, out_dir )
