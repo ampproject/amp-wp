@@ -70,7 +70,7 @@ export const settings = {
 								<amp-img layout="fill" src={ mediaUrl } />
 							) }
 							{ VIDEO_BACKGROUND_TYPE === mediaType && (
-								<amp-video layout="fill" src={ mediaUrl } poster="background.png" muted autoplay />
+								<amp-video layout="fill" src={ mediaUrl } poster="background.png" muted autoplay loop />
 							) }
 						</amp-story-grid-layer>
 					)

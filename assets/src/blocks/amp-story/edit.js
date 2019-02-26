@@ -23,7 +23,7 @@ import {
 	BaseControl,
 	FocalPointPicker,
 } from '@wordpress/components';
-import { select } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -32,16 +32,11 @@ import BlockNavigation from './block-navigation';
 import { ALLOWED_BLOCKS } from '../../helpers';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from './constants';
 
-const {
-	hasSelectedInnerBlock,
-	getSelectedBlockClientId,
-} = select( 'core/editor' );
-
 const TEMPLATE = [
 	[ 'core/paragraph' ],
 ];
 
-export default class EditPage extends Component {
+class EditPage extends Component {
 	constructor( props ) {
 		// Call parent constructor.
 		super( props );
@@ -55,7 +50,7 @@ export default class EditPage extends Component {
 
 	maybeAddBlockNavigation() {
 		// If no blocks are selected or if it's the current page, change the view.
-		if ( ! getSelectedBlockClientId() || this.props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( this.props.clientId, true ) ) {
+		if ( this.props.showBlockNavigation ) {
 			const editLayout = document.getElementsByClassName( 'edit-post-layout' );
 			if ( editLayout.length ) {
 				const blockNav = document.getElementById( 'amp-root-navigation' );
@@ -119,7 +114,7 @@ export default class EditPage extends Component {
 
 	render() {
 		const props = this.props;
-		const { attributes } = props;
+		const { attributes, media } = props;
 
 		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint } = attributes;
 
@@ -185,10 +180,36 @@ export default class EditPage extends Component {
 						</Fragment>
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style }>
+				<div key="contents" style={ style } className={ 'editor-amp-story-page-wrap' }>
+					{ /* todo: show poster image as background-image instead */ }
+					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+						<video autoPlay muted loop className={ 'editor-amp-story-page-video' }>
+							<source src={ mediaUrl } type={ media.mime_type } />
+						</video>
+					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
 			</Fragment>
 		);
 	}
 }
+
+export default withSelect( ( select, props ) => {
+	const { mediaId } = props.attributes;
+	const { getMedia } = select( 'core' );
+	const {
+		hasSelectedInnerBlock,
+		getSelectedBlockClientId,
+	} = select( 'core/editor' );
+
+	let showBlockNavigation = false;
+
+	if ( ! getSelectedBlockClientId() || props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( props.clientId, true ) ) {
+		showBlockNavigation = true;
+	}
+
+	return {
+		media: mediaId ? getMedia( mediaId ) : null,
+		showBlockNavigation,
+	};
+} )( EditPage );

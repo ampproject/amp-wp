@@ -451,6 +451,20 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin-top: 1em;
 }
 
+.editor-amp-story-page-wrap {
+	position: relative;
+}
+
+.editor-amp-story-page-video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	min-width: 100%;
+	min-height: 100%;
+}
+
 /*
  * 100. Shame
  */
