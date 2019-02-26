@@ -16,10 +16,13 @@ import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../help
  *
  * @param {Function} setAttributes Set Attributes.
  * @param {Object} attributes Props.
+ * @param {Array} animatedBlocks List of animated blocks on the same page.
  * @return {Component} Controls.
  */
 function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
-	const placeHolder = ANIMATION_DURATION_DEFAULTS[ attributes.ampAnimationType ] || 0;
+	const { ampAnimationType, ampAnimationDuration, ampAnimationDelay, ampAnimationAfter } = attributes;
+
+	const placeHolder = ANIMATION_DURATION_DEFAULTS[ ampAnimationType ] || 0;
 
 	const animationAfterOptions = [
 		{
@@ -31,9 +34,13 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 	animatedBlocks.map( ( block ) => {
 		let label;
 
+		// Todo: Cover more special cases if needed.
 		switch ( block.name ) {
+			case 'core/image':
+				label = sprintf( __( '%1$s (%2$s)', 'amp' ), block.attributes.url.lastIndexOf( '/' ).slice( 0, 20 ), block.clientId );
+				break;
 			case 'core/paragraph':
-				const content = block.originalContent.replace( /<[^<>]+>/g, ' ' ).slice( 0, 20 );
+				const content = block.originalContent ? block.originalContent.replace( /<[^<>]+>/g, ' ' ).slice( 0, 20 ) : '';
 
 				label = content.length > 0 ? sprintf( __( '%1$s (%2$s)', 'amp' ), content, block.type.title ) : block.type.title;
 				break;
@@ -43,8 +50,7 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 
 		animationAfterOptions.push(
 			{
-				// @todo: Make sure ID attribute always exists.
-				value: block.attributes.id || block.clientId,
+				value: block.attributes.anchor,
 				label,
 			}
 		);
@@ -55,40 +61,45 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 			<SelectControl
 				key="animation"
 				label={ __( 'Animation Type', 'amp' ) }
-				value={ attributes.ampAnimationType }
+				value={ ampAnimationType }
 				options={ AMP_ANIMATION_TYPE_OPTIONS }
 				onChange={ ( value ) => ( setAttributes( { ampAnimationType: value } ) ) }
 			/>
-			<RangeControl
-				key="duration"
-				label={ __( 'Duration (ms)', 'amp' ) }
-				value={ attributes.ampAnimationDuration ? parseInt( attributes.ampAnimationDuration ) : '' }
-				onChange={ ( value ) => {
-					value = value + 'ms';
-					setAttributes( { ampAnimationDuration: value } );
-				} }
-				min="0"
-				max="5000"
-				placeholder={ placeHolder }
-				initialPosition={ placeHolder }
-			/>
-			<RangeControl
-				key="delay"
-				label={ __( 'Delay (ms)', 'amp' ) }
-				value={ attributes.ampAnimationDelay ? parseInt( attributes.ampAnimationDelay ) : '' }
-				onChange={ ( value ) => {
-					value = value + 'ms';
-					setAttributes( { ampAnimationDelay: value } );
-				} }
-				min="0"
-				max="5000"
-			/>
-			<SelectControl
-				key="order"
-				label={ __( 'Begin after', 'amp' ) }
-				value={ attributes.ampAnimationAfter }
-				options={ animationAfterOptions }
-			/>
+			{ ampAnimationType && (
+				<Fragment>
+					<RangeControl
+						key="duration"
+						label={ __( 'Duration (ms)', 'amp' ) }
+						value={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
+						onChange={ ( value ) => {
+							value = value + 'ms';
+							setAttributes( { ampAnimationDuration: value } );
+						} }
+						min="0"
+						max="5000"
+						placeholder={ placeHolder }
+						initialPosition={ placeHolder }
+					/>
+					<RangeControl
+						key="delay"
+						label={ __( 'Delay (ms)', 'amp' ) }
+						value={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+						onChange={ ( value ) => {
+							value = value + 'ms';
+							setAttributes( { ampAnimationDelay: value } );
+						} }
+						min="0"
+						max="5000"
+					/>
+					<SelectControl
+						key="order"
+						label={ __( 'Begin after', 'amp' ) }
+						value={ ampAnimationAfter }
+						options={ animationAfterOptions }
+						onChange={ ( value ) => setAttributes( { ampAnimationAfter: value } ) }
+					/>
+				</Fragment>
+			) }
 		</Fragment>
 	);
 }
@@ -107,14 +118,14 @@ export default withSelect( ( select ) => {
 	const rootClientId = getBlockRootClientId( clientId );
 	const order = getBlockOrder( rootClientId );
 
-	const animatedBlocks = getBlocksByClientId( order ).filter( ( block ) => {
-		return ( block.clientId !== clientId && block.attributes.ampAnimationType );
-	} ).map( ( block ) => {
-		return {
-			...block,
-			type: getBlockType( block.name ),
-		};
-	} );
+	const animatedBlocks = getBlocksByClientId( order )
+		.filter( ( block ) => ( block.clientId !== clientId && block.attributes.ampAnimationType ) )
+		.map( ( block ) => {
+			return {
+				...block,
+				type: getBlockType( block.name ),
+			};
+		} );
 
 	return {
 		animatedBlocks,

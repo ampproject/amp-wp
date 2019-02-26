@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import uuid from 'uuid/v4';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
@@ -29,11 +34,23 @@ subscribe( () => {
  * @return {Object} Settings.
  */
 const addAMPAttributes = ( settings, name ) => {
-	if ( -1 === ALLOWED_BLOCKS.indexOf( name ) ) {
+	const addedAttributes = {
+		anchor: {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: '*',
+		},
+	};
+
+	if ( ! ALLOWED_BLOCKS.includes( name ) ) {
+		settings.attributes = {
+			...settings.attributes,
+			...addedAttributes,
+		};
+
 		return settings;
 	}
-
-	const addedAttributes = {};
 
 	// Define selector according to mappings.
 	if ( BLOCK_TAG_MAPPING[ name ] ) {
@@ -89,6 +106,10 @@ const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	// Disable anchor support as we auto-generate IDs.
+	settings.supports = settings.supports || {};
+	settings.supports.anchor = false;
+
 	settings.attributes = settings.attributes || {};
 	settings.attributes = {
 		...settings.attributes,
@@ -109,9 +130,12 @@ const addAMPAttributes = ( settings, name ) => {
 const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const ampAttributes = {};
 
-	if ( -1 === ALLOWED_BLOCKS.indexOf( blockType.name ) ) {
+	if ( ! ALLOWED_BLOCKS.includes( blockType.name ) ) {
 		return props;
 	}
+
+	// Always add anchor ID regardless of block support. Needed for animations.
+	props.id = attributes.anchor || uuid();
 
 	if ( attributes.ampAnimationType ) {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
@@ -147,7 +171,7 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
  */
 const setBlockParent = ( props ) => {
 	const { name } = props;
-	if ( -1 !== ALLOWED_BLOCKS.indexOf( name ) ) {
+	if ( ! ALLOWED_BLOCKS.includes( name ) ) {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,

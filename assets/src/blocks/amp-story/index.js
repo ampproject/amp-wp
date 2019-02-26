@@ -44,7 +44,7 @@ export const settings = {
 
 	save( { attributes } ) {
 		return (
-			<amp-story-page style={ { backgroundColor: attributes.backgroundColor } } id={ attributes.id }>
+			<amp-story-page style={ { backgroundColor: attributes.backgroundColor } } id={ attributes.anchor }>
 				{ /* @todo Add fill layer for image/video */ }
 				<amp-story-grid-layer template="vertical">
 					<InnerBlocks.Content />
