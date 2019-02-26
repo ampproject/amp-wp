@@ -162,16 +162,17 @@ Contributors who want to make a new release, follow these steps:
 
 0. Do `npm install && composer selfupdate && composer install`.
 1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
-2. Add changelog entry to readme.
 3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 4. Do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
 5. Draft blog post about the new release.
-6. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title. Attaching the `amp.zip` build to the release. Include link to changelog in release tag.
+6. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title.
+    1. Attach the `amp.zip` build to the release.
+    2. Add changelog entry to the release.
 7. Run `npm run deploy` to commit the plugin to WordPress.org.
 8. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 9. Publish GitHub release.
 10. Create built release tag: `git fetch --tags && git checkout $(git tag | tail -n1) && ./bin/tag-built.sh` (then add link from release)
-11. Create a new branch off of the release branch (e.g. `update/develop-with-1.0.x`), merge `develop` into it and resolve conflicts (e.g. with version and changelog), and then open pull request to merge changes into `develop`.
+11. Create a new branch off of the release branch (e.g. `update/develop-with-1.0.x`), merge `develop` into it and resolve conflicts (e.g. with version), and then open pull request to merge changes into `develop`.
 12. Merge release tag into `master`.
 13. Publish release blog post, including link to GitHub release.
 14. Close the GitHub milestone and project.

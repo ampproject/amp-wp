@@ -357,10 +357,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
-			'unamerican_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
+			'unamerican_lang_attribute_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
 				'<html amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
 				array(
 					'html[lang=en-US]{color:red}html[lang="en-US"]{color:white}html[lang^=en]{color:blue}',
+				),
+				array(),
+			),
+			'unamerican_lang_selector_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
+				'
+					<html amp><head><meta charset="utf-8">
+					<style>
+						html:lang(en-US) { color:red; }
+						body span:lang(en-US) { color:red; }
+						html:lang(en) {color:white; }
+						.test:lang(en-us, en-CA) {color:white; }
+						html span.test:lang(en-US) { color: blue;}
+						html:lang("en-US") span.test { color: blue;}
+						html:lang(en-CA) {color:red; }
+						html:lang(ar) { color:green; }
+						html:lang(es-MX) { color:green; }
+						</style>
+					</head><body><span class="test">Test</span></body></html>
+				',
+				array(
+					'html:lang(en-US){color:red}body span:lang(en-US){color:red}html:lang(en){color:white}.test:lang(en-us, en-CA){color:white}html span.test:lang(en-US){color:blue}html:lang("en-US") span.test{color:blue}',
 				),
 				array(),
 			),

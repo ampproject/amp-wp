@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1e3ee1c47cacf03fbca80271eee967de",
+    "content-hash": "0d66be8b7dd9e2aba1a7239a468b5643",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -52,16 +52,16 @@
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.2.0",
+            "version": "v1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "05af344dda4406476f50fae59fbb880ef68d2020"
+                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/05af344dda4406476f50fae59fbb880ef68d2020",
-                "reference": "05af344dda4406476f50fae59fbb880ef68d2020",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/e267dcb6d273075b85cef34258fc8c34d2f7deff",
+                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff",
                 "shasum": ""
             },
             "require": {
@@ -104,34 +104,41 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2018-03-07T06:46:48+00:00"
+            "time": "2019-02-18T21:02:17+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "8.1.1",
+            "version": "8.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/xwp/PHP-CSS-Parser.git",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b"
+                "url": "https://github.com/sabberworm/PHP-CSS-Parser.git",
+                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/PHP-CSS-Parser/zipball/22311fa3d67217c5fcd0b839670be39a768eda7b",
-                "reference": "22311fa3d67217c5fcd0b839670be39a768eda7b",
+                "url": "https://api.github.com/repos/sabberworm/PHP-CSS-Parser/zipball/91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
+                "reference": "91bcc3e3fdb7386c9a2e0e0aa09ca75cc43f121f",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2"
             },
             "require-dev": {
+                "codacy/coverage": "^1.4",
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -147,10 +154,7 @@
                 "parser",
                 "stylesheet"
             ],
-            "support": {
-                "source": "https://github.com/xwp/PHP-CSS-Parser/tree/8.1.1"
-            },
-            "time": "2018-11-25T04:50:29+00:00"
+            "time": "2019-02-22T07:42:52+00:00"
         },
         {
             "name": "willwashburn/stream",
