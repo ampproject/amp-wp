@@ -356,10 +356,6 @@ def ParseRules(out_dir):
 				if tag_spec.HasField('deprecation'):
 					continue
 
-				# Ignore transformed AMP for now.
-				if '(transformed)' in tag_spec.spec_name:
-					continue
-
 				# Handle the special $REFERENCE_POINT tag
 				if '$REFERENCE_POINT' == tag_spec.tag_name:
 					reference_points[ tag_spec.spec_name ] = GetTagSpec(tag_spec, attr_lists)
@@ -497,6 +493,10 @@ def GetTagRules(tag_spec):
 		if not has_amp_format:
 			return None
 
+	# Ignore transformed AMP for now.
+	if tag_spec.enabled_by and 'transformed' in tag_spec.enabled_by:
+		return None
+
 	if tag_spec.HasField('extension_spec'):
 		extension_spec = {}
 		for field in tag_spec.extension_spec.ListFields():
@@ -569,8 +569,9 @@ def GetAttrs(attrs):
 
 		value_dict = GetValues(attr_spec)
 
-		# Add attribute name and alternative_names
-		attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
+		if value_dict is not None:
+			# Add attribute name and alternative_names
+			attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
 
 	logging.info('... done')
 	return attr_dict
@@ -580,6 +581,10 @@ def GetValues(attr_spec):
 	logging.info('entering ...')
 
 	value_dict = {}
+
+	# Ignore transformed AMP for now.
+	if 'transformed' in attr_spec.enabled_by:
+		return None
 
 	# Add alternative names
 	if attr_spec.alternative_names:
