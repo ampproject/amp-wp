@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
