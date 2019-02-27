@@ -71,8 +71,4 @@ function TextBlock( {
 	);
 }
 
-const TextEdit = compose( [
-	withFontSizes( 'fontSize' ),
-] )( TextBlock );
-
-export default TextEdit;
+export default withFontSizes( 'fontSize' )( TextBlock );
