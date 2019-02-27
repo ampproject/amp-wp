@@ -17,14 +17,15 @@ BIN_PATH="$(dirname "$0")"
 PROJECT_PATH=$(dirname $BIN_PATH)
 AMPHTML_LOCATION="$1"
 
-if ! command -v apt-get >/dev/null 2>&1; then
-	echo "The AMP HTML uses apt-get, make sure to run this script in a Linux environment"
+if ! command -v python >/dev/null 2>&1 || ! python -c "import google.protobuf" 2>/dev/null; then
+	echo "Error: The google.protobuf Python module is not installed."
+	echo
+	echo "On Linux, you can install the required dependencies via:"
+	echo "# apt-get install python protobuf-compiler python-protobuf"
+	echo
+	echo "On MacOS, Python is already installed but you may install via:"
+	echo "$ pip install --upgrade protobuf"
 	exit 1
-fi
-
-# Install dependencies.
-if ! dpkg -s python >/dev/null 2>&1 || ! dpkg -s protobuf-compiler >/dev/null 2>&1 || ! dpkg -s python-protobuf >/dev/null 2>&1; then
-	sudo apt-get install python protobuf-compiler python-protobuf
 fi
 
 if [[ -z "$AMPHTML_LOCATION" ]]; then
