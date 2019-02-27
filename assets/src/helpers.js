@@ -45,7 +45,7 @@ export const BLOCK_TAG_MAPPING = {
 	'core/code': 'pre',
 	'core/embed': 'figure',
 	'core/image': '.wp-block-image',
-	'core/paragraph': 'p',
+	'amp/amp-story-text': 'p,h1,h2',
 	'core/preformatted': 'pre',
 	'core/pullquote': 'blockquote',
 	'core/quote': 'blockquote',
