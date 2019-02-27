@@ -205,8 +205,7 @@ const addWrapperProps = ( BlockListBlock ) => {
 			} );
 		}
 
-		const newProps = Object.assign( {}, props, { wrapperProps: wrapperProps } );
-		return <BlockListBlock { ...newProps } />;
+		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 	} );
 };
 
