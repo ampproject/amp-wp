@@ -9,21 +9,65 @@ import uuid from 'uuid/v4';
 import { addFilter } from '@wordpress/hooks';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
-import { setDefaultBlockName } from '@wordpress/blocks';
-import { select, subscribe } from '@wordpress/data';
-const { getSelectedBlockClientId } = select( 'core/editor' );
+import { getDefaultBlockName, setDefaultBlockName } from '@wordpress/blocks';
+import { select, subscribe, dispatch } from '@wordpress/data';
+
 /**
  * Internal dependencies
  */
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerblock, withAmpStorySettings } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
+import './stores/amp-story';
 
-// Ensure that the default block is page when no block is selected.
+const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId, getBlock } = select( 'core/editor' );
+const { updateBlockAttributes } = dispatch( 'core/editor' );
+const { getAnimationPredecessor } = select( 'amp/story' );
+const { addAnimation } = dispatch( 'amp/story' );
+
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
+
+	// Set initial animation order state.
+	getBlocksByClientId( getBlockOrder() )
+		.filter( ( block ) => block.name === 'amp/amp-story-page' )
+		.map( ( page ) => {
+			const blocks = getBlocksByClientId( getBlockOrder( page.clientId ) );
+
+			blocks.filter( ( block ) => block.attributes.ampAnimationType )
+				.map( ( block ) => {
+					const ampAnimationAfter = block.attributes.ampAnimationAfter;
+					const predecessor = blocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+
+					addAnimation( page.clientId, block.clientId, predecessor ? predecessor.clientId : undefined );
+				} );
+		} );
 } );
+
 subscribe( () => {
-	setDefaultBlockName( getSelectedBlockClientId() ? 'core/paragraph' : 'amp/amp-story-page' );
+	const defaultBlockName = getDefaultBlockName();
+	const selectedBlockClientId = getSelectedBlockClientId();
+
+	// Ensure that the default block is page when no block is selected.
+	if ( selectedBlockClientId && 'core/paragraph' !== defaultBlockName ) {
+		setDefaultBlockName( 'core/paragraph' );
+	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
+		setDefaultBlockName( 'amp/amp-story-page' );
+	}
+
+	// Keep animation order in order.
+	// Todo: First check if animation order has actually changed.
+	getBlocksByClientId( getBlockOrder() )
+		.filter( ( block ) => block.name === 'amp/amp-story-page' )
+		.map( ( page ) => {
+			const blocks = getBlocksByClientId( getBlockOrder( page.clientId ) );
+
+			blocks.map( ( block ) => {
+				const predecessor = getAnimationPredecessor( page.clientId, block.clientId );
+				const predecessorBlock = predecessor ? getBlock( predecessor ) : undefined;
+
+				updateBlockAttributes( block.clientId, { ampAnimationAfter: predecessorBlock ? predecessorBlock.attributes.anchor : undefined } );
+			} );
+		} );
 } );
 
 /**
