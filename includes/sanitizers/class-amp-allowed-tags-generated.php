@@ -14588,6 +14588,11 @@ class AMP_Allowed_Tags_Generated {
 					'[spellcheck]' => array(),
 					'[wrap]' => array(),
 					'autocomplete' => array(),
+					'autoexpand' => array(
+						'requires_extension' => array(
+							'amp-form',
+						),
+					),
 					'autofocus' => array(),
 					'cols' => array(),
 					'disabled' => array(),

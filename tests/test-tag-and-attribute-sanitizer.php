@@ -1143,6 +1143,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-form', 'amp-inputmask', 'amp-mustache' ),
 			),
 
+			'amp_textarea_without_autoexpand' => array(
+				'<textarea name="without-autoexpand"></textarea>',
+				null,
+				array(),
+			),
+
+			'amp_textarea_with_autoexpand' => array(
+				'<textarea name="with-autoexpand" autoexpand></textarea>',
+				null,
+				array( 'amp-form' ),
+			),
+
 			'amp-viqeo-player' => array(
 				'<amp-viqeo-player data-profileid="184" data-videoid="b51b70cdbb06248f4438" width="640" height="360" layout="responsive"></amp-viqeo-player>',
 				null,
