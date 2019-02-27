@@ -3,7 +3,8 @@
  */
 import { RangeControl, SelectControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
+import { withSelect, withDispatch } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -15,11 +16,13 @@ import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../help
  * Animation controls for AMP Story layout blocks'.
  *
  * @param {Function} setAttributes Set Attributes.
+ * @param {Function} onAnimationOrderChange Animation order change callback
+ * @param {Function} onAnimationTypeChange Animation type change callback
  * @param {Object} attributes Props.
- * @param {Array} animatedBlocks List of animated blocks on the same page.
+ * @param {Function} getAnimatedBlocks Function to retrieve list of animated blocks on the same page.
  * @return {Component} Controls.
  */
-function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
+function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAnimationOrderChange, onAnimationTypeChange } ) {
 	const { ampAnimationType, ampAnimationDuration, ampAnimationDelay, ampAnimationAfter } = attributes;
 
 	const placeHolder = ANIMATION_DURATION_DEFAULTS[ ampAnimationType ] || 0;
@@ -31,7 +34,7 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 		},
 	];
 
-	animatedBlocks.map( ( block ) => {
+	getAnimatedBlocks().map( ( block ) => {
 		let label;
 
 		// Todo: Cover more special cases if needed.
@@ -50,7 +53,7 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 
 		animationAfterOptions.push(
 			{
-				value: block.attributes.anchor,
+				value: block.clientId,
 				label,
 			}
 		);
@@ -63,7 +66,10 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 				label={ __( 'Animation Type', 'amp' ) }
 				value={ ampAnimationType }
 				options={ AMP_ANIMATION_TYPE_OPTIONS }
-				onChange={ ( value ) => ( setAttributes( { ampAnimationType: value } ) ) }
+				onChange={ ( value ) => {
+					onAnimationTypeChange( value, ampAnimationAfter );
+					setAttributes( { ampAnimationType: value } );
+				} }
 			/>
 			{ ampAnimationType && (
 				<Fragment>
@@ -96,7 +102,9 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 						label={ __( 'Begin after', 'amp' ) }
 						value={ ampAnimationAfter }
 						options={ animationAfterOptions }
-						onChange={ ( value ) => setAttributes( { ampAnimationAfter: value } ) }
+						onChange={ ( value ) => {
+							onAnimationOrderChange( value );
+						} }
 					/>
 				</Fragment>
 			) }
@@ -104,7 +112,7 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 	);
 }
 
-export default withSelect( ( select ) => {
+const applyWithSelect = withSelect( ( select ) => {
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
@@ -112,22 +120,55 @@ export default withSelect( ( select ) => {
 		getBlocksByClientId,
 	} = select( 'core/editor' );
 
-	const { getBlockType } = select( 'core/blocks' );
+	return {
+		getAnimatedBlocks() {
+			const { getBlockType } = select( 'core/blocks' );
 
-	const clientId = getSelectedBlockClientId();
-	const rootClientId = getBlockRootClientId( clientId );
-	const order = getBlockOrder( rootClientId );
+			const clientId = getSelectedBlockClientId();
+			const rootClientId = getBlockRootClientId( clientId );
+			const order = getBlockOrder( rootClientId );
 
-	const animatedBlocks = getBlocksByClientId( order )
-		.filter( ( block ) => ( block.clientId !== clientId && block.attributes.ampAnimationType ) )
-		.map( ( block ) => {
-			return {
-				...block,
-				type: getBlockType( block.name ),
-			};
-		} );
+			return getBlocksByClientId( order )
+				.filter( ( block ) => ( block.clientId !== clientId && block.attributes.ampAnimationType ) )
+				.map( ( block ) => {
+					return {
+						...block,
+						type: getBlockType( block.name ),
+					};
+				} );
+		},
+	};
+} );
+
+const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
+	const {
+		getSelectedBlockClientId,
+		getBlockRootClientId,
+	} = select( 'core/editor' );
+
+	const item = getSelectedBlockClientId();
+	const page = getBlockRootClientId( item );
+
+	const {
+		addAnimation,
+		removeAnimation,
+	} = dispatch( 'amp/story' );
 
 	return {
-		animatedBlocks,
+		onAnimationTypeChange( type, predecessor ) {
+			if ( ! type ) {
+				removeAnimation( page, item );
+			} else {
+				addAnimation( page, item, predecessor );
+			}
+		},
+		onAnimationOrderChange( predecessor ) {
+			addAnimation( page, item, predecessor );
+		},
 	};
-} )( AnimationControls );
+} );
+
+export default compose(
+	applyWithSelect,
+	applyWithDispatch,
+)( AnimationControls );
