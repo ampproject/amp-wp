@@ -6,18 +6,32 @@ import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
-const { getSelectedBlockClientId } = select( 'core/editor' );
 
 /**
  * Internal dependencies
  */
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { maybeEnqueueFontStyle } from './helpers';
+
+const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
 
 // Ensure that the default block is page when no block is selected.
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
+
+	// Load all needed fonts.
+	getBlocksByClientId( getBlockOrder() )
+		.filter( ( block ) => block.name === 'amp/amp-story-page' )
+		.map( ( page ) => {
+			getBlocksByClientId( getBlockOrder( page.clientId ) )
+				.filter( ( block ) => block.attributes.ampFontFamily )
+				.map( ( block ) => {
+					maybeEnqueueFontStyle( block.attributes.ampFontFamily );
+				} );
+		} );
 } );
+
 subscribe( () => {
 	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
 } );
