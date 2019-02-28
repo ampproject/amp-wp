@@ -2,15 +2,16 @@
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
 const { getSelectedBlockClientId } = select( 'core/editor' );
+
 /**
  * Internal dependencies
  */
-import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
+import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 
 // Ensure that the default block is page when no block is selected.
@@ -162,8 +163,7 @@ const setBlockParent = ( props ) => {
 const wrapperWithSelect = compose(
 	withAttributes,
 	withBlockName,
-	withHasSelectedInnerblock,
-	withParentBlock
+	withHasSelectedInnerblock
 );
 
 /**
@@ -172,35 +172,42 @@ const wrapperWithSelect = compose(
  * @param {Object} BlockListBlock BlockListBlock element.
  * @return {Function} Handler.
  */
-const addWrapperProps = createHigherOrderComponent(
-	( BlockListBlock ) => {
-		return wrapperWithSelect( ( props ) => {
-			const { blockName, hasSelectedInnerBlock, attributes } = props;
+const addWrapperProps = ( BlockListBlock ) => {
+	return wrapperWithSelect( ( props ) => {
+		const { blockName, hasSelectedInnerBlock, attributes } = props;
 
-			// If we have an inner block selected let's add 'data-amp-selected=parent' to the wrapper.
-			if (
-				hasSelectedInnerBlock &&
-				(
-					'amp/amp-story-page' === blockName
-				)
-			) {
-				return <BlockListBlock { ...props } data-amp-selected={ 'parent' } />;
-			}
+		// If it's not an allowed block then lets return original;
+		if ( -1 === ALLOWED_BLOCKS.indexOf( blockName ) ) {
+			return <BlockListBlock { ...props } />;
+		}
 
-			// If we got this far and it's not an allowed inner block then lets return original.
-			if ( -1 === ALLOWED_BLOCKS.indexOf( blockName ) ) {
-				return <BlockListBlock { ...props } />;
-			}
+		let wrapperProps;
 
-			return <BlockListBlock
-				{ ...props }
-				data-amp-image-caption={ ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined }
-				data-font-family={ attributes.ampFontFamily || undefined }
-			/>;
-		} );
-	},
-	'addWrapperProps'
-);
+		// If we have an inner block selected let's add 'data-amp-selected=parent' to the wrapper.
+		if (
+			hasSelectedInnerBlock &&
+			(
+				'amp/amp-story-page' === blockName
+			)
+		) {
+			wrapperProps = {
+				...props.wrapperProps,
+				'data-amp-selected': 'parent',
+			};
+
+			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+		}
+
+		// If we have image caption or font-family set, add these to wrapper properties.
+		wrapperProps = {
+			...props.wrapperProps,
+			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
+			'data-font-family': attributes.ampFontFamily || undefined,
+		};
+
+		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+	} );
+};
 
 // These do not reliably work at domReady.
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
