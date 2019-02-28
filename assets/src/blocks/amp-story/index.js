@@ -39,6 +39,9 @@ export const settings = {
 		mediaType: {
 			type: 'string',
 		},
+		poster: {
+			type: 'string',
+		},
 		focalPoint: {
 			type: 'object',
 		},
@@ -59,7 +62,7 @@ export const settings = {
 	edit: EditPage,
 
 	save( { attributes } ) {
-		const { id, backgroundColor, mediaUrl, mediaType } = attributes;
+		const { id, backgroundColor, mediaUrl, mediaType, poster } = attributes;
 
 		return (
 			<amp-story-page style={ { backgroundColor: backgroundColor } } id={ id }>
@@ -70,7 +73,7 @@ export const settings = {
 								<amp-img layout="fill" src={ mediaUrl } />
 							) }
 							{ VIDEO_BACKGROUND_TYPE === mediaType && (
-								<amp-video layout="fill" src={ mediaUrl } muted autoplay loop />
+								<amp-video layout="fill" src={ mediaUrl } poster={ poster } muted autoplay loop />
 							) }
 						</amp-story-grid-layer>
 					)

@@ -30,7 +30,7 @@ import { withSelect } from '@wordpress/data';
  */
 import BlockNavigation from './block-navigation';
 import { ALLOWED_BLOCKS } from '../../helpers';
-import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from './constants';
+import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
 const TEMPLATE = [
 	[ 'core/paragraph' ],
@@ -80,7 +80,7 @@ class EditPage extends Component {
 
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } );
+			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
 			return;
 		}
 
@@ -110,13 +110,16 @@ class EditPage extends Component {
 			mediaId: media.id,
 			mediaType: mediaType,
 		} );
+
+		if ( IMAGE_BACKGROUND_TYPE === mediaType ) {
+			this.props.setAttributes( { poster: undefined } );
+		}
 	}
 
 	render() {
-		const props = this.props;
-		const { attributes, media } = props;
+		const { attributes, media, setAttributes } = this.props;
 
-		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint } = attributes;
+		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint, poster } = attributes;
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -127,6 +130,10 @@ class EditPage extends Component {
 			backgroundRepeat: 'no-repeat',
 		};
 
+		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
+			style.backgroundImage = `url(${ poster })`;
+		}
+
 		return (
 			<Fragment>
 				<InspectorControls key="controls">
@@ -136,7 +143,7 @@ class EditPage extends Component {
 						colorSettings={ [
 							{
 								value: backgroundColor,
-								onChange: ( value ) => this.props.setAttributes( { backgroundColor: value } ),
+								onChange: ( value ) => setAttributes( { backgroundColor: value } ),
 								label: __( 'Background Color', 'amp' ),
 							},
 						] }
@@ -158,12 +165,42 @@ class EditPage extends Component {
 								</MediaUploadCheck>
 								{ !! mediaId &&
 								<MediaUploadCheck>
-									<Button onClick={ () => this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
+									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
 										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove video', 'amp' ) : __( 'Remove image', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>
 								}
 							</BaseControl>
+							{ VIDEO_BACKGROUND_TYPE === mediaType && (
+								<MediaUploadCheck>
+									<BaseControl
+										label={ __( 'Poster Image', 'amp' ) }
+									>
+										<MediaUpload
+											title={ __( 'Select Poster Image', 'amp' ) }
+											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
+											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
+											render={ ( { open } ) => (
+												<Button
+													isDefault
+													onClick={ open }
+													className={ 'editor-amp-story-page-background' }
+												>
+													{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
+												</Button>
+											) }
+										/>
+										{ poster &&
+										<Button
+											onClick={ () => setAttributes( { poster: undefined } ) }
+											isLink
+											isDestructive>
+											{ __( 'Remove Poster Image', 'amp' ) }
+										</Button>
+										}
+									</BaseControl>
+								</MediaUploadCheck>
+							) }
 							{ mediaUrl && (
 								<Fragment>
 									{ /* Note: FocalPointPicker is only available in Gutenberg 5.1+ */ }
@@ -172,7 +209,7 @@ class EditPage extends Component {
 											label={ __( 'Focal Point Picker', 'amp' ) }
 											url={ mediaUrl }
 											value={ focalPoint }
-											onChange={ ( value ) => this.props.setAttributes( { focalPoint: value } ) }
+											onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 										/>
 									) }
 								</Fragment>
@@ -182,8 +219,8 @@ class EditPage extends Component {
 				</InspectorControls>
 				<div key="contents" style={ style } className={ 'editor-amp-story-page-wrap' }>
 					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-						<video autoPlay muted loop className={ 'editor-amp-story-page-video' }>
+					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
+						<video muted loop className={ 'editor-amp-story-page-video' }>
 							<source src={ mediaUrl } type={ media.mime_type } />
 						</video>
 					) }
