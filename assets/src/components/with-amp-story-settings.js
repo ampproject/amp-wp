@@ -4,14 +4,14 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls } from '@wordpress/editor';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS, AMP_STORY_FONTS } from '../helpers';
-import { AnimationControls, withParentBlock } from './';
+import { AnimationControls, withParentBlock, FontFamilyPicker } from './';
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
@@ -37,14 +37,10 @@ export default createHigherOrderComponent(
 							/>
 							{
 								( 'core/paragraph' === name || 'core/heading' === name ) && (
-									<SelectControl
-										key={ 'font-family' }
-										label={ __( 'Font family', 'amp' ) }
+									<FontFamilyPicker
 										value={ ampFontFamily }
 										options={ AMP_STORY_FONTS }
-										onChange={ function( value ) {
-											props.setAttributes( { ampFontFamily: value } );
-										} }
+										onChange={ ( value ) => props.setAttributes( { ampFontFamily: value } ) }
 									/>
 								)
 							}

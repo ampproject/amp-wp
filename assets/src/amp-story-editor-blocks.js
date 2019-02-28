@@ -10,7 +10,7 @@ const { getSelectedBlockClientId } = select( 'core/editor' );
 /**
  * Internal dependencies
  */
-import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerblock, withAmpStorySettings } from './components';
+import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 
 // Ensure that the default block is page when no block is selected.
@@ -169,7 +169,7 @@ const setBlockParent = ( props ) => {
 const wrapperWithSelect = compose(
 	withAttributes,
 	withBlockName,
-	withHasSelectedInnerblock,
+	withHasSelectedInnerBlock,
 	withParentBlock
 );
 
