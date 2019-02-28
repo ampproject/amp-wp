@@ -453,6 +453,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .editor-amp-story-page-wrap {
 	position: relative;
+	overflow: hidden;
 }
 
 .editor-amp-story-page-video {
@@ -463,6 +464,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	bottom: 0;
 	min-width: 100%;
 	min-height: 100%;
+	object-fit: cover;
+	pointer-events: none;
 }
 
 /*
