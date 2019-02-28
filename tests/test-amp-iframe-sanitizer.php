@@ -105,13 +105,26 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<iframe src="https://www.geoportail.gouv.fr/embed/visu.html?c=3.9735668054865076,43.90558192721261&z=15&l0=GEOLOGY.GEOLOGY::EXTERNAL:OGC:EXTERNALWMS(1)&permalink=yes" width="100" height="200" sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen=""></iframe>',
 				'<amp-iframe src="https://www.geoportail.gouv.fr/embed/visu.html?c=3.9735668054865076,43.90558192721261&amp;z=15&amp;l0=GEOLOGY.GEOLOGY::EXTERNAL:OGC:EXTERNALWMS(1)&amp;permalink=yes" width="100" height="200" sandbox="allow-forms allow-scripts allow-same-origin" allowfullscreen="" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
 			),
+
+			'amp_iframe_with_fallback'                  => array(
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic"><noscript><iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe></noscript></amp-iframe>',
+				null,
+			),
 		);
 	}
 
 	/**
+	 * Test converter.
+	 *
 	 * @dataProvider get_data
+	 *
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
-	public function test_converter( $source, $expected ) {
+	public function test_converter( $source, $expected = null ) {
+		if ( ! $expected ) {
+			$expected = $source;
+		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
 		$sanitizer->sanitize();

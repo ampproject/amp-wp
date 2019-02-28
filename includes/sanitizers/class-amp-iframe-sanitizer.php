@@ -74,7 +74,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node                  = $nodes->item( $i );
+			$node = $nodes->item( $i );
+
+			// Skip element if in AMP-element fallbacks.
+			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+				continue;
+			}
+
 			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
