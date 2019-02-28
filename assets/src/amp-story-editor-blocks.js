@@ -56,7 +56,7 @@ subscribe( () => {
 
 	// Keep animation order in order.
 	// Todo: First check if animation order has actually changed.
-	getBlocksByClientId( getBlockOrder() )
+	/*getBlocksByClientId( getBlockOrder() )
 		.filter( ( block ) => block.name === 'amp/amp-story-page' )
 		.map( ( page ) => {
 			const blocks = getBlocksByClientId( getBlockOrder( page.clientId ) );
@@ -67,7 +67,7 @@ subscribe( () => {
 
 				updateBlockAttributes( block.clientId, { ampAnimationAfter: predecessorBlock ? predecessorBlock.attributes.anchor : undefined } );
 			} );
-		} );
+		} );*/
 } );
 
 /**
