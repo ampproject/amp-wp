@@ -32,8 +32,8 @@ function AnimationControls( { setAttributes, attributes, animatedBlocks } ) {
 		let label;
 
 		switch ( block.name ) {
-			case 'core/paragraph':
-				const content = block.originalContent.replace( /<[^<>]+>/g, ' ' ).slice( 0, 20 );
+			case 'amp/amp-story-text':
+				const content = block.originalContent.replace( /<[^<>]+>/g, '' ).slice( 0, 20 );
 
 				label = content.length > 0 ? sprintf( __( '%1$s (%2$s)', 'amp' ), content, block.type.title ) : block.type.title;
 				break;

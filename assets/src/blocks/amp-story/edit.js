@@ -33,7 +33,7 @@ import { ALLOWED_BLOCKS } from '../../helpers';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
 const TEMPLATE = [
-	[ 'core/paragraph' ],
+	[ 'amp/amp-story-text' ],
 ];
 
 class EditPage extends Component {
