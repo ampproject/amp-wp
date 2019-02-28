@@ -16,6 +16,7 @@
 		6.1 Ghosted page inserter
 	7. Block navigator
 	8. Block mover
+	9. General block editor components
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -436,6 +437,39 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .post-type-amp_story .is-selected .editor-block-mover.is-visible {
 	opacity: 1;
+}
+
+/*
+ * 9. General block editor components
+ */
+
+.editor-amp-story-page-background {
+	display: block;
+}
+
+.editor-amp-story-page-background + .is-destructive {
+	margin-top: 1em;
+}
+
+.editor-amp-story-page-wrap {
+	position: relative;
+	overflow: hidden;
+}
+
+.editor-amp-story-page-video {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	min-width: 100%;
+	min-height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+}
+
+#editor-amp-story-page-poster__help {
+	margin-top: 0;
 }
 
 /*
