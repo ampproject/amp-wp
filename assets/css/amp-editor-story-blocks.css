@@ -468,6 +468,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	pointer-events: none;
 }
 
+#editor-amp-story-page-poster__help {
+	margin-top: 0;
+}
+
 /*
  * 100. Shame
  */

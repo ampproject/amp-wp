@@ -174,7 +174,9 @@ class EditPage extends Component {
 							{ VIDEO_BACKGROUND_TYPE === mediaType && (
 								<MediaUploadCheck>
 									<BaseControl
-										label={ __( 'Poster Image', 'amp' ) }
+										id="editor-amp-story-page-poster"
+										label={ __( 'Poster Image (required)', 'amp' ) }
+										help={ __( 'The recommended dimensions for a poster image are: 720p (720w x 1280h)', 'amp' ) }
 									>
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
