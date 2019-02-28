@@ -1,22 +1,24 @@
+/* global _, jQuery */
+
 /* exported ampCustomizeControls */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
-var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unused-vars
+const ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
-	var component = {
+	const component = {
 		data: {
 			queryVar: 'amp',
 			panelId: '',
 			ampUrl: '',
 			l10n: {
 				unavailableMessage: '',
-				unavailableLinkText: ''
-			}
+				unavailableLinkText: '',
+			},
 		},
 		tooltipTimeout: 5000,
 		tooltipVisible: new api.Value( false ),
-		tooltipFocused: new api.Value( 0 )
+		tooltipFocused: new api.Value( 0 ),
 	};
 
 	/**
@@ -60,7 +62,7 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {boolean} whether it is an AMP URL.
 	 */
 	component.isAmpUrl = function isAmpUrl( url ) {
-		var urlParser = document.createElement( 'a' ),
+		const urlParser = document.createElement( 'a' ),
 			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
 
 		urlParser.href = url;
@@ -77,15 +79,14 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {string} non-AMPified URL.
 	 */
 	component.unampifyUrl = function unampifyUrl( url ) {
-		var urlParser = document.createElement( 'a' ),
-			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' ),
-			params;
+		const urlParser = document.createElement( 'a' ),
+			regexEndpoint = new RegExp( '\\/' + component.data.queryVar + '\\/?$' );
 
 		urlParser.href = url;
 		urlParser.pathname = urlParser.pathname.replace( regexEndpoint, '' );
 
 		if ( 1 < urlParser.search.length ) {
-			params = wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
+			const params = window.wp.customize.utils.parseQueryString( urlParser.search.substr( 1 ) );
 			delete params[ component.data.queryVar ];
 			urlParser.search = $.param( params );
 		}
@@ -100,7 +101,7 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {string} AMPified URL.
 	 */
 	component.ampifyUrl = function ampifyUrl( url ) {
-		var urlParser = document.createElement( 'a' );
+		const urlParser = document.createElement( 'a' );
 		urlParser.href = component.unampifyUrl( url );
 		if ( urlParser.search.length ) {
 			urlParser.search += '&';
@@ -135,7 +136,7 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {string} AMPified URL.
 	 */
 	component.setCurrentAmpUrl = function setCurrentAmpUrl( url ) {
-		var enabled = api.state( 'ampEnabled' ).get();
+		const enabled = api.state( 'ampEnabled' ).get();
 		if ( ! enabled && component.isAmpUrl( url ) ) {
 			return component.unampifyUrl( url );
 		} else if ( enabled && ! component.isAmpUrl( url ) ) {
@@ -170,9 +171,8 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {void}
 	 */
 	component.updatePanelNotifications = function updatePanelNotifications() {
-		var panel = api.panel( component.data.panelId ),
-			containers;
-		containers = panel.sections().concat( [ panel ] );
+		const panel = api.panel( component.data.panelId );
+		const containers = panel.sections().concat( [ panel ] );
 		if ( api.state( 'ampAvailable' ).get() ) {
 			_.each( containers, function( container ) {
 				container.notifications.remove( 'amp_unavailable' );
@@ -186,13 +186,13 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 					url: component.data.ampUrl,
 					templateId: 'customize-amp-unavailable-notification',
 					render: function() {
-						var li = api.Notification.prototype.render.call( this );
+						const li = api.Notification.prototype.render.call( this );
 						li.find( 'a' ).on( 'click', function( event ) {
 							event.preventDefault();
 							component.enableAndNavigateToUrl( this.href );
 						} );
 						return li;
-					}
+					},
 				} ) );
 			} );
 		}
@@ -205,16 +205,14 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 	 * @return {void}
 	 */
 	component.panelReady = function panelReady( panel ) {
-		var ampToggleContainer, checkbox, tooltip, tooltipLink;
-
-		ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
+		const ampToggleContainer = $( wp.template( 'customize-amp-enabled-toggle' )( {
 			message: component.data.l10n.unavailableMessage,
 			linkText: component.data.l10n.unavailableLinkText,
-			url: component.data.ampUrl
+			url: component.data.ampUrl,
 		} ) );
-		checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
-		tooltip = ampToggleContainer.find( '.tooltip' );
-		tooltipLink = tooltip.find( 'a' );
+		const checkbox = ampToggleContainer.find( 'input[type=checkbox]' );
+		const tooltip = ampToggleContainer.find( '.tooltip' );
+		const tooltipLink = tooltip.find( 'a' );
 
 		// AMP panel triggers the input toggle for AMP preview.
 		panel.expanded.bind( function( expanded ) {
@@ -264,7 +262,7 @@ var ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unus
 		 */
 		api.previewer.previewUrl.validate = ( function( prevValidate ) {
 			return function( value ) {
-				var val = prevValidate.call( this, value );
+				let val = prevValidate.call( this, value );
 				if ( val ) {
 					val = component.setCurrentAmpUrl( val );
 				}

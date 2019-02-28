@@ -1,25 +1,23 @@
 {
   "presets": [
-    [
-      "env",
-      {
-        "modules": false
-      }
-    ]
+    "@wordpress/default"
   ],
   "plugins": [
-    "transform-object-rest-spread",
+    "@babel/plugin-proposal-object-rest-spread",
     [
-      "transform-react-jsx",
+      "@wordpress/babel-plugin-import-jsx-pragma",
       {
-        "pragma": "wp.element.createElement"
+        "scopeVariable": "createElement",
+        "source": "@wordpress/element",
+        "isDefault": false
+      }
+    ],
+    [
+      "@babel/transform-react-jsx",
+      {
+        "pragma": "createElement"
       }
     ]
   ],
-  "env": {
-    "default": {
-      "plugins": ["transform-runtime"]
-    },
-    "production": {}
-  }
+  "sourceMaps": true
 }

@@ -61,19 +61,12 @@ class AMP_Story_Post_Type {
 				'template'     => array(
 					array(
 						'amp/amp-story-page',
+						array(),
 						array(
 							array(
-								'amp/amp-story-grid-layer-background-image',
-							),
-							array(
-								'amp/amp-story-grid-layer-vertical',
+								'core/paragraph',
 								array(
-									array(
-										'core/paragraph',
-										array(
-											'placeholder' => __( 'This is the story\'s first page\'s first layer.', 'amp' ),
-										),
-									),
+									'placeholder' => __( 'Write something!', 'amp' ),
 								),
 							),
 						),
@@ -139,6 +132,7 @@ class AMP_Story_Post_Type {
 		$story_components = array(
 			'amp-story-page',
 			'amp-story-grid-layer',
+			'amp-story-cta-layer',
 		);
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
@@ -151,7 +145,6 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['grid-area']           = true;
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;
@@ -189,15 +182,10 @@ class AMP_Story_Post_Type {
 		// @todo Name the script better to distinguish.
 		wp_enqueue_script(
 			'amp-story-editor-blocks',
-			amp_get_asset_url( 'js/amp-story-editor-blocks.js' ),
-			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
+			amp_get_asset_url( 'js/amp-story-editor-blocks-compiled.js' ),
+			array( 'wp-dom-ready', 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
 			AMP__VERSION,
 			false
-		);
-
-		wp_add_inline_script(
-			'amp-story-editor-blocks',
-			'ampStoryEditorBlocks.boot();'
 		);
 
 		wp_enqueue_script(

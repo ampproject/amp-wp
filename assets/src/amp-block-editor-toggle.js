@@ -1,12 +1,13 @@
 /**
  * WordPress dependencies
  */
-const { __ } = wp.i18n;
-const { FormToggle, Notice } = wp.components;
-const { Fragment, RawHTML } = wp.element;
-const { withSelect, withDispatch } = wp.data;
-const { PluginPostStatusInfo } = wp.editPost;
-const { compose, withInstanceId } = wp.compose;
+import { __ } from '@wordpress/i18n';
+import { FormToggle, Notice } from '@wordpress/components';
+import { Fragment, RawHTML } from '@wordpress/element';
+import { withSelect, withDispatch } from '@wordpress/data';
+import { PluginPostStatusInfo } from '@wordpress/edit-post';
+import { compose, withInstanceId } from '@wordpress/compose';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Exported via wp_localize_script().
@@ -26,14 +27,14 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 	return (
 		<Fragment>
 			<PluginPostStatusInfo>
-				{ ! errorMessages.length && <label htmlFor='amp-enabled'>{ __( 'Enable AMP', 'amp' ) }</label> }
+				{ ! errorMessages.length && <label htmlFor="amp-enabled">{ __( 'Enable AMP', 'amp' ) }</label> }
 				{
 					! errorMessages.length &&
 					(
 						<FormToggle
 							checked={ 'enabled' === enabledStatus }
 							onChange={ () => onAmpChange( enabledStatus ) }
-							id='amp-enabled'
+							id="amp-enabled"
 						/>
 					)
 				}
@@ -41,7 +42,7 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 					!! errorMessages.length &&
 					(
 						<Notice
-							status='warning'
+							status="warning"
 							isDismissible={ false }
 						>
 							{
@@ -88,13 +89,13 @@ function ComposedAMPToggle() {
 			onAmpChange: ( enabledStatus ) => {
 				const newStatus = 'enabled' === enabledStatus ? 'disabled' : 'enabled';
 				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
-			}
+			},
 		} ) ),
-		withInstanceId
+		withInstanceId,
 	] )( AMPToggle );
 }
 
-export default wp.plugins.registerPlugin( 'amp', {
+export default registerPlugin( 'amp', {
 	icon: 'hidden',
-	render: ComposedAMPToggle()
+	render: ComposedAMPToggle(),
 } );

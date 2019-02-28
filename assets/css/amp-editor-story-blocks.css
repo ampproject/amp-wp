@@ -10,7 +10,6 @@
 		4.2 Blur layers above
 		4.3 Stroke text for legibility.
 	5. Layers Styling
-		5.1 Thirds Layer
 		5.2 Fill layer
 		5.3 CTA layer
 	6. Inserter customisations.
@@ -58,8 +57,7 @@ div[data-type="amp/amp-story-page"]::after {
 }
 
 .amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before,
-div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before
+.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before
 {
 	outline: 1px solid #007cba;
 }
@@ -118,12 +116,6 @@ div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-app
 	width: 316px;
 }
 
-/* Also override needed core inline styles. */
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-inner-blocks .editor-block-list__layout {
-	min-height: initial !important;
-}
-
 /*
  * 4. Layers stacking.
  * Setup on top of each other layering on the story children.
@@ -140,16 +132,6 @@ div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-app
 
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__layout {
 	background-color: initial;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"] {
-	position: absolute;
-	height: 100%;
-	width: 100%;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"] .components-toolbar button[aria-label="Link"] {
-	display: none;
 }
 
 .editor-block-list__layout div[data-amp-selected="parent"] {
@@ -174,20 +156,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	box-sizing: border-box;
 }
 
-.amp-grid-template-horizontal .editor-block-list__layout:first-of-type {
-	grid-auto-flow: column !important;
-	grid-template-rows: 100% !important;
-	-ms-flex-line-pack: stretch;
-	align-content: stretch;
-	-webkit-box-align: start;
-	-ms-flex-align: start;
-	align-items: start;
-	grid-gap: 16px;
-	-webkit-box-pack: start;
-	-ms-flex-pack: start;
-	justify-content: start;
-}
-
 .amp-grid-template-vertical .editor-block-list__layout:first-of-type {
 	grid-auto-flow: row;
 	grid-template-columns: 100%;
@@ -201,49 +169,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .amp-grid-template-vertical .editor-block-list__block {
 	width: 100%;
-}
-
-/*
- * 4.1 Hide layers above
- * Hide elements above the currently selected layer.
- */
-
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block {
-	z-index: 0;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"]:not(.is-selected):not([data-amp-selected="parent"]) .editor-block-list__block p[data-is-placeholder-visible="true"] ~ p {
-	display: none;
-}
-
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-amp-type="grid"],
-.editor-block-list__layout div[data-amp-type="grid"].is-selected ~ div[data-type="amp/amp-story-cta-layer"],
-.editor-block-list__layout div[data-amp-type="grid"][data-amp-selected="parent"] ~ div[data-type="amp/amp-story-cta-layer"]{
-	display: none;
-}
-
-/*
- * 4.2 Blur layers above
- * Layers - Blur and fade out the layers beneath the currently selected layer.
- */
-
-.editor-block-list__layout > div {
-	transition: .3s;
-	transition-property: opacity, filter;
-}
-
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .wp-block {
-	opacity: 0.3;
-	filter: blur(8px);
-	-webkit-filter: blur(8px);
-}
-
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > div[data-amp-selected="parent"],
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected {
-	opacity: 1;
-	filter: none;
-	-webkit-filter: none;
 }
 
 /*
@@ -282,27 +207,6 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 /*
  * 5. Layers Styling
  */
-
-/*
- * 5.1 Thirds layer.
- */
-
-.amp-grid-template-thirds .editor-block-list__layout:first-of-type {
-	grid-template-rows: 1fr 1fr 1fr;
-	grid-template-areas: "upper-third" "middle-third" "lower-third";
-}
-
-div[data-amp-position="upper-third"] {
-	grid-area: upper-third / lower-third / lower-third / lower-third;
-}
-
-div[data-amp-position="middle-third"] {
-	grid-area: middle-third / lower-third / lower-third / lower-third;
-}
-
-div[data-amp-position="lower-third"] {
-	grid-area: lower-third / lower-third / lower-third / lower-third;
-}
 
 /*
  * 5.2 Fill layer.
@@ -354,50 +258,16 @@ div[data-amp-position="lower-third"] {
 	height: 533px !important;
 }
 
-div[data-amp-type="grid"] .block-library-image__resizer {
-	max-width: 318px !important;
-	max-height: 533px !important;
-}
-
 .amp-grid-template-fill > :not(:first-child) {
 	display: none;
-}
-
-/*
- * 5.3 CTA layer.
- */
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] {
-	position: absolute;
-	height: 20%;
-	width: 318px;
-	bottom: 38px;
-}
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__block-edit {
-	max-height: 100%;
-}
-
-.editor-block-list__layout div[data-type="amp/amp-story-cta-layer"] .editor-block-list__layout:first-of-type {
-	height: auto !important;
 }
 
 /*
  * 6. Inserter customisations.
  */
 
- .components-popover.editor-inserter__amp .components-popover__content {
+.components-popover.editor-inserter__amp .components-popover__content {
 	height: 200px;
-}
-
-/* Fade out CTA Layer in inserter when it's already present */
-.editor-inserter__popover .amp-story-has-cta-layer .editor-block-list-item-amp-amp-story-cta-layer {
-	opacity: 0.5;
-}
-
-/* Hide CTA button when inserting on the first page */
-.amp-story-page-first .editor-block-types-list .editor-block-list-item-amp-amp-story-cta-layer {
-	display: none;
 }
 
 /* Hide inserter inside of the page when block navigator is visible */
@@ -409,63 +279,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 	.post-type-amp_story .amp-grid-template .editor-block-list__layout:first-of-type {
 		padding-top: 24px;
 	}
-}
-
-/*
- * 6.1 Ghosted page inserter
- * Change the last inserter into a ghosted page.
- * Shame disclaimer: long selectors needed because the classes are quite common.
- */
-
-.post-type-amp_story .editor-default-block-appender {
-	max-width: 318px;
-}
-
-.post-type-amp_story .editor-default-block-appender .editor-inserter {
-	position: relative;
-	margin: 0 auto;
-	left: 0;
-	top: 0;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender {
-	position: static;
-	margin-top: 38px;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter {
-	opacity: 1;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button {
-	background-color: #FAFAFA;
-	background-image: url( '../images/add-page-inserter.svg' );
-	background-position: center center;
-	background-repeat: no-repeat;
-	background-size: 86px 96px;
-	border: 10px solid #eff0f1;
-	border-radius: 0;
-	height: 533px;
-	width: 338px;
-	margin: 0 auto;
-	outline: none;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:hover,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button:focus {
-	box-shadow: inset 0 0 0 1px #e2e4e7,inset 0 0 0 2px #fff, 0 1px 1px rgba(25,30,35,.2);
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__insertion-point-inserter .components-icon-button svg,
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .block-list-appender .components-button svg {
-	display: none;
-}
-
-.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout > .editor-block-list__block[data-type="core/paragraph"] .editor-block-list__block-edit {
-	display: none;
 }
 
 /*
@@ -529,10 +342,6 @@ div[data-amp-type="grid"] .block-library-image__resizer {
 		bottom: 100%;
 		left: 0;
 		width: 100%;
-	}
-
-	#amp-root-navigation .editor-inserter__toggle::after {
-		content: 'Add Layer';
 	}
 
 	.post-type-amp_story #amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {

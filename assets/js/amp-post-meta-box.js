@@ -7,10 +7,10 @@
  *
  * @since 0.6
  */
-var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
+const ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
-	var component = {
+	const component = {
 
 		/**
 		 * Holds data.
@@ -24,8 +24,8 @@ var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 			canSupport: true, // Overridden by count( AMP_Post_Type_Support::get_support_errors( $post ) ) === 0.
 			statusInputName: '',
 			l10n: {
-				ampPreviewBtnLabel: ''
-			}
+				ampPreviewBtnLabel: '',
+			},
 		},
 
 		/**
@@ -47,7 +47,7 @@ var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 		 *
 		 * @since 0.6
 		 */
-		ampPreviewBtnSelector: '#amp-post-preview'
+		ampPreviewBtnSelector: '#amp-post-preview',
 	};
 
 	/**
@@ -99,13 +99,13 @@ var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	 * @return {void}
 	 */
 	component.addPreviewButton = function addPreviewButton() {
-		var previewBtn = $( component.previewBtnSelector );
+		const previewBtn = $( component.previewBtnSelector );
 		previewBtn
 			.clone()
 			.insertAfter( previewBtn )
 			.prop( {
 				href: component.data.previewLink,
-				id: component.ampPreviewBtnSelector.replace( '#', '' )
+				id: component.ampPreviewBtnSelector.replace( '#', '' ),
 			} )
 			.text( component.data.l10n.ampPreviewBtnLabel )
 			.parent()
@@ -121,14 +121,12 @@ var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	 * @return {void}
 	 */
 	component.onAmpPreviewButtonClick = function onAmpPreviewButtonClick() {
-		var $input;
-
 		// Flag the AMP preview referer.
-		$input = $( '<input>' )
+		const $input = $( '<input>' )
 			.prop( {
 				type: 'hidden',
 				name: 'amp-preview',
-				value: 'do-preview'
+				value: 'do-preview',
 			} )
 			.insertAfter( component.ampPreviewBtnSelector );
 
@@ -145,17 +143,17 @@ var ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	 * @return {void}
 	 */
 	component.toggleAmpStatus = function toggleAmpStatus( $target ) {
-		var $container = $( '#amp-status-select' ),
-			status = $container.data( 'amp-status' ),
-			$checked,
-			editAmpStatus = $( '.edit-amp-status' );
+		const $container = $( '#amp-status-select' );
+		const editAmpStatus = $( '.edit-amp-status' );
+
+		let status = $container.data( 'amp-status' );
 
 		// Don't modify status on cancel button click.
 		if ( ! $target.hasClass( 'button-cancel' ) ) {
 			status = component.statusRadioInputs.filter( ':checked' ).val();
 		}
 
-		$checked = $( '#amp-status-' + status );
+		const $checked = $( '#amp-status-' + status );
 
 		// Toggle elements.
 		editAmpStatus.fadeToggle( component.toggleSpeed, function() {
