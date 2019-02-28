@@ -170,8 +170,6 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
-		self::enqueue_google_fonts();
-
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
 			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
@@ -210,6 +208,12 @@ class AMP_Story_Post_Type {
 				'before'
 			);
 		}
+
+		wp_localize_script(
+			'amp-story-editor-blocks',
+			'ampStoriesGoogleFonts',
+			self::get_google_fonts_handles()
+		);
 	}
 
 	/**
@@ -238,19 +242,14 @@ class AMP_Story_Post_Type {
 		$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
 		$css_contents = file_get_contents( $css_src ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		wp_add_inline_style( 'wp-block-library', $css_contents );
-
-		self::enqueue_google_fonts();
-
-		$wp_styles = wp_styles();
-		$wp_styles->do_items();
 	}
 
 	/**
-	 * Enqueues all the Google Fonts that can be used in an AMP story.
+	 * Returns all the Google Fonts that can be used in an AMP story.
 	 *
 	 * @see /assets/css/amp-stories.css
 	 */
-	public static function enqueue_google_fonts() {
+	public static function get_google_fonts_handles() {
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = array( 'latin', 'latin-ext' );
 
@@ -355,6 +354,8 @@ class AMP_Story_Post_Type {
 			),
 		);
 
+		$handles = array();
+
 		foreach ( $fonts as $font ) {
 			$src = add_query_arg(
 				array(
@@ -364,11 +365,14 @@ class AMP_Story_Post_Type {
 				$fonts_url
 			);
 
-			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
-			wp_enqueue_style(
-				sprintf( '%s-font', sanitize_title( $font['name'] ) ),
-				$src
+			$slug = sanitize_title( $font['name'] );
+
+			$handles[ $slug ] = array(
+				'handle' => sprintf( '%s-font', $slug ),
+				'src'    => $src,
 			);
 		}
+
+		return $handles;
 	}
 }

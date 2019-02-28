@@ -13,6 +13,29 @@ import getTagName from './get-tag-name';
 import { AMP_STORY_FONTS } from '../../helpers';
 import { FontFamilyPicker } from '../../components';
 
+const maybeEnqueueFontStyle = ( slug ) => {
+	if ( ! slug || ! window.ampStoriesGoogleFonts[ slug ] ) {
+		return;
+	}
+
+	const { handle, src } = window.ampStoriesGoogleFonts[ slug ];
+
+	const element = document.getElementById( handle );
+
+	if ( element ) {
+		return;
+	}
+
+	const fontStylesheet = document.createElement( 'link' );
+	fontStylesheet.id = handle;
+	fontStylesheet.href = src;
+	fontStylesheet.rel = 'stylesheet';
+	fontStylesheet.type = 'text/css';
+	fontStylesheet.media = 'all';
+
+	document.head.appendChild( fontStylesheet );
+};
+
 function TextBlock( {
 	attributes,
 	setAttributes,
@@ -32,7 +55,10 @@ function TextBlock( {
 					<FontFamilyPicker
 						value={ ampFontFamily }
 						options={ AMP_STORY_FONTS }
-						onChange={ ( value ) => setAttributes( { ampFontFamily: value } ) }
+						onChange={ ( value ) => {
+							maybeEnqueueFontStyle( value );
+							setAttributes( { ampFontFamily: value } );
+						} }
 					/>
 					<FontSizePicker
 						value={ fontSize.size }

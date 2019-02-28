@@ -311,7 +311,7 @@ export const AMP_STORY_FONTS = [
 		element: RobotoSlab,
 	},
 	{
-		value: 'slabo-27',
+		value: 'slabo-27px',
 		label: 'Slabo 27px',
 		element: Slabo27,
 	},
