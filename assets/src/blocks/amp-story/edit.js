@@ -29,7 +29,7 @@ const {
 } = select( 'core/editor' );
 
 const TEMPLATE = [
-	[ 'core/paragraph' ],
+	[ 'amp/amp-story-text' ],
 ];
 
 export default class EditPage extends Component {
