@@ -12,7 +12,7 @@ import { Dashicon, BaseControl, Button, Dropdown, NavigableMenu } from '@wordpre
 function FontFamilyPicker( {
 	options = [],
 	onChange,
-	value,
+	value = '',
 } ) {
 	if ( ! options.length ) {
 		return null;
