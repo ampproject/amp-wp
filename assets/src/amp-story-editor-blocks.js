@@ -196,14 +196,20 @@ const addWrapperProps = ( BlockListBlock ) => {
 				'amp/amp-story-page' === blockName
 			)
 		) {
-			wrapperProps = Object.assign( {}, props.wrapperProps, { 'data-amp-selected': 'parent' } );
-		} else {
-			// If we have image caption or font-family set, add these to wrapper properties.
-			wrapperProps = Object.assign( {}, props.wrapperProps, {
-				'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
-				'data-font-family': attributes.ampFontFamily || undefined,
-			} );
+			wrapperProps = {
+				...props.wrapperProps,
+				'data-amp-selected': 'parent',
+			};
+
+			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 		}
+
+		// If we have image caption or font-family set, add these to wrapper properties.
+		wrapperProps = {
+			...props.wrapperProps,
+			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
+			'data-font-family': attributes.ampFontFamily || undefined,
+		};
 
 		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 	} );
