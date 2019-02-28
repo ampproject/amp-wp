@@ -18,8 +18,8 @@ function FontFamilyPicker( {
 		return null;
 	}
 
-	const currentFont = options.find( ( font ) => font.size === value );
-	const currentFontName = ( currentFont && currentFont.name ) || __( 'None', 'amp' );
+	const fontLabel = ( { label, element: Element } ) => Element ? <Element height="20" /> : label;
+	const currentFont = options.find( ( font ) => font.value === value );
 
 	return (
 		<BaseControl label={ __( 'Font Family', 'amp' ) }>
@@ -38,15 +38,16 @@ function FontFamilyPicker( {
 							aria-label={ sprintf(
 								/* translators: %s: font name */
 								__( 'Font Family: %s', 'amp' ),
-								currentFontName
+								( currentFont && currentFont.label ) || __( 'None', 'amp' )
 							) }
+							data-font-family={ currentFont ? currentFont.value : '' }
 						>
-							{ currentFontName }
+							{ fontLabel( currentFont ) }
 						</Button>
 					) }
 					renderContent={ () => (
 						<NavigableMenu>
-							{ options.map( ( { value: slug, label: Label } ) => {
+							{ options.map( ( { value: slug, label, element } ) => {
 								const isSelected = ( value === slug || ( ! value && slug === '' ) );
 
 								return (
@@ -59,7 +60,7 @@ function FontFamilyPicker( {
 									>
 										{ isSelected && <Dashicon icon="saved" /> }
 										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ slug }>
-											{ 'string' === typeof Label ? Label : <Label height="20" /> }
+											{ fontLabel( { label, element } ) }
 										</span>
 									</Button>
 								);

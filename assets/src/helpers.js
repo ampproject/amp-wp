@@ -15,7 +15,7 @@ import NotoSans from '../images/font-names/noto-sans.svg';
 import OpenSans from '../images/font-names/open-sans.svg';
 import OpenSansCondensed from '../images/font-names/open-sans-condensed.svg';
 import Oswald from '../images/font-names/oswald.svg';
-import PlayFairDisplay from '../images/font-names/playfair-display.svg';
+import PlayfairDisplay from '../images/font-names/playfair-display.svg';
 import PtSans from '../images/font-names/pt-sans.svg';
 import PtSansNarrow from '../images/font-names/pt-sans-narrow.svg';
 import PtSerif from '../images/font-names/pt-serif.svg';
@@ -179,7 +179,8 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'arimo',
-		label: Arimo,
+		label: 'Arimo',
+		element: Arimo,
 	},
 	{
 		value: 'baskerville',
@@ -215,11 +216,13 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'lato',
-		label: Lato,
+		label: 'Lato',
+		element: Lato,
 	},
 	{
 		value: 'lora',
-		label: Lora,
+		label: 'Lora',
+		element: Lora,
 	},
 	{
 		value: 'lucida-bright',
@@ -231,27 +234,33 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'merriweather',
-		label: Merriweather,
+		label: 'Merriweather',
+		element: Merriweather,
 	},
 	{
 		value: 'montserrat',
-		label: Montserrat,
+		label: 'Montserrat',
+		element: Montserrat,
 	},
 	{
 		value: 'noto-sans',
-		label: NotoSans,
+		label: 'Noto Sans',
+		element: NotoSans,
 	},
 	{
 		value: 'open-sans',
-		label: OpenSans,
+		label: 'Open Sans',
+		element: OpenSans,
 	},
 	{
 		value: 'open-sans-condensed',
-		label: OpenSansCondensed,
+		label: 'Open Sans Condensed',
+		element: OpenSansCondensed,
 	},
 	{
 		value: 'oswald',
-		label: Oswald,
+		label: 'Oswald',
+		element: Oswald,
 	},
 	{
 		value: 'papyrus',
@@ -263,43 +272,53 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'playfair-display',
-		label: PlayFairDisplay,
+		label: 'Playfair Display',
+		element: PlayfairDisplay,
 	},
 	{
 		value: 'pt-sans',
-		label: PtSans,
+		label: 'PT Sans',
+		element: PtSans,
 	},
 	{
 		value: 'pt-sans-narrow',
-		label: PtSansNarrow,
+		label: 'PT Sans Narrow',
+		element: PtSansNarrow,
 	},
 	{
 		value: 'pt-serif',
-		label: PtSerif,
+		label: 'PT Serif',
+		element: PtSerif,
 	},
 	{
 		value: 'raleway',
-		label: Raleway,
+		label: 'Raleway',
+		element: Raleway,
 	},
 	{
 		value: 'roboto',
-		label: Roboto,
+		label: 'Roboto',
+		element: Roboto,
 	},
 	{
 		value: 'roboto-condensed',
-		label: RobotoCondensed,
+		label: 'Roboto Condensed',
+		element: RobotoCondensed,
 	},
 	{
 		value: 'roboto-slab',
-		label: RobotoSlab,
+		label: 'Roboto Slab',
+		element: RobotoSlab,
 	},
 	{
 		value: 'slabo-27',
-		label: Slabo27,
+		label: 'Slabo 27px',
+		element: Slabo27,
 	},
 	{
 		value: 'source-sans-pro',
-		label: SourceSansPro,
+		label: 'Source Sans Pro',
+		element: SourceSansPro,
 	},
 	{
 		value: 'tahoma',
@@ -315,7 +334,8 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'ubuntu',
-		label: Ubuntu,
+		label: 'Ubuntu',
+		element: Ubuntu,
 	},
 	{
 		value: 'verdana',

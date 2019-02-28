@@ -486,7 +486,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 .components-font-family-picker__buttons .components-font-family-picker__selector {
 	background: none;
 	position: relative;
-	width: 110px;
+	width: 200px;
 	box-shadow: 0 0 0 transparent;
 	transition: box-shadow 0.1s linear;
 	border-radius: 4px;
