@@ -12,7 +12,7 @@ const { getSelectedBlockClientId } = select( 'core/editor' );
  * Internal dependencies
  */
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
-import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
+import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 
 // Ensure that the default block is page when no block is selected.
 domReady( () => {

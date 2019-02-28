@@ -21,7 +21,7 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import BlockNavigation from './block-navigation';
-import { ALLOWED_BLOCKS } from '../../helpers';
+import { ALLOWED_BLOCKS } from '../../constants';
 
 const {
 	hasSelectedInnerBlock,

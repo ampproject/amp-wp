@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../helpers';
+import { ALLOWED_BLOCKS } from '../constants';
 import { withParentBlock } from './';
 
 export default createHigherOrderComponent(

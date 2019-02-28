@@ -10,7 +10,7 @@ import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wor
  * Internal dependencies
  */
 import getTagName from './get-tag-name';
-import { AMP_STORY_FONTS } from '../../helpers';
+import { AMP_STORY_FONTS } from '../../constants';
 import { FontFamilyPicker } from '../../components';
 
 const maybeEnqueueFontStyle = ( slug ) => {
