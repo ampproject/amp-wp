@@ -7,10 +7,11 @@ import domReady from '@wordpress/dom-ready';
 import { setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
 const { getSelectedBlockClientId } = select( 'core/editor' );
+
 /**
  * Internal dependencies
  */
-import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings } from './components';
+import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 
 // Ensure that the default block is page when no block is selected.
@@ -18,7 +19,7 @@ domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
 } );
 subscribe( () => {
-	setDefaultBlockName( getSelectedBlockClientId() ? 'core/paragraph' : 'amp/amp-story-page' );
+	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
 } );
 
 /**
@@ -71,13 +72,6 @@ const addAMPAttributes = ( settings, name ) => {
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			type: 'string',
-		};
-	}
-
-	// Lets add font family to the text blocks.
-	if ( 'core/paragraph' === name || 'core/heading' === name ) {
-		addedAttributes.ampFontFamily = {
 			type: 'string',
 		};
 	}
@@ -218,6 +212,7 @@ const addWrapperProps = ( BlockListBlock ) => {
 // These do not reliably work at domReady.
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
