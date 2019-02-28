@@ -64,7 +64,7 @@ class AMP_Story_Post_Type {
 						array(),
 						array(
 							array(
-								'core/paragraph',
+								'amp/amp-story-text',
 								array(
 									'placeholder' => __( 'Write something!', 'amp' ),
 								),

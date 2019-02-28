@@ -38,6 +38,7 @@ const wpDependencies = [
 	'plugins',
 	'edit-post',
 	'keycodes',
+	'wordcount',
 ];
 
 /**

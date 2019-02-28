@@ -4,50 +4,38 @@
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { InspectorControls } from '@wordpress/editor';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl, ToggleControl } from '@wordpress/components';
+import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, AMP_STORY_FONTS } from '../helpers';
-import { AnimationControls, withParentBlock } from './';
+import { ALLOWED_BLOCKS } from '../helpers';
+import { withParentBlock } from './';
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return withParentBlock( ( props ) => {
-			const { attributes, setAttributes, name, parentBlock } = props;
+			const { attributes, name, parentBlock } = props;
 
 			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
 				return <BlockEdit { ...props } />;
 			}
 
-			const { ampFontFamily, ampShowImageCaption } = attributes;
+			if ( 'core/image' !== name ) {
+				return <BlockEdit { ...props } />;
+			}
+
+			const { ampShowImageCaption } = attributes;
 
 			return (
 				<Fragment>
 					<BlockEdit { ...props } />
 					<InspectorControls>
 						<PanelBody
-							title={ __( 'AMP Story Settings', 'amp' ) }
+							title={ __( 'Story Settings', 'amp' ) }
 						>
-							<AnimationControls
-								setAttributes={ setAttributes }
-								attributes={ attributes }
-							/>
-							{
-								( 'core/paragraph' === name || 'core/heading' === name ) && (
-									<SelectControl
-										key={ 'font-family' }
-										label={ __( 'Font family', 'amp' ) }
-										value={ ampFontFamily }
-										options={ AMP_STORY_FONTS }
-										onChange={ function( value ) {
-											props.setAttributes( { ampFontFamily: value } );
-										} }
-									/>
-								)
-							}
+
 							{
 								( 'core/image' === name ) && (
 									<ToggleControl
@@ -72,5 +60,5 @@ export default createHigherOrderComponent(
 			);
 		} );
 	},
-	'filterBlocksEdit'
+	'withAmpStorySettings'
 );

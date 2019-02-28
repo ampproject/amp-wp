@@ -42,7 +42,7 @@ function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAn
 			case 'core/image':
 				label = sprintf( __( '%1$s (%2$s)', 'amp' ), block.attributes.url.lastIndexOf( '/' ).slice( 0, 20 ), block.clientId );
 				break;
-			case 'core/paragraph':
+			case 'amp/amp-story-text':
 				const content = block.originalContent ? block.originalContent.replace( /<[^<>]+>/g, ' ' ).slice( 0, 20 ) : '';
 
 				label = content.length > 0 ? sprintf( __( '%1$s (%2$s)', 'amp' ), content, block.type.title ) : block.type.title;

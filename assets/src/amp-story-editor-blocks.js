@@ -7,7 +7,7 @@ import uuid from 'uuid/v4';
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { getDefaultBlockName, setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe, dispatch } from '@wordpress/data';
@@ -15,7 +15,7 @@ import { select, subscribe, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerblock, withAmpStorySettings } from './components';
+import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 import './stores/amp-story';
 
@@ -48,8 +48,8 @@ subscribe( () => {
 	const selectedBlockClientId = getSelectedBlockClientId();
 
 	// Ensure that the default block is page when no block is selected.
-	if ( selectedBlockClientId && 'core/paragraph' !== defaultBlockName ) {
-		setDefaultBlockName( 'core/paragraph' );
+	if ( selectedBlockClientId && 'amp/amp-story-text' !== defaultBlockName ) {
+		setDefaultBlockName( 'amp/amp-story-text' );
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
@@ -132,13 +132,6 @@ const addAMPAttributes = ( settings, name ) => {
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			type: 'string',
-		};
-	}
-
-	// Lets add font family to the text blocks.
-	if ( 'core/paragraph' === name || 'core/heading' === name ) {
-		addedAttributes.ampFontFamily = {
 			type: 'string',
 		};
 	}
@@ -237,8 +230,7 @@ const setBlockParent = ( props ) => {
 const wrapperWithSelect = compose(
 	withAttributes,
 	withBlockName,
-	withHasSelectedInnerblock,
-	withParentBlock
+	withHasSelectedInnerblock
 );
 
 /**
@@ -247,39 +239,47 @@ const wrapperWithSelect = compose(
  * @param {Object} BlockListBlock BlockListBlock element.
  * @return {Function} Handler.
  */
-const addWrapperProps = createHigherOrderComponent(
-	( BlockListBlock ) => {
-		return wrapperWithSelect( ( props ) => {
-			const { blockName, hasSelectedInnerBlock, attributes } = props;
+const addWrapperProps = ( BlockListBlock ) => {
+	return wrapperWithSelect( ( props ) => {
+		const { blockName, hasSelectedInnerBlock, attributes } = props;
 
-			// If we have an inner block selected let's add 'data-amp-selected=parent' to the wrapper.
-			if (
-				hasSelectedInnerBlock &&
-				(
-					'amp/amp-story-page' === blockName
-				)
-			) {
-				return <BlockListBlock { ...props } data-amp-selected={ 'parent' } />;
-			}
+		// If it's not an allowed block then lets return original;
+		if ( -1 === ALLOWED_BLOCKS.indexOf( blockName ) ) {
+			return <BlockListBlock { ...props } />;
+		}
 
-			// If we got this far and it's not an allowed inner block then lets return original.
-			if ( -1 === ALLOWED_BLOCKS.indexOf( blockName ) ) {
-				return <BlockListBlock { ...props } />;
-			}
+		let wrapperProps;
 
-			return <BlockListBlock
-				{ ...props }
-				data-amp-image-caption={ ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined }
-				data-font-family={ attributes.ampFontFamily || undefined }
-			/>;
-		} );
-	},
-	'addWrapperProps'
-);
+		// If we have an inner block selected let's add 'data-amp-selected=parent' to the wrapper.
+		if (
+			hasSelectedInnerBlock &&
+			(
+				'amp/amp-story-page' === blockName
+			)
+		) {
+			wrapperProps = {
+				...props.wrapperProps,
+				'data-amp-selected': 'parent',
+			};
+
+			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+		}
+
+		// If we have image caption or font-family set, add these to wrapper properties.
+		wrapperProps = {
+			...props.wrapperProps,
+			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
+			'data-font-family': attributes.ampFontFamily || undefined,
+		};
+
+		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+	} );
+};
 
 // These do not reliably work at domReady.
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
