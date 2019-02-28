@@ -46,7 +46,7 @@ function FontFamilyPicker( {
 					) }
 					renderContent={ () => (
 						<NavigableMenu>
-							{ options.map( ( { value: slug, label } ) => {
+							{ options.map( ( { value: slug, label: Label } ) => {
 								const isSelected = ( value === slug || ( ! value && slug === '' ) );
 
 								return (
@@ -59,7 +59,7 @@ function FontFamilyPicker( {
 									>
 										{ isSelected && <Dashicon icon="saved" /> }
 										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ slug }>
-											{ label }
+											{ 'string' === typeof Label ? Label : <Label height="20" /> }
 										</span>
 									</Button>
 								);

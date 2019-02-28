@@ -1,4 +1,31 @@
-import { __, _x } from '@wordpress/i18n';
+/**
+ * WordPress dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import Arimo from '../images/font-names/arimo.svg';
+import Lato from '../images/font-names/lato.svg';
+import Lora from '../images/font-names/lora.svg';
+import Merriweather from '../images/font-names/merriweather.svg';
+import Montserrat from '../images/font-names/montserrat.svg';
+import NotoSans from '../images/font-names/noto-sans.svg';
+import OpenSans from '../images/font-names/open-sans.svg';
+import OpenSansCondensed from '../images/font-names/open-sans-condensed.svg';
+import Oswald from '../images/font-names/oswald.svg';
+import PlayFairDisplay from '../images/font-names/playfair-display.svg';
+import PtSans from '../images/font-names/pt-sans.svg';
+import PtSansNarrow from '../images/font-names/pt-sans-narrow.svg';
+import PtSerif from '../images/font-names/pt-serif.svg';
+import Raleway from '../images/font-names/raleway.svg';
+import Roboto from '../images/font-names/roboto.svg';
+import RobotoCondensed from '../images/font-names/roboto-condensed.svg';
+import RobotoSlab from '../images/font-names/roboto-slab.svg';
+import Slabo27 from '../images/font-names/slabo-27.svg';
+import SourceSansPro from '../images/font-names/source-sans-pro.svg';
+import Ubuntu from '../images/font-names/ubuntu.svg';
 
 export const ALLOWED_BLOCKS = [
 	'core/audio',
@@ -140,158 +167,158 @@ export const AMP_STORY_FONTS = [
 	},
 	{
 		value: 'arial',
-		label: _x( 'Arial', 'font name', 'amp' ),
+		label: 'Arial',
 	},
 	{
 		value: 'arial-black',
-		label: _x( 'Arial Black', 'font name', 'amp' ),
+		label: 'Arial Black',
 	},
 	{
 		value: 'arial-narrow',
-		label: _x( 'Arial Narrow', 'font name', 'amp' ),
+		label: 'Arial Narrow',
 	},
 	{
 		value: 'arimo',
-		label: _x( 'Arimo', 'font name', 'amp' ),
+		label: Arimo,
 	},
 	{
 		value: 'baskerville',
-		label: _x( 'Baskerville', 'font name', 'amp' ),
+		label: 'Baskerville',
 	},
 	{
 		value: 'brush-script-mt',
-		label: _x( 'Brush Script MT', 'font name', 'amp' ),
+		label: 'Brush Script MT',
 	},
 	{
 		value: 'copperplate',
-		label: _x( 'Copperplate', 'font name', 'amp' ),
+		label: 'Copperplate',
 	},
 	{
 		value: 'courier-new',
-		label: _x( 'Courier New', 'font name', 'amp' ),
+		label: 'Courier New',
 	},
 	{
 		value: 'century-gothic',
-		label: _x( 'Century Gothic', 'font name', 'amp' ),
+		label: 'Century Gothic',
 	},
 	{
 		value: 'garamond',
-		label: _x( 'Garamond', 'font name', 'amp' ),
+		label: 'Garamond',
 	},
 	{
 		value: 'georgia',
-		label: _x( 'Georgia', 'font name', 'amp' ),
+		label: 'Georgia',
 	},
 	{
 		value: 'gill-sans',
-		label: _x( 'Gill Sans', 'font name', 'amp' ),
+		label: 'Gill Sans',
 	},
 	{
 		value: 'lato',
-		label: _x( 'Lato', 'font name', 'amp' ),
+		label: Lato,
 	},
 	{
 		value: 'lora',
-		label: _x( 'Lora', 'font name', 'amp' ),
+		label: Lora,
 	},
 	{
 		value: 'lucida-bright',
-		label: _x( 'Lucida Bright', 'font name', 'amp' ),
+		label: 'Lucida Bright',
 	},
 	{
 		value: 'lucida-sans-typewriter',
-		label: _x( 'Lucida Sans Typewriter', 'font name', 'amp' ),
+		label: 'Lucida Sans Typewriter',
 	},
 	{
 		value: 'merriweather',
-		label: _x( 'Merriweather', 'font name', 'amp' ),
+		label: Merriweather,
 	},
 	{
 		value: 'montserrat',
-		label: _x( 'Montserrat', 'font name', 'amp' ),
+		label: Montserrat,
 	},
 	{
 		value: 'noto-sans',
-		label: _x( 'Noto Sans', 'font name', 'amp' ),
+		label: NotoSans,
 	},
 	{
 		value: 'open-sans',
-		label: _x( 'Open Sans', 'font name', 'amp' ),
+		label: OpenSans,
 	},
 	{
 		value: 'open-sans-condensed',
-		label: _x( 'Open Sans Condensed', 'font name', 'amp' ),
+		label: OpenSansCondensed,
 	},
 	{
 		value: 'oswald',
-		label: _x( 'Oswald', 'font name', 'amp' ),
+		label: Oswald,
 	},
 	{
 		value: 'papyrus',
-		label: _x( 'Papyrus', 'font name', 'amp' ),
+		label: 'Papyrus',
 	},
 	{
 		value: 'palatino',
-		label: _x( 'Palatino', 'font name', 'amp' ),
+		label: 'Palatino',
 	},
 	{
 		value: 'playfair-display',
-		label: _x( 'Playfair Display', 'font name', 'amp' ),
+		label: PlayFairDisplay,
 	},
 	{
 		value: 'pt-sans',
-		label: _x( 'PT Sans', 'font name', 'amp' ),
+		label: PtSans,
 	},
 	{
 		value: 'pt-sans-narrow',
-		label: _x( 'PT Sans Narrow', 'font name', 'amp' ),
+		label: PtSansNarrow,
 	},
 	{
 		value: 'pt-serif',
-		label: _x( 'PT Serif', 'font name', 'amp' ),
+		label: PtSerif,
 	},
 	{
 		value: 'raleway',
-		label: _x( 'Raleway', 'font name', 'amp' ),
+		label: Raleway,
 	},
 	{
 		value: 'roboto',
-		label: _x( 'Roboto', 'font name', 'amp' ),
+		label: Roboto,
 	},
 	{
 		value: 'roboto-condensed',
-		label: _x( 'Roboto Condensed', 'font name', 'amp' ),
+		label: RobotoCondensed,
 	},
 	{
 		value: 'roboto-slab',
-		label: _x( 'Roboto Slab', 'font name', 'amp' ),
+		label: RobotoSlab,
 	},
 	{
 		value: 'slabo-27',
-		label: _x( 'Slabo 27px', 'font name', 'amp' ),
+		label: Slabo27,
 	},
 	{
 		value: 'source-sans-pro',
-		label: _x( 'Source Sans Pro', 'font name', 'amp' ),
+		label: SourceSansPro,
 	},
 	{
 		value: 'tahoma',
-		label: _x( 'Tahoma', 'font name', 'amp' ),
+		label: 'Tahoma',
 	},
 	{
 		value: 'times-new-roman',
-		label: _x( 'Times New Roman', 'font name', 'amp' ),
+		label: 'Times New Roman',
 	},
 	{
 		value: 'trebuchet-ms',
-		label: _x( 'Trebuchet MS', 'font name', 'amp' ),
+		label: 'Trebuchet MS',
 	},
 	{
 		value: 'ubuntu',
-		label: _x( 'Ubuntu', 'font name', 'amp' ),
+		label: Ubuntu,
 	},
 	{
 		value: 'verdana',
-		label: _x( 'Verdana', 'font name', 'amp' ),
+		label: 'Verdana',
 	},
 ];
