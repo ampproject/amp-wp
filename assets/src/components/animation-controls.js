@@ -3,8 +3,6 @@
  */
 import { RangeControl, SelectControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { withSelect, withDispatch } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -15,17 +13,20 @@ import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../help
 /**
  * Animation controls for AMP Story layout blocks'.
  *
- * @param {Function} setAttributes Set Attributes.
- * @param {Function} onAnimationOrderChange Animation order change callback
- * @param {Function} onAnimationTypeChange Animation type change callback
- * @param {Object} attributes Props.
- * @param {Function} getAnimatedBlocks Function to retrieve list of animated blocks on the same page.
  * @return {Component} Controls.
  */
-function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAnimationOrderChange, onAnimationTypeChange } ) {
-	const { ampAnimationType, ampAnimationDuration, ampAnimationDelay, ampAnimationAfter } = attributes;
-
-	const placeHolder = ANIMATION_DURATION_DEFAULTS[ ampAnimationType ] || 0;
+export default function AnimationControls( {
+	getAnimatedBlocks,
+	onAnimationTypeChange,
+	onAnimationDurationChange,
+	onAnimationDelayChange,
+	onAnimationOrderChange,
+	animationType,
+	animationDuration,
+	animationDelay,
+	animationAfter,
+} ) {
+	const placeHolder = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
 	const animationAfterOptions = [
 		{
@@ -64,23 +65,17 @@ function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAn
 			<SelectControl
 				key="animation"
 				label={ __( 'Animation Type', 'amp' ) }
-				value={ ampAnimationType }
+				value={ animationType }
 				options={ AMP_ANIMATION_TYPE_OPTIONS }
-				onChange={ ( value ) => {
-					onAnimationTypeChange( value, ampAnimationAfter );
-					setAttributes( { ampAnimationType: value } );
-				} }
+				onChange={ onAnimationTypeChange }
 			/>
-			{ ampAnimationType && (
+			{ animationType && (
 				<Fragment>
 					<RangeControl
 						key="duration"
 						label={ __( 'Duration (ms)', 'amp' ) }
-						value={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-						onChange={ ( value ) => {
-							value = value + 'ms';
-							setAttributes( { ampAnimationDuration: value } );
-						} }
+						value={ animationDuration }
+						onChange={ onAnimationDurationChange }
 						min="0"
 						max="5000"
 						placeholder={ placeHolder }
@@ -89,22 +84,17 @@ function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAn
 					<RangeControl
 						key="delay"
 						label={ __( 'Delay (ms)', 'amp' ) }
-						value={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
-						onChange={ ( value ) => {
-							value = value + 'ms';
-							setAttributes( { ampAnimationDelay: value } );
-						} }
+						value={ animationDelay }
+						onChange={ onAnimationDelayChange }
 						min="0"
 						max="5000"
 					/>
 					<SelectControl
 						key="order"
 						label={ __( 'Begin after', 'amp' ) }
-						value={ ampAnimationAfter }
+						value={ animationAfter }
 						options={ animationAfterOptions }
-						onChange={ ( value ) => {
-							onAnimationOrderChange( value );
-						} }
+						onChange={ onAnimationOrderChange }
 					/>
 				</Fragment>
 			) }
@@ -112,63 +102,3 @@ function AnimationControls( { setAttributes, attributes, getAnimatedBlocks, onAn
 	);
 }
 
-const applyWithSelect = withSelect( ( select ) => {
-	const {
-		getSelectedBlockClientId,
-		getBlockRootClientId,
-		getBlockOrder,
-		getBlocksByClientId,
-	} = select( 'core/editor' );
-
-	return {
-		getAnimatedBlocks() {
-			const { getBlockType } = select( 'core/blocks' );
-
-			const clientId = getSelectedBlockClientId();
-			const rootClientId = getBlockRootClientId( clientId );
-			const order = getBlockOrder( rootClientId );
-
-			return getBlocksByClientId( order )
-				.filter( ( block ) => ( block.clientId !== clientId && block.attributes.ampAnimationType ) )
-				.map( ( block ) => {
-					return {
-						...block,
-						type: getBlockType( block.name ),
-					};
-				} );
-		},
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
-	const {
-		getSelectedBlockClientId,
-		getBlockRootClientId,
-	} = select( 'core/editor' );
-
-	const item = getSelectedBlockClientId();
-	const page = getBlockRootClientId( item );
-
-	const {
-		addAnimation,
-		removeAnimation,
-	} = dispatch( 'amp/story' );
-
-	return {
-		onAnimationTypeChange( type, predecessor ) {
-			if ( ! type ) {
-				removeAnimation( page, item );
-			} else {
-				addAnimation( page, item, predecessor );
-			}
-		},
-		onAnimationOrderChange( predecessor ) {
-			addAnimation( page, item, predecessor );
-		},
-	};
-} );
-
-export default compose(
-	applyWithSelect,
-	applyWithDispatch,
-)( AnimationControls );
