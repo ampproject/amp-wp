@@ -922,7 +922,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v13'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v14'; // This should be bumped whenever the PHP-CSS-Parser is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2202,7 +2202,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function ampify_ruleset_selectors( $ruleset ) {
 		$selectors = array();
 		$changes   = 0;
-		$language  = get_bloginfo( 'language' );
+		$language  = strtolower( get_bloginfo( 'language' ) );
 		foreach ( $ruleset->getSelectors() as $old_selector ) {
 			$selector = $old_selector->getSelector();
 
@@ -2212,9 +2212,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Automatically remove selectors that are for another language (and thus are irrelevant). This is safe because amp-bind'ed [lang] is not allowed.
-			$is_other_language = (
-				preg_match( '/^html\[lang(?P<starts_with>\^?)=([\'"]?)(?P<lang>.+?)\2\]/', $selector, $matches )
+			// Automatically remove selectors with html[lang] that are for another language (and thus are irrelevant). This is safe because amp-bind'ed [lang] is not allowed.
+			$is_other_language_root = (
+				preg_match( '/^html\[lang(?P<starts_with>\^)?=([\'"]?)(?P<lang>.+?)\2\]/', strtolower( $selector ), $matches )
 				&&
 				(
 					empty( $matches['starts_with'] )
@@ -2224,9 +2224,43 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					substr( $language, 0, strlen( $matches['lang'] ) ) !== $matches['lang']
 				)
 			);
-			if ( $is_other_language ) {
+			if ( $is_other_language_root ) {
 				$changes++;
 				continue;
+			}
+
+			// Remove selectors with :lang() for another language (and thus irrelevant).
+			if ( preg_match( '/:lang\((?P<languages>.+?)\)/', $selector, $matches ) ) {
+				$has_matching_language = 0;
+				$selector_languages    = array_map(
+					function ( $selector_language ) {
+						return trim( $selector_language, '"\'' );
+					},
+					preg_split( '/\s*,\s*/', strtolower( trim( $matches['languages'] ) ) )
+				);
+				foreach ( $selector_languages as $selector_language ) {
+					/*
+					 * The following logic accounts for the following conditions, where all but the last is a match:
+					 *
+					 * N: en && fr
+					 * Y: en && en
+					 * Y: en && en-US
+					 * Y: en-US && en
+					 * N: en-US && en-UK
+					 */
+					if (
+						substr( $language, 0, strlen( $selector_language ) ) === $selector_language
+						||
+						substr( $selector_language, 0, strlen( $language ) ) === $language
+					) {
+						$has_matching_language = true;
+						break;
+					}
+				}
+				if ( ! $has_matching_language ) {
+					$changes++;
+					continue;
+				}
 			}
 
 			// An element (type) either starts a selector or is preceded by combinator, comma, opening paren, or closing brace.

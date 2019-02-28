@@ -493,6 +493,10 @@ def GetTagRules(tag_spec):
 		if not has_amp_format:
 			return None
 
+	# Ignore transformed AMP for now.
+	if tag_spec.enabled_by and 'transformed' in tag_spec.enabled_by:
+		return None
+
 	if tag_spec.HasField('extension_spec'):
 		extension_spec = {}
 		for field in tag_spec.extension_spec.ListFields():
@@ -565,8 +569,9 @@ def GetAttrs(attrs):
 
 		value_dict = GetValues(attr_spec)
 
-		# Add attribute name and alternative_names
-		attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
+		if value_dict is not None:
+			# Add attribute name and alternative_names
+			attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
 
 	logging.info('... done')
 	return attr_dict
@@ -576,6 +581,10 @@ def GetValues(attr_spec):
 	logging.info('entering ...')
 
 	value_dict = {}
+
+	# Ignore transformed AMP for now.
+	if 'transformed' in attr_spec.enabled_by:
+		return None
 
 	# Add alternative names
 	if attr_spec.alternative_names:
@@ -700,7 +709,11 @@ def Main( validator_directory, out_dir ):
 	GeneratePHP(out_dir)
 
 if __name__ == '__main__':
-	project_repo_absolute_path = os.path.realpath( os.path.join( os.path.dirname( __file__ ), '..' ) )
-	validator_directory = os.path.join( project_repo_absolute_path, 'vendor/ampproject/amphtml/validator' )
+	if len( sys.argv ) == 0:
+		Die( "Error: Must supply amphtml directory as first argument" )
+	validator_directory = os.path.join( sys.argv[1], 'validator' )
+	if not os.path.exists( validator_directory ):
+		Die( "Error: The amphtml directory does not exist: %s" % validator_directory )
+	validator_directory = os.path.realpath( validator_directory )
 	out_dir = os.path.join( tempfile.gettempdir(), 'amp_wp' )
 	Main( validator_directory, out_dir )

@@ -776,7 +776,9 @@ function amp_get_content_sanitizers( $post = null ) {
 		),
 		'AMP_Img_Sanitizer'               => array(),
 		'AMP_Form_Sanitizer'              => array(),
-		'AMP_Comments_Sanitizer'          => array(),
+		'AMP_Comments_Sanitizer'          => array(
+			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
+		),
 		'AMP_Video_Sanitizer'             => array(),
 		'AMP_O2_Player_Sanitizer'         => array(),
 		'AMP_Audio_Sanitizer'             => array(),
