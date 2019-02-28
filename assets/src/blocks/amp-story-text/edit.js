@@ -5,7 +5,6 @@ import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import { PanelBody, SelectControl } from '@wordpress/components';
 import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wordpress/editor';
-import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
