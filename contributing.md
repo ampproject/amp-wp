@@ -90,10 +90,16 @@ This will create an `amp.zip` in the plugin directory which you can install. The
 ## Updating Allowed Tags And Attributes
 
 The file `class-amp-allowed-tags-generated.php` has the AMP specification's allowed tags and attributes. It's used in sanitization.
-To update that file:
+
+To update that file, perform the following steps:
+
 1. `cd` to the root of this plugin
-2. run `bash bin/amphtml-update.sh`
-That script is intended for a Linux environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
+2. Run `./bin/amphtml-update.sh` (or `lando ssh -c './bin/amphtml-update.sh'` if using Lando).
+3. Review the diff.
+4. Update tests based on changes to the spec.
+5. Commit changes.
+
+This script is intended for a Linux environment like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV) or [Lando wordpressdev](https://github.com/felixarntz/wordpressdev).
 
 ## Testing Media And Embed Support
 

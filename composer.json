@@ -4,24 +4,6 @@
   "homepage": "https://github.com/ampproject/amp-wp",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
-  "repositories": [
-    {
-      "type": "package",
-      "package": {
-        "name": "ampproject/amphtml",
-        "version": "1902072121410",
-        "dist": {
-          "url": "https://github.com/ampproject/amphtml/archive/1902072121410.zip",
-          "type": "zip"
-        },
-        "source": {
-          "url": "git@github.com:ampproject/amphtml.git",
-          "type": "git",
-          "reference": "tags/1902072121410"
-        }
-      }
-    }
-  ],
   "require": {
     "php": "^5.4 || ^7.0",
     "sabberworm/php-css-parser": "8.3.0",
@@ -32,8 +14,7 @@
     "wp-coding-standards/wpcs": "2.0.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
     "phpcompatibility/php-compatibility": "9.1.1",
-    "xwp/wp-dev-lib": "1.0.1",
-    "ampproject/amphtml": "1902072121410"
+    "xwp/wp-dev-lib": "1.0.1"
   },
   "config": {
     "platform": {
