@@ -4,7 +4,7 @@
 import { addFilter } from '@wordpress/hooks';
 import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
-import { setDefaultBlockName } from '@wordpress/blocks';
+import { setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
 
 /**
@@ -35,6 +35,9 @@ domReady( () => {
 subscribe( () => {
 	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
 } );
+
+// Remove all blocks that aren't whitelisted.
+getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) ).map( ( { name } ) => unregisterBlockType( name ) );
 
 /**
  * Add AMP attributes to every allowed AMP Story block.
