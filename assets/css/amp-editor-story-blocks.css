@@ -452,9 +452,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin-top: 1em;
 }
 
-.editor-amp-story-page-wrap {
-	position: relative;
+.editor-amp-story-page-video-wrap {
+	position: absolute;
 	overflow: hidden;
+	width: 100%;
+	height: 100%;
 }
 
 .editor-amp-story-page-video {

@@ -219,12 +219,14 @@ class EditPage extends Component {
 						</Fragment>
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style } className="editor-amp-story-page-wrap">
+				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
-						<video muted loop className="editor-amp-story-page-video">
-							<source src={ mediaUrl } type={ media.mime_type } />
-						</video>
+						<div className="editor-amp-story-page-video-wrap">
+							<video autoPlay muted loop className="editor-amp-story-page-video">
+								<source src={ mediaUrl } type={ media.mime_type } />
+							</video>
+						</div>
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
 				</div>
