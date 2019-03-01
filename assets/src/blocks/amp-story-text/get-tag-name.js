@@ -7,8 +7,8 @@ import { _x } from '@wordpress/i18n';
 // Todo: Make these customizable?
 const H1_FONT_SIZE = 40;
 const H2_FONT_SIZE = 24;
-const H1_TEXT_LENGTH = 15;
-const H2_TEXT_LENGTH = 30;
+const H1_TEXT_LENGTH = 4;
+const H2_TEXT_LENGTH = 10;
 
 /*
  * translators: If your word count is based on single characters (e.g. East Asian characters),
@@ -19,6 +19,8 @@ const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' )
 
 /**
  * Determines the HTML tag name that should be used given on the block's attributes.
+ *
+ * Font size takes precedence over text length as it's a stronger signal for semantic meaning.
  *
  * @param {Object} attributes Block attributes.
  * @return {string} HTML tag name. Either p, h1, or h2.
