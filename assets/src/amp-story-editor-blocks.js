@@ -47,7 +47,7 @@ getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) ).map(
  * @return {Object} Settings.
  */
 const addAMPAttributes = ( settings, name ) => {
-	if ( -1 === ALLOWED_BLOCKS.indexOf( name ) ) {
+	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
 		return settings;
 	}
 
@@ -120,7 +120,7 @@ const addAMPAttributes = ( settings, name ) => {
 const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const ampAttributes = {};
 
-	if ( -1 === ALLOWED_BLOCKS.indexOf( blockType.name ) ) {
+	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( blockType.name ) ) {
 		return props;
 	}
 
@@ -166,7 +166,7 @@ const setBlockParent = ( props ) => {
 		};
 	}
 
-	if ( -1 === name.indexOf( 'amp/amp-story-page' ) ) {
+	if ( name !== 'amp/amp-story-page' ) {
 		// Do not allow inserting any of the blocks if they're not AMP Story blocks.
 		return {
 			...props,
