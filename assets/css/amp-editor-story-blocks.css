@@ -17,6 +17,7 @@
 	7. Block navigator
 	8. Block mover
 	9. General block editor components
+	10. Custom Components
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -470,6 +471,84 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 #editor-amp-story-page-poster__help {
 	margin-top: 0;
+}
+
+/*
+ * 10. Custom Components
+ */
+
+/*
+ * Font Family Picker
+ *
+ * Styling derived form font size picker in Gutenberg
+ */
+.components-font-family-picker__buttons {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.components-font-family-picker__dropdown-content .components-button {
+	display: block;
+	position: relative;
+	padding: 10px 20px 10px 40px;
+	width: 100%;
+	text-align: left;
+}
+
+.components-font-family-picker__dropdown-content .components-button:hover {
+	color: #191e23;
+	border: none;
+	box-shadow: none;
+	background: #f3f4f5;
+}
+
+.components-font-family-picker__dropdown-content .components-button:focus {
+	color: #191e23;
+	border: none;
+	box-shadow: none;
+	outline-offset: -2px;
+	outline: 1px dotted #555d66;
+}
+
+.components-font-family-picker__dropdown-content .components-button .dashicon {
+	position: absolute;
+	top: calc(50% - 10px);
+	left: 10px;
+}
+
+.components-font-family-picker__buttons .components-font-family-picker__selector {
+	background: none;
+	position: relative;
+	width: 200px;
+	box-shadow: 0 0 0 transparent;
+	transition: box-shadow 0.1s linear;
+	border-radius: 4px;
+	border: 1px solid #8d96a0;
+}
+
+.components-font-family-picker__buttons .components-font-family-picker__selector:focus {
+	color: #191e23;
+	border-color: #00a0d2;
+	box-shadow: 0 0 0 1px #00a0d2;
+	outline: 2px solid transparent;
+	outline-offset: -2px;
+}
+
+.components-font-family-picker__buttons .components-font-family-picker__selector::after {
+	content: "";
+	pointer-events: none;
+	display: block;
+	width: 0;
+	height: 0;
+	border-left: 3px solid transparent;
+	border-right: 3px solid transparent;
+	border-top: 5px solid currentColor;
+	margin-left: 4px;
+	margin-right: 2px;
+	right: 8px;
+	top: 12px;
+	position: absolute;
 }
 
 /*

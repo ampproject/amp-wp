@@ -29,7 +29,7 @@ import { withSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import BlockNavigation from './block-navigation';
-import { ALLOWED_BLOCKS } from '../../helpers';
+import { ALLOWED_BLOCKS } from '../../constants';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
 const TEMPLATE = [

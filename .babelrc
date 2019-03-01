@@ -17,7 +17,8 @@
       {
         "pragma": "createElement"
       }
-    ]
+    ],
+    "inline-react-svg"
   ],
   "sourceMaps": true
 }
