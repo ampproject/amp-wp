@@ -74,6 +74,16 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
 			array_push( $stories, $new_story );
+
+			// Create the featured image.
+			$thumbnail_id = $this->factory()->attachment->create_object(
+				'https://example.com/foo-image.jpeg',
+				$i,
+				array(
+					'post_mime_type' => 'image/jpeg',
+				)
+			);
+			update_post_meta( $new_story->ID, '_thumbnail_id', $thumbnail_id );
 		}
 
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
