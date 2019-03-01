@@ -79,16 +79,6 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		// Forcibly sanitize all validation errors.
-		add_action(
-			'wp',
-			function() {
-				if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-					add_filter( 'amp_validation_error_sanitized', '__return_true' );
-				}
-			}
-		);
-
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
@@ -163,7 +153,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// This CSS is separately since it's used both in frontend and in the editor.
-		$amp_stories_fonts_handle = 'amp-story-fonts';// @todo This should be renamed since no longer fonts?
+		$amp_stories_fonts_handle = 'amp-story-fonts'; // @todo This should be renamed since no longer fonts?
 		wp_enqueue_style(
 			$amp_stories_fonts_handle,
 			amp_get_asset_url( 'css/amp-stories.css' ),

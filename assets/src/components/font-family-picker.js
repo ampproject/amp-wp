@@ -76,7 +76,7 @@ function FontFamilyPicker( {
 										aria-checked={ isSelected }
 									>
 										{ isSelected && <Dashicon icon="saved" /> }
-										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ optionName }>
+										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ value === '' ? undefined : value }>
 											{ fontLabel( { name: optionName } ) }
 										</span>
 									</Button>
