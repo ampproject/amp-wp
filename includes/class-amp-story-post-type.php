@@ -163,8 +163,9 @@ class AMP_Story_Post_Type {
 		}
 
 		// This CSS is separately since it's used both in frontend and in the editor.
+		$amp_stories_fonts_handle = 'amp-story-fonts';// @todo This should be renamed since no longer fonts?
 		wp_enqueue_style(
-			'amp-story-fonts',
+			$amp_stories_fonts_handle,
 			amp_get_asset_url( 'css/amp-stories.css' ),
 			false,
 			AMP__VERSION
@@ -209,10 +210,26 @@ class AMP_Story_Post_Type {
 			);
 		}
 
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			$families = array_map(
+				'wp_json_encode',
+				array_merge( (array) $font['name'], $font['fallbacks'] )
+			);
+			wp_add_inline_style(
+				$amp_stories_fonts_handle,
+				sprintf(
+					'[data-font-family="%s"] { font-family: %s; }',
+					$font['name'],
+					implode( ', ', $families )
+				)
+			);
+		}
+
 		wp_localize_script(
 			'amp-story-editor-blocks',
-			'ampStoriesGoogleFonts',
-			self::get_google_fonts_handles()
+			'ampStoriesFonts',
+			$fonts
 		);
 	}
 
@@ -245,11 +262,190 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Returns all the Google Fonts that can be used in an AMP story.
+	 * Get list of fonts used in AMP Stories.
 	 *
-	 * @see /assets/css/amp-stories.css
+	 * @return array Fonts.
 	 */
-	public static function get_google_fonts_handles() {
+	public static function get_fonts() {
+		$fonts = array(
+			array(
+				'name'      => 'Arial',
+				'fallbacks' => array( 'Helvetica Neue', 'Helvetica', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arial Black',
+				'fallbacks' => array( 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arial Narrow',
+				'fallbacks' => array( 'Arial', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arimo',
+				'gfont'     => 'Arimo:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Baskerville',
+				'fallbacks' => array( 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Brush Script MT',
+				'fallbacks' => array( 'cursive' ),
+			),
+			array(
+				'name'      => 'Copperplate',
+				'fallbacks' => array( 'Copperplate Gothic Light', 'fantasy' ),
+			),
+			array(
+				'name'      => 'Courier New',
+				'fallbacks' => array( 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ),
+			),
+			array(
+				'name'      => 'Century Gothic',
+				'fallbacks' => array( 'CenturyGothic', 'AppleGothic', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Garamond',
+				'fallbacks' => array( 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Georgia',
+				'fallbacks' => array( 'Times', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Gill Sans',
+				'fallbacks' => array( 'Gill Sans MT', 'Calibri', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Lato',
+				'gfont'     => 'Lato:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Lora',
+				'gfont'     => 'Lora:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Lucida Bright',
+				'fallbacks' => array( 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Lucida Sans Typewriter',
+				'fallbacks' => array( 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ),
+			),
+			array(
+				'name'      => 'Merriweather',
+				'gfont'     => 'Merriweather:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Montserrat',
+				'gfont'     => 'Montserrat:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Noto Sans',
+				'gfont'     => 'Noto Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Open Sans',
+				'gfont'     => 'Open Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Open Sans Condensed',
+				'gfont'     => 'Open Sans Condensed:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Oswald',
+				'gfont'     => 'Oswald:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Palatino',
+				'fallbacks' => array( 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Papyrus',
+				'fallbacks' => array( 'fantasy' ),
+			),
+			array(
+				'name'      => 'Playfair Display',
+				'gfont'     => 'Playfair Display:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'PT Sans',
+				'gfont'     => 'PT Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'PT Sans Narrow',
+				'gfont'     => 'PT Sans Narrow:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'PT Serif',
+				'gfont'     => 'PT Serif:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Raleway',
+				'gfont'     => 'Raleway:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto',
+				'gfont'     => 'Roboto:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto Condensed',
+				'gfont'     => 'Roboto Condensed:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto Slab',
+				'gfont'     => 'Roboto Slab:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Slabo 27px',
+				'gfont'     => 'Slabo 27px:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Source Sans Pro',
+				'gfont'     => 'Source Sans Pro:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Tahoma',
+				'fallbacks' => array( 'Verdana', 'Segoe', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Times New Roman',
+				'fallbacks' => array( 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Trebuchet MS',
+				'fallbacks' => array( 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Ubuntu',
+				'gfont'     => 'Ubuntu:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Verdana',
+				'fallbacks' => array( 'Geneva', 'sans-serif' ),
+			),
+		);
+
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = array( 'latin', 'latin-ext' );
 
@@ -271,108 +467,24 @@ class AMP_Story_Post_Type {
 			$subsets[] = 'vietnamese';
 		}
 
-		$fonts = array(
-			array(
-				'name'   => 'Arimo',
-				'family' => 'Arimo:400,700',
-			),
-			array(
-				'name'   => 'Lato',
-				'family' => 'Lato:400,700',
-			),
-			array(
-				'name'   => 'Lora',
-				'family' => 'Lora:400,700',
-			),
-			array(
-				'name'   => 'Merriweather',
-				'family' => 'Merriweather:400,700',
-			),
-			array(
-				'name'   => 'Montserrat',
-				'family' => 'Montserrat:400,700',
-			),
-			array(
-				'name'   => 'Noto Sans',
-				'family' => 'Noto Sans:400,700',
-			),
-			array(
-				'name'   => 'Open Sans',
-				'family' => 'Open Sans:400,700',
-			),
-			array(
-				'name'   => 'Open Sans Condensed',
-				'family' => 'Open Sans Condensed:400,700',
-			),
-			array(
-				'name'   => 'Oswald',
-				'family' => 'Oswald:400,700',
-			),
-			array(
-				'name'   => 'Playfair Display',
-				'family' => 'Playfair Display:400,700',
-			),
-			array(
-				'name'   => 'PT Sans',
-				'family' => 'PT Sans:400,700',
-			),
-			array(
-				'name'   => 'PT Sans Narrow',
-				'family' => 'PT Sans Narrow:400,700',
-			),
-			array(
-				'name'   => 'PT Serif',
-				'family' => 'PT Serif:400,700',
-			),
-			array(
-				'name'   => 'Raleway',
-				'family' => 'Raleway:400,700',
-			),
-			array(
-				'name'   => 'Roboto',
-				'family' => 'Roboto:400,700',
-			),
-			array(
-				'name'   => 'Roboto Condensed',
-				'family' => 'Roboto Condensed:400,700',
-			),
-			array(
-				'name'   => 'Roboto Slab',
-				'family' => 'Roboto Slab:400,700',
-			),
-			array(
-				'name'   => 'Slabo 27px',
-				'family' => 'Slabo 27px:400,700',
-			),
-			array(
-				'name'   => 'Source Sans Pro',
-				'family' => 'Source Sans Pro:400,700',
-			),
-			array(
-				'name'   => 'Ubuntu',
-				'family' => 'Ubuntu:400,700',
-			),
+		return array_map(
+			function ( $font ) use ( $fonts_url, $subsets ) {
+				$font['slug'] = sanitize_title( $font['name'] );
+
+				if ( isset( $font['gfont'] ) ) {
+					$font['handle'] = sprintf( '%s-font', $font['slug'] );
+					$font['src']    = add_query_arg(
+						array(
+							'family' => rawurlencode( $font['gfont'] ),
+							'subset' => rawurlencode( implode( ',', $subsets ) ),
+						),
+						$fonts_url
+					);
+				}
+
+				return $font;
+			},
+			$fonts
 		);
-
-		$handles = array();
-
-		foreach ( $fonts as $font ) {
-			$src = add_query_arg(
-				array(
-					'family' => rawurlencode( $font['family'] ),
-					'subset' => rawurlencode( implode( ',', $subsets ) ),
-				),
-				$fonts_url
-			);
-
-			$slug = sanitize_title( $font['name'] );
-
-			$handles[ $slug ] = array(
-				'handle' => sprintf( '%s-font', $slug ),
-				'src'    => $src,
-			);
-		}
-
-		return $handles;
 	}
 }

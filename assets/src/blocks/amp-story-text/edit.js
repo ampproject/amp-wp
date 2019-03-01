@@ -10,7 +10,6 @@ import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wor
  * Internal dependencies
  */
 import getTagName from './get-tag-name';
-import { AMP_STORY_FONTS } from '../../constants';
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle } from '../../helpers';
 
@@ -31,8 +30,7 @@ function TextBlock( {
 			<InspectorControls>
 				<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 					<FontFamilyPicker
-						value={ ampFontFamily }
-						options={ AMP_STORY_FONTS }
+						name={ ampFontFamily }
 						onChange={ ( value ) => {
 							maybeEnqueueFontStyle( value );
 							setAttributes( { ampFontFamily: value } );

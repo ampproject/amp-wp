@@ -5,26 +5,44 @@ import { __, sprintf } from '@wordpress/i18n';
 import { Dashicon, BaseControl, Button, Dropdown, NavigableMenu } from '@wordpress/components';
 
 /**
+ * Internal dependencies
+ */
+import { AMP_STORY_FONT_IMAGES } from '../constants';
+
+/**
  * Font Family Picker component.
  *
  * @return {?Object} The rendered component or null if there are no options.
  */
 function FontFamilyPicker( {
-	options = [],
 	onChange,
-	value = '',
+	name = '',
 } ) {
-	if ( ! options.length ) {
+	if ( ! window.ampStoriesFonts ) {
 		return null;
 	}
 
-	const fontLabel = ( { label, element: Element } ) => Element ? <Element height="20" /> : label;
-	const currentFont = options.find( ( font ) => font.value === value );
+	const noneFont = {
+		name: __( 'None', 'amp' ),
+		value: '',
+	};
+
+	const options = [
+		noneFont,
+		...window.ampStoriesFonts.map( ( font ) => ( {
+			name: font.name,
+			value: font.name,
+		} ) ),
+	];
+
+	const fontLabel = ( { name: familyName } ) => AMP_STORY_FONT_IMAGES[ familyName ] ?
+		AMP_STORY_FONT_IMAGES[ familyName ]( { height: 13 } ) :
+		familyName;
+	const currentFont = options.find( ( font ) => font.name === name ) || noneFont;
 
 	return (
 		<BaseControl label={ __( 'Font Family', 'amp' ) }>
 			<div className="components-font-family-picker__buttons">
-				{ ( options.length > 0 ) &&
 				<Dropdown
 					className="components-font-family-picker__dropdown"
 					contentClassName="components-font-family-picker__dropdown-content"
@@ -38,29 +56,28 @@ function FontFamilyPicker( {
 							aria-label={ sprintf(
 								/* translators: %s: font name */
 								__( 'Font Family: %s', 'amp' ),
-								( currentFont && currentFont.label ) || __( 'None', 'amp' )
+								currentFont.name
 							) }
-							data-font-family={ currentFont ? currentFont.value : '' }
+							data-font-family={ currentFont.name }
 						>
 							{ fontLabel( currentFont ) }
 						</Button>
 					) }
 					renderContent={ () => (
 						<NavigableMenu>
-							{ options.map( ( { value: slug, label, element } ) => {
-								const isSelected = ( value === slug || ( ! value && slug === '' ) );
+							{ options.map( ( { name: optionName, value } ) => {
+								const isSelected = ( optionName === name || ( ! name && optionName === '' ) );
 
 								return (
 									<Button
-										key={ slug }
-										onClick={ () => onChange( slug === '' ? undefined : slug ) }
-										className={ `is-font-${ slug }` }
+										key={ optionName }
+										onClick={ () => onChange( value === '' ? undefined : value ) }
 										role="menuitemradio"
 										aria-checked={ isSelected }
 									>
 										{ isSelected && <Dashicon icon="saved" /> }
-										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ slug }>
-											{ fontLabel( { label, element } ) }
+										<span className="components-font-family-picker__dropdown-text-size" data-font-family={ optionName }>
+											{ fontLabel( { name: optionName } ) }
 										</span>
 									</Button>
 								);
@@ -68,7 +85,6 @@ function FontFamilyPicker( {
 						</NavigableMenu>
 					) }
 				/>
-				}
 			</div>
 		</BaseControl>
 	);

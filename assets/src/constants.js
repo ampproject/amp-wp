@@ -160,185 +160,25 @@ export const AMP_ANIMATION_TYPE_OPTIONS = [
 	},
 ];
 
-export const AMP_STORY_FONTS = [
-	{
-		value: '',
-		label: __( 'None', 'amp' ),
-	},
-	{
-		value: 'arial',
-		label: 'Arial',
-	},
-	{
-		value: 'arial-black',
-		label: 'Arial Black',
-	},
-	{
-		value: 'arial-narrow',
-		label: 'Arial Narrow',
-	},
-	{
-		value: 'arimo',
-		label: 'Arimo',
-		element: Arimo,
-	},
-	{
-		value: 'baskerville',
-		label: 'Baskerville',
-	},
-	{
-		value: 'brush-script-mt',
-		label: 'Brush Script MT',
-	},
-	{
-		value: 'copperplate',
-		label: 'Copperplate',
-	},
-	{
-		value: 'courier-new',
-		label: 'Courier New',
-	},
-	{
-		value: 'century-gothic',
-		label: 'Century Gothic',
-	},
-	{
-		value: 'garamond',
-		label: 'Garamond',
-	},
-	{
-		value: 'georgia',
-		label: 'Georgia',
-	},
-	{
-		value: 'gill-sans',
-		label: 'Gill Sans',
-	},
-	{
-		value: 'lato',
-		label: 'Lato',
-		element: Lato,
-	},
-	{
-		value: 'lora',
-		label: 'Lora',
-		element: Lora,
-	},
-	{
-		value: 'lucida-bright',
-		label: 'Lucida Bright',
-	},
-	{
-		value: 'lucida-sans-typewriter',
-		label: 'Lucida Sans Typewriter',
-	},
-	{
-		value: 'merriweather',
-		label: 'Merriweather',
-		element: Merriweather,
-	},
-	{
-		value: 'montserrat',
-		label: 'Montserrat',
-		element: Montserrat,
-	},
-	{
-		value: 'noto-sans',
-		label: 'Noto Sans',
-		element: NotoSans,
-	},
-	{
-		value: 'open-sans',
-		label: 'Open Sans',
-		element: OpenSans,
-	},
-	{
-		value: 'open-sans-condensed',
-		label: 'Open Sans Condensed',
-		element: OpenSansCondensed,
-	},
-	{
-		value: 'oswald',
-		label: 'Oswald',
-		element: Oswald,
-	},
-	{
-		value: 'papyrus',
-		label: 'Papyrus',
-	},
-	{
-		value: 'palatino',
-		label: 'Palatino',
-	},
-	{
-		value: 'playfair-display',
-		label: 'Playfair Display',
-		element: PlayfairDisplay,
-	},
-	{
-		value: 'pt-sans',
-		label: 'PT Sans',
-		element: PtSans,
-	},
-	{
-		value: 'pt-sans-narrow',
-		label: 'PT Sans Narrow',
-		element: PtSansNarrow,
-	},
-	{
-		value: 'pt-serif',
-		label: 'PT Serif',
-		element: PtSerif,
-	},
-	{
-		value: 'raleway',
-		label: 'Raleway',
-		element: Raleway,
-	},
-	{
-		value: 'roboto',
-		label: 'Roboto',
-		element: Roboto,
-	},
-	{
-		value: 'roboto-condensed',
-		label: 'Roboto Condensed',
-		element: RobotoCondensed,
-	},
-	{
-		value: 'roboto-slab',
-		label: 'Roboto Slab',
-		element: RobotoSlab,
-	},
-	{
-		value: 'slabo-27px',
-		label: 'Slabo 27px',
-		element: Slabo27,
-	},
-	{
-		value: 'source-sans-pro',
-		label: 'Source Sans Pro',
-		element: SourceSansPro,
-	},
-	{
-		value: 'tahoma',
-		label: 'Tahoma',
-	},
-	{
-		value: 'times-new-roman',
-		label: 'Times New Roman',
-	},
-	{
-		value: 'trebuchet-ms',
-		label: 'Trebuchet MS',
-	},
-	{
-		value: 'ubuntu',
-		label: 'Ubuntu',
-		element: Ubuntu,
-	},
-	{
-		value: 'verdana',
-		label: 'Verdana',
-	},
-];
+export const AMP_STORY_FONT_IMAGES = {
+	Arimo,
+	Lato,
+	Lora,
+	Merriweather,
+	Montserrat,
+	'Noto Sans': NotoSans,
+	'Open Sans': OpenSans,
+	'Open Sans Condensed': OpenSansCondensed,
+	Oswald,
+	'Playfair Display': PlayfairDisplay,
+	'PT Sans': PtSans,
+	'PT Sans Narrow': PtSansNarrow,
+	'PT Serif': PtSerif,
+	Raleway,
+	Roboto,
+	'Roboto Condensed': RobotoCondensed,
+	'Roboto Slab': RobotoSlab,
+	'Slabo 27px': Slabo27,
+	'Source Sans Pro': SourceSansPro,
+	Ubuntu,
+};
