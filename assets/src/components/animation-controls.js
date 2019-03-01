@@ -17,7 +17,7 @@ import { AnimationOrderPicker } from './';
  * @return {Component} Controls.
  */
 export default function AnimationControls( {
-	getAnimatedBlocks,
+	animatedBlocks,
 	onAnimationTypeChange,
 	onAnimationDurationChange,
 	onAnimationDelayChange,
@@ -62,7 +62,7 @@ export default function AnimationControls( {
 						key="order"
 						label={ __( 'Begin after', 'amp' ) }
 						value={ animationAfter }
-						options={ getAnimatedBlocks() }
+						options={ animatedBlocks }
 						onChange={ onAnimationAfterChange }
 					/>
 				</Fragment>

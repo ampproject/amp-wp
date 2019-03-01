@@ -19,14 +19,16 @@ function ButtonContent( { option, displayIcon = true } ) {
 	switch ( block.name ) {
 		case 'core/image':
 			if ( block.attributes.url ) {
-				label = block.attributes.url.slice( block.attributes.url.lastIndexOf( '/' ) );
+				const content = block.attributes.url.slice( block.attributes.url.lastIndexOf( '/' ) ).slice( 0, 30 );
+
+				label = content.length > 0 ? content : label;
 			}
 
 			break;
 		case 'amp/amp-story-text':
-			const content = block.originalContent ? block.originalContent.replace( /<[^<>]+>/g, ' ' ) : '';
+			const content = block.attributes.content.length > 0 ? block.attributes.content.replace( /<[^<>]+>/g, ' ' ).slice( 0, 30 ) : '';
 
-			label = content.slice( 0, 20 );
+			label = content.length > 0 ? content : blockType.title;
 			break;
 		default:
 			label = block.clientId;
@@ -34,7 +36,7 @@ function ButtonContent( { option, displayIcon = true } ) {
 
 	return (
 		<Fragment>
-			{ label }
+			{ label.length > 20 ? `${ label.substr( 0, 20 ) }…` : label }
 			{ displayIcon && <BlockIcon icon={ blockType.icon } /> }
 		</Fragment>
 	);
