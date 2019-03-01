@@ -3,12 +3,13 @@
  */
 import { RangeControl, SelectControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../constants';
+import { AnimationOrderPicker } from './';
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -20,45 +21,13 @@ export default function AnimationControls( {
 	onAnimationTypeChange,
 	onAnimationDurationChange,
 	onAnimationDelayChange,
-	onAnimationOrderChange,
+	onAnimationAfterChange,
 	animationType,
 	animationDuration,
 	animationDelay,
 	animationAfter,
 } ) {
 	const placeHolder = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
-
-	const animationAfterOptions = [
-		{
-			value: '',
-			label: __( 'Immediately', 'amp' ),
-		},
-	];
-
-	getAnimatedBlocks().map( ( block ) => {
-		let label;
-
-		// Todo: Cover more special cases if needed.
-		switch ( block.name ) {
-			case 'core/image':
-				label = sprintf( __( '%1$s (%2$s)', 'amp' ), block.attributes.url.lastIndexOf( '/' ).slice( 0, 20 ), block.clientId );
-				break;
-			case 'amp/amp-story-text':
-				const content = block.originalContent ? block.originalContent.replace( /<[^<>]+>/g, ' ' ).slice( 0, 20 ) : '';
-
-				label = content.length > 0 ? sprintf( __( '%1$s (%2$s)', 'amp' ), content, block.type.title ) : block.type.title;
-				break;
-			default:
-				label = sprintf( __( '%1$s (%2$s)', 'amp' ), block.type.title, block.clientId );
-		}
-
-		animationAfterOptions.push(
-			{
-				value: block.clientId,
-				label,
-			}
-		);
-	} );
 
 	return (
 		<Fragment>
@@ -89,12 +58,12 @@ export default function AnimationControls( {
 						min="0"
 						max="5000"
 					/>
-					<SelectControl
+					<AnimationOrderPicker
 						key="order"
 						label={ __( 'Begin after', 'amp' ) }
 						value={ animationAfter }
-						options={ animationAfterOptions }
-						onChange={ onAnimationOrderChange }
+						options={ getAnimatedBlocks() }
+						onChange={ onAnimationAfterChange }
 					/>
 				</Fragment>
 			) }

@@ -15,28 +15,32 @@ import { ALLOWED_BLOCKS } from '../constants';
 import { AnimationControls } from './';
 
 const applyWithSelect = withSelect( ( select, props ) => {
-	const { getBlockRootClientId, getBlock } = select( 'core/editor' );
+	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlocksByClientId, getBlockOrder } = select( 'core/editor' );
+	const { getAnimationOrder } = select( 'amp/story' );
+
+	const currentBlock = getSelectedBlockClientId();
+	const page = getBlockRootClientId( currentBlock );
+
+	const { ampAnimationAfter } = props.attributes;
+	const predecessor = getBlocksByClientId( getBlockOrder( page ) ).find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 	return {
 		parentBlock: getBlock( getBlockRootClientId( props.clientId ) ),
+		animationAfter: predecessor ? predecessor.clientId : undefined,
 		getAnimatedBlocks() {
-			const {
-				getSelectedBlockClientId,
-				getBlockOrder,
-				getBlocksByClientId,
-			} = select( 'core/editor' );
 			const { getBlockType } = select( 'core/blocks' );
 
-			const clientId = getSelectedBlockClientId();
-			const rootClientId = getBlockRootClientId( clientId );
-			const order = getBlockOrder( rootClientId );
-
-			return getBlocksByClientId( order )
-				.filter( ( block ) => ( block.clientId !== clientId && block.attributes.ampAnimationType ) )
-				.map( ( block ) => {
+			const animatedBlocks = getAnimationOrder()[ page ] || [];
+			return animatedBlocks
+				.filter( ( { id } ) => id !== currentBlock )
+				.filter( ( { id } ) => getBlock( id ) )
+				.map( ( { id } ) => {
+					const block = getBlock( id );
 					return {
-						...block,
-						type: getBlockType( block.name ),
+						value: id,
+						label: block.name,
+						block,
+						blockType: getBlockType( block.name ),
 					};
 				} );
 		},
@@ -79,7 +83,7 @@ const wrapperWithSelect = compose(
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return wrapperWithSelect( ( props ) => {
-			const { attributes, setAttributes, name, parentBlock, onAnimationTypeChange, onAnimationOrderChange, getAnimatedBlocks } = props;
+			const { attributes, setAttributes, name, parentBlock, onAnimationTypeChange, onAnimationOrderChange, getAnimatedBlocks, animationAfter } = props;
 
 			const { ampAnimationType, ampAnimationDuration, ampAnimationDelay, ampAnimationAfter } = attributes;
 
@@ -99,7 +103,7 @@ export default createHigherOrderComponent(
 								animationType={ ampAnimationType }
 								animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
 								animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
-								animationAfter={ ampAnimationAfter }
+								animationAfter={ animationAfter }
 								onAnimationTypeChange={ ( value ) => {
 									onAnimationTypeChange( value, ampAnimationAfter );
 									setAttributes( { ampAnimationType: value } );
@@ -112,7 +116,7 @@ export default createHigherOrderComponent(
 									value = value + 'ms';
 									setAttributes( { ampAnimationDelay: value } );
 								} }
-								onAnimationOrderChange={ onAnimationOrderChange }
+								onAnimationAfterChange={ onAnimationOrderChange }
 							/>
 						</PanelBody>
 					</InspectorControls>

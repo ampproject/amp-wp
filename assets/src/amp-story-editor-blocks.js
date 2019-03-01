@@ -18,10 +18,11 @@ import { select, subscribe, dispatch } from '@wordpress/data';
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
-import './stores/amp-story';
+import { store } from './stores/amp-story';
 
-const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
-const { addAnimation } = dispatch( 'amp/story' );
+const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId, getBlock } = select( 'core/editor' );
+const { getAnimationOrder } = select( 'amp/story' );
+const { addAnimation, removePage } = dispatch( 'amp/story' );
 
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
@@ -40,6 +41,7 @@ domReady( () => {
 					addAnimation( page.clientId, block.clientId, predecessor ? predecessor.clientId : undefined );
 				} );
 		} );
+
 	// Load all needed fonts.
 	getBlocksByClientId( getBlockOrder() )
 		.filter( ( block ) => block.name === 'amp/amp-story-page' )
@@ -62,6 +64,14 @@ subscribe( () => {
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
+} );
+
+store.subscribe( () => {
+	Object.keys( getAnimationOrder() ).map( ( page ) => {
+		if ( ! getBlock( page ) ) {
+			removePage( store.getState(), page );
+		}
+	} );
 } );
 
 /**

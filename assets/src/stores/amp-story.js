@@ -33,6 +33,12 @@ const actions = {
 			item,
 		};
 	},
+	removePage( page ) {
+		return {
+			type: 'REMOVE_PAGE',
+			page,
+		};
+	},
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
@@ -92,6 +98,15 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			updateBlockAttributes( item, { ampAnimationAfter: undefined } );
 
 			animationOrder[ page ] = pageAnimationOrder;
+
+			return {
+				...state,
+				...animationOrder,
+			};
+		case 'REMOVE_PAGE':
+			if ( animationOrder[ page ] ) {
+				animationOrder[ page ] = undefined;
+			}
 
 			return {
 				...state,
