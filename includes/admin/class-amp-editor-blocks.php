@@ -42,6 +42,7 @@ class AMP_Editor_Blocks {
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+			add_action( 'wp_loaded', array( $this, 'register_block_latest_stories' ), 11 );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
 			/*
@@ -203,5 +204,94 @@ class AMP_Editor_Blocks {
 		if ( ! is_amp_endpoint() && ! empty( $this->content_required_amp_scripts ) ) {
 			wp_scripts()->do_items( $this->content_required_amp_scripts );
 		}
+	}
+
+	/**
+	 * Registers the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see register_block_core_latest_posts()
+	 */
+	public function register_block_latest_stories() {
+		register_block_type(
+			'amp/amp-latest-stories',
+			array(
+				'attributes'      => array(
+					'className'     => array(
+						'type' => 'string',
+					),
+					'storiesToShow' => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'storyLayout'   => array(
+						'type'    => 'string',
+						'default' => 'list',
+					),
+					'align'         => array(
+						'type' => 'string',
+					),
+					'order'         => array(
+						'type'    => 'string',
+						'default' => 'desc',
+					),
+					'orderBy'       => array(
+						'type'    => 'string',
+						'default' => 'date',
+					),
+				),
+				'render_callback' => array( $this, 'render_block_latest_stories' ),
+			)
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see render_block_core_latest_posts()
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public function render_block_latest_stories( $attributes ) {
+		$args = array(
+			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page'   => $attributes['storiesToShow'],
+			'post_status'      => 'publish',
+			'order'            => $attributes['order'],
+			'orderby'          => $attributes['orderBy'],
+			'suppress_filters' => false,
+		);
+
+		$story_query = new WP_Query( $args );
+
+		ob_start();
+		foreach ( $story_query->posts as $post ) :
+			?>
+			<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+				<?php echo get_the_post_thumbnail( $post->ID ); ?>
+			</a>
+			<?php
+		endforeach;
+		$featured_images = ob_get_clean();
+
+		$class = 'amp-block-latest-stories';
+		if ( isset( $attributes['align'] ) ) {
+			$class .= ' align' . $attributes['align'];
+		}
+
+		if ( isset( $attributes['storyLayout'] ) && 'grid' === $attributes['storyLayout'] ) {
+			$class .= ' is-grid';
+		}
+
+		if ( isset( $attributes['className'] ) ) {
+			$class .= ' ' . $attributes['className'];
+		}
+
+		return sprintf(
+			'<amp-carousel height="300" layout="fixed-height" type="carousel" class="%1$s">%2$s</amp-carousel>',
+			esc_attr( $class ),
+			$featured_images
+		);
 	}
 }
