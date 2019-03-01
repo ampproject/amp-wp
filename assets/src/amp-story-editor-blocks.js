@@ -158,7 +158,7 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
  */
 const setBlockParent = ( props ) => {
 	const { name } = props;
-	if ( -1 !== ALLOWED_BLOCKS.indexOf( name ) ) {
+	if ( -1 !== ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,
