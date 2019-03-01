@@ -28,7 +28,7 @@ import SourceSansPro from '../images/font-names/source-sans-pro.svg';
 import Ubuntu from '../images/font-names/ubuntu.svg';
 
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
-	'amp/amp-story-pag',
+	'amp/amp-story-page',
 ];
 
 export const ALLOWED_CHILD_BLOCKS = [
