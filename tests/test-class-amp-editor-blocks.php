@@ -38,8 +38,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$this->instance->init();
 		if ( function_exists( 'register_block_type' ) ) {
 			$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_editor_assets' ) ) );
+			$this->assertEquals( 11, has_action( 'wp_loaded', array( $this->instance, 'register_block_latest_stories' ) ) );
 			$this->assertEquals( 10, has_action( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
-			$this->assertEquals( 11, has_action( 'wp_loaded', array( $this->instance, 'register_latest_stories_block' ) ) );
 
 			// Because amp_is_canonical() is false, these
 			$this->assertFalse( has_action( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
@@ -51,7 +51,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			// Now that amp_is_canonical() is true, these action hooks should be added.
 			$this->assertEquals( 10, has_action( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
 			$this->assertEquals( 10, has_action( 'wp_print_footer_scripts', array( $this->instance, 'print_dirty_amp_scripts' ) ) );
-			rmeove_theme_support( 'amp' );
+			remove_theme_support( 'amp' );
 		}
 	}
 
