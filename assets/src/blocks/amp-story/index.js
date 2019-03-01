@@ -8,7 +8,7 @@ import { InnerBlocks } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import { BLOCK_ICONS } from '../../helpers';
+import { BLOCK_ICONS } from '../../constants';
 import EditPage from './edit';
 import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from './constants';
 

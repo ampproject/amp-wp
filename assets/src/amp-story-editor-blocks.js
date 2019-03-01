@@ -11,13 +11,20 @@ import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { getDefaultBlockName, setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe, dispatch } from '@wordpress/data';
+import { setDefaultBlockName } from '@wordpress/blocks';
+import { select, subscribe } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
+import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
+import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
 import './stores/amp-story';
+import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
+import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { maybeEnqueueFontStyle } from './helpers';
 
 const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId, getBlock } = select( 'core/editor' );
 const { updateBlockAttributes } = dispatch( 'core/editor' );
@@ -39,6 +46,16 @@ domReady( () => {
 					const predecessor = blocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 					addAnimation( page.clientId, block.clientId, predecessor ? predecessor.clientId : undefined );
+				} );
+		} );
+	// Load all needed fonts.
+	getBlocksByClientId( getBlockOrder() )
+		.filter( ( block ) => block.name === 'amp/amp-story-page' )
+		.map( ( page ) => {
+			getBlocksByClientId( getBlockOrder( page.clientId ) )
+				.filter( ( block ) => block.attributes.ampFontFamily )
+				.map( ( block ) => {
+					maybeEnqueueFontStyle( block.attributes.ampFontFamily );
 				} );
 		} );
 } );
@@ -230,7 +247,8 @@ const setBlockParent = ( props ) => {
 const wrapperWithSelect = compose(
 	withAttributes,
 	withBlockName,
-	withHasSelectedInnerblock
+	withHasSelectedInnerBlock,
+	withParentBlock
 );
 
 /**

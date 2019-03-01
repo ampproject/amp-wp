@@ -11,7 +11,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../helpers';
+import { ALLOWED_BLOCKS } from '../constants';
 import { AnimationControls } from './';
 
 const applyWithSelect = withSelect( ( select, props ) => {

@@ -52,5 +52,10 @@ the_post();
 		>
 			<?php the_content(); ?>
 		</amp-story>
+
+		<?php
+		// Note that \AMP_Story_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
+		wp_styles()->do_items();
+		?>
 	</body>
 </html>

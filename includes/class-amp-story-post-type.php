@@ -79,16 +79,6 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		// Forcibly sanitize all validation errors.
-		add_action(
-			'wp',
-			function() {
-				if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-					add_filter( 'amp_validation_error_sanitized', '__return_true' );
-				}
-			}
-		);
-
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
@@ -105,7 +95,19 @@ class AMP_Story_Post_Type {
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
 		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
 
+		// Limit the styles that are printed in a story.
+		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
+
+		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+
+		// Register render callback for just-in-time inclusion of dependent Google Font styles.
+		register_block_type(
+			'amp/amp-story-text',
+			array(
+				'render_callback' => array( __CLASS__, 'render_text_block' ),
+			)
+		);
 	}
 
 	/**
@@ -156,6 +158,33 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Filter which styles will be printed on an AMP Story.
+	 *
+	 * At the moment, this will only allow Google fonts to be printed.
+	 *
+	 * @todo We will need to allow sites to enqueue story-specific styles beyond fonts.
+	 *
+	 * @param array $handles Style handles.
+	 * @return array Styles to print.
+	 */
+	public static function filter_frontend_print_styles_array( $handles ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) ) {
+			return $handles;
+		}
+
+		return array_filter(
+			$handles,
+			function( $handle ) {
+				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
+					return false;
+				}
+				$dep = wp_styles()->registered[ $handle ];
+				return 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST );
+			}
+		);
+	}
+
+	/**
 	 * Enqueue block editor assets.
 	 */
 	public static function enqueue_block_editor_assets() {
@@ -164,8 +193,9 @@ class AMP_Story_Post_Type {
 		}
 
 		// This CSS is separately since it's used both in frontend and in the editor.
+		$amp_stories_fonts_handle = 'amp-story-fonts'; // @todo This should be renamed since no longer fonts?
 		wp_enqueue_style(
-			'amp-story-fonts',
+			$amp_stories_fonts_handle,
 			amp_get_asset_url( 'css/amp-stories.css' ),
 			false,
 			AMP__VERSION
@@ -209,6 +239,38 @@ class AMP_Story_Post_Type {
 				'before'
 			);
 		}
+
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				$amp_stories_fonts_handle,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
+
+		wp_localize_script(
+			'amp-story-editor-blocks',
+			'ampStoriesFonts',
+			$fonts
+		);
+	}
+
+	/**
+	 * Get inline font style rule.
+	 *
+	 * @param array $font Font.
+	 * @return string Font style rule.
+	 */
+	public static function get_inline_font_style_rule( $font ) {
+		$families = array_map(
+			'wp_json_encode',
+			array_merge( (array) $font['name'], $font['fallbacks'] )
+		);
+		return sprintf(
+			'[data-font-family="%s"] { font-family: %s; }',
+			$font['name'],
+			implode( ', ', $families )
+		);
 	}
 
 	/**
@@ -237,5 +299,288 @@ class AMP_Story_Post_Type {
 		$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
 		$css_contents = file_get_contents( $css_src ); // phpcs:ignore -- It's a local filesystem path not a remote request.
 		wp_add_inline_style( 'wp-block-library', $css_contents );
+	}
+
+	/**
+	 * Get list of fonts used in AMP Stories.
+	 *
+	 * @return array Fonts.
+	 */
+	public static function get_fonts() {
+		static $fonts = null;
+		if ( isset( $fonts ) ) {
+			return $fonts;
+		}
+
+		$fonts = array(
+			array(
+				'name'      => 'Arial',
+				'fallbacks' => array( 'Helvetica Neue', 'Helvetica', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arial Black',
+				'fallbacks' => array( 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arial Narrow',
+				'fallbacks' => array( 'Arial', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Arimo',
+				'gfont'     => 'Arimo:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Baskerville',
+				'fallbacks' => array( 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Brush Script MT',
+				'fallbacks' => array( 'cursive' ),
+			),
+			array(
+				'name'      => 'Copperplate',
+				'fallbacks' => array( 'Copperplate Gothic Light', 'fantasy' ),
+			),
+			array(
+				'name'      => 'Courier New',
+				'fallbacks' => array( 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ),
+			),
+			array(
+				'name'      => 'Century Gothic',
+				'fallbacks' => array( 'CenturyGothic', 'AppleGothic', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Garamond',
+				'fallbacks' => array( 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Georgia',
+				'fallbacks' => array( 'Times', 'Times New Roman', 'serif' ),
+			),
+			array(
+				'name'      => 'Gill Sans',
+				'fallbacks' => array( 'Gill Sans MT', 'Calibri', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Lato',
+				'gfont'     => 'Lato:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Lora',
+				'gfont'     => 'Lora:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Lucida Bright',
+				'fallbacks' => array( 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Lucida Sans Typewriter',
+				'fallbacks' => array( 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ),
+			),
+			array(
+				'name'      => 'Merriweather',
+				'gfont'     => 'Merriweather:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Montserrat',
+				'gfont'     => 'Montserrat:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Noto Sans',
+				'gfont'     => 'Noto Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Open Sans',
+				'gfont'     => 'Open Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Open Sans Condensed',
+				'gfont'     => 'Open Sans Condensed:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Oswald',
+				'gfont'     => 'Oswald:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Palatino',
+				'fallbacks' => array( 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Papyrus',
+				'fallbacks' => array( 'fantasy' ),
+			),
+			array(
+				'name'      => 'Playfair Display',
+				'gfont'     => 'Playfair Display:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'PT Sans',
+				'gfont'     => 'PT Sans:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'PT Sans Narrow',
+				'gfont'     => 'PT Sans Narrow:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'PT Serif',
+				'gfont'     => 'PT Serif:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Raleway',
+				'gfont'     => 'Raleway:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto',
+				'gfont'     => 'Roboto:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto Condensed',
+				'gfont'     => 'Roboto Condensed:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Roboto Slab',
+				'gfont'     => 'Roboto Slab:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Slabo 27px',
+				'gfont'     => 'Slabo 27px:400,700',
+				'fallbacks' => array( 'serif' ),
+			),
+			array(
+				'name'      => 'Source Sans Pro',
+				'gfont'     => 'Source Sans Pro:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Tahoma',
+				'fallbacks' => array( 'Verdana', 'Segoe', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Times New Roman',
+				'fallbacks' => array( 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ),
+			),
+			array(
+				'name'      => 'Trebuchet MS',
+				'fallbacks' => array( 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Ubuntu',
+				'gfont'     => 'Ubuntu:400,700',
+				'fallbacks' => array( 'sans-serif' ),
+			),
+			array(
+				'name'      => 'Verdana',
+				'fallbacks' => array( 'Geneva', 'sans-serif' ),
+			),
+		);
+
+		$fonts_url = 'https://fonts.googleapis.com/css';
+		$subsets   = array( 'latin', 'latin-ext' );
+
+		/*
+		 * Translators: To add an additional character subset specific to your language,
+		 * translate this to 'greek', 'cyrillic', 'devanagari' or 'vietnamese'. Do not translate into your own language.
+		 */
+		$subset = _x( 'no-subset', 'Add new subset (greek, cyrillic, devanagari, vietnamese)', 'amp' );
+
+		if ( 'cyrillic' === $subset ) {
+			$subsets[] = 'cyrillic';
+			$subsets[] = 'cyrillic-ext';
+		} elseif ( 'greek' === $subset ) {
+			$subsets[] = 'greek';
+			$subsets[] = 'greek-ext';
+		} elseif ( 'devanagari' === $subset ) {
+			$subsets[] = 'devanagari';
+		} elseif ( 'vietnamese' === $subset ) {
+			$subsets[] = 'vietnamese';
+		}
+
+		$fonts = array_map(
+			function ( $font ) use ( $fonts_url, $subsets ) {
+				$font['slug'] = sanitize_title( $font['name'] );
+
+				if ( isset( $font['gfont'] ) ) {
+					$font['handle'] = sprintf( '%s-font', $font['slug'] );
+					$font['src']    = add_query_arg(
+						array(
+							'family' => rawurlencode( $font['gfont'] ),
+							'subset' => rawurlencode( implode( ',', $subsets ) ),
+						),
+						$fonts_url
+					);
+				}
+
+				return $font;
+			},
+			$fonts
+		);
+
+		return $fonts;
+	}
+
+	/**
+	 * Get a font.
+	 *
+	 * @param string $name Font family name.
+	 * @return array|null The font or null if not defined.
+	 */
+	public static function get_font( $name ) {
+		$fonts = array_filter(
+			self::get_fonts(),
+			function ( $font ) use ( $name ) {
+				return $font['name'] === $name;
+			}
+		);
+		return array_shift( $fonts );
+	}
+
+	/**
+	 * Include any required Google Font styles when rendering a Text block.
+	 *
+	 * @param array  $props   Props.
+	 * @param string $content Content.
+	 * @return string Text block.
+	 */
+	public static function render_text_block( $props, $content ) {
+		$prop_name = 'ampFontFamily';
+
+		// Short-circuit if no font family present.
+		if ( empty( $props[ $prop_name ] ) ) {
+			return $content;
+		}
+
+		// Short-circuit if there is no Google Font or the font is already enqueued.
+		$font = self::get_font( $props[ $prop_name ] );
+		if ( ! $font || ! isset( $font['handle'] ) || ! isset( $font['src'] ) || wp_style_is( $font['handle'], 'enqueued' ) ) {
+			return $content;
+		}
+
+		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
+			wp_register_style( $font['handle'], $font['src'], array(), null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+		wp_enqueue_style( $font['handle'] );
+		wp_add_inline_style(
+			$font['handle'],
+			self::get_inline_font_style_rule( $font )
+		);
+
+		return $content;
 	}
 }
