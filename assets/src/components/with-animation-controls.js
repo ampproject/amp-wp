@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../constants';
+import { ALLOWED_CHILD_BLOCKS } from '../constants';
 import { AnimationControls, withParentBlock } from './';
 
 export default createHigherOrderComponent(
@@ -18,7 +18,7 @@ export default createHigherOrderComponent(
 		return withParentBlock( ( props ) => {
 			const { attributes, setAttributes, name, parentBlock } = props;
 
-			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
+			if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
 				return <BlockEdit { ...props } />;
 			}
 
