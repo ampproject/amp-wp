@@ -95,7 +95,19 @@ class AMP_Story_Post_Type {
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
 		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
 
+		// Limit the styles that are printed in a story.
+		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
+
+		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+
+		// Register render callback for just-in-time inclusion of dependent Google Font styles.
+		register_block_type(
+			'amp/amp-story-text',
+			array(
+				'render_callback' => array( __CLASS__, 'render_text_block' ),
+			)
+		);
 	}
 
 	/**
@@ -142,6 +154,33 @@ class AMP_Story_Post_Type {
 		}
 
 		return $allowed_tags;
+	}
+
+	/**
+	 * Filter which styles will be printed on an AMP Story.
+	 *
+	 * At the moment, this will only allow Google fonts to be printed.
+	 *
+	 * @todo We will need to allow sites to enqueue story-specific styles beyond fonts.
+	 *
+	 * @param array $handles Style handles.
+	 * @return array Styles to print.
+	 */
+	public static function filter_frontend_print_styles_array( $handles ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) ) {
+			return $handles;
+		}
+
+		return array_filter(
+			$handles,
+			function( $handle ) {
+				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
+					return false;
+				}
+				$dep = wp_styles()->registered[ $handle ];
+				return 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST );
+			}
+		);
 	}
 
 	/**
@@ -202,17 +241,9 @@ class AMP_Story_Post_Type {
 
 		$fonts = self::get_fonts();
 		foreach ( $fonts as $font ) {
-			$families = array_map(
-				'wp_json_encode',
-				array_merge( (array) $font['name'], $font['fallbacks'] )
-			);
 			wp_add_inline_style(
 				$amp_stories_fonts_handle,
-				sprintf(
-					'[data-font-family="%s"] { font-family: %s; }',
-					$font['name'],
-					implode( ', ', $families )
-				)
+				self::get_inline_font_style_rule( $font )
 			);
 		}
 
@@ -220,6 +251,24 @@ class AMP_Story_Post_Type {
 			'amp-story-editor-blocks',
 			'ampStoriesFonts',
 			$fonts
+		);
+	}
+
+	/**
+	 * Get inline font style rule.
+	 *
+	 * @param array $font Font.
+	 * @return string Font style rule.
+	 */
+	public static function get_inline_font_style_rule( $font ) {
+		$families = array_map(
+			'wp_json_encode',
+			array_merge( (array) $font['name'], $font['fallbacks'] )
+		);
+		return sprintf(
+			'[data-font-family="%s"] { font-family: %s; }',
+			$font['name'],
+			implode( ', ', $families )
 		);
 	}
 
@@ -257,6 +306,11 @@ class AMP_Story_Post_Type {
 	 * @return array Fonts.
 	 */
 	public static function get_fonts() {
+		static $fonts = null;
+		if ( isset( $fonts ) ) {
+			return $fonts;
+		}
+
 		$fonts = array(
 			array(
 				'name'      => 'Arial',
@@ -476,5 +530,54 @@ class AMP_Story_Post_Type {
 			},
 			$fonts
 		);
+	}
+
+	/**
+	 * Get a font.
+	 *
+	 * @param string $name Font family name.
+	 * @return array|null The font or null if not defined.
+	 */
+	public static function get_font( $name ) {
+		$fonts = array_filter(
+			self::get_fonts(),
+			function ( $font ) use ( $name ) {
+				return $font['name'] === $name;
+			}
+		);
+		return array_shift( $fonts );
+	}
+
+	/**
+	 * Include any required Google Font styles when rendering a Text block.
+	 *
+	 * @param array  $props   Props.
+	 * @param string $content Content.
+	 * @return string Text block.
+	 */
+	public static function render_text_block( $props, $content ) {
+		$prop_name = 'ampFontFamily';
+
+		// Short-circuit if no font family present.
+		if ( empty( $props[ $prop_name ] ) ) {
+			return $content;
+		}
+
+		// Short-circuit if there is no Google Font or the font is already enqueued.
+		$font = self::get_font( $props[ $prop_name ] );
+		if ( ! $font || ! isset( $font['handle'] ) || ! isset( $font['src'] ) || wp_style_is( $font['handle'], 'enqueued' ) ) {
+			return $content;
+		}
+
+		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
+			wp_register_style( $font['handle'], $font['src'], array(), null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		}
+		wp_enqueue_style( $font['handle'] );
+		wp_add_inline_style(
+			$font['handle'],
+			self::get_inline_font_style_rule( $font )
+		);
+
+		return $content;
 	}
 }
