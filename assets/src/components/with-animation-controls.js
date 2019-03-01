@@ -11,7 +11,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../constants';
+import { ALLOWED_CHILD_BLOCKS } from '../constants';
 import { AnimationControls } from './';
 
 const applyWithSelect = withSelect( ( select, props ) => {
@@ -87,7 +87,7 @@ export default createHigherOrderComponent(
 
 			const { ampAnimationType, ampAnimationDuration, ampAnimationDelay, ampAnimationAfter } = attributes;
 
-			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
+			if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
 				return <BlockEdit { ...props } />;
 			}
 
