@@ -43,7 +43,7 @@ function ButtonContent( { option, displayIcon = true } ) {
 }
 
 /**
- * Font Family Picker component.
+ * Animation order picker component.
  *
  * @return {?Object} The rendered component or null if there are no options.
  */
@@ -62,7 +62,7 @@ function AnimationOrderPicker( {
 
 	const currentOption = options.find( ( option ) => option.value === value ) || defaultOption;
 	/* translators: %s: block name */
-	const ariaLabel = currentOption ? sprintf(	__( 'Begin after: %s', 'amp' ), currentOption.label ) : __( 'Begin immediately', 'amp' );
+	const ariaLabel = currentOption ? sprintf( __( 'Begin after: %s', 'amp' ), currentOption.label ) : __( 'Begin immediately', 'amp' );
 
 	return (
 		<BaseControl label={ label || __( 'Begin after', 'amp' ) }>

@@ -129,4 +129,4 @@ const selectors = {
 	},
 };
 
-export const store = registerStore(	namespace, { reducer, selectors, actions } );
+export const store = registerStore( namespace, { reducer, selectors, actions } );
