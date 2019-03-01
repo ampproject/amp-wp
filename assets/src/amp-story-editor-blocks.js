@@ -88,6 +88,10 @@ store.subscribe( () => {
  * @return {Object} Settings.
  */
 const addAMPAttributes = ( settings, name ) => {
+	if ( ! ALLOWED_BLOCKS.includes( name ) ) {
+		return settings;
+	}
+
 	const addedAttributes = {
 		anchor: {
 			type: 'string',
@@ -96,15 +100,6 @@ const addAMPAttributes = ( settings, name ) => {
 			selector: '*',
 		},
 	};
-
-	if ( ! ALLOWED_BLOCKS.includes( name ) ) {
-		settings.attributes = {
-			...settings.attributes,
-			...addedAttributes,
-		};
-
-		return settings;
-	}
 
 	// Define selector according to mappings.
 	if ( BLOCK_TAG_MAPPING[ name ] ) {
