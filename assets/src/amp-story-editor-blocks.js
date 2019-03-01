@@ -4,14 +4,14 @@
 import { addFilter } from '@wordpress/hooks';
 import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
-import { setDefaultBlockName } from '@wordpress/blocks';
+import { setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 import { select, subscribe } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
-import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
 
 const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
@@ -19,6 +19,9 @@ const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select(
 // Ensure that the default block is page when no block is selected.
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
+
+	// Remove all blocks that aren't whitelisted.
+	getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) && 'amp/amp-story-page' ).map( ( { name } ) => unregisterBlockType( name ) );
 
 	// Load all needed fonts.
 	getBlocksByClientId( getBlockOrder() )
@@ -44,7 +47,7 @@ subscribe( () => {
  * @return {Object} Settings.
  */
 const addAMPAttributes = ( settings, name ) => {
-	if ( -1 === ALLOWED_BLOCKS.indexOf( name ) ) {
+	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
 		return settings;
 	}
 
@@ -117,7 +120,7 @@ const addAMPAttributes = ( settings, name ) => {
 const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const ampAttributes = {};
 
-	if ( -1 === ALLOWED_BLOCKS.indexOf( blockType.name ) ) {
+	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( blockType.name ) ) {
 		return props;
 	}
 
@@ -155,7 +158,7 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
  */
 const setBlockParent = ( props ) => {
 	const { name } = props;
-	if ( -1 !== ALLOWED_BLOCKS.indexOf( name ) ) {
+	if ( -1 !== ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,
@@ -163,7 +166,7 @@ const setBlockParent = ( props ) => {
 		};
 	}
 
-	if ( -1 === name.indexOf( 'amp/amp-story-page' ) ) {
+	if ( name !== 'amp/amp-story-page' ) {
 		// Do not allow inserting any of the blocks if they're not AMP Story blocks.
 		return {
 			...props,
