@@ -1,7 +1,10 @@
 /**
  * WordPress dependencies
  */
-import { registerStore } from '@wordpress/data';
+import { select, dispatch, registerStore } from '@wordpress/data';
+
+const { getBlock } = select( 'core/editor' );
+const { updateBlockAttributes } = dispatch( 'core/editor' );
 
 export const namespace = 'amp/story';
 
@@ -37,33 +40,56 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 	const { type, page, item, predecessor } = action;
 
 	const pageAnimationOrder = animationOrder[ page ] || [];
-	const found = pageAnimationOrder.findIndex( ( { id } ) => id === item );
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	const hasCycle = ( a, b ) => {
+		let parent = b;
+
+		while ( parent !== undefined ) {
+			if ( parent === a ) {
+				return true;
+			}
+
+			const parentItem = pageAnimationOrder.findIndex( ( { id } ) => id === parent );
+			parent = parentItem ? parentItem.parent : undefined;
+		}
+
+		return false;
+	};
 
 	switch ( type ) {
-		// Todo: Find cycles.
 		case 'ADD_ANIMATION':
-			if ( found !== -1 ) {
-				pageAnimationOrder[ found ].parent = predecessor;
+			const parent = -1 !== entryIndex( predecessor ) && ! hasCycle( item, predecessor ) ? predecessor : undefined;
+
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].parent = parent;
 			} else {
-				pageAnimationOrder.push( { id: item, parent: predecessor } );
+				pageAnimationOrder.push( { id: item, parent: parent } );
 			}
 
 			animationOrder[ page ] = pageAnimationOrder;
+
+			const parentBlock = parent ? getBlock( parent ) : undefined;
+
+			updateBlockAttributes( item, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
 
 			return {
 				...state,
 				...animationOrder,
 			};
 		case 'REMOVE_ANIMATION':
-			if ( found !== -1 ) {
+			if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder.splice( pageAnimationOrder.findIndex( ( { id } ) => id === item ), 1 );
 				pageAnimationOrder
-					.filter( ( { parent } ) => parent === item )
-					.map( ( parent ) => {
-						parent.parent = pageAnimationOrder[ found ].parent;
-						return parent;
+					.filter( ( { parent: p } ) => p === item )
+					.map( ( p ) => {
+						p.parent = pageAnimationOrder[ entryIndex( item ) ].parent;
+						return p;
 					} );
 			}
+
+			updateBlockAttributes( item, { ampAnimationAfter: undefined } );
 
 			animationOrder[ page ] = pageAnimationOrder;
 

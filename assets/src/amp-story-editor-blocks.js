@@ -11,24 +11,16 @@ import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
 import { getDefaultBlockName, setDefaultBlockName } from '@wordpress/blocks';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { setDefaultBlockName } from '@wordpress/blocks';
-import { select, subscribe } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
-import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
-import { withAttributes, withBlockName, withHasSelectedInnerblock, withAmpStorySettings, withAnimationControls } from './components';
-import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './helpers';
-import './stores/amp-story';
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
+import './stores/amp-story';
 
-const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId, getBlock } = select( 'core/editor' );
-const { updateBlockAttributes } = dispatch( 'core/editor' );
-const { getAnimationPredecessor } = select( 'amp/story' );
+const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
 const { addAnimation } = dispatch( 'amp/story' );
 
 domReady( () => {
@@ -70,21 +62,6 @@ subscribe( () => {
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
-
-	// Keep animation order in order.
-	// Todo: First check if animation order has actually changed.
-	/*getBlocksByClientId( getBlockOrder() )
-		.filter( ( block ) => block.name === 'amp/amp-story-page' )
-		.map( ( page ) => {
-			const blocks = getBlocksByClientId( getBlockOrder( page.clientId ) );
-
-			blocks.map( ( block ) => {
-				const predecessor = getAnimationPredecessor( page.clientId, block.clientId );
-				const predecessorBlock = predecessor ? getBlock( predecessor ) : undefined;
-
-				updateBlockAttributes( block.clientId, { ampAnimationAfter: predecessorBlock ? predecessorBlock.attributes.anchor : undefined } );
-			} );
-		} );*/
 } );
 
 /**
