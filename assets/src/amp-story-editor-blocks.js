@@ -58,9 +58,15 @@ subscribe( () => {
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
-	// Ensure that the default block is page when no block is selected.
-	if ( selectedBlockClientId && 'amp/amp-story-text' !== defaultBlockName ) {
-		setDefaultBlockName( 'amp/amp-story-text' );
+	// Switch default block depending on context
+	if ( selectedBlockClientId ) {
+		const selectedBlock = getBlock( selectedBlockClientId );
+
+		if ( 'amp/amp-story-page' === selectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
+			setDefaultBlockName( 'amp/amp-story-page' );
+		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
+			setDefaultBlockName( 'amp/amp-story-text' );
+		}
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
