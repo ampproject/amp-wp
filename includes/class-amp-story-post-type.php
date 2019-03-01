@@ -511,7 +511,7 @@ class AMP_Story_Post_Type {
 			$subsets[] = 'vietnamese';
 		}
 
-		return array_map(
+		$fonts = array_map(
 			function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
@@ -530,6 +530,8 @@ class AMP_Story_Post_Type {
 			},
 			$fonts
 		);
+
+		return $fonts;
 	}
 
 	/**

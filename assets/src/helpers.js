@@ -1,9 +1,11 @@
+/* global ampStoriesFonts */
+
 export const maybeEnqueueFontStyle = ( name ) => {
-	if ( ! name || ! window.ampStoriesFonts ) {
+	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
 		return;
 	}
 
-	const font = window.ampStoriesFonts.find( ( thisFont ) => thisFont.name === name )
+	const font = ampStoriesFonts.find( ( thisFont ) => thisFont.name === name );
 	if ( ! font ) {
 		return;
 	}
