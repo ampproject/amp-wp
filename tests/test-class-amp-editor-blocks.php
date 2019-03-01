@@ -39,7 +39,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		if ( function_exists( 'register_block_type' ) ) {
 			$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_editor_assets' ) ) );
 			$this->assertEquals( 10, has_action( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
-			$this->assertEquals( 10, has_action( 'init', array( $this->instance, 'register_latest_stories_block' ) ) );
+			$this->assertEquals( 11, has_action( 'wp_loaded', array( $this->instance, 'register_latest_stories_block' ) ) );
 
 			// Because amp_is_canonical() is false, these
 			$this->assertFalse( has_action( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
