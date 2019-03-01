@@ -27,7 +27,11 @@ import Slabo27 from '../images/font-names/slabo-27.svg';
 import SourceSansPro from '../images/font-names/source-sans-pro.svg';
 import Ubuntu from '../images/font-names/ubuntu.svg';
 
-export const ALLOWED_BLOCKS = [
+export const ALLOWED_TOP_LEVEL_BLOCKS = [
+	'amp/amp-story-pag',
+];
+
+export const ALLOWED_CHILD_BLOCKS = [
 	'core/audio',
 	'core/code',
 	'core/embed',
@@ -40,6 +44,11 @@ export const ALLOWED_BLOCKS = [
 	'core/verse',
 	'core/video',
 	'amp/amp-story-text',
+];
+
+export const ALLOWED_BLOCKS = [
+	...ALLOWED_TOP_LEVEL_BLOCKS,
+	...ALLOWED_CHILD_BLOCKS,
 ];
 
 export const BLOCK_ICONS = {
