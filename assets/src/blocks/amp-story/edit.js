@@ -157,7 +157,7 @@ class EditPage extends Component {
 										allowedTypes={ ALLOWED_MEDIA_TYPES }
 										value={ mediaId }
 										render={ ( { open } ) => (
-											<Button isDefault isLarge onClick={ open } className={ 'editor-amp-story-page-background' }>
+											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
 												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Upload Media', 'amp' ) }
 											</Button>
 										) }
@@ -186,7 +186,7 @@ class EditPage extends Component {
 												<Button
 													isDefault
 													onClick={ open }
-													className={ 'editor-amp-story-page-background' }
+													className="editor-amp-story-page-background"
 												>
 													{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
 												</Button>
@@ -219,10 +219,10 @@ class EditPage extends Component {
 						</Fragment>
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style } className={ 'editor-amp-story-page-wrap' }>
+				<div key="contents" style={ style } className="editor-amp-story-page-wrap">
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
-						<video muted loop className={ 'editor-amp-story-page-video' }>
+						<video muted loop className="editor-amp-story-page-video">
 							<source src={ mediaUrl } type={ media.mime_type } />
 						</video>
 					) }

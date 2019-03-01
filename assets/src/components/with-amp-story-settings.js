@@ -36,7 +36,7 @@ export default createHigherOrderComponent(
 							title={ __( 'Story Settings', 'amp' ) }
 						>
 							<ToggleControl
-								key={ 'position' }
+								key="position"
 								label={ __( 'Show or hide the caption', 'amp' ) }
 								checked={ ampShowImageCaption }
 								onChange={
