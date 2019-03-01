@@ -11,7 +11,7 @@ import { select, subscribe } from '@wordpress/data';
  * Internal dependencies
  */
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
-import { ALLOWED_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
 
 const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
@@ -19,6 +19,9 @@ const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select(
 // Ensure that the default block is page when no block is selected.
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
+
+	// Remove all blocks that aren't whitelisted.
+	getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) && 'amp/amp-story-page' ).map( ( { name } ) => unregisterBlockType( name ) );
 
 	// Load all needed fonts.
 	getBlocksByClientId( getBlockOrder() )
@@ -35,9 +38,6 @@ domReady( () => {
 subscribe( () => {
 	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
 } );
-
-// Remove all blocks that aren't whitelisted.
-getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) ).map( ( { name } ) => unregisterBlockType( name ) );
 
 /**
  * Add AMP attributes to every allowed AMP Story block.
