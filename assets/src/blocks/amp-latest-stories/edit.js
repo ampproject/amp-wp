@@ -26,7 +26,6 @@ import {
 import { __ } from '@wordpress/i18n';
 import {
 	InspectorControls,
-	BlockAlignmentToolbar,
 	BlockControls,
 } from '@wordpress/editor';
 import { withSelect } from '@wordpress/data';
@@ -42,7 +41,7 @@ class LatestStoriesEdit extends Component {
 
 	render() {
 		const { attributes, setAttributes, latestStories } = this.props;
-		const { align, storyLayout, order, orderBy, storiesToShow } = attributes;
+		const { order, orderBy, storiesToShow } = attributes;
 
 		const inspectorControls = (
 			<InspectorControls>
@@ -81,37 +80,11 @@ class LatestStoriesEdit extends Component {
 			latestStories.slice( 0, storiesToShow ) :
 			latestStories;
 
-		const layoutControls = [
-			{
-				icon: 'list-view',
-				title: __( 'List View', 'amp' ),
-				onClick: () => setAttributes( { storyLayout: 'list' } ),
-				isActive: storyLayout === 'list',
-			},
-			{
-				icon: 'grid-view',
-				title: __( 'Grid View', 'amp' ),
-				onClick: () => setAttributes( { storyLayout: 'grid' } ),
-				isActive: storyLayout === 'grid',
-			},
-		];
-
 		return (
 			<Fragment>
 				{ inspectorControls }
-				<BlockControls>
-					<BlockAlignmentToolbar
-						value={ align }
-						onChange={ ( nextAlign ) => {
-							setAttributes( { align: nextAlign } );
-						} }
-					/>
-					<Toolbar controls={ layoutControls } />
-				</BlockControls>
 				<ul
-					className={ classnames( this.props.className, {
-						'is-grid': storyLayout === 'grid',
-					} ) }
+					className={ classnames( this.props.className ) }
 				>
 					{ displayStories.map( ( post, i ) => {
 						const titleTrimmed = post.title.rendered.trim();

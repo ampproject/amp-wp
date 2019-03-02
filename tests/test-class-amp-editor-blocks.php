@@ -68,30 +68,78 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		);
 
 		// Create mock AMP story posts to test.
+		$minimum_height = 200;
+		$heights        = array( $minimum_height, 300, 500 );
+		$stories        = $this->create_story_posts_with_featured_images( $heights );
+		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
+		$this->assertContains( '<amp-carousel', $rendered_block );
+		$this->assertContains(
+			sprintf(
+				'height="%s"',
+				$minimum_height
+			),
+			$rendered_block
+		);
+
+		foreach ( $stories as $story ) {
+			$this->assertContains( get_the_permalink( $story->ID ), $rendered_block );
+			$this->assertContains( get_the_post_thumbnail( $story->ID, AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE ), $rendered_block );
+		}
+	}
+
+	/**
+	 * Test get_minimum_height.
+	 *
+	 * @covers \AMP_Editor_Blocks::get_minimum_height()
+	 */
+	public function test_get_minimum_height() {
+		$expected_min_height = 300;
+		$heights             = array(
+			$expected_min_height,
+			400,
+			500,
+			600,
+		);
+		$stories             = $this->create_story_posts_with_featured_images( $heights );
+		$this->assertEquals( $expected_min_height, $this->instance->get_minimum_height( $stories ) );
+
+		// When an empty array() is passed, the minimum height should be 0.
+		$this->assertEquals( 0, $this->instance->get_minimum_height( array() ) );
+	}
+
+	/**
+	 * Creates amp_story posts with featured images of given heights.
+	 *
+	 * @param array $image_heights The heights of images, as integers.
+	 * @return array $posts An array of WP_Post objects of the amp_story post type.
+	 */
+	public function create_story_posts_with_featured_images( $image_heights ) {
 		$stories = array();
-		for ( $i = 0; $i < 5; $i++ ) {
+		foreach ( $image_heights as $height ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
 			array_push( $stories, $new_story );
 
 			// Create the featured image.
-			$thumbnail_id = $this->factory()->attachment->create_object(
-				'https://example.com/foo-image.jpeg',
-				$i,
+			$thumbnail_id = wp_insert_attachment(
 				array(
 					'post_mime_type' => 'image/jpeg',
+				),
+				'https://example.com/foo-image.jpeg',
+				$new_story->ID
+			);
+			set_post_thumbnail( $new_story, $thumbnail_id );
+
+			wp_update_attachment_metadata(
+				$thumbnail_id,
+				array(
+					'width'  => 400,
+					'height' => $height,
 				)
 			);
-			update_post_meta( $new_story->ID, '_thumbnail_id', $thumbnail_id );
 		}
 
-		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
-		$this->assertContains( '<amp-carousel', $rendered_block );
-
-		foreach ( $stories as $story ) {
-			$this->assertContains( get_the_permalink( $story->ID ), $rendered_block );
-			$this->assertContains( get_the_post_thumbnail( $story->ID ), $rendered_block );
-		}
+		return $stories;
 	}
 }

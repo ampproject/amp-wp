@@ -12,6 +12,13 @@
 class AMP_Editor_Blocks {
 
 	/**
+	 * The image size for the Latest Stories block.
+	 *
+	 * @var string
+	 */
+	const LATEST_STORIES_IMAGE_SIZE = 'large';
+
+	/**
 	 * List of AMP scripts that need to be printed when AMP components are used in non-AMP document context ("dirty AMP").
 	 *
 	 * @var array
@@ -224,13 +231,6 @@ class AMP_Editor_Blocks {
 						'type'    => 'number',
 						'default' => 5,
 					),
-					'storyLayout'   => array(
-						'type'    => 'string',
-						'default' => 'list',
-					),
-					'align'         => array(
-						'type' => 'string',
-					),
 					'order'         => array(
 						'type'    => 'string',
 						'default' => 'desc',
@@ -269,29 +269,53 @@ class AMP_Editor_Blocks {
 		foreach ( $story_query->posts as $post ) :
 			?>
 			<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-				<?php echo get_the_post_thumbnail( $post->ID ); ?>
+				<?php echo get_the_post_thumbnail( $post->ID, self::LATEST_STORIES_IMAGE_SIZE ); ?>
 			</a>
 			<?php
 		endforeach;
+
 		$featured_images = ob_get_clean();
-
-		$class = 'amp-block-latest-stories';
-		if ( isset( $attributes['align'] ) ) {
-			$class .= ' align' . $attributes['align'];
-		}
-
-		if ( isset( $attributes['storyLayout'] ) && 'grid' === $attributes['storyLayout'] ) {
-			$class .= ' is-grid';
-		}
+		$class           = 'amp-block-latest-stories';
 
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
 
 		return sprintf(
-			'<amp-carousel height="300" layout="fixed-height" type="carousel" class="%1$s">%2$s</amp-carousel>',
+			'<amp-carousel height="%1$s" layout="fixed-height" type="slides" class="%2$s">%3$s</amp-carousel>',
+			esc_attr( $this->get_minimum_height( $story_query->posts ) ),
 			esc_attr( $class ),
 			$featured_images
 		);
+	}
+
+	/**
+	 * Gets the smallest height of the featured images of posts.
+	 *
+	 * Iterates through all of the posts, to find their featured image.
+	 * Then, this returns the smallest featured image height.
+	 *
+	 * @param array $posts An array or WP_Post objects.
+	 * @return int $minimum_height The smallest height of a featured image of any of the posts.
+	 */
+	public function get_minimum_height( $posts ) {
+		$minimum_height = 0;
+		$height_index   = 2;
+		foreach ( $posts as $post ) {
+			$image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), self::LATEST_STORIES_IMAGE_SIZE );
+			if (
+				isset( $image[ $height_index ] )
+				&&
+				(
+					! $minimum_height
+					||
+					$image[ $height_index ] < $minimum_height
+				)
+			) {
+				$minimum_height = $image[ $height_index ];
+			}
+		}
+
+		return $minimum_height;
 	}
 }
