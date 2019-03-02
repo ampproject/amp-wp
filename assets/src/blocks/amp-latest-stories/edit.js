@@ -21,12 +21,10 @@ import {
 	Placeholder,
 	QueryControls,
 	Spinner,
-	Toolbar,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	InspectorControls,
-	BlockControls,
 } from '@wordpress/editor';
 import { withSelect } from '@wordpress/data';
 
