@@ -60,7 +60,7 @@ function AnimationOrderPicker( {
 
 	options.unshift( defaultOption );
 
-	const currentOption = options.find( ( option ) => option.value === value ) || defaultOption;
+	const currentOption = options.find( ( option ) => value && option.value === value ) || defaultOption;
 	/* translators: %s: block name */
 	const ariaLabel = currentOption ? sprintf( __( 'Begin after: %s', 'amp' ), currentOption.label ) : __( 'Begin immediately', 'amp' );
 
