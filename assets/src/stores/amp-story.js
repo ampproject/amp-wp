@@ -57,7 +57,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				return true;
 			}
 
-			const parentItem = pageAnimationOrder.findIndex( ( { id } ) => id === parent );
+			const parentItem = pageAnimationOrder.find( ( { id } ) => id === parent );
 			parent = parentItem ? parentItem.parent : undefined;
 		}
 
