@@ -62,7 +62,7 @@ export default function AnimationControls( {
 						key="order"
 						label={ __( 'Begin after', 'amp' ) }
 						value={ animationAfter }
-						options={ animatedBlocks }
+						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }
 					/>
 				</Fragment>

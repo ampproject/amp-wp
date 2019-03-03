@@ -99,7 +99,7 @@ export default createHigherOrderComponent(
 							title={ __( 'Animation', 'amp' ) }
 						>
 							<AnimationControls
-								animatedBlocks={ getAnimatedBlocks() }
+								animatedBlocks={ getAnimatedBlocks }
 								animationType={ ampAnimationType }
 								animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
 								animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
