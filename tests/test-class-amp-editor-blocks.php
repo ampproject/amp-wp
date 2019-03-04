@@ -94,6 +94,79 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 				$rendered_block
 			);
 		}
+
+		// Reset for the next assertions.
+		foreach ( $stories as $story ) {
+			wp_delete_post( $story->ID );
+		}
+
+		$thumbnail_ids = array();
+		for ( $i = 0; $i < 5; $i++ ) {
+			$new_story = $this->factory()->post->create_and_get(
+				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
+			);
+
+			/*
+			 * Create an image attached to the post, but not a featured image.
+			 * This method should output it as a fallback for the featured image.
+			 */
+			$thumbnail_id = wp_insert_attachment(
+				array(
+					'post_mime_type' => 'image/jpeg',
+				),
+				'https://example.com/foo-image.jpeg',
+				$new_story->ID
+			);
+
+			$thumbnail_ids = array_merge( $thumbnail_ids, array( $thumbnail_id => $new_story ) );
+		}
+
+		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
+		$this->assertContains( '<amp-carousel', $rendered_block );
+
+		foreach ( $thumbnail_ids as $thumbnail_id => $new_story ) {
+			$this->assertContains(
+				wp_get_attachment_image(
+					$thumbnail_id,
+					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
+					false,
+					array(
+						'alt' => $new_story->post_title,
+					)
+				),
+				$rendered_block
+			);
+		}
+	}
+
+	/**
+	 * Test get_attachment_id.
+	 *
+	 * @covers \AMP_Editor_Blocks::get_attachment_id()
+	 */
+	public function test_get_attachment_id() {
+		$story = $this->factory()->post->create_and_get(
+			array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
+		);
+
+		// Create a featured image.
+		$thumbnail_id = wp_insert_attachment(
+			array(
+				'post_mime_type' => 'image/jpeg',
+			),
+			'https://example.com/foo-image.jpeg',
+			$story->ID
+		);
+		set_post_thumbnail( $story, $thumbnail_id );
+
+		$this->assertEquals( $thumbnail_id, $this->instance->get_attachment_id( $story ) );
+
+		/*
+		 * Remove the story's post thumbnail.
+		 * It's still attached to the story (post), so this should return it if there's no featured image.
+		 */
+		delete_post_thumbnail( $story );
+		$this->assertEquals( $thumbnail_id, $this->instance->get_attachment_id( $story ) );
 	}
 
 	/**
