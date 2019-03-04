@@ -270,7 +270,15 @@ class AMP_Editor_Blocks {
 			if ( has_post_thumbnail( $post->ID ) ) :
 				?>
 				<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-					<?php echo get_the_post_thumbnail( $post->ID, self::LATEST_STORIES_IMAGE_SIZE ); ?>
+					<?php
+					echo get_the_post_thumbnail(
+						$post->ID,
+						self::LATEST_STORIES_IMAGE_SIZE,
+						array(
+							'alt' => get_the_title( $post ),
+						)
+					);
+					?>
 				</a>
 				<?php
 			endif;

@@ -83,7 +83,16 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 
 		foreach ( $stories as $story ) {
 			$this->assertContains( get_the_permalink( $story->ID ), $rendered_block );
-			$this->assertContains( get_the_post_thumbnail( $story->ID, AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE ), $rendered_block );
+			$this->assertContains(
+				get_the_post_thumbnail(
+					$story->ID,
+					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
+					array(
+						'alt' => get_the_title( $story ),
+					)
+				),
+				$rendered_block
+			);
 		}
 	}
 
