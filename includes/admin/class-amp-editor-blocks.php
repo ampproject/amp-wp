@@ -254,7 +254,7 @@ class AMP_Editor_Blocks {
 	 * @return string $markup The rendered block markup.
 	 */
 	public function render_block_latest_stories( $attributes ) {
-		$args = array(
+		$args                = array(
 			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
 			'post_status'      => 'publish',
@@ -262,24 +262,31 @@ class AMP_Editor_Blocks {
 			'orderby'          => $attributes['orderBy'],
 			'suppress_filters' => false,
 		);
-
-		$story_query = new WP_Query( $args );
+		$story_query         = new WP_Query( $args );
+		$min_width           = $this->get_minimum_dimension( 'width', $story_query->posts );
+		$min_height          = $this->get_minimum_dimension( 'height', $story_query->posts );
+		$amp_fit_text_height = 30;
 
 		ob_start();
 		foreach ( $story_query->posts as $post ) :
 			if ( has_post_thumbnail( $post->ID ) ) :
 				?>
-				<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-					<?php
-					echo get_the_post_thumbnail(
-						$post->ID,
-						self::LATEST_STORIES_IMAGE_SIZE,
-						array(
-							'alt' => get_the_title( $post ),
-						)
-					);
-					?>
-				</a>
+				<div>
+					<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+						<?php
+						echo get_the_post_thumbnail(
+							$post->ID,
+							self::LATEST_STORIES_IMAGE_SIZE,
+							array(
+								'alt' => get_the_title( $post ),
+							)
+						);
+						?>
+					</a>
+					<amp-fit-text layout="responsive" width="<?php echo esc_attr( $min_width ); ?>" height="<?php echo esc_attr( $amp_fit_text_height ); ?>">
+						<?php echo esc_html( get_the_title( $post ) ); ?>
+					</amp-fit-text>
+				</div>
 				<?php
 			endif;
 		endforeach;
@@ -294,8 +301,8 @@ class AMP_Editor_Blocks {
 		return sprintf(
 			'<div class="%1$s"><amp-carousel width="%2$s" height="%3$s" layout="fixed" type="slides">%4$s</amp-carousel></div>',
 			$class,
-			esc_attr( $this->get_minimum_dimension( 'width', $story_query->posts ) ),
-			esc_attr( $this->get_minimum_dimension( 'height', $story_query->posts ) ),
+			esc_attr( $min_width ),
+			esc_attr( $min_height + $amp_fit_text_height ),
 			$featured_images
 		);
 	}
