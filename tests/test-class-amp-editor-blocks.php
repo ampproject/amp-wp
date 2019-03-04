@@ -127,42 +127,16 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
 
+		/*
+		 * These images are only attached to the post, and not featured images.
+		 * So they shouldn't appear in the render callback.
+		 */
 		for ( $i = 0; $i < $number_of_images; $i++ ) {
-			$this->assertContains(
+			$this->assertNotContains(
 				wp_get_attachment_image_src( $thumbnail_ids[ $i ] )[0],
 				$rendered_block
 			);
 		}
-	}
-
-	/**
-	 * Test get_attachment_id.
-	 *
-	 * @covers \AMP_Editor_Blocks::get_attachment_id()
-	 */
-	public function test_get_attachment_id() {
-		$story = $this->factory()->post->create_and_get(
-			array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
-		);
-
-		// Create a featured image.
-		$thumbnail_id = wp_insert_attachment(
-			array(
-				'post_mime_type' => 'image/jpeg',
-			),
-			'https://example.com/foo-image.jpeg',
-			$story->ID
-		);
-		set_post_thumbnail( $story, $thumbnail_id );
-
-		$this->assertEquals( $thumbnail_id, $this->instance->get_attachment_id( $story ) );
-
-		/*
-		 * Remove the story's post thumbnail.
-		 * It's still attached to the story (post), so this should return it if there's no featured image.
-		 */
-		delete_post_thumbnail( $story );
-		$this->assertEquals( $thumbnail_id, $this->instance->get_attachment_id( $story ) );
 	}
 
 	/**

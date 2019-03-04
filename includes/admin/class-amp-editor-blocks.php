@@ -261,6 +261,7 @@ class AMP_Editor_Blocks {
 			'order'            => $attributes['order'],
 			'orderby'          => $attributes['orderBy'],
 			'suppress_filters' => false,
+			'meta_key'         => '_thumbnail_id',
 		);
 		$story_query         = new WP_Query( $args );
 		$min_width           = $this->get_minimum_dimension( 'width', $story_query->posts );
@@ -269,14 +270,14 @@ class AMP_Editor_Blocks {
 
 		ob_start();
 		foreach ( $story_query->posts as $post ) :
-			$attachment_id = $this->get_attachment_id( $post );
-			if ( $attachment_id ) :
+			$thumbnail_id = get_post_thumbnail_id( $post );
+			if ( $thumbnail_id ) :
 				?>
 				<div>
 					<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
 						<?php
 						echo wp_get_attachment_image(
-							$attachment_id,
+							$thumbnail_id,
 							self::LATEST_STORIES_IMAGE_SIZE,
 							false,
 							array(
@@ -307,29 +308,6 @@ class AMP_Editor_Blocks {
 			esc_attr( $min_height + $amp_fit_text_height ),
 			$featured_images
 		);
-	}
-
-	/**
-	 * Gets the story's attachment ID, if available.
-	 *
-	 * If the post has a featured image, this returns that.
-	 * Otherwise, this searches for images attached to the post.
-	 * Like if a user uploaded an image to the Media Library for an image block,
-	 * but did not set a featured image.
-	 *
-	 * @param WP_Post $post The post to search for a post thumbnail or attachments.
-	 * @return int|null The ID of an attachment, if available.
-	 */
-	public function get_attachment_id( $post ) {
-		if ( has_post_thumbnail( $post ) ) {
-			return get_post_thumbnail_id( $post );
-		}
-
-		$attachments = get_attached_media( 'image', $post->ID );
-		if ( $attachments ) {
-			$first_attachment = reset( $attachments );
-			return $first_attachment->ID;
-		}
 	}
 
 	/**
