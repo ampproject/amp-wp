@@ -32,7 +32,6 @@ class EditorCarousel extends Component {
 	}
 
 	componentDidMount() {
-		console.log('mount');
 		this.translateWrapper();
 	}
 
