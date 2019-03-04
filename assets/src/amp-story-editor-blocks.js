@@ -1,11 +1,16 @@
 /**
+ * External dependencies
+ */
+import uuid from 'uuid/v4';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
 import { compose } from '@wordpress/compose';
 import domReady from '@wordpress/dom-ready';
-import { setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
-import { select, subscribe } from '@wordpress/data';
+import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import { select, subscribe, dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,30 +18,69 @@ import { select, subscribe } from '@wordpress/data';
 import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
+import { store } from './stores/amp-story';
 
-const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+const { getSelectedBlockClientId, getBlocksByClientId, getBlock, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
+const { getAnimationOrder } = select( 'amp/story' );
+const { addAnimation, removePage } = dispatch( 'amp/story' );
 
-// Ensure that the default block is page when no block is selected.
 domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
 
 	// Remove all blocks that aren't whitelisted.
-	getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) && 'amp/amp-story-page' ).map( ( { name } ) => unregisterBlockType( name ) );
+	const disallowedBlockTypes = getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) );
 
-	// Load all needed fonts.
-	getBlocksByClientId( getBlockOrder() )
-		.filter( ( block ) => block.name === 'amp/amp-story-page' )
-		.map( ( page ) => {
-			getBlocksByClientId( getBlockOrder( page.clientId ) )
-				.filter( ( block ) => block.attributes.ampFontFamily )
-				.map( ( block ) => {
-					maybeEnqueueFontStyle( block.attributes.ampFontFamily );
-				} );
-		} );
+	for ( const blockType of disallowedBlockTypes ) {
+		unregisterBlockType( blockType.name );
+	}
+
+	const allBlocks = getBlocksByClientId( getClientIdsWithDescendants() );
+
+	for ( const block of allBlocks ) {
+		const page = getBlockRootClientId( block.clientId );
+
+		// Set initial animation order state.
+		if ( page ) {
+			const ampAnimationAfter = block.attributes.ampAnimationAfter;
+			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+
+			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+		}
+
+		// Load all needed fonts.
+		if ( block.attributes.ampFontFamily ) {
+			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
+		}
+	}
 } );
 
 subscribe( () => {
-	setDefaultBlockName( getSelectedBlockClientId() ? 'amp/amp-story-text' : 'amp/amp-story-page' );
+	const defaultBlockName = getDefaultBlockName();
+	const selectedBlockClientId = getSelectedBlockClientId();
+
+	// Switch default block depending on context
+	if ( selectedBlockClientId ) {
+		const selectedBlock = getBlock( selectedBlockClientId );
+
+		if ( 'amp/amp-story-page' === selectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
+			setDefaultBlockName( 'amp/amp-story-page' );
+		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
+			setDefaultBlockName( 'amp/amp-story-text' );
+		}
+	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
+		setDefaultBlockName( 'amp/amp-story-page' );
+	}
+} );
+
+store.subscribe( () => {
+	const animatedPages = Object.keys( getAnimationOrder() );
+
+	// Remove stale data from store.
+	for ( const page of animatedPages ) {
+		if ( ! getBlock( page ) ) {
+			removePage( store.getState(), page );
+		}
+	}
 } );
 
 /**
@@ -47,11 +91,18 @@ subscribe( () => {
  * @return {Object} Settings.
  */
 const addAMPAttributes = ( settings, name ) => {
-	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
+	if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 		return settings;
 	}
 
-	const addedAttributes = {};
+	const addedAttributes = {
+		anchor: {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: '*',
+		},
+	};
 
 	// Define selector according to mappings.
 	if ( BLOCK_TAG_MAPPING[ name ] ) {
@@ -100,13 +151,17 @@ const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	settings.attributes = settings.attributes || {};
-	settings.attributes = {
-		...settings.attributes,
-		...addedAttributes,
+	return {
+		...settings,
+		attributes: {
+			...settings.attributes,
+			...addedAttributes,
+		},
+		supports: {
+			...settings.supports,
+			anchor: false,
+		},
 	};
-
-	return settings;
 };
 
 /**
@@ -120,9 +175,12 @@ const addAMPAttributes = ( settings, name ) => {
 const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const ampAttributes = {};
 
-	if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( blockType.name ) ) {
+	if ( ! ALLOWED_CHILD_BLOCKS.includes( blockType.name ) ) {
 		return props;
 	}
+
+	// Always add anchor ID regardless of block support. Needed for animations.
+	props.id = attributes.anchor || uuid();
 
 	if ( attributes.ampAnimationType ) {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
@@ -158,7 +216,8 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
  */
 const setBlockParent = ( props ) => {
 	const { name } = props;
-	if ( -1 !== ALLOWED_CHILD_BLOCKS.indexOf( name ) ) {
+
+	if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,

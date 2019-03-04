@@ -150,6 +150,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['animate-in-after']    = true;
 			$allowed_tag['data-font-family']    = true;
 		}
 
