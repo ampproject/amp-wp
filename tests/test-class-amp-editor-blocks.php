@@ -82,11 +82,13 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		);
 
 		foreach ( $stories as $story ) {
+			$featured_image = get_post_thumbnail_id( $story );
 			$this->assertContains( get_the_permalink( $story->ID ), $rendered_block );
 			$this->assertContains(
-				get_the_post_thumbnail(
-					$story->ID,
+				wp_get_attachment_image(
+					$featured_image,
 					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
+					false,
 					array(
 						'alt' => get_the_title( $story ),
 					)
