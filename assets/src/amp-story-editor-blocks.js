@@ -20,7 +20,7 @@ import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './const
 import { maybeEnqueueFontStyle } from './helpers';
 import { store } from './stores/amp-story';
 
-const { getSelectedBlockClientId, getBlockOrder, getBlocksByClientId, getBlock } = select( 'core/editor' );
+const { getSelectedBlockClientId, getBlocksByClientId, getBlock, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
 const { getAnimationOrder } = select( 'amp/story' );
 const { addAnimation, removePage } = dispatch( 'amp/story' );
 
@@ -28,33 +28,30 @@ domReady( () => {
 	setDefaultBlockName( 'amp/amp-story-page' );
 
 	// Remove all blocks that aren't whitelisted.
-	getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) && 'amp/amp-story-page' ).map( ( { name } ) => unregisterBlockType( name ) );
+	const disallowedBlockTypes = getBlockTypes().filter( ( { name } ) => ! ALLOWED_BLOCKS.includes( name ) );
 
-	// Set initial animation order state.
-	getBlocksByClientId( getBlockOrder() )
-		.filter( ( block ) => block.name === 'amp/amp-story-page' )
-		.map( ( page ) => {
-			const blocks = getBlocksByClientId( getBlockOrder( page.clientId ) );
+	for ( const blockType of disallowedBlockTypes ) {
+		unregisterBlockType( blockType.name );
+	}
 
-			blocks.filter( ( block ) => block.attributes.ampAnimationType )
-				.map( ( block ) => {
-					const ampAnimationAfter = block.attributes.ampAnimationAfter;
-					const predecessor = blocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	const allBlocks = getBlocksByClientId( getClientIdsWithDescendants() );
 
-					addAnimation( page.clientId, block.clientId, predecessor ? predecessor.clientId : undefined );
-				} );
-		} );
+	for ( const block of allBlocks ) {
+		const page = getBlockRootClientId( block.clientId );
 
-	// Load all needed fonts.
-	getBlocksByClientId( getBlockOrder() )
-		.filter( ( block ) => block.name === 'amp/amp-story-page' )
-		.map( ( page ) => {
-			getBlocksByClientId( getBlockOrder( page.clientId ) )
-				.filter( ( block ) => block.attributes.ampFontFamily )
-				.map( ( block ) => {
-					maybeEnqueueFontStyle( block.attributes.ampFontFamily );
-				} );
-		} );
+		// Set initial animation order state.
+		if ( page ) {
+			const ampAnimationAfter = block.attributes.ampAnimationAfter;
+			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+
+			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+		}
+
+		// Load all needed fonts.
+		if ( block.attributes.ampFontFamily ) {
+			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
+		}
+	}
 } );
 
 subscribe( () => {
@@ -76,11 +73,14 @@ subscribe( () => {
 } );
 
 store.subscribe( () => {
-	Object.keys( getAnimationOrder() ).map( ( page ) => {
+	const animatedPages = Object.keys( getAnimationOrder() );
+
+	// Remove stale data from store.
+	for ( const page of animatedPages ) {
 		if ( ! getBlock( page ) ) {
 			removePage( store.getState(), page );
 		}
-	} );
+	}
 } );
 
 /**
