@@ -267,11 +267,13 @@ class AMP_Editor_Blocks {
 
 		ob_start();
 		foreach ( $story_query->posts as $post ) :
-			?>
-			<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-				<?php echo get_the_post_thumbnail( $post->ID, self::LATEST_STORIES_IMAGE_SIZE ); ?>
-			</a>
-			<?php
+			if ( has_post_thumbnail( $post->ID ) ) :
+				?>
+				<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+					<?php echo get_the_post_thumbnail( $post->ID, self::LATEST_STORIES_IMAGE_SIZE ); ?>
+				</a>
+				<?php
+			endif;
 		endforeach;
 
 		$featured_images = ob_get_clean();
@@ -302,7 +304,12 @@ class AMP_Editor_Blocks {
 		$minimum_height = 0;
 		$height_index   = 2;
 		foreach ( $posts as $post ) {
-			$image = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), self::LATEST_STORIES_IMAGE_SIZE );
+			$thumbnail_id = get_post_thumbnail_id( $post->ID );
+			if ( ! $thumbnail_id ) {
+				continue;
+			}
+
+			$image = wp_get_attachment_image_src( $thumbnail_id, self::LATEST_STORIES_IMAGE_SIZE );
 			if (
 				isset( $image[ $height_index ] )
 				&&
