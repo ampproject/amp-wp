@@ -151,17 +151,17 @@ const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	// Disable anchor support as we auto-generate IDs.
-	settings.supports = settings.supports || {};
-	settings.supports.anchor = false;
-
-	settings.attributes = settings.attributes || {};
-	settings.attributes = {
-		...settings.attributes,
-		...addedAttributes,
+	return {
+		...settings,
+		attributes: {
+			...settings.attributes,
+			...addedAttributes,
+		},
+		supports: {
+			...settings.supports,
+			anchor: false,
+		},
 	};
-
-	return settings;
 };
 
 /**
