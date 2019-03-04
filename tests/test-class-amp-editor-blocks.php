@@ -102,8 +102,9 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			wp_delete_post( $story->ID );
 		}
 
-		$thumbnail_ids = array();
-		for ( $i = 0; $i < 5; $i++ ) {
+		$number_of_images = 5;
+		$thumbnail_ids    = array();
+		for ( $i = 0; $i < $number_of_images; $i++ ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
@@ -120,22 +121,15 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 				$new_story->ID
 			);
 
-			$thumbnail_ids = array_merge( $thumbnail_ids, array( $thumbnail_id => $new_story ) );
+			$thumbnail_ids[ $i ] = $thumbnail_id;
 		}
 
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
 
-		foreach ( $thumbnail_ids as $thumbnail_id => $new_story ) {
+		for ( $i = 0; $i < $number_of_images; $i++ ) {
 			$this->assertContains(
-				wp_get_attachment_image(
-					$thumbnail_id,
-					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
-					false,
-					array(
-						'alt' => $new_story->post_title,
-					)
-				),
+				wp_get_attachment_image_src( $thumbnail_ids[ $i ] )[0],
 				$rendered_block
 			);
 		}
