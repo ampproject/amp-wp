@@ -87,6 +87,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Skip element if in AMP-element fallbacks.
+			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+				continue;
+			}
+
 			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
