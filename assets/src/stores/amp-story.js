@@ -3,7 +3,7 @@
  */
 import { select, dispatch, registerStore } from '@wordpress/data';
 
-const { getBlock } = select( 'core/editor' );
+const { getBlock, getBlockOrder, getAdjacentBlockClientId } = select( 'core/editor' );
 const { updateBlockAttributes } = dispatch( 'core/editor' );
 
 export const namespace = 'amp/story';
@@ -15,6 +15,7 @@ const DEFAULT_STATE = {
 	 * For each block, its clientId and its predecessor's (parent) clientId are stored.
 	 */
 	animationOrder: {},
+	currentPage: undefined,
 };
 
 const actions = {
@@ -39,10 +40,16 @@ const actions = {
 			page,
 		};
 	},
+	setCurrentPage( page ) {
+		return {
+			type: 'SET_CURRENT_PAGE',
+			page,
+		};
+	},
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
-	const { animationOrder } = state;
+	const { animationOrder, currentPage } = state;
 	const { type, page, item, predecessor } = action;
 
 	const pageAnimationOrder = animationOrder[ page ] || [];
@@ -108,9 +115,21 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				animationOrder[ page ] = undefined;
 			}
 
+			let newCurrentPage = currentPage;
+
+			if ( page === currentPage ) {
+				newCurrentPage = getAdjacentBlockClientId( page, -1 ) || getAdjacentBlockClientId( page, 1 ) || ( getBlockOrder() ? [ 0 ] : getBlockOrder() ) || undefined;
+			}
+
 			return {
 				...state,
 				...animationOrder,
+				currentPage: newCurrentPage,
+			};
+		case 'SET_CURRENT_PAGE':
+			return {
+				...state,
+				currentPage: getBlock( page ) ? page : currentPage,
 			};
 	}
 
@@ -126,6 +145,9 @@ const selectors = {
 		const found = pageAnimationOrder.find( ( { id } ) => id === item );
 
 		return found ? found.parent : undefined;
+	},
+	getCurrentPage( state ) {
+		return state.currentPage;
 	},
 };
 
