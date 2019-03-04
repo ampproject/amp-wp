@@ -15,10 +15,11 @@ import { withBlockName } from './';
 const applyWithSelect = withSelect( ( select, props ) => {
 	const {
 		getBlockOrder,
+		getBlockRootClientId,
 	} = select( 'core/editor' );
 
 	return {
-		pageNumber: getBlockOrder().indexOf( props.clientId ) + 1,
+		pageNumber: '' === getBlockRootClientId() ? getBlockOrder().indexOf( props.clientId ) + 1 : undefined,
 	};
 } );
 
@@ -38,8 +39,8 @@ export default createHigherOrderComponent(
 		return wrapperWithSelect( ( props ) => {
 			const { blockName, pageNumber } = props;
 
-			// If it's not an allowed block then lets return original;
-			if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( blockName ) ) {
+			// Not a valid top level block.
+			if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( blockName ) || ! pageNumber ) {
 				return <BlockEdit { ...props } />;
 			}
 
