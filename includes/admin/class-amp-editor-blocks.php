@@ -16,7 +16,7 @@ class AMP_Editor_Blocks {
 	 *
 	 * @var string
 	 */
-	const LATEST_STORIES_IMAGE_SIZE = 'large';
+	const LATEST_STORIES_IMAGE_SIZE = 'medium';
 
 	/**
 	 * List of AMP scripts that need to be printed when AMP components are used in non-AMP document context ("dirty AMP").
@@ -284,25 +284,36 @@ class AMP_Editor_Blocks {
 		}
 
 		return sprintf(
-			'<amp-carousel height="%1$s" layout="fixed-height" type="slides" class="%2$s">%3$s</amp-carousel>',
-			esc_attr( $this->get_minimum_height( $story_query->posts ) ),
-			esc_attr( $class ),
+			'<div class="%1$s"><amp-carousel width="%2$s" height="%3$s" layout="fixed" type="slides">%4$s</amp-carousel></div>',
+			$class,
+			esc_attr( $this->get_minimum_dimension( 'width', $story_query->posts ) ),
+			esc_attr( $this->get_minimum_dimension( 'height', $story_query->posts ) ),
 			$featured_images
 		);
 	}
 
 	/**
-	 * Gets the smallest height of the featured images of posts.
+	 * Gets the smallest of the given dimension of any of the featured images.
 	 *
-	 * Iterates through all of the posts, to find their featured image.
-	 * Then, this returns the smallest featured image height.
+	 * This iterates through all of the posts, to find their featured image.
+	 * Then, this returns the smallest dimension (width or height).
+	 * For example, if $dimension is 'width' and the featured image widths are 100, 200 and 300,
+	 * this will return 100.
 	 *
-	 * @param array $posts An array or WP_Post objects.
-	 * @return int $minimum_height The smallest height of a featured image of any of the posts.
+	 * @param string $dimension The dimension, either 'width' or 'height'.
+	 * @param array  $posts An array or WP_Post objects.
+	 * @return int $minimum_dimension The smallest dimension of a featured image.
 	 */
-	public function get_minimum_height( $posts ) {
-		$minimum_height = 0;
-		$height_index   = 2;
+	public function get_minimum_dimension( $dimension, $posts ) {
+		if ( 'width' === $dimension ) {
+			$index = 1;
+		} elseif ( 'height' === $dimension ) {
+			$index = 2;
+		} else {
+			return;
+		}
+
+		$minimum_dimension = 0;
 		foreach ( $posts as $post ) {
 			$thumbnail_id = get_post_thumbnail_id( $post->ID );
 			if ( ! $thumbnail_id ) {
@@ -311,18 +322,18 @@ class AMP_Editor_Blocks {
 
 			$image = wp_get_attachment_image_src( $thumbnail_id, self::LATEST_STORIES_IMAGE_SIZE );
 			if (
-				isset( $image[ $height_index ] )
+				isset( $image[ $index ] )
 				&&
 				(
-					! $minimum_height
+					! $minimum_dimension
 					||
-					$image[ $height_index ] < $minimum_height
+					$image[ $index ] < $minimum_dimension
 				)
 			) {
-				$minimum_height = $image[ $height_index ];
+				$minimum_dimension = $image[ $index ];
 			}
 		}
 
-		return $minimum_height;
+		return $minimum_dimension;
 	}
 }

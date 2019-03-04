@@ -69,8 +69,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 
 		// Create mock AMP story posts to test.
 		$minimum_height = 200;
-		$heights        = array( $minimum_height, 300, 500 );
-		$stories        = $this->create_story_posts_with_featured_images( $heights );
+		$dimensions     = array( $minimum_height, 300, 500 );
+		$stories        = $this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
 		$this->assertContains(
@@ -88,34 +88,44 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_minimum_height.
+	 * Test get_minimum_dimension.
 	 *
-	 * @covers \AMP_Editor_Blocks::get_minimum_height()
+	 * @covers \AMP_Editor_Blocks::get_minimum_dimension()
 	 */
-	public function test_get_minimum_height() {
+	public function test_get_minimum_dimension() {
 		$expected_min_height = 300;
-		$heights             = array(
+		$dimensions          = array(
 			$expected_min_height,
 			400,
 			500,
 			600,
 		);
-		$stories             = $this->create_story_posts_with_featured_images( $heights );
-		$this->assertEquals( $expected_min_height, $this->instance->get_minimum_height( $stories ) );
+		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
+		$this->assertEquals( $expected_min_height, $this->instance->get_minimum_dimension( 'height', $stories ) );
+
+		$expected_min_width = 100;
+		$dimensions         = array(
+			$expected_min_width,
+			200,
+			300,
+			800,
+		);
+		$stories            = $this->create_story_posts_with_featured_images( $dimensions );
+		$this->assertEquals( $expected_min_width, $this->instance->get_minimum_dimension( 'width', $stories ) );
 
 		// When an empty array() is passed, the minimum height should be 0.
-		$this->assertEquals( 0, $this->instance->get_minimum_height( array() ) );
+		$this->assertEquals( 0, $this->instance->get_minimum_dimension( 'height', array() ) );
 	}
 
 	/**
 	 * Creates amp_story posts with featured images of given heights.
 	 *
-	 * @param array $image_heights The heights of images, as integers.
+	 * @param array $dimensions An array of strings.
 	 * @return array $posts An array of WP_Post objects of the amp_story post type.
 	 */
-	public function create_story_posts_with_featured_images( $image_heights ) {
+	public function create_story_posts_with_featured_images( $dimensions ) {
 		$stories = array();
-		foreach ( $image_heights as $height ) {
+		foreach ( $dimensions as $dimension ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
@@ -134,8 +144,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			wp_update_attachment_metadata(
 				$thumbnail_id,
 				array(
-					'width'  => 400,
-					'height' => $height,
+					'width'  => $dimension,
+					'height' => $dimension,
 				)
 			);
 		}
