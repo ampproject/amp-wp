@@ -8,7 +8,7 @@ import uuid from 'uuid/v4';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -52,7 +52,7 @@ export const maybeEnqueueFontStyle = ( name ) => {
 export const setBlockParent = ( props ) => {
 	const { name } = props;
 
-	if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+	if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) ) {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,
