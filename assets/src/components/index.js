@@ -11,3 +11,4 @@ export { default as withHasSelectedInnerBlock } from './with-has-selected-inner-
 export { default as withPageNumber } from './with-page-number';
 export { default as withParentBlock } from './with-parent-block';
 export { default as withWrapperProps } from './with-wrapper-props';
+export { default as withActivePageState } from './with-active-page-state';
