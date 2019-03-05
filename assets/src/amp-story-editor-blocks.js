@@ -64,10 +64,33 @@ domReady( () => {
 		}
 	}
 
+	renderStoryComponents();
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	document.getElementsByClassName( 'editor-writing-flow__click-redirect' )[ 0 ].remove();
+} );
+
+/**
+ * Add some additional elements needed to render our custom UI controls.
+ */
+function renderStoryComponents() {
 	const editorBlockList = document.getElementsByClassName( 'editor-block-list__layout' )[ 0 ];
 	const postTitle = document.getElementsByClassName( 'editor-post-title' )[ 0 ];
 
-	// Add some additional elements needed to render our custom UI controls.
+	if ( postTitle ) {
+		const storyControls = document.createElement( 'div' );
+		storyControls.id = 'amp-story-controls';
+
+		postTitle.appendChild( storyControls );
+
+		render(
+			<div key="storyControls" className="amp-story-controls">
+				<StoryControls />
+			</div>,
+			storyControls
+		);
+	}
+
 	if ( editorBlockList ) {
 		const blockNavigation = document.createElement( 'div' );
 		blockNavigation.id = 'amp-root-navigation';
@@ -75,12 +98,8 @@ domReady( () => {
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
 
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
 		editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
 		editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
-		postTitle.appendChild( storyControls );
 
 		render(
 			<div key="blockNavigation" className="block-navigation">
@@ -95,18 +114,8 @@ domReady( () => {
 			</div>,
 			editorCarousel
 		);
-
-		render(
-			<div key="storyControls" className="amp-story-controls">
-				<StoryControls />
-			</div>,
-			storyControls
-		);
 	}
-
-	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.getElementsByClassName( 'editor-writing-flow__click-redirect' )[ 0 ].remove();
-} );
+}
 
 const { getBlockOrder } = select( 'core/editor' );
 
@@ -114,6 +123,8 @@ let blockOrder = getBlockOrder();
 
 subscribe( () => {
 	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
+	const { moveBlockToPosition } = dispatch( 'core/editor' );
+	const { isReordering, getBlockOrder: getCustomBlockOrder } = select( 'amp/story' );
 	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
@@ -136,6 +147,14 @@ subscribe( () => {
 	const newPage = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
 
 	blockOrder = newBlockOrder;
+
+	// The block order was changed manually, let's do the re-order.
+	// Todo: Needs testing.
+	if ( ! isReordering && blockOrder !== getCustomBlockOrder() ) {
+		for ( const [ index, page ] of getCustomBlockOrder().entries() ) {
+			moveBlockToPosition( page, '', '', index );
+		}
+	}
 
 	// If a new page has been inserted, make it the current one.
 	if ( newPage ) {

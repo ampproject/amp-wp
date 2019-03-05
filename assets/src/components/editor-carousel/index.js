@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { Component } from '@wordpress/element';
+import { Component, Fragment } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -11,6 +11,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import Indicator from './indicator';
+import { Reorderer } from '../';
 
 const PAGE_MARGIN = 20;
 const PAGE_WIDTH = 338;
@@ -24,7 +25,12 @@ class EditorCarousel extends Component {
 
 	translateWrapper() {
 		const wrapper = document.querySelector( '.editor-writing-flow .editor-block-list__layout' );
-		wrapper.style.transform = `translateX(calc(50% - ${ PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * PAGE_WIDTH }px))`;
+		if ( this.props.isReordering ) {
+			wrapper.style.display = 'none';
+		} else {
+			wrapper.style.display = '';
+			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * PAGE_WIDTH }px))`;
+		}
 	}
 
 	componentDidMount() {
@@ -43,32 +49,35 @@ class EditorCarousel extends Component {
 		};
 
 		return (
-			<div className="amp-story-editor-carousel-navigation">
-				<IconButton
-					icon="arrow-left-alt2"
-					label={ __( 'Previous Page', 'amp' ) }
-					onClick={ ( e ) => {
-						e.preventDefault();
-						goToPage( previousPage );
-					} }
-					disabled={ null === previousPage || isReordering }
-				/>
-				<Indicator
-					pages={ pages }
-					currentPage={ currentPage }
-					onClick={ goToPage }
-					disabled={ isReordering }
-				/>
-				<IconButton
-					icon="arrow-right-alt2"
-					label={ __( 'Next Page', 'amp' ) }
-					onClick={ ( e ) => {
-						e.preventDefault();
-						goToPage( nextPage );
-					} }
-					disabled={ null === nextPage || isReordering }
-				/>
-			</div>
+			<Fragment>
+				{ isReordering && <Reorderer pages={ pages } /> }
+				<div className="amp-story-editor-carousel-navigation">
+					<IconButton
+						icon="arrow-left-alt2"
+						label={ __( 'Previous Page', 'amp' ) }
+						onClick={ ( e ) => {
+							e.preventDefault();
+							goToPage( previousPage );
+						} }
+						disabled={ null === previousPage || isReordering }
+					/>
+					<Indicator
+						pages={ pages }
+						currentPage={ currentPage }
+						onClick={ goToPage }
+						disabled={ isReordering }
+					/>
+					<IconButton
+						icon="arrow-right-alt2"
+						label={ __( 'Next Page', 'amp' ) }
+						onClick={ ( e ) => {
+							e.preventDefault();
+							goToPage( nextPage );
+						} }
+						disabled={ null === nextPage || isReordering }
+					/>
+				</div>
+			</Fragment>
 		);
 	}
 }

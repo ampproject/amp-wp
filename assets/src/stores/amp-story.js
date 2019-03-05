@@ -48,6 +48,12 @@ const actions = {
 			page,
 		};
 	},
+	changeblockOrder( blockOrder ) {
+		return {
+			type: 'CHANGE_BLOCK_ORDER',
+			blockOrder,
+		};
+	},
 	startReordering() {
 		return {
 			type: 'START_REORDERING',
@@ -62,7 +68,7 @@ const actions = {
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
 	const { animationOrder, currentPage } = state;
-	const { type, page, item, predecessor } = action;
+	const { type, page, item, predecessor, blockOrder } = action;
 
 	const pageAnimationOrder = animationOrder[ page ] || [];
 
@@ -142,6 +148,11 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			return {
 				...state,
 				currentPage: getBlock( page ) ? page : currentPage,
+			};
+		case 'CHANGE_BLOCK_ORDER':
+			return {
+				...state,
+				blockOrder,
 			};
 		case 'START_REORDERING':
 			return {
