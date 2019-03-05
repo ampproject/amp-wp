@@ -90,6 +90,9 @@ domReady( () => {
 			editorCarousel
 		);
 	}
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	document.getElementsByClassName( 'editor-writing-flow__click-redirect' )[ 0 ].remove();
 } );
 
 const { getBlockOrder } = select( 'core/editor' );
