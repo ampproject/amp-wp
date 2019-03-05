@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { Fragment, Component } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -36,40 +36,39 @@ class EditorCarousel extends Component {
 	}
 
 	render() {
-		const { pages, currentPage, previousPage, nextPage, onChangePage } = this.props;
+		const { pages, currentPage, previousPage, nextPage, onChangePage, isReordering } = this.props;
 
 		const goToPage = ( page ) => {
 			onChangePage( page );
 		};
 
 		return (
-			<Fragment>
-				<div className="amp-story-editor-carousel-navigation">
-					<IconButton
-						icon="arrow-left-alt2"
-						label={ __( 'Previous Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( previousPage );
-						} }
-						disabled={ null === previousPage }
-					/>
-					<Indicator
-						pages={ pages }
-						currentPage={ currentPage }
-						onClick={ goToPage }
-					/>
-					<IconButton
-						icon="arrow-right-alt2"
-						label={ __( 'Next Page', 'amp' ) }
-						onClick={ ( e ) => {
-							e.preventDefault();
-							goToPage( nextPage );
-						} }
-						disabled={ null === nextPage }
-					/>
-				</div>
-			</Fragment>
+			<div className="amp-story-editor-carousel-navigation">
+				<IconButton
+					icon="arrow-left-alt2"
+					label={ __( 'Previous Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( previousPage );
+					} }
+					disabled={ null === previousPage || isReordering }
+				/>
+				<Indicator
+					pages={ pages }
+					currentPage={ currentPage }
+					onClick={ goToPage }
+					disabled={ isReordering }
+				/>
+				<IconButton
+					icon="arrow-right-alt2"
+					label={ __( 'Next Page', 'amp' ) }
+					onClick={ ( e ) => {
+						e.preventDefault();
+						goToPage( nextPage );
+					} }
+					disabled={ null === nextPage || isReordering }
+				/>
+			</div>
 		);
 	}
 }
@@ -81,7 +80,7 @@ export default compose(
 			getBlocksByClientId,
 			getAdjacentBlockClientId,
 		} = select( 'core/editor' );
-		const { getCurrentPage } = select( 'amp/story' );
+		const { getCurrentPage, isReordering } = select( 'amp/story' );
 
 		const currentPage = getCurrentPage();
 		const pages = getBlocksByClientId( getBlockOrder() );
@@ -92,6 +91,7 @@ export default compose(
 			currentIndex: pages.findIndex( ( { clientId } ) => clientId === currentPage ),
 			previousPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, -1 ) : null,
 			nextPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, 1 ) : null,
+			isReordering: isReordering(),
 		};
 	} ),
 	withDispatch( ( dispatch ) => {

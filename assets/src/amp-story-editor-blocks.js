@@ -18,6 +18,7 @@ import {
 	withActivePageState,
 	BlockNavigation,
 	EditorCarousel,
+	StoryControls,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
@@ -64,6 +65,7 @@ domReady( () => {
 	}
 
 	const editorBlockList = document.getElementsByClassName( 'editor-block-list__layout' )[ 0 ];
+	const postTitle = document.getElementsByClassName( 'editor-post-title' )[ 0 ];
 
 	// Add some additional elements needed to render our custom UI controls.
 	if ( editorBlockList ) {
@@ -73,8 +75,12 @@ domReady( () => {
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
 
+		const storyControls = document.createElement( 'div' );
+		storyControls.id = 'amp-story-controls';
+
 		editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
 		editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
+		postTitle.appendChild( storyControls );
 
 		render(
 			<div key="blockNavigation" className="block-navigation">
@@ -88,6 +94,13 @@ domReady( () => {
 				<EditorCarousel />
 			</div>,
 			editorCarousel
+		);
+
+		render(
+			<div key="storyControls" className="amp-story-controls">
+				<StoryControls />
+			</div>,
+			storyControls
 		);
 	}
 

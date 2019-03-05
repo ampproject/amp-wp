@@ -45,8 +45,12 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	);
 }
 
-function BlockNavigation( { elements, selectBlock, selectedBlockClientId } ) {
+function BlockNavigation( { elements, selectBlock, selectedBlockClientId, isReordering } ) {
 	const hasElements = elements.length > 0;
+
+	if ( isReordering ) {
+		return null;
+	}
 
 	return (
 		<NavigableMenu
@@ -72,12 +76,13 @@ function BlockNavigation( { elements, selectBlock, selectedBlockClientId } ) {
 
 export default compose(
 	withSelect( ( select ) => {
-		const { getCurrentPage } = select( 'amp/story' );
+		const { getCurrentPage, isReordering } = select( 'amp/story' );
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/editor' );
 
 		return {
 			elements: getBlocksByClientId( getBlockOrder( getCurrentPage() ) ),
 			selectedBlockClientId: getSelectedBlockClientId(),
+			isReordering: isReordering(),
 		};
 	} ),
 	withDispatch( ( dispatch, { onSelect = () => undefined } ) => {

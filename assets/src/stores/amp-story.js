@@ -16,6 +16,8 @@ const DEFAULT_STATE = {
 	 */
 	animationOrder: {},
 	currentPage: undefined,
+	blockOrder: [],
+	isReordering: false,
 };
 
 const actions = {
@@ -44,6 +46,16 @@ const actions = {
 		return {
 			type: 'SET_CURRENT_PAGE',
 			page,
+		};
+	},
+	startReordering() {
+		return {
+			type: 'START_REORDERING',
+		};
+	},
+	stopReordering() {
+		return {
+			type: 'STOP_REORDERING',
 		};
 	},
 };
@@ -131,6 +143,17 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				...state,
 				currentPage: getBlock( page ) ? page : currentPage,
 			};
+		case 'START_REORDERING':
+			return {
+				...state,
+				blockOrder: getBlockOrder(),
+				isReordering: true,
+			};
+		case 'STOP_REORDERING':
+			return {
+				...state,
+				isReordering: false,
+			};
 	}
 
 	return state;
@@ -148,6 +171,12 @@ const selectors = {
 	},
 	getCurrentPage( state ) {
 		return state.currentPage;
+	},
+	getBlockOrder( state ) {
+		return state.blockOrder;
+	},
+	isReordering( state ) {
+		return state.isReordering;
 	},
 };
 

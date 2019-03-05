@@ -298,10 +298,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 @media (min-width: 961px) {
-	.post-type-amp_story .editor-post-title__input {
-		text-align: center;
-	}
-
 	.post-type-amp_story .editor-writing-flow > div > div {
 		overflow: hidden;
 	}
@@ -390,6 +386,23 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		background: #666;
 	}
 
+	.editor-post-title {
+		position: relative;
+	}
+
+	.editor-post-title .amp-story-controls {
+		position: absolute;
+		right: 0;
+		top: 50%;
+		transform: translateY(-50%);
+		display: flex;
+	}
+
+	.edit-post-visual-editor .editor-post-title__block {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
 	.components-icon-button.editor-block-navigation {
 		display: none;
 	}
@@ -475,19 +488,19 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-right: 5px;
 	}
 
-	.block-navigation {
+	.editor-block-navigation__container {
 		background: #fff;
 		border: 1px solid #eee;
 	}
 
-	.block-navigation .component-editor__selector button {
+	.editor-block-navigation__container .component-editor__selector button {
 		background: no-repeat left top;
 		padding-left: 37px;
 		height: 40px;
 		margin: 1px 0 1px 4px;
 	}
 
-	.block-navigation .component-editor__selector .components-button:focus {
+	.editor-block-navigation__container .component-editor__selector .components-button:focus {
 		box-shadow: none;
 	}
 

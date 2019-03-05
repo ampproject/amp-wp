@@ -4,7 +4,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 
-export default function Indicator( { pages, currentPage, onClick } ) {
+export default function Indicator( { pages, currentPage, onClick, disabled } ) {
 	/* translators: %s: Page number */
 	const label = ( pageNumber ) => sprintf( __( 'Page %s', 'amp' ), pageNumber );
 
@@ -24,7 +24,7 @@ export default function Indicator( { pages, currentPage, onClick } ) {
 									e.preventDefault();
 									onClick( page.clientId );
 								} }
-								disabled={ page.clientId === currentPage }
+								disabled={ page.clientId === currentPage || disabled }
 							>
 								<span className="screen-reader-text">
 									{ label( index + 1 ) }
