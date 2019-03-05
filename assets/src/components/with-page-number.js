@@ -19,7 +19,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	} = select( 'core/editor' );
 
 	return {
-		pageNumber: '' === getBlockRootClientId() ? getBlockOrder().indexOf( props.clientId ) + 1 : undefined,
+		pageNumber: '' === getBlockRootClientId( props.clientId ) ? getBlockOrder().indexOf( props.clientId ) + 1 : undefined,
 	};
 } );
 
