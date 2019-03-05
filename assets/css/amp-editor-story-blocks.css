@@ -307,8 +307,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
-		padding-left: 15px;
-		padding-right: 15px;
+		padding-left: 0;
+		padding-right: 0;
 		display: flex;
 		align-items: center;
 		transform: none;
@@ -322,7 +322,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] + div[data-type="amp/amp-story-page"] {
-		margin-left: 1em;
+		margin-left: 20px;
 	}
 
 	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-active {
@@ -361,7 +361,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		padding: 0;
 		list-style-type: none;
 		justify-content: center;
-		max-width: 338px;
+		max-width: 30%;
 	}
 
 	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item {
@@ -378,6 +378,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		background: #eff0f1;
 		width: 100%;
 		height: 100%;
+		display: block;
 	}
 
 	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:hover,

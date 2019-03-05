@@ -12,23 +12,19 @@ import { compose } from '@wordpress/compose';
  */
 import Indicator from './indicator';
 
-const PAGE_WIDTH = 350;
-const WRAPPER_PADDING = 15;
+const PAGE_MARGIN = 20;
+const PAGE_WIDTH = 338;
 
 class EditorCarousel extends Component {
 	constructor( props ) {
 		super( props );
-
-		this.state = {
-			index: 0,
-		};
 
 		this.translateWrapper.bind( this );
 	}
 
 	translateWrapper() {
 		const wrapper = document.querySelector( '.editor-writing-flow .editor-block-list__layout' );
-		wrapper.style.transform = `translateX(calc(50% - ${ PAGE_WIDTH / 2 }px - ${ WRAPPER_PADDING }px - ${ ( this.state.index ) * PAGE_WIDTH }px))`;
+		wrapper.style.transform = `translateX(calc(50% - ${ PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * PAGE_WIDTH }px))`;
 	}
 
 	componentDidMount() {
@@ -44,12 +40,6 @@ class EditorCarousel extends Component {
 
 		const goToPage = ( page ) => {
 			onChangePage( page );
-
-			const index = pages.findIndex( ( { clientId } ) => clientId === page );
-
-			if ( -1 !== index ) {
-				this.setState( { index } );
-			}
 		};
 
 		return (
@@ -93,12 +83,15 @@ export default compose(
 		} = select( 'core/editor' );
 		const { getCurrentPage } = select( 'amp/story' );
 
+		const currentPage = getCurrentPage();
+		const pages = getBlocksByClientId( getBlockOrder() );
+
 		return {
-			pages: getBlocksByClientId( getBlockOrder() ),
-			// Todo: Use state for the following properties/methods.
-			currentPage: getCurrentPage(),
-			previousPage: getCurrentPage() ? getAdjacentBlockClientId( getCurrentPage(), -1 ) : null,
-			nextPage: getCurrentPage() ? getAdjacentBlockClientId( getCurrentPage(), 1 ) : null,
+			pages,
+			currentPage,
+			currentIndex: pages.findIndex( ( { clientId } ) => clientId === currentPage ),
+			previousPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, -1 ) : null,
+			nextPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, 1 ) : null,
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
