@@ -21,7 +21,7 @@ import {
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
-import { store } from './stores/amp-story';
+import './stores/amp-story';
 
 /**
  * Initialize editor integration.
@@ -101,7 +101,7 @@ let blockOrder = getBlockOrder();
 
 subscribe( () => {
 	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
-	const { setCurrentPage } = dispatch( 'amp/story' );
+	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -118,29 +118,20 @@ subscribe( () => {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
 
-	// If a new page has been inserted, make it the current one.
 	const newBlockOrder = getBlockOrder();
+	const oldPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
 	const newPage = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
 
 	blockOrder = newBlockOrder;
 
+	// If a new page has been inserted, make it the current one.
 	if ( newPage ) {
 		setCurrentPage( newPage );
 	}
-} );
-
-store.subscribe( () => {
-	const { getBlock } = select( 'core/editor' );
-	const { getAnimationOrder } = select( 'amp/story' );
-	const { removePage } = dispatch( 'amp/story' );
-
-	const animatedPages = Object.keys( getAnimationOrder() );
 
 	// Remove stale data from store.
-	for ( const page of animatedPages ) {
-		if ( ! getBlock( page ) ) {
-			removePage( store.getState(), page );
-		}
+	for ( const oldPage of oldPages ) {
+		removePage( oldPage );
 	}
 } );
 
