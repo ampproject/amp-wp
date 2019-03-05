@@ -385,6 +385,44 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test is_amp_endpoint() function before the parse_query action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_parse_query_action() {
+		global $wp_actions;
+		unset( $wp_actions['parse_query'] );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function when there is no WP_Query.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_feed
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_when_no_wp_query() {
+		global $wp_query;
+		$wp_query = null;
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the wp action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_wp_action() {
+		add_theme_support( 'amp' );
+		global $wp_actions;
+		unset( $wp_actions['wp'] );
+		$this->assertTrue( is_amp_endpoint() );
+	}
+
+	/**
 	 * Filter calls.
 	 *
 	 * @var array

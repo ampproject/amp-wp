@@ -246,9 +246,11 @@ function post_supports_amp( $post ) {
  * var is present, or else in native mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
+ * @global string $pagenow
+ * @global WP_Query $wp_query
  */
 function is_amp_endpoint() {
-	global $pagenow;
+	global $pagenow, $wp_query;
 
 	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ), true ) ) {
 		return false;
@@ -270,10 +272,28 @@ function is_amp_endpoint() {
 		);
 	}
 
+	if ( empty( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: is_amp_endpoint(), 2: WP_Query, 3: false */
+				esc_html__( '%1$s was called before the %2$s was instantiated. This function will always return %3$s before the %2$s hook is called.', 'amp' ),
+				'is_amp_endpoint()',
+				'WP_Query',
+				'false'
+			),
+			'1.1'
+		);
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
-		false !== get_query_var( amp_get_slug(), false )
+		(
+			$wp_query instanceof WP_Query
+			&&
+			false !== $wp_query->get( amp_get_slug(), false )
+		)
 	);
 
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
