@@ -92,8 +92,13 @@ domReady( () => {
 	}
 } );
 
+const { getBlockOrder } = select( 'core/editor' );
+
+let blockOrder = getBlockOrder();
+
 subscribe( () => {
 	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
+	const { setCurrentPage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -108,6 +113,16 @@ subscribe( () => {
 		}
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
+	}
+
+	// If a new page has been inserted, make it the current one.
+	const newBlockOrder = getBlockOrder();
+	const newPage = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
+
+	blockOrder = newBlockOrder;
+
+	if ( newPage ) {
+		setCurrentPage( newPage );
 	}
 } );
 
