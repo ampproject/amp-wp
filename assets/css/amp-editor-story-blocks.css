@@ -302,12 +302,15 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		text-align: center;
 	}
 
+	.post-type-amp_story .editor-writing-flow > div > div {
+		overflow: hidden;
+	}
+
 	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
 		padding-left: 15px;
 		padding-right: 15px;
 		display: flex;
 		align-items: center;
-		overflow: hidden;
 		transform: none;
 		transition: transform 300ms linear;
 	}
@@ -368,7 +371,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item + .amp-story-editor-carousel-item {
-		margin-left: 1em;
+		margin-left: 20px;
 	}
 
 	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button {
