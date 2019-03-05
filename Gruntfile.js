@@ -108,7 +108,7 @@ module.exports = function( grunt ) {
 					dest: 'build',
 					expand: true,
 					options: {
-						noProcess: [ '*/**', 'LICENSE', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
+						noProcess: [ '*/**', 'LICENSE' ], // That is, only process amp.php and readme.txt.
 						process: function( content, srcpath ) {
 							var matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
