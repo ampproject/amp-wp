@@ -332,6 +332,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-inactive {
 		opacity: .5;
+		pointer-events: none;
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number {
