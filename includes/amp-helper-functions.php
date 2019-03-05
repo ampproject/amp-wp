@@ -262,11 +262,10 @@ function is_amp_endpoint() {
 		_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: parse_query, 3: false */
-				esc_html__( '%1$s was called before the %2$s hook was called. This function will always return %3$s before the %2$s hook is called.', 'amp' ),
+				/* translators: 1: is_amp_endpoint(), 2: parse_query */
+				esc_html__( '%1$s was called before the %2$s hook was called.', 'amp' ),
 				'is_amp_endpoint()',
-				'parse_query',
-				'false'
+				'parse_query'
 			),
 			'0.4.2'
 		);
@@ -276,11 +275,10 @@ function is_amp_endpoint() {
 		_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: WP_Query, 3: false */
-				esc_html__( '%1$s was called before the %2$s was instantiated. This function will always return %3$s before the %2$s hook is called.', 'amp' ),
+				/* translators: 1: is_amp_endpoint(), 2: WP_Query */
+				esc_html__( '%1$s was called before the %2$s was instantiated.', 'amp' ),
 				'is_amp_endpoint()',
-				'WP_Query',
-				'false'
+				'WP_Query'
 			),
 			'1.1'
 		);
