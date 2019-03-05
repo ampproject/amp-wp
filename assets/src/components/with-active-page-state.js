@@ -30,8 +30,8 @@ const withActivePageState = ( BlockListBlock ) => {
 			...props,
 			className: {
 				...props.className,
-				'amp-page-active': isActivePage,
-				'amp-page-inactive': ! isActivePage,
+				'amp-page-active': isTopLevelBlock && isActivePage,
+				'amp-page-inactive': isTopLevelBlock && ! isActivePage,
 			},
 		};
 
