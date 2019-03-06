@@ -67,7 +67,7 @@ domReady( () => {
 	renderStoryComponents();
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.getElementsByClassName( 'editor-writing-flow__click-redirect' )[ 0 ].remove();
+	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 } );
 
 /**
