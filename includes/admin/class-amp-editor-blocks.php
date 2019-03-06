@@ -273,6 +273,7 @@ class AMP_Editor_Blocks {
 			'meta_key'         => '_thumbnail_id',
 		);
 		$story_query = new WP_Query( $args );
+		$min_width   = $this->get_minimum_dimension( 'width', $story_query->posts );
 		$min_height  = $this->get_minimum_dimension( 'height', $story_query->posts );
 		$class       = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
@@ -282,13 +283,13 @@ class AMP_Editor_Blocks {
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
-			<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<amp-carousel width="<?php echo esc_attr( $min_width ); ?>" height="<?php echo esc_attr( $min_height ); ?>" layout="fixed" type="slides">
 				<?php
 				foreach ( $story_query->posts as $post ) :
 					$thumbnail_id = get_post_thumbnail_id( $post );
 					if ( $thumbnail_id ) :
 						?>
-						<li class="slide">
+						<div class="slide">
 							<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
 								<?php
 								echo wp_get_attachment_image(
@@ -302,12 +303,12 @@ class AMP_Editor_Blocks {
 								?>
 							</a>
 							<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
-						</li>
+						</div>
 						<?php
 					endif;
 				endforeach;
 				?>
-			</ul>
+			</amp-carousel>
 		</div>
 		<?php
 		return ob_get_clean();

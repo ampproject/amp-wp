@@ -1,27 +1,13 @@
-/* The front-end styling for the AMP Latest Stories block */
-.amp-block-latest-stories {
-	overflow-x: scroll;
-	overflow-y: hidden;
-	scrollbar-width: none;
-	position: relative;
-	width: auto;
-}
-
-.latest-stories-carousel {
-	-webkit-box-orient: horizontal;
-	display: -webkit-box;
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-}
-
-.latest-stories-carousel .slide {
+/* The front-end styling for the AMP Latest Stories block. */
+.amp-block-latest-stories .slide {
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
 	position: relative;
+	border-radius: 1rem;
 }
 
-.latest-stories-carousel .slide:after {
+/* The gradient styling, showing a darker background at the bottom so the white title displays. */
+.amp-block-latest-stories .slide:after {
 	display: block;
 	position: absolute;
 	border-radius: 1rem;
@@ -33,14 +19,10 @@
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), 80%, rgba(0, 0, 0, 0.9));
 }
 
-.latest-stories-carousel span {
+.amp-block-latest-stories span {
 	position: absolute;
 	bottom: 3rem;
 	left: 1rem;
 	color: #fff;
 	z-index: 10;
-}
-
-.latest-stories-carousel img {
-	border-radius: 1rem;
 }

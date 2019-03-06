@@ -73,7 +73,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$dimensions     = array( $minimum_height, 300, 500 );
 		$stories        = $this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
-		$this->assertContains( '<ul class="latest-stories-carousel"', $rendered_block );
+		$this->assertContains( 'class="amp-block-latest-stories"', $rendered_block );
 		$this->assertContains(
 			sprintf(
 				'height="%s"',
@@ -126,7 +126,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		}
 
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
-		$this->assertContains( '<ul class="latest-stories-carousel"', $rendered_block );
+		$this->assertContains( '<amp-carousel', $rendered_block );
 
 		/*
 		 * These images are only attached to the post, and not featured images.
