@@ -158,7 +158,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_assets().
 	 *
-	 * @covers |AMP_Editor_Blocks::enqueue_block_assets().
+	 * @covers \AMP_Editor_Blocks::enqueue_block_assets().
 	 */
 	public function test_enqueue_block_assets() {
 		$this->instance->enqueue_block_assets();
@@ -170,8 +170,30 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$this->assertEquals( $slug, $stylesheet->handle );
 		$this->assertEquals( array(), $stylesheet->deps );
 		$this->assertContains( $stylesheet_base . '.css', $stylesheet->src );
-		$this->assertContains( AMP__VERSION, $stylesheet->ver );
+		$this->assertEquals( AMP__VERSION, $stylesheet->ver );
 		$this->assertTrue( in_array( $slug, $styles->queue, true ) );
+	}
+
+	/**
+	 * Test enqueue_block_editor_assets().
+	 *
+	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets().
+	 */
+	public function test_enqueue_block_editor_assets() {
+		$this->instance->enqueue_block_editor_assets();
+
+		$slug    = 'amp-agnostic-blocks-compiled';
+		$scripts = wp_scripts();
+		$script  = $scripts->registered[ $slug ];
+
+		$this->assertEquals( $slug, $script->handle );
+		$this->assertEquals(
+			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			$script->deps
+		);
+		$this->assertContains( $slug . '.js', $script->src );
+		$this->assertEquals( AMP__VERSION, $script->ver );
+		$this->assertTrue( in_array( $slug, $scripts->queue, true ) );
 	}
 
 	/**
