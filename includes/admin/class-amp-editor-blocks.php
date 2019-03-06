@@ -320,11 +320,6 @@ class AMP_Editor_Blocks {
 		</div>
 		<?php
 
-		// Enqueue the amp-carousel component script here to avoid enqueuing it on every URL, even if this block isn't present.
-		if ( ! is_amp_endpoint() && ! is_admin() ) {
-			wp_enqueue_script( 'amp-carousel' );
-		}
-
 		return ob_get_clean();
 	}
 
