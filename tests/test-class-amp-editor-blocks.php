@@ -138,6 +138,27 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 				$rendered_block
 			);
 		}
+
+		// Prevent an error when calling is_amp_endpoint().
+		do_action( 'wp' );
+		$amp_carousel_slug = 'amp-carousel';
+		wp_dequeue_script( $amp_carousel_slug );
+		add_theme_support( 'amp' );
+		$this->instance->render_block_latest_stories( $attributes );
+		$scripts = wp_scripts();
+
+		/*
+		 * Because this is an AMP endpoint, the render callback should not enqueue the amp-carousel component script.
+		 * The sanitizer will do that.
+		 */
+		$this->assertFalse( in_array( $amp_carousel_slug, $scripts->queue, true ) );
+
+		remove_theme_support( 'amp' );
+		$this->instance->render_block_latest_stories( $attributes );
+		$scripts = wp_scripts();
+
+		// This is not an AMP endpoint, so the render callback should enqueue the amp-carousel component script.
+		$this->assertTrue( in_array( $amp_carousel_slug, $scripts->queue, true ) );
 	}
 
 	/**
