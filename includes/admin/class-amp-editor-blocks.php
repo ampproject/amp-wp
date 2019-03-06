@@ -12,11 +12,11 @@
 class AMP_Editor_Blocks {
 
 	/**
-	 * The image size for the Latest Stories block.
+	 * The ideal image size for the Latest Stories block.
 	 *
 	 * @var string
 	 */
-	const LATEST_STORIES_IMAGE_SIZE = 'medium';
+	public $image_size = array( 300, 400 );
 
 	/**
 	 * List of AMP scripts that need to be printed when AMP components are used in non-AMP document context ("dirty AMP").
@@ -51,6 +51,7 @@ class AMP_Editor_Blocks {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_action( 'wp_loaded', array( $this, 'register_block_latest_stories' ), 11 );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
+			add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
 
 			/*
 			 * Dirty AMP is required when a site is in native mode but not all templates are being served
@@ -186,6 +187,14 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
+	 * Enqueues the front-end block stylesheet.
+	 */
+	public function enqueue_block_assets() {
+		$stylesheet_base = 'amp-blocks';
+		wp_enqueue_style( $stylesheet_base . '-style', amp_get_asset_url( "/css/{$stylesheet_base}.css" ), array(), AMP__VERSION );
+	}
+
+	/**
 	 * Tally the AMP component scripts that are needed in a dirty AMP document.
 	 *
 	 * @param string $content Content.
@@ -254,7 +263,7 @@ class AMP_Editor_Blocks {
 	 * @return string $markup The rendered block markup.
 	 */
 	public function render_block_latest_stories( $attributes ) {
-		$args                = array(
+		$args        = array(
 			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
 			'post_status'      => 'publish',
@@ -263,51 +272,45 @@ class AMP_Editor_Blocks {
 			'suppress_filters' => false,
 			'meta_key'         => '_thumbnail_id',
 		);
-		$story_query         = new WP_Query( $args );
-		$min_width           = $this->get_minimum_dimension( 'width', $story_query->posts );
-		$min_height          = $this->get_minimum_dimension( 'height', $story_query->posts );
-		$amp_fit_text_height = 30;
-
-		ob_start();
-		foreach ( $story_query->posts as $post ) :
-			$thumbnail_id = get_post_thumbnail_id( $post );
-			if ( $thumbnail_id ) :
-				?>
-				<div>
-					<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-						<?php
-						echo wp_get_attachment_image(
-							$thumbnail_id,
-							self::LATEST_STORIES_IMAGE_SIZE,
-							false,
-							array(
-								'alt' => get_the_title( $post ),
-							)
-						);
-						?>
-					</a>
-					<amp-fit-text layout="responsive" width="<?php echo esc_attr( $min_width ); ?>" height="<?php echo esc_attr( $amp_fit_text_height ); ?>">
-						<?php echo esc_html( get_the_title( $post ) ); ?>
-					</amp-fit-text>
-				</div>
-				<?php
-			endif;
-		endforeach;
-
-		$featured_images = ob_get_clean();
-		$class           = 'amp-block-latest-stories';
-
+		$story_query = new WP_Query( $args );
+		$min_height  = $this->get_minimum_dimension( 'height', $story_query->posts );
+		$class       = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
 
-		return sprintf(
-			'<div class="%1$s"><amp-carousel width="%2$s" height="%3$s" layout="fixed" type="slides">%4$s</amp-carousel></div>',
-			$class,
-			esc_attr( $min_width ),
-			esc_attr( $min_height + $amp_fit_text_height ),
-			$featured_images
-		);
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $class ); ?>">
+			<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+				<?php
+				foreach ( $story_query->posts as $post ) :
+					$thumbnail_id = get_post_thumbnail_id( $post );
+					if ( $thumbnail_id ) :
+						?>
+						<li class="slide">
+							<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+								<?php
+								echo wp_get_attachment_image(
+									$thumbnail_id,
+									$this->image_size,
+									false,
+									array(
+										'alt' => get_the_title( $post ),
+									)
+								);
+								?>
+							</a>
+							<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
+						</li>
+						<?php
+					endif;
+				endforeach;
+				?>
+			</ul>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 
 	/**
@@ -338,7 +341,7 @@ class AMP_Editor_Blocks {
 				continue;
 			}
 
-			$image = wp_get_attachment_image_src( $thumbnail_id, self::LATEST_STORIES_IMAGE_SIZE );
+			$image = wp_get_attachment_image_src( $thumbnail_id, $this->image_size );
 			if (
 				isset( $image[ $index ] )
 				&&
