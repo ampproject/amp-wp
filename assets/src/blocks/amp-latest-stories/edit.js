@@ -13,7 +13,6 @@ import { isUndefined, pickBy } from 'lodash';
 import {
 	Component,
 	Fragment,
-	RawHTML,
 } from '@wordpress/element';
 import {
 	PanelBody,
