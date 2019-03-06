@@ -6,7 +6,6 @@
  * External dependencies
  */
 import { isUndefined, pickBy } from 'lodash';
-import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -75,11 +74,6 @@ class LatestStoriesEdit extends Component {
 				</Fragment>
 			);
 		}
-
-		// Removing posts from display should be instant.
-		const displayStories = latestStories.length > storiesToShow ?
-			latestStories.slice( 0, storiesToShow ) :
-			latestStories;
 
 		return (
 			<Fragment>
