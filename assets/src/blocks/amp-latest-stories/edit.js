@@ -20,6 +20,7 @@ import {
 	PanelBody,
 	Placeholder,
 	QueryControls,
+	ServerSideRender,
 	Spinner,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -27,6 +28,8 @@ import {
 	InspectorControls,
 } from '@wordpress/editor';
 import { withSelect } from '@wordpress/data';
+
+const blockName = 'amp/amp-latest-stories';
 
 class LatestStoriesEdit extends Component {
 	componentWillMount() {
@@ -81,26 +84,10 @@ class LatestStoriesEdit extends Component {
 		return (
 			<Fragment>
 				{ inspectorControls }
-				<ul
-					className={ classnames( this.props.className ) }
-				>
-					{ displayStories.map( ( post, i ) => {
-						const titleTrimmed = post.title.rendered.trim();
-						return (
-							<li key={ i }>
-								<a href={ post.link } target="_blank" rel="noopener noreferrer">
-									{ titleTrimmed ? (
-										<RawHTML>
-											{ titleTrimmed }
-										</RawHTML>
-									) :
-										__( '(Untitled)', 'amp' )
-									}
-								</a>
-							</li>
-						);
-					} ) }
-				</ul>
+				<ServerSideRender
+					block={ blockName }
+					attributes={ attributes }
+				/>
 			</Fragment>
 		);
 	}

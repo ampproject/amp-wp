@@ -1,13 +1,30 @@
-/* The front-end styling for the AMP Latest Stories block. */
-.amp-block-latest-stories .slide {
+/* The front-end styling for the AMP Latest Stories block */
+.amp-block-latest-stories {
+	overflow-x: scroll;
+	overflow-y: hidden;
+	scrollbar-width: none;
+	position: relative;
+	width: auto;
+}
+
+div > .amp-block-latest-stories > .latest-stories-carousel {
+	list-style-type: none;
+}
+
+.latest-stories-carousel {
+	-webkit-box-orient: horizontal;
+	display: -webkit-box;
+	margin: 0;
+	padding: 0;
+}
+
+.latest-stories-carousel .slide {
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
 	position: relative;
-	border-radius: 1rem;
 }
 
-/* The gradient styling, showing a darker background at the bottom so the white title displays. */
-.amp-block-latest-stories .slide:after {
+.latest-stories-carousel .slide:after {
 	display: block;
 	position: absolute;
 	border-radius: 1rem;
@@ -19,10 +36,14 @@
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), 80%, rgba(0, 0, 0, 0.9));
 }
 
-.amp-block-latest-stories span {
+.latest-stories-carousel span {
 	position: absolute;
 	bottom: 3rem;
 	left: 1rem;
 	color: #fff;
 	z-index: 10;
+}
+
+.latest-stories-carousel img {
+	border-radius: 1rem;
 }
