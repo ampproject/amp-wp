@@ -32,7 +32,7 @@ export const settings = {
 	edit,
 
 	/**
-	 * Render in PHP as a dynamic block.
+	 * Rendered in PHP as a dynamic block.
 	 *
 	 * @return {null} Renders in PHP.
 	 */

@@ -39,18 +39,18 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		if ( function_exists( 'register_block_type' ) ) {
 			$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_editor_assets' ) ) );
 			$this->assertEquals( 11, has_action( 'wp_loaded', array( $this->instance, 'register_block_latest_stories' ) ) );
-			$this->assertEquals( 10, has_action( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
+			$this->assertEquals( 10, has_filter( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
 			$this->assertEquals( 10, has_action( 'enqueue_block_assets', array( $this->instance, 'enqueue_block_assets' ) ) );
 
-			// Because amp_is_canonical() is false, these
-			$this->assertFalse( has_action( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
+			// Because amp_is_canonical() is false, these should not be hooked.
+			$this->assertFalse( has_filter( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
 			$this->assertFalse( has_action( 'wp_print_footer_scripts', array( $this->instance, 'print_dirty_amp_scripts' ) ) );
 
 			add_theme_support( 'amp' );
 			$this->instance->init();
 
 			// Now that amp_is_canonical() is true, these action hooks should be added.
-			$this->assertEquals( 10, has_action( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
+			$this->assertEquals( 10, has_filter( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
 			$this->assertEquals( 10, has_action( 'wp_print_footer_scripts', array( $this->instance, 'print_dirty_amp_scripts' ) ) );
 			remove_theme_support( 'amp' );
 		}
@@ -101,42 +101,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		// Reset for the next assertions.
 		foreach ( $stories as $story ) {
 			wp_delete_post( $story->ID );
-		}
-
-		$number_of_images = 5;
-		$thumbnail_ids    = array();
-		for ( $i = 0; $i < $number_of_images; $i++ ) {
-			$new_story = $this->factory()->post->create_and_get(
-				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
-			);
-
-			/*
-			 * Create an image attached to the post, but not a featured image.
-			 * This method should output it as a fallback for the featured image.
-			 */
-			$thumbnail_id = wp_insert_attachment(
-				array(
-					'post_mime_type' => 'image/jpeg',
-				),
-				'https://example.com/foo-image.jpeg',
-				$new_story->ID
-			);
-
-			$thumbnail_ids[ $i ] = $thumbnail_id;
-		}
-
-		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
-		$this->assertContains( '<amp-carousel', $rendered_block );
-
-		/*
-		 * These images are only attached to the post, and not featured images.
-		 * So they shouldn't appear in the render callback.
-		 */
-		for ( $i = 0; $i < $number_of_images; $i++ ) {
-			$this->assertNotContains(
-				wp_get_attachment_image_src( $thumbnail_ids[ $i ] )[0],
-				$rendered_block
-			);
 		}
 
 		// Prevent an error when calling is_amp_endpoint().
