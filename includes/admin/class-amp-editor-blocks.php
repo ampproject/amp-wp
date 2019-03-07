@@ -291,32 +291,32 @@ class AMP_Editor_Blocks {
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
-			<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<div class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 				<?php
 				foreach ( $story_query->posts as $post ) :
 					$thumbnail_id = get_post_thumbnail_id( $post );
 					if ( $thumbnail_id ) :
 						?>
-						<li class="slide">
+						<div class="slide">
+							<?php
+							echo wp_get_attachment_image(
+								$thumbnail_id,
+								$this->image_size,
+								false,
+								array(
+									'alt' => get_the_title( $post ),
+								)
+							);
+							?>
 							<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-								<?php
-								echo wp_get_attachment_image(
-									$thumbnail_id,
-									$this->image_size,
-									false,
-									array(
-										'alt' => get_the_title( $post ),
-									)
-								);
-								?>
+								<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
 							</a>
-							<span><?php echo esc_html( get_the_title( $post ) ); ?></span>
-						</li>
+						</div>
 						<?php
 					endif;
 				endforeach;
 				?>
-			</ul>
+			</div>
 		</div>
 		<?php
 
