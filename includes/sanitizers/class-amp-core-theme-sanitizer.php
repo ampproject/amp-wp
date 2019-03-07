@@ -413,6 +413,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public static function remove_twentynineteen_thumbnail_image_sizes() {
+		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+			return;
+		}
 		add_filter(
 			'wp_get_attachment_image_attributes',
 			function( $attr ) {
@@ -435,37 +438,40 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes() {
-		add_filter(
-			'wp_get_attachment_image_attributes',
-			function ( $attr, $attachment, $size ) {
-				if (
-				isset( $attr['class'] )
-				&&
-				(
-					'custom-logo' === $attr['class']
-					||
-					false !== strpos( $attr['class'], 'attachment-twentyseventeen-featured-image' )
-				)
-				) {
-					/*
-					 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
-					 * For example, <amp-img style="width:100%">.
-					 * Removing the 'sizes' attribute is only a workaround, as it looks like it's not possible to override that inline style.
-					 *
-					 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
-					 */
-					unset( $attr['sizes'] );
-				} elseif ( is_attachment() ) {
-					$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
-					if ( false !== $sizes ) {
-						$attr['sizes'] = $sizes;
+		if ( ! in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+			add_filter(
+				'wp_get_attachment_image_attributes',
+				function ( $attr, $attachment, $size ) {
+					if (
+						isset( $attr['class'] )
+						&&
+						(
+							'custom-logo' === $attr['class']
+							||
+							false !== strpos( $attr['class'], 'attachment-twentyseventeen-featured-image' )
+						)
+					) {
+						/*
+						 * The AMP runtime sets an inline style on an <amp-img> based on the sizes attribute if it's present.
+						 * For example, <amp-img style="width:100%">.
+						 * Removing the 'sizes' attribute is only a workaround, as it looks like it's not possible to override that inline style.
+						 *
+						 * @todo: remove when this is resolved: https://github.com/ampproject/amphtml/issues/17053
+						 */
+						unset( $attr['sizes'] );
+					} elseif ( is_attachment() ) {
+						$sizes = wp_get_attachment_image_sizes( $attachment->ID, $size );
+						if ( false !== $sizes ) {
+							$attr['sizes'] = $sizes;
+						}
 					}
-				}
-				return $attr;
-			},
-			11,
-			3
-		);
+
+					return $attr;
+				},
+				11,
+				3
+			);
+		}
 
 		/*
 		 * The max-height of the `.custom-logo-link img` is defined as being 80px, unless

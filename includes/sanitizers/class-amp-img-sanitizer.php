@@ -121,7 +121,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type string $alt <img> `alt` attribute - Pass along if found
 	 *      @type string $class <img> `class` attribute - Pass along if found
 	 *      @type string $srcset <img> `srcset` attribute - Pass along if found
-	 *      @type string $sizes <img> `sizes` attribute - Pass along if found
+	 *      @type string $sizes <img> `sizes` attribute - Pass along if found, or remove if found when amp-img-auto-sizes experiment enabled, because AMP will automatically compute as of <https://github.com/ampproject/amphtml/pull/20968>.
 	 *      @type string $on <img> `on` attribute - Pass along if found
 	 *      @type string $attribution <img> `attribution` attribute - Pass along if found
 	 *      @type int $width <img> width attribute - Set to numeric value if px or %
@@ -131,6 +131,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function filter_attributes( $attributes ) {
 		$out = array();
+
+		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+			unset( $attributes['sizes'] );
+		}
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
