@@ -569,9 +569,66 @@ class AMP_Theme_Support {
 			}
 		}
 
-		// The is_home() condition is the default so discard it if there are other matching templates.
+		// If there is more than 1 matching template, the is_home() condition is the default so discard it if there are other matching templates.
 		if ( count( $matching_templates ) > 1 && isset( $matching_templates['is_home'] ) ) {
 			unset( $matching_templates['is_home'] );
+		}
+
+		/*
+		 * When there is still more than one matching template, account for ambiguous cases, informed by the order in template-loader.php.
+		 * See <https://github.com/WordPress/wordpress-develop/blob/5.1.0/src/wp-includes/template-loader.php#L49-L68>.
+		 */
+		if ( count( $matching_templates ) > 1 ) {
+			$template_conditional_priority_order = array(
+				'is_embed',
+				'is_404',
+				'is_search',
+				'is_front_page',
+				'is_home',
+				'is_post_type_archive',
+				'is_tax',
+				'is_attachment',
+				'is_single',
+				'is_page',
+				'is_singular',
+				'is_category',
+				'is_tag',
+				'is_author',
+				'is_date',
+				'is_archive',
+			);
+
+			// Obtain the template conditionals for each matching template ID (e.g. 'is_post_type_archive[product]' => 'is_post_type_archive').
+			$template_conditional_id_mapping = array();
+			foreach ( array_keys( $matching_templates ) as $template_id ) {
+				$template_conditional_id_mapping[ strtok( $template_id, '[' ) ] = $template_id;
+			}
+
+			// If there are any custom supportable templates, only consider them since they would override the conditional logic in core.
+			$custom_template_conditions = array_diff(
+				array_keys( $template_conditional_id_mapping ),
+				$template_conditional_priority_order
+			);
+			if ( ! empty( $custom_template_conditions ) ) {
+				$matching_templates = wp_array_slice_assoc(
+					$matching_templates,
+					array_values( wp_array_slice_assoc( $template_conditional_id_mapping, $custom_template_conditions ) )
+				);
+			} else {
+				/*
+				 * Otherwise, iterate over the template conditionals in the order they occur in the if/elseif/else conditional chain.
+				 * to then populate $matching_templates with just this one entry.
+				 */
+				foreach ( $template_conditional_priority_order as $template_conditional ) {
+					if ( isset( $template_conditional_id_mapping[ $template_conditional ] ) ) {
+						$template_id        = $template_conditional_id_mapping[ $template_conditional ];
+						$matching_templates = array(
+							$template_id => $matching_templates[ $template_id ],
+						);
+						break;
+					}
+				}
+			}
 		}
 
 		/*
