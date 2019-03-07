@@ -91,7 +91,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
 					false,
 					array(
-						'alt' => get_the_title( $story ),
+						'alt'   => get_the_title( $story ),
+						'class' => 'latest-stories__featured-img',
 					)
 				),
 				$rendered_block

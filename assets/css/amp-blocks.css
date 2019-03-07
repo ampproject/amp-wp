@@ -2,36 +2,37 @@
 .amp-block-latest-stories {
 	overflow-x: scroll;
 	overflow-y: hidden;
-	scrollbar-width: none;
 	position: relative;
 	width: auto;
 }
 
-.amp-block-latest-stories::-webkit-scrollbar {
+.latest-stories-carousel::-webkit-scrollbar {
 	display: none;
 }
 
 .amp-block-latest-stories > .latest-stories-carousel {
-	-webkit-box-orient: horizontal;
-	display: -webkit-box;
+	display: flex;
+	flex-wrap: nowrap;
+	-webkit-overflow-scrolling: touch;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+	overflow-x: auto;
+	overflow-y: hidden;
 	margin: 0;
 	padding: 0;
 }
 
-.latest-stories-carousel .latest-stories__featured-img {
-	border-radius: 1rem;
-}
-
 .latest-stories-carousel .latest-stories__slide {
+	flex: 0 0 auto;
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
 	position: relative;
 }
 
+/* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
 .latest-stories-carousel .latest-stories__slide:after {
 	display: block;
 	position: absolute;
-	border-radius: 1rem;
+	border-radius: 0.5rem;
 	top: 0;
 	left: 0;
 	content: "\020";
@@ -40,10 +41,15 @@
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), 70%, rgba(0, 0, 0, 0.9));
 }
 
+.latest-stories-carousel .latest-stories__featured-img {
+	border-radius: 0.5rem;
+}
+
 .latest-stories-carousel .latest-stories__title {
 	position: absolute;
 	bottom: 5rem;
 	left: 1rem;
+	margin-right: 1rem;
 	color: #fff;
 	z-index: 10;
 }
@@ -52,23 +58,10 @@
 	width: 100%;
 	position: absolute;
 	bottom: 0;
-	border-radius: 0 0 1rem 1rem;
-	padding-top: 0.6rem;
-	padding-bottom: 1rem;
-	background-color: #000;
+	border-radius: 0 0 0.5rem 0.5rem;
+	padding: 0.6rem 1rem 1rem 1rem;
+	background-color: #333;
 	z-index: 10;
-}
-
-.latest-stories-carousel .latest-stories__meta span {
-	color: #fff;
-	vertical-align: middle;
-}
-
-.latest-stories-carousel .latest-stories__author {
-	margin-left: 1rem;
-	margin-right: 0.2rem;
-	border-bottom: 0;
-	vertical-align: middle;
 }
 
 .latest-stories-carousel .latest-stories__meta .latest-stories__avatar {
@@ -79,4 +72,12 @@
 	box-shadow: none;
 	-webkit-box-shadow: none;
 	vertical-align: middle;
+}
+
+.latest-stories-carousel .latest-stories__meta .latest-stories__author {
+	margin-left: 0.5rem;
+	margin-right: 0.2rem;
+	border-bottom: 0;
+	vertical-align: middle;
+	color: #d3d3d3;
 }

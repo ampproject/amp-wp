@@ -298,10 +298,18 @@ class AMP_Editor_Blocks {
 					if ( $thumbnail_id ) :
 						$author_id           = $post->post_author;
 						$author_display_name = get_the_author_meta( 'display_name', $author_id );
-						$author_link         = get_author_posts_url( $author_id, $author_display_name );
+						$avatar              = get_avatar(
+							$author_id,
+							24,
+							'',
+							'',
+							array(
+								'class' => 'latest-stories__avatar',
+							)
+						);
 
 						?>
-						<div class="latest-stories__slide">
+						<a href="<?php echo esc_url( get_permalink( $post ) ); ?>" class="latest-stories__slide">
 							<?php
 							echo wp_get_attachment_image(
 								$thumbnail_id,
@@ -313,35 +321,21 @@ class AMP_Editor_Blocks {
 								)
 							);
 							?>
-							<a href="<?php echo esc_url( get_permalink( $post ) ); ?>">
-								<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
-							</a>
+							<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
 							<div class="latest-stories__meta">
-								<a class="latest-stories__author" href="<?php echo esc_url( $author_link ); ?>">
-									<?php
-									echo get_avatar(
-										$author_id,
-										24,
-										'',
-										'',
-										array(
-											'class' => 'latest-stories__avatar',
-										)
-									);
-									?>
-									<span><?php echo esc_html( $author_display_name ); ?></span>
-								</a>
-								<span class="latest-stories__time">
+								<?php echo wp_kses_post( $avatar ); ?>
+								<span class="latest-stories__author">
 									<?php
 									printf(
-										/* translators: %s: the amount of time ago */
-										esc_html__( '&#8226; %s ago', 'amp' ),
+										/* translators: 1: the post author. 2: the amount of time ago. */
+										esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
+										esc_html( $author_display_name ),
 										esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
 									);
 									?>
 								</span>
 							</div>
-						</div>
+						</a>
 						<?php
 					endif;
 				endforeach;
