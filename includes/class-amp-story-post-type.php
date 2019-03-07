@@ -18,6 +18,13 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
+	 *
+	 * @var string
+	 */
+	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -100,6 +107,9 @@ class AMP_Story_Post_Type {
 
 		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+
+		// Get an embed template for this post type.
+		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
@@ -280,7 +290,7 @@ class AMP_Story_Post_Type {
 	 * @return string Template.
 	 */
 	public static function filter_template_include( $template ) {
-		if ( is_singular( self::POST_TYPE_SLUG ) ) {
+		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
 			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
 		}
 		return $template;
@@ -582,5 +592,86 @@ class AMP_Story_Post_Type {
 		);
 
 		return $content;
+	}
+
+	/**
+	 * Get the AMP story's embed template.
+	 *
+	 * This is used when an AMP story is embedded in a post,
+	 * often with the WordPress (embed) block.
+	 *
+	 * @param string $template  The path of the template, from locate_template().
+	 * @param string $type The file name.
+	 * @param array  $templates An array of possible templates.
+	 * @return string $template  The path of the template, from locate_template().
+	 */
+	public static function get_embed_template( $template, $type, $templates ) {
+		$old_amp_story_template      = sprintf( 'embed-%s.php', self::POST_TYPE_SLUG );
+		$new_amp_story_template_name = 'embed-amp-story.php';
+		$amp_story_embed_path        = AMP__DIR__ . '/includes/templates/' . $new_amp_story_template_name;
+		if (
+			'embed' === $type
+			&&
+			in_array( $old_amp_story_template, $templates, true )
+			&&
+			file_exists( $amp_story_embed_path )
+		) {
+			return $amp_story_embed_path;
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Outputs a card of a single AMP story.
+	 *
+	 * @param WP_Post $post The AMP story post.
+	 * @return void
+	 */
+	public static function the_single_story_card( $post ) {
+		$thumbnail_id = get_post_thumbnail_id( $post );
+		if ( $thumbnail_id ) :
+			$author_id           = $post->post_author;
+			$author_display_name = get_the_author_meta( 'display_name', $author_id );
+			$avatar              = get_avatar(
+				$author_id,
+				24,
+				'',
+				'',
+				array(
+					'class' => 'latest-stories__avatar',
+				)
+			);
+
+			?>
+			<a href="<?php echo esc_url( get_permalink( $post ) ); ?>" class="latest-stories__slide">
+				<?php
+				echo wp_get_attachment_image(
+					$thumbnail_id,
+					self::STORY_CARD_IMAGE_SIZE,
+					false,
+					array(
+						'alt'   => get_the_title( $post ),
+						'class' => 'latest-stories__featured-img',
+					)
+				);
+				?>
+				<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
+				<div class="latest-stories__meta">
+					<?php echo wp_kses_post( $avatar ); ?>
+					<span class="latest-stories__author">
+						<?php
+						printf(
+							/* translators: 1: the post author. 2: the amount of time ago. */
+							esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
+							esc_html( $author_display_name ),
+							esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
+						);
+						?>
+					</span>
+				</div>
+			</a>
+			<?php
+		endif;
 	}
 }

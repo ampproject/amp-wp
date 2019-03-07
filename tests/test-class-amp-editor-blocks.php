@@ -88,7 +88,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			$this->assertContains(
 				wp_get_attachment_image(
 					$featured_image,
-					AMP_Editor_Blocks::LATEST_STORIES_IMAGE_SIZE,
+					AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
 					false,
 					array(
 						'alt'   => get_the_title( $story ),
