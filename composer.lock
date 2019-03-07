@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb4a5f333a175b102d33e31b5d6922ac",
+    "content-hash": "f35ca4870517517bac1674c2156367e8",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -52,16 +52,16 @@
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.2.1",
+            "version": "v1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff"
+                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/e267dcb6d273075b85cef34258fc8c34d2f7deff",
-                "reference": "e267dcb6d273075b85cef34258fc8c34d2f7deff",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/2a85079bef8090c2820bcad5c649cdc41f7b53ab",
+                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab",
                 "shasum": ""
             },
             "require": {
@@ -73,11 +73,6 @@
                 "phpunit/phpunit": "~4.0"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
-                }
-            },
             "autoload": {
                 "classmap": [
                     "src"
@@ -104,7 +99,7 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2019-02-18T21:02:17+00:00"
+            "time": "2019-03-07T05:20:21+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
@@ -128,11 +123,6 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
-                }
-            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
