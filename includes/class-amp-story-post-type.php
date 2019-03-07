@@ -108,6 +108,9 @@ class AMP_Story_Post_Type {
 		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
 
+		// Get an embed template for this post type.
+		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
+
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
 			'amp/amp-story-text',
@@ -287,7 +290,7 @@ class AMP_Story_Post_Type {
 	 * @return string Template.
 	 */
 	public static function filter_template_include( $template ) {
-		if ( is_singular( self::POST_TYPE_SLUG ) ) {
+		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
 			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
 		}
 		return $template;
