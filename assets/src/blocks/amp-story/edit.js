@@ -41,6 +41,10 @@ class EditPage extends Component {
 		// Call parent constructor.
 		super( props );
 
+		if ( ! props.attributes.id ) {
+			this.props.setAttributes( { id: uuid() } );
+		}
+
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: uuid() } );
 		}
