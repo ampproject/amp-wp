@@ -3,7 +3,6 @@
 	overflow-x: scroll;
 	overflow-y: hidden;
 	position: relative;
-	width: auto;
 }
 
 .latest-stories-carousel::-webkit-scrollbar {
@@ -15,7 +14,6 @@
 	flex-wrap: nowrap;
 	-webkit-overflow-scrolling: touch;
 	-ms-overflow-style: -ms-autohiding-scrollbar;
-	overflow-x: auto;
 	overflow-y: hidden;
 	margin: 0;
 	padding: 0;
@@ -67,16 +65,15 @@
 .latest-stories-carousel .latest-stories__meta .latest-stories__avatar {
 	height: 24px;
 	width: 24px;
-	display: inline;
 	border-radius: 50%;
 	box-shadow: none;
 	-webkit-box-shadow: none;
 	vertical-align: middle;
+	display: inline;
 }
 
 .latest-stories-carousel .latest-stories__meta .latest-stories__author {
 	margin-left: 0.5rem;
-	margin-right: 0.2rem;
 	border-bottom: 0;
 	vertical-align: middle;
 	color: #d3d3d3;
