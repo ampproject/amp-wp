@@ -11,14 +11,14 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import Indicator from './indicator';
-import { Reorderer } from '../';
+import Reorderer from './reorderer';
 
 const PAGE_MARGIN = 20;
 const PAGE_WIDTH = 338;
 
 class EditorCarousel extends Component {
-	constructor( props ) {
-		super( props );
+	constructor() {
+		super( ...arguments );
 
 		this.translateWrapper.bind( this );
 	}

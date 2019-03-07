@@ -74,8 +74,8 @@ domReady( () => {
  * Add some additional elements needed to render our custom UI controls.
  */
 function renderStoryComponents() {
-	const editorBlockList = document.getElementsByClassName( 'editor-block-list__layout' )[ 0 ];
-	const postTitle = document.getElementsByClassName( 'editor-post-title' )[ 0 ];
+	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
+	const postTitle = document.querySelector( '.editor-post-title' );
 
 	if ( postTitle ) {
 		const storyControls = document.createElement( 'div' );

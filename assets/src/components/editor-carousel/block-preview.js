@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
-import { BlockEdit } from '@wordpress/editor';
 import { createBlock } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
+import { BlockEdit } from '@wordpress/editor';
 
 const BlockPreview = ( { clientId, name, attributes, innerBlocks } ) => {
 	const block = createBlock( name, attributes, innerBlocks );
@@ -22,21 +22,4 @@ const BlockPreview = ( { clientId, name, attributes, innerBlocks } ) => {
 	);
 };
 
-const Reorderer = ( { pages } ) => {
-	return (
-		<div className="amp-story-reorderer">
-			{ pages.map( ( page, index ) => {
-				return (
-					<div
-						key={ index }
-						className="amp-story-page-preview"
-					>
-						<BlockPreview { ...page } />
-					</div>
-				);
-			} ) }
-		</div>
-	);
-};
-
-export default Reorderer;
+export default BlockPreview;

@@ -403,6 +403,47 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-right: 0;
 	}
 
+	.amp-story-reorderer {
+		margin-top: 100px;
+		display: grid;
+		grid-template-columns: repeat(auto-fill, 169px);
+		grid-gap: 1rem;
+		justify-content: space-between;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item {
+		margin: 0 auto 10px;
+		width: 100%;
+		max-width: 169px;
+		height: 277px;
+		position: relative;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
+		border: none;
+		border-radius: 0;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview {
+		border: 5px solid #eff0f1;
+		border-radius: 5px;
+		width: 100%;
+		height: 277px;
+		cursor: grab;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
+		margin: 0;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {
+		padding: 0;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .block-list-appender {
+		display: none;
+	}
+
 	.components-icon-button.editor-block-navigation {
 		display: none;
 	}
