@@ -12,11 +12,11 @@
 class AMP_Editor_Blocks {
 
 	/**
-	 * The ideal image size for the Latest Stories block.
+	 * The image size for the Latest Stories block, which is also used for the amp_story post.
 	 *
 	 * @var string
 	 */
-	public $image_size = array( 300, 400 );
+	const LATEST_STORIES_IMAGE_SIZE = 'amp-story-poster-portrait';
 
 	/**
 	 * List of AMP scripts that need to be printed when AMP components are used in non-AMP document context ("dirty AMP").
@@ -301,7 +301,7 @@ class AMP_Editor_Blocks {
 							<?php
 							echo wp_get_attachment_image(
 								$thumbnail_id,
-								$this->image_size,
+								self::LATEST_STORIES_IMAGE_SIZE,
 								false,
 								array(
 									'alt' => get_the_title( $post ),
@@ -351,7 +351,7 @@ class AMP_Editor_Blocks {
 				continue;
 			}
 
-			$image = wp_get_attachment_image_src( $thumbnail_id, $this->image_size );
+			$image = wp_get_attachment_image_src( $thumbnail_id, self::LATEST_STORIES_IMAGE_SIZE );
 			if (
 				isset( $image[ $index ] )
 				&&
