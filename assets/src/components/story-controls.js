@@ -39,7 +39,7 @@ function StoryControls( { isReordering, startReordering, stopReordering } ) {
 		<Fragment>
 			<IconButton
 				className="amp-story-controls-add"
-				icon="plus-alt"
+				icon="insert"
 				label={ __( 'Add New Page', 'amp' ) }
 				onClick={ ( e ) => {
 					e.preventDefault();
