@@ -4,6 +4,7 @@
 import { Fragment } from '@wordpress/element';
 import { withState } from '@wordpress/compose';
 import { Draggable, DropZoneProvider, DropZone } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ const Reorderer = ( { pages, dragging, hasDropped, setState } ) => {
 			<div className="amp-story-reorderer">
 				{ pages.map( ( page, index ) => {
 					const { clientId } = page;
-					const pageElementId = `page-${ clientId }`;
+					const pageElementId = `reorder-page-${ clientId }`;
 					const transferData = {
 						type: 'block',
 						srcIndex: index,
@@ -27,7 +28,7 @@ const Reorderer = ( { pages, dragging, hasDropped, setState } ) => {
 
 					return (
 						<div
-							key={ pageElementId }
+							key={ `page-${ clientId }` }
 							className="amp-story-reorderer-item"
 						>
 							<Draggable
@@ -45,15 +46,18 @@ const Reorderer = ( { pages, dragging, hasDropped, setState } ) => {
 									( { onDraggableStart, onDraggableEnd } ) => (
 										<Fragment>
 											<DropZone
+												label={ __( 'Drop page to re-order', 'amp' ) }
 												onDrop={ () => setState( { hasDropped: true } ) }
 											/>
-											<div
-												className="amp-story-page-preview"
-												onDragStart={ onDraggableStart }
-												onDragEnd={ onDraggableEnd }
-												draggable
-											>
-												<BlockPreview { ...page } />
+											<div id={ pageElementId }>
+												<div
+													className="amp-story-page-preview"
+													onDragStart={ onDraggableStart }
+													onDragEnd={ onDraggableEnd }
+													draggable
+												>
+													<BlockPreview { ...page } />
+												</div>
 											</div>
 										</Fragment>
 									)
