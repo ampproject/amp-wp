@@ -493,6 +493,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->process_style_element( $element );
 			} elseif ( 'link' === $node_name ) {
 				$this->process_link_element( $element );
+
+				// If the element is still in the document, it is a font stylesheet; make sure it gets moved to the head as required.
+				if ( $element->parentNode && 'head' !== $element->parentNode->nodeName ) {
+					$this->head->appendChild( $element->parentNode->removeChild( $element ) );
+				}
 			}
 		}
 

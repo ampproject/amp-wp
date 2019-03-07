@@ -29,7 +29,7 @@ import { withSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import BlockNavigation from './block-navigation';
-import { ALLOWED_BLOCKS } from '../../helpers';
+import { ALLOWED_CHILD_BLOCKS } from '../../constants';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
 const TEMPLATE = [
@@ -41,8 +41,8 @@ class EditPage extends Component {
 		// Call parent constructor.
 		super( props );
 
-		if ( ! props.attributes.id ) {
-			this.props.setAttributes( { id: uuid() } );
+		if ( ! props.attributes.anchor ) {
+			this.props.setAttributes( { anchor: uuid() } );
 		}
 
 		this.onSelectMedia = this.onSelectMedia.bind( this );
@@ -157,7 +157,7 @@ class EditPage extends Component {
 										allowedTypes={ ALLOWED_MEDIA_TYPES }
 										value={ mediaId }
 										render={ ( { open } ) => (
-											<Button isDefault isLarge onClick={ open } className={ 'editor-amp-story-page-background' }>
+											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
 												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Upload Media', 'amp' ) }
 											</Button>
 										) }
@@ -186,7 +186,7 @@ class EditPage extends Component {
 												<Button
 													isDefault
 													onClick={ open }
-													className={ 'editor-amp-story-page-background' }
+													className="editor-amp-story-page-background"
 												>
 													{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
 												</Button>
@@ -219,14 +219,16 @@ class EditPage extends Component {
 						</Fragment>
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style } className={ 'editor-amp-story-page-wrap' }>
+				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
-						<video muted loop className={ 'editor-amp-story-page-video' }>
-							<source src={ mediaUrl } type={ media.mime_type } />
-						</video>
+						<div className="editor-amp-story-page-video-wrap">
+							<video autoPlay muted loop className="editor-amp-story-page-video">
+								<source src={ mediaUrl } type={ media.mime_type } />
+							</video>
+						</div>
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_BLOCKS } />
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />
 				</div>
 			</Fragment>
 		);

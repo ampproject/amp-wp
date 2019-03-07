@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../helpers';
+import { ALLOWED_CHILD_BLOCKS } from '../constants';
 import { withParentBlock } from './';
 
 export default createHigherOrderComponent(
@@ -18,7 +18,7 @@ export default createHigherOrderComponent(
 		return withParentBlock( ( props ) => {
 			const { attributes, name, parentBlock } = props;
 
-			if ( -1 === ALLOWED_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
+			if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
 				return <BlockEdit { ...props } />;
 			}
 
@@ -35,25 +35,20 @@ export default createHigherOrderComponent(
 						<PanelBody
 							title={ __( 'Story Settings', 'amp' ) }
 						>
-
-							{
-								( 'core/image' === name ) && (
-									<ToggleControl
-										key={ 'position' }
-										label={ __( 'Show or hide the caption', 'amp' ) }
-										checked={ ampShowImageCaption }
-										onChange={
-											function() {
-												props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
-												if ( ! attributes.ampShowImageCaption ) {
-													props.setAttributes( { caption: '' } );
-												}
-											}
+							<ToggleControl
+								key="position"
+								label={ __( 'Show or hide the caption', 'amp' ) }
+								checked={ ampShowImageCaption }
+								onChange={
+									function() {
+										props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
+										if ( ! attributes.ampShowImageCaption ) {
+											props.setAttributes( { caption: '' } );
 										}
-										help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
-									/>
-								)
-							}
+									}
+								}
+								help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+							/>
 						</PanelBody>
 					</InspectorControls>
 				</Fragment>

@@ -96,6 +96,6 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertRegExp( '/<!-- Google Tag Manager -->\s*<!-- End Google Tag Manager -->/', $content );
 		$this->assertContains( '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>', $content );
 		$this->assertContains( 'Has script? <!--noscript-->Nope!<!--/noscript-->', $content );
-		$this->assertContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" sandbox="allow-scripts allow-same-origin" layout="fixed-height" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span></amp-iframe><!--/noscript-->', $content );
+		$this->assertContains( '<!--noscript--><amp-iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="400" sandbox="allow-scripts allow-same-origin" layout="fixed-height" class="amp-wp-b3bfe1b"><span placeholder="" class="amp-wp-iframe-placeholder"></span><noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXX" height="0" width="0" class="amp-wp-b3bfe1b"></iframe></noscript></amp-iframe><!--/noscript-->', $content );
 	}
 }

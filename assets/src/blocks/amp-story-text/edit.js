@@ -10,7 +10,8 @@ import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wor
  * Internal dependencies
  */
 import getTagName from './get-tag-name';
-import { AMP_STORY_FONTS } from '../../helpers';
+import { FontFamilyPicker } from '../../components';
+import { maybeEnqueueFontStyle } from '../../helpers';
 
 function TextBlock( {
 	attributes,
@@ -28,12 +29,10 @@ function TextBlock( {
 		<Fragment>
 			<InspectorControls>
 				<PanelBody title={ __( 'Text Settings', 'amp' ) }>
-					<SelectControl
-						key={ 'font-family' }
-						label={ __( 'Font family', 'amp' ) }
-						value={ ampFontFamily }
-						options={ AMP_STORY_FONTS }
-						onChange={ function( value ) {
+					<FontFamilyPicker
+						name={ ampFontFamily }
+						onChange={ ( value ) => {
+							maybeEnqueueFontStyle( value );
 							setAttributes( { ampFontFamily: value } );
 						} }
 					/>
