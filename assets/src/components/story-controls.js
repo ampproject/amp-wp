@@ -16,8 +16,15 @@ function StoryControls( { isReordering, startReordering, stopReordering } ) {
 	if ( isReordering ) {
 		return (
 			<Fragment>
+				<IconButton
+					className="amp-story-controls-reorder-cancel"
+					onClick={ stopReordering }
+					icon="no-alt"
+				>
+					{ __( 'Cancel', 'amp' ) }
+				</IconButton>
 				<Button
-					className="amp-story-controls-reorder-stop"
+					className="amp-story-controls-reorder-save"
 					onClick={ stopReordering }
 					isLarge
 					isPrimary

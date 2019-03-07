@@ -403,6 +403,12 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-right: 0;
 	}
 
+	.amp-story-controls-reorder-cancel {
+		padding-top: 0;
+		padding-bottom: 0;
+		margin-right: 20px;
+	}
+
 	.amp-story-reorderer {
 		margin-top: 100px;
 		display: grid;
