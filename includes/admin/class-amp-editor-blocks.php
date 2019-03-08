@@ -12,13 +12,6 @@
 class AMP_Editor_Blocks {
 
 	/**
-	 * The image size for the Latest Stories block, which is also used for the amp_story post.
-	 *
-	 * @var string
-	 */
-	const LATEST_STORIES_IMAGE_SIZE = 'amp-story-poster-portrait';
-
-	/**
 	 * List of AMP scripts that need to be printed when AMP components are used in non-AMP document context ("dirty AMP").
 	 *
 	 * @var array
@@ -285,50 +278,7 @@ class AMP_Editor_Blocks {
 			<div class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 				<?php
 				foreach ( $story_query->posts as $post ) :
-					$thumbnail_id = get_post_thumbnail_id( $post );
-					if ( $thumbnail_id ) :
-						$author_id           = $post->post_author;
-						$author_display_name = get_the_author_meta( 'display_name', $author_id );
-						$avatar              = get_avatar(
-							$author_id,
-							24,
-							'',
-							'',
-							array(
-								'class' => 'latest-stories__avatar',
-							)
-						);
-
-						?>
-						<a href="<?php echo esc_url( get_permalink( $post ) ); ?>" class="latest-stories__slide">
-							<?php
-							echo wp_get_attachment_image(
-								$thumbnail_id,
-								self::LATEST_STORIES_IMAGE_SIZE,
-								false,
-								array(
-									'alt'   => get_the_title( $post ),
-									'class' => 'latest-stories__featured-img',
-								)
-							);
-							?>
-							<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
-							<div class="latest-stories__meta">
-								<?php echo wp_kses_post( $avatar ); ?>
-								<span class="latest-stories__author">
-									<?php
-									printf(
-										/* translators: 1: the post author. 2: the amount of time ago. */
-										esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
-										esc_html( $author_display_name ),
-										esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
-									);
-									?>
-								</span>
-							</div>
-						</a>
-						<?php
-					endif;
+					AMP_Story_Post_Type::the_single_story_card( $post );
 				endforeach;
 				?>
 			</div>
@@ -369,7 +319,7 @@ class AMP_Editor_Blocks {
 				continue;
 			}
 
-			$image = wp_get_attachment_image_src( $thumbnail_id, self::LATEST_STORIES_IMAGE_SIZE );
+			$image = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
 			if (
 				isset( $image[ $index ] )
 				&&
