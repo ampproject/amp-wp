@@ -12,20 +12,20 @@ import { compose } from '@wordpress/compose';
  *
  * @return {Object} Story controls component.
  */
-function StoryControls( { isReordering, startReordering, stopReordering } ) {
+function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
 	if ( isReordering ) {
 		return (
 			<Fragment>
 				<IconButton
 					className="amp-story-controls-reorder-cancel"
-					onClick={ stopReordering }
+					onClick={ resetOrder }
 					icon="no-alt"
 				>
 					{ __( 'Cancel', 'amp' ) }
 				</IconButton>
 				<Button
 					className="amp-story-controls-reorder-save"
-					onClick={ stopReordering }
+					onClick={ saveOrder }
 					isLarge
 					isPrimary
 				>
@@ -43,6 +43,7 @@ function StoryControls( { isReordering, startReordering, stopReordering } ) {
 				label={ __( 'Add New Page', 'amp' ) }
 				onClick={ ( e ) => {
 					e.preventDefault();
+					// Todo: Implement.
 				} }
 			/>
 			<IconButton
@@ -69,16 +70,12 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { moveBlockToPosition } = dispatch( 'core/editor' );
-		const { setCurrentPage, startReordering, stopReordering } = dispatch( 'amp/story' );
+		const { startReordering, saveOrder, resetOrder } = dispatch( 'amp/story' );
 
 		return {
-			onChangePage: ( pageClientId ) => {
-				setCurrentPage( pageClientId );
-			},
 			startReordering,
-			stopReordering,
-			moveBlockToPosition: ( clientId, index ) => moveBlockToPosition( clientId, '', '', index ),
+			saveOrder,
+			resetOrder,
 		};
 	} )
 )( StoryControls );

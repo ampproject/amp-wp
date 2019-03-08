@@ -48,27 +48,33 @@ const actions = {
 			page,
 		};
 	},
-	changeblockOrder( blockOrder ) {
-		return {
-			type: 'CHANGE_BLOCK_ORDER',
-			blockOrder,
-		};
-	},
 	startReordering() {
 		return {
 			type: 'START_REORDERING',
 		};
 	},
-	stopReordering() {
+	saveOrder() {
 		return {
 			type: 'STOP_REORDERING',
+		};
+	},
+	movePageToPosition( page, index ) {
+		return {
+			type: 'MOVE_PAGE',
+			page,
+			index,
+		};
+	},
+	resetOrder() {
+		return {
+			type: 'RESET_ORDER',
 		};
 	},
 };
 
 const reducer = ( state = DEFAULT_STATE, action ) => {
-	const { animationOrder, currentPage } = state;
-	const { type, page, item, predecessor, blockOrder } = action;
+	const { animationOrder, currentPage, blockOrder } = state;
+	const { type, page, item, predecessor, index } = action;
 
 	const pageAnimationOrder = animationOrder[ page ] || [];
 
@@ -149,11 +155,6 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 				...state,
 				currentPage: getBlock( page ) ? page : currentPage,
 			};
-		case 'CHANGE_BLOCK_ORDER':
-			return {
-				...state,
-				blockOrder,
-			};
 		case 'START_REORDERING':
 			return {
 				...state,
@@ -163,6 +164,19 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 		case 'STOP_REORDERING':
 			return {
 				...state,
+				isReordering: false,
+			};
+		case 'MOVE_PAGE':
+			const oldIndex = blockOrder.indexOf( page );
+
+			return {
+				...state,
+				bockOrder: blockOrder.splice( index, 0, ...blockOrder.splice( oldIndex, 1 ) ),
+			};
+		case 'RESET_ORDER':
+			return {
+				...state,
+				blockOrder: getBlockOrder(),
 				isReordering: false,
 			};
 	}

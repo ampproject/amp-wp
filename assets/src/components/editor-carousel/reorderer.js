@@ -1,77 +1,38 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
-import { withState } from '@wordpress/compose';
-import { Draggable, DropZoneProvider, DropZone } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { withSelect } from '@wordpress/data';
+import { DropZoneProvider } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import BlockPreview from './block-preview';
+import ReordererItem from './reorderer-item';
 
-const Reorderer = ( { pages, dragging, hasDropped, setState } ) => {
+const Reorderer = ( { pages } ) => {
 	return (
 		<DropZoneProvider>
-			{ hasDropped ? 'Dropped!' : 'Drop something here' }
 			<div className="amp-story-reorderer">
-				{ pages.map( ( page, index ) => {
-					const { clientId } = page;
-					const pageElementId = `reorder-page-${ clientId }`;
-					const transferData = {
-						type: 'block',
-						srcIndex: index,
-						srcRootClientId: '',
-						srcClientId: clientId,
-					};
-
-					return (
-						<div
-							key={ `page-${ clientId }` }
-							className="amp-story-reorderer-item"
-						>
-							<Draggable
-								className={ dragging ? 'is-dragging' : undefined }
-								elementId={ pageElementId }
-								transferData={ transferData }
-								onDragStart={ () => {
-									setState( { dragging: true } );
-								} }
-								onDragEnd={ () => {
-									setState( { dragging: false } );
-								} }
-							>
-								{
-									( { onDraggableStart, onDraggableEnd } ) => (
-										<Fragment>
-											<DropZone
-												label={ __( 'Drop page to re-order', 'amp' ) }
-												onDrop={ () => setState( { hasDropped: true } ) }
-											/>
-											<div id={ pageElementId }>
-												<div
-													className="amp-story-page-preview"
-													onDragStart={ onDraggableStart }
-													onDragEnd={ onDraggableEnd }
-													draggable
-												>
-													<BlockPreview { ...page } />
-												</div>
-											</div>
-										</Fragment>
-									)
-								}
-							</Draggable>
-						</div>
-					);
-				} ) }
+				{ pages.map( ( page, index ) => (
+					<ReordererItem
+						key={ `page-${ page.clientId }` }
+						page={ page }
+						index={ index }
+					/>
+				) ) }
 			</div>
 		</DropZoneProvider>
 	);
 };
 
-export default withState( {
-	dragging: false,
-	hasDropped: false,
+export default withSelect( ( select ) => {
+	const { getBlocksByClientId } = select( 'core/editor' );
+	const { getBlockOrder } = select( 'amp/story' );
+
+	const pages = getBlocksByClientId( getBlockOrder() );
+
+	return {
+		pages,
+	};
 } )( Reorderer );
+

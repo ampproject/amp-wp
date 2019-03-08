@@ -6,6 +6,12 @@
 import uuid from 'uuid/v4';
 
 /**
+ * WordPress dependencies
+ */
+import { withSelect } from '@wordpress/data';
+import { createHigherOrderComponent } from '@wordpress/compose';
+
+/**
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
@@ -195,3 +201,31 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...ampAttributes,
 	};
 };
+
+/**
+ * Add page number label to page blocks
+ *
+ * @param {Object} BlockListBlock BlockListBlock element.
+ * @return {Function} Handler.
+ */
+export const disableBlockDropZone = createHigherOrderComponent(
+	( BlockDropZone ) => {
+		return withSelect( ( select ) => {
+			const { isReordering } = select( 'amp/story' );
+
+			return {
+				isReordering: isReordering(),
+			};
+		} )( ( props ) => {
+			const { isReordering } = props;
+
+			if ( isReordering ) {
+				return null;
+			}
+
+			return <BlockDropZone { ...props } />;
+		} );
+	},
+	'disableBlockDropZone'
+);
+

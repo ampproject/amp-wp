@@ -21,7 +21,7 @@ import {
 	StoryControls,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
+import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
 import './stores/amp-story';
 
 /**
@@ -149,7 +149,6 @@ subscribe( () => {
 	blockOrder = newBlockOrder;
 
 	// The block order was changed manually, let's do the re-order.
-	// Todo: Needs testing.
 	if ( ! isReordering && blockOrder !== getCustomBlockOrder() ) {
 		for ( const [ index, page ] of getCustomBlockOrder().entries() ) {
 			moveBlockToPosition( page, '', '', index );
@@ -175,3 +174,4 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', disableBlockDropZone );

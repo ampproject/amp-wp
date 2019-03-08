@@ -17,9 +17,21 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		getBlockOrder,
 		getBlockRootClientId,
 	} = select( 'core/editor' );
+	const {
+		isReordering,
+		getBlockOrder: getModifiedBlockOrder,
+	} = select( 'amp/story' );
+
+	if ( '' !== getBlockRootClientId( props.clientId ) ) {
+		return {
+			pageNumber: undefined,
+		};
+	}
+
+	const currentIndex = isReordering() ? getModifiedBlockOrder().indexOf( props.clientId ) : getBlockOrder().indexOf( props.clientId );
 
 	return {
-		pageNumber: '' === getBlockRootClientId( props.clientId ) ? getBlockOrder().indexOf( props.clientId ) + 1 : undefined,
+		pageNumber: currentIndex + 1,
 	};
 } );
 

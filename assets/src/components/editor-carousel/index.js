@@ -50,7 +50,7 @@ class EditorCarousel extends Component {
 
 		return (
 			<Fragment>
-				{ isReordering && <Reorderer pages={ pages } /> }
+				{ isReordering && <Reorderer /> }
 				<div className="amp-story-editor-carousel-navigation">
 					<IconButton
 						icon="arrow-left-alt2"

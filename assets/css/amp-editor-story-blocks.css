@@ -428,6 +428,23 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
 		border: none;
 		border-radius: 0;
+		background: #eff0f1;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-active {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element {
+		opacity: 1;
+		visibility: visible;
+		transition: opacity .3s,background-color .3s;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone__content,
+	.amp-story-reorderer .amp-story-reorderer-item .is-dragging-over-element .components-drop-zone__content {
+		display: none;
 	}
 
 	.amp-story-reorderer .amp-story-page-preview {
