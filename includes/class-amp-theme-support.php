@@ -1694,8 +1694,6 @@ class AMP_Theme_Support {
 			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
 		}
 
-		$enabled_experiments = AMP_HTTP::get_enabled_experiments();
-
 		$args = array_merge(
 			array(
 				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
@@ -1711,7 +1709,7 @@ class AMP_Theme_Support {
 				),
 				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
 				'stream_fragment'         => $stream_fragment,
-				'enabled_experiments'     => $enabled_experiments,
+				'doing_img_experiment'    => _amp_is_doing_img_experiment(),
 			),
 			$args
 		);
@@ -2014,14 +2012,6 @@ class AMP_Theme_Support {
 				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
 				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
 			}
-		}
-
-		// Add experiments meta tag.
-		if ( ! empty( $enabled_experiments ) ) {
-			$meta = $dom->createElement( 'meta' );
-			$meta->setAttribute( 'name', 'amp-experiments-opt-in' );
-			$meta->setAttribute( 'content', implode( ',', $enabled_experiments ) );
-			$head->insertBefore( $meta, $head->firstChild );
 		}
 
 		$response  = "<!DOCTYPE html>\n";

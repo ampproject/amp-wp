@@ -617,3 +617,21 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	return $link;
 }
+
+/**
+ * Determine whether to run the img experiment.
+ *
+ * @private
+ * @return bool Whether running experiment.
+ */
+function _amp_is_doing_img_experiment() {
+	if ( defined( 'AMP_IMG_EXPERIMENT' ) ) {
+		return AMP_IMG_EXPERIMENT;
+	}
+
+	return (
+		( defined( 'WP_DEBUG' ) && WP_DEBUG )
+		&&
+		isset( $_GET['amp_img_experiment'] ) // phpcs:ignore
+	);
+}

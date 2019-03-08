@@ -167,7 +167,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+		if ( _amp_is_doing_img_experiment() ) {
 			unset( $out['sizes'] );
 		}
 
@@ -267,7 +267,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
-			if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+			if ( _amp_is_doing_img_experiment() ) {
 				if ( $new_attributes['width'] < $this->args['content_max_width'] ) {
 					$new_attributes['layout'] = 'fixed';
 				} else {

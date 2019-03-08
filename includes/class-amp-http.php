@@ -118,7 +118,6 @@ class AMP_HTTP {
 			'_wp_amp_action_xhr_converted',
 			'amp_latest_update_time',
 			'amp_last_check_time',
-			'amp_experiments',
 		);
 
 		// Scrub input vars.
@@ -160,22 +159,6 @@ class AMP_HTTP {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Get the enabled experiments.
-	 *
-	 * @return array Enabled experiments.
-	 */
-	public static function get_enabled_experiments() {
-		$enabled_experiments = array();
-		if ( isset( self::$purged_amp_query_vars['amp_experiments'] ) ) {
-			$enabled_experiments = array_map(
-				'sanitize_key',
-				(array) self::$purged_amp_query_vars['amp_experiments']
-			);
-		}
-		return $enabled_experiments;
 	}
 
 	/**

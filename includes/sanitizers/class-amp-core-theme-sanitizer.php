@@ -413,7 +413,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public static function remove_twentynineteen_thumbnail_image_sizes() {
-		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+		if ( _amp_is_doing_img_experiment() ) {
 			return;
 		}
 		add_filter(
@@ -438,7 +438,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @link https://github.com/WordPress/wordpress-develop/blob/ddc8f803c6e99118998191fd2ea24124feb53659/src/wp-content/themes/twentyseventeen/functions.php#L545:L554
 	 */
 	public static function add_twentyseventeen_attachment_image_attributes() {
-		if ( ! in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+		if ( ! _amp_is_doing_img_experiment() ) {
 			add_filter(
 				'wp_get_attachment_image_attributes',
 				function ( $attr, $attachment, $size ) {
