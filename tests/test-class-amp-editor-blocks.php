@@ -130,18 +130,27 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets().
 	 */
 	public function test_enqueue_block_editor_assets() {
+		set_current_screen( 'admin.php' );
 		$this->instance->enqueue_block_editor_assets();
+		$slug               = 'amp-editor-blocks-build';
+		$scripts            = wp_scripts();
+		$expected_file_name = 'amp-blocks-compiled.js';
 
-		$slug    = 'amp-agnostic-blocks-compiled';
+		// Because amp_is_canonical() is false, this shouldn't have been enqueued.
+		$this->assertFalse( in_array( $slug, $scripts->queue, true ) );
+
+		add_theme_support( 'amp' );
+		$this->instance->enqueue_block_editor_assets();
 		$scripts = wp_scripts();
 		$script  = $scripts->registered[ $slug ];
 
+		// Now that amp_is_canonical() is true, this should have been enqueued.
 		$this->assertEquals( $slug, $script->handle );
 		$this->assertEquals(
 			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 			$script->deps
 		);
-		$this->assertContains( $slug . '.js', $script->src );
+		$this->assertContains( $expected_file_name, $script->src );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, $scripts->queue, true ) );
 	}

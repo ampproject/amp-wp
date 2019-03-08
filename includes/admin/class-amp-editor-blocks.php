@@ -124,15 +124,6 @@ class AMP_Editor_Blocks {
 	 */
 	public function enqueue_block_editor_assets() {
 
-		$amp_agnostic_slug = 'amp-agnostic-blocks-compiled';
-		wp_enqueue_script(
-			$amp_agnostic_slug,
-			amp_get_asset_url( "js/{$amp_agnostic_slug}.js" ),
-			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-			AMP__VERSION,
-			false
-		);
-
 		// Enqueue script and style for AMP-specific blocks.
 		if ( amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			wp_enqueue_style(

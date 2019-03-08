@@ -75,7 +75,6 @@ module.exports = {
 		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details.js',
 		'./assets/js/amp-story-editor-blocks-compiled': './assets/src/amp-story-editor-blocks.js',
 		'./assets/js/amp-story-blocks-compiled': './assets/src/blocks/stories.js',
-		'./assets/js/amp-agnostic-blocks-compiled': './assets/src/blocks/amp-agnostic.js',
 	},
 	output: {
 		path: path.resolve( __dirname ),
