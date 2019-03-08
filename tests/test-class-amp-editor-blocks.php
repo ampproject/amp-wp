@@ -72,7 +72,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$dimensions     = array( $minimum_height, 300, 500 );
 		$this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
-		$this->assertContains( '<div class="latest-stories-carousel"', $rendered_block );
+		$this->assertContains( '<ul class="latest-stories-carousel"', $rendered_block );
 		$this->assertContains(
 			sprintf(
 				'height="%s"',

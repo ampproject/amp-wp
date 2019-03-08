@@ -13,7 +13,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test the_single_story_card.
 	 *
-	 * @covers AMP_Admin_Pointer::the_single_story_card()
+	 * @covers AMP_Story_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
 		$number_of_stories = 10;

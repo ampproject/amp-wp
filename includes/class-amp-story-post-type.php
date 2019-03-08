@@ -617,7 +617,7 @@ class AMP_Story_Post_Type {
 		);
 
 		?>
-		<a href="<?php echo esc_url( get_permalink( $post ) ); ?>" class="latest-stories__slide">
+		<a class="latest_stories__link" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
 			<?php
 			echo wp_get_attachment_image(
 				$thumbnail_id,

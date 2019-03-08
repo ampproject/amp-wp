@@ -275,13 +275,19 @@ class AMP_Editor_Blocks {
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
-			<div class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 				<?php
 				foreach ( $story_query->posts as $post ) :
-					AMP_Story_Post_Type::the_single_story_card( $post );
+					?>
+					<li class="latest-stories__slide">
+					<?php
+						AMP_Story_Post_Type::the_single_story_card( $post );
+					?>
+					</li>
+					<?php
 				endforeach;
 				?>
-			</div>
+			</ul>
 		</div>
 		<?php
 

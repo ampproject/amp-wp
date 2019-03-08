@@ -19,6 +19,11 @@
 	padding: 0;
 }
 
+/* The ul is needed in ul.latest-stories-carousel to override Gutenberg styling. */
+div.amp-block-latest-stories > ul.latest-stories-carousel {
+	list-style: none;
+}
+
 .latest-stories-carousel .latest-stories__slide {
 	flex: 0 0 auto;
 	margin-left: 0.5rem;
@@ -27,7 +32,7 @@
 }
 
 /* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
-.latest-stories-carousel .latest-stories__slide:after {
+.latest-stories-carousel .latest_stories__link:after {
 	display: block;
 	position: absolute;
 	border-radius: 0.5rem;
