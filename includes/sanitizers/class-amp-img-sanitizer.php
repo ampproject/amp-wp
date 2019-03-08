@@ -97,8 +97,22 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$style = (string) $node->getAttribute( 'style' );
+
+			// Determine if dimensions are specified, and populate them from styles if defined.
+			$has_width = is_numeric( $node->getAttribute( 'width' ) );
+			if ( ! $has_width && $style && preg_match( '#(?:^|;)\s*width:\s*(\d+(?:\.\d+)?)px#', $style, $matches ) ) {
+				$has_width = true;
+				$node->setAttribute( 'width', (string) $matches[1] );
+			}
+			$has_height = is_numeric( $node->getAttribute( 'height' ) );
+			if ( ! $has_height && $style && preg_match( '#(?:^|;)\s*height:\s*(\d+(?:\.\d+)?)px#', $style, $matches ) ) {
+				$has_height = true;
+				$node->setAttribute( 'height', (string) $matches[1] );
+			}
+
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+			if ( ! $has_width || ! $has_height ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -132,10 +146,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private function filter_attributes( $attributes ) {
 		$out = array();
 
-		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
-			unset( $attributes['sizes'] );
-		}
-
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'width':
@@ -155,6 +165,10 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out[ $name ] = $value;
 					break;
 			}
+		}
+
+		if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+			unset( $out['sizes'] );
 		}
 
 		return $out;
@@ -253,7 +267,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
-			$new_attributes['layout'] = 'intrinsic';
+			if ( in_array( 'amp-img-auto-sizes', AMP_HTTP::get_enabled_experiments(), true ) ) {
+				if ( $new_attributes['width'] < $this->args['content_max_width'] ) {
+					$new_attributes['layout'] = 'fixed';
+				} else {
+					$new_attributes['layout'] = 'intrinsic';
+				}
+			} else {
+				$new_attributes['layout'] = 'intrinsic';
+			}
 		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
