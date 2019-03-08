@@ -70,7 +70,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		// Create mock AMP story posts to test.
 		$minimum_height = 200;
 		$dimensions     = array( $minimum_height, 300, 500 );
-		$stories        = $this->create_story_posts_with_featured_images( $dimensions );
+		$this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = $this->instance->render_block_latest_stories( $attributes );
 		$this->assertContains( '<div class="latest-stories-carousel"', $rendered_block );
 		$this->assertContains(
@@ -80,23 +80,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			),
 			$rendered_block
 		);
-
-		foreach ( $stories as $story ) {
-			$featured_image = get_post_thumbnail_id( $story );
-			$this->assertContains( get_the_permalink( $story->ID ), $rendered_block );
-			$this->assertContains(
-				wp_get_attachment_image(
-					$featured_image,
-					AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
-					false,
-					array(
-						'alt'   => get_the_title( $story ),
-						'class' => 'latest-stories__featured-img',
-					)
-				),
-				$rendered_block
-			);
-		}
 
 		// Assert that the wp_enqueue_style() call in the render callback worked.
 		$styles          = wp_styles();
