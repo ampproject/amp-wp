@@ -95,11 +95,11 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_minimum_dimension.
+	 * Test get_featured_image_minimum_height.
 	 *
-	 * @covers \AMP_Editor_Blocks::get_minimum_dimension()
+	 * @covers \AMP_Editor_Blocks::get_featured_image_minimum_height()
 	 */
-	public function test_get_minimum_dimension() {
+	public function test_get_featured_image_minimum_height() {
 		$expected_min_height = 300;
 		$dimensions          = array(
 			$expected_min_height,
@@ -108,20 +108,10 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			600,
 		);
 		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
-		$this->assertEquals( $expected_min_height, $this->instance->get_minimum_dimension( 'height', $stories ) );
-
-		$expected_min_width = 100;
-		$dimensions         = array(
-			$expected_min_width,
-			200,
-			300,
-			800,
-		);
-		$stories            = $this->create_story_posts_with_featured_images( $dimensions );
-		$this->assertEquals( $expected_min_width, $this->instance->get_minimum_dimension( 'width', $stories ) );
+		$this->assertEquals( $expected_min_height, $this->instance->get_featured_image_minimum_height( $stories ) );
 
 		// When an empty array() is passed, the minimum height should be 0.
-		$this->assertEquals( 0, $this->instance->get_minimum_dimension( 'height', array() ) );
+		$this->assertEquals( 0, $this->instance->get_featured_image_minimum_height( array() ) );
 	}
 
 	/**

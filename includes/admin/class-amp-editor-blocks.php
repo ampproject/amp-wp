@@ -255,7 +255,7 @@ class AMP_Editor_Blocks {
 			'meta_key'         => '_thumbnail_id',
 		);
 		$story_query = new WP_Query( $args );
-		$min_height  = $this->get_minimum_dimension( 'height', $story_query->posts );
+		$min_height  = $this->get_featured_image_minimum_height( $story_query->posts );
 		$class       = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
@@ -283,27 +283,20 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * Gets the smallest of the given dimension of any of the featured images.
+	 * Gets the smallest height of any of the featured images.
 	 *
 	 * This iterates through all of the posts, to find their featured image.
-	 * Then, this returns the smallest dimension (width or height).
-	 * For example, if $dimension is 'width' and the featured image widths are 100, 200 and 300,
+	 * Then, this returns the smallest height.
+	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
 	 * this will return 100.
 	 *
-	 * @param string $dimension The dimension, either 'width' or 'height'.
-	 * @param array  $posts An array or WP_Post objects.
+	 * @param array $posts An array or WP_Post objects.
 	 * @return int $minimum_dimension The smallest dimension of a featured image.
 	 */
-	public function get_minimum_dimension( $dimension, $posts ) {
-		if ( 'width' === $dimension ) {
-			$index = 1;
-		} elseif ( 'height' === $dimension ) {
-			$index = 2;
-		} else {
-			return;
-		}
+	public function get_featured_image_minimum_height( $posts ) {
+		$index = 2;
 
-		$minimum_dimension = 0;
+		$minimum_height = 0;
 		foreach ( $posts as $post ) {
 			$thumbnail_id = get_post_thumbnail_id( $post->ID );
 			if ( ! $thumbnail_id ) {
@@ -315,15 +308,15 @@ class AMP_Editor_Blocks {
 				isset( $image[ $index ] )
 				&&
 				(
-					! $minimum_dimension
+					! $minimum_height
 					||
-					$image[ $index ] < $minimum_dimension
+					$image[ $index ] < $minimum_height
 				)
 			) {
-				$minimum_dimension = $image[ $index ];
+				$minimum_height = $image[ $index ];
 			}
 		}
 
-		return $minimum_dimension;
+		return $minimum_height;
 	}
 }
