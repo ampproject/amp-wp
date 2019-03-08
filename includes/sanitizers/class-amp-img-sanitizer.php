@@ -267,7 +267,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
-			$new_attributes['layout'] = 'intrinsic';
+			// Use responsive images when a theme supports wide and full-bleed images.
+			if ( _amp_is_doing_img_experiment() && current_theme_supports( 'align-wide' ) && $node->parentNode && 'figure' === $node->parentNode->nodeName && preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) ) ) {
+				$new_attributes['layout'] = 'responsive';
+			} else {
+				$new_attributes['layout'] = 'intrinsic';
+			}
 		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
