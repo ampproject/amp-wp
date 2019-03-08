@@ -131,15 +131,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	 */
 	public function test_enqueue_block_editor_assets() {
 		set_current_screen( 'admin.php' );
-		$this->instance->enqueue_block_editor_assets();
 		$slug               = 'amp-editor-blocks-build';
-		$scripts            = wp_scripts();
 		$expected_file_name = 'amp-blocks-compiled.js';
-
-		// Because amp_is_canonical() is false, this shouldn't have been enqueued.
-		$this->assertFalse( in_array( $slug, $scripts->queue, true ) );
-
-		add_theme_support( 'amp' );
 		$this->instance->enqueue_block_editor_assets();
 		$scripts = wp_scripts();
 		$script  = $scripts->registered[ $slug ];
