@@ -137,7 +137,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$scripts = wp_scripts();
 		$script  = $scripts->registered[ $slug ];
 
-		// Now that amp_is_canonical() is true, this should have been enqueued.
 		$this->assertEquals( $slug, $script->handle );
 		$this->assertEquals(
 			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),

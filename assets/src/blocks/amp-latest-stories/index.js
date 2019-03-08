@@ -16,7 +16,7 @@ import edit from './edit';
 export const name = 'amp/amp-latest-stories';
 
 export const settings = {
-	title: __( 'AMP Latest Stories', 'amp' ),
+	title: __( 'Latest Stories', 'amp' ),
 	description: __( 'See the latest AMP stories', 'amp' ),
 	icon: 'list-view',
 	category: 'widgets',
