@@ -51,7 +51,6 @@ class AMP_Editor_Blocks {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_action( 'wp_loaded', array( $this, 'register_block_latest_stories' ), 11 );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
-			add_action( 'enqueue_block_assets', array( $this, 'enqueue_block_assets' ) );
 
 			/*
 			 * Dirty AMP is required when a site is in native mode but not all templates are being served
@@ -196,14 +195,6 @@ class AMP_Editor_Blocks {
 	}
 
 	/**
-	 * Enqueues the front-end block stylesheet.
-	 */
-	public function enqueue_block_assets() {
-		$stylesheet_base = 'amp-blocks';
-		wp_enqueue_style( $stylesheet_base . '-style', amp_get_asset_url( "/css/{$stylesheet_base}.css" ), array(), AMP__VERSION );
-	}
-
-	/**
 	 * Tally the AMP component scripts that are needed in a dirty AMP document.
 	 *
 	 * @param string $content Content.
@@ -343,6 +334,9 @@ class AMP_Editor_Blocks {
 			</div>
 		</div>
 		<?php
+
+		$stylesheet_base = 'amp-blocks';
+		wp_enqueue_style( $stylesheet_base . '-style', amp_get_asset_url( "/css/{$stylesheet_base}.css" ), array(), AMP__VERSION );
 
 		return ob_get_clean();
 	}

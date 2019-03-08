@@ -40,7 +40,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_editor_assets' ) ) );
 			$this->assertEquals( 11, has_action( 'wp_loaded', array( $this->instance, 'register_block_latest_stories' ) ) );
 			$this->assertEquals( 10, has_filter( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
-			$this->assertEquals( 10, has_action( 'enqueue_block_assets', array( $this->instance, 'enqueue_block_assets' ) ) );
 
 			// Because amp_is_canonical() is false, these should not be hooked.
 			$this->assertFalse( has_filter( 'the_content', array( $this->instance, 'tally_content_requiring_amp_scripts' ) ) );
@@ -98,6 +97,18 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 				$rendered_block
 			);
 		}
+
+		// Assert that the wp_enqueue_style() call in the render callback worked.
+		$styles          = wp_styles();
+		$stylesheet_base = 'amp-blocks';
+		$slug            = $stylesheet_base . '-style';
+		$stylesheet      = $styles->registered[ $slug ];
+
+		$this->assertEquals( $slug, $stylesheet->handle );
+		$this->assertEquals( array(), $stylesheet->deps );
+		$this->assertContains( $stylesheet_base . '.css', $stylesheet->src );
+		$this->assertEquals( AMP__VERSION, $stylesheet->ver );
+		$this->assertTrue( in_array( $slug, $styles->queue, true ) );
 	}
 
 	/**
@@ -128,25 +139,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 
 		// When an empty array() is passed, the minimum height should be 0.
 		$this->assertEquals( 0, $this->instance->get_minimum_dimension( 'height', array() ) );
-	}
-
-	/**
-	 * Test enqueue_block_assets().
-	 *
-	 * @covers \AMP_Editor_Blocks::enqueue_block_assets().
-	 */
-	public function test_enqueue_block_assets() {
-		$this->instance->enqueue_block_assets();
-		$styles          = wp_styles();
-		$stylesheet_base = 'amp-blocks';
-		$slug            = $stylesheet_base . '-style';
-		$stylesheet      = $styles->registered[ $slug ];
-
-		$this->assertEquals( $slug, $stylesheet->handle );
-		$this->assertEquals( array(), $stylesheet->deps );
-		$this->assertContains( $stylesheet_base . '.css', $stylesheet->src );
-		$this->assertEquals( AMP__VERSION, $stylesheet->ver );
-		$this->assertTrue( in_array( $slug, $styles->queue, true ) );
 	}
 
 	/**
