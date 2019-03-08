@@ -10,6 +10,9 @@ module.exports = function( grunt ) {
 
 		// Clean up the build.
 		clean: {
+			compiled: {
+				src: [ 'assets/js/*-compiled.js' ]
+			},
 			build: {
 				src: [ 'build' ]
 			}
@@ -72,6 +75,9 @@ module.exports = function( grunt ) {
 		spawnQueue = [];
 		stdout = [];
 
+		// Clear out all existing compiled files first.
+		grunt.task.run( 'clean' );
+
 		grunt.task.run( 'shell:webpack_production' );
 
 		spawnQueue.push(
@@ -101,7 +107,6 @@ module.exports = function( grunt ) {
 			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
 			paths.push( 'vendor/willwashburn/stream/src/**' );
 
-			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
 				build: {
 					src: paths,
