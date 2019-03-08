@@ -267,15 +267,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
-			if ( _amp_is_doing_img_experiment() ) {
-				if ( $new_attributes['width'] < $this->args['content_max_width'] ) {
-					$new_attributes['layout'] = 'fixed';
-				} else {
-					$new_attributes['layout'] = 'intrinsic';
-				}
-			} else {
-				$new_attributes['layout'] = 'intrinsic';
-			}
+			$new_attributes['layout'] = 'intrinsic';
 		}
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
