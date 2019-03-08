@@ -113,7 +113,7 @@ const ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
-		wp.domReady( component.maybeUnregisterBlocks );
+		component.maybeUnregisterBlocks();
 	};
 
 	/**
