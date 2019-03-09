@@ -921,7 +921,7 @@ const ampEditorBlocks = ( function() {
 			'amp-timeago',
 		];
 
-		if ( ! component.data.hasThemeSupport ) {
+		if ( ! component.data.isNativeAMP ) {
 			ampDependentBlocks.forEach( function( block ) {
 				wp.blocks.unregisterBlockType( 'amp/' + block );
 			} );

@@ -159,6 +159,7 @@ class AMP_Editor_Blocks {
 				wp_json_encode(
 					array(
 						'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
+						'isNativeAMP'     => amp_is_canonical(),
 					)
 				)
 			)
