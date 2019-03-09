@@ -257,7 +257,7 @@ class AMP_Editor_Blocks {
 		 * This detects whether this render_callback is called in the editor context.
 		 */
 		$is_amp_carousel = ! isset( $attributes['isServerSide'] ) || ! $attributes['isServerSide'];
-		$args        = array(
+		$args            = array(
 			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
 			'post_status'      => 'publish',
@@ -266,18 +266,21 @@ class AMP_Editor_Blocks {
 			'suppress_filters' => false,
 			'meta_key'         => '_thumbnail_id',
 		);
-		$story_query = new WP_Query( $args );
-		$min_height  = $this->get_featured_image_minimum_height( $story_query->posts );
-		$class       = 'amp-block-latest-stories';
+		$story_query     = new WP_Query( $args );
+		$min_height      = $this->get_featured_image_minimum_height( $story_query->posts );
+		$class           = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
+		}
+		if ( $is_amp_carousel ) {
+			$class .= ' is-amp-carousel';
 		}
 
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
 			<?php if ( $is_amp_carousel ) : ?>
-				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="slides" class="latest-stories-carousel">
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
 			<?php else : ?>
 				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 			<?php endif; ?>
