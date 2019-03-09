@@ -23,3 +23,13 @@ body amp-audio:not([controls]) {
 	display: inline-block;
 	height: auto;
 }
+
+/**
+ * Prevent display:block in a theme's stylesheet from breaking the width of an image that has an intrinsic layout.
+ * See <https://github.com/ampproject/amphtml/issues/17053#issuecomment-471127486>.
+ * @todo Remove the body.amp-wp-img-experiment selector from \AMP_Theme_Support::enqueue_assets() when experiment graduates.
+ */
+body.amp-wp-img-experiment .wp-block-image:not(#_) > figure > amp-img {
+	display: inline-block;
+	vertical-align: middle;
+}

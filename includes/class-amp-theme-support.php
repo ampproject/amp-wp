@@ -2132,6 +2132,16 @@ class AMP_Theme_Support {
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
+
+		if ( _amp_is_doing_img_experiment() ) {
+			add_filter(
+				'body_class',
+				function( $body_classes ) {
+					$body_classes[] = 'amp-wp-img-experiment';
+					return $body_classes;
+				}
+			);
+		}
 	}
 
 	/**
