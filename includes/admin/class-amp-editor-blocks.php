@@ -233,6 +233,9 @@ class AMP_Editor_Blocks {
 						'type'    => 'string',
 						'default' => 'date',
 					),
+					'isServerSide'  => array(
+						'type' => 'boolean',
+					),
 				),
 				'render_callback' => array( $this, 'render_block_latest_stories' ),
 			)
@@ -248,6 +251,12 @@ class AMP_Editor_Blocks {
 	 * @return string $markup The rendered block markup.
 	 */
 	public function render_block_latest_stories( $attributes ) {
+		/*
+		 * There should only be an <amp-carousel> on the front-end,
+		 * so the editor component passes isServerSide to <ServerSideRender>.
+		 * This detects whether this render_callback is called in the editor context.
+		 */
+		$is_amp_carousel = ! isset( $attributes['isServerSide'] ) || ! $attributes['isServerSide'];
 		$args        = array(
 			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
@@ -267,15 +276,19 @@ class AMP_Editor_Blocks {
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
-			<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<?php if ( $is_amp_carousel ) : ?>
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="slides" class="latest-stories-carousel">
+			<?php else : ?>
+				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
-					<li class="latest-stories__slide">
+					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
 						<?php AMP_Story_Post_Type::the_single_story_card( $post ); ?>
-					</li>
+					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;
 				?>
-			</ul>
+			<<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?> >
 		</div>
 		<?php
 

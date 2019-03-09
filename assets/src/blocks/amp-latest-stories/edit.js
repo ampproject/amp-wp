@@ -41,6 +41,7 @@ class LatestStoriesEdit extends Component {
 	render() {
 		const { attributes, setAttributes, latestStories } = this.props;
 		const { order, orderBy, storiesToShow } = attributes;
+		const serverSideAttributes = Object.assign( {}, attributes, { isServerSide: true } );
 
 		const inspectorControls = (
 			<InspectorControls>
@@ -79,7 +80,7 @@ class LatestStoriesEdit extends Component {
 				{ inspectorControls }
 				<ServerSideRender
 					block={ blockName }
-					attributes={ attributes }
+					attributes={ serverSideAttributes }
 				/>
 			</Fragment>
 		);
