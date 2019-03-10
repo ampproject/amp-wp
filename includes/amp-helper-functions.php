@@ -285,7 +285,7 @@ function is_amp_endpoint() {
 	}
 
 	// AMP Stories are always an AMP endpoint.
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return true;
 	}
 
