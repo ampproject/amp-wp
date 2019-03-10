@@ -291,7 +291,7 @@ class AMP_Editor_Blocks {
 					<?php
 				endforeach;
 				?>
-			<<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?> >
+			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
 		</div>
 		<?php
 
