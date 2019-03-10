@@ -17,10 +17,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		getBlockOrder,
 		getBlockRootClientId,
 	} = select( 'core/editor' );
-	const {
-		isReordering,
-		getBlockOrder: getModifiedBlockOrder,
-	} = select( 'amp/story' );
+	const {	isReordering } = select( 'amp/story' );
 
 	if ( '' !== getBlockRootClientId( props.clientId ) ) {
 		return {
@@ -28,10 +25,11 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		};
 	}
 
-	const currentIndex = isReordering() ? getModifiedBlockOrder().indexOf( props.clientId ) : getBlockOrder().indexOf( props.clientId );
+	const currentIndex = getBlockOrder().indexOf( props.clientId );
 
 	return {
 		pageNumber: currentIndex + 1,
+		isReordering: isReordering(),
 	};
 } );
 
@@ -49,10 +47,15 @@ const wrapperWithSelect = compose(
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return wrapperWithSelect( ( props ) => {
-			const { blockName, pageNumber } = props;
+			const { blockName, pageNumber, isReordering } = props;
 
 			// Not a valid top level block.
 			if ( ! ALLOWED_TOP_LEVEL_BLOCKS.includes( blockName ) || ! pageNumber ) {
+				return <BlockEdit { ...props } />;
+			}
+
+			// No page numbers needed during reordering.
+			if ( isReordering ) {
 				return <BlockEdit { ...props } />;
 			}
 
