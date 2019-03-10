@@ -9,23 +9,12 @@
 	display: none;
 }
 
-.amp-block-latest-stories:not(.is-amp-carousel) > .latest-stories-carousel {
-	display: flex;
-	flex-wrap: nowrap;
-	-webkit-overflow-scrolling: touch;
-	-ms-overflow-style: -ms-autohiding-scrollbar;
-	overflow-y: hidden;
-	margin: 0;
-	padding: 0;
-}
-
 /* The ul is needed in ul.latest-stories-carousel to override Gutenberg styling. */
 div.amp-block-latest-stories > ul.latest-stories-carousel {
 	list-style: none;
 }
 
 .latest-stories-carousel .latest-stories__slide {
-	flex: 0 0 auto;
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
 	position: relative;

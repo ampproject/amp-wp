@@ -272,9 +272,6 @@ class AMP_Editor_Blocks {
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
-		if ( $is_amp_carousel ) {
-			$class .= ' is-amp-carousel';
-		}
 
 		ob_start();
 		?>
