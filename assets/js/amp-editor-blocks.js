@@ -113,6 +113,7 @@ const ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
+		component.maybeUnregisterBlocks();
 	};
 
 	/**
@@ -901,6 +902,30 @@ const ampEditorBlocks = ( function() {
 	 */
 	component.isGalleryShortcode = function isGalleryShortcode( attributes ) {
 		return attributes.text && -1 !== attributes.text.indexOf( 'gallery' );
+	};
+
+	/**
+	 * If there's no theme support, unregister blocks that are only meant for AMP.
+	 * The Latest Stories block is meant for AMP and non-AMP, so don't unregister it here.
+	 */
+	component.maybeUnregisterBlocks = function maybeUnregisterBlocks() {
+		const ampDependentBlocks = [
+			'amp-brid-player',
+			'amp-ima-video',
+			'amp-jwplayer',
+			'amp-mathml',
+			'amp-o2-player',
+			'amp-ooyala-player',
+			'amp-reach-player',
+			'amp-springboard-player',
+			'amp-timeago',
+		];
+
+		if ( ! component.data.isNativeAMP ) {
+			ampDependentBlocks.forEach( function( block ) {
+				wp.blocks.unregisterBlockType( 'amp/' + block );
+			} );
+		}
 	};
 
 	return component;

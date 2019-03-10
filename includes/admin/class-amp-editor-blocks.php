@@ -42,6 +42,7 @@ class AMP_Editor_Blocks {
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+			add_action( 'wp_loaded', array( $this, 'register_block_latest_stories' ), 11 );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
 			/*
@@ -124,7 +125,7 @@ class AMP_Editor_Blocks {
 	public function enqueue_block_editor_assets() {
 
 		// Enqueue script and style for AMP-specific blocks.
-		if ( amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			wp_enqueue_style(
 				'amp-editor-blocks-style',
 				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
@@ -160,6 +161,7 @@ class AMP_Editor_Blocks {
 				wp_json_encode(
 					array(
 						'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
+						'isNativeAMP'     => amp_is_canonical(),
 					)
 				)
 			)
@@ -203,5 +205,138 @@ class AMP_Editor_Blocks {
 		if ( ! is_amp_endpoint() && ! empty( $this->content_required_amp_scripts ) ) {
 			wp_scripts()->do_items( $this->content_required_amp_scripts );
 		}
+	}
+
+	/**
+	 * Registers the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see register_block_core_latest_posts()
+	 */
+	public function register_block_latest_stories() {
+		register_block_type(
+			'amp/amp-latest-stories',
+			array(
+				'attributes'      => array(
+					'className'     => array(
+						'type' => 'string',
+					),
+					'storiesToShow' => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'order'         => array(
+						'type'    => 'string',
+						'default' => 'desc',
+					),
+					'orderBy'       => array(
+						'type'    => 'string',
+						'default' => 'date',
+					),
+					'useCarousel'   => array(
+						'type'    => 'boolean',
+						'default' => ! is_admin(),
+					),
+				),
+				'render_callback' => array( $this, 'render_block_latest_stories' ),
+			)
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see render_block_core_latest_posts()
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public function render_block_latest_stories( $attributes ) {
+		/*
+		 * There should only be an <amp-carousel> on the front-end,
+		 * so the editor component passes useCarousel=false to <ServerSideRender>.
+		 * This detects whether this render_callback is called in the editor context.
+		 */
+		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
+		$args            = array(
+			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			'posts_per_page'   => $attributes['storiesToShow'],
+			'post_status'      => 'publish',
+			'order'            => $attributes['order'],
+			'orderby'          => $attributes['orderBy'],
+			'suppress_filters' => false,
+			'meta_key'         => '_thumbnail_id',
+		);
+		$story_query     = new WP_Query( $args );
+		$min_height      = $this->get_featured_image_minimum_height( $story_query->posts );
+		$class           = 'amp-block-latest-stories';
+		if ( isset( $attributes['className'] ) ) {
+			$class .= ' ' . $attributes['className'];
+		}
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $class ); ?>">
+			<?php if ( $is_amp_carousel ) : ?>
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
+			<?php else : ?>
+				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<?php endif; ?>
+				<?php foreach ( $story_query->posts as $post ) : ?>
+					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
+						<?php AMP_Story_Post_Type::the_single_story_card( $post ); ?>
+					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
+					<?php
+				endforeach;
+				?>
+			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
+		</div>
+		<?php
+
+		$stylesheet_base = 'amp-blocks';
+		wp_enqueue_style( $stylesheet_base . '-style', amp_get_asset_url( "/css/{$stylesheet_base}.css" ), array(), AMP__VERSION );
+		if ( $is_amp_carousel ) {
+			wp_enqueue_script( 'amp-carousel' );
+		}
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gets the smallest height of any of the featured images.
+	 *
+	 * This iterates through all of the posts, to find their featured image.
+	 * Then, this returns the smallest height.
+	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
+	 * this will return 100.
+	 *
+	 * @param array $posts An array or WP_Post objects.
+	 * @return int $minimum_dimension The smallest dimension of a featured image.
+	 */
+	public function get_featured_image_minimum_height( $posts ) {
+		$index = 2;
+
+		$minimum_height = 0;
+		foreach ( $posts as $post ) {
+			$thumbnail_id = get_post_thumbnail_id( $post->ID );
+			if ( ! $thumbnail_id ) {
+				continue;
+			}
+
+			$image = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
+			if (
+				isset( $image[ $index ] )
+				&&
+				(
+					! $minimum_height
+					||
+					$image[ $index ] < $minimum_height
+				)
+			) {
+				$minimum_height = $image[ $index ];
+			}
+		}
+
+		return $minimum_height;
 	}
 }
