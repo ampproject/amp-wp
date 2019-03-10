@@ -385,6 +385,65 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test is_amp_endpoint() function for post embeds and feeds.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * global WP_Query $wp_the_query
+	 */
+	public function test_is_amp_endpoint_for_post_embeds_and_feeds() {
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$post_id = $this->factory()->post->create_and_get()->ID;
+
+		$this->go_to( home_url( "?p=$post_id" ) );
+		$this->assertTrue( is_amp_endpoint() );
+
+		$this->go_to( home_url( "?p=$post_id&embed=1" ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		$this->go_to( home_url( '?feed=rss' ) );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the parse_query action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_parse_query_action() {
+		global $wp_actions;
+		unset( $wp_actions['parse_query'] );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function when there is no WP_Query.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_feed
+	 * @expectedIncorrectUsage is_embed
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_when_no_wp_query() {
+		global $wp_query;
+		$wp_query = null;
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the wp action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_wp_action() {
+		add_theme_support( 'amp' );
+		global $wp_actions;
+		unset( $wp_actions['wp'] );
+		$this->assertTrue( is_amp_endpoint() );
+	}
+
+	/**
 	 * Filter calls.
 	 *
 	 * @var array
