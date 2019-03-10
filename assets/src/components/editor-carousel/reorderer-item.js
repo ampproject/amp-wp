@@ -40,7 +40,13 @@ const ReordererItem = ( { page, index, movePageToPosition } ) => {
 		srcClientId: clientId,
 	};
 
-	const onDrop = ( event ) => {
+	const getInsertIndex = ( position ) => {
+		if ( index !== undefined ) {
+			return position.x === 'left' ? index - 1 : index;
+		}
+	};
+
+	const onDrop = ( event, position ) => {
 		const { srcClientId, type } = parseDropEvent( event );
 
 		const isBlockDropType = ( dropType ) => dropType === 'block';
@@ -50,7 +56,7 @@ const ReordererItem = ( { page, index, movePageToPosition } ) => {
 			return;
 		}
 
-		movePageToPosition( srcClientId, index );
+		movePageToPosition( srcClientId, getInsertIndex( position ) );
 	};
 
 	return (
