@@ -450,6 +450,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	.amp-story-reorderer .amp-story-page-preview {
 		border: 5px solid #eff0f1;
 		border-radius: 5px;
+		background: #fff;
 		width: 100%;
 		height: 277px;
 		cursor: grab;
