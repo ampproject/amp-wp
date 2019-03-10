@@ -428,7 +428,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
 		border: none;
 		border-radius: 0;
-		background: #eff0f1;
+		background: transparent;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-active {
@@ -440,6 +440,14 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		opacity: 1;
 		visibility: visible;
 		transition: opacity .3s,background-color .3s;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-right {
+		border-right: 3px solid #0071a1;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-left {
+		border-left: 3px solid #0071a1;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone__content,
