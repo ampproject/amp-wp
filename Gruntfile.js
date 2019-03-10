@@ -11,7 +11,7 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*-compiled.js' ]
+				src: [ 'assets/js/*-compiled.js' ],
 			},
 			build: {
 				src: [ 'build' ],
