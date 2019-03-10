@@ -65,6 +65,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			'storiesToShow' => 10,
 			'order'         => 'desc',
 			'orderBy'       => 'date',
+			'useCarousel'   => true,
 		);
 
 		// Create mock AMP story posts to test.
