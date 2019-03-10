@@ -58,15 +58,13 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 }
 
 .latest-stories-carousel .latest-stories__meta .latest-stories__avatar {
-	float: left;
-	margin-top: 5px;
 	height: 24px;
 	width: 24px;
 	border-radius: 50%;
 	box-shadow: none;
 	-webkit-box-shadow: none;
 	vertical-align: middle;
-	display: inline;
+	display: inline-block;
 }
 
 .latest-stories-carousel .latest-stories__meta .latest-stories__author {
