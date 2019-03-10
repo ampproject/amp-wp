@@ -295,6 +295,9 @@ class AMP_Editor_Blocks {
 
 		$stylesheet_base = 'amp-blocks';
 		wp_enqueue_style( $stylesheet_base . '-style', amp_get_asset_url( "/css/{$stylesheet_base}.css" ), array(), AMP__VERSION );
+		if ( $is_amp_carousel ) {
+			wp_enqueue_script( 'amp-carousel' );
+		}
 
 		return ob_get_clean();
 	}
