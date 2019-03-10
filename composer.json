@@ -7,7 +7,7 @@
   "require": {
     "php": "^5.4 || ^7.0",
     "sabberworm/php-css-parser": "8.3.0",
-    "fasterimage/fasterimage": "1.2.1",
+    "fasterimage/fasterimage": "1.4.0",
     "cweagans/composer-patches": "~1.6"
   },
   "require-dev": {
@@ -23,9 +23,6 @@
   },
   "extra": {
     "patches": {
-      "fasterimage/fasterimage": {
-        "FasterImage: Add support for SVG images and enable TLS verification": "patches/fasterimage-fixes.diff"
-      },
       "sabberworm/php-css-parser": {
         "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
       }

@@ -562,27 +562,34 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter(
 			'amp_supportable_templates',
 			function( $templates ) {
-				$templates['is_single']  = array(
+				$templates['is_single']        = array(
 					'label'     => 'Single post',
 					'supported' => false,
 					'parent'    => 'is_singular',
 				);
-				$templates['is_special'] = array(
+				$templates['is_special']       = array(
 					'label'    => 'Special post',
 					'parent'   => 'is_single',
 					'callback' => function( WP_Query $query ) {
 						return $query->is_singular() && 'special' === get_post( $query->get_queried_object_id() )->post_name;
 					},
 				);
-				$templates['is_page']    = array(
+				$templates['is_page']          = array(
 					'label'     => 'Page',
 					'supported' => true,
 					'parent'    => 'is_singular',
 				);
-				$templates['is_custom']  = array(
+				$templates['is_custom']        = array(
 					'label'    => 'Custom',
 					'callback' => function( WP_Query $query ) {
 						return false !== $query->get( 'custom', false );
+					},
+				);
+				$templates['is_custom[thing]'] = array(
+					'label'    => 'Custom Thing',
+					'parent'   => 'is_custom',
+					'callback' => function( WP_Query $query ) {
+						return 'thing' === $query->get( 'custom', false );
 					},
 				);
 				return $templates;
@@ -621,11 +628,59 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertTrue( $availability['supported'] );
 
-		// Test custom.
+		// Test is_custom.
 		$this->go_to( '/?custom=1' );
 		$availability = AMP_Theme_Support::get_template_availability();
 		$this->assertTrue( $availability['supported'] );
 		$this->assertEquals( 'is_custom', $availability['template'] );
+
+		// Test is_custom[thing].
+		$this->go_to( '/?custom=thing' );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertFalse( $availability['supported'] );
+		$this->assertEquals( 'is_custom[thing]', $availability['template'] );
+	}
+
+	/**
+	 * Test get_template_availability with ambiguous matching templates.
+	 *
+	 * @covers AMP_Theme_Support::get_template_availability()
+	 */
+	public function test_get_template_availability_with_ambiguity() {
+		AMP_Options_Manager::update_option( 'all_templates_supported', true );
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$custom_post_type = 'book';
+		register_post_type(
+			$custom_post_type,
+			array(
+				'has_archive'        => true,
+				'publicly_queryable' => true,
+			)
+		);
+		$this->factory()->post->create(
+			array(
+				'post_type'  => $custom_post_type,
+				'post_title' => 'test',
+			)
+		);
+
+		// Test that when doing a post_type archive, we get the post type archive as expected.
+		$this->go_to( "/?post_type=$custom_post_type" );
+		$this->assertTrue( is_post_type_archive( $custom_post_type ) );
+		$this->assertFalse( is_search() );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEmpty( $availability['errors'] );
+		$this->assertEquals( "is_post_type_archive[$custom_post_type]", $availability['template'] );
+
+		// Test that when doing a search and a post_type archive, the search wins.
+		$this->go_to( "/?s=test&post_type=$custom_post_type" );
+		$this->assertTrue( is_post_type_archive( $custom_post_type ) );
+		$this->assertTrue( is_search() );
+		$availability = AMP_Theme_Support::get_template_availability();
+		$this->assertTrue( $availability['supported'] );
+		$this->assertEmpty( $availability['errors'] );
+		$this->assertEquals( 'is_search', $availability['template'] );
 	}
 
 	/**
