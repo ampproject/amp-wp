@@ -233,8 +233,9 @@ class AMP_Editor_Blocks {
 						'type'    => 'string',
 						'default' => 'date',
 					),
-					'isServerSide'  => array(
-						'type' => 'boolean',
+					'useCarousel'   => array(
+						'type'    => 'boolean',
+						'default' => ! is_admin(),
 					),
 				),
 				'render_callback' => array( $this, 'render_block_latest_stories' ),
@@ -253,10 +254,10 @@ class AMP_Editor_Blocks {
 	public function render_block_latest_stories( $attributes ) {
 		/*
 		 * There should only be an <amp-carousel> on the front-end,
-		 * so the editor component passes isServerSide to <ServerSideRender>.
+		 * so the editor component passes useCarousel=false to <ServerSideRender>.
 		 * This detects whether this render_callback is called in the editor context.
 		 */
-		$is_amp_carousel = ! isset( $attributes['isServerSide'] ) || ! $attributes['isServerSide'];
+		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
 		$args            = array(
 			'post_type'        => AMP_Story_Post_Type::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
