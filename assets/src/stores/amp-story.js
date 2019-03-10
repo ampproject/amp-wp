@@ -168,10 +168,12 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			};
 		case 'MOVE_PAGE':
 			const oldIndex = blockOrder.indexOf( page );
+			const newBlockOrder = [ ...blockOrder ];
+			newBlockOrder.splice( index, 0, ...newBlockOrder.splice( oldIndex, 1 ) );
 
 			return {
 				...state,
-				bockOrder: blockOrder.splice( index, 0, ...blockOrder.splice( oldIndex, 1 ) ),
+				blockOrder: newBlockOrder,
 			};
 		case 'RESET_ORDER':
 			return {
