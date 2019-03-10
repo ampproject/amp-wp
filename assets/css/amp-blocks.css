@@ -49,6 +49,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 }
 
 .latest-stories-carousel .latest-stories__title {
+	white-space: normal; /* Override an AMP style rule of white-space: nowrap */
 	position: absolute;
 	bottom: 5rem;
 	left: 1rem;
