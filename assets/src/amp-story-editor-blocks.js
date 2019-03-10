@@ -22,7 +22,7 @@ import {
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
-import './stores/amp-story';
+import { store } from './stores/amp-story';
 
 /**
  * Initialize editor integration.
@@ -120,11 +120,10 @@ function renderStoryComponents() {
 const { getBlockOrder } = select( 'core/editor' );
 
 let blockOrder = getBlockOrder();
+let customBlockOrder;
 
 subscribe( () => {
 	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
-	const { moveBlockToPosition } = dispatch( 'core/editor' );
-	const { isReordering, getBlockOrder: getCustomBlockOrder } = select( 'amp/story' );
 	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
@@ -143,26 +142,34 @@ subscribe( () => {
 	}
 
 	const newBlockOrder = getBlockOrder();
-	const oldPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
-	const newPage = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
+	const deletedPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
+	const newlyAddedPages = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
 
 	blockOrder = newBlockOrder;
 
-	// The block order was changed manually, let's do the re-order.
-	if ( ! isReordering && blockOrder !== getCustomBlockOrder() ) {
-		for ( const [ index, page ] of getCustomBlockOrder().entries() ) {
-			moveBlockToPosition( page, '', '', index );
-		}
-	}
-
 	// If a new page has been inserted, make it the current one.
-	if ( newPage ) {
-		setCurrentPage( newPage );
+	if ( newlyAddedPages ) {
+		setCurrentPage( newlyAddedPages );
 	}
 
 	// Remove stale data from store.
-	for ( const oldPage of oldPages ) {
+	for ( const oldPage of deletedPages ) {
 		removePage( oldPage );
+	}
+} );
+
+const { isReordering, getBlockOrder: getCustomBlockOrder } = select( 'amp/story' );
+const { moveBlockToPosition } = dispatch( 'core/editor' );
+
+store.subscribe( () => {
+	const editorBlockOrder = getBlockOrder();
+	customBlockOrder = getCustomBlockOrder();
+
+	// The block order was changed manually, let's do the re-order.
+	if ( ! isReordering() && customBlockOrder.length > 0 && editorBlockOrder !== customBlockOrder ) {
+		for ( const [ index, page ] of customBlockOrder.entries() ) {
+			moveBlockToPosition( page, '', '', index );
+		}
 	}
 } );
 
