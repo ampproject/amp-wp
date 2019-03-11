@@ -436,10 +436,16 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		visibility: hidden;
 	}
 
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-page,
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element {
 		opacity: 1;
 		visibility: visible;
 		transition: opacity .3s,background-color .3s;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-page {
+		background: #eff0f1;
+		border: none !important;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-right {

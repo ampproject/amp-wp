@@ -13,11 +13,10 @@ const Reorderer = ( { pages } ) => {
 	return (
 		<DropZoneProvider>
 			<div className="amp-story-reorderer">
-				{ pages.map( ( page, index ) => (
+				{ pages.map( ( page ) => (
 					<ReordererItem
 						key={ `page-${ page.clientId }` }
 						page={ page }
-						index={ index }
 					/>
 				) ) }
 			</div>

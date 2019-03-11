@@ -202,6 +202,9 @@ const selectors = {
 	getBlockOrder( state ) {
 		return state.blockOrder;
 	},
+	getBlockIndex( state, page ) {
+		return state.blockOrder.indexOf( page );
+	},
 	isReordering( state ) {
 		return state.isReordering;
 	},
