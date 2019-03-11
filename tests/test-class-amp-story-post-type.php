@@ -80,19 +80,22 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
 	 */
 	public function test_enqueue_embed_styling() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type is not registered.' );
+		}
+
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Only the first part of the conditional is satisfied, so this again should not enqueue the stylesheet.
-		$GLOBALS['wp_query']->is_embed = true;
+		$this->go_to( add_query_arg( 'embed', '' ) );
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Now that the conditional is satisfied, this should enqueue the stylesheet.
 		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
-		$this->go_to( get_post_permalink( $amp_story_post ) );
-		$GLOBALS['wp_query']->is_embed = true;
+		$this->go_to( add_query_arg( 'embed', '', get_post_permalink( $amp_story_post ) ) );
 		AMP_Story_Post_Type::enqueue_embed_styling();
 	}
 
