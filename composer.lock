@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b2b0f486c54a51f99f43eaf9df2d3316",
+    "content-hash": "00f2b0db8672dd862a26ce2ea959e801",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -123,11 +123,6 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
-                }
-            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
@@ -422,16 +417,16 @@
         },
         {
             "name": "xwp/wp-dev-lib",
-            "version": "1.0.1",
+            "version": "1.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/wp-dev-lib.git",
-                "reference": "95d9ba72a90b3d3dbc02b1e48f4d8212467f7edc"
+                "reference": "d7ce871c35f63895809e5796beb3ae554a6eee9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/95d9ba72a90b3d3dbc02b1e48f4d8212467f7edc",
-                "reference": "95d9ba72a90b3d3dbc02b1e48f4d8212467f7edc",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/d7ce871c35f63895809e5796beb3ae554a6eee9a",
+                "reference": "d7ce871c35f63895809e5796beb3ae554a6eee9a",
                 "shasum": ""
             },
             "type": "library",
@@ -456,7 +451,7 @@
             "keywords": [
                 "wordpress"
             ],
-            "time": "2019-01-19T06:21:38+00:00"
+            "time": "2019-03-11T08:43:39+00:00"
         }
     ],
     "aliases": [],
