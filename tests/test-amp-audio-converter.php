@@ -174,6 +174,22 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 				'<amp-audio src="https://example.com/audio/file.ogg"><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
 				null,
 			),
+
+			'audio_with_existing_noscript_fallback'     => array(
+				'<div id="player"><noscript><audio src="https://example.com/audio/file.mp3"></audio></noscript></div>',
+				'
+					<div id="player">
+						<!--noscript-->
+						<amp-audio src="https://example.com/audio/file.mp3" width="auto">
+							<a href="https://example.com/audio/file.mp3" fallback="">https://example.com/audio/file.mp3</a>
+							<noscript>
+								<audio src="https://example.com/audio/file.mp3"></audio>
+							</noscript>
+						</amp-audio>
+						<!--/noscript-->
+					</div>
+				',
+			),
 		);
 	}
 
@@ -191,6 +207,9 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$style_sanitizer = new AMP_Style_Sanitizer( $dom );

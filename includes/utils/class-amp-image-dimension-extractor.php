@@ -212,10 +212,20 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images ) {
-		$urls       = array_keys( $urls_to_fetch );
-		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client     = new \FasterImage\FasterImage( $user_agent ); // @todo The $user_agent is not actually able to be passed in this way to FasterImage. Needs another patch?
-		$images     = $client->batch( $urls );
+		$urls   = array_keys( $urls_to_fetch );
+		$client = new \FasterImage\FasterImage();
+
+		/**
+		 * Filters the user agent for onbtaining the image dimensions.
+		 *
+		 * @param string $user_agent User agent.
+		 */
+		$client->setUserAgent( apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() ) );
+		$client->setBufferSize( 1024 );
+		$client->setSslVerifyHost( true );
+		$client->setSslVerifyPeer( true );
+
+		$images = $client->batch( $urls );
 	}
 
 	/**

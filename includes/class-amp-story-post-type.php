@@ -18,6 +18,13 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
+	 *
+	 * @var string
+	 */
+	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -150,6 +157,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['animate-in']          = true;
 			$allowed_tag['animate-in-duration'] = true;
 			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['animate-in-after']    = true;
 			$allowed_tag['data-font-family']    = true;
 		}
 
@@ -581,5 +589,61 @@ class AMP_Story_Post_Type {
 		);
 
 		return $content;
+	}
+
+	/**
+	 * Outputs a card of a single AMP story.
+	 * Used for a slide in the Latest Stories block.
+	 *
+	 * @param WP_Post $post The AMP story post.
+	 * @return void
+	 */
+	public static function the_single_story_card( $post ) {
+		$thumbnail_id = get_post_thumbnail_id( $post );
+		if ( ! $thumbnail_id ) {
+			return;
+		}
+
+		$author_id           = $post->post_author;
+		$author_display_name = get_the_author_meta( 'display_name', $author_id );
+		$avatar              = get_avatar(
+			$author_id,
+			24,
+			'',
+			'',
+			array(
+				'class' => 'latest-stories__avatar',
+			)
+		);
+
+		?>
+		<a class="latest_stories__link" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+			<?php
+			echo wp_get_attachment_image(
+				$thumbnail_id,
+				self::STORY_CARD_IMAGE_SIZE,
+				false,
+				array(
+					'alt'   => get_the_title( $post ),
+					'class' => 'latest-stories__featured-img',
+				)
+			);
+			?>
+			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
+			<div class="latest-stories__meta">
+				<?php echo wp_kses_post( $avatar ); ?>
+				<span class="latest-stories__author">
+					<?php
+					printf(
+						/* translators: 1: the post author. 2: the amount of time ago. */
+						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
+						esc_html( $author_display_name ),
+						esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
+					);
+					?>
+				</span>
+			</div>
+		</a>
+		<?php
 	}
 }

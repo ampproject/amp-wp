@@ -480,17 +480,17 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  */
 
 /*
- * Font Family Picker
+ * Preview Picker component
  *
  * Styling derived form font size picker in Gutenberg
  */
-.components-font-family-picker__buttons {
+.components-preview-picker__buttons {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 }
 
-.components-font-family-picker__dropdown-content .components-button {
+.components-preview-picker__dropdown-content .components-button {
 	display: block;
 	position: relative;
 	padding: 10px 20px 10px 40px;
@@ -498,14 +498,14 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	text-align: left;
 }
 
-.components-font-family-picker__dropdown-content .components-button:hover {
+.components-preview-picker__dropdown-content .components-button:hover {
 	color: #191e23;
 	border: none;
 	box-shadow: none;
 	background: #f3f4f5;
 }
 
-.components-font-family-picker__dropdown-content .components-button:focus {
+.components-preview-picker__dropdown-content .components-button:focus {
 	color: #191e23;
 	border: none;
 	box-shadow: none;
@@ -513,13 +513,19 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	outline: 1px dotted #555d66;
 }
 
-.components-font-family-picker__dropdown-content .components-button .dashicon {
+.components-preview-picker__dropdown-content .components-button .dashicon {
 	position: absolute;
 	top: calc(50% - 10px);
 	left: 10px;
 }
 
-.components-font-family-picker__buttons .components-font-family-picker__selector {
+.components-preview-picker__dropdown-content .components-button .editor-block-icon {
+	position: absolute;
+	top: calc(50% - 10px);
+	right: 10px;
+}
+
+.components-preview-picker__buttons .components-preview-picker__selector {
 	background: none;
 	position: relative;
 	width: 200px;
@@ -529,7 +535,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	border: 1px solid #8d96a0;
 }
 
-.components-font-family-picker__buttons .components-font-family-picker__selector:focus {
+.components-preview-picker__buttons .components-preview-picker__selector:focus {
 	color: #191e23;
 	border-color: #00a0d2;
 	box-shadow: 0 0 0 1px #00a0d2;
@@ -537,7 +543,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	outline-offset: -2px;
 }
 
-.components-font-family-picker__buttons .components-font-family-picker__selector::after {
+.components-preview-picker__buttons .components-preview-picker__selector::after {
 	content: "";
 	pointer-events: none;
 	display: block;

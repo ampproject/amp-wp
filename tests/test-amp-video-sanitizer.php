@@ -166,6 +166,11 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 				null,
 			),
+
+			'video_with_fallback' => array(
+				'<div id="player"><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></div>',
+				'<div id="player"><!--noscript--><amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video><!--/noscript--></div>',
+			),
 		);
 	}
 
@@ -185,6 +190,9 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 
 		$sanitizer = new AMP_Video_Sanitizer( $dom );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );

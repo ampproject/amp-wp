@@ -19,7 +19,7 @@ export const settings = {
 	category: 'layout',
 	icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
 	attributes: {
-		id: {
+		anchor: {
 			source: 'attribute',
 			selector: 'amp-story-page',
 			attribute: 'id',
@@ -62,10 +62,10 @@ export const settings = {
 	edit: EditPage,
 
 	save( { attributes } ) {
-		const { id, backgroundColor, mediaUrl, mediaType, poster } = attributes;
+		const { anchor, backgroundColor, mediaUrl, mediaType, poster } = attributes;
 
 		return (
-			<amp-story-page style={ { backgroundColor: backgroundColor } } id={ id }>
+			<amp-story-page style={ { backgroundColor: backgroundColor } } id={ anchor }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">

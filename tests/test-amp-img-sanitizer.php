@@ -209,6 +209,11 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<figure class="wp-block-image is-resized"><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" /></figure>',
 				'<figure class="wp-block-image is-resized"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
 			),
+
+			'amp_img_with_noscript_fallback'           => array(
+				'<amp-img src="http://placehold.it/100x100" layout="fixed" width="100" height="100"><noscript><img src="http://placehold.it/100x100" width="100" height="100"></noscript></amp-img>',
+				null,
+			),
 		);
 	}
 
@@ -219,7 +224,10 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param string $expected Expected.
 	 * @dataProvider get_data
 	 */
-	public function test_converter( $source, $expected ) {
+	public function test_converter( $source, $expected = null ) {
+		if ( ! $expected ) {
+			$expected = $source;
+		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();

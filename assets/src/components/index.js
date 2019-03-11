@@ -1,4 +1,5 @@
 export { default as AnimationControls } from './animation-controls';
+export { default as AnimationOrderPicker } from './animation-order-picker';
 export { default as withAnimationControls } from './with-animation-controls';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
 export { default as withParentBlock } from './with-parent-block';

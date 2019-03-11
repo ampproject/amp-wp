@@ -59,8 +59,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
-			// Allow video in fallbacks.
-			if ( 'noscript' === $node->parentNode->nodeName ) {
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
 				continue;
 			}
 
