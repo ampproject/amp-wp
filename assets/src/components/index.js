@@ -7,3 +7,4 @@ export { default as withHasSelectedInnerBlock } from './with-has-selected-inner-
 export { default as withBlockName } from './with-block-name';
 export { default as withAttributes } from './with-attributes';
 export { default as FontFamilyPicker } from './font-family-picker';
+export { default as BlockDropZone } from './block-drop-zone';

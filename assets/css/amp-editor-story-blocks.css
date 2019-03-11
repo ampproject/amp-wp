@@ -18,6 +18,7 @@
 	8. Block mover
 	9. General block editor components
 	10. Custom Components
+	11. Drag and drop customizations.
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -32,6 +33,11 @@
 
 div[data-type="amp/amp-story-page"] {
 	border: 10px solid #eff0f1;
+}
+
+.editor-styles-wrapper div[data-type="amp/amp-story-page"] {
+	max-width: 338px;
+	height: 553px;
 }
 
 div[data-type="amp/amp-story-page"]::after {
@@ -112,6 +118,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	width: 100%;
 	max-width: 338px;
 	height: 553px;
+	position: relative;
 }
 
 div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
@@ -217,7 +224,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 .amp-grid-template-fill .editor-block-list__layout > :first-child {
 	bottom: 0;
-	display: block;
 	height: auto;
 	left: 0;
 	position: absolute;
@@ -476,6 +482,23 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
+ * Make all the inner blocks positioned with absolute.
+ * @todo Add exception for CTA block once it's added back.
+ */
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
+	position: absolute;
+}
+
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout .editor-block-list__block .editor-block-drop-zone {
+	top: -48px;
+	bottom: 0;
+	margin: 0;
+	height: 533px;
+	width: 340px;
+	left: -45px;
+}
+
+/*
  * 10. Custom Components
  */
 
@@ -560,6 +583,16 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
+ * Custom block mover.
+ * @todo This needs hiding in case we'll be replacing the default block mover with a custom one.
+ */
+
+.post-type-amp_story .editor-block-list__layout .editor-block-mover.is-visible,
+.post-type-amp_story .editor-block-list__layout .editor-block-mover {
+	display: block;
+}
+
+/*
  * 100. Shame
  */
 
@@ -577,5 +610,5 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
-    display: none;
+	display: none;
 }

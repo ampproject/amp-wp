@@ -15,7 +15,7 @@ import { select, subscribe, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls } from './components';
+import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls, BlockDropZone } from './components';
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
 import { store } from './stores/amp-story';
@@ -151,6 +151,15 @@ const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	addedAttributes.positionTop = {
+		type: 'number',
+		default: 0
+	};
+	addedAttributes.positionLeft = {
+		type: 'number',
+		default: 0
+	};
+
 	return {
 		...settings,
 		attributes: {
@@ -282,7 +291,52 @@ const addWrapperProps = ( BlockListBlock ) => {
 			'data-font-family': attributes.ampFontFamily || undefined,
 		};
 
-		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
+			let style = {
+				top: attributes.positionTop,
+				left: attributes.positionLeft,
+			};
+			if ( props.wrapperProps && props.wrapperProps.style ) {
+				style = {
+					...style,
+					...props.wrapperProps.style
+				};
+			}
+			wrapperProps = {
+				...wrapperProps,
+				style: style,
+			};
+		}
+
+		return <BlockListBlock { ...props } style="background: yellow;" wrapperProps={ wrapperProps } />;
+	} );
+};
+
+const dropBlockZoneWithSelect = compose(
+	withParentBlock,
+	withBlockName
+);
+
+/**
+ * Filters DropBlockZone for the inner blocks of an AMP Story Page.
+ *
+ * @param {Object} OriginalBlockDropZone Original BlockDropZone component.
+ * @return {Function} Handler.
+ */
+const filterDropBlockZone = ( OriginalBlockDropZone ) => {
+	return dropBlockZoneWithSelect( ( props ) => {
+		// If it's not an allowed child block, return original.
+		if (
+			! props.parentBlock ||
+			'amp/amp-story-page' !== props.parentBlock.name ||
+			! ALLOWED_CHILD_BLOCKS.includes( props.blockName ) ) {
+			return <OriginalBlockDropZone { ...props } />;
+		}
+
+		return <BlockDropZone
+			clientId={ props.clientId }
+			rootClientId={ props.rootClientId }
+		/>;
 	} );
 };
 
@@ -293,3 +347,4 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAnimationC
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/filterEdit', withAmpStorySettings );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', addWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/filterBlockDropZone', filterDropBlockZone );
