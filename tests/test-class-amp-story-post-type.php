@@ -75,8 +75,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
-		$this->go_to( add_query_arg( 'embed', '1', get_post_permalink( $amp_story_post ) ) );
-		$GLOBALS['wp_query']->is_singular = true;
+		$this->go_to( get_post_permalink( $amp_story_post ) );
+		$GLOBALS['wp_query']->is_embed = true;
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
@@ -84,7 +84,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->handle );
 		$this->assertEquals( 'all', $stylesheet->args );
 		$this->assertEquals( array(), $stylesheet->deps );
-		$this->assertContains( '.amp-story-embed', $stylesheet->extra['after'][0] );
 		$this->assertContains( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->src );
 	}
 

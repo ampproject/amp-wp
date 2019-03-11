@@ -73,3 +73,11 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	vertical-align: middle;
 	color: #d3d3d3;
 }
+
+/* Styling for when an AMP story is embedded in a post, like with the WordPress (embed) block. */
+.amp-story-embed {
+	position: relative;
+	width: min-content;
+	border-radius: 0.5rem;
+	overflow-x: hidden;
+}

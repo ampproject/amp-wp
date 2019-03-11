@@ -698,17 +698,6 @@ class AMP_Story_Post_Type {
 				array(),
 				AMP__VERSION
 			);
-
-			ob_start();
-			?>
-				.amp-story-embed {
-					position: relative;
-					width: min-content;
-					border-radius: 0.5rem;
-					overflow-x: hidden;
-				}
-			<?php
-			wp_add_inline_style( self::STORY_CARD_CSS_SLUG, ob_get_clean() );
 		}
 	}
 }
