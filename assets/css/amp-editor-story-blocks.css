@@ -390,6 +390,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		position: relative;
 	}
 
+	.edit-post-header-toolbar #amp-story-shortcuts {
+		display: flex;
+	}
+
 	.editor-post-title .amp-story-controls {
 		position: absolute;
 		right: 0;

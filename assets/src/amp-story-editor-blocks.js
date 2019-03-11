@@ -19,6 +19,7 @@ import {
 	BlockNavigation,
 	EditorCarousel,
 	StoryControls,
+	Shortcuts,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
@@ -76,6 +77,7 @@ domReady( () => {
 function renderStoryComponents() {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
 	const postTitle = document.querySelector( '.editor-post-title' );
+	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
 	if ( postTitle ) {
 		const storyControls = document.createElement( 'div' );
@@ -113,6 +115,18 @@ function renderStoryComponents() {
 				<EditorCarousel />
 			</div>,
 			editorCarousel
+		);
+	}
+
+	if ( editorBlockNavigation ) {
+		const shortcuts = document.createElement( 'div' );
+		shortcuts.id = 'amp-story-shortcuts';
+
+		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+
+		render(
+			<Shortcuts />,
+			shortcuts
 		);
 	}
 }
