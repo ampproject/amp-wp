@@ -74,9 +74,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
-		$GLOBALS['wp_query']->is_embed       = true;
-		$GLOBALS['wp_query']->is_singular    = true;
-		$GLOBALS['wp_query']->queried_object = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$this->go_to( add_query_arg( 'embed', '1', get_permalink( $amp_story_post ) ) );
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
