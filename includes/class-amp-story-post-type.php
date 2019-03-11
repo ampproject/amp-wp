@@ -617,17 +617,9 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_embed_template( $template, $type, $templates ) {
 		$old_amp_story_template = sprintf( 'embed-%s.php', self::POST_TYPE_SLUG );
-		$amp_story_embed_path   = AMP__DIR__ . '/includes/templates/embed-amp-story.php';
-		if (
-			'embed' === $type
-			&&
-			in_array( $old_amp_story_template, $templates, true )
-			&&
-			file_exists( $amp_story_embed_path )
-		) {
-			return $amp_story_embed_path;
+		if ( 'embed' === $type && in_array( $old_amp_story_template, $templates, true ) ) {
+			$template = AMP__DIR__ . '/includes/templates/embed-amp-story.php';
 		}
-
 		return $template;
 	}
 
