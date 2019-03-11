@@ -299,6 +299,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	#amp-root-navigation {
 		display: none;
 	}
+
+	#amp-story-editor-carousel {
+		display: none;
+	}
 }
 
 @media (min-width: 961px) {
