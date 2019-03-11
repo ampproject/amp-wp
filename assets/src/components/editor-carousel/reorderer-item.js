@@ -53,8 +53,8 @@ class ReordererItem extends Component {
 	}
 
 	onDrop( event, position ) {
-		const { page: { clientId }, index, movePageToPosition } = this.props;
-		const { srcClientId, type, srcIndex } = parseDropEvent( event );
+		const { page: { clientId }, movePageToPosition } = this.props;
+		const { srcClientId, type } = parseDropEvent( event );
 
 		const isBlockDropType = ( dropType ) => dropType === 'block';
 		const isSameBlock = ( src, dst ) => src === dst;
