@@ -82,15 +82,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			$rendered_block
 		);
 
-		// Assert that the wp_enqueue_style() call in the render callback worked.
-		$styles     = wp_styles();
-		$stylesheet = $styles->registered[ AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ];
-
-		$this->assertEquals( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->handle );
-		$this->assertEquals( array(), $stylesheet->deps );
-		$this->assertContains( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG . '.css', $stylesheet->src );
-		$this->assertEquals( AMP__VERSION, $stylesheet->ver );
-		$this->assertTrue( in_array( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $styles->queue, true ) );
+		// Assert that wp_enqueue_style() was called in the render callback.
+		wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG );
 	}
 
 	/**

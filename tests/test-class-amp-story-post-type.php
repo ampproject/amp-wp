@@ -60,6 +60,21 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test register_embed_styling.
+	 *
+	 * @covers AMP_Story_Post_Type::register_embed_styling()
+	 */
+	public function test_register_embed_styling() {
+		AMP_Story_Post_Type::register_embed_styling();
+		$stylesheet = wp_styles()->registered[ AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ];
+
+		$this->assertEquals( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->handle );
+		$this->assertEquals( 'all', $stylesheet->args );
+		$this->assertEquals( array(), $stylesheet->deps );
+		$this->assertContains( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->src );
+	}
+
+	/**
 	 * Test enqueue_embed_styling.
 	 *
 	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
@@ -74,17 +89,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
+		// Now that the conditional is satisfied, this should enqueue the stylesheet.
 		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$this->go_to( get_post_permalink( $amp_story_post ) );
 		$GLOBALS['wp_query']->is_embed = true;
 		AMP_Story_Post_Type::enqueue_embed_styling();
-		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
-
-		$stylesheet = wp_styles()->registered[ AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ];
-		$this->assertEquals( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->handle );
-		$this->assertEquals( 'all', $stylesheet->args );
-		$this->assertEquals( array(), $stylesheet->deps );
-		$this->assertContains( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->src );
 	}
 
 	/**

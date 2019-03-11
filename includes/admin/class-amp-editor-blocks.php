@@ -293,12 +293,7 @@ class AMP_Editor_Blocks {
 		</div>
 		<?php
 
-		wp_enqueue_style(
-			AMP_Story_Post_Type::STORY_CARD_CSS_SLUG,
-			amp_get_asset_url( '/css/' . AMP_Story_Post_Type::STORY_CARD_CSS_SLUG . '.css' ),
-			array(),
-			AMP__VERSION
-		);
+		wp_enqueue_style( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG );
 		if ( $is_amp_carousel ) {
 			wp_enqueue_script( 'amp-carousel' );
 		}
