@@ -120,7 +120,6 @@ function renderStoryComponents() {
 const { getBlockOrder } = select( 'core/editor' );
 
 let blockOrder = getBlockOrder();
-let customBlockOrder;
 
 subscribe( () => {
 	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
@@ -163,7 +162,7 @@ const { moveBlockToPosition } = dispatch( 'core/editor' );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
-	customBlockOrder = getCustomBlockOrder();
+	const customBlockOrder = getCustomBlockOrder();
 
 	// The block order was changed manually, let's do the re-order.
 	if ( ! isReordering() && customBlockOrder.length > 0 && editorBlockOrder !== customBlockOrder ) {
