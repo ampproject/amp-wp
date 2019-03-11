@@ -9,7 +9,6 @@ import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wor
 /**
  * Internal dependencies
  */
-import getTagName from './get-tag-name';
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle } from '../../helpers';
 
@@ -21,7 +20,6 @@ function TextBlock( {
 	setFontSize,
 } ) {
 	const { placeholder, content, type, ampFontFamily } = attributes;
-	const tagName = getTagName( attributes );
 
 	const fontSizeClass = fontSize.class || undefined;
 
@@ -56,7 +54,7 @@ function TextBlock( {
 			<RichText
 				identifier="content"
 				wrapperClassName="wp-block-amp-story-text"
-				tagName={ tagName }
+				tagName="p"
 				value={ content }
 				onChange={ ( value ) => setAttributes( { content: value } ) }
 				style={ {
