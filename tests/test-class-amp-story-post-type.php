@@ -41,6 +41,53 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_embed_template.
+	 *
+	 * @covers AMP_Story_Post_Type::get_embed_template()
+	 */
+	public function test_get_embed_template() {
+		$template          = '/srv/www/baz.php';
+		$wrong_type        = 'post';
+		$correct_type      = 'embed';
+		$wrong_templates   = array( 'embed-testimonal.php', 'embed.php' );
+		$correct_template  = sprintf( 'embed-%s.php', AMP_Story_Post_Type::POST_TYPE_SLUG );
+		$expected_template = 'embed-amp-story.php';
+		$correct_templates = array( $correct_template, 'embed.php' );
+
+		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $wrong_type, $correct_templates ) );
+		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $wrong_templates ) );
+		$this->assertContains( $expected_template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $correct_templates ) );
+	}
+
+	/**
+	 * Test enqueue_embed_styling.
+	 *
+	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
+	 */
+	public function test_enqueue_embed_styling() {
+		AMP_Story_Post_Type::enqueue_embed_styling();
+		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
+		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+
+		// Only the first part of the conditional is satisfied, so this again should not enqueue the stylesheet.
+		$GLOBALS['wp_query']->is_embed = true;
+		AMP_Story_Post_Type::enqueue_embed_styling();
+		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+
+		$this->go_to( get_the_permalink( $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) ) ) );
+		$GLOBALS['wp_query']->is_embed = true;
+		AMP_Story_Post_Type::enqueue_embed_styling();
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+
+		$stylesheet = wp_styles()->registered[ AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ];
+		$this->assertEquals( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->handle );
+		$this->assertEquals( 'all', $stylesheet->args );
+		$this->assertEquals( array(), $stylesheet->deps );
+		$this->assertContains( '.amp-story-embed', $stylesheet->extra['after'][0] );
+		$this->assertContains( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, $stylesheet->src );
+	}
+
+	/**
 	 * Creates a given number of amp_story posts.
 	 *
 	 * @param int $number_of_stories An array of strings.
@@ -66,24 +113,5 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		}
 
 		return $stories;
-	}
-
-	/**
-	 * Test get_embed_template.
-	 *
-	 * @covers AMP_Admin_Pointer::get_embed_template()
-	 */
-	public function test_get_embed_template() {
-		$template          = '/srv/www/baz.php';
-		$wrong_type        = 'post';
-		$correct_type      = 'embed';
-		$wrong_templates   = array( 'embed-testimonal.php', 'embed.php' );
-		$correct_template  = sprintf( 'embed-%s.php', AMP_Story_Post_Type::POST_TYPE_SLUG );
-		$expected_template = 'embed-amp-story.php';
-		$correct_templates = array( $correct_template, 'embed.php' );
-
-		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $wrong_type, $correct_templates ) );
-		$this->assertEquals( $template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $wrong_templates ) );
-		$this->assertContains( $expected_template, AMP_Story_Post_Type::get_embed_template( $template, $correct_type, $correct_templates ) );
 	}
 }

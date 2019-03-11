@@ -25,6 +25,13 @@ class AMP_Story_Post_Type {
 	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
 
 	/**
+	 * The slug of the story card CSS file.
+	 *
+	 * @var string
+	 */
+	const STORY_CARD_CSS_SLUG = 'amp-story-card';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -111,6 +118,9 @@ class AMP_Story_Post_Type {
 		// Get an embed template for this post type.
 		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
 
+		// Enqueue the styling for the /embed endpoint.
+		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
+
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
 			'amp/amp-story-text',
@@ -178,7 +188,7 @@ class AMP_Story_Post_Type {
 	 * @return array Styles to print.
 	 */
 	public static function filter_frontend_print_styles_array( $handles ) {
-		if ( ! is_singular( self::POST_TYPE_SLUG ) ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) || is_embed() ) {
 			return $handles;
 		}
 
@@ -595,6 +605,33 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Get the AMP story's embed template.
+	 *
+	 * This is used when an AMP story is embedded in a post,
+	 * often with the WordPress (embed) block.
+	 *
+	 * @param string $template  The path of the template, from locate_template().
+	 * @param string $type The file name.
+	 * @param array  $templates An array of possible templates.
+	 * @return string $template  The path of the template, from locate_template().
+	 */
+	public static function get_embed_template( $template, $type, $templates ) {
+		$old_amp_story_template = sprintf( 'embed-%s.php', self::POST_TYPE_SLUG );
+		$amp_story_embed_path   = AMP__DIR__ . '/includes/templates/embed-amp-story.php';
+		if (
+			'embed' === $type
+			&&
+			in_array( $old_amp_story_template, $templates, true )
+			&&
+			file_exists( $amp_story_embed_path )
+		) {
+			return $amp_story_embed_path;
+		}
+
+		return $template;
+	}
+
+	/**
 	 * Outputs a card of a single AMP story.
 	 * Used for a slide in the Latest Stories block.
 	 *
@@ -648,5 +685,30 @@ class AMP_Story_Post_Type {
 			</div>
 		</a>
 		<?php
+	}
+
+	/**
+	 * Enqueues this post type's stylesheet for the embed endpoint.
+	 */
+	public static function enqueue_embed_styling() {
+		if ( is_embed() && is_singular( self::POST_TYPE_SLUG ) ) {
+			wp_enqueue_style(
+				self::STORY_CARD_CSS_SLUG,
+				amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
+				array(),
+				AMP__VERSION
+			);
+
+			ob_start();
+			?>
+				.amp-story-embed {
+					position: relative;
+					width: min-content;
+					border-radius: 0.5rem;
+					overflow-x: hidden;
+				}
+			<?php
+			wp_add_inline_style( self::STORY_CARD_CSS_SLUG, ob_get_clean() );
+		}
 	}
 }
