@@ -74,7 +74,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node                  = $nodes->item( $i );
+			$node = $nodes->item( $i );
+
+			// Skip element if in AMP-element fallbacks.
+			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+				continue;
+			}
+
 			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
@@ -103,7 +109,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$new_node->appendChild( $placeholder_node );
 			}
 
+			// Preserve original node in noscript for no-JS environments.
+			$node->setAttribute( 'src', $normalized_attributes['src'] );
 			$node->parentNode->replaceChild( $new_node, $node );
+			$noscript = $this->dom->createElement( 'noscript' );
+			$noscript->appendChild( $node );
+			$new_node->appendChild( $noscript );
 		}
 	}
 

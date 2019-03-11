@@ -549,12 +549,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$this->script_components = array_merge( $this->script_components, $tag_spec['requires_extension'] );
 			}
 
+			// Add required AMP components for attributes.
+			foreach ( $node->attributes as $attribute ) {
+				if ( isset( $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] ) ) {
+					$this->script_components = array_merge( $this->script_components, $merged_attr_spec_list[ $attribute->nodeName ]['requires_extension'] );
+				}
+			}
+
 			// Manually add components for attributes; this is hard-coded because attributes do not have requires_extension like tags do. See <https://github.com/ampproject/amp-wp/issues/1808>.
 			if ( $node->hasAttribute( 'lightbox' ) ) {
 				$this->script_components[] = 'amp-lightbox-gallery';
-			}
-			if ( $node->hasAttribute( 'amp-fx' ) ) {
-				$this->script_components[] = 'amp-fx-collection';
 			}
 
 			// Check if element needs amp-bind component.
@@ -666,6 +670,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! empty( $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) && ! $this->has_ancestor( $node, $tag_spec[ AMP_Rule_Spec::MANDATORY_ANCESTOR ] ) ) {
+			return false;
+		}
+
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] ) ) {
+			$allowed_tags = AMP_Allowed_Tags_Generated::get_descendant_tag_list( $tag_spec[ AMP_Rule_Spec::DESCENDANT_TAG_LIST ] );
+			if ( ! empty( $allowed_tags ) ) {
+				$this->remove_disallowed_descendants( $node, $allowed_tags );
+			}
+		}
+
+		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
 			return false;
 		}
 
@@ -1772,6 +1787,86 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		$parsed_specs[ $spec_name ] = compact( 'tag_name', 'attributes' );
 		return $parsed_specs[ $spec_name ];
+	}
+
+	/**
+	 * Loop through node's descendants and remove the ones that are not whitelisted.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $allowed_descendants List of allowed descendant tags.
+	 */
+	private function remove_disallowed_descendants( $node, $allowed_descendants ) {
+		if ( ! $node->hasChildNodes() ) {
+			return;
+		}
+
+		$child_elements = array();
+		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
+			$child = $node->childNodes->item( $i );
+			if ( $child instanceof DOMElement ) {
+				$child_elements[] = $child;
+			}
+		}
+
+		foreach ( $child_elements as $child_element ) {
+			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
+				$this->remove_invalid_child( $child_element );
+			} else {
+				$this->remove_disallowed_descendants( $child, $allowed_descendants );
+			}
+		}
+	}
+
+	/**
+	 * Loop through node's children and remove the ones that are not whitelisted.
+	 *
+	 * @param DOMNode $node Node.
+	 * @param array   $child_tags {
+	 *     List of allowed child tags.
+	 *
+	 *     @type array $first_child_tag_name_oneof   List of tag names that are allowed as the first element child.
+	 *     @type array $child_tag_name_oneof         List of tag names that are allowed as children.
+	 *     @type int   $mandatory_num_child_tags     Mandatory number of child tags.
+	 *     @type int   $mandatory_min_num_child_tags Mandatory minimum number of child tags.
+	 * }
+	 * @return bool Whether the element satisfies the requirements, or else it should be removed.
+	 */
+	private function check_valid_children( $node, $child_tags ) {
+		$child_elements = array();
+		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
+			$child = $node->childNodes->item( $i );
+			if ( $child instanceof DOMElement ) {
+				$child_elements[] = $child;
+			}
+		}
+
+		// If the first element is not of the required type, invalidate the entire element.
+		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ( empty( $child_elements[0] ) || ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) ) {
+			return false;
+		}
+
+		// Verify that all of the child are among the set of allowed elements.
+		$removed_count = 0;
+		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
+			foreach ( $child_elements as $child_element ) {
+				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
+					$removed_count++;
+					$this->remove_invalid_child( $child_element );
+				}
+			}
+		}
+
+		// If there aren't the exact number of elements, then mark this $node as being invalid.
+		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
+			return ( count( $child_elements ) - $removed_count ) === $child_tags['mandatory_num_child_tags'];
+		}
+
+		// If there aren't enough elements, then mark this $node as being invalid.
+		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
+			return ( count( $child_elements ) - $removed_count ) >= $child_tags['mandatory_min_num_child_tags'];
+		}
+
+		return true;
 	}
 
 	/**

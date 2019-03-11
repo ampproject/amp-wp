@@ -87,6 +87,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Skip element if in AMP-element fallbacks.
+			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+				continue;
+			}
+
 			if ( ! $node->hasAttribute( 'src' ) || '' === trim( $node->getAttribute( 'src' ) ) ) {
 				$this->remove_invalid_child( $node );
 				continue;
@@ -229,7 +234,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @param DOMElement $node The img element to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
 
@@ -254,9 +259,16 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		} else {
 			$new_tag = 'amp-img';
 		}
-		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
-		$new_node = $this->handle_centering( $new_node );
+
+		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
+		$new_node = $this->handle_centering( $img_node );
 		$node->parentNode->replaceChild( $new_node, $node );
+
+		// Preserve original node in noscript for no-JS environments.
+		$noscript = $this->dom->createElement( 'noscript' );
+		$noscript->appendChild( $node );
+		$img_node->appendChild( $noscript );
+
 		$this->add_auto_width_to_figure( $new_node );
 	}
 

@@ -211,9 +211,9 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_theme_support_forced() {
 		return (
-			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			( self::has_cap() || self::get_amp_validate_nonce() === $_GET[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 	}
 
@@ -302,7 +302,7 @@ class AMP_Validation_Manager {
 		 * when the response is being prepared by AMP_Validation_Manager::finalize_validation().
 		 */
 		if ( ! is_amp_endpoint() ) {
-			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
 			}
 			if ( $error_count < 0 ) {
@@ -427,7 +427,7 @@ class AMP_Validation_Manager {
 		);
 
 		// Scrub the query var from the URL.
-		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
 				'wp_before_admin_bar_render',
 				function() {
@@ -459,20 +459,20 @@ class AMP_Validation_Manager {
 
 		// Capture overrides validation error status overrides from query var.
 		$can_override_validation_error_statuses = (
-			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
 		if ( $can_override_validation_error_statuses ) {
 			/*
 			 * This can't just easily add an amp_validation_error_sanitized filter because the the filter_sanitizer_args() method
 			 * currently needs to obtain the list of overrides to create a parsed_cache_variant.
 			 */
-			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$slug   = sanitize_key( $slug );
 				$status = intval( $status );
 				self::$validation_error_status_overrides[ $slug ] = $status;
@@ -1225,7 +1225,7 @@ class AMP_Validation_Manager {
 				$wrapped_callback  = self::wrapped_callback(
 					array_merge(
 						$callback,
-						compact( 'priority', 'source', 'hook' )
+						compact( 'priority', 'source' )
 					)
 				);
 
@@ -1507,10 +1507,12 @@ class AMP_Validation_Manager {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
+			$is_filter = isset( $callback['source']['hook'] ) && ! did_action( $callback['source']['hook'] );
+
 			// Wrap the markup output of (action) hooks in source comments.
 			AMP_Validation_Manager::$hook_source_stack[] = $callback['source'];
 			$has_buffer_started                          = false;
-			if ( AMP_Validation_Manager::can_output_buffer() ) {
+			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
 			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
@@ -1596,13 +1598,13 @@ class AMP_Validation_Manager {
 	 * @return boolean Whether to validate.
 	 */
 	public static function should_validate_response() {
-		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! isset( $_GET[ self::VALIDATE_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return false;
 		}
 		if ( self::has_cap() ) {
 			return true;
 		}
-		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$validate_key = wp_unslash( $_GET[ self::VALIDATE_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		return self::get_amp_validate_nonce() === $validate_key;
 	}
 
@@ -1904,16 +1906,24 @@ class AMP_Validation_Manager {
 			case 'white_screen_of_death':
 				return __( 'Unable to validate URL. Encountered a white screen of death likely due to a fatal error. Please check your server\'s PHP error logs.', 'amp' );
 			case '404':
-				return __( 'The fetched URL(s) was not found. It may have been deleted. If so, you can trash this.', 'amp' );
+				return __( 'The fetched URL was not found. It may have been deleted. If so, you can trash this.', 'amp' );
 			case '500':
 				return __( 'An internal server error occurred when fetching the URL for validation.', 'amp' );
 			case 'response_comment_absent':
-				return __( 'URL validation failed to due to the absence of the expected JSON-containing AMP_VALIDATION comment after the body.', 'amp' );
+				return sprintf(
+					/* translators: %s: AMP_VALIDATION */
+					__( 'URL validation failed to due to the absence of the expected JSON-containing %s comment after the body.', 'amp' ),
+					'AMP_VALIDATION'
+				);
 			case 'malformed_json_validation_errors':
-				return __( 'URL validation failed to due to unexpected JSON in the AMP_VALIDATION comment after the body.', 'amp' );
+				return sprintf(
+					/* translators: %s: AMP_VALIDATION */
+					__( 'URL validation failed to due to unexpected JSON in the %s comment after the body.', 'amp' ),
+					'AMP_VALIDATION'
+				);
 			default:
 				/* translators: %s is error code */
-				return sprintf( __( 'Unable to validate the URL(s); error code is %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
+				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
 		};
 	}
 
@@ -1924,7 +1934,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function print_plugin_notice() {
 		global $pagenow;
-		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ( 'plugins.php' === $pagenow ) && ( ! empty( $_GET['activate'] ) || ! empty( $_GET['activate-multi'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$validation_errors = get_transient( self::PLUGIN_ACTIVATION_VALIDATION_ERRORS_TRANSIENT_KEY );
 			if ( empty( $validation_errors ) || ! is_array( $validation_errors ) ) {
 				return;

@@ -28,7 +28,7 @@ class AMP_Autoloader {
 	 *
 	 * @var string[]
 	 */
-	private static $_classmap = array(
+	private static $classmap = array(
 		'AMP_Editor_Blocks'                  => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                  => 'includes/class-amp-theme-support',
 		'AMP_Service_Worker'                 => 'includes/class-amp-service-worker',
@@ -123,10 +123,10 @@ class AMP_Autoloader {
 	 * @param string $class_name Class name.
 	 */
 	protected static function autoload( $class_name ) {
-		if ( ! isset( self::$_classmap[ $class_name ] ) ) {
+		if ( ! isset( self::$classmap[ $class_name ] ) ) {
 			return;
 		}
-		$filepath = self::$_classmap[ $class_name ];
+		$filepath = self::$classmap[ $class_name ];
 		require AMP__DIR__ . "/{$filepath}.php";
 	}
 
@@ -157,6 +157,6 @@ class AMP_Autoloader {
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.
 	 */
 	public static function register_autoload_class( $class_name, $filepath ) {
-		self::$_classmap[ $class_name ] = '!' . $filepath;
+		self::$classmap[ $class_name ] = '!' . $filepath;
 	}
 }
