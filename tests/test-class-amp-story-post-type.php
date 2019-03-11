@@ -76,6 +76,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$this->go_to( add_query_arg( 'embed', '1', get_post_permalink( $amp_story_post ) ) );
+		$GLOBALS['wp_query']->is_singular = true;
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
