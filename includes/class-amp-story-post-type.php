@@ -118,9 +118,6 @@ class AMP_Story_Post_Type {
 		// Get an embed template for this post type.
 		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
 
-		// Register the styling for the /embed endpoint and the Latest Stories block.
-		add_action( 'wp_loaded', array( __CLASS__, 'register_embed_styling' ) );
-
 		// Enqueue the styling for the /embed endpoint.
 		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
 
@@ -680,18 +677,6 @@ class AMP_Story_Post_Type {
 			</div>
 		</a>
 		<?php
-	}
-
-	/**
-	 * Registers this post type's stylesheet for the embed endpoint and Latest Stories block.
-	 */
-	public static function register_embed_styling() {
-		wp_register_style(
-			self::STORY_CARD_CSS_SLUG,
-			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
-			array(),
-			AMP__VERSION
-		);
 	}
 
 	/**
