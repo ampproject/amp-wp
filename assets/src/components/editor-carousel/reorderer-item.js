@@ -3,15 +3,20 @@
  */
 import { compose } from '@wordpress/compose';
 import { Draggable, DropZone } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
+import { Fragment, Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { Component } from 'react';
 
+/**
+ * Parses drag & drop events to ensure the event contains valid transfer data.
+ *
+ * @param {Object} event
+ * @return {Object} Parsed event data.
+ */
 const parseDropEvent = ( event ) => {
 	let result = {
 		srcRootClientId: null,
@@ -33,6 +38,12 @@ const parseDropEvent = ( event ) => {
 	return result;
 };
 
+/**
+ * A single item within the list of pages to be reordered.
+ *
+ * Re-uses existing Draggable and DropZone provided by WordPress
+ * in order to not re-invent the wheel.
+ */
 class ReordererItem extends Component {
 	constructor() {
 		super( ...arguments );
@@ -92,7 +103,10 @@ class ReordererItem extends Component {
 									className={ this.state.isDragging ? 'is-dragging-page' : undefined }
 									onDrop={ this.onDrop }
 								/>
-								<div id={ pageElementId }>
+								<div
+									className="amp-story-reorderer-item-page"
+									id={ pageElementId }
+								>
 									<div
 										className="amp-story-page-preview"
 										onDragStart={ onDraggableStart }

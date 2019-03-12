@@ -79,6 +79,11 @@ const wrapperWithSelect = compose(
 	applyWithDispatch,
 );
 
+/**
+ * Higher-order component that adds animation controls to a block.
+ *
+ * @return {Function} Higher-order component.
+ */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return wrapperWithSelect( ( props ) => {

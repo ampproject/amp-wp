@@ -113,7 +113,7 @@ module.exports = function( grunt ) {
 					expand: true,
 					options: {
 						noProcess: [ '*/**', 'LICENSE', 'jetpack-helper.php', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
-						process: function( content, srcpath ) {
+						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
 								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;

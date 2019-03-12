@@ -41,7 +41,6 @@ class LatestStoriesEdit extends Component {
 	render() {
 		const { attributes, setAttributes, latestStories } = this.props;
 		const { order, orderBy, storiesToShow } = attributes;
-		const serverSideAttributes = Object.assign( {}, attributes, { useCarousel: false } );
 
 		const inspectorControls = (
 			<InspectorControls>
@@ -74,6 +73,8 @@ class LatestStoriesEdit extends Component {
 				</Fragment>
 			);
 		}
+
+		const serverSideAttributes = Object.assign( {}, attributes, { useCarousel: false } );
 
 		return (
 			<Fragment>

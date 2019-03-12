@@ -3,10 +3,16 @@
 /**
  * Helper methods for blocks.
  */
+/**
+ * Internal dependencies
+ */
 import { getLayoutControls } from '../utils.js';
 
 /**
  * Internal block libraries.
+ */
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
@@ -17,6 +23,9 @@ import {
 	TextControl,
 } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
+/**
+ * External dependencies
+ */
 import timeago from 'timeago.js';
 
 /**

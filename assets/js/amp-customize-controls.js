@@ -185,7 +185,7 @@ const ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-un
 					linkText: component.data.l10n.unavailableLinkText,
 					url: component.data.ampUrl,
 					templateId: 'customize-amp-unavailable-notification',
-					render: function() {
+					render() {
 						const li = api.Notification.prototype.render.call( this );
 						li.find( 'a' ).on( 'click', function( event ) {
 							event.preventDefault();

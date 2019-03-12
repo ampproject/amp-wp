@@ -203,10 +203,13 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 };
 
 /**
- * Add page number label to page blocks
+ * Disables drop zones within a block while reordering is on.
+ *
+ * In reorder mode, any interaction with blocks is disabled, and only
+ * pages themselves can be dragged & dropped in order to reorder pages within the story.
  *
  * @param {Object} BlockListBlock BlockListBlock element.
- * @return {Function} Handler.
+ * @return {?Function} BlockDropZone or null if reordering.
  */
 export const disableBlockDropZone = createHigherOrderComponent(
 	( BlockDropZone ) => {

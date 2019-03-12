@@ -9,6 +9,17 @@ import { DropZoneProvider } from '@wordpress/components';
  */
 import ReordererItem from './reorderer-item';
 
+/**
+ * Reorderer component.
+ *
+ * Displays pages as cards that can be dragged & dropped at new locations to
+ * order them.
+ *
+ * @param {Object}   props             Indicator props.
+ * @param {Array}    props.pages       Pages to list.
+ *
+ * @return {Object} Reorder interface.
+ */
 const Reorderer = ( { pages } ) => {
 	return (
 		<DropZoneProvider>

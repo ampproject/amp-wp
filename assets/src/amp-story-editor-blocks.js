@@ -23,7 +23,7 @@ import {
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
-import { store } from './stores/amp-story';
+import store from './stores/amp-story';
 
 /**
  * Initialize editor integration.
@@ -76,32 +76,41 @@ domReady( () => {
  */
 function renderStoryComponents() {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const postTitle = document.querySelector( '.editor-post-title' );
 	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
-	if ( postTitle ) {
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
-		postTitle.appendChild( storyControls );
-
-		render(
-			<div key="storyControls" className="amp-story-controls">
-				<StoryControls />
-			</div>,
-			storyControls
-		);
-	}
-
 	if ( editorBlockList ) {
+		const ampStoryWrapper = document.createElement( 'div' );
+		ampStoryWrapper.id = 'amp-story-editor';
+
 		const blockNavigation = document.createElement( 'div' );
 		blockNavigation.id = 'amp-root-navigation';
 
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
 
-		editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
-		editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
+		const storyControls = document.createElement( 'div' );
+		storyControls.id = 'amp-story-controls';
+
+		/**
+		 * The intended layout is as follows:
+		 *
+		 * - Post title
+		 * - AMP story wrapper element (needed for overflow styling)
+		 * - - Story controls
+		 * - - Block list
+		 * - - Block navigation
+		 * - - Carousel controls
+		 */
+		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
+		ampStoryWrapper.appendChild( storyControls );
+		ampStoryWrapper.appendChild( editorBlockList );
+		ampStoryWrapper.appendChild( blockNavigation );
+		ampStoryWrapper.appendChild( editorCarousel );
+
+		render(
+			<StoryControls />,
+			storyControls
+		);
 
 		render(
 			<div key="blockNavigation" className="block-navigation">

@@ -1,6 +1,9 @@
 /**
  * Import blocks.
  */
+/**
+ * Internal dependencies
+ */
 import './amp-mathml';
 import './amp-timeago';
 import './amp-o2-player';

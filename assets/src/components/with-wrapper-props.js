@@ -17,10 +17,10 @@ const wrapperWithSelect = compose(
 );
 
 /**
- * Add wrapper props to the blocks.
+ * Adds wrapper props to the blocks.
  *
  * @param {Object} BlockListBlock BlockListBlock element.
- * @return {Function} Handler.
+ * @return {Function} Enhanced component.
  */
 const withWrapperProps = ( BlockListBlock ) => {
 	return wrapperWithSelect( ( props ) => {

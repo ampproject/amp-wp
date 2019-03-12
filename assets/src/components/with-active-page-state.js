@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { withSelect } from '@wordpress/data';
+import { withSelect, dispatch } from '@wordpress/data';
 
 /**
  * Add wrapper props to the blocks.
@@ -33,7 +33,23 @@ const withActivePageState = ( BlockListBlock ) => {
 				'amp-page-active': isTopLevelBlock && isActivePage,
 				'amp-page-inactive': isTopLevelBlock && ! isActivePage,
 			},
+			isLocked: ! isActivePage,
 		};
+
+		const { setCurrentPage } = dispatch( 'amp/story' );
+		const { selectBlock } = dispatch( 'core/editor' );
+
+		if ( ! isActivePage ) {
+			return (
+				<BlockListBlock
+					{ ...newProps }
+					onSelect={ () => {
+						setCurrentPage( props.clientId );
+						selectBlock( props.clientId );
+					} }
+				/>
+			);
+		}
 
 		return <BlockListBlock { ...newProps } />;
 	} );
