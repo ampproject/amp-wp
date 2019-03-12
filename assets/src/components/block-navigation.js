@@ -80,7 +80,7 @@ export default compose(
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/editor' );
 
 		return {
-			elements: getBlocksByClientId( getBlockOrder( getCurrentPage() ) ),
+			elements: getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [],
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};

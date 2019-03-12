@@ -5,6 +5,11 @@ import { createBlock } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
 import { BlockEdit } from '@wordpress/editor';
 
+/**
+ * BlockPreview component that is used within the reordering UI.
+ *
+ * @return {Object} Block preview.
+ */
 const BlockPreview = ( { clientId, name, attributes, innerBlocks } ) => {
 	const block = createBlock( name, attributes, innerBlocks );
 	return (

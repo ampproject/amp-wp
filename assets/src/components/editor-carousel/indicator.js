@@ -4,7 +4,20 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Tooltip } from '@wordpress/components';
 
-export default function Indicator( { pages, currentPage, onClick, disabled } ) {
+/**
+ * Carousel indicator component.
+ *
+ * "Progress bar"-style indicator at the bottom of the pages carousel,
+ * indicating the number of pages and the currently selected one.
+ *
+ * @param {Object}   props             Indicator props.
+ * @param {Array}    props.pages       Pages to list.
+ * @param {string}   props.currentPage The currently selected page.
+ * @param {Function} props.onClick     onClick callback.
+ *
+ * @return {Object} Carousel indicator.
+ */
+export default function Indicator( { pages, currentPage, onClick } ) {
 	/* translators: %s: Page number */
 	const label = ( pageNumber ) => sprintf( __( 'Page %s', 'amp' ), pageNumber );
 
@@ -24,7 +37,7 @@ export default function Indicator( { pages, currentPage, onClick, disabled } ) {
 									e.preventDefault();
 									onClick( page.clientId );
 								} }
-								disabled={ page.clientId === currentPage || disabled }
+								disabled={ page.clientId === currentPage }
 							>
 								<span className="screen-reader-text">
 									{ label( index + 1 ) }

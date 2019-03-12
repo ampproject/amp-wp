@@ -39,10 +39,9 @@ const wrapperWithSelect = compose(
 );
 
 /**
- * Add page number label to page blocks
+ * Higher-order component that adds a page number label to page blocks
  *
- * @param {Object} BlockListBlock BlockListBlock element.
- * @return {Function} Handler.
+ * @return {Function} Higher-order component.
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
