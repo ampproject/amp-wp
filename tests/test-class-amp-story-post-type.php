@@ -19,6 +19,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		global $wp_rewrite;
 
 		$wp_rewrite->set_permalink_structure( false );
+		unset( $_SERVER['HTTPS'] );
 		parent::tearDown();
 	}
 
