@@ -213,7 +213,7 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
 
 	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
 		let style = attributes.style ? attributes.style : 'position: absolute;';
-		style += `top: ${ attributes.positionTop }px; left: ${ attributes.positionLeft }px;`;
+		style += `top: ${ attributes.positionTop }%; left: ${ attributes.positionLeft }%;`;
 		ampAttributes.style = style;
 	}
 
@@ -299,8 +299,8 @@ const addWrapperProps = ( BlockListBlock ) => {
 
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
 			let style = {
-				top: attributes.positionTop,
-				left: attributes.positionLeft,
+				top: `${ attributes.positionTop }%`,
+				left: `${ attributes.positionLeft }%`,
 			};
 			if ( props.wrapperProps && props.wrapperProps.style ) {
 				style = {

@@ -10,8 +10,9 @@ import {
 	DropZone,
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { withDispatch, withSelect } from '@wordpress/data';
-import { compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
+
+const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
 /**
  * Internal dependencies
@@ -28,29 +29,32 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { getBlockAttributes, updateBlockAttributes, srcClientId } = this.props;
+		const { updateBlockAttributes, srcClientId } = this.props;
 
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
 		const element = document.getElementById( elementId );
 		const clone = document.getElementById( cloneElementId );
-		if ( ! element || ! clone ) {
+
+		// Get the editor wrapper element for calculating the width and height.
+		const wrapperEl = document.querySelector( wrapperElSelector );
+		if ( ! element || ! clone || ! wrapperEl || ! wrapperEl.clientHeight || ! wrapperEl.clientWidth ) {
 			event.preventDefault();
 			return;
 		}
 
-		const srcAttributes = getBlockAttributes( srcClientId );
-		// Get the original position of the block that was dragged
-		const srcPosition = element.getBoundingClientRect();
 		// Get the current position of the clone.
 		const clonePosition = clone.getBoundingClientRect();
 
-		// We will set the new position based on where the clone was moved to.
-		// The new attributes are set based on the difference between the original component and the clone added to the previous attributes.
-		let positionLeft = srcAttributes.positionLeft + clonePosition.left - srcPosition.left;
-		let positionTop = srcAttributes.positionTop + clonePosition.top - srcPosition.top;
-		positionLeft = positionLeft < 0 ? 0 : positionLeft;
-		positionTop = positionTop < 0 ? 0 : positionTop;
+		const wrapperPosition = wrapperEl.getBoundingClientRect();
+
+		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
+		// Lets take the % based on the wrapper for top and left.
+		const positionLeftInPx = clonePosition.left - wrapperPosition.left;
+		const positionTopInPx = clonePosition.top - wrapperPosition.top;
+
+		const positionLeft = Math.round( ( positionLeftInPx / wrapperEl.clientWidth ) * 100 );
+		const positionTop = Math.round( ( positionTopInPx / wrapperEl.clientHeight ) * 100 );
 
 		updateBlockAttributes( srcClientId, {
 			positionLeft,
@@ -69,21 +73,12 @@ class BlockDropZone extends Component {
 		);
 	}
 }
+export default withDispatch( ( dispatch ) => {
+	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
-export default compose(
-	withDispatch( ( dispatch ) => {
-		const { updateBlockAttributes } = dispatch( 'core/block-editor' );
-
-		return {
-			updateBlockAttributes( ...args ) {
-				updateBlockAttributes( ...args );
-			},
-		};
-	} ),
-	withSelect( ( select ) => {
-		const { getBlockAttributes } = select( 'core/block-editor' );
-		return {
-			getBlockAttributes,
-		};
-	} )
-)( BlockDropZone );
+	return {
+		updateBlockAttributes( ...args ) {
+			updateBlockAttributes( ...args );
+		},
+	};
+} )( BlockDropZone );
