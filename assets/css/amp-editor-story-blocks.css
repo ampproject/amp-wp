@@ -420,6 +420,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		width: 100%;
 		height: 277px;
 		cursor: grab;
+		overflow: hidden;
 	}
 
 	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
