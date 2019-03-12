@@ -148,6 +148,17 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$overriden_render_callback = AMP_Story_Post_Type::override_story_embed_callback( null, $correct_block );
 		$this->assertContains( get_permalink( $amp_story_post ), $overriden_render_callback );
 		$this->assertContains( get_the_post_thumbnail_url( $amp_story_post ), $overriden_render_callback );
+
+		// This should override the callback even if the site uses HTTPS and the permalink uses HTTP.
+		$_SERVER['HTTPS'] = 'on';
+		$correct_block    = array(
+			'attrs'     => array( 'url' => set_url_scheme( $correct_url, 'http' ) ),
+			'blockName' => $correct_block_name,
+		);
+
+		$overriden_render_callback = AMP_Story_Post_Type::override_story_embed_callback( null, $correct_block );
+		$this->assertContains( get_permalink( $amp_story_post ), $overriden_render_callback );
+		$this->assertContains( get_the_post_thumbnail_url( $amp_story_post ), $overriden_render_callback );
 	}
 
 	/**
