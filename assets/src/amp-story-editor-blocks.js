@@ -80,6 +80,9 @@ function renderStoryComponents() {
 		return;
 	}
 
+	const ampStoryWrapper = document.createElement( 'div' );
+	ampStoryWrapper.id = 'amp-story-editor';
+
 	const blockNavigation = document.createElement( 'div' );
 	blockNavigation.id = 'amp-root-navigation';
 
@@ -92,13 +95,18 @@ function renderStoryComponents() {
 	/**
 	 * The intended layout is as follows:
 	 *
-	 * - Story controls
-	 * - Block list
-	 * - Carousel controls
+	 * - Post title
+	 * - AMP story wrapper element (needed for overflow styling)
+	 * - - Story controls
+	 * - - Block list
+	 * - - Block navigation
+	 * - - Carousel controls
 	 */
-	editorBlockList.parentNode.insertBefore( storyControls, editorBlockList );
-	editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
-	editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
+	editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
+	ampStoryWrapper.appendChild( storyControls );
+	ampStoryWrapper.appendChild( editorBlockList );
+	ampStoryWrapper.appendChild( blockNavigation );
+	ampStoryWrapper.appendChild( editorCarousel );
 
 	render(
 		<StoryControls />,

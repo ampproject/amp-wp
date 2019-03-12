@@ -248,11 +248,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 @media (min-width: 961px) {
-	.post-type-amp_story .editor-writing-flow > div > div {
-		overflow: hidden;
+	#amp-story-editor {
+		overflow-x: hidden;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
+	#amp-story-editor > .editor-block-list__layout {
 		padding-left: 0;
 		padding-right: 0;
 		display: flex;
