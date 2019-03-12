@@ -22,7 +22,7 @@ import {
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
-import { store } from './stores/amp-story';
+import store from './stores/amp-story';
 
 /**
  * Initialize editor integration.
