@@ -203,7 +203,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Editor_Blocks::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
-		AMP_Story_Post_Type::register_styles( wp_styles() );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
+		}
 
 		$attributes = array(
 			'storiesToShow' => 10,
