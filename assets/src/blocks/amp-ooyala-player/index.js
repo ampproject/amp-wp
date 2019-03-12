@@ -1,10 +1,16 @@
 /**
  * Helper methods for blocks.
  */
+/**
+ * Internal dependencies
+ */
 import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
 
 /**
  * Internal block libraries.
+ */
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
@@ -141,7 +147,7 @@ export default registerBlockType(
 
 			const ooyalaProps = {
 				layout: ampLayout,
-				height: height,
+				height,
 				'data-embedcode': dataEmbedCode,
 				'data-playerid': dataPlayerId,
 				'data-pcode': dataPcode,

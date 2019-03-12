@@ -1,6 +1,9 @@
 /**
  * Localized data
  */
+/**
+ * External dependencies
+ */
 import { detailToggleBtnAriaLabel, sourcesToggleBtnAriaLabel } from 'amp-validation-i18n';
 
 const OPEN_CLASS = 'is-open';
