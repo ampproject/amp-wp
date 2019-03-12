@@ -32,6 +32,13 @@ class AMP_Story_Post_Type {
 	const STORY_CARD_CSS_SLUG = 'amp-story-card';
 
 	/**
+	 * The rewrite slug for this post type.
+	 *
+	 * @var string
+	 */
+	const REWRITE_SLUG = 'stories';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -67,7 +74,7 @@ class AMP_Story_Post_Type {
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
 				),
 				'rewrite'      => array(
-					'slug' => 'stories',
+					'slug' => self::REWRITE_SLUG,
 				),
 				'public'       => true,
 				'show_ui'      => true,
@@ -120,6 +127,9 @@ class AMP_Story_Post_Type {
 
 		// Enqueue the styling for the /embed endpoint.
 		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
+
+		// Override the render_callback for AMP story embeds.
+		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
@@ -685,6 +695,34 @@ class AMP_Story_Post_Type {
 	public static function enqueue_embed_styling() {
 		if ( is_embed() && is_singular( self::POST_TYPE_SLUG ) ) {
 			wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		}
+	}
+
+	/**
+	 * Overrides the render_callback of an AMP story post embed, when using the WordPress (embed) block.
+	 *
+	 * @param string $pre_render The pre-rendered markup, default null.
+	 * @param array  $block The block to render.
+	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
+	 */
+	public static function override_story_embed_callback( $pre_render, $block ) {
+		unset( $pre_render );
+		if ( empty( $block['attrs']['url'] ) ) {
+			return;
+		}
+
+		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $block['attrs']['url'] );
+		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
+
+		if ( 'core-embed/wordpress' === $block['blockName'] && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+			wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+			ob_start();
+			?>
+			<div class="amp-story-embed">
+				<?php self::the_single_story_card( $post ); ?>
+			</div>
+			<?php
+			return ob_get_clean();
 		}
 	}
 }
