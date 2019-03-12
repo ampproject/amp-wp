@@ -100,11 +100,11 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'register_styles' ) );
-
 		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'register_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_styles' ) );
+
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
 
@@ -222,9 +222,9 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Register the styles for this post type.
+	 * Enqueue the styles for the block editor.
 	 */
-	public static function register_styles() {
+	public static function enqueue_block_editor_styles() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			return;
 		}
@@ -256,6 +256,7 @@ class AMP_Story_Post_Type {
 
 	/**
 	 * Registers the story card styling.
+	 *
 	 * This can't take place on the 'wp_enqueue_scripts' hook, as the /embed endpoint doesn't trigger that.
 	 *
 	 * @param WP_Styles $wp_styles The styles.
@@ -271,9 +272,9 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Registers the post type's scripts.
+	 * Enqueue scripts for the block editor.
 	 */
-	public static function register_scripts() {
+	public static function enqueue_block_editor_scripts() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			return;
 		}
