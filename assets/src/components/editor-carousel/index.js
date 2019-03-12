@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
-import { withDispatch, withSelect } from '@wordpress/data';
+import { dispatch, withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -107,10 +107,12 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { setCurrentPage } = dispatch( 'amp/story' );
+		const { selectBlock } = dispatch( 'core/editor' );
 
 		return {
 			onChangePage: ( pageClientId ) => {
 				setCurrentPage( pageClientId );
+				selectBlock( pageClientId );
 			},
 		};
 	} )

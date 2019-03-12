@@ -37,6 +37,7 @@ const withActivePageState = ( BlockListBlock ) => {
 		};
 
 		const { setCurrentPage } = dispatch( 'amp/story' );
+		const { selectBlock } = dispatch( 'core/editor' );
 
 		if ( ! isActivePage ) {
 			return (
@@ -44,6 +45,7 @@ const withActivePageState = ( BlockListBlock ) => {
 					{ ...newProps }
 					onSelect={ () => {
 						setCurrentPage( props.clientId );
+						selectBlock( props.clientId );
 					} }
 				/>
 			);
