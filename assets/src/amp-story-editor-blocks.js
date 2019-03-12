@@ -75,46 +75,49 @@ domReady( () => {
  */
 function renderStoryComponents() {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const postTitle = document.querySelector( '.editor-post-title' );
 
-	if ( postTitle ) {
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
-		postTitle.appendChild( storyControls );
-
-		render(
-			<div key="storyControls" className="amp-story-controls">
-				<StoryControls />
-			</div>,
-			storyControls
-		);
+	if ( ! editorBlockList ) {
+		return;
 	}
 
-	if ( editorBlockList ) {
-		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
+	const blockNavigation = document.createElement( 'div' );
+	blockNavigation.id = 'amp-root-navigation';
 
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
+	const editorCarousel = document.createElement( 'div' );
+	editorCarousel.id = 'amp-story-editor-carousel';
 
-		editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
-		editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
+	const storyControls = document.createElement( 'div' );
+	storyControls.id = 'amp-story-controls';
 
-		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
-			blockNavigation
-		);
+	/**
+	 * The intended layout is as follows:
+	 *
+	 * - Story controls
+	 * - Block list
+	 * - Carousel controls
+	 */
+	editorBlockList.parentNode.insertBefore( storyControls, editorBlockList );
+	editorBlockList.parentNode.insertBefore( blockNavigation, editorBlockList.nextSibling );
+	editorBlockList.parentNode.insertBefore( editorCarousel, editorBlockList.nextSibling );
 
-		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
-			editorCarousel
-		);
-	}
+	render(
+		<StoryControls />,
+		storyControls
+	);
+
+	render(
+		<div key="blockNavigation" className="block-navigation">
+			<BlockNavigation />
+		</div>,
+		blockNavigation
+	);
+
+	render(
+		<div key="pagesCarousel" className="editor-carousel">
+			<EditorCarousel />
+		</div>,
+		editorCarousel
+	);
 }
 
 const { getBlockOrder } = select( 'core/editor' );

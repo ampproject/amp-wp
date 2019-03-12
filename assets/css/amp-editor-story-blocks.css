@@ -394,16 +394,14 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		background: #666;
 	}
 
-	.editor-post-title {
-		position: relative;
+	#amp-story-controls {
+		text-align: right;
 	}
 
-	.editor-post-title .amp-story-controls {
-		position: absolute;
-		right: 0;
-		top: 50%;
-		transform: translateY(-50%);
-		display: flex;
+	#amp-story-controls .amp-story-controls-reorder {
+		display: inline-block;
+		line-height: 1;
+
 	}
 
 	.edit-post-visual-editor .editor-post-title__block {
