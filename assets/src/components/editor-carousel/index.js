@@ -48,9 +48,12 @@ class EditorCarousel extends Component {
 			onChangePage( page );
 		};
 
+		if ( isReordering ) {
+			return <Reorderer />;
+		}
+
 		return (
 			<Fragment>
-				{ isReordering && <Reorderer /> }
 				<div className="amp-story-editor-carousel-navigation">
 					<IconButton
 						icon="arrow-left-alt2"
@@ -59,13 +62,12 @@ class EditorCarousel extends Component {
 							e.preventDefault();
 							goToPage( previousPage );
 						} }
-						disabled={ null === previousPage || isReordering }
+						disabled={ null === previousPage }
 					/>
 					<Indicator
 						pages={ pages }
 						currentPage={ currentPage }
 						onClick={ goToPage }
-						disabled={ isReordering }
 					/>
 					<IconButton
 						icon="arrow-right-alt2"
@@ -74,7 +76,7 @@ class EditorCarousel extends Component {
 							e.preventDefault();
 							goToPage( nextPage );
 						} }
-						disabled={ null === nextPage || isReordering }
+						disabled={ null === nextPage }
 					/>
 				</div>
 			</Fragment>
