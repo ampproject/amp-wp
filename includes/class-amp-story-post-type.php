@@ -133,6 +133,9 @@ class AMP_Story_Post_Type {
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
+		// Register the Latest Stories block.
+		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
+
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
 			'amp/amp-story-text',
@@ -759,5 +762,137 @@ class AMP_Story_Post_Type {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Registers the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see register_block_core_latest_posts()
+	 */
+	public static function register_block_latest_stories() {
+		register_block_type(
+			'amp/amp-latest-stories',
+			array(
+				'attributes'      => array(
+					'className'     => array(
+						'type' => 'string',
+					),
+					'storiesToShow' => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'order'         => array(
+						'type'    => 'string',
+						'default' => 'desc',
+					),
+					'orderBy'       => array(
+						'type'    => 'string',
+						'default' => 'date',
+					),
+					'useCarousel'   => array(
+						'type'    => 'boolean',
+						'default' => ! is_admin(),
+					),
+				),
+				'render_callback' => array( __CLASS__, 'render_block_latest_stories' ),
+			)
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see render_block_core_latest_posts()
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_latest_stories( $attributes ) {
+		/*
+		 * There should only be an <amp-carousel> on the front-end,
+		 * so the editor component passes useCarousel=false to <ServerSideRender>.
+		 * This detects whether this render_callback is called in the editor context.
+		 */
+		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
+		$args            = array(
+			'post_type'        => self::POST_TYPE_SLUG,
+			'posts_per_page'   => $attributes['storiesToShow'],
+			'post_status'      => 'publish',
+			'order'            => $attributes['order'],
+			'orderby'          => $attributes['orderBy'],
+			'suppress_filters' => false,
+			'meta_key'         => '_thumbnail_id',
+		);
+		$story_query     = new WP_Query( $args );
+		$min_height      = self::get_featured_image_minimum_height( $story_query->posts );
+		$class           = 'amp-block-latest-stories';
+		if ( isset( $attributes['className'] ) ) {
+			$class .= ' ' . $attributes['className'];
+		}
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $class ); ?>">
+			<?php if ( $is_amp_carousel ) : ?>
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
+			<?php else : ?>
+				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<?php endif; ?>
+				<?php foreach ( $story_query->posts as $post ) : ?>
+					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
+						<?php self::the_single_story_card( $post ); ?>
+					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
+					<?php
+				endforeach;
+				?>
+			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
+		</div>
+		<?php
+
+		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		if ( $is_amp_carousel ) {
+			wp_enqueue_script( 'amp-carousel' );
+		}
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gets the smallest height of any of the featured images.
+	 *
+	 * This iterates through all of the posts, to find their featured image.
+	 * Then, this returns the smallest height.
+	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
+	 * this will return 100.
+	 *
+	 * @param array $posts An array or WP_Post objects.
+	 * @return int $minimum_dimension The smallest dimension of a featured image.
+	 */
+	public static function get_featured_image_minimum_height( $posts ) {
+		$index = 2;
+
+		$minimum_height = 0;
+		foreach ( $posts as $post ) {
+			$thumbnail_id = get_post_thumbnail_id( $post->ID );
+			if ( ! $thumbnail_id ) {
+				continue;
+			}
+
+			$image = wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE );
+			if (
+				isset( $image[ $index ] )
+				&&
+				(
+					! $minimum_height
+					||
+					$image[ $index ] < $minimum_height
+				)
+			) {
+				$minimum_height = $image[ $index ];
+			}
+		}
+
+		return $minimum_height;
 	}
 }

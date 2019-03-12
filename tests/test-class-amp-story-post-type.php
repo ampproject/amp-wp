@@ -28,8 +28,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
-		$number_of_stories = 10;
-		$stories           = $this->create_story_posts( $number_of_stories );
+		$featured_image_dimensions = array( 100, 200, 400 );
+		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
 			ob_start();
@@ -137,7 +137,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
 		// The conditional is now satisfied, so this should return the overriden callback.
-		$story_posts    = $this->create_story_posts( 1 );
+		$story_posts    = $this->create_story_posts_with_featured_images( array( 400 ) );
 		$amp_story_post = reset( $story_posts );
 		$correct_url    = get_post_permalink( $amp_story_post );
 		$correct_block  = array(
@@ -151,14 +151,112 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Creates a given number of amp_story posts.
+	 * Test register_block_latest_stories.
 	 *
-	 * @param int $number_of_stories An array of strings.
-	 * @return array $stories The created AMP story posts.
+	 * @covers AMP_Story_Post_Type::register_block_latest_stories()
 	 */
-	public function create_story_posts( $number_of_stories ) {
+	public function test_register_block_latest_stories() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
+		}
+
+		set_current_screen( 'edit.php' );
+		$registered_blocks    = WP_Block_Type_Registry::get_instance()->get_all_registered();
+		$block_name           = 'amp/amp-latest-stories';
+		$latest_stories_block = $registered_blocks[ $block_name ];
+
+		$this->assertEquals(
+			array(
+				'className'     => array(
+					'type' => 'string',
+				),
+				'storiesToShow' => array(
+					'type'    => 'number',
+					'default' => 5,
+				),
+				'order'         => array(
+					'type'    => 'string',
+					'default' => 'desc',
+				),
+				'orderBy'       => array(
+					'type'    => 'string',
+					'default' => 'date',
+				),
+				'useCarousel'   => array(
+					'type'    => 'boolean',
+					'default' => true,
+				),
+			),
+			$latest_stories_block->attributes
+		);
+		$this->assertEquals( null, $latest_stories_block->editor_script );
+		$this->assertEquals( null, $latest_stories_block->editor_style );
+		$this->assertEquals( $block_name, $latest_stories_block->name );
+		$this->assertEquals( array( 'AMP_Story_Post_Type', 'render_block_latest_stories' ), $latest_stories_block->render_callback );
+		$this->assertEquals( null, $latest_stories_block->script );
+		$this->assertEquals( null, $latest_stories_block->style );
+	}
+
+	/**
+	 * Test render_block_latest_stories.
+	 *
+	 * @covers \AMP_Editor_Blocks::render_block_latest_stories()
+	 */
+	public function test_render_block_latest_stories() {
+		$attributes = array(
+			'storiesToShow' => 10,
+			'order'         => 'desc',
+			'orderBy'       => 'date',
+			'useCarousel'   => true,
+		);
+
+		// Create mock AMP story posts to test.
+		$minimum_height = 200;
+		$dimensions     = array( $minimum_height, 300, 500 );
+		$this->create_story_posts_with_featured_images( $dimensions );
+		$rendered_block = AMP_Story_Post_Type::render_block_latest_stories( $attributes );
+		$this->assertContains( '<amp-carousel', $rendered_block );
+		$this->assertContains(
+			sprintf(
+				'height="%s"',
+				$minimum_height
+			),
+			$rendered_block
+		);
+
+		// Assert that wp_enqueue_style() was called in the render callback.
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+	}
+
+	/**
+	 * Test get_featured_image_minimum_height.
+	 *
+	 * @covers \AMP_Editor_Blocks::get_featured_image_minimum_height()
+	 */
+	public function test_get_featured_image_minimum_height() {
+		$expected_min_height = 300;
+		$dimensions          = array(
+			$expected_min_height,
+			400,
+			500,
+			600,
+		);
+		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
+		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_featured_image_minimum_height( $stories ) );
+
+		// When an empty array() is passed, the minimum height should be 0.
+		$this->assertEquals( 0, AMP_Story_Post_Type::get_featured_image_minimum_height( array() ) );
+	}
+
+	/**
+	 * Creates amp_story posts with featured images of given heights.
+	 *
+	 * @param array $dimensions An array of strings.
+	 * @return array $posts An array of WP_Post objects of the amp_story post type.
+	 */
+	public function create_story_posts_with_featured_images( $dimensions ) {
 		$stories = array();
-		for ( $i = 0; $i < $number_of_stories; $i++ ) {
+		foreach ( $dimensions as $dimension ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
@@ -173,6 +271,14 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 				$new_story->ID
 			);
 			set_post_thumbnail( $new_story, $thumbnail_id );
+
+			wp_update_attachment_metadata(
+				$thumbnail_id,
+				array(
+					'width'  => $dimension,
+					'height' => $dimension,
+				)
+			);
 		}
 
 		return $stories;
