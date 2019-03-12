@@ -274,6 +274,13 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	height: 200px;
 }
 
+/* Hide inserter within inactive pages */
+@media (min-width: 961px) {
+	.amp-page-inactive[data-type="amp/amp-story-page"] .block-list-appender {
+		display: none;
+	}
+}
+
 /*
  * 7. Block Navigation and Page Carousel
 
