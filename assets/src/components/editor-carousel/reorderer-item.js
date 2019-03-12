@@ -3,14 +3,13 @@
  */
 import { compose } from '@wordpress/compose';
 import { Draggable, DropZone } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
+import { Fragment, Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import { Component } from 'react';
 
 const parseDropEvent = ( event ) => {
 	let result = {
