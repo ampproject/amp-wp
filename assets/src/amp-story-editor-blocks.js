@@ -15,7 +15,7 @@ import { select, subscribe, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls, BlockDropZone } from './components';
+import { withAttributes, withParentBlock, withBlockName, withHasSelectedInnerBlock, withAmpStorySettings, withAnimationControls, BlockDropZone, withSelectedBlock } from './components';
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 import { maybeEnqueueFontStyle } from './helpers';
 import { store } from './stores/amp-story';
@@ -211,6 +211,12 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
 	}
 
+	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
+		let style = attributes.style ? attributes.style : 'position: absolute;';
+		style += `top: ${ attributes.positionTop }px; left: ${ attributes.positionLeft }px;`;
+		ampAttributes['style'] = style;
+	}
+
 	return {
 		...props,
 		...ampAttributes,
@@ -313,30 +319,26 @@ const addWrapperProps = ( BlockListBlock ) => {
 };
 
 const dropBlockZoneWithSelect = compose(
-	withParentBlock,
-	withBlockName
+	withBlockName,
+	withHasSelectedInnerBlock,
+	withSelectedBlock
 );
 
 /**
- * Filters DropBlockZone for the inner blocks of an AMP Story Page.
+ * Filters DropBlockZone, leaves the only drop zone for AMP Story Page.
  *
- * @param {Object} OriginalBlockDropZone Original BlockDropZone component.
  * @return {Function} Handler.
  */
-const filterDropBlockZone = ( OriginalBlockDropZone ) => {
+const filterDropBlockZone = () => {
 	return dropBlockZoneWithSelect( ( props ) => {
-		// If it's not an allowed child block, return original.
-		if (
-			! props.parentBlock ||
-			'amp/amp-story-page' !== props.parentBlock.name ||
-			! ALLOWED_CHILD_BLOCKS.includes( props.blockName ) ) {
-			return <OriginalBlockDropZone { ...props } />;
+		/*
+		 * We'll be using only the Page's dropzone since all the elements are being moved around within a Page.
+		 * Using dropzone of each single element would result the dropzone moving together with the element.
+		 */
+		if ( 'amp/amp-story-page' === props.blockName && props.hasSelectedInnerBlock ) {
+			return <BlockDropZone srcClientId={ props.selectedBlock.clientId } />;
 		}
-
-		return <BlockDropZone
-			clientId={ props.clientId }
-			rootClientId={ props.rootClientId }
-		/>;
+		return null;
 	} );
 };
 

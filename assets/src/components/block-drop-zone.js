@@ -20,27 +20,6 @@ import {
 	MediaUploadCheck,
 } from '@wordpress/editor';
 
-const parseDropEvent = ( event ) => {
-	let result = {
-		srcRootClientId: null,
-		srcClientId: null,
-		srcIndex: null,
-		type: null,
-	};
-
-	if ( ! event.dataTransfer ) {
-		return result;
-	}
-
-	try {
-		result = Object.assign( result, JSON.parse( event.dataTransfer.getData( 'text' ) ) );
-	} catch ( err ) {
-		return result;
-	}
-
-	return result;
-};
-
 class BlockDropZone extends Component {
 	constructor() {
 		super( ...arguments );
@@ -49,12 +28,13 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { clientId: dstClientId, getBlockAttributes, updateBlockAttributes } = this.props;
-		const { srcClientId } = parseDropEvent( event );
+		const { getBlockAttributes, updateBlockAttributes, srcClientId } = this.props;
 
-		const elementId = `block-${ dstClientId }`;
+		const elementId = `block-${ srcClientId }`;
+		const cloneElementId = `clone-block-${ srcClientId }`;
 		const element = document.getElementById( elementId );
-		if ( ! element ) {
+		const clone = document.getElementById( cloneElementId );
+		if ( ! element || ! clone ) {
 			event.preventDefault();
 			return;
 		}
@@ -62,10 +42,16 @@ class BlockDropZone extends Component {
 		const srcAttributes = getBlockAttributes( srcClientId );
 		// Get the original position of the block that was dragged
 		const srcPosition = element.getBoundingClientRect();
+		// Get the current position of the clone.
+		const clonePosition = clone.getBoundingClientRect();
 
-		// Base on this we can calculate the change of the original position and add this to the previous value.
-		const positionLeft = srcAttributes.positionLeft + ( event.clientX - srcPosition.left );
-		const positionTop = srcAttributes.positionTop + ( event.clientY - srcPosition.top );
+		// We will set the new position based on where the clone was moved to.
+		// The new attributes are set based on the difference between the original component and the clone added to the previous attributes.
+		let positionLeft = srcAttributes.positionLeft + clonePosition.left - srcPosition.left;
+		let positionTop = srcAttributes.positionTop + clonePosition.top - srcPosition.top;
+		positionLeft = positionLeft < 0 ? 0 : positionLeft;
+		positionTop = positionTop < 0 ? 0 : positionTop;
+
 		updateBlockAttributes( srcClientId, {
 			positionLeft,
 			positionTop
