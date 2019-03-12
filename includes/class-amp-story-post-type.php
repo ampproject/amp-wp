@@ -749,8 +749,7 @@ class AMP_Story_Post_Type {
 		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $url );
 		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
 
-		// @todo Beware of HTTPS vs HTTP in the home URL.
-		if ( 0 !== strpos( $url, home_url() ) || self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
 			return $pre_render;
 		}
 
