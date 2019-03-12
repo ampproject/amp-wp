@@ -54,7 +54,7 @@ class BlockDropZone extends Component {
 
 		updateBlockAttributes( srcClientId, {
 			positionLeft,
-			positionTop
+			positionTop,
 		} );
 	}
 
@@ -62,7 +62,7 @@ class BlockDropZone extends Component {
 		return (
 			<MediaUploadCheck>
 				<DropZone
-					className='editor-block-drop-zone'
+					className="editor-block-drop-zone"
 					onDrop={ this.onDrop }
 				/>
 			</MediaUploadCheck>

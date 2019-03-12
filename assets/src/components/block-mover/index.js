@@ -49,9 +49,8 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { onMoveUp, onMoveDown, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientIds, blockElementId, blockType, firstIndex, instanceId } = this.props;
+		const { onMoveUp, onMoveDown, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientIds, blockElementId, instanceId } = this.props;
 		const { isFocused } = this.state;
-		const blocksCount = castArray( clientIds ).length;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
 		// attribute on the button while it has focus causes the screen to change

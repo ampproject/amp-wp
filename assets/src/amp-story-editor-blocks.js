@@ -153,11 +153,11 @@ const addAMPAttributes = ( settings, name ) => {
 
 	addedAttributes.positionTop = {
 		type: 'number',
-		default: 0
+		default: 0,
 	};
 	addedAttributes.positionLeft = {
 		type: 'number',
-		default: 0
+		default: 0,
 	};
 
 	return {
@@ -214,7 +214,7 @@ const addAMPExtraProps = ( props, blockType, attributes ) => {
 	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
 		let style = attributes.style ? attributes.style : 'position: absolute;';
 		style += `top: ${ attributes.positionTop }px; left: ${ attributes.positionLeft }px;`;
-		ampAttributes['style'] = style;
+		ampAttributes.style = style;
 	}
 
 	return {
@@ -305,7 +305,7 @@ const addWrapperProps = ( BlockListBlock ) => {
 			if ( props.wrapperProps && props.wrapperProps.style ) {
 				style = {
 					...style,
-					...props.wrapperProps.style
+					...props.wrapperProps.style,
 				};
 			}
 			wrapperProps = {

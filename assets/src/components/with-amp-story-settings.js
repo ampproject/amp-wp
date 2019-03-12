@@ -38,7 +38,7 @@ export default createHigherOrderComponent(
 						/>
 					</IgnoreNestedEvents>
 					<BlockEdit { ...props } />
-					{  isImageBlock && (
+					{ isImageBlock && (
 						<InspectorControls>
 							<PanelBody
 								title={ __( 'Story Settings', 'amp' ) }
