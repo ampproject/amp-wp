@@ -56,16 +56,11 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 	);
 }
 
-// Todo: Move pages and moveBlockToPosition to separate reorder component.
 export default compose(
 	withSelect( ( select ) => {
-		const {	getBlocksByClientId	} = select( 'core/editor' );
-		const { getBlockOrder, isReordering } = select( 'amp/story' );
-
-		const pages = getBlocksByClientId( getBlockOrder() );
+		const { isReordering } = select( 'amp/story' );
 
 		return {
-			pages,
 			isReordering: isReordering(),
 		};
 	} ),
