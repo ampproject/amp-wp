@@ -707,14 +707,24 @@ class AMP_Story_Post_Type {
 	 */
 	public static function override_story_embed_callback( $pre_render, $block ) {
 		unset( $pre_render );
-		if ( empty( $block['attrs']['url'] ) ) {
+		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || 'core-embed/wordpress' !== $block['blockName'] ) {
 			return;
 		}
 
-		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $block['attrs']['url'] );
+		// Taken from url_to_postid(), ensures that the URL is from this site.
+		$url           = $block['attrs']['url'];
+		$url_host      = wp_parse_url( $url, PHP_URL_HOST );
+		$home_url_host = wp_parse_url( home_url(), PHP_URL_HOST );
+
+		// Exit if the URL isn't from this site.
+		if ( $url_host !== $home_url_host ) {
+			return;
+		}
+
+		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $url );
 		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
 
-		if ( 'core-embed/wordpress' === $block['blockName'] && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
+		if ( 0 === strpos( $url, home_url() ) && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
 			wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
 			ob_start();
 			?>

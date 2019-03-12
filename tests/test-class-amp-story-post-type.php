@@ -127,13 +127,22 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		);
 		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
+		// The conditional is only partially satisfied, as the URL is still wrong.
+		$correct_block_name = 'core-embed/wordpress';
+		$wrong_url          = 'https://incorrect-domain.com/example-story';
+		$wrong_block        = array(
+			'attrs'     => array( 'url' => $wrong_url ),
+			'blockName' => $correct_block_name,
+		);
+		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
+
 		// The conditional is now satisfied, so this should return the overriden callback.
 		$story_posts    = $this->create_story_posts( 1 );
 		$amp_story_post = reset( $story_posts );
 		$correct_url    = get_post_permalink( $amp_story_post );
 		$correct_block  = array(
 			'attrs'     => array( 'url' => $correct_url ),
-			'blockName' => 'core-embed/wordpress',
+			'blockName' => $correct_block_name,
 		);
 
 		$overriden_render_callback = AMP_Story_Post_Type::override_story_embed_callback( null, $correct_block );
