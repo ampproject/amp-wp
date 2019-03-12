@@ -670,10 +670,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 /*
  * 8. Block mover
- * Disable the block mover at all times.
+ * Disable the block mover at all times for page blocks.
  */
 
-.post-type-amp_story .editor-block-mover {
+.post-type-amp_story [data-type="amp/amp-story-page"] > .editor-block-mover {
 	display: none !important;
 }
 
