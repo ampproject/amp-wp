@@ -22,7 +22,7 @@ const ampAdminPointer = ( function( $ ) { // eslint-disable-line no-unused-vars
 					/**
 					 * Makes a POST request to store the pointer ID as dismissed for this user.
 					 */
-					close: function() {
+					close() {
 						$.post( ajaxurl, {
 							pointer: data.pointer.pointer_id,
 							action: 'dismiss-wp-pointer',

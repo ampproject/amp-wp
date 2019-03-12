@@ -102,7 +102,7 @@ const reducer = ( state = DEFAULT_STATE, action ) => {
 			if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder[ entryIndex( item ) ].parent = parent;
 			} else {
-				pageAnimationOrder.push( { id: item, parent: parent } );
+				pageAnimationOrder.push( { id: item, parent } );
 			}
 
 			animationOrder[ page ] = pageAnimationOrder;

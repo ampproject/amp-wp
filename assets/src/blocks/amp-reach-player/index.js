@@ -1,10 +1,16 @@
 /**
  * Helper methods for blocks.
  */
+/**
+ * Internal dependencies
+ */
 import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
 
 /**
  * Internal block libraries.
+ */
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
@@ -105,7 +111,7 @@ export default registerBlockType(
 
 			const reachProps = {
 				layout: ampLayout,
-				height: height,
+				height,
 				'data-embed-id': dataEmbedId,
 			};
 			if ( 'fixed-height' !== ampLayout && width ) {

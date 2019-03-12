@@ -152,11 +152,12 @@ const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-u
 	 */
 	component.handleShowAll = function handleShowAll() {
 		const onClick = function( event ) {
-			const validationErrors = document.querySelectorAll( '[data-error-type]' );
 			if ( ! event.target.matches( '#' + component.showAllId ) ) {
 				return;
 			}
 			event.preventDefault();
+
+			const validationErrors = document.querySelectorAll( '[data-error-type]' );
 
 			// Iterate through all of the errors, and remove the 'hidden' class.
 			validationErrors.forEach( function( element ) {
@@ -188,12 +189,13 @@ const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-u
 	 */
 	component.handleFiltering = function handleFiltering() {
 		const onChange = function( event ) {
-			const showAllButton = document.getElementById( component.showAllId );
 			if ( ! event.target.matches( 'select' ) ) {
 				return;
 			}
 
 			event.preventDefault();
+
+			const showAllButton = document.getElementById( component.showAllId );
 
 			const isAllErrorTypesSelected = ( '-1' === event.target.value );
 			const errorTypeQuery = document.querySelectorAll( '[data-error-type]' );
