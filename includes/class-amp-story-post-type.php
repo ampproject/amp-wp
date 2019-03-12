@@ -757,7 +757,12 @@ class AMP_Story_Post_Type {
 			return $pre_render;
 		}
 
-		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $url );
+		$embed_url_path = wp_parse_url( $url, PHP_URL_PATH );
+		$base_url_path  = wp_parse_url( trailingslashit( home_url( self::REWRITE_SLUG ) ), PHP_URL_PATH );
+		if ( 0 !== strpos( $embed_url_path, $base_url_path ) ) {
+			return $pre_render;
+		}
+		$path = substr( $embed_url_path, strlen( $base_url_path ) );
 		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
 
 		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
