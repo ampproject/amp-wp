@@ -137,13 +137,20 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function get_embed_type( $node ) {
 		$class_attr = $node->getAttribute( 'class' );
-		if ( null !== $class_attr && $node->hasAttribute( 'data-href' ) ) {
-			if ( false !== strpos( $class_attr, 'fb-post' ) ) {
-				return 'post';
-			} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
-				return 'video';
-			}
-			return false !== strpos( $class_attr, 'fb-video' ) ? 'video' : 'post';
+		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
+			return null;
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-post' ) ) {
+			return 'post';
+		} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+			return 'video';
+		} elseif ( false !== strpos( $class_attr, 'fb-page' ) ) {
+			return 'page';
+		} elseif ( false !== strpos( $class_attr, 'fb-like' ) ) {
+			return 'like';
+		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
+			return 'comments';
 		}
 
 		return null;
@@ -157,16 +164,38 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param string      $embed_type Embed type.
 	 */
 	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
+
+		$attributes = array(
+			'layout' => 'responsive',
+			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
+			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
+		);
+
+		$node->removeAttribute( 'data-width' );
+		$node->removeAttribute( 'data-height' );
+
+		foreach ( $node->attributes as $attribute ) {
+			if ( 'data-' === substr( $attribute->nodeName, 0, 5 ) ) {
+				$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+		}
+
+		if ( 'page' === $embed_type ) {
+			$amp_tag = 'amp-facebook-page';
+		} elseif ( 'like' === $embed_type ) {
+			$amp_tag = 'amp-facebook-like';
+		} elseif ( 'comments' === $embed_type ) {
+			$amp_tag = 'amp-facebook-comments';
+		} else {
+			$amp_tag = $this->amp_tag;
+
+			$attributes['data-embed-as'] = $embed_type;
+		}
+
 		$amp_facebook_node = AMP_DOM_Utils::create_node(
 			$dom,
-			$this->amp_tag,
-			array(
-				'data-href'     => $node->getAttribute( 'data-href' ),
-				'data-embed-as' => $embed_type,
-				'layout'        => 'responsive',
-				'width'         => $this->DEFAULT_WIDTH,
-				'height'        => $this->DEFAULT_HEIGHT,
-			)
+			$amp_tag,
+			$attributes
 		);
 
 		$node->parentNode->replaceChild( $amp_facebook_node, $node );

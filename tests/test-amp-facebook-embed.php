@@ -1,6 +1,22 @@
 <?php
+/**
+ * Class AMP_Facebook_Embed_Test
+ *
+ * @package AMP
+ */
 
+/**
+ * Test AMP_Facebook_Embed_Test
+ *
+ * @covers AMP_Facebook_Embed_Handler
+ */
 class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
+
+	/**
+	 * Data provider for test__conversion.
+	 *
+	 * @return array Data.
+	 */
 	public function get_conversion_data() {
 		return array(
 			'no_embed'         => array(
@@ -36,16 +52,25 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test conversion.
+	 *
 	 * @dataProvider get_conversion_data
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
 	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Facebook_Embed_Handler();
 		$embed->register_embed();
 		$filtered_content = apply_filters( 'the_content', $source );
 
-		$this->assertEquals( $expected, $filtered_content );
+		$this->assertEqualMarkup( $expected, $filtered_content );
 	}
 
+	/**
+	 * Get scripts data.
+	 *
+	 * @return array Scripts.
+	 */
 	public function get_scripts_data() {
 		return array(
 			'not_converted' => array(
@@ -60,7 +85,11 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_scripts().
+	 *
 	 * @dataProvider get_scripts_data
+	 * @param string $source Source.
+	 * @param array  $expected Expected scripts.
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Facebook_Embed_Handler();
@@ -96,15 +125,42 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 			'post_embed'            => array(
 				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
-				'<amp-facebook data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post" layout="responsive" width="600" height="400"></amp-facebook>',
+				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post"></amp-facebook>',
 			),
 			'video_embed'           => array(
 				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
-				'<amp-facebook data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-embed-as="video" layout="responsive" width="600" height="400"></amp-facebook>',
+				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video"></amp-facebook>',
+			),
+
+			'page_embed'            => array(
+				'
+					<div class="fb-page" data-href="https://www.facebook.com/xwp.co/" data-width="340" data-height="432" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
+						<div class="fb-xfbml-parse-ignore">
+							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
+						</div>
+					</div>
+				',
+				'<amp-facebook-page layout="responsive" width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false"></amp-facebook-page>',
+			),
+
+			'like'                  => array(
+				'
+					<div class="fb-like" data-href="https://developers.facebook.com/docs/plugins/" data-width="400" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true"></div>
+				',
+				'
+					<amp-facebook-like layout="responsive" width="400" height="400" data-href="https://developers.facebook.com/docs/plugins/" data-layout="standard" data-action="like" data-size="small" data-show-faces="true" data-share="true">
+					</amp-facebook-like>
+				',
+			),
+
+			'comments'              => array(
+				'
+					<div class="fb-comments" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></div>
+				',
+				'<amp-facebook-comments layout="responsive" width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
 			),
 		);
 	}
-
 
 	/**
 	 * Test raw_embed_sanitizer.
@@ -122,6 +178,24 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
-		$this->assertEquals( $expected, $content );
+		$this->assertEqualMarkup( $expected, $content );
+	}
+
+	/**
+	 * Assert markup is equal.
+	 *
+	 * @param string $expected Expected markup.
+	 * @param string $actual   Actual markup.
+	 */
+	public function assertEqualMarkup( $expected, $actual ) {
+		$actual   = preg_replace( '/\s+/', ' ', $actual );
+		$expected = preg_replace( '/\s+/', ' ', $expected );
+		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
+		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
+
+		$this->assertEquals(
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
+		);
 	}
 }
