@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
 import { Component, Fragment } from '@wordpress/element';
-import { dispatch, withDispatch, withSelect } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
 /**
