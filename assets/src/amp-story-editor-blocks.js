@@ -314,7 +314,7 @@ const addWrapperProps = ( BlockListBlock ) => {
 			};
 		}
 
-		return <BlockListBlock { ...props } style="background: yellow;" wrapperProps={ wrapperProps } />;
+		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 	} );
 };
 
