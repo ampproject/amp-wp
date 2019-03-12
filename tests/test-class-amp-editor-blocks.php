@@ -83,7 +83,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		);
 
 		// Assert that wp_enqueue_style() was called in the render callback.
-		wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG );
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 	}
 
 	/**
