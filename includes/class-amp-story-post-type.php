@@ -100,9 +100,11 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		add_action( 'wp_default_styles', array( __CLASS__, 'register_styles' ) );
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'register_styles' ) );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
+		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
+
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'register_scripts' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
 
@@ -220,36 +222,19 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Register styles.
-	 *
-	 * @param WP_Styles $styles Styles.
+	 * Register the styles for this post type.
 	 */
-	public static function register_styles( WP_Styles $styles ) {
-
-		// Register the styling for the /embed endpoint and the Latest Stories block.
-		$styles->add(
-			self::STORY_CARD_CSS_SLUG,
-			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
-			array(),
-			AMP__VERSION
-		);
-	}
-
-	/**
-	 * Enqueue block editor assets.
-	 */
-	public static function enqueue_block_editor_assets() {
+	public static function register_styles() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			return;
 		}
 
-		// @todo Move the following styles to register_styles method, and scripts to a new register_scripts method which runs at wp_default_scripts?
-		// This CSS is separately since it's used both in frontend and in the editor.
-		$amp_stories_fonts_handle = 'amp-story-fonts'; // @todo This should be renamed since no longer fonts?
+		// This CSS is separate since it's used both in front-end and in the editor.
+		$amp_stories_handle = 'amp-story-style';
 		wp_enqueue_style(
-			$amp_stories_fonts_handle,
+			$amp_stories_handle,
 			amp_get_asset_url( 'css/amp-stories.css' ),
-			false,
+			array(),
 			AMP__VERSION
 		);
 
@@ -259,6 +244,39 @@ class AMP_Story_Post_Type {
 			array(),
 			AMP__VERSION
 		);
+
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				$amp_stories_handle,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
+	}
+
+	/**
+	 * Registers the story card styling.
+	 * This can't take place on the 'wp_enqueue_scripts' hook, as the /embed endpoint doesn't trigger that.
+	 *
+	 * @param WP_Styles $wp_styles The styles.
+	 */
+	public static function register_story_card_styling( WP_Styles $wp_styles ) {
+		// Register the styling for the /embed endpoint and the Latest Stories block.
+		$wp_styles->add(
+			self::STORY_CARD_CSS_SLUG,
+			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
+			array(),
+			AMP__VERSION
+		);
+	}
+
+	/**
+	 * Registers the post type's scripts.
+	 */
+	public static function register_scripts() {
+		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+			return;
+		}
 
 		// @todo Name the script better to distinguish.
 		wp_enqueue_script(
@@ -292,18 +310,10 @@ class AMP_Story_Post_Type {
 			);
 		}
 
-		$fonts = self::get_fonts();
-		foreach ( $fonts as $font ) {
-			wp_add_inline_style(
-				$amp_stories_fonts_handle,
-				self::get_inline_font_style_rule( $font )
-			);
-		}
-
 		wp_localize_script(
 			'amp-story-editor-blocks',
 			'ampStoriesFonts',
-			$fonts
+			self::get_fonts()
 		);
 	}
 
