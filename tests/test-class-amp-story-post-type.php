@@ -78,7 +78,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_enqueue_embed_styling() {
 		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type is not registered.' );
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
 		AMP_Story_Post_Type::enqueue_embed_styling();
@@ -103,6 +103,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_override_story_embed_callback() {
 		global $wp_rewrite;
+
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
+		}
 
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.
