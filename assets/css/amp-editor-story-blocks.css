@@ -249,7 +249,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 @media (min-width: 961px) {
 	#amp-story-editor {
-		overflow-x: hidden;
+		overflow: hidden;
 	}
 
 	#amp-story-editor > .editor-block-list__layout {
@@ -365,16 +365,20 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-top: 100px;
 		display: grid;
 		grid-template-columns: repeat(auto-fill, 169px);
-		grid-gap: 1rem;
+		grid-gap: 0;
 		justify-content: space-between;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item {
 		margin: 0 auto 10px;
 		width: 100%;
+		position: relative;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page {
 		max-width: 169px;
 		height: 277px;
-		position: relative;
+		margin: 0 10px;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
@@ -398,6 +402,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-page {
 		background: #eff0f1;
 		border: none !important;
+		margin: 0 10px;
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-right {

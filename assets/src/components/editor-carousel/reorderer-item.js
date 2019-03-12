@@ -91,7 +91,10 @@ class ReordererItem extends Component {
 									className={ this.state.isDragging ? 'is-dragging-page' : undefined }
 									onDrop={ this.onDrop }
 								/>
-								<div id={ pageElementId }>
+								<div
+									className="amp-story-reorderer-item-page"
+									id={ pageElementId }
+								>
 									<div
 										className="amp-story-page-preview"
 										onDragStart={ onDraggableStart }
