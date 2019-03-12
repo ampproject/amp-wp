@@ -81,8 +81,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
-		AMP_Story_Post_Type::enqueue_embed_styling();
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
+		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Only the first part of the conditional is satisfied, so this again should not enqueue the stylesheet.

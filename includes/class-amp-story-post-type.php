@@ -701,6 +701,10 @@ class AMP_Story_Post_Type {
 	/**
 	 * Overrides the render_callback of an AMP story post embed, when using the WordPress (embed) block.
 	 *
+	 * WordPress post embeds are usually wrapped in an <iframe>,
+	 * which can cause validation and display issues in AMP.
+	 * This overrides the embed callback in that case, replacing the <iframe> with the simple AMP story card.
+	 *
 	 * @param string $pre_render The pre-rendered markup, default null.
 	 * @param array  $block The block to render.
 	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
