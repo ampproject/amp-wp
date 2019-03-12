@@ -166,6 +166,11 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				',
 				'<amp-facebook layout="responsive" width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment"></amp-facebook>',
 			),
+
+			'remove_fb_root'        => array(
+				'<div id="fb-root"></div><script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+				'',
+			),
 		);
 	}
 

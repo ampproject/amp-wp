@@ -127,6 +127,24 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
 			}
 		}
+
+		/*
+		 * Remove the fb-root div and the Facebook Connect JS script since irrelevant.
+		 * <div id="fb-root"></div>
+		 * <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
+		 */
+		$fb_root = $dom->getElementById( 'fb-root' );
+		if ( $fb_root ) {
+			$xpath   = new DOMXPath( $dom );
+			$scripts = array();
+			foreach ( $xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
+				$scripts[] = $script;
+			}
+			foreach ( $scripts as $script ) {
+				$script->parentNode->removeChild( $script );
+			}
+			$fb_root->parentNode->removeChild( $fb_root );
+		}
 	}
 
 	/**
