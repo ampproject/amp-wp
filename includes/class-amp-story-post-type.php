@@ -729,9 +729,8 @@ class AMP_Story_Post_Type {
 	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
 	 */
 	public static function override_story_embed_callback( $pre_render, $block ) {
-		unset( $pre_render );
-		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || 'core-embed/wordpress' !== $block['blockName'] ) {
-			return;
+		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || ! in_array( $block['blockName'], array( 'core-embed/wordpress', 'core/embed' ), true ) ) {
+			return $pre_render;
 		}
 
 		// Taken from url_to_postid(), ensures that the URL is from this site.
@@ -741,21 +740,24 @@ class AMP_Story_Post_Type {
 
 		// Exit if the URL isn't from this site.
 		if ( $url_host !== $home_url_host ) {
-			return;
+			return $pre_render;
 		}
 
 		$path = str_replace( home_url( self::REWRITE_SLUG . '/' ), '', $url );
 		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
 
-		if ( 0 === strpos( $url, home_url() ) && self::POST_TYPE_SLUG === get_post_type( $post ) ) {
-			wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
-			ob_start();
-			?>
-			<div class="amp-story-embed">
-				<?php self::the_single_story_card( $post ); ?>
-			</div>
-			<?php
-			return ob_get_clean();
+		// @todo Beware of HTTPS vs HTTP in the home URL.
+		if ( 0 !== strpos( $url, home_url() ) || self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $pre_render;
 		}
+
+		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		ob_start();
+		?>
+		<div class="amp-story-embed">
+			<?php self::the_single_story_card( $post ); ?>
+		</div>
+		<?php
+		return ob_get_clean();
 	}
 }
