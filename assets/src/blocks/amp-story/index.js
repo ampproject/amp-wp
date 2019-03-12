@@ -65,7 +65,7 @@ export const settings = {
 		const { anchor, backgroundColor, mediaUrl, mediaType, poster } = attributes;
 
 		return (
-			<amp-story-page style={ { backgroundColor: backgroundColor } } id={ anchor }>
+			<amp-story-page style={ { backgroundColor } } id={ anchor }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">

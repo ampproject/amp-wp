@@ -108,7 +108,7 @@ class EditPage extends Component {
 		this.props.setAttributes( {
 			mediaUrl: media.url,
 			mediaId: media.id,
-			mediaType: mediaType,
+			mediaType,
 		} );
 
 		if ( IMAGE_BACKGROUND_TYPE === mediaType ) {
@@ -124,7 +124,7 @@ class EditPage extends Component {
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
-			backgroundColor: backgroundColor,
+			backgroundColor,
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',

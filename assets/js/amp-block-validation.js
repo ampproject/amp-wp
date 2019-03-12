@@ -75,7 +75,7 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		registerStore: function registerStore() {
 			return wp.data.registerStore( module.storeName, {
-				reducer: function( _state, action ) {
+				reducer( _state, action ) {
 					const state = _state || {
 						blockValidationErrorsByClientId: {},
 					};
@@ -90,15 +90,15 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					}
 				},
 				actions: {
-					updateBlocksValidationErrors: function( blockValidationErrorsByClientId ) {
+					updateBlocksValidationErrors( blockValidationErrorsByClientId ) {
 						return {
 							type: 'UPDATE_BLOCKS_VALIDATION_ERRORS',
-							blockValidationErrorsByClientId: blockValidationErrorsByClientId,
+							blockValidationErrorsByClientId,
 						};
 					},
 				},
 				selectors: {
-					getBlockValidationErrors: function( state, clientId ) {
+					getBlockValidationErrors( state, clientId ) {
 						return state.blockValidationErrorsByClientId[ clientId ] || [];
 					},
 				},
@@ -523,7 +523,7 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 							'ul',
 							{ key: 'list', className: 'amp-block-validation-errors__list' },
 							_.map( props.ampBlockValidationErrors, function( error, key ) {
-								return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
+								return wp.element.createElement( 'li', { key }, module.getValidationErrorMessage( error ) );
 							} )
 						),
 					] );
