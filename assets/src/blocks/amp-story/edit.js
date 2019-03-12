@@ -205,19 +205,8 @@ class EditPage extends Component {
 export default withSelect( ( select, props ) => {
 	const { mediaId } = props.attributes;
 	const { getMedia } = select( 'core' );
-	const {
-		hasSelectedInnerBlock,
-		getSelectedBlockClientId,
-	} = select( 'core/editor' );
-
-	let showBlockNavigation = false;
-
-	if ( ! getSelectedBlockClientId() || props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( props.clientId, true ) ) {
-		showBlockNavigation = true;
-	}
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
-		showBlockNavigation,
 	};
 } )( EditPage );
