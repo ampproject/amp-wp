@@ -213,60 +213,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  */
 
 /*
- * 5.2 Fill layer.
- * Style the fill image & fill video type layers.
- */
-
-.amp-grid-template-fill .editor-block-list__layout > :first-child {
-	bottom: 0;
-	display: block;
-	height: auto;
-	left: 0;
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: auto;
-	display: flex;
-}
-
-.amp-grid-template-fill .editor-block-list__block-edit {
-	display: flex;
-	flex-direction: column;
-}
-
-.amp-grid-template-fill .editor-block-list__block-edit > div:last-child {
-	display: flex;
-	flex: 1;
-}
-
-.amp-grid-template-fill .components-resizable-box__container {
-	width: 318px;
-	height: 533px;
-}
-
-.amp-grid-template-fill .components-disabled {
-	width: 318px;
-	max-height: 533px;
-	overflow: hidden;
-}
-
-.amp-grid-template-fill .wp-block-image,
-.amp-grid-template-fill .wp-block-video {
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
-.amp-grid-template-fill .components-resizable-box__container img {
-	object-fit: cover;
-	width: 318px !important;
-	height: 533px !important;
-}
-
-.amp-grid-template-fill > :not(:first-child) {
-	display: none;
-}
-
-/*
  * 6. Inserter customisations.
  */
 
