@@ -159,6 +159,13 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				',
 				'<amp-facebook-comments layout="responsive" width="600" height="400" data-href="https://developers.facebook.com/docs/plugins/comments#configurator" data-numposts="5"></amp-facebook-comments>',
 			),
+
+			'comment_embed'         => array(
+				'
+					<div class="fb-comment-embed" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-width="500"></div>
+				',
+				'<amp-facebook layout="responsive" width="500" height="400" data-href="https://www.facebook.com/zuck/posts/10102735452532991?comment_id=1070233703036185" data-embed-as="comment"></amp-facebook>',
+			),
 		);
 	}
 

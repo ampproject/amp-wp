@@ -151,6 +151,8 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			return 'like';
 		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
 			return 'comments';
+		} elseif ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
+			return 'comment';
 		}
 
 		return null;
