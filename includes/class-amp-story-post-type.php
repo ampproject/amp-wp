@@ -100,6 +100,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
+		add_action( 'wp_default_styles', array( __CLASS__, 'register_styles' ) );
+
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
@@ -215,6 +217,22 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Register styles.
+	 *
+	 * @param WP_Styles $styles Styles.
+	 */
+	public static function register_styles( WP_Styles $styles ) {
+
+		// Register the styling for the /embed endpoint and the Latest Stories block.
+		$styles->add(
+			self::STORY_CARD_CSS_SLUG,
+			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
+			array(),
+			AMP__VERSION
+		);
+	}
+
+	/**
 	 * Enqueue block editor assets.
 	 */
 	public static function enqueue_block_editor_assets() {
@@ -222,6 +240,7 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
+		// @todo Move the following styles to register_styles method, and scripts to a new register_scripts method which runs at wp_default_scripts?
 		// This CSS is separately since it's used both in frontend and in the editor.
 		$amp_stories_fonts_handle = 'amp-story-fonts'; // @todo This should be renamed since no longer fonts?
 		wp_enqueue_style(
