@@ -120,7 +120,7 @@ export function blocks( state = {}, action ) {
 		case 'MOVE_PAGE':
 			const { page, index } = action;
 
-			const oldIndex = state.indexOf( page );
+			const oldIndex = state.order.indexOf( page );
 			const newBlockOrder = [ ...state.order ];
 			newBlockOrder.splice( index, 0, ...newBlockOrder.splice( oldIndex, 1 ) );
 
