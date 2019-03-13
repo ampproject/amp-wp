@@ -109,7 +109,7 @@ class AMP_Image_Dimension_Extractor {
 			$url = $home . $path;
 		}
 
-		$url = apply_filters('amp_normalize_url',$url);
+		$url = apply_filters( 'amp_normalize_url', $url );
 
 		return $url;
 	}
