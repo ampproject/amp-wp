@@ -98,7 +98,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
-	margin: 60px 0 0;
+	margin: 60px 30px 0;
 }
 
 @media (min-width: 600px) {
@@ -556,11 +556,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"][data-amp-selected="parent"] .editor-block-drop-zone {
-	height: 100%;
-	width: 336px;
+	height: 633px;
+	width: 428px;
 	margin: 0;
-	left: -10px;
-	top: -8px;
+	left: -90px;
+	top: -100px;
 }
 
 div[data-type="amp/amp-story-page"] .wp-block-image {
