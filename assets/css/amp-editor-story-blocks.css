@@ -508,7 +508,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Disable the block mover at all times for page blocks.
  */
 
-.post-type-amp_story [data-type="amp/amp-story-page"] > .editor-block-mover {
+.post-type-amp_story [data-type="amp/amp-story-page"] > .editor-block-list__block-edit > .editor-block-mover {
 	display: none !important;
 }
 
