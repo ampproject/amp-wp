@@ -64,8 +64,8 @@ class ReordererItem extends Component {
 	}
 
 	onDrop( event, position ) {
-		const { page: { clientId }, movePageToPosition } = this.props;
-		const { srcClientId, type } = parseDropEvent( event );
+		const { page: { clientId }, movePageToPosition, index } = this.props;
+		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
 		const isBlockDropType = ( dropType ) => dropType === 'block';
 		const isSameBlock = ( src, dst ) => src === dst;
@@ -74,7 +74,8 @@ class ReordererItem extends Component {
 			return;
 		}
 
-		const insertIndex = this.getInsertIndex( position );
+		const positionIndex = this.getInsertIndex( position );
+		const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
 		movePageToPosition( srcClientId, insertIndex );
 	}
 
