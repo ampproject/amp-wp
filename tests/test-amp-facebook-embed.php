@@ -43,7 +43,7 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'https://www.facebook.com/photo.php?fbid=10102533316889441&set=a.529237706231.2034669.4&type=3&theater' . PHP_EOL,
 				'<p><amp-facebook data-href="https://www.facebook.com/photo.php?fbid=10102533316889441&amp;set=a.529237706231.2034669.4&amp;type=3&amp;theater" layout="responsive" width="600" height="400"></amp-facebook></p>' . PHP_EOL,
 			),
-			'notes_url'        => array(
+			'notes_url2'       => array(
 				'https://www.facebook.com/zuck/videos/10102509264909801/' . PHP_EOL,
 				'<p><amp-facebook data-href="https://www.facebook.com/zuck/videos/10102509264909801/" layout="responsive" width="600" height="400"></amp-facebook></p>' . PHP_EOL,
 			),
@@ -127,6 +127,24 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 				'<div class="fb-post" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/"></div>',
 				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/notes/facebook-engineering/under-the-hood-the-javascript-sdk-truly-asynchronous-loading/10151176218703920/" data-embed-as="post"></amp-facebook>',
 			),
+
+			'post_with_fallbacks'   => array(
+				'
+					<div class="fb-post" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/" data-width="500" data-show-text="true">
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore">
+							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
+						</blockquote>
+					</div>
+				',
+				'
+					<amp-facebook layout="responsive" width="500" height="400" data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"  data-show-text="true" data-embed-as="post">
+						<blockquote cite="https://developers.facebook.com/20531316728/posts/10154009990506729/" class="fb-xfbml-parse-ignore" fallback="">
+							Posted by <a href="https://www.facebook.com/facebook/">Facebook</a> on <a href="https://developers.facebook.com/20531316728/posts/10154009990506729/">Thursday, August 27, 2015</a>
+						</blockquote>
+					</amp-facebook>
+				',
+			),
+
 			'video_embed'           => array(
 				'<div class="fb-video" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false"></div>',
 				'<amp-facebook layout="responsive" width="600" height="400" data-href="https://www.facebook.com/amanda.orr.56/videos/10212156330049017/" data-show-text="false" data-embed-as="video"></amp-facebook>',
@@ -140,7 +158,13 @@ class AMP_Facebook_Embed_Test extends WP_UnitTestCase {
 						</div>
 					</div>
 				',
-				'<amp-facebook-page layout="responsive" width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false"></amp-facebook-page>',
+				'
+					<amp-facebook-page layout="responsive" width="340" height="432" data-href="https://www.facebook.com/xwp.co/" data-hide-cover="true" data-show-facepile="true" data-show-posts="false">
+						<div class="fb-xfbml-parse-ignore" fallback="">
+							<blockquote cite="https://www.facebook.com/xwp.co/"><a href="https://www.facebook.com/xwp.co/">Like Us</a></blockquote>
+						</div>
+					</amp-facebook-page>
+				',
 			),
 
 			'like'                  => array(

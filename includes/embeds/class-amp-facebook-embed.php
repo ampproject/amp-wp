@@ -218,7 +218,20 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes
 		);
 
+		$fallback = null;
+		foreach ( $node->childNodes as $child_node ) {
+			if ( $child_node instanceof DOMElement && false !== strpos( $child_node->getAttribute( 'class' ), 'fb-xfbml-parse-ignore' ) ) {
+				$fallback = $child_node;
+				$child_node->parentNode->removeChild( $child_node );
+				$fallback->setAttribute( 'fallback', '' );
+				break;
+			}
+		}
+
 		$node->parentNode->replaceChild( $amp_facebook_node, $node );
+		if ( $fallback ) {
+			$amp_facebook_node->appendChild( $fallback );
+		}
 
 		$this->did_convert_elements = true;
 	}
