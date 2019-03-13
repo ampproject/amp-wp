@@ -375,7 +375,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$dynamic_class_names = array(
 
 			/*
-			 * See >https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
+			 * See <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
 			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
 			 */
 			'amp-viewer',
