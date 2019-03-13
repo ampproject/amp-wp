@@ -108,15 +108,15 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 	}
 }
 
-div[data-type="amp/amp-story-page"],
-div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
+#amp-story-editor .wp-block[data-type="amp/amp-story-page"],
+#amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	margin: auto;
 	width: 100%;
 	max-width: 338px;
 	height: 553px;
 }
 
-div[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
+#amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
 	width: 316px;
 }
 
