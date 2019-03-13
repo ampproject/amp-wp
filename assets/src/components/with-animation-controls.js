@@ -7,6 +7,7 @@ import { Fragment } from '@wordpress/element';
 import { PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { withDispatch, withSelect } from '@wordpress/data';
+import { getBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -28,8 +29,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		parentBlock: getBlock( getBlockRootClientId( props.clientId ) ),
 		animationAfter: predecessor ? predecessor.clientId : undefined,
 		getAnimatedBlocks() {
-			const { getBlockType } = select( 'core/blocks' );
-
 			const animatedBlocks = getAnimationOrder()[ page ] || [];
 			return animatedBlocks
 				.filter( ( { id } ) => id !== currentBlock )

@@ -339,6 +339,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		background: #666;
 	}
 
+	.edit-post-header-toolbar #amp-story-shortcuts {
+		display: flex;
+	}
+
 	#amp-story-controls {
 		text-align: right;
 	}

@@ -3,6 +3,7 @@ export { default as AnimationOrderPicker } from './animation-order-picker';
 export { default as BlockNavigation } from './block-navigation';
 export { default as EditorCarousel } from './editor-carousel';
 export { default as StoryControls } from './story-controls';
+export { default as Shortcuts } from './shortcuts';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
 export { default as withAnimationControls } from './with-animation-controls';
