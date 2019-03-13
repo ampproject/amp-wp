@@ -96,7 +96,7 @@ const ampEditorBlocks = ( function() {
 			ampPanelLabel: __( 'AMP Settings', 'amp' ),
 		},
 		hasThemeSupport: true,
-		isCanonical: false,
+		isNativeAMP: false,
 	};
 
 	/**
@@ -113,6 +113,7 @@ const ampEditorBlocks = ( function() {
 		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
 		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
 		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
+		component.maybeUnregisterBlocks();
 	};
 
 	/**
@@ -396,10 +397,10 @@ const ampEditorBlocks = ( function() {
 		}
 
 		return el( SelectControl, {
-			label: label,
+			label,
 			value: ampLayout,
 			options: component.getLayoutOptions( name ),
-			onChange: function( value ) {
+			onChange( value ) {
 				props.setAttributes( { ampLayout: value } );
 				if ( 'core/image' === props.name ) {
 					component.setImageBlockLayoutAttributes( props, value );
@@ -421,9 +422,9 @@ const ampEditorBlocks = ( function() {
 			label = __( 'AMP Noloading', 'amp' );
 
 		return el( ToggleControl, {
-			label: label,
+			label,
 			checked: ampNoLoading,
-			onChange: function() {
+			onChange() {
 				props.setAttributes( { ampNoLoading: ! ampNoLoading } );
 			},
 		} );
@@ -451,7 +452,6 @@ const ampEditorBlocks = ( function() {
 			maxFont = props.attributes.maxFont,
 			height = props.attributes.height;
 
-		const label = __( 'Automatically fit text to container', 'amp' );
 		const FONT_SIZES = [
 			{
 				name: 'small',
@@ -479,13 +479,15 @@ const ampEditorBlocks = ( function() {
 			return null;
 		}
 
+		const label = __( 'Automatically fit text to container', 'amp' );
+
 		const inspectorPanelBodyArgs = [
 			PanelBody,
 			{ title: component.data.ampSettingsLabel, className: ampFitText ? 'is-amp-fit-text' : '' },
 			el( ToggleControl, {
-				label: label,
+				label,
 				checked: ampFitText,
-				onChange: function() {
+				onChange() {
 					props.setAttributes( { ampFitText: ! ampFitText } );
 				},
 			} ),
@@ -500,7 +502,7 @@ const ampEditorBlocks = ( function() {
 					label: __( 'Height', 'amp' ),
 					value: height,
 					min: 1,
-					onChange: function( nextHeight ) {
+					onChange( nextHeight ) {
 						props.setAttributes( { height: nextHeight } );
 					},
 				} ),
@@ -517,7 +519,7 @@ const ampEditorBlocks = ( function() {
 						fallbackFontSize: 14,
 						value: minFont,
 						fontSizes: FONT_SIZES,
-						onChange: function( nextMinFont ) {
+						onChange( nextMinFont ) {
 							if ( ! nextMinFont ) {
 								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
 							}
@@ -540,7 +542,7 @@ const ampEditorBlocks = ( function() {
 						value: maxFont,
 						fallbackFontSize: 48,
 						fontSizes: FONT_SIZES,
-						onChange: function( nextMaxFont ) {
+						onChange( nextMaxFont ) {
 							if ( ! nextMaxFont ) {
 								nextMaxFont = component.data.fontSizes.larger; // @todo Supplying fallbackFontSize should be done automatically by the component?
 							}
@@ -601,9 +603,9 @@ const ampEditorBlocks = ( function() {
 			label = __( 'Add lightbox effect', 'amp' );
 
 		return el( ToggleControl, {
-			label: label,
+			label,
 			checked: ampLightbox,
-			onChange: function( nextValue ) {
+			onChange( nextValue ) {
 				props.setAttributes( { ampLightbox: ! ampLightbox } );
 				if ( nextValue ) {
 					// Lightbox doesn't work with fixed height, so change.
@@ -632,9 +634,9 @@ const ampEditorBlocks = ( function() {
 			label = __( 'Display as carousel', 'amp' );
 
 		return el( ToggleControl, {
-			label: label,
+			label,
 			checked: ampCarousel,
-			onChange: function() {
+			onChange() {
 				props.setAttributes( { ampCarousel: ! ampCarousel } );
 			},
 		} );
@@ -901,6 +903,35 @@ const ampEditorBlocks = ( function() {
 	 */
 	component.isGalleryShortcode = function isGalleryShortcode( attributes ) {
 		return attributes.text && -1 !== attributes.text.indexOf( 'gallery' );
+	};
+
+	/**
+	 * If there's no theme support, unregister blocks that are only meant for AMP.
+	 * The Latest Stories block is meant for AMP and non-AMP, so don't unregister it here.
+	 */
+	component.maybeUnregisterBlocks = function maybeUnregisterBlocks() {
+		const ampDependentBlocks = [
+			'amp-brid-player',
+			'amp-ima-video',
+			'amp-jwplayer',
+			'amp-mathml',
+			'amp-o2-player',
+			'amp-ooyala-player',
+			'amp-reach-player',
+			'amp-springboard-player',
+			'amp-timeago',
+		];
+
+		if ( component.data.isNativeAMP ) {
+			return;
+		}
+
+		ampDependentBlocks.forEach( function( block ) {
+			const blockName = 'amp/' + block;
+			if ( wp.blocks.getBlockType( blockName ) ) {
+				wp.blocks.unregisterBlockType( blockName );
+			}
+		} );
 	};
 
 	return component;

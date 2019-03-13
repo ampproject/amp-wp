@@ -18,6 +18,27 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
+	 *
+	 * @var string
+	 */
+	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
+
+	/**
+	 * The slug of the story card CSS file.
+	 *
+	 * @var string
+	 */
+	const STORY_CARD_CSS_SLUG = 'amp-story-card';
+
+	/**
+	 * The rewrite slug for this post type.
+	 *
+	 * @var string
+	 */
+	const REWRITE_SLUG = 'stories';
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
@@ -53,7 +74,7 @@ class AMP_Story_Post_Type {
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
 				),
 				'rewrite'      => array(
-					'slug' => 'stories',
+					'slug' => self::REWRITE_SLUG,
 				),
 				'public'       => true,
 				'show_ui'      => true,
@@ -79,7 +100,11 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_assets' ) );
+		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
+
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_styles' ) );
+
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
 
@@ -100,6 +125,18 @@ class AMP_Story_Post_Type {
 
 		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+
+		// Get an embed template for this post type.
+		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
+
+		// Enqueue the styling for the /embed endpoint.
+		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
+
+		// Override the render_callback for AMP story embeds.
+		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
+
+		// Register the Latest Stories block.
+		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
@@ -168,7 +205,7 @@ class AMP_Story_Post_Type {
 	 * @return array Styles to print.
 	 */
 	public static function filter_frontend_print_styles_array( $handles ) {
-		if ( ! is_singular( self::POST_TYPE_SLUG ) ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) || is_embed() ) {
 			return $handles;
 		}
 
@@ -185,19 +222,19 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Enqueue block editor assets.
+	 * Enqueue the styles for the block editor.
 	 */
-	public static function enqueue_block_editor_assets() {
+	public static function enqueue_block_editor_styles() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			return;
 		}
 
-		// This CSS is separately since it's used both in frontend and in the editor.
-		$amp_stories_fonts_handle = 'amp-story-fonts'; // @todo This should be renamed since no longer fonts?
+		// This CSS is separate since it's used both in front-end and in the editor.
+		$amp_stories_handle = 'amp-story-style';
 		wp_enqueue_style(
-			$amp_stories_fonts_handle,
+			$amp_stories_handle,
 			amp_get_asset_url( 'css/amp-stories.css' ),
-			false,
+			array(),
 			AMP__VERSION
 		);
 
@@ -207,6 +244,40 @@ class AMP_Story_Post_Type {
 			array(),
 			AMP__VERSION
 		);
+
+		$fonts = self::get_fonts();
+		foreach ( $fonts as $font ) {
+			wp_add_inline_style(
+				$amp_stories_handle,
+				self::get_inline_font_style_rule( $font )
+			);
+		}
+	}
+
+	/**
+	 * Registers the story card styling.
+	 *
+	 * This can't take place on the 'wp_enqueue_scripts' hook, as the /embed endpoint doesn't trigger that.
+	 *
+	 * @param WP_Styles $wp_styles The styles.
+	 */
+	public static function register_story_card_styling( WP_Styles $wp_styles ) {
+		// Register the styling for the /embed endpoint and the Latest Stories block.
+		$wp_styles->add(
+			self::STORY_CARD_CSS_SLUG,
+			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
+			array(),
+			AMP__VERSION
+		);
+	}
+
+	/**
+	 * Enqueue scripts for the block editor.
+	 */
+	public static function enqueue_block_editor_scripts() {
+		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+			return;
+		}
 
 		// @todo Name the script better to distinguish.
 		wp_enqueue_script(
@@ -240,18 +311,10 @@ class AMP_Story_Post_Type {
 			);
 		}
 
-		$fonts = self::get_fonts();
-		foreach ( $fonts as $font ) {
-			wp_add_inline_style(
-				$amp_stories_fonts_handle,
-				self::get_inline_font_style_rule( $font )
-			);
-		}
-
 		wp_localize_script(
 			'amp-story-editor-blocks',
 			'ampStoriesFonts',
-			$fonts
+			self::get_fonts()
 		);
 	}
 
@@ -280,7 +343,7 @@ class AMP_Story_Post_Type {
 	 * @return string Template.
 	 */
 	public static function filter_template_include( $template ) {
-		if ( is_singular( self::POST_TYPE_SLUG ) ) {
+		if ( is_singular( self::POST_TYPE_SLUG ) && ! is_embed() ) {
 			$template = AMP__DIR__ . '/includes/templates/single-amp_story.php';
 		}
 		return $template;
@@ -582,5 +645,269 @@ class AMP_Story_Post_Type {
 		);
 
 		return $content;
+	}
+
+	/**
+	 * Get the AMP story's embed template.
+	 *
+	 * This is used when an AMP story is embedded in a post,
+	 * often with the WordPress (embed) block.
+	 *
+	 * @param string $template  The path of the template, from locate_template().
+	 * @param string $type The file name.
+	 * @param array  $templates An array of possible templates.
+	 * @return string $template  The path of the template, from locate_template().
+	 */
+	public static function get_embed_template( $template, $type, $templates ) {
+		$old_amp_story_template = sprintf( 'embed-%s.php', self::POST_TYPE_SLUG );
+		if ( 'embed' === $type && in_array( $old_amp_story_template, $templates, true ) ) {
+			$template = AMP__DIR__ . '/includes/templates/embed-amp-story.php';
+		}
+		return $template;
+	}
+
+	/**
+	 * Outputs a card of a single AMP story.
+	 * Used for a slide in the Latest Stories block.
+	 *
+	 * @param WP_Post $post The AMP story post.
+	 * @return void
+	 */
+	public static function the_single_story_card( $post ) {
+		$thumbnail_id = get_post_thumbnail_id( $post );
+		if ( ! $thumbnail_id ) {
+			return;
+		}
+
+		$author_id           = $post->post_author;
+		$author_display_name = get_the_author_meta( 'display_name', $author_id );
+		$avatar              = get_avatar(
+			$author_id,
+			24,
+			'',
+			'',
+			array(
+				'class' => 'latest-stories__avatar',
+			)
+		);
+
+		?>
+		<a class="latest_stories__link" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+			<?php
+			echo wp_get_attachment_image(
+				$thumbnail_id,
+				self::STORY_CARD_IMAGE_SIZE,
+				false,
+				array(
+					'alt'   => get_the_title( $post ),
+					'class' => 'latest-stories__featured-img',
+				)
+			);
+			?>
+			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
+			<div class="latest-stories__meta">
+				<?php echo wp_kses_post( $avatar ); ?>
+				<span class="latest-stories__author">
+					<?php
+					printf(
+						/* translators: 1: the post author. 2: the amount of time ago. */
+						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
+						esc_html( $author_display_name ),
+						esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
+					);
+					?>
+				</span>
+			</div>
+		</a>
+		<?php
+	}
+
+	/**
+	 * Enqueues this post type's stylesheet for the embed endpoint and Latest Stories block.
+	 */
+	public static function enqueue_embed_styling() {
+		if ( is_embed() && is_singular( self::POST_TYPE_SLUG ) ) {
+			wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		}
+	}
+
+	/**
+	 * Overrides the render_callback of an AMP story post embed, when using the WordPress (embed) block.
+	 *
+	 * WordPress post embeds are usually wrapped in an <iframe>,
+	 * which can cause validation and display issues in AMP.
+	 * This overrides the embed callback in that case, replacing the <iframe> with the simple AMP story card.
+	 *
+	 * @param string $pre_render The pre-rendered markup, default null.
+	 * @param array  $block The block to render.
+	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
+	 */
+	public static function override_story_embed_callback( $pre_render, $block ) {
+		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || ! in_array( $block['blockName'], array( 'core-embed/wordpress', 'core/embed' ), true ) ) {
+			return $pre_render;
+		}
+
+		// Taken from url_to_postid(), ensures that the URL is from this site.
+		$url           = $block['attrs']['url'];
+		$url_host      = wp_parse_url( $url, PHP_URL_HOST );
+		$home_url_host = wp_parse_url( home_url(), PHP_URL_HOST );
+
+		// Exit if the URL isn't from this site.
+		if ( $url_host !== $home_url_host ) {
+			return $pre_render;
+		}
+
+		$embed_url_path = wp_parse_url( $url, PHP_URL_PATH );
+		$base_url_path  = wp_parse_url( trailingslashit( home_url( self::REWRITE_SLUG ) ), PHP_URL_PATH );
+		if ( 0 !== strpos( $embed_url_path, $base_url_path ) ) {
+			return $pre_render;
+		}
+		$path = substr( $embed_url_path, strlen( $base_url_path ) );
+		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
+
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $pre_render;
+		}
+
+		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		ob_start();
+		?>
+		<div class="amp-story-embed">
+			<?php self::the_single_story_card( $post ); ?>
+		</div>
+		<?php
+		return ob_get_clean();
+	}
+
+	/**
+	 * Registers the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see register_block_core_latest_posts()
+	 */
+	public static function register_block_latest_stories() {
+		register_block_type(
+			'amp/amp-latest-stories',
+			array(
+				'attributes'      => array(
+					'className'     => array(
+						'type' => 'string',
+					),
+					'storiesToShow' => array(
+						'type'    => 'number',
+						'default' => 5,
+					),
+					'order'         => array(
+						'type'    => 'string',
+						'default' => 'desc',
+					),
+					'orderBy'       => array(
+						'type'    => 'string',
+						'default' => 'date',
+					),
+					'useCarousel'   => array(
+						'type'    => 'boolean',
+						'default' => ! is_admin(),
+					),
+				),
+				'render_callback' => array( __CLASS__, 'render_block_latest_stories' ),
+			)
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see render_block_core_latest_posts()
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_latest_stories( $attributes ) {
+		/*
+		 * There should only be an <amp-carousel> on the front-end,
+		 * so the editor component passes useCarousel=false to <ServerSideRender>.
+		 * This detects whether this render_callback is called in the editor context.
+		 */
+		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
+		$args            = array(
+			'post_type'        => self::POST_TYPE_SLUG,
+			'posts_per_page'   => $attributes['storiesToShow'],
+			'post_status'      => 'publish',
+			'order'            => $attributes['order'],
+			'orderby'          => $attributes['orderBy'],
+			'suppress_filters' => false,
+			'meta_key'         => '_thumbnail_id',
+		);
+		$story_query     = new WP_Query( $args );
+		$min_height      = self::get_featured_image_minimum_height( $story_query->posts );
+		$class           = 'amp-block-latest-stories';
+		if ( isset( $attributes['className'] ) ) {
+			$class .= ' ' . $attributes['className'];
+		}
+
+		ob_start();
+		?>
+		<div class="<?php echo esc_attr( $class ); ?>">
+			<?php if ( $is_amp_carousel ) : ?>
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
+			<?php else : ?>
+				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+			<?php endif; ?>
+				<?php foreach ( $story_query->posts as $post ) : ?>
+					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
+						<?php self::the_single_story_card( $post ); ?>
+					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
+					<?php
+				endforeach;
+				?>
+			</<?php echo $is_amp_carousel ? 'amp-carousel' : 'ul'; ?>>
+		</div>
+		<?php
+
+		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
+		if ( $is_amp_carousel ) {
+			wp_enqueue_script( 'amp-carousel' );
+		}
+
+		return ob_get_clean();
+	}
+
+	/**
+	 * Gets the smallest height of any of the featured images.
+	 *
+	 * This iterates through all of the posts, to find their featured image.
+	 * Then, this returns the smallest height.
+	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
+	 * this will return 100.
+	 *
+	 * @param array $posts An array or WP_Post objects.
+	 * @return int $minimum_dimension The smallest dimension of a featured image.
+	 */
+	public static function get_featured_image_minimum_height( $posts ) {
+		$index = 2;
+
+		$minimum_height = 0;
+		foreach ( $posts as $post ) {
+			$thumbnail_id = get_post_thumbnail_id( $post->ID );
+			if ( ! $thumbnail_id ) {
+				continue;
+			}
+
+			$image = wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE );
+			if (
+				isset( $image[ $index ] )
+				&&
+				(
+					! $minimum_height
+					||
+					$image[ $index ] < $minimum_height
+				)
+			) {
+				$minimum_height = $image[ $index ];
+			}
+		}
+
+		return $minimum_height;
 	}
 }

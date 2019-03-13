@@ -10,6 +10,9 @@ module.exports = function( grunt ) {
 
 		// Clean up the build.
 		clean: {
+			compiled: {
+				src: [ 'assets/js/*-compiled.js' ],
+			},
 			build: {
 				src: [ 'build' ],
 			},
@@ -71,6 +74,9 @@ module.exports = function( grunt ) {
 		const spawnQueue = [];
 		const stdout = [];
 
+		// Clear out all existing compiled files first.
+		grunt.task.run( 'clean' );
+
 		grunt.task.run( 'shell:webpack_production' );
 
 		spawnQueue.push(
@@ -100,7 +106,6 @@ module.exports = function( grunt ) {
 			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
 			paths.push( 'vendor/willwashburn/stream/src/**' );
 
-			grunt.task.run( 'clean' );
 			grunt.config.set( 'copy', {
 				build: {
 					src: paths,
@@ -108,7 +113,7 @@ module.exports = function( grunt ) {
 					expand: true,
 					options: {
 						noProcess: [ '*/**', 'LICENSE', 'jetpack-helper.php', 'wpcom-helper.php' ], // That is, only process amp.php and readme.txt.
-						process: function( content, srcpath ) {
+						process( content, srcpath ) {
 							let matches, version, versionRegex;
 							if ( /amp\.php$/.test( srcpath ) ) {
 								versionRegex = /(\*\s+Version:\s+)(\d+(\.\d+)+-\w+)/;

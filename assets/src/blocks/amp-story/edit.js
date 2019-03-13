@@ -1,5 +1,3 @@
-/* global ReactDOM */
-
 /**
  * External dependencies
  */
@@ -28,7 +26,6 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import BlockNavigation from './block-navigation';
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
@@ -46,36 +43,6 @@ class EditPage extends Component {
 		}
 
 		this.onSelectMedia = this.onSelectMedia.bind( this );
-	}
-
-	maybeAddBlockNavigation() {
-		// If no blocks are selected or if it's the current page, change the view.
-		if ( this.props.showBlockNavigation ) {
-			const editLayout = document.getElementsByClassName( 'edit-post-layout' );
-			if ( editLayout.length ) {
-				const blockNav = document.getElementById( 'amp-root-navigation' );
-				if ( ! blockNav ) {
-					const navWrapper = document.createElement( 'div' );
-					navWrapper.id = 'amp-root-navigation';
-					editLayout[ 0 ].appendChild( navWrapper );
-				}
-				ReactDOM.render(
-					<div key="layerManager" className="editor-selectors">
-						<BlockNavigation />
-					</div>,
-					document.getElementById( 'amp-root-navigation' )
-				);
-			}
-		}
-	}
-
-	componentDidMount() {
-		this.maybeAddBlockNavigation();
-	}
-
-	componentDidUpdate() {
-		// @todo Check if there is a better way to do this without calling it on both componentDidMount and componentDidUpdate.
-		this.maybeAddBlockNavigation();
 	}
 
 	onSelectMedia( media ) {
@@ -108,7 +75,7 @@ class EditPage extends Component {
 		this.props.setAttributes( {
 			mediaUrl: media.url,
 			mediaId: media.id,
-			mediaType: mediaType,
+			mediaType,
 		} );
 
 		if ( IMAGE_BACKGROUND_TYPE === mediaType ) {
@@ -124,7 +91,7 @@ class EditPage extends Component {
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
-			backgroundColor: backgroundColor,
+			backgroundColor,
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',
@@ -238,19 +205,8 @@ class EditPage extends Component {
 export default withSelect( ( select, props ) => {
 	const { mediaId } = props.attributes;
 	const { getMedia } = select( 'core' );
-	const {
-		hasSelectedInnerBlock,
-		getSelectedBlockClientId,
-	} = select( 'core/editor' );
-
-	let showBlockNavigation = false;
-
-	if ( ! getSelectedBlockClientId() || props.clientId === getSelectedBlockClientId() || hasSelectedInnerBlock( props.clientId, true ) ) {
-		showBlockNavigation = true;
-	}
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
-		showBlockNavigation,
 	};
 } )( EditPage );

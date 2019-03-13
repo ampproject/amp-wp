@@ -11,15 +11,11 @@ import {
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch } from '@wordpress/data';
-
-const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
-
-/**
- * Internal dependencies
- */
 import {
 	MediaUploadCheck,
 } from '@wordpress/editor';
+
+const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
 class BlockDropZone extends Component {
 	constructor() {

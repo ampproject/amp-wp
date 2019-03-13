@@ -31,22 +31,19 @@
  */
 
 div[data-type="amp/amp-story-page"] {
-	border: 10px solid #eff0f1;
-}
-
-.editor-styles-wrapper div[data-type="amp/amp-story-page"] {
-	max-width: 338px;
-	height: 553px;
+	border: 5px solid #eff0f1;
+	border-radius: 5px;
 }
 
 div[data-type="amp/amp-story-page"]::after {
 	content: '';
 	position: absolute;
-	bottom: -10px;
+	bottom: -5px;
 	left: 0;
 	width: 100%;
-	height: 10px;
+	height: 5px;
 	background: #eff0f1;
+	transition: background-color 300ms linear;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] .components-placeholder.wp-block-image {
@@ -101,7 +98,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
-	margin: 60px auto 0;
+	margin: 60px 0 0;
 }
 
 @media (min-width: 600px) {
@@ -217,59 +214,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  */
 
 /*
- * 5.2 Fill layer.
- * Style the fill image & fill video type layers.
- */
-
-.amp-grid-template-fill .editor-block-list__layout > :first-child {
-	bottom: 0;
-	height: auto;
-	left: 0;
-	position: absolute;
-	right: 0;
-	top: 0;
-	width: auto;
-	display: flex;
-}
-
-.amp-grid-template-fill .editor-block-list__block-edit {
-	display: flex;
-	flex-direction: column;
-}
-
-.amp-grid-template-fill .editor-block-list__block-edit > div:last-child {
-	display: flex;
-	flex: 1;
-}
-
-.amp-grid-template-fill .components-resizable-box__container {
-	width: 318px;
-	height: 533px;
-}
-
-.amp-grid-template-fill .components-disabled {
-	width: 318px;
-	max-height: 533px;
-	overflow: hidden;
-}
-
-.amp-grid-template-fill .wp-block-image,
-.amp-grid-template-fill .wp-block-video {
-	margin-top: 0;
-	margin-bottom: 0;
-}
-
-.amp-grid-template-fill .components-resizable-box__container img {
-	object-fit: cover;
-	width: 318px !important;
-	height: 533px !important;
-}
-
-.amp-grid-template-fill > :not(:first-child) {
-	display: none;
-}
-
-/*
  * 6. Inserter customisations.
  */
 
@@ -277,19 +221,16 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	height: 200px;
 }
 
-/* Hide inserter inside of the page when block navigator is visible */
+/* Hide inserter within inactive pages */
 @media (min-width: 961px) {
-	div[data-type="amp/amp-story-page"] .block-list-appender {
+	.amp-page-inactive[data-type="amp/amp-story-page"] .block-list-appender {
 		display: none;
-	}
-
-	.post-type-amp_story .amp-grid-template .editor-block-list__layout:first-of-type {
-		padding-top: 24px;
 	}
 }
 
 /*
- * 7. Block navigator
+ * 7. Block Navigation and Page Carousel
+
  * Hides the toggler and shows the navigator by default on large screens.
  */
 
@@ -297,51 +238,226 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	.editor-block-list__block-edit > div > .editor-selectors {
 		display: none;
 	}
+
+	#amp-root-navigation {
+		display: none;
+	}
+
+	#amp-story-editor-carousel {
+		display: none;
+	}
 }
 
 @media (min-width: 961px) {
-	.post-type-amp_story .editor-post-title__input {
-		text-align: center;
+	#amp-story-editor {
+		overflow: hidden;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
-		padding-left: 15px;
-		padding-right: 15px;
+	#amp-story-editor > .editor-block-list__layout {
+		padding-left: 0;
+		padding-right: 0;
+		display: flex;
+		align-items: center;
+		transform: none;
+		transition: transform 300ms linear;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div {
+	.editor-block-list__layout div[data-type="amp/amp-story-page"] {
+		flex: 0 0 auto;
+		position: relative;
+		transition: border 300ms linear;
+	}
+
+	.editor-block-list__layout div[data-type="amp/amp-story-page"] + div[data-type="amp/amp-story-page"] {
+		margin-left: 20px;
+	}
+
+	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-active {
+		border-color: #ccc;
+	}
+
+	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-active::after {
+		background-color: #ccc;
+	}
+
+	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-inactive {
+		opacity: .5;
+	}
+
+	.editor-block-list__layout [data-type="amp/amp-story-page"].amp-page-inactive > div {
+		pointer-events: none;
+	}
+
+	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number {
+		position: absolute;
+		top: -3em;
+		text-transform: uppercase;
+		font-weight: 600;
+		font-size: 12px;
+		color: #666;
+		letter-spacing: 1px;
+	}
+
+	.amp-story-editor-carousel-navigation {
+		display: flex;
+		justify-content: space-between;
+		margin-top: 2em;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list {
+		flex: 1;
+		display: flex;
+		margin: 0;
+		padding: 0;
+		list-style-type: none;
+		justify-content: center;
+		max-width: 30%;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item {
+		flex: 1;
+		height: .5em;
+		max-width: 5em;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item + .amp-story-editor-carousel-item {
+		margin-left: 20px;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button {
+		background: #eff0f1;
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:hover,
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:focus {
+		background: #e0e0e0;
+	}
+
+	.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item--active button {
+		background: #666;
+	}
+
+	.edit-post-header-toolbar #amp-story-shortcuts {
+		display: flex;
+	}
+
+	#amp-story-controls {
+		text-align: right;
+	}
+
+	#amp-story-controls .amp-story-controls-reorder {
+		display: inline-block;
+		line-height: 1;
+
+	}
+
+	.edit-post-visual-editor .editor-post-title__block {
+		margin-left: 0;
+		margin-right: 0;
+	}
+
+	.amp-story-controls-reorder-cancel {
+		padding-top: 2px;
+		padding-bottom: 2px;
+		margin-right: 20px;
+		display: inline-flex;
+	}
+
+	.amp-story-reorderer {
+		margin-top: 100px;
 		display: grid;
+		grid-template-columns: repeat(auto-fill, 169px);
+		grid-gap: 0;
+		justify-content: space-between;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div::before {
-		content: '';
-		grid-column: 1 / 1;
-		grid-row: 1 / 2;
+	.amp-story-reorderer .amp-story-reorderer-item {
+		margin: 0 auto 10px;
+		width: 100%;
+		position: relative;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div > div:first-child {
-		grid-column: 2 / 2;
-		grid-row: 1 / 1;
+	.amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page {
+		max-width: 169px;
+		height: 277px;
+		margin: 0 10px;
 	}
 
-	.post-type-amp_story .editor-writing-flow > div > div > .editor-block-list__layout {
-		grid-column: 2 / 2;
-		grid-row: 2 / 2;
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
+		border: none;
+		border-radius: 0;
+		background: transparent;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-active {
+		opacity: 0;
+		visibility: hidden;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-page,
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element {
+		opacity: 1;
+		visibility: visible;
+		transition: opacity .3s,background-color .3s;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-page {
+		background: #eff0f1;
+		border: none !important;
+		margin: 0 10px;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-right {
+		border-right: 3px solid #0071a1;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone.is-dragging-over-element.is-close-to-left {
+		border-left: 3px solid #0071a1;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone__content,
+	.amp-story-reorderer .amp-story-reorderer-item .is-dragging-over-element .components-drop-zone__content {
+		display: none;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview {
+		border: 5px solid #eff0f1;
+		border-radius: 5px;
+		background: #fff;
+		width: 100%;
+		height: 277px;
+		cursor: grab;
+		overflow: hidden;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
+		margin: 0;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {
+		padding: 0;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .block-list-appender {
+		display: none;
 	}
 
 	.components-icon-button.editor-block-navigation {
-			display: none;
+		display: none;
 	}
 
 	#amp-root-navigation {
-			position: absolute;
-			left: 5px;
-			top: 218px;
-			width: 300px;
-			z-index: 80;
-			list-style-type: none;
-			padding: 0;
-			margin: 0;
+		position: absolute;
+		left: 5px;
+		top: 218px;
+		width: 300px;
+		z-index: 80;
+		list-style-type: none;
+		padding: 0;
+		margin: 0;
 	}
 
 	#amp-root-navigation .editor-inserter {
@@ -359,53 +475,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-left: -50px;
 	}
 
-	/*
-		Legend of the magic numbers:
-		Sidebar
-			Expanded - 160px wide
-			Folded - 36px wide
-		Settings
-			Shown - 280px wide
-		Content - 383px (including 15px padding)
-		Block Navigation - <= 300px
-	*/
-
-	/* Navigator in the context of the open sidebar, settings hidden. */
-	.post-type-amp_story .edit-post-layout #amp-root-navigation {
-		max-width: calc( 100vw - 160px - 383px );
-	}
-
-	.post-type-amp_story .edit-post-layout .editor-writing-flow > div > div {
-		grid-template-columns: auto minmax( 368px, calc( 100vw - 160px - 315px ) );
-	}
-
-	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
-	.post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-root-navigation {
-		max-width: calc( 100vw - 280px - 160px - 383px );
-	}
-
-	.post-type-amp_story .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
-		grid-template-columns: auto minmax( 368px, calc( 100vw - 280px - 160px - 315px ) );
-	}
-
-	/* Navigator in the context of folded sidebar, settings hidden. */
-	.post-type-amp_story.folded #amp-root-navigation {
-		max-width: calc( 100vw - 36px - 383px );
-	}
-
-	.post-type-amp_story.folded .edit-post-visual-editor .editor-writing-flow > div > div {
-		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 315px ) );
-	}
-
-	/* Navigator in the context of folded sidebar, settings shown. */
-	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-root-navigation {
-		max-width: calc( 100vw - 36px - 280px - 383px );
-	}
-
-	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened .editor-writing-flow > div > div {
-		grid-template-columns: auto minmax( 368px, calc( 100vw - 36px - 280px - 315px ) );
-	}
-
 	#amp-root-navigation .editor-block-navigation__list {
 		list-style-type: none;
 	}
@@ -414,14 +483,19 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		margin-right: 5px;
 	}
 
-	.editor-selectors .component-editor__selector button {
+	.editor-block-navigation__container {
+		background: #fff;
+		border: 1px solid #eee;
+	}
+
+	.editor-block-navigation__container .component-editor__selector button {
 		background: no-repeat left top;
 		padding-left: 37px;
 		height: 40px;
 		margin: 1px 0 1px 4px;
 	}
 
-	.editor-selectors .component-editor__selector .components-button:focus {
+	.editor-block-navigation__container .component-editor__selector .components-button:focus {
 		box-shadow: none;
 	}
 
@@ -432,17 +506,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 /*
  * 8. Block mover
- * Show the block mover by default.
+ * Disable the block mover at all times for page blocks.
  */
 
-.post-type-amp_story .is-selected .editor-block-mover {
-	opacity: 0.7;
-	animation: none;
-	transition: opacity .3s;
-}
-
-.post-type-amp_story .is-selected .editor-block-mover.is-visible {
-	opacity: 1;
+.post-type-amp_story [data-type="amp/amp-story-page"] > .editor-block-mover {
+	display: none !important;
 }
 
 /*
@@ -473,7 +541,6 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	min-width: 100%;
 	min-height: 100%;
 	object-fit: cover;
-	pointer-events: none;
 }
 
 #editor-amp-story-page-poster__help {

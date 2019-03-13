@@ -246,11 +246,13 @@ function post_supports_amp( $post ) {
  * var is present, or else in native mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
+ * @global string $pagenow
+ * @global WP_Query $wp_query
  */
 function is_amp_endpoint() {
-	global $pagenow;
+	global $pagenow, $wp_query;
 
-	if ( is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ), true ) ) {
+	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ), true ) ) {
 		return false;
 	}
 
@@ -260,25 +262,41 @@ function is_amp_endpoint() {
 		_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
-				/* translators: 1: is_amp_endpoint(), 2: parse_query, 3: false */
-				esc_html__( '%1$s was called before the %2$s hook was called. This function will always return %3$s before the %2$s hook is called.', 'amp' ),
+				/* translators: 1: is_amp_endpoint(), 2: parse_query */
+				esc_html__( '%1$s was called before the %2$s hook was called.', 'amp' ),
 				'is_amp_endpoint()',
-				'parse_query',
-				'false'
+				'parse_query'
 			),
 			'0.4.2'
 		);
 	}
 
+	if ( empty( $wp_query ) || ! ( $wp_query instanceof WP_Query ) ) {
+		_doing_it_wrong(
+			__FUNCTION__,
+			sprintf(
+				/* translators: 1: is_amp_endpoint(), 2: WP_Query */
+				esc_html__( '%1$s was called before the %2$s was instantiated.', 'amp' ),
+				'is_amp_endpoint()',
+				'WP_Query'
+			),
+			'1.1'
+		);
+	}
+
 	// AMP Stories are always an AMP endpoint.
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return true;
 	}
 
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
-		false !== get_query_var( amp_get_slug(), false )
+		(
+			$wp_query instanceof WP_Query
+			&&
+			false !== $wp_query->get( amp_get_slug(), false )
+		)
 	);
 
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {

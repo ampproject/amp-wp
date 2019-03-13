@@ -1,10 +1,16 @@
 /**
  * Helper methods for blocks.
  */
+/**
+ * Internal dependencies
+ */
 import { getLayoutControls, getMediaPlaceholder } from '../utils.js';
 
 /**
  * Internal block libraries.
+ */
+/**
+ * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { registerBlockType } from '@wordpress/blocks';
@@ -160,7 +166,7 @@ export default registerBlockType(
 			const { dataSiteId, dataPlayerId, dataContentId, dataDomain, dataMode, dataItems, ampLayout, height, width } = attributes;
 			const springboardProps = {
 				layout: ampLayout,
-				height: height,
+				height,
 				'data-site-id': dataSiteId,
 				'data-mode': dataMode,
 				'data-content-id': dataContentId,
