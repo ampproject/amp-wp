@@ -1,10 +1,9 @@
 /**
  * WordPress dependencies
  */
-import { select, dispatch, combineReducers } from '@wordpress/data';
+import { select, combineReducers } from '@wordpress/data';
 
 const { getBlock, getBlockOrder, getAdjacentBlockClientId } = select( 'core/editor' );
-const { updateBlockAttributes } = dispatch( 'core/editor' );
 
 /**
  * Reducer handling animation order changes.
@@ -17,13 +16,12 @@ const { updateBlockAttributes } = dispatch( 'core/editor' );
 export function animationOrder( state = {}, action ) {
 	const newAnimationOrder = { ...state };
 	const { page, item, predecessor } = action;
-	const pageAnimationOrder = state[ page ] || [];
+	const pageAnimationOrder = newAnimationOrder[ page ] || [];
 
 	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
 
 	switch ( action.type ) {
 		case 'ADD_ANIMATION':
-
 			const hasCycle = ( a, b ) => {
 				let parent = b;
 
@@ -47,30 +45,25 @@ export function animationOrder( state = {}, action ) {
 				pageAnimationOrder.push( { id: item, parent } );
 			}
 
-			newAnimationOrder[ page ] = pageAnimationOrder;
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
 
-			const parentBlock = parent ? getBlock( parent ) : undefined;
-
-			updateBlockAttributes( item, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
-
-			return newAnimationOrder;
 		case 'REMOVE_ANIMATION':
-
 			if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder.splice( pageAnimationOrder.findIndex( ( { id } ) => id === item ), 1 );
-				pageAnimationOrder
-					.filter( ( { parent: p } ) => p === item )
-					.map( ( p ) => {
-						p.parent = pageAnimationOrder[ entryIndex( item ) ].parent;
-						return p;
-					} );
+				const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+				pageAnimationOrder[ entryIndex( item ) ].parent = undefined;
+
+				for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
+					pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+				}
 			}
 
-			updateBlockAttributes( item, { ampAnimationAfter: undefined } );
-
-			newAnimationOrder[ page ] = pageAnimationOrder;
-
-			return newAnimationOrder;
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
 	}
 
 	return state;
@@ -102,7 +95,7 @@ export function currentPage( state = undefined, action ) {
 }
 
 /**
- * Reducer starting the reordering
+ * Reducer handling block order.
  *
  * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.

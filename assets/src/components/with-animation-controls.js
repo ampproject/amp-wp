@@ -16,23 +16,26 @@ import { ALLOWED_CHILD_BLOCKS } from '../constants';
 import { AnimationControls } from './';
 
 const applyWithSelect = withSelect( ( select, props ) => {
-	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlocksByClientId, getBlockOrder } = select( 'core/editor' );
+	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/editor' );
 	const { getAnimationOrder } = select( 'amp/story' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
 
-	const { ampAnimationAfter } = props.attributes;
-	const predecessor = getBlocksByClientId( getBlockOrder( page ) ).find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	const animatedBlocks = getAnimationOrder()[ page ] || [];
+	const animationOrderEntry = animatedBlocks.find( ( { id } ) => id === props.clientId );
 
 	return {
 		parentBlock: getBlock( getBlockRootClientId( props.clientId ) ),
-		animationAfter: predecessor ? predecessor.clientId : undefined,
+		animationAfter: animationOrderEntry ? animationOrderEntry.parent : undefined,
 		getAnimatedBlocks() {
-			const animatedBlocks = getAnimationOrder()[ page ] || [];
-			return animatedBlocks
+			return ( getAnimationOrder()[ page ] || [] )
 				.filter( ( { id } ) => id !== currentBlock )
-				.filter( ( { id } ) => getBlock( id ) )
+				.filter( ( { id } ) => {
+					const block = getBlock( id );
+
+					return block && block.attributes.ampAnimationType;
+				} )
 				.map( ( { id } ) => {
 					const block = getBlock( id );
 					return {

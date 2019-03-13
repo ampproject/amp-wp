@@ -140,12 +140,12 @@ function renderStoryComponents() {
 	}
 }
 
-const { getBlockOrder } = select( 'core/editor' );
+const { getBlockOrder, getBlock } = select( 'core/editor' );
 
 let blockOrder = getBlockOrder();
 
 subscribe( () => {
-	const { getSelectedBlockClientId, getBlock } = select( 'core/editor' );
+	const { getSelectedBlockClientId } = select( 'core/editor' );
 	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
@@ -180,17 +180,31 @@ subscribe( () => {
 	}
 } );
 
-const { isReordering, getBlockOrder: getCustomBlockOrder } = select( 'amp/story' );
-const { moveBlockToPosition } = dispatch( 'core/editor' );
+const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
+const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
 	const customBlockOrder = getCustomBlockOrder();
 
-	// The block order was changed manually, let's do the re-order.
+	// The block order has changed, let's re-order.
 	if ( ! isReordering() && customBlockOrder.length > 0 && editorBlockOrder !== customBlockOrder ) {
 		for ( const [ index, page ] of customBlockOrder.entries() ) {
 			moveBlockToPosition( page, '', '', index );
+		}
+	}
+
+	const animationOrder = getAnimationOrder();
+
+	for ( const page in animationOrder ) {
+		if ( ! animationOrder.hasOwnProperty( page ) ) {
+			continue;
+		}
+
+		for ( const item of animationOrder[ page ] ) {
+			const parentBlock = item.parent ? getBlock( item.parent ) : undefined;
+
+			updateBlockAttributes( item.id, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
 		}
 	}
 } );
