@@ -96,7 +96,7 @@ const ampEditorBlocks = ( function() {
 			ampPanelLabel: __( 'AMP Settings', 'amp' ),
 		},
 		hasThemeSupport: true,
-		isCanonical: false,
+		isNativeAMP: false,
 	};
 
 	/**
@@ -922,11 +922,16 @@ const ampEditorBlocks = ( function() {
 			'amp-timeago',
 		];
 
-		if ( ! component.data.isNativeAMP ) {
-			ampDependentBlocks.forEach( function( block ) {
-				wp.blocks.unregisterBlockType( 'amp/' + block );
-			} );
+		if ( component.data.isNativeAMP ) {
+			return;
 		}
+
+		ampDependentBlocks.forEach( function( block ) {
+			const blockName = 'amp/' + block;
+			if ( wp.blocks.getBlockType( blockName ) ) {
+				wp.blocks.unregisterBlockType( blockName );
+			}
+		} );
 	};
 
 	return component;
