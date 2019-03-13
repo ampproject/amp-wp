@@ -81,12 +81,12 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
  * Show label while the layer is selected
  */
 
- .post-type-amp_story .editor-block-list__breadcrumb {
+ .editor-block-list__breadcrumb {
 	 z-index: 6;
 	 pointer-events: none;
  }
 
- .post-type-amp_story .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
+ .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
 	 opacity: 1;
 	 animation: none;
  }
@@ -466,7 +466,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		width: 100%;
 	}
 
-	.post-type-amp_story #amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {
+	#amp-root-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {
 		transform: translateX( -13% );
 	}
 
@@ -498,7 +498,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		box-shadow: none;
 	}
 
-	.post-type-amp_story .components-range-control__number {
+	.components-range-control__number {
 		width: 60px;
 	}
 }
@@ -508,7 +508,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Disable the block mover at all times for page blocks.
  */
 
-.post-type-amp_story [data-type="amp/amp-story-page"] > .editor-block-list__block-edit > .editor-block-mover {
+[data-type="amp/amp-story-page"] > .editor-block-list__block-edit > .editor-block-mover {
 	display: none !important;
 }
 
@@ -639,11 +639,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
  */
 
-.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
+.editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
 	pointer-events: all;
 }
 
-.post-type-amp_story .editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
+.editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
 }
 
