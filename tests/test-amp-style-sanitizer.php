@@ -417,7 +417,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						array(
 							'.amp-viewer{color:blue}',
 							'.amp-referrer-www-google-com{color:red}',
-							'.amp-form-submit-success{color:green}',
+							'', // Because there is no form.
 							'', // Because there is no <amp-carousel> in the document.
 							'', // Because non-existent class is not used.
 						)
@@ -425,15 +425,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
-			'dynamic_classes_preserved_carousel' => array(
+			'dynamic_classes_preserved_carousel_form' => array(
 				'
 					<html amp><head>
 					<style>
 					.amp-viewer { color: blue; }
 					.amp-carousel-slide { outline: solid 1px red; }
+					.amp-form-submit-success{color:green}
 					</style>
 					</head>
-					<body><amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img> </amp-carousel></body>
+					<body>
+						<amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img></amp-carousel>
+						<form action="https://example.com/" target="_top" method="get"><input name="search" type="search" required></form>
+					</body>
 					</html>
 				',
 				array(
@@ -442,6 +446,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						array(
 							'.amp-viewer{color:blue}',
 							'.amp-carousel-slide{outline:solid 1px red}',
+							'.amp-form-submit-success{color:green}',
 						)
 					),
 				),

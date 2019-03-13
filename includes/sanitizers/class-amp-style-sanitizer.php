@@ -371,16 +371,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
 			 */
 			'amp-viewer',
-
-			// See <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
-			'amp-form-initial',
-			'amp-form-verify',
-			'amp-form-verify-error',
-			'amp-form-submitting',
-			'amp-form-submit-success',
-			'amp-form-submit-error',
-			'user-valid',
-			'user-invalid',
 		);
 
 		$classes = ' ';
@@ -425,7 +415,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 			// See <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
 			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
-				return $this->has_used_tag_names( array( 'amp-carousel' ) );
+				if ( ! $this->has_used_tag_names( array( 'amp-carousel' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// See <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
+				if ( ! $this->has_used_tag_names( array( 'form' ) ) ) {
+					return false;
+				}
+				continue;
 			}
 
 			if ( ! isset( $this->used_class_names[ $class_name ] ) ) {
