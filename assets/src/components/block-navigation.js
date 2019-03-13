@@ -8,12 +8,7 @@ import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import { BlockIcon } from '@wordpress/editor';
 
-function BlockNavigationList( {
-	blocks,
-	selectedBlockClientId,
-	selectBlock,
-	showNestedBlocks,
-} ) {
+function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
 		/*
 		 * Disable reason: The `list` ARIA role is redundant but
@@ -24,6 +19,7 @@ function BlockNavigationList( {
 			{ blocks.map( ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
+
 				let className = 'editor-block-navigation__item-button';
 				if ( isSelected ) {
 					className += ' is-selected';
@@ -41,14 +37,6 @@ function BlockNavigationList( {
 								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)', 'amp' ) }</span> }
 							</Button>
 						</div>
-						{ showNestedBlocks && !! block.innerBlocks && !! block.innerBlocks.length && (
-							<BlockNavigationList
-								blocks={ block.innerBlocks }
-								selectedBlockClientId={ selectedBlockClientId }
-								selectBlock={ selectBlock }
-								showNestedBlocks
-							/>
-						) }
 					</li>
 				);
 			} ) }
@@ -57,13 +45,12 @@ function BlockNavigationList( {
 	);
 }
 
-function BlockNavigation( { rootBlock, rootBlocks, selectedBlockClientId, selectBlock } ) {
-	const hasHierarchy = (
-		rootBlock && (
-			rootBlock.clientId !== selectedBlockClientId ||
-			( rootBlock.innerBlocks && rootBlock.innerBlocks.length !== 0 )
-		)
-	);
+function BlockNavigation( { elements, selectBlock, selectedBlockClientId, isReordering } ) {
+	const hasElements = elements.length > 0;
+
+	if ( isReordering ) {
+		return null;
+	}
 
 	return (
 		<NavigableMenu
@@ -71,24 +58,14 @@ function BlockNavigation( { rootBlock, rootBlocks, selectedBlockClientId, select
 			className="editor-block-navigation__container"
 		>
 			<p className="editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
-			{ hasHierarchy && (
+			{ hasElements && (
 				<BlockNavigationList
-					blocks={ [ rootBlock ] }
-					selectedBlockClientId={ selectedBlockClientId }
-					selectBlock={ selectBlock }
-					showNestedBlocks
-				/>
-			) }
-			{ ! hasHierarchy && (
-				<BlockNavigationList
-					blocks={ rootBlocks }
+					blocks={ elements }
 					selectedBlockClientId={ selectedBlockClientId }
 					selectBlock={ selectBlock }
 				/>
 			) }
-			{ ( ! rootBlocks || rootBlocks.length === 0 ) && (
-				// If there are no blocks in this document, don't render a list of blocks.
-				// Instead: inform the user no blocks exist yet.
+			{ ! hasElements && (
 				<p className="editor-block-navigation__paragraph">
 					{ __( 'No blocks created yet.', 'amp' ) }
 				</p>
@@ -99,19 +76,13 @@ function BlockNavigation( { rootBlock, rootBlocks, selectedBlockClientId, select
 
 export default compose(
 	withSelect( ( select ) => {
-		const {
-			getSelectedBlockClientId,
-			getBlockHierarchyRootClientId,
-			getBlock,
-			getBlocks,
-		} = select( 'core/editor' );
-
-		const selectedBlockClientId = getSelectedBlockClientId();
+		const { getCurrentPage, isReordering } = select( 'amp/story' );
+		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/editor' );
 
 		return {
-			rootBlocks: getBlocks().filter( ( block ) => block.name === 'amp/amp-story-page' ),
-			rootBlock: selectedBlockClientId ? getBlock( getBlockHierarchyRootClientId( selectedBlockClientId ) ) : null,
-			selectedBlockClientId,
+			elements: getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [],
+			selectedBlockClientId: getSelectedBlockClientId(),
+			isReordering: isReordering(),
 		};
 	} ),
 	withDispatch( ( dispatch, { onSelect = () => undefined } ) => {
