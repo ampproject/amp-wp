@@ -399,6 +399,54 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'dynamic_classes_preserved' => array(
+				'
+					<html amp><head>
+					<style>
+					.amp-viewer { color: blue; }
+					.amp-referrer-www-google-com { color: red; }
+					.amp-form-submit-success { color: green; }
+					.amp-carousel-slide { outline: solid 1px red; }
+					.non-existent { color: black; }
+					</style>
+					</head><body><p>Hello!</p></body></html>
+				',
+				array(
+					implode(
+						'',
+						array(
+							'.amp-viewer{color:blue}',
+							'.amp-referrer-www-google-com{color:red}',
+							'.amp-form-submit-success{color:green}',
+							'', // Because there is no <amp-carousel> in the document.
+							'', // Because non-existent class is not used.
+						)
+					),
+				),
+				array(),
+			),
+			'dynamic_classes_preserved_carousel' => array(
+				'
+					<html amp><head>
+					<style>
+					.amp-viewer { color: blue; }
+					.amp-carousel-slide { outline: solid 1px red; }
+					</style>
+					</head>
+					<body><amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img> </amp-carousel></body>
+					</html>
+				',
+				array(
+					implode(
+						'',
+						array(
+							'.amp-viewer{color:blue}',
+							'.amp-carousel-slide{outline:solid 1px red}',
+						)
+					),
+				),
+				array(),
+			),
 		);
 	}
 
