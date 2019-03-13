@@ -19,6 +19,7 @@ import {
 	BlockNavigation,
 	EditorCarousel,
 	StoryControls,
+	Shortcuts,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
@@ -75,57 +76,68 @@ domReady( () => {
  */
 function renderStoryComponents() {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
+	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
-	if ( ! editorBlockList ) {
-		return;
+	if ( editorBlockList ) {
+		const ampStoryWrapper = document.createElement( 'div' );
+		ampStoryWrapper.id = 'amp-story-editor';
+
+		const blockNavigation = document.createElement( 'div' );
+		blockNavigation.id = 'amp-root-navigation';
+
+		const editorCarousel = document.createElement( 'div' );
+		editorCarousel.id = 'amp-story-editor-carousel';
+
+		const storyControls = document.createElement( 'div' );
+		storyControls.id = 'amp-story-controls';
+
+		/**
+		 * The intended layout is as follows:
+		 *
+		 * - Post title
+		 * - AMP story wrapper element (needed for overflow styling)
+		 * - - Story controls
+		 * - - Block list
+		 * - - Block navigation
+		 * - - Carousel controls
+		 */
+		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
+		ampStoryWrapper.appendChild( storyControls );
+		ampStoryWrapper.appendChild( editorBlockList );
+		ampStoryWrapper.appendChild( blockNavigation );
+		ampStoryWrapper.appendChild( editorCarousel );
+
+		render(
+			<StoryControls />,
+			storyControls
+		);
+
+		render(
+			<div key="blockNavigation" className="block-navigation">
+				<BlockNavigation />
+			</div>,
+			blockNavigation
+		);
+
+		render(
+			<div key="pagesCarousel" className="editor-carousel">
+				<EditorCarousel />
+			</div>,
+			editorCarousel
+		);
 	}
 
-	const ampStoryWrapper = document.createElement( 'div' );
-	ampStoryWrapper.id = 'amp-story-editor';
+	if ( editorBlockNavigation ) {
+		const shortcuts = document.createElement( 'div' );
+		shortcuts.id = 'amp-story-shortcuts';
 
-	const blockNavigation = document.createElement( 'div' );
-	blockNavigation.id = 'amp-root-navigation';
+		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
 
-	const editorCarousel = document.createElement( 'div' );
-	editorCarousel.id = 'amp-story-editor-carousel';
-
-	const storyControls = document.createElement( 'div' );
-	storyControls.id = 'amp-story-controls';
-
-	/**
-	 * The intended layout is as follows:
-	 *
-	 * - Post title
-	 * - AMP story wrapper element (needed for overflow styling)
-	 * - - Story controls
-	 * - - Block list
-	 * - - Block navigation
-	 * - - Carousel controls
-	 */
-	editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-	ampStoryWrapper.appendChild( storyControls );
-	ampStoryWrapper.appendChild( editorBlockList );
-	ampStoryWrapper.appendChild( blockNavigation );
-	ampStoryWrapper.appendChild( editorCarousel );
-
-	render(
-		<StoryControls />,
-		storyControls
-	);
-
-	render(
-		<div key="blockNavigation" className="block-navigation">
-			<BlockNavigation />
-		</div>,
-		blockNavigation
-	);
-
-	render(
-		<div key="pagesCarousel" className="editor-carousel">
-			<EditorCarousel />
-		</div>,
-		editorCarousel
-	);
+		render(
+			<Shortcuts />,
+			shortcuts
+		);
+	}
 }
 
 const { getBlockOrder } = select( 'core/editor' );
