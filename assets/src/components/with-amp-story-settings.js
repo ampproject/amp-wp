@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../constants';
-import { withParentBlock, BlockMover, IgnoreNestedEvents } from './';
+import { withParentBlock, StoryBlockMover } from './';
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
@@ -27,16 +27,14 @@ export default createHigherOrderComponent(
 
 			return (
 				<Fragment>
-					<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] }>
-						<BlockMover
-							clientIds={ props.clientId }
-							blockElementId={ `block-${ props.clientId }` }
-							isFirst={ props.isFirst }
-							isLast={ props.isLast }
-							isFocused={ props.isFocused }
-							isDraggable={ ! props.isPartOfMultiSelection }
-						/>
-					</IgnoreNestedEvents>
+					<StoryBlockMover
+						clientIds={ props.clientId }
+						blockElementId={ `block-${ props.clientId }` }
+						isFirst={ props.isFirst }
+						isLast={ props.isLast }
+						isFocused={ props.isFocused }
+						isDraggable={ ! props.isPartOfMultiSelection }
+					/>
 					<BlockEdit { ...props } />
 					{ isImageBlock && (
 						<InspectorControls>

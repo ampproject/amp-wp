@@ -16,15 +16,14 @@ import {
 	withPageNumber,
 	withWrapperProps,
 	withActivePageState,
+	withStoryBlockDropZone,
 	BlockNavigation,
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
-	BlockDropZone,
-	withSelectedBlock
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
+import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
 import store from './stores/amp-story';
 
 /**
@@ -197,30 +196,6 @@ store.subscribe( () => {
 	}
 } );
 
-const dropBlockZoneWithSelect = compose(
-	withBlockName,
-	withHasSelectedInnerBlock,
-	withSelectedBlock
-);
-
-/**
- * Filters DropBlockZone, leaves the only drop zone for AMP Story Page.
- *
- * @return {Function} Handler.
- */
-const filterDropBlockZone = () => {
-	return dropBlockZoneWithSelect( ( props ) => {
-		/*
-		 * We'll be using only the Page's dropzone since all the elements are being moved around within a Page.
-		 * Using dropzone of each single element would result the dropzone moving together with the element.
-		 */
-		if ( 'amp/amp-story-page' === props.blockName && props.hasSelectedInnerBlock ) {
-			return <BlockDropZone srcClientId={ props.selectedBlock.clientId } />;
-		}
-		return null;
-	} );
-};
-
 // These do not reliably work at domReady.
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
@@ -230,5 +205,4 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
-addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', disableBlockDropZone );
-addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/filterBlockDropZone', filterDropBlockZone );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', withStoryBlockDropZone );

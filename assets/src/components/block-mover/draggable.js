@@ -55,7 +55,6 @@ class Draggable extends Component {
 	 * @param  {Object} event     The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
-		event.preventDefault();
 		this.cloneWrapper.style.top =
 			`${ parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop }px`;
 		this.cloneWrapper.style.left =
@@ -85,7 +84,8 @@ class Draggable extends Component {
 	onDragStart( event ) {
 		const { elementId, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
-		if ( ! element ) {
+		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
+		if ( ! element || ! parentPage ) {
 			event.preventDefault();
 			return;
 		}
@@ -95,6 +95,11 @@ class Draggable extends Component {
 		// Prepare element clone and append to element wrapper.
 		const elementRect = element.getBoundingClientRect();
 		const elementWrapper = element.parentNode;
+		const elementTopOffset = parseInt( elementRect.top, 10 );
+		const elementLeftOffset = parseInt( elementRect.left, 10 );
+
+		const pageWrapperRect = parentPage.getBoundingClientRect();
+
 		const clone = element.cloneNode( true );
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -103,9 +108,9 @@ class Draggable extends Component {
 		this.cloneWrapper.classList.add( cloneWrapperClass );
 		this.cloneWrapper.style.width = `${ elementRect.width }px`;
 
-		// Position clone right over the original element.
-		this.cloneWrapper.style.top = `${ event.clientY }px`;
-		this.cloneWrapper.style.left = `${ event.clientX }px`;
+		// Position clone over the original element.
+		this.cloneWrapper.style.top = `${ elementTopOffset - parseInt( pageWrapperRect.top, 10 ) }px`;
+		this.cloneWrapper.style.left = `${ elementLeftOffset - parseInt( pageWrapperRect.left, 10 ) }px`;
 
 		// Hack: Remove iFrames as it's causing the embeds drag clone to freeze
 		[ ...clone.querySelectorAll( 'iframe' ) ].forEach( ( child ) => child.parentNode.removeChild( child ) );

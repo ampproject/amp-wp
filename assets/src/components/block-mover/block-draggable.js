@@ -7,8 +7,8 @@
  */
 import { withSelect } from '@wordpress/data';
 
-/*
- * Internal dependencies.
+/**
+ * Internal dependencies
  */
 import Draggable from './draggable';
 

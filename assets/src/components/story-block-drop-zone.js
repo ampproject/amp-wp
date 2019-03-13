@@ -15,6 +15,11 @@ import {
 	MediaUploadCheck,
 } from '@wordpress/editor';
 
+/**
+ * Internal dependencies
+ */
+import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from './../constants';
+
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
 class BlockDropZone extends Component {
@@ -22,6 +27,16 @@ class BlockDropZone extends Component {
 		super( ...arguments );
 
 		this.onDrop = this.onDrop.bind( this );
+	}
+
+	getDragDropPercentagePosition( axis, srcValue, dstValue ) {
+		const positionInPx = dstValue - srcValue;
+		if ( 'x' === axis ) {
+			return Math.round( ( positionInPx / STORY_PAGE_INNER_WIDTH ) * 100 );
+		} else if ( 'y' === axis ) {
+			return Math.round( ( positionInPx / STORY_PAGE_INNER_HEIGHT ) * 100 );
+		}
+		return 0;
 	}
 
 	onDrop( event ) {
@@ -34,7 +49,7 @@ class BlockDropZone extends Component {
 
 		// Get the editor wrapper element for calculating the width and height.
 		const wrapperEl = document.querySelector( wrapperElSelector );
-		if ( ! element || ! clone || ! wrapperEl || ! wrapperEl.clientHeight || ! wrapperEl.clientWidth ) {
+		if ( ! element || ! clone || ! wrapperEl ) {
 			event.preventDefault();
 			return;
 		}
@@ -46,15 +61,10 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
-		const positionLeftInPx = clonePosition.left - wrapperPosition.left;
-		const positionTopInPx = clonePosition.top - wrapperPosition.top;
-
-		const positionLeft = Math.round( ( positionLeftInPx / wrapperEl.clientWidth ) * 100 );
-		const positionTop = Math.round( ( positionTopInPx / wrapperEl.clientHeight ) * 100 );
 
 		updateBlockAttributes( srcClientId, {
-			positionLeft,
-			positionTop,
+			positionLeft: this.getDragDropPercentagePosition( 'x', wrapperPosition.left, clonePosition.left ),
+			positionTop: this.getDragDropPercentagePosition( 'y', wrapperPosition.top, clonePosition.top ),
 		} );
 	}
 

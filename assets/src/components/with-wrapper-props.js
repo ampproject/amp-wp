@@ -7,7 +7,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
-import { withAttributes, withBlockName, withHasSelectedInnerBlock, withParentBlock } from '.';
+import { withAttributes, withBlockName, withHasSelectedInnerBlock, withParentBlock } from './';
 
 const wrapperWithSelect = compose(
 	withAttributes,
@@ -68,7 +68,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 			}
 			wrapperProps = {
 				...wrapperProps,
-				style: style,
+				style,
 			};
 		}
 

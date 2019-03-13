@@ -27,6 +27,9 @@ import Slabo27 from '../images/font-names/slabo-27.svg';
 import SourceSansPro from '../images/font-names/source-sans-pro.svg';
 import Ubuntu from '../images/font-names/ubuntu.svg';
 
+export const STORY_PAGE_INNER_WIDTH = 328;
+export const STORY_PAGE_INNER_HEIGHT = 553;
+
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 ];

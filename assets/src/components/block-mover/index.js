@@ -25,6 +25,7 @@ import { withInstanceId, compose } from '@wordpress/compose';
  */
 import { upArrow, downArrow, dragHandle } from './icons';
 import { IconDragHandle } from './drag-handle';
+import IgnoreNestedEvents from './ignore-nested-events';
 
 export class BlockMover extends Component {
 	constructor() {
@@ -57,38 +58,39 @@ export class BlockMover extends Component {
 		// to an unfocused state (body as active element) without firing blur on,
 		// the rendering parent, leaving it unable to react to focus out.
 		return (
-			<div className={ classnames( 'amp-story-editor-block-mover', { 'is-visible': isFocused } ) }>
-
-				<IconButton
-					className="editor-block-mover__control"
-					onClick={ isLast ? null : onMoveDown }
-					icon={ downArrow }
-					label={ __( 'Bring forward', 'amp' ) }
-					aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
-					aria-disabled={ isLast }
-					onFocus={ this.onFocus }
-					onBlur={ this.onBlur }
-				/>
-				<IconDragHandle
-					className="editor-block-mover__control"
-					icon={ dragHandle }
-					clientId={ clientIds }
-					blockElementId={ blockElementId }
-					isVisible={ isDraggable }
-					onDragStart={ onDragStart }
-					onDragEnd={ onDragEnd }
-				/>
-				<IconButton
-					className="editor-block-mover__control"
-					onClick={ isFirst ? null : onMoveUp }
-					icon={ upArrow }
-					label={ __( 'Move to back', 'amp' ) }
-					aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
-					aria-disabled={ isFirst }
-					onFocus={ this.onFocus }
-					onBlur={ this.onBlur }
-				/>
-			</div>
+			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] }>
+				<div className={ classnames( 'amp-story-editor-block-mover', { 'is-visible': isFocused } ) }>
+					<IconButton
+						className="editor-block-mover__control"
+						onClick={ isLast ? null : onMoveDown }
+						icon={ downArrow }
+						label={ __( 'Bring forward', 'amp' ) }
+						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
+						aria-disabled={ isLast }
+						onFocus={ this.onFocus }
+						onBlur={ this.onBlur }
+					/>
+					<IconDragHandle
+						className="editor-block-mover__control"
+						icon={ dragHandle }
+						clientId={ clientIds }
+						blockElementId={ blockElementId }
+						isVisible={ isDraggable }
+						onDragStart={ onDragStart }
+						onDragEnd={ onDragEnd }
+					/>
+					<IconButton
+						className="editor-block-mover__control"
+						onClick={ isFirst ? null : onMoveUp }
+						icon={ upArrow }
+						label={ __( 'Move to back', 'amp' ) }
+						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
+						aria-disabled={ isFirst }
+						onFocus={ this.onFocus }
+						onBlur={ this.onBlur }
+					/>
+				</div>
+			</IgnoreNestedEvents>
 		);
 	}
 }

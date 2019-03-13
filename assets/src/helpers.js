@@ -6,12 +6,6 @@
 import uuid from 'uuid/v4';
 
 /**
- * WordPress dependencies
- */
-import { withSelect } from '@wordpress/data';
-import { createHigherOrderComponent } from '@wordpress/compose';
-
-/**
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
@@ -216,68 +210,3 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...ampAttributes,
 	};
 };
-
-const dropBlockZoneWithSelect = compose(
-	withBlockName,
-	withHasSelectedInnerBlock,
-	withSelectedBlock
-);
-
-/**
- * Filters DropBlockZone, leaves the only drop zone for AMP Story Page.
- *
- * @return {Function} Handler.
- */
-const filterDropBlockZone = () => {
-	return dropBlockZoneWithSelect( ( props ) => {
-		/*
-		 * We'll be using only the Page's dropzone since all the elements are being moved around within a Page.
-		 * Using dropzone of each single element would result the dropzone moving together with the element.
-		 */
-		if ( 'amp/amp-story-page' === props.blockName && props.hasSelectedInnerBlock ) {
-			return <BlockDropZone srcClientId={ props.selectedBlock.clientId } />;
-		}
-		return null;
-	} );
-};
-
-/**
- * Filter drop zones for each block.
- *
- * Disables drop zones within a block while reordering is on.
- *
- * In reorder mode, any interaction with blocks is disabled, and only
- * pages themselves can be dragged & dropped in order to reorder pages within the story.
- *
- * In default mode, only Page will have a drop zone since all the elements are being
- * moved around within a Page.
- *
- * @param {Object} BlockListBlock BlockListBlock element.
- * @return {?Function} BlockDropZone or null if reordering.
- */
-export const filterBlockDropZone = createHigherOrderComponent(
-	( BlockDropZone ) => {
-		return withSelect( ( select ) => {
-			const { isReordering } = select( 'amp/story' );
-
-			return {
-				isReordering: isReordering(),
-			};
-		} )( ( props ) => {
-			const { isReordering } = props;
-
-			if ( isReordering ) {
-				return null;
-			}
-
-			if ( 'amp/amp-story-page' === props.blockName && props.hasSelectedInnerBlock ) {
-				return <BlockDropZone srcClientId={ props.selectedBlock.clientId } />;
-			}
-
-			// Using drop zone of each single element would result the drop zone moving together with the element.
-			return null;
-		} );
-	},
-	'filterBlockDropZone'
-);
-

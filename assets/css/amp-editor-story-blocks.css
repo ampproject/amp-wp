@@ -567,6 +567,10 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	margin-top: 0;
 }
 
+#amp-story-editor .components-draggable__clone {
+	position: absolute;
+}
+
 /*
  * 10. Custom Components
  */
