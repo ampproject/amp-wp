@@ -14,14 +14,14 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	list-style: none;
 }
 
-.latest-stories-carousel .latest-stories__slide {
+.latest-stories__slide {
 	margin-left: 0.5rem;
 	margin-right: 0.5rem;
 	position: relative;
 }
 
 /* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
-.latest-stories-carousel .latest_stories__link:after {
+.latest_stories__link:after {
 	display: block;
 	position: absolute;
 	border-radius: 0.5rem;
@@ -33,11 +33,11 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), 70%, rgba(0, 0, 0, 0.9));
 }
 
-.latest-stories-carousel .latest-stories__featured-img {
+.latest-stories__featured-img {
 	border-radius: 0.5rem;
 }
 
-.latest-stories-carousel .latest-stories__title {
+.latest-stories__title {
 	white-space: normal; /* Override an AMP style rule of white-space: nowrap */
 	position: absolute;
 	bottom: 5rem;
@@ -47,7 +47,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	z-index: 10;
 }
 
-.latest-stories-carousel .latest-stories__meta {
+.latest-stories__meta {
 	width: 100%;
 	position: absolute;
 	bottom: 0;
@@ -57,7 +57,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	z-index: 10;
 }
 
-.latest-stories-carousel .latest-stories__meta .latest-stories__avatar {
+.latest-stories__meta .latest-stories__avatar {
 	height: 24px;
 	width: 24px;
 	border-radius: 50%;
@@ -67,9 +67,17 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	display: inline-block;
 }
 
-.latest-stories-carousel .latest-stories__meta .latest-stories__author {
+.latest-stories__meta .latest-stories__author {
 	margin-left: 0.5rem;
 	border-bottom: 0;
 	vertical-align: middle;
 	color: #d3d3d3;
+}
+
+/* Styling for when an AMP story is embedded in a post, like with the WordPress (embed) block. */
+.amp-story-embed {
+	position: relative;
+	width: max-content;
+	border-radius: 0.5rem;
+	overflow-x: hidden;
 }
