@@ -85,7 +85,7 @@ function AnimationOrderPicker( {
 					renderContent={ () => (
 						<NavigableMenu>
 							{ options.map( ( option ) => {
-								const isSelected = ( option.value === value );
+								const isSelected = option.value === currentOption.value;
 
 								return (
 									<Button
