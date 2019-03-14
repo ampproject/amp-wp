@@ -150,6 +150,8 @@ function renderStoryComponents() {
 const { getBlockOrder, getBlock, getBlockRootClientId } = select( 'core/editor' );
 
 const positionTopLimit = 75;
+const positionTopHighest = 5;
+const positionTopGap = 10;
 
 /**
  * Set initial positioning if the selected block is an unmodified block.
@@ -187,8 +189,8 @@ function maybeSetInitialPositioning( selectedBlockClientId ) {
 				highestTop = childBlock.attributes.positionTop;
 			}
 		} );
-		// If it's more than the limit, set the new one to 10
-		const newPositionTop = highestTop > positionTopLimit ? 10 : highestTop + 10;
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestTop > positionTopLimit ? positionTopHighest : highestTop + positionTopGap;
 
 		updateBlockAttributes( selectedBlockClientId, { positionTop: newPositionTop } );
 	}
