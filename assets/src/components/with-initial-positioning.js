@@ -26,7 +26,7 @@ export default createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 
-			// If the positions are not set and if the block is selected.
+			// If the positions are already set or the block is not selected, just return original.
 			if (
 				! props.isSelected ||
 				0 !== attributes.positionTop ||
