@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl } from '@wordpress/components';
+import { PanelBody, SelectControl, withFallbackStyles } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
 	RichText,
@@ -26,6 +26,20 @@ import {
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle } from '../../helpers';
 
+const { getComputedStyle } = window;
+
+const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
+	const { textColor, backgroundColor, fontSize, customFontSize } = ownProps.attributes;
+	const editableNode = node.querySelector( '[contenteditable="true"]' );
+	const computedStyles = editableNode ? getComputedStyle( editableNode ) : null;
+
+	return {
+		fallbackBackgroundColor: backgroundColor || ! computedStyles ? undefined : computedStyles.backgroundColor,
+		fallbackTextColor: textColor || ! computedStyles ? undefined : computedStyles.color,
+		fallbackFontSize: fontSize || customFontSize || ! computedStyles ? undefined : parseInt( computedStyles.fontSize ) || undefined,
+	};
+} );
+
 function TextBlock( props ) {
 	const {
 		attributes,
@@ -37,6 +51,8 @@ function TextBlock( props ) {
 		textColor,
 		setBackgroundColor,
 		setTextColor,
+		fallbackTextColor,
+		fallbackBackgroundColor,
 	} = props;
 
 	const {
@@ -93,10 +109,10 @@ function TextBlock( props ) {
 						{ ...{
 							textColor: textColor.color,
 							backgroundColor: backgroundColor.color,
-							// Todo: Calculate from page background.
-							fallbackBackgroundColor: undefined,
+							fallbackTextColor,
+							fallbackBackgroundColor,
+							fontSize: fontSize.size,
 						} }
-						fontSize={ fontSize.size }
 					/>
 				</PanelColorSettings>
 			</InspectorControls>
@@ -127,4 +143,5 @@ function TextBlock( props ) {
 export default compose(
 	withColors( 'backgroundColor', { textColor: 'color' } ),
 	withFontSizes( 'fontSize' ),
+	applyFallbackStyles
 )( TextBlock );
