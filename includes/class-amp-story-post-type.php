@@ -216,7 +216,16 @@ class AMP_Story_Post_Type {
 					return false;
 				}
 				$dep = wp_styles()->registered[ $handle ];
-				return 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST );
+
+				if ( 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST ) ) {
+					return true;
+				}
+
+				if ( $handle === 'wp-block-library' ) {
+					return true;
+				}
+
+				return false;
 			}
 		);
 	}
@@ -241,7 +250,7 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
 			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
-			array(),
+			array( 'wp-edit-blocks' ),
 			AMP__VERSION
 		);
 
