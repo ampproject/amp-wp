@@ -200,8 +200,10 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
-		let style = attributes.style ? attributes.style : 'position: absolute;';
-		style += `top: ${ attributes.positionTop }%; left: ${ attributes.positionLeft }%;`;
+		const style = props.style ? props.style : {};
+		style.position = 'absolute';
+		style.top = `${ attributes.positionTop }%`;
+		style.left = `${ attributes.positionLeft }%`;
 		ampAttributes.style = style;
 	}
 
