@@ -1,11 +1,17 @@
 /**
+ * External dependencies
+ */
+import { every } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 /**
  * Internal dependencies
@@ -13,7 +19,6 @@ import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBloc
 import {
 	withAmpStorySettings,
 	withAnimationControls,
-	withInitialPositioning,
 	withPageNumber,
 	withWrapperProps,
 	withActivePageState,
@@ -23,7 +28,7 @@ import {
 	StoryControls,
 	Shortcuts,
 } from './components';
-import { ALLOWED_BLOCKS } from './constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
 import store from './stores/amp-story';
 
@@ -142,7 +147,52 @@ function renderStoryComponents() {
 	}
 }
 
-const { getBlockOrder, getBlock } = select( 'core/editor' );
+const { getBlockOrder, getBlock, getBlockRootClientId } = select( 'core/editor' );
+
+const positionTopLimit = 75;
+
+/**
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {number} selectedBlockClientId Selected block's ID.
+ */
+function maybeSetInitialPositioning( selectedBlockClientId ) {
+	const block = getBlock( selectedBlockClientId );
+	if ( ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	const parentBlock = getBlock( getBlockRootClientId( selectedBlockClientId ) );
+	// Short circuit if the positions are already set or the parent block doesn't have any inner blocks.
+	if (
+		0 !== block.attributes.positionTop ||
+		0 !== block.attributes.positionLeft ||
+		! parentBlock.innerBlocks.length
+	) {
+		return;
+	}
+
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) =>
+		value === block.attributes[ key ]
+	);
+
+	// Only set the position if the block was unmodifed before.
+	if ( isUnmodified ) {
+		let highestTop = 0;
+		// Get all child blocks of the parent block and get the highest "positionTop" value.
+		parentBlock.innerBlocks.forEach( ( childBlock ) => {
+			if ( childBlock.attributes.positionTop > highestTop ) {
+				highestTop = childBlock.attributes.positionTop;
+			}
+		} );
+		// If it's more than the limit, set the new one to 10
+		const newPositionTop = highestTop > positionTopLimit ? 10 : highestTop + 10;
+
+		updateBlockAttributes( selectedBlockClientId, { positionTop: newPositionTop } );
+	}
+}
 
 let blockOrder = getBlockOrder();
 
@@ -161,6 +211,9 @@ subscribe( () => {
 		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-text' );
 		}
+
+		// If newly added blocks we'll also position them.
+		maybeSetInitialPositioning( selectedBlockClientId );
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
@@ -183,7 +236,6 @@ subscribe( () => {
 } );
 
 const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
-const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
@@ -216,7 +268,6 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', se
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
-addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withInitialPositioning );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
