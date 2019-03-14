@@ -1084,10 +1084,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * This ensures that the image inside it is centered.
 	 *
 	 * @since 1.0
-	 *
-	 * @param array $args Arguments.
 	 */
-	public static function add_twentynineteen_image_styles( $args = array() ) {
+	public static function add_twentynineteen_image_styles() {
 		add_action(
 			'wp_enqueue_scripts',
 			function() {
