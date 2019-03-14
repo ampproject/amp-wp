@@ -60,6 +60,7 @@
     "@wordpress/hooks": "2.1.0",
     "@wordpress/i18n": "3.2.0",
     "@wordpress/plugins": "2.1.0",
-    "@wordpress/wordcount": "2.1.0"
+    "@wordpress/wordcount": "2.1.0",
+    "classnames": "2.2.6"
   }
 }

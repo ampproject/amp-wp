@@ -1,8 +1,17 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { RichText } from '@wordpress/editor';
+import {
+	RichText,
+	getColorClassName,
+	getFontSizeClass,
+} from '@wordpress/editor';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
@@ -12,6 +21,48 @@ import edit from './edit';
 import getTagName from './get-tag-name';
 
 export const name = 'amp/amp-story-text';
+
+const supports = {
+	className: false,
+	anchor: true,
+};
+
+const schema = {
+	placeholder: {
+		type: 'string',
+	},
+	content: {
+		type: 'string',
+		source: 'html',
+		selector: 'p,h1,h2',
+		default: '',
+	},
+	type: {
+		type: 'string',
+		default: 'auto',
+	},
+	fontSize: {
+		type: 'string',
+	},
+	customFontSize: {
+		type: 'number',
+	},
+	ampFontFamily: {
+		type: 'string',
+	},
+	textColor: {
+		type: 'string',
+	},
+	customTextColor: {
+		type: 'string',
+	},
+	backgroundColor: {
+		type: 'string',
+	},
+	customBackgroundColor: {
+		type: 'string',
+	},
+};
 
 export const settings = {
 	title: __( 'Text', 'amp' ),
@@ -28,46 +79,40 @@ export const settings = {
 		__( 'paragraph', 'amp' ),
 	],
 
-	supports: {
-		className: false,
-		anchor: true,
-	},
+	supports,
 
-	attributes: {
-		placeholder: {
-			type: 'string',
-		},
-		content: {
-			type: 'string',
-			source: 'html',
-			selector: 'p,h1,h2',
-			default: '',
-		},
-		type: {
-			type: 'string',
-			default: 'auto',
-		},
-		fontSize: {
-			type: 'string',
-		},
-		customFontSize: {
-			type: 'number',
-		},
-		ampFontFamily: {
-			type: 'string',
-		},
-	},
+	attributes: schema,
 
 	edit,
 
 	save( { attributes } ) {
-		const { content, fontSize, customFontSize } = attributes;
+		const {
+			content,
+			fontSize,
+			customFontSize,
+			backgroundColor,
+			textColor,
+			customBackgroundColor,
+			customTextColor,
+		} = attributes;
+
+		const textClass = getColorClassName( 'color', textColor );
+		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+		const fontSizeClass = getFontSizeClass( fontSize );
 
 		const tagName = getTagName( attributes );
-		const fontSizeClass = fontSize && `is-${ fontSize }-text`;
-		const className = fontSizeClass ? fontSizeClass : undefined;
+
+		const className = classnames( {
+			'has-text-color': textColor || customTextColor,
+			'has-background': backgroundColor || customBackgroundColor,
+			[ fontSizeClass ]: fontSizeClass,
+			[ textClass ]: textClass,
+			[ backgroundClass ]: backgroundClass,
+		} );
 
 		const styles = {
+			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
+			color: textClass ? undefined : customTextColor,
 			fontSize: fontSizeClass ? undefined : customFontSize,
 		};
 

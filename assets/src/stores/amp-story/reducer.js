@@ -3,7 +3,7 @@
  */
 import { select, combineReducers } from '@wordpress/data';
 
-const { getBlock, getBlockOrder, getAdjacentBlockClientId } = select( 'core/editor' );
+const { getBlock, getBlockOrder } = select( 'core/editor' );
 
 /**
  * Reducer handling animation order changes.
@@ -81,12 +81,6 @@ export function currentPage( state = undefined, action ) {
 	const { page } = action;
 
 	switch ( action.type ) {
-		case 'REMOVE_PAGE':
-			if ( page === state ) {
-				return getAdjacentBlockClientId( page, -1 ) || getAdjacentBlockClientId( page, 1 ) || ( getBlockOrder() ? [ 0 ] : getBlockOrder() ) || undefined;
-			}
-
-			return state;
 		case 'SET_CURRENT_PAGE':
 			return getBlock( page ) ? page : state;
 	}

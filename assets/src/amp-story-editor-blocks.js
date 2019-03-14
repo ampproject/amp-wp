@@ -200,7 +200,8 @@ let blockOrder = getBlockOrder();
 
 subscribe( () => {
 	const { getSelectedBlockClientId } = select( 'core/editor' );
-	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
+	const { getCurrentPage } = select( 'amp/story' );
+	const { setCurrentPage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -221,19 +222,23 @@ subscribe( () => {
 	}
 
 	const newBlockOrder = getBlockOrder();
-	const deletedPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
 	const newlyAddedPages = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
+	const deletedPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
+
+	if ( deletedPages.includes( getCurrentPage() ) ) {
+		// Change current page if it has been deleted.
+		const nextIndex = Math.max( 0, blockOrder.indexOf( getCurrentPage() ) - 1 );
+
+		blockOrder = newBlockOrder;
+
+		setCurrentPage( blockOrder[ nextIndex ] );
+	}
 
 	blockOrder = newBlockOrder;
 
 	// If a new page has been inserted, make it the current one.
 	if ( newlyAddedPages ) {
 		setCurrentPage( newlyAddedPages );
-	}
-
-	// Remove stale data from store.
-	for ( const oldPage of deletedPages ) {
-		removePage( oldPage );
 	}
 } );
 
