@@ -32,11 +32,12 @@ import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
 import store from './stores/amp-story';
 
+const { getBlockOrder, getBlock, getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
+
 /**
  * Initialize editor integration.
  */
 domReady( () => {
-	const { getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
 	const { addAnimation, setCurrentPage } = dispatch( 'amp/story' );
 
 	// Ensure that the default block is page when no block is selected.
@@ -147,8 +148,6 @@ function renderStoryComponents() {
 	}
 }
 
-const { getBlockOrder, getBlock, getBlockRootClientId } = select( 'core/editor' );
-
 const positionTopLimit = 75;
 const positionTopHighest = 5;
 const positionTopGap = 10;
@@ -197,6 +196,7 @@ function maybeSetInitialPositioning( selectedBlockClientId ) {
 }
 
 let blockOrder = getBlockOrder();
+let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
 	const { getSelectedBlockClientId } = select( 'core/editor' );
@@ -214,9 +214,6 @@ subscribe( () => {
 		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-text' );
 		}
-
-		// If newly added blocks we'll also position them.
-		maybeSetInitialPositioning( selectedBlockClientId );
 	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
@@ -240,6 +237,12 @@ subscribe( () => {
 	if ( newlyAddedPages ) {
 		setCurrentPage( newlyAddedPages );
 	}
+
+	for ( const block of allBlocksWithChildren ) {
+		maybeSetInitialPositioning( block );
+	}
+
+	allBlocksWithChildren = getClientIdsWithDescendants();
 } );
 
 const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
