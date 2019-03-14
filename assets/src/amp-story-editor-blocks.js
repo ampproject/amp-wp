@@ -165,12 +165,8 @@ function maybeSetInitialPositioning( clientId ) {
 	}
 
 	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
-	// Short circuit if the positions are already set or the block has no parent.
-	if (
-		0 !== block.attributes.positionTop ||
-		0 !== block.attributes.positionLeft ||
-		! parentBlock
-	) {
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
 		return;
 	}
 

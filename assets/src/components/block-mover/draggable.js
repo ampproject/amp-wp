@@ -108,7 +108,9 @@ class Draggable extends Component {
 
 		// Position clone over the original element.
 		this.cloneWrapper.style.top = `${ elementTopOffset - parseInt( pageWrapperRect.top, 10 ) }px`;
-		this.cloneWrapper.style.left = `${ elementLeftOffset - parseInt( pageWrapperRect.left, 10 ) }px`;
+		// Add 5px adjustment for having the block mover right next to the clone.
+		// @todo This will need some additional adjusting once we add padding to the Page in the editor.
+		this.cloneWrapper.style.left = `${ elementLeftOffset - parseInt( pageWrapperRect.left, 10 ) - 5 }px`;
 
 		// Hack: Remove iFrames as it's causing the embeds drag clone to freeze
 		[ ...clone.querySelectorAll( 'iframe' ) ].forEach( ( child ) => child.parentNode.removeChild( child ) );
