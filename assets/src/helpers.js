@@ -145,7 +145,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	};
 	addedAttributes.positionLeft = {
 		type: 'number',
-		default: 0,
+		default: 5,
 	};
 
 	return {

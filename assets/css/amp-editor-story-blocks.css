@@ -575,6 +575,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	margin: 0;
 	left: -100px;
 	top: -50px;
+	border-top: none;
 }
 
 div[data-type="amp/amp-story-page"] .wp-block-image {
