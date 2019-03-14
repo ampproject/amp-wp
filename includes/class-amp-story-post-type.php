@@ -277,12 +277,9 @@ class AMP_Story_Post_Type {
 	 * @return array Modified editor settings.
 	 */
 	public static function filter_block_editor_settings( $editor_settings, $post ) {
-		if ( self::POST_TYPE_SLUG !== $post->post_type ) {
-			return $editor_settings;
+		if ( self::POST_TYPE_SLUG === $post->post_type ) {
+			unset( $editor_settings['colors'] );
 		}
-
-		unset( $editor_settings['colors'] );
-
 		return $editor_settings;
 	}
 
