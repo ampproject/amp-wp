@@ -62,11 +62,11 @@ export class BlockMover extends Component {
 				<div className={ classnames( 'amp-story-editor-block-mover', { 'is-visible': isFocused } ) }>
 					<IconButton
 						className="editor-block-mover__control"
-						onClick={ isLast ? null : onMoveDown }
-						icon={ downArrow }
-						label={ __( 'Bring forward', 'amp' ) }
-						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
-						aria-disabled={ isLast }
+						onClick={ isFirst ? null : onMoveUp }
+						icon={ upArrow }
+						label={ __( 'Send Backward', 'amp' ) }
+						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
+						aria-disabled={ isFirst }
 						onFocus={ this.onFocus }
 						onBlur={ this.onBlur }
 					/>
@@ -81,11 +81,11 @@ export class BlockMover extends Component {
 					/>
 					<IconButton
 						className="editor-block-mover__control"
-						onClick={ isFirst ? null : onMoveUp }
-						icon={ upArrow }
-						label={ __( 'Move to back', 'amp' ) }
-						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
-						aria-disabled={ isFirst }
+						onClick={ isLast ? null : onMoveDown }
+						icon={ downArrow }
+						label={ __( 'Bring Forward', 'amp' ) }
+						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
+						aria-disabled={ isLast }
 						onFocus={ this.onFocus }
 						onBlur={ this.onBlur }
 					/>

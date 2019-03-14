@@ -149,7 +149,7 @@ function renderStoryComponents() {
 }
 
 const positionTopLimit = 75;
-const positionTopHighest = 5;
+const positionTopHighest = 0;
 const positionTopGap = 10;
 
 /**

@@ -1,7 +1,6 @@
 /**
  * This file is based on the core's <Draggable> Component.
- * See diff here: https://gist.github.com/miina/199fb96e2f4971dddc739a86e8418367/revisions#diff-8503647849484251f7c1151df9e3771e
- */
+ **/
 
 /**
  * External dependencies
@@ -74,7 +73,6 @@ class Draggable extends Component {
 
 	/**
 	 *  - Clones the current element and spawns clone over original element.
-	 *  - Adds a fake temporary drag image to avoid browser defaults.
 	 *  - Sets transfer data.
 	 *  - Adds dragover listener.
 	 * @param  {Object} event					The non-custom DragEvent.
