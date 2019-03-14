@@ -95,6 +95,7 @@ class EditPage extends Component {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',
+			backgroundSize: 'cover',
 		};
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
