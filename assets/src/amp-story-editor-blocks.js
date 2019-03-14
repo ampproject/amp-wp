@@ -155,43 +155,39 @@ const positionTopGap = 10;
 /**
  * Set initial positioning if the selected block is an unmodified block.
  *
- * @param {number} selectedBlockClientId Selected block's ID.
+ * @param {number} clientId Selected block's ID.
  */
-function maybeSetInitialPositioning( selectedBlockClientId ) {
-	const block = getBlock( selectedBlockClientId );
+function maybeSetInitialPositioning( clientId ) {
+	const block = getBlock( clientId );
+
 	if ( ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
 		return;
 	}
 
-	const parentBlock = getBlock( getBlockRootClientId( selectedBlockClientId ) );
-	// Short circuit if the positions are already set or the parent block doesn't have any inner blocks.
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the positions are already set or the block has no parent.
 	if (
 		0 !== block.attributes.positionTop ||
 		0 !== block.attributes.positionLeft ||
-		! parentBlock.innerBlocks.length
+		! parentBlock
 	) {
 		return;
 	}
 
 	// Check if it's a new block.
 	const newBlock = createBlock( block.name );
-	const isUnmodified = every( newBlock.attributes, ( value, key ) =>
-		value === block.attributes[ key ]
-	);
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
 
-	// Only set the position if the block was unmodifed before.
+	// Only set the position if the block was unmodified before.
 	if ( isUnmodified ) {
-		let highestTop = 0;
-		// Get all child blocks of the parent block and get the highest "positionTop" value.
-		parentBlock.innerBlocks.forEach( ( childBlock ) => {
-			if ( childBlock.attributes.positionTop > highestTop ) {
-				highestTop = childBlock.attributes.positionTop;
-			}
-		} );
-		// If it's more than the limit, set the new one.
-		const newPositionTop = highestTop > positionTopLimit ? positionTopHighest : highestTop + positionTopGap;
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
 
-		updateBlockAttributes( selectedBlockClientId, { positionTop: newPositionTop } );
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
 	}
 }
 
