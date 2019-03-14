@@ -3,7 +3,7 @@
  */
 import { select, combineReducers } from '@wordpress/data';
 
-const { getBlock, getBlockOrder, getAdjacentBlockClientId } = select( 'core/editor' );
+const { getBlock, getBlockOrder } = select( 'core/editor' );
 
 /**
  * Reducer handling animation order changes.
