@@ -221,7 +221,7 @@ class AMP_Story_Post_Type {
 					return true;
 				}
 
-				if ( $handle === 'wp-block-library' ) {
+				if ( 'wp-block-library' === $handle ) {
 					return true;
 				}
 
