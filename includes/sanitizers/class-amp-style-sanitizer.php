@@ -157,10 +157,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Class names used in document.
 	 *
+	 * This list includes all class names that AMP can dynamically add.
+	 *
+	 * @link https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes
 	 * @since 1.0
 	 * @var array
 	 */
-	private $used_class_names = array();
+	private $used_class_names;
+
+	/**
+	 * Attributes used in the document.
+	 *
+	 * @since 1.1
+	 * @var array
+	 */
+	private $used_attributes = array();
 
 	/**
 	 * Tag names used in document.
@@ -168,7 +179,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @var array
 	 */
-	private $used_tag_names = array();
+	private $used_tag_names;
 
 	/**
 	 * XPath.
@@ -357,24 +368,146 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Used class names.
 	 */
 	private function get_used_class_names() {
-		if ( empty( $this->used_class_names ) ) {
-			$classes = ' ';
-			foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
-				$classes .= ' ' . $class_attribute->nodeValue;
-			}
-
-			// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-			foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class' ) as $bound_class_attribute ) {
-				if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
-					$classes .= ' ' . implode( ' ', $matches[2] );
-				}
-			}
-
-			$this->used_class_names = array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) );
+		if ( isset( $this->used_class_names ) ) {
+			return $this->used_class_names;
 		}
+
+		$dynamic_class_names = array(
+
+			/*
+			 * See <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
+			 * Note that amp-referrer-* class names are handled in has_used_class_name() below.
+			 */
+			'amp-viewer',
+		);
+
+		$classes = ' ';
+		foreach ( $this->xpath->query( '//*/@class' ) as $class_attribute ) {
+			$classes .= ' ' . $class_attribute->nodeValue;
+		}
+
+		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
+		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class' ) as $bound_class_attribute ) {
+			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
+				$classes .= ' ' . implode( ' ', $matches[2] );
+			}
+		}
+
+		$class_names = array_merge(
+			$dynamic_class_names,
+			array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) )
+		);
+
+		$this->used_class_names = array_fill_keys( $class_names, true );
 		return $this->used_class_names;
 	}
 
+	/**
+	 * Determine if all the supplied class names are used.
+	 *
+	 * @since 1.1
+	 *
+	 * @param string[] $class_names Class names.
+	 * @return bool All used.
+	 */
+	private function has_used_class_name( $class_names ) {
+		if ( empty( $this->used_class_names ) ) {
+			$this->get_used_class_names();
+		}
+
+		foreach ( $class_names as $class_name ) {
+			// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
+			if ( 'amp-referrer-' === substr( $class_name, 0, 13 ) ) {
+				continue;
+			}
+
+			/*
+			 * Common class names used for amp-user-notification and amp-live-list.
+			 * See <https://www.ampproject.org/docs/reference/components/amp-user-notification#styling>.
+			 * See <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+			 */
+			if ( 'amp-active' === $class_name || 'amp-hidden' === $class_name ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-live-list' ) ) && ! $this->has_used_tag_names( array( 'amp-user-notification' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
+			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-carousel' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
+			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
+				if ( ! $this->has_used_tag_names( array( 'form' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			/*
+			 * Class names for amp-access and amp-access-laterpay.
+			 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
+			 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
+			 */
+			if ( 'amp-access-' === substr( $class_name, 0, 11 ) ) {
+				if ( ! $this->has_used_attributes( array( 'amp-access' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
+			if ( 'amp-image-lightbox-caption' === $class_name ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-image-lightbox' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
+			if ( 'amp-live-list-' === substr( $class_name, 0, 14 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-live-list' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
+			if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-sidebar' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
+			if ( 'amp-sticky-ad-' === substr( $class_name, 0, 14 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-sticky-ad' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
+			if ( 'amp-docked-' === substr( $class_name, 0, 11 ) ) {
+				if ( ! $this->has_used_attributes( array( 'dock' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			if ( ! isset( $this->used_class_names[ $class_name ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * Get list of all the tag names used in the document.
@@ -383,14 +516,56 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Used tag names.
 	 */
 	private function get_used_tag_names() {
-		if ( empty( $this->used_tag_names ) ) {
-			$used_tag_names = array();
+		if ( ! isset( $this->used_tag_names ) ) {
+			$this->used_tag_names = array();
 			foreach ( $this->dom->getElementsByTagName( '*' ) as $el ) {
-				$used_tag_names[ $el->tagName ] = true;
+				$this->used_tag_names[ $el->tagName ] = true;
 			}
-			$this->used_tag_names = array_keys( $used_tag_names );
 		}
 		return $this->used_tag_names;
+	}
+
+	/**
+	 * Determine if all the supplied tag names are used.
+	 *
+	 * @since 1.1
+	 *
+	 * @param string[] $tag_names Tag names.
+	 * @return bool All used.
+	 */
+	private function has_used_tag_names( $tag_names ) {
+		if ( empty( $this->used_tag_names ) ) {
+			$this->get_used_tag_names();
+		}
+		foreach ( $tag_names as $tag_name ) {
+			if ( ! isset( $this->used_tag_names[ $tag_name ] ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Check whether the attributes exist.
+	 *
+	 * @since 1.1
+	 * @todo Make $attribute_names into $attributes as an associative array and implement lookups of specific values.
+	 *
+	 * @param string[] $attribute_names Attribute names.
+	 * @return bool Whether all supplied attributes are used.
+	 */
+	private function has_used_attributes( $attribute_names ) {
+		foreach ( $attribute_names as $attribute_name ) {
+			if ( ! isset( $this->used_attributes[ $attribute_name ] ) ) {
+				$expression = sprintf( '(//@%s)[1]', $attribute_name );
+
+				$this->used_attributes[ $attribute_name ] = ( 0 !== $this->xpath->query( $expression )->length );
+			}
+			if ( ! $this->used_attributes[ $attribute_name ] ) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	/**
@@ -2349,7 +2524,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 								(
 									empty( $parsed_selector['classes'] )
 									||
-									0 === count( array_diff( $parsed_selector['classes'], $this->get_used_class_names() ) )
+									$this->has_used_class_name( $parsed_selector['classes'] )
 								)
 								&&
 								// If all IDs are used in the doc.
@@ -2370,7 +2545,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 								(
 									empty( $parsed_selector['tags'] )
 									||
-									0 === count( array_diff( $parsed_selector['tags'], $this->get_used_tag_names() ) )
+									$this->has_used_tag_names( $parsed_selector['tags'] )
 								)
 							)
 						);
