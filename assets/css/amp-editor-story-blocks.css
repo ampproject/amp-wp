@@ -18,6 +18,7 @@
 	8. Block mover
 	9. General block editor components
 	10. Custom Components
+	11. Text Block
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -697,6 +698,16 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 .amp-story-editor-block-mover.is-visible,
 div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
 	opacity: 1;
+}
+
+/**
+ * 11. Text Block.
+ */
+.amp-story-text__resize-container .components-resizable-box__handle-right {
+	right: -26px;
+}
+.amp-story-text__resize-container .components-resizable-box__handle-bottom {
+	bottom: -26px;
 }
 
 /*

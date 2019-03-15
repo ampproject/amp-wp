@@ -134,15 +134,12 @@ function TextBlock( props ) {
 				} }
 				minHeight={ minTextHeight }
 				minWidth={ minTextWidth }
+				// Adding only right and bottom since otherwise it needs to change the top and left position, too.
 				enable={ {
-					top: true,
+					top: false,
 					right: true,
 					bottom: true,
-					left: true,
-					topRight: false,
-					bottomRight: false,
-					bottomLeft: false,
-					topLeft: false,
+					left: false,
 				} }
 				onResizeStop={ ( event, direction, elt, delta ) => {
 					setAttributes( {
