@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
@@ -16,13 +15,17 @@ import {
 	withPageNumber,
 	withWrapperProps,
 	withActivePageState,
-	BlockNavigation,
-	EditorCarousel,
-	StoryControls,
-	Shortcuts,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
+import {
+	maybeEnqueueFontStyle,
+	setBlockParent,
+	addAMPAttributes,
+	addAMPExtraProps,
+	disableBlockDropZone,
+	getTotalAnimationDuration,
+	renderStoryComponents,
+} from './helpers';
 import store from './stores/amp-story';
 
 const {
@@ -75,21 +78,19 @@ domReady( () => {
 	const firstPage = allBlocks.find( ( { name } ) => name === 'amp/amp-story-page' );
 	setCurrentPage( firstPage ? firstPage.clientId : undefined );
 
+	// Set initial animation order state for all child blocks.
 	for ( const block of allBlocks ) {
 		const page = getBlockRootClientId( block.clientId );
 
-		// Set initial animation order state.
 		if ( page ) {
 			const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
 			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
-			changeAnimationType( page, block.clientId, ampAnimationType );
 
-			if ( ampAnimationType ) {
-				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
-				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
-			}
+			changeAnimationType( page, block.clientId, ampAnimationType );
+			changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+			changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 		}
 
 		// Load all needed fonts.
@@ -103,75 +104,6 @@ domReady( () => {
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 } );
-
-/**
- * Add some additional elements needed to render our custom UI controls.
- */
-function renderStoryComponents() {
-	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
-
-	if ( editorBlockList ) {
-		const ampStoryWrapper = document.createElement( 'div' );
-		ampStoryWrapper.id = 'amp-story-editor';
-
-		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
-
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
-
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
-		/**
-		 * The intended layout is as follows:
-		 *
-		 * - Post title
-		 * - AMP story wrapper element (needed for overflow styling)
-		 * - - Story controls
-		 * - - Block list
-		 * - - Block navigation
-		 * - - Carousel controls
-		 */
-		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-		ampStoryWrapper.appendChild( storyControls );
-		ampStoryWrapper.appendChild( editorBlockList );
-		ampStoryWrapper.appendChild( blockNavigation );
-		ampStoryWrapper.appendChild( editorCarousel );
-
-		render(
-			<StoryControls />,
-			storyControls
-		);
-
-		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
-			blockNavigation
-		);
-
-		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
-			editorCarousel
-		);
-	}
-
-	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
-
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
-
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
-	}
-}
 
 let blockOrder = getBlockOrder();
 
@@ -209,39 +141,6 @@ subscribe( () => {
 	}
 } );
 
-/**
- * Given a page and a list of animated blocks, calculates the total duration
- * of all animations.
- *
- * Traverses through the animation order tree level by level.
- *
- * @param {string} page           Page client ID.
- * @param {Array}  animatedBlocks List of animated blocks for that page.
- *
- * @return {number} Total animation duration time.
- */
-const getTotalAnimationDuration = ( page, animatedBlocks ) => {
-	const getLongestAnimation = ( parentBlockId ) => {
-		return animatedBlocks
-			.filter( ( { parent } ) => parent === parentBlockId )
-			.map( ( { id, duration, delay } ) => {
-				if ( page !== getBlockRootClientId( id ) ) {
-					return 0;
-				}
-
-				const animationDelay = delay ? parseInt( delay ) : 0;
-				const animationDuration = duration ? parseInt( duration ) : 0;
-
-				return animationDelay + animationDuration;
-			} )
-			.reduce( ( max, current ) => Math.max( max, current ), 0 );
-	};
-
-	const levels = [ ...new Set( animatedBlocks.map( ( { parent } ) => parent ) ) ];
-
-	return levels.map( getLongestAnimation ).reduce( ( sum, duration ) => sum + duration, 0 );
-};
-
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
 	const customBlockOrder = getCustomBlockOrder();
@@ -263,9 +162,10 @@ store.subscribe( () => {
 
 		const pageAttributes = getBlockAttributes( page );
 
+		const animatedBlocksPerPage = animatedBlocks[ page ].filter( ( { id } ) => page === getBlockRootClientId( id ) );
+
 		if ( 'auto' === pageAttributes.autoAdvanceAfter ) {
-			const totalAnimationDuration = getTotalAnimationDuration( page, animatedBlocks[ page ] );
-			// @todo Fine tune this?
+			const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 			const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 			if ( totalAnimationDurationInSeconds !== pageAttributes.autoAdvanceAfterDuration ) {
@@ -273,7 +173,7 @@ store.subscribe( () => {
 			}
 		}
 
-		for ( const item of animatedBlocks[ page ] ) {
+		for ( const item of animatedBlocksPerPage ) {
 			const { id, parent, animationType, duration, delay } = item;
 
 			const parentBlock = parent ? getBlock( parent ) : undefined;
