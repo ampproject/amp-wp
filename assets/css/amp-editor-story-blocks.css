@@ -260,7 +260,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		display: flex;
 		align-items: center;
 		transform: none;
-		transition: transform 300ms linear;
+		transition: transform 300ms ease-in-out;
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] {
