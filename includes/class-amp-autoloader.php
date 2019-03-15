@@ -42,6 +42,7 @@ class AMP_Autoloader {
 		'AMP_Admin_Pointers'                 => 'includes/admin/class-amp-admin-pointers',
 		'AMP_Post_Type_Support'              => 'includes/class-amp-post-type-support',
 		'AMP_Base_Embed_Handler'             => 'includes/embeds/class-amp-base-embed-handler',
+		'AMP_Crowdsignal_Embed_Handler'      => 'includes/embeds/class-amp-crowdsignal-embed-handler',
 		'AMP_DailyMotion_Embed_Handler'      => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'         => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'          => 'includes/embeds/class-amp-gallery-embed',

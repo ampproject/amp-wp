@@ -740,6 +740,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),
 			'AMP_YouTube_Embed_Handler'     => array(),
+			'AMP_Crowdsignal_Embed_Handler' => array(),
 			'AMP_DailyMotion_Embed_Handler' => array(),
 			'AMP_Vimeo_Embed_Handler'       => array(),
 			'AMP_SoundCloud_Embed_Handler'  => array(),
