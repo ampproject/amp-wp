@@ -29,7 +29,7 @@ import { withSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
+import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES, MEDIA_INNER_BLOCKS } from './constants';
 import { getTotalAnimationDuration } from '../../helpers';
 
 const TEMPLATE = [
@@ -87,7 +87,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, firstMediaBlock } = this.props;
 
 		const {
 			backgroundColor,
@@ -112,6 +112,16 @@ class EditPage extends Component {
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
 			style.backgroundImage = `url(${ poster })`;
+		}
+
+		const autoAdvanceAfterOptions = [
+			{ value: '', label: __( 'Manual', 'amp' ) },
+			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
+			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
+		];
+
+		if ( firstMediaBlock ) {
+			autoAdvanceAfterOptions.push( { value: 'media', label: __( 'After media has played', 'amp' ) } );
 		}
 
 		return (
@@ -201,14 +211,16 @@ class EditPage extends Component {
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
 							label={ __( 'Advance to next page', 'amp' ) }
+							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first video encountered on the page', 'amp' ) : undefined }
 							value={ autoAdvanceAfter }
-							options={ [
-								{ value: '', label: __( 'Manual', 'amp' ) },
-								{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-								{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-								{ value: 'video', label: __( 'After video has ended', 'amp' ) },
-							] }
-							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
+							options={ autoAdvanceAfterOptions }
+							onChange={ ( value ) => {
+								setAttributes( { autoAdvanceAfter: value } );
+
+								if ( 'media' === value ) {
+									setAttributes( { autoAdvanceAfterMedia: firstMediaBlock.attributes.anchor } );
+								}
+							} }
 						/>
 						{ 'time' === autoAdvanceAfter && (
 							<RangeControl
@@ -240,7 +252,7 @@ class EditPage extends Component {
 
 export default withSelect( ( select, { attributes, clientId } ) => {
 	const { getMedia } = select( 'core' );
-	const { getBlockRootClientId } = select( 'core/editor' );
+	const { getBlockRootClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
 	const { getAnimatedBlocks } = select( 'amp/story' );
 
 	const { mediaId } = attributes;
@@ -250,8 +262,11 @@ export default withSelect( ( select, { attributes, clientId } ) => {
 	const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 	const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
+		firstMediaBlock: innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) ),
 	};
 } )( EditPage );

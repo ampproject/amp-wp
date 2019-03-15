@@ -47,6 +47,9 @@ const schema = {
 	autoAdvanceAfterDuration: {
 		type: 'number',
 	},
+	autoAdvanceAfterMedia: {
+		type: 'string',
+	},
 };
 
 export const settings = {
@@ -78,14 +81,15 @@ export const settings = {
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
+			autoAdvanceAfterMedia,
 		} = attributes;
 
 		let advanceAfter;
 
 		if ( 'time' === autoAdvanceAfter || 'auto' === autoAdvanceAfter ) {
 			advanceAfter = parseInt( autoAdvanceAfterDuration ) + 's';
-		} else if ( 'video' === autoAdvanceAfter ) {
-			// @todo: Find inner video block and get its ID.
+		} else if ( 'media' === autoAdvanceAfter ) {
+			advanceAfter = autoAdvanceAfterMedia;
 		}
 
 		return (
