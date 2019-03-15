@@ -1,11 +1,17 @@
 /**
+ * External dependencies
+ */
+import { every } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 /**
  * Internal dependencies
@@ -16,20 +22,22 @@ import {
 	withPageNumber,
 	withWrapperProps,
 	withActivePageState,
+	withStoryBlockDropZone,
 	BlockNavigation,
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
 } from './components';
-import { ALLOWED_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
+import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps } from './helpers';
 import store from './stores/amp-story';
+
+const { getBlockOrder, getBlock, getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
 
 /**
  * Initialize editor integration.
  */
 domReady( () => {
-	const { getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
 	const { addAnimation, setCurrentPage } = dispatch( 'amp/story' );
 
 	// Ensure that the default block is page when no block is selected.
@@ -140,9 +148,47 @@ function renderStoryComponents() {
 	}
 }
 
-const { getBlockOrder, getBlock } = select( 'core/editor' );
+const positionTopLimit = 75;
+const positionTopHighest = 0;
+const positionTopGap = 10;
+
+/**
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {number} clientId Selected block's ID.
+ */
+function maybeSetInitialPositioning( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
+		return;
+	}
+
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
+
+	// Only set the position if the block was unmodified before.
+	if ( isUnmodified ) {
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
+
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+}
 
 let blockOrder = getBlockOrder();
+let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
 	const { getSelectedBlockClientId } = select( 'core/editor' );
@@ -183,10 +229,15 @@ subscribe( () => {
 	if ( newlyAddedPages ) {
 		setCurrentPage( newlyAddedPages );
 	}
+
+	for ( const block of allBlocksWithChildren ) {
+		maybeSetInitialPositioning( block );
+	}
+
+	allBlocksWithChildren = getClientIdsWithDescendants();
 } );
 
 const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
-const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
@@ -222,4 +273,4 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
-addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', disableBlockDropZone );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

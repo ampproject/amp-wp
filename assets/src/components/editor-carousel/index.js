@@ -12,9 +12,9 @@ import { compose } from '@wordpress/compose';
  */
 import Indicator from './indicator';
 import Reorderer from './reorderer';
+import { STORY_PAGE_WIDTH } from './../../constants';
 
 const PAGE_MARGIN = 20;
-const PAGE_WIDTH = 338;
 
 class EditorCarousel extends Component {
 	constructor() {
@@ -29,7 +29,7 @@ class EditorCarousel extends Component {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * PAGE_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_WIDTH }px))`;
 		}
 	}
 
