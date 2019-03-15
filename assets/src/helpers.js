@@ -188,11 +188,11 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
 		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay.replace( 'ms', 0 ) + 'ms';
+			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay;
 		}
 
 		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration.replace( 'ms', 0 ) + 'ms';
+			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration;
 		}
 
 		if ( attributes.ampAnimationAfter ) {
