@@ -9,8 +9,6 @@ import uuid from 'uuid/v4';
  * WordPress dependencies
  */
 import { render } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
-import { createHigherOrderComponent } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -153,6 +151,15 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	addedAttributes.positionTop = {
+		type: 'number',
+		default: 0,
+	};
+	addedAttributes.positionLeft = {
+		type: 'number',
+		default: 5,
+	};
+
 	return {
 		...settings,
 		attributes: {
@@ -204,42 +211,24 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
 	}
 
+	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
+		const style = props.style ? props.style : {};
+		const positionStyle = {
+			position: 'absolute',
+			top: `${ attributes.positionTop }%`,
+			left: `${ attributes.positionLeft }%`,
+		};
+		ampAttributes.style = {
+			...style,
+			...positionStyle,
+		};
+	}
+
 	return {
 		...props,
 		...ampAttributes,
 	};
 };
-
-/**
- * Disables drop zones within a block while reordering is on.
- *
- * In reorder mode, any interaction with blocks is disabled, and only
- * pages themselves can be dragged & dropped in order to reorder pages within the story.
- *
- * @param {Object} BlockListBlock BlockListBlock element.
- * @return {?Function} BlockDropZone or null if reordering.
- */
-export const disableBlockDropZone = createHigherOrderComponent(
-	( BlockDropZone ) => {
-		return withSelect( ( select ) => {
-			const { isReordering } = select( 'amp/story' );
-
-			return {
-				isReordering: isReordering(),
-			};
-		} )( ( props ) => {
-			const { isReordering } = props;
-
-			if ( isReordering ) {
-				return null;
-			}
-
-			return <BlockDropZone { ...props } />;
-		} );
-	},
-	'disableBlockDropZone'
-);
-
 /**
  * Given a list of animated blocks, calculates the total duration
  * of all animations based on the durations and the delays.

@@ -93,7 +93,7 @@ class AMP_Content_Sanitizer {
 						sprintf(
 							/* translators: 1: sanitizer class. 2: AMP_Base_Sanitizer */
 							__( 'Sanitizer (%1$s) must extend `%2$s`', 'amp' ),
-							esc_html( $embed_handler_class ),
+							esc_html( $sanitizer_class ),
 							'AMP_Base_Sanitizer'
 						)
 					),

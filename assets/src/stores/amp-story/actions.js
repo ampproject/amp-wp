@@ -71,23 +71,6 @@ export function changeAnimationDelay( page, item, delay ) {
 }
 
 /**
- * Returns an action object in signalling that a page has been removed.
- *
- * Can be used to remove associated stale information like animation order
- * of the elements that were on the page.
- *
- * @param {string} page ID of the removed page.
- *
- * @return {Object} Action object.
- */
-export function removePage( page ) {
-	return {
-		type: 'REMOVE_PAGE',
-		page,
-	};
-}
-
-/**
  * Returns an action object in signalling that the currently selected page has changed.
  *
  * Only a single page can be edited at a time.

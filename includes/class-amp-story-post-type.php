@@ -108,6 +108,9 @@ class AMP_Story_Post_Type {
 
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
 
+		// Remove support for custom color palettes.
+		add_filter( 'block_editor_settings', array( __CLASS__, 'filter_block_editor_settings' ), 10, 2 );
+
 		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
@@ -216,7 +219,16 @@ class AMP_Story_Post_Type {
 					return false;
 				}
 				$dep = wp_styles()->registered[ $handle ];
-				return 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST );
+
+				if ( 'fonts.googleapis.com' === wp_parse_url( $dep->src, PHP_URL_HOST ) ) {
+					return true;
+				}
+
+				if ( 'wp-block-library' === $handle ) {
+					return true;
+				}
+
+				return false;
 			}
 		);
 	}
@@ -241,7 +253,7 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
 			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
-			array(),
+			array( 'wp-edit-blocks' ),
 			AMP__VERSION
 		);
 
@@ -252,6 +264,23 @@ class AMP_Story_Post_Type {
 				self::get_inline_font_style_rule( $font )
 			);
 		}
+	}
+
+	/**
+	 * Filters the settings to pass to the block editor.
+	 *
+	 * Used to remove support for custom color palettes for AMP stories.
+	 *
+	 * @param array   $editor_settings Default editor settings.
+	 * @param WP_Post $post            Post being edited.
+	 *
+	 * @return array Modified editor settings.
+	 */
+	public static function filter_block_editor_settings( $editor_settings, $post ) {
+		if ( self::POST_TYPE_SLUG === $post->post_type ) {
+			unset( $editor_settings['colors'] );
+		}
+		return $editor_settings;
 	}
 
 	/**

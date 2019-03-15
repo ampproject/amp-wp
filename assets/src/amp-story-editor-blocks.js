@@ -1,10 +1,15 @@
 /**
+ * External dependencies
+ */
+import { every } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -15,17 +20,19 @@ import {
 	withPageNumber,
 	withWrapperProps,
 	withActivePageState,
+	withStoryBlockDropZone,
 } from './components';
-import { ALLOWED_BLOCKS } from './constants';
+
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
 	addAMPAttributes,
 	addAMPExtraProps,
-	disableBlockDropZone,
 	getTotalAnimationDuration,
 	renderStoryComponents,
 } from './helpers';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
+
 import store from './stores/amp-story';
 
 const {
@@ -41,6 +48,7 @@ const {
 const {
 	isReordering,
 	getBlockOrder: getCustomBlockOrder,
+	getCurrentPage,
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
@@ -51,7 +59,6 @@ const {
 
 const {
 	setCurrentPage,
-	removePage,
 	addAnimation,
 	changeAnimationType,
 	changeAnimationDuration,
@@ -105,7 +112,47 @@ domReady( () => {
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 } );
 
+const positionTopLimit = 75;
+const positionTopHighest = 0;
+const positionTopGap = 10;
+
+/**
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {number} clientId Selected block's ID.
+ */
+function maybeSetInitialPositioning( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
+		return;
+	}
+
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
+
+	// Only set the position if the block was unmodified before.
+	if ( isUnmodified ) {
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
+
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+}
+
 let blockOrder = getBlockOrder();
+let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
 	const defaultBlockName = getDefaultBlockName();
@@ -125,8 +172,17 @@ subscribe( () => {
 	}
 
 	const newBlockOrder = getBlockOrder();
-	const deletedPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
 	const newlyAddedPages = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
+	const deletedPages = blockOrder.filter( ( block ) => ! newBlockOrder.includes( block ) );
+
+	if ( deletedPages.includes( getCurrentPage() ) ) {
+		// Change current page if it has been deleted.
+		const nextIndex = Math.max( 0, blockOrder.indexOf( getCurrentPage() ) - 1 );
+
+		blockOrder = newBlockOrder;
+
+		setCurrentPage( blockOrder[ nextIndex ] );
+	}
 
 	blockOrder = newBlockOrder;
 
@@ -135,10 +191,11 @@ subscribe( () => {
 		setCurrentPage( newlyAddedPages );
 	}
 
-	// Remove stale data from store.
-	for ( const oldPage of deletedPages ) {
-		removePage( oldPage );
+	for ( const block of allBlocksWithChildren ) {
+		maybeSetInitialPositioning( block );
 	}
+
+	allBlocksWithChildren = getClientIdsWithDescendants();
 } );
 
 store.subscribe( () => {
@@ -196,4 +253,4 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
-addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', disableBlockDropZone );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

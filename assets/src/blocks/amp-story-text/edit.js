@@ -1,10 +1,24 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl } from '@wordpress/components';
-import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wordpress/editor';
+import { PanelBody, SelectControl, withFallbackStyles } from '@wordpress/components';
+import { compose } from '@wordpress/compose';
+import {
+	RichText,
+	InspectorControls,
+	FontSizePicker,
+	withFontSizes,
+	withColors,
+	PanelColorSettings,
+	ContrastChecker,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -12,16 +26,41 @@ import { RichText, InspectorControls, FontSizePicker, withFontSizes } from '@wor
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle } from '../../helpers';
 
-function TextBlock( {
-	attributes,
-	setAttributes,
-	className,
-	fontSize,
-	setFontSize,
-} ) {
-	const { placeholder, content, type, ampFontFamily } = attributes;
+const { getComputedStyle } = window;
 
-	const fontSizeClass = fontSize.class || undefined;
+const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
+	const { textColor, backgroundColor, fontSize, customFontSize } = ownProps.attributes;
+	const editableNode = node.querySelector( '[contenteditable="true"]' );
+	const computedStyles = editableNode ? getComputedStyle( editableNode ) : null;
+
+	return {
+		fallbackBackgroundColor: backgroundColor || ! computedStyles ? undefined : computedStyles.backgroundColor,
+		fallbackTextColor: textColor || ! computedStyles ? undefined : computedStyles.color,
+		fallbackFontSize: fontSize || customFontSize || ! computedStyles ? undefined : parseInt( computedStyles.fontSize ) || undefined,
+	};
+} );
+
+function TextBlock( props ) {
+	const {
+		attributes,
+		setAttributes,
+		className,
+		fontSize,
+		setFontSize,
+		backgroundColor,
+		textColor,
+		setBackgroundColor,
+		setTextColor,
+		fallbackTextColor,
+		fallbackBackgroundColor,
+	} = props;
+
+	const {
+		placeholder,
+		content,
+		type,
+		ampFontFamily,
+	} = attributes;
 
 	return (
 		<Fragment>
@@ -50,6 +89,32 @@ function TextBlock( {
 						] }
 					/>
 				</PanelBody>
+				<PanelColorSettings
+					title={ __( 'Color Settings', 'amp' ) }
+					initialOpen={ false }
+					colorSettings={ [
+						{
+							value: backgroundColor.color,
+							onChange: setBackgroundColor,
+							label: __( 'Background Color', 'amp' ),
+						},
+						{
+							value: textColor.color,
+							onChange: setTextColor,
+							label: __( 'Text Color', 'amp' ),
+						},
+					] }
+				>
+					<ContrastChecker
+						{ ...{
+							textColor: textColor.color,
+							backgroundColor: backgroundColor.color,
+							fallbackTextColor,
+							fallbackBackgroundColor,
+							fontSize: fontSize.size,
+						} }
+					/>
+				</PanelColorSettings>
 			</InspectorControls>
 			<RichText
 				identifier="content"
@@ -58,13 +123,25 @@ function TextBlock( {
 				value={ content }
 				onChange={ ( value ) => setAttributes( { content: value } ) }
 				style={ {
+					backgroundColor: backgroundColor.color,
+					color: textColor.color,
 					fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 				} }
-				className={ `${ className } ${ fontSizeClass }` }
+				className={ classnames( className, {
+					'has-text-color': textColor.color,
+					'has-background': backgroundColor.color,
+					[ backgroundColor.class ]: backgroundColor.class,
+					[ textColor.class ]: textColor.class,
+					[ fontSize.class ]: fontSize.class,
+				} ) }
 				placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 			/>
 		</Fragment>
 	);
 }
 
-export default withFontSizes( 'fontSize' )( TextBlock );
+export default compose(
+	withColors( 'backgroundColor', { textColor: 'color' } ),
+	withFontSizes( 'fontSize' ),
+	applyFallbackStyles
+)( TextBlock );

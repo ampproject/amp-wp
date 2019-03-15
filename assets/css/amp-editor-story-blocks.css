@@ -98,7 +98,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
-	margin: 60px 0 0;
+	margin: 60px 30px 0;
 }
 
 @media (min-width: 600px) {
@@ -113,10 +113,13 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 	width: 100%;
 	max-width: 338px;
 	height: 553px;
+	position: relative;
 }
 
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
 	width: 316px;
+	margin: 0 auto;
+	display: none;
 }
 
 /*
@@ -296,6 +299,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		letter-spacing: 1px;
 	}
 
+	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div {
+		height: 543px;
+	}
+
 	.amp-story-editor-carousel-navigation {
 		display: flex;
 		justify-content: space-between;
@@ -432,7 +439,12 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
-		margin: 0;
+		margin: -32px 0 0 0;
+		height: 267px;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper > div {
+		height: 267px;
 	}
 
 	.amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {
@@ -546,6 +558,35 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
+ * Make all the inner blocks positioned with absolute.
+ * @todo Add exception for CTA block once it's added back.
+ */
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
+	position: absolute;
+}
+
+.editor-block-list__block .editor-block-list__layout {
+	margin: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"][data-amp-selected="parent"] .editor-block-drop-zone {
+	height: 583px;
+	width: 438px;
+	margin: 0;
+	left: -100px;
+	top: -50px;
+	border: none;
+}
+
+div[data-type="amp/amp-story-page"] .wp-block-image {
+	margin-top: 0;
+}
+
+#amp-story-editor .components-draggable__clone {
+	position: absolute;
+}
+
+/*
  * 10. Custom Components
  */
 
@@ -630,6 +671,35 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
+ * Custom block mover.
+ */
+
+.post-type-amp_story .editor-block-list__layout .editor-block-mover.is-visible,
+.post-type-amp_story .editor-block-list__layout .editor-block-mover {
+	display: none;
+}
+
+.amp-story-editor-block-mover {
+	position: absolute;
+	width: 30px;
+	height: 100%;
+	max-height: 112px;
+	top: -15px;
+	z-index: 80;
+	padding-right: 2px;
+	left: -45px;
+	margin-top: -8px;
+	opacity: 0;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.amp-story-editor-block-mover.is-visible,
+div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
+	opacity: 1;
+}
+
+/*
  * 100. Shame
  */
 
@@ -647,5 +717,5 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
-    display: none;
+	display: none;
 }
