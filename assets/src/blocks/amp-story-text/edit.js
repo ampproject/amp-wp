@@ -8,7 +8,7 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import { PanelBody, SelectControl, withFallbackStyles } from '@wordpress/components';
+import { PanelBody, ResizableBox, SelectControl, withFallbackStyles } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
 	RichText,
@@ -46,6 +46,7 @@ function TextBlock( props ) {
 		setAttributes,
 		className,
 		fontSize,
+		isSelected,
 		setFontSize,
 		backgroundColor,
 		textColor,
@@ -53,6 +54,7 @@ function TextBlock( props ) {
 		setTextColor,
 		fallbackTextColor,
 		fallbackBackgroundColor,
+		toggleSelection,
 	} = props;
 
 	const {
@@ -60,7 +62,12 @@ function TextBlock( props ) {
 		content,
 		type,
 		ampFontFamily,
+		height,
+		width,
 	} = attributes;
+
+	const minTextHeight = 20;
+	const minTextWidth = 30;
 
 	return (
 		<Fragment>
@@ -116,26 +123,59 @@ function TextBlock( props ) {
 					/>
 				</PanelColorSettings>
 			</InspectorControls>
-			<RichText
-				identifier="content"
-				wrapperClassName="wp-block-amp-story-text"
-				tagName="p"
-				value={ content }
-				onChange={ ( value ) => setAttributes( { content: value } ) }
-				style={ {
-					backgroundColor: backgroundColor.color,
-					color: textColor.color,
-					fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+			<ResizableBox
+				className={ classnames(
+					'amp-story-text__resize-container',
+					{ 'is-selected': isSelected }
+				) }
+				size={ {
+					height,
+					width,
 				} }
-				className={ classnames( className, {
-					'has-text-color': textColor.color,
-					'has-background': backgroundColor.color,
-					[ backgroundColor.class ]: backgroundColor.class,
-					[ textColor.class ]: textColor.class,
-					[ fontSize.class ]: fontSize.class,
-				} ) }
-				placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-			/>
+				minHeight={ minTextHeight }
+				minWidth={ minTextWidth }
+				enable={ {
+					top: true,
+					right: true,
+					bottom: true,
+					left: true,
+					topRight: false,
+					bottomRight: false,
+					bottomLeft: false,
+					topLeft: false,
+				} }
+				onResizeStop={ ( event, direction, elt, delta ) => {
+					setAttributes( {
+						width: parseInt( width + delta.width, 10 ),
+						height: parseInt( height + delta.height, 10 ),
+					} );
+					toggleSelection( true );
+				} }
+				onResizeStart={ () => {
+					toggleSelection( false );
+				} }
+			>
+				<RichText
+					identifier="content"
+					wrapperClassName="wp-block-amp-story-text"
+					tagName="p"
+					value={ content }
+					onChange={ ( value ) => setAttributes( { content: value } ) }
+					style={ {
+						backgroundColor: backgroundColor.color,
+						color: textColor.color,
+						fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+					} }
+					className={ classnames( className, {
+						'has-text-color': textColor.color,
+						'has-background': backgroundColor.color,
+						[ backgroundColor.class ]: backgroundColor.class,
+						[ textColor.class ]: textColor.class,
+						[ fontSize.class ]: fontSize.class,
+					} ) }
+					placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+				/>
+			</ResizableBox>
 		</Fragment>
 	);
 }

@@ -62,6 +62,14 @@ const schema = {
 	customBackgroundColor: {
 		type: 'string',
 	},
+	height: {
+		default: 50,
+		type: 'number',
+	},
+	width: {
+		default: 100,
+		type: 'number',
+	},
 };
 
 export const settings = {
@@ -94,6 +102,8 @@ export const settings = {
 			textColor,
 			customBackgroundColor,
 			customTextColor,
+			width,
+			height,
 		} = attributes;
 
 		const textClass = getColorClassName( 'color', textColor );
@@ -114,6 +124,8 @@ export const settings = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
 			fontSize: fontSizeClass ? undefined : customFontSize,
+			width,
+			height,
 		};
 
 		return (
