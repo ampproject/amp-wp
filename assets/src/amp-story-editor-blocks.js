@@ -160,7 +160,7 @@ const positionTopGap = 10;
 function maybeSetInitialPositioning( clientId ) {
 	const block = getBlock( clientId );
 
-	if ( ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
 		return;
 	}
 
