@@ -200,7 +200,6 @@ class EditPage extends Component {
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
 							label={ __( 'Advance to next page', 'amp' ) }
-							help={ __( 'Advance to next page', 'amp' ) }
 							value={ autoAdvanceAfter }
 							options={ [
 								{ value: '', label: __( 'Manual', 'amp' ) },
