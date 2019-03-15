@@ -19,7 +19,7 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.7.0",
     "cross-env": "5.2.0",
-    "eslint": "5.15.1",
+    "eslint": "5.15.2",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-react": "7.12.4",
     "grunt": "1.0.3",
