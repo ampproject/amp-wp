@@ -30,6 +30,7 @@ import { withSelect } from '@wordpress/data';
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
+import { getTotalAnimationDuration } from '../../helpers';
 
 const TEMPLATE = [
 	[ 'amp/amp-story-text' ],
@@ -86,7 +87,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
 
 		const {
 			backgroundColor,
@@ -209,14 +210,14 @@ class EditPage extends Component {
 							] }
 							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
 						/>
-						{ /* @todo: Set minimum so that it can't be below total animation duration time */ }
 						{ 'time' === autoAdvanceAfter && (
 							<RangeControl
 								label={ __( 'Time in seconds', 'amp' ) }
 								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
 								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
-								min={ 0 }
-								initialPosition={ 0 }
+								min={ totalAnimationDuration }
+								initialPosition={ totalAnimationDuration }
+								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page', 'amp' ) : undefined }
 							/>
 						) }
 					</PanelBody>
@@ -237,11 +238,20 @@ class EditPage extends Component {
 	}
 }
 
-export default withSelect( ( select, { attributes } ) => {
-	const { mediaId } = attributes;
+export default withSelect( ( select, { attributes, clientId } ) => {
 	const { getMedia } = select( 'core' );
+	const { getBlockRootClientId } = select( 'core/editor' );
+	const { getAnimatedBlocks } = select( 'amp/story' );
+
+	const { mediaId } = attributes;
+
+	const animatedBlocks = getAnimatedBlocks();
+	const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
+	const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+	const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
+		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
 } )( EditPage );
