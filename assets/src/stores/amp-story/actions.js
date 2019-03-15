@@ -17,22 +17,6 @@ export function addAnimation( page, item, predecessor ) {
 }
 
 /**
- * Returns an action object in signalling that a given item is no longer animated.
- *
- * @param {string} page ID of the page the item is in.
- * @param {string} item ID of the animated item.
- *
- * @return {Object} Action object.
- */
-export function removeAnimation( page, item ) {
-	return {
-		type: 'REMOVE_ANIMATION',
-		page,
-		item,
-	};
-}
-
-/**
  * Returns an action object in signalling that an item's animation type has changed.
  *
  * @param {string} page          ID of the page the item is in.

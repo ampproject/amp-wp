@@ -53,24 +53,22 @@ export function animations( state = {}, action ) {
 				[ page ]: pageAnimationOrder,
 			};
 
-		case 'REMOVE_ANIMATION':
-			if ( entryIndex( item ) !== -1 ) {
-				const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
-				pageAnimationOrder[ entryIndex( item ) ].parent = undefined;
-
-				for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
-					pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
-				}
-			}
-
-			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
-			};
-
 		case 'CHANGE_ANIMATION_TYPE':
-			if ( entryIndex( item ) !== -1 ) {
+			// Animation was disabled, update all successors.
+			if ( ! animationType ) {
+				if ( entryIndex( item ) !== -1 ) {
+					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+
+					for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
+						pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+					}
+
+					pageAnimationOrder.splice( entryIndex( item ), 1 );
+				}
+			} else if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
+			} else {
+				pageAnimationOrder.push( { id: item, animationType } );
 			}
 
 			return {
