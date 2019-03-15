@@ -109,7 +109,6 @@ export const addAMPAttributes = ( settings, name ) => {
 			source: 'attribute',
 			selector: BLOCK_TAG_MAPPING[ name ],
 			attribute: 'animate-in-delay',
-			default: '0ms',
 		};
 		addedAttributes.ampAnimationDuration = {
 			source: 'attribute',
@@ -180,11 +179,11 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
 		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay;
+			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay.replace( 'ms', 0 ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration;
+			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration.replace( 'ms', 0 ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationAfter ) {

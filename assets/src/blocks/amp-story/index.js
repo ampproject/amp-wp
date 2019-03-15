@@ -14,38 +14,46 @@ import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from './constants';
 
 export const name = 'amp/amp-story-page';
 
+const schema = {
+	anchor: {
+		source: 'attribute',
+		selector: 'amp-story-page',
+		attribute: 'id',
+	},
+	backgroundColor: {
+		default: '#ffffff',
+	},
+	mediaId: {
+		type: 'number',
+	},
+	mediaUrl: {
+		type: 'string',
+		source: 'attribute',
+		selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
+		attribute: 'src',
+	},
+	mediaType: {
+		type: 'string',
+	},
+	poster: {
+		type: 'string',
+	},
+	focalPoint: {
+		type: 'object',
+	},
+	autoAdvanceAfter: {
+		type: 'string',
+	},
+	autoAdvanceAfterDuration: {
+		type: 'number',
+	},
+};
+
 export const settings = {
 	title: __( 'Page', 'amp' ),
 	category: 'layout',
 	icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
-	attributes: {
-		anchor: {
-			source: 'attribute',
-			selector: 'amp-story-page',
-			attribute: 'id',
-		},
-		backgroundColor: {
-			default: '#ffffff',
-		},
-		mediaId: {
-			type: 'number',
-		},
-		mediaUrl: {
-			type: 'string',
-			source: 'attribute',
-			selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
-			attribute: 'src',
-		},
-		mediaType: {
-			type: 'string',
-		},
-		poster: {
-			type: 'string',
-		},
-		focalPoint: {
-			type: 'object',
-		},
-	},
+	attributes: schema,
 
 	/*
      * <amp-story-page>:
@@ -62,10 +70,26 @@ export const settings = {
 	edit: EditPage,
 
 	save( { attributes } ) {
-		const { anchor, backgroundColor, mediaUrl, mediaType, poster } = attributes;
+		const {
+			anchor,
+			backgroundColor,
+			mediaUrl,
+			mediaType,
+			poster,
+			autoAdvanceAfter,
+			autoAdvanceAfterDuration,
+		} = attributes;
+
+		let advanceAfter;
+
+		if ( 'time' === autoAdvanceAfter || 'auto' === autoAdvanceAfter ) {
+			advanceAfter = parseInt( autoAdvanceAfterDuration ) + 's';
+		} else if ( 'video' === autoAdvanceAfter ) {
+			// @todo: Find inner video block and get its ID.
+		}
 
 		return (
-			<amp-story-page style={ { backgroundColor } } id={ anchor }>
+			<amp-story-page style={ { backgroundColor } } id={ anchor } auto-advance-after={ advanceAfter }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">

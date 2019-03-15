@@ -33,6 +33,60 @@ export function removeAnimation( page, item ) {
 }
 
 /**
+ * Returns an action object in signalling that an item's animation type has changed.
+ *
+ * @param {string} page          ID of the page the item is in.
+ * @param {string} item          ID of the animated item.
+ * @param {string} animationType Animation type value.
+ *
+ * @return {Object} Action object.
+ */
+export function changeAnimationType( page, item, animationType ) {
+	return {
+		type: 'CHANGE_ANIMATION_TYPE',
+		page,
+		item,
+		animationType,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an item's animation duration has changed.
+ *
+ * @param {string} page     ID of the page the item is in.
+ * @param {string} item     ID of the animated item.
+ * @param {number} duration Animation delay value
+ *
+ * @return {Object} Action object.
+ */
+export function changeAnimationDuration( page, item, duration ) {
+	return {
+		type: 'CHANGE_ANIMATION_DURATION',
+		page,
+		item,
+		duration,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an item's animation delay has changed.
+ *
+ * @param {string} page  ID of the page the item is in.
+ * @param {string} item  ID of the animated item.
+ * @param {number} delay Animation delay value
+ *
+ * @return {Object} Action object.
+ */
+export function changeAnimationDelay( page, item, delay ) {
+	return {
+		type: 'CHANGE_ANIMATION_DELAY',
+		page,
+		item,
+		delay,
+	};
+}
+
+/**
  * Returns an action object in signalling that a page has been removed.
  *
  * Can be used to remove associated stale information like animation order

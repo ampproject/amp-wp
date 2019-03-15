@@ -20,6 +20,8 @@ import {
 	Button,
 	BaseControl,
 	FocalPointPicker,
+	SelectControl,
+	RangeControl,
 } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 
@@ -86,7 +88,16 @@ class EditPage extends Component {
 	render() {
 		const { attributes, media, setAttributes } = this.props;
 
-		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint, poster } = attributes;
+		const {
+			backgroundColor,
+			mediaId,
+			mediaType,
+			mediaUrl,
+			focalPoint,
+			poster,
+			autoAdvanceAfter,
+			autoAdvanceAfterDuration,
+		} = attributes;
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -185,6 +196,30 @@ class EditPage extends Component {
 							) }
 						</Fragment>
 					</PanelBody>
+					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
+						<SelectControl
+							label={ __( 'Advance to next page', 'amp' ) }
+							help={ __( 'Advance to next page', 'amp' ) }
+							value={ autoAdvanceAfter }
+							options={ [
+								{ value: '', label: __( 'Manual', 'amp' ) },
+								{ value: 'auto', label: __( 'Automatic', 'amp' ) },
+								{ value: 'time', label: __( 'After a certain time', 'amp' ) },
+								{ value: 'video', label: __( 'After video has ended', 'amp' ) },
+							] }
+							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
+						/>
+						{ /* @todo: Set minimum so that it can't be below total animation duration time */ }
+						{ 'time' === autoAdvanceAfter && (
+							<RangeControl
+								label={ __( 'Time in seconds', 'amp' ) }
+								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
+								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
+								min={ 0 }
+								initialPosition={ 0 }
+							/>
+						) }
+					</PanelBody>
 				</InspectorControls>
 				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
@@ -202,8 +237,8 @@ class EditPage extends Component {
 	}
 }
 
-export default withSelect( ( select, props ) => {
-	const { mediaId } = props.attributes;
+export default withSelect( ( select, { attributes } ) => {
+	const { mediaId } = attributes;
 	const { getMedia } = select( 'core' );
 
 	return {

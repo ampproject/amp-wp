@@ -25,13 +25,40 @@ import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
 import store from './stores/amp-story';
 
+const {
+	getSelectedBlockClientId,
+	getBlocksByClientId,
+	getClientIdsWithDescendants,
+	getBlockRootClientId,
+	getBlockOrder,
+	getBlock,
+	getBlockAttributes,
+} = select( 'core/editor' );
+
+const {
+	isReordering,
+	getBlockOrder: getCustomBlockOrder,
+	getAnimatedBlocks,
+} = select( 'amp/story' );
+
+const {
+	moveBlockToPosition,
+	updateBlockAttributes,
+} = dispatch( 'core/editor' );
+
+const {
+	setCurrentPage,
+	removePage,
+	addAnimation,
+	changeAnimationType,
+	changeAnimationDuration,
+	changeAnimationDelay,
+} = dispatch( 'amp/story' );
+
 /**
  * Initialize editor integration.
  */
 domReady( () => {
-	const { getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
-	const { addAnimation, setCurrentPage } = dispatch( 'amp/story' );
-
 	// Ensure that the default block is page when no block is selected.
 	setDefaultBlockName( 'amp/amp-story-page' );
 
@@ -53,10 +80,16 @@ domReady( () => {
 
 		// Set initial animation order state.
 		if ( page ) {
-			const ampAnimationAfter = block.attributes.ampAnimationAfter;
+			const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
 			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+			changeAnimationType( page, block.clientId, ampAnimationType );
+
+			if ( ampAnimationType ) {
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+			}
 		}
 
 		// Load all needed fonts.
@@ -140,13 +173,9 @@ function renderStoryComponents() {
 	}
 }
 
-const { getBlockOrder, getBlock } = select( 'core/editor' );
-
 let blockOrder = getBlockOrder();
 
 subscribe( () => {
-	const { getSelectedBlockClientId } = select( 'core/editor' );
-	const { setCurrentPage, removePage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -180,8 +209,38 @@ subscribe( () => {
 	}
 } );
 
-const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
-const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
+/**
+ * Given a page and a list of animated blocks, calculates the total duration
+ * of all animations.
+ *
+ * Traverses through the animation order tree level by level.
+ *
+ * @param {string} page           Page client ID.
+ * @param {Array}  animatedBlocks List of animated blocks for that page.
+ *
+ * @return {number} Total animation duration time.
+ */
+const getTotalAnimationDuration = ( page, animatedBlocks ) => {
+	const getLongestAnimation = ( parentBlockId ) => {
+		return animatedBlocks
+			.filter( ( { parent } ) => parent === parentBlockId )
+			.map( ( { id, duration, delay } ) => {
+				if ( page !== getBlockRootClientId( id ) ) {
+					return 0;
+				}
+
+				const animationDelay = delay ? parseInt( delay ) : 0;
+				const animationDuration = duration ? parseInt( duration ) : 0;
+
+				return animationDelay + animationDuration;
+			} )
+			.reduce( ( max, current ) => Math.max( max, current ), 0 );
+	};
+
+	const levels = [ ...new Set( animatedBlocks.map( ( { parent } ) => parent ) ) ];
+
+	return levels.map( getLongestAnimation ).reduce( ( sum, duration ) => sum + duration, 0 );
+};
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
@@ -194,17 +253,37 @@ store.subscribe( () => {
 		}
 	}
 
-	const animationOrder = getAnimationOrder();
+	const animatedBlocks = getAnimatedBlocks();
 
-	for ( const page in animationOrder ) {
-		if ( ! animationOrder.hasOwnProperty( page ) ) {
+	// Update pages and blocks based on updated animation data.
+	for ( const page in animatedBlocks ) {
+		if ( ! animatedBlocks.hasOwnProperty( page ) ) {
 			continue;
 		}
 
-		for ( const item of animationOrder[ page ] ) {
-			const parentBlock = item.parent ? getBlock( item.parent ) : undefined;
+		const pageAttributes = getBlockAttributes( page );
 
-			updateBlockAttributes( item.id, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
+		if ( 'auto' === pageAttributes.autoAdvanceAfter ) {
+			const totalAnimationDuration = getTotalAnimationDuration( page, animatedBlocks[ page ] );
+			// @todo Fine tune this?
+			const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+
+			if ( totalAnimationDurationInSeconds !== pageAttributes.autoAdvanceAfterDuration ) {
+				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+			}
+		}
+
+		for ( const item of animatedBlocks[ page ] ) {
+			const { id, parent, animationType, duration, delay } = item;
+
+			const parentBlock = parent ? getBlock( parent ) : undefined;
+
+			updateBlockAttributes( id, {
+				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
+				ampAnimationType: animationType,
+				ampAnimationDuration: duration,
+				ampAnimationDelay: delay,
+			} );
 		}
 	}
 } );

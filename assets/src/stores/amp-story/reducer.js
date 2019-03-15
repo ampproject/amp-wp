@@ -6,16 +6,19 @@ import { select, combineReducers } from '@wordpress/data';
 const { getBlock, getBlockOrder, getAdjacentBlockClientId } = select( 'core/editor' );
 
 /**
- * Reducer handling animation order changes.
+ * Reducer handling animation state changes.
+ *
+ * For each page, its animated elements with their
+ * data (ID, duration, delay, predecessor) are stored.
  *
  * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  *
  * @return {Object} Updated state.
  */
-export function animationOrder( state = {}, action ) {
+export function animations( state = {}, action ) {
 	const newAnimationOrder = { ...state };
-	const { page, item, predecessor } = action;
+	const { page, item, predecessor, animationType, duration, delay } = action;
 	const pageAnimationOrder = newAnimationOrder[ page ] || [];
 
 	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
@@ -58,6 +61,36 @@ export function animationOrder( state = {}, action ) {
 				for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
 					pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
 				}
+			}
+
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
+
+		case 'CHANGE_ANIMATION_TYPE':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
+			}
+
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
+
+		case 'CHANGE_ANIMATION_DURATION':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].duration = duration;
+			}
+
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
+
+		case 'CHANGE_ANIMATION_DELAY':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].delay = delay;
 			}
 
 			return {
@@ -140,4 +173,4 @@ export function blocks( state = {}, action ) {
 	return state;
 }
 
-export default combineReducers( { animationOrder, currentPage, blocks } );
+export default combineReducers( { animations, currentPage, blocks } );
