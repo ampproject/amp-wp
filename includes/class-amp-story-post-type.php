@@ -910,6 +910,11 @@ class AMP_Story_Post_Type {
 	public static function maybe_flush_rewrite_rules() {
 		$current_rules = get_option( 'rewrite_rules' );
 
+		// If we're not using permalinks.
+		if ( empty( $current_rules ) ) {
+			return;
+		}
+
 		// Check if the rewrite rule for showing preview exists for different permalink settings.
 		$story_rules = array_filter(
 			array_keys( $current_rules ),
