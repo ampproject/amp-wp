@@ -923,7 +923,7 @@ class AMP_Story_Post_Type {
 			}
 		);
 		if ( empty( $story_rules ) ) {
-			flush_rewrite_rules();
+			flush_rewrite_rules( false );
 		}
 	}
 
