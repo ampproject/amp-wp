@@ -34,7 +34,7 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 			'html'          => '<div class="pd-embed" data-settings="{&quot;type&quot;:&quot;iframe&quot;,&quot;auto&quot;:true,&quot;domain&quot;:&quot;rydk.survey.fm&quot;,&quot;id&quot;:&quot;test-survey&quot;}"></div><script type="text/javascript">(function(d,c,j){if(!document.getElementById(j)){var pd=d.createElement(c),s;pd.id=j;pd.src=(\'https:\'==document.location.protocol)?\'https://polldaddy.com/survey.js\':\'http://i0.poll.fm/survey.js\';s=document.getElementsByTagName(c)[0];s.parentNode.insertBefore(pd,s);}}(document,\'script\',\'pd-embed\'));</script>',
 		);
 
-		return array(
+		$data = array(
 			'poll.fm'          => array(
 				'https://poll.fm/7012505',
 				'<p><a href="https://poll.fm/7012505">Which design do you prefer?</a></p>',
@@ -47,24 +47,26 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 				$poll_response,
 			),
 
-			/*
-			 * There seems to be a bug in WordPress core's oEmbed handling. The following patch seems necessary to
-			 * wp-includes/class-oembed.php:
-			 *  - '#https?://survey\.fm/.*#i'                    => array( 'https://api.crowdsignal.com/oembed', true ),
-			 *  + '#https?://(\w+\.)?survey\.fm/.*#i'            => array( 'https://api.crowdsignal.com/oembed', true ),
-			 */
-			'survey.fm'        => array(
-				'https://rydk.survey.fm/test-survey',
-				'<p><a href="https://rydk.survey.fm/test-survey" target="_blank">View Survey</a></p>',
-				$survey_response,
-			),
-
 			'polldaddy_survey' => array(
 				'https://rydk.polldaddy.com/s/test-survey',
 				'<p><a href="https://rydk.polldaddy.com/s/test-survey" target="_blank">View Survey</a></p>',
 				$survey_response,
 			),
 		);
+
+		/*
+		 * There is a bug with WordPress's oEmbed handling for Crowdsignal surveys.
+		 * See <https://core.trac.wordpress.org/ticket/46467>.
+		 */
+		if ( version_compare( get_bloginfo( 'version' ), '5.2.0', '>=' ) ) {
+			$data['survey.fm'] = array(
+				'https://rydk.survey.fm/test-survey',
+				'<p><a href="https://rydk.survey.fm/test-survey" target="_blank">View Survey</a></p>',
+				$survey_response,
+			);
+		}
+
+		return $data;
 	}
 
 	/**
