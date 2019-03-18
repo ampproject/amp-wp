@@ -1,8 +1,7 @@
 /**
  * This file is mainly copied from the default BlockMover component, there are some small differences.
  * The arrows' labels are changed and are switched. Also, dragging is enabled even if the element is the only block.
- * See the diff here: https://gist.github.com/miina/1e9835ed93d752987685bf133d123d4d/revisions#diff-f7a1098c9549e3334c67c9ac7c146e9d
- */
+ **/
 
 /**
  * External dependencies
@@ -59,9 +58,9 @@ export class BlockMover extends Component {
 		// the rendering parent, leaving it unable to react to focus out.
 		return (
 			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] }>
-				<div className={ classnames( 'amp-story-editor-block-mover', { 'is-visible': isFocused } ) }>
+				<div className={ classnames( 'amp-story-editor-block-mover editor-block-mover block-editor-block-mover', { 'is-visible': isFocused } ) }>
 					<IconButton
-						className="editor-block-mover__control"
+						className="editor-block-mover__control block-editor-block-mover__control"
 						onClick={ isFirst ? null : onMoveUp }
 						icon={ upArrow }
 						label={ __( 'Send Backward', 'amp' ) }
@@ -71,7 +70,7 @@ export class BlockMover extends Component {
 						onBlur={ this.onBlur }
 					/>
 					<IconDragHandle
-						className="editor-block-mover__control"
+						className="editor-block-mover__control block-editor-block-mover__control"
 						icon={ dragHandle }
 						clientId={ clientIds }
 						blockElementId={ blockElementId }
@@ -80,7 +79,7 @@ export class BlockMover extends Component {
 						onDragEnd={ onDragEnd }
 					/>
 					<IconButton
-						className="editor-block-mover__control"
+						className="editor-block-mover__control block-editor-block-mover__control"
 						onClick={ isLast ? null : onMoveDown }
 						icon={ downArrow }
 						label={ __( 'Bring Forward', 'amp' ) }

@@ -67,7 +67,7 @@ const schema = {
 		type: 'number',
 	},
 	width: {
-		default: 100,
+		default: 250,
 		type: 'number',
 	},
 };
