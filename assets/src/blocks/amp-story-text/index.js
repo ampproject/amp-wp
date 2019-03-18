@@ -18,7 +18,6 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import edit from './edit';
-import getTagName from './get-tag-name';
 
 export const name = 'amp/amp-story-text';
 
@@ -40,6 +39,10 @@ const schema = {
 	type: {
 		type: 'string',
 		default: 'auto',
+	},
+	tagName: {
+		type: 'string',
+		default: 'p',
 	},
 	fontSize: {
 		type: 'string',
@@ -94,13 +97,12 @@ export const settings = {
 			textColor,
 			customBackgroundColor,
 			customTextColor,
+			tagName,
 		} = attributes;
 
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
 		const fontSizeClass = getFontSizeClass( fontSize );
-
-		const tagName = getTagName( attributes );
 
 		const className = classnames( {
 			'has-text-color': textColor || customTextColor,
