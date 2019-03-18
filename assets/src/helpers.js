@@ -188,8 +188,10 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
+	const newProps = { ...props };
+
 	// Always add anchor ID regardless of block support. Needed for animations.
-	props.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || uuid();
 
 	if ( attributes.ampAnimationType ) {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
@@ -225,7 +227,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	return {
-		...props,
+		...newProps,
 		...ampAttributes,
 	};
 };
