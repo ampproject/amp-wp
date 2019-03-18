@@ -127,6 +127,24 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 				$this->create_amp_facebook_and_replace_node( $dom, $node, $embed_type );
 			}
 		}
+
+		/*
+		 * Remove the fb-root div and the Facebook Connect JS script since irrelevant.
+		 * <div id="fb-root"></div>
+		 * <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v3.2"></script>
+		 */
+		$fb_root = $dom->getElementById( 'fb-root' );
+		if ( $fb_root ) {
+			$xpath   = new DOMXPath( $dom );
+			$scripts = array();
+			foreach ( $xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
+				$scripts[] = $script;
+			}
+			foreach ( $scripts as $script ) {
+				$script->parentNode->removeChild( $script );
+			}
+			$fb_root->parentNode->removeChild( $fb_root );
+		}
 	}
 
 	/**
@@ -137,13 +155,22 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function get_embed_type( $node ) {
 		$class_attr = $node->getAttribute( 'class' );
-		if ( null !== $class_attr && $node->hasAttribute( 'data-href' ) ) {
-			if ( false !== strpos( $class_attr, 'fb-post' ) ) {
-				return 'post';
-			} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
-				return 'video';
-			}
-			return false !== strpos( $class_attr, 'fb-video' ) ? 'video' : 'post';
+		if ( null === $class_attr || ! $node->hasAttribute( 'data-href' ) ) {
+			return null;
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-post' ) ) {
+			return 'post';
+		} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+			return 'video';
+		} elseif ( false !== strpos( $class_attr, 'fb-page' ) ) {
+			return 'page';
+		} elseif ( false !== strpos( $class_attr, 'fb-like' ) ) {
+			return 'like';
+		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
+			return 'comments';
+		} elseif ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
+			return 'comment';
 		}
 
 		return null;
@@ -157,19 +184,54 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @param string      $embed_type Embed type.
 	 */
 	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
-		$amp_facebook_node = AMP_DOM_Utils::create_node(
-			$dom,
-			$this->amp_tag,
-			array(
-				'data-href'     => $node->getAttribute( 'data-href' ),
-				'data-embed-as' => $embed_type,
-				'layout'        => 'responsive',
-				'width'         => $this->DEFAULT_WIDTH,
-				'height'        => $this->DEFAULT_HEIGHT,
-			)
+
+		$attributes = array(
+			'layout' => 'responsive',
+			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
+			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
 		);
 
+		$node->removeAttribute( 'data-width' );
+		$node->removeAttribute( 'data-height' );
+
+		foreach ( $node->attributes as $attribute ) {
+			if ( 'data-' === substr( $attribute->nodeName, 0, 5 ) ) {
+				$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
+			}
+		}
+
+		if ( 'page' === $embed_type ) {
+			$amp_tag = 'amp-facebook-page';
+		} elseif ( 'like' === $embed_type ) {
+			$amp_tag = 'amp-facebook-like';
+		} elseif ( 'comments' === $embed_type ) {
+			$amp_tag = 'amp-facebook-comments';
+		} else {
+			$amp_tag = $this->amp_tag;
+
+			$attributes['data-embed-as'] = $embed_type;
+		}
+
+		$amp_facebook_node = AMP_DOM_Utils::create_node(
+			$dom,
+			$amp_tag,
+			$attributes
+		);
+
+		$fallback = null;
+		foreach ( $node->childNodes as $child_node ) {
+			if ( $child_node instanceof DOMElement && false !== strpos( $child_node->getAttribute( 'class' ), 'fb-xfbml-parse-ignore' ) ) {
+				$fallback = $child_node;
+				$child_node->parentNode->removeChild( $child_node );
+				$fallback->setAttribute( 'fallback', '' );
+				break;
+			}
+		}
+
 		$node->parentNode->replaceChild( $amp_facebook_node, $node );
+		if ( $fallback ) {
+			$amp_facebook_node->appendChild( $fallback );
+		}
 
 		$this->did_convert_elements = true;
 	}
