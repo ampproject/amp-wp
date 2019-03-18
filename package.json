@@ -20,7 +20,7 @@
     "babel-loader": "8.0.5",
     "babel-plugin-inline-react-svg": "^1.0.1",
     "cross-env": "5.2.0",
-    "eslint": "5.15.1",
+    "eslint": "5.15.2",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-react": "7.12.4",
     "grunt": "1.0.3",
@@ -34,7 +34,7 @@
     "timeago.js": "3.0.2",
     "uuid": "3.3.2",
     "webpack": "4.29.6",
-    "webpack-cli": "3.2.3"
+    "webpack-cli": "3.3.0"
   },
   "scripts": {
     "build": "npm-run-all build:*",

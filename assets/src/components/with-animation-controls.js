@@ -17,7 +17,7 @@ import { AnimationControls } from './';
 
 const applyWithSelect = withSelect( ( select, props ) => {
 	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/editor' );
-	const { getAnimatedBlocks } = select( 'amp/story' );
+	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
@@ -36,7 +36,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 				.filter( ( { id } ) => {
 					const block = getBlock( id );
 
-					return block && block.attributes.ampAnimationType;
+					return block && block.attributes.ampAnimationType && isValidAnimationPredecessor( page, currentBlock, id );
 				} )
 				.map( ( { id } ) => {
 					const block = getBlock( id );

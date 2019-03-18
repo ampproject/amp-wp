@@ -22,7 +22,6 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 } from './components';
-
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
@@ -30,6 +29,7 @@ import {
 	addAMPExtraProps,
 	getTotalAnimationDuration,
 	renderStoryComponents,
+	getTagName,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -189,6 +189,33 @@ function maybeUpdateAutoAdvanceAfterMedia( clientId ) {
 	}
 }
 
+/**
+ * Determines the HTML tag name that should be used for text blocks.
+ *
+ * This is based on the block's attributes, as well as the surrounding context.
+ *
+ * For example, there can only be one <h1> tag on a page.
+ * Also, font size takes precedence over text length as it's a stronger signal for semantic meaning.
+ *
+ * @param {string} clientId Block ID.
+ */
+function maybeSetTagName( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'amp/amp-story-text' !== block.name ) {
+		return;
+	}
+
+	const siblings = getBlocksByClientId( getBlockOrder( clientId ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const canUseH1 = ! siblings.some( ( { attributes } ) => attributes.tagName === 'h1' );
+
+	const tagName = getTagName( block.attributes, canUseH1 );
+
+	if ( block.attributes.tagName !== tagName ) {
+		updateBlockAttributes( clientId, { tagName } );
+	}
+}
+
 let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
@@ -232,6 +259,7 @@ subscribe( () => {
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
+		maybeSetTagName( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
