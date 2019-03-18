@@ -28,9 +28,15 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES, MEDIA_INNER_BLOCKS } from './constants';
 import { getTotalAnimationDuration } from '../../helpers';
+import {
+	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MEDIA_TYPES,
+	IMAGE_BACKGROUND_TYPE,
+	VIDEO_BACKGROUND_TYPE,
+	POSTER_ALLOWED_MEDIA_TYPES,
+	MEDIA_INNER_BLOCKS
+} from '../../constants';
 
 const TEMPLATE = [
 	[ 'amp/amp-story-text' ],
