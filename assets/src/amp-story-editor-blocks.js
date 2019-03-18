@@ -221,11 +221,16 @@ store.subscribe( () => {
 
 		const animatedBlocksPerPage = animatedBlocks[ page ].filter( ( { id } ) => page === getBlockRootClientId( id ) );
 
-		if ( 'auto' === pageAttributes.autoAdvanceAfter ) {
+		if ( [ 'auto', 'time' ].includes( pageAttributes.autoAdvanceAfter ) ) {
 			const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 			const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
-			if ( totalAnimationDurationInSeconds !== pageAttributes.autoAdvanceAfterDuration ) {
+			if ( 'time' === pageAttributes.autoAdvanceAfter ) {
+				// Enforce minimum value for manually set time.
+				if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
+					updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+				}
+			} else {
 				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 			}
 		}
