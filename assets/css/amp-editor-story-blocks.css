@@ -826,7 +826,9 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	opacity: 100;
 }
 
-.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable {
+.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit
+{
 	display: inline-block;
 }
 
