@@ -218,6 +218,7 @@ class EditPage extends Component {
 								setAttributes( { autoAdvanceAfter: value } );
 
 								if ( 'media' === value ) {
+									// @todo Update this value when media block gets removed (move data to store?)
 									setAttributes( { autoAdvanceAfterMedia: firstMediaBlock.attributes.anchor } );
 								}
 							} }
