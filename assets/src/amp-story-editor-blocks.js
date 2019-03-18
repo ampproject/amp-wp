@@ -31,7 +31,8 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 } from './helpers';
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
+
+import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
 
 import store from './stores/amp-story';
 
@@ -119,7 +120,7 @@ const positionTopGap = 10;
 /**
  * Set initial positioning if the selected block is an unmodified block.
  *
- * @param {number} clientId Selected block's ID.
+ * @param {string} clientId Block ID.
  */
 function maybeSetInitialPositioning( clientId ) {
 	const block = getBlock( clientId );
@@ -148,6 +149,43 @@ function maybeSetInitialPositioning( clientId ) {
 		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
 
 		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+}
+
+/**
+ * Verify and perhaps update autoAdvanceAfterMedia attribute for pages.
+ *
+ * For pages with autoAdvanceAfter set to 'media',
+ * verify that the referenced media block still exists.
+ * If not, find another media block to be used for the
+ * autoAdvanceAfterMedia attribute.
+ *
+ * @param {string} clientId Block ID.
+ */
+function maybeUpdateAutoAdvanceAfterMedia( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_TOP_LEVEL_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	if ( 'media' !== block.attributes.autoAdvanceAfter ) {
+		return;
+	}
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
+	const mediaBlock = block.attributes.autoAdvanceAfterMedia && innerBlocks.find( ( { attributes } ) => attributes.anchor === block.attributes.autoAdvanceAfterMedia );
+
+	if ( mediaBlock ) {
+		return;
+	}
+
+	const firstMediaBlock = innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) );
+	const autoAdvanceAfterMedia = firstMediaBlock ? firstMediaBlock.attributes.anchor : '';
+
+	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
+		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
 	}
 }
 
@@ -193,6 +231,7 @@ subscribe( () => {
 
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
+		maybeUpdateAutoAdvanceAfterMedia( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
@@ -213,7 +252,7 @@ store.subscribe( () => {
 
 	// Update pages and blocks based on updated animation data.
 	for ( const page in animatedBlocks ) {
-		if ( ! animatedBlocks.hasOwnProperty( page ) ) {
+		if ( ! animatedBlocks.hasOwnProperty( page ) || ! getBlock( page ) ) {
 			continue;
 		}
 

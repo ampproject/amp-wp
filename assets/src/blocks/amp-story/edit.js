@@ -35,7 +35,7 @@ import {
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
-	MEDIA_INNER_BLOCKS
+	MEDIA_INNER_BLOCKS,
 } from '../../constants';
 
 const TEMPLATE = [
@@ -93,7 +93,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes, totalAnimationDuration, firstMediaBlock } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, hasMediaBlocks } = this.props;
 
 		const {
 			backgroundColor,
@@ -126,7 +126,7 @@ class EditPage extends Component {
 			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
 		];
 
-		if ( firstMediaBlock ) {
+		if ( hasMediaBlocks ) {
 			autoAdvanceAfterOptions.push( { value: 'media', label: __( 'After media has played', 'amp' ) } );
 		}
 
@@ -220,14 +220,7 @@ class EditPage extends Component {
 							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first video encountered on the page', 'amp' ) : undefined }
 							value={ autoAdvanceAfter }
 							options={ autoAdvanceAfterOptions }
-							onChange={ ( value ) => {
-								setAttributes( { autoAdvanceAfter: value } );
-
-								if ( 'media' === value ) {
-									// @todo Update this value when media block gets removed (move data to store?)
-									setAttributes( { autoAdvanceAfterMedia: firstMediaBlock.attributes.anchor } );
-								}
-							} }
+							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
 						/>
 						{ 'time' === autoAdvanceAfter && (
 							<RangeControl
@@ -274,6 +267,6 @@ export default withSelect( ( select, { attributes, clientId } ) => {
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
-		firstMediaBlock: innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) ),
+		hasMediaBlocks: innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) ) !== undefined,
 	};
 } )( EditPage );
