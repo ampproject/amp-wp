@@ -3,6 +3,11 @@
  */
 import { select, combineReducers } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
+import { isValidAnimationPredecessor } from './selectors';
+
 const { getBlock, getBlockOrder } = select( 'core/editor' );
 
 /**
@@ -22,22 +27,7 @@ export function animationOrder( state = {}, action ) {
 
 	switch ( action.type ) {
 		case 'ADD_ANIMATION':
-			const hasCycle = ( a, b ) => {
-				let parent = b;
-
-				while ( parent !== undefined ) {
-					if ( parent === a ) {
-						return true;
-					}
-
-					const parentItem = pageAnimationOrder.find( ( { id } ) => id === parent );
-					parent = parentItem ? parentItem.parent : undefined;
-				}
-
-				return false;
-			};
-
-			const parent = -1 !== entryIndex( predecessor ) && ! hasCycle( item, predecessor ) ? predecessor : undefined;
+			const parent = isValidAnimationPredecessor( { animationOrder: state }, page, item, predecessor ) ? predecessor : undefined;
 
 			if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder[ entryIndex( item ) ].parent = parent;
