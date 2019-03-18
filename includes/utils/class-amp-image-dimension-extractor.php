@@ -120,6 +120,7 @@ class AMP_Image_Dimension_Extractor {
 		 * @param string $url            Original image URL.
 		 */
 		$normalized_url = apply_filters( 'amp_normalized_dimension_extractor_image_url', $normalized_url, $url );
+
 		return $normalized_url;
 	}
 
