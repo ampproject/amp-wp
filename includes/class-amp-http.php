@@ -203,7 +203,7 @@ class AMP_HTTP {
 		 */
 		foreach ( $domains as $domain ) {
 			if ( function_exists( 'idn_to_utf8' ) ) {
-				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with and old ICU version.
+				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
