@@ -148,6 +148,8 @@ class AMP_Story_Post_Type {
 				'render_callback' => array( __CLASS__, 'render_text_block' ),
 			)
 		);
+
+		self::maybe_flush_rewrite_rules();
 	}
 
 	/**
@@ -900,6 +902,29 @@ class AMP_Story_Post_Type {
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Flushes rewrite rules if it hasn't been done yet after having AMP Stories Post type.
+	 */
+	public static function maybe_flush_rewrite_rules() {
+		$current_rules = get_option( 'rewrite_rules' );
+
+		// If we're not using permalinks.
+		if ( empty( $current_rules ) ) {
+			return;
+		}
+
+		// Check if the rewrite rule for showing preview exists for different permalink settings.
+		$story_rules = array_filter(
+			array_keys( $current_rules ),
+			function( $rule ) {
+				return 0 === strpos( $rule, self::REWRITE_SLUG ) || false !== strpos( $rule, '/' . self::REWRITE_SLUG . '/' );
+			}
+		);
+		if ( empty( $story_rules ) ) {
+			flush_rewrite_rules( false );
+		}
 	}
 
 	/**
