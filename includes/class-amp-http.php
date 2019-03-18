@@ -203,11 +203,9 @@ class AMP_HTTP {
 		 */
 		foreach ( $domains as $domain ) {
 			if ( function_exists( 'idn_to_utf8' ) ) {
-				if ( version_compare( PHP_VERSION, '5.4', '>=' ) && defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
-					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.Constants.NewConstants.intl_idna_variant_uts46Found
-				} else {
-					$domain = idn_to_utf8( $domain );
-				}
+				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with and old ICU version.
+				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
 			$subdomain = str_replace( '-', '--', $domain );
 			$subdomain = str_replace( '.', '-', $subdomain );
