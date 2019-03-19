@@ -6,9 +6,22 @@
 import uuid from 'uuid/v4';
 
 /**
+ * WordPress dependencies
+ */
+import { count } from '@wordpress/wordcount';
+import { _x } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import {
+	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MOVABLE_BLOCKS,
+	ALLOWED_TOP_LEVEL_BLOCKS,
+	BLOCK_TAG_MAPPING,
+	STORY_PAGE_INNER_WIDTH,
+	STORY_PAGE_INNER_HEIGHT,
+} from './constants';
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -219,4 +232,102 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...props,
 		...ampAttributes,
 	};
+};
+
+// Todo: Make these customizable?
+const H1_FONT_SIZE = 40;
+const H2_FONT_SIZE = 24;
+const H1_TEXT_LENGTH = 4;
+const H2_TEXT_LENGTH = 10;
+
+/*
+ * translators: If your word count is based on single characters (e.g. East Asian characters),
+ * enter 'characters_excluding_spaces' or 'characters_including_spaces'. Otherwise, enter 'words'.
+ * Do not translate into your own language.
+ */
+const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' );
+
+/**
+ * Determines the HTML tag name that should be used given on the block's attributes.
+ *
+ * Font size takes precedence over text length as it's a stronger signal for semantic meaning.
+ *
+ * @param {Object}  attributes Block attributes.
+ * @param {boolean} canUseH1   Whether an H1 tag is allowed.
+ *
+ * @return {string} HTML tag name. Either p, h1, or h2.
+ */
+export const getTagName = ( attributes, canUseH1 ) => {
+	const { fontSize, customFontSize, positionTop } = attributes;
+
+	// Elements positioned that low on a page are unlikely to be headings.
+	if ( positionTop > 80 ) {
+		return 'p';
+	}
+
+	if ( 'huge' === fontSize || ( customFontSize && customFontSize > H1_FONT_SIZE ) ) {
+		return canUseH1 ? 'h1' : 'h2';
+	}
+
+	if ( 'large' === fontSize || ( customFontSize && customFontSize > H2_FONT_SIZE ) ) {
+		return 'h2';
+	}
+
+	const textLength = count( attributes.content, wordCountType, {} );
+
+	if ( H1_TEXT_LENGTH >= textLength ) {
+		return canUseH1 ? 'h1' : 'h2';
+	}
+
+	if ( H2_TEXT_LENGTH >= textLength ) {
+		return 'h2';
+	}
+
+	return 'p';
+};
+
+/**
+ * Calculates font size that fits to the text element based on the element's size.
+ * Replicates amp-fit-text's logic in the editor.
+ *
+ * @see https://github.com/ampproject/amphtml/blob/e7a1b3ff97645ec0ec482192205134bd0735943c/extensions/amp-fit-text/0.1/amp-fit-text.js
+ *
+ * @param {Object} measurer HTML element.
+ * @param {number} expectedHeight Maximum height.
+ * @param {number} expectedWidth Maximum width.
+ * @param {number} maxFontSize Maximum font size.
+ * @param {number} minFontSize Minimum font size.
+ * @return {number} Calculated font size.
+ */
+export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	maxFontSize++;
+	// Binomial search for the best font size.
+	while ( maxFontSize - minFontSize > 1 ) {
+		const mid = Math.floor( ( minFontSize + maxFontSize ) / 2 );
+		measurer.style.fontSize = mid + 'px';
+		const currentHeight = measurer.offsetHeight;
+		const currentWidth = measurer.offsetWidth;
+		if ( currentHeight > expectedHeight || currentWidth > expectedWidth ) {
+			maxFontSize = mid;
+		} else {
+			minFontSize = mid;
+		}
+	}
+	return minFontSize;
+};
+
+/**
+ * Get percentage of a distance compared to the full width / height of the page.
+ *
+ * @param {string} axis X or Y axis.
+ * @param {number} pixelValue Value in pixels.
+ * @return {number} Value in percentage.
+ */
+export const getPercentageFromPixels = ( axis, pixelValue ) => {
+	if ( 'x' === axis ) {
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 );
+	} else if ( 'y' === axis ) {
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
+	}
+	return 0;
 };

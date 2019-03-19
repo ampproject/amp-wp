@@ -11,14 +11,11 @@ import {
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch } from '@wordpress/data';
-import {
-	MediaUploadCheck,
-} from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from './../constants';
+import { getPercentageFromPixels } from './../helpers';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
@@ -27,16 +24,6 @@ class BlockDropZone extends Component {
 		super( ...arguments );
 
 		this.onDrop = this.onDrop.bind( this );
-	}
-
-	getDragDropPercentagePosition( axis, srcValue, dstValue ) {
-		const positionInPx = dstValue - srcValue;
-		if ( 'x' === axis ) {
-			return Math.round( ( positionInPx / STORY_PAGE_INNER_WIDTH ) * 100 );
-		} else if ( 'y' === axis ) {
-			return Math.round( ( positionInPx / STORY_PAGE_INNER_HEIGHT ) * 100 );
-		}
-		return 0;
 	}
 
 	onDrop( event ) {
@@ -61,21 +48,18 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
-
 		updateBlockAttributes( srcClientId, {
-			positionLeft: this.getDragDropPercentagePosition( 'x', wrapperPosition.left, clonePosition.left ),
-			positionTop: this.getDragDropPercentagePosition( 'y', wrapperPosition.top, clonePosition.top ),
+			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
+			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
 		} );
 	}
 
 	render() {
 		return (
-			<MediaUploadCheck>
-				<DropZone
-					className="editor-block-drop-zone"
-					onDrop={ this.onDrop }
-				/>
-			</MediaUploadCheck>
+			<DropZone
+				className="editor-block-drop-zone"
+				onDrop={ this.onDrop }
+			/>
 		);
 	}
 }
