@@ -20,7 +20,7 @@
     "babel-loader": "8.0.5",
     "babel-plugin-inline-react-svg": "^1.0.1",
     "cross-env": "5.2.0",
-    "eslint": "5.15.2",
+    "eslint": "5.15.3",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-react": "7.12.4",
     "grunt": "1.0.3",
