@@ -37,7 +37,7 @@ export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 ];
 
-export const ALLOWED_CHILD_BLOCKS = [
+export const ALLOWED_MOVABLE_BLOCKS = [
 	'core/audio',
 	'core/code',
 	'core/embed',
@@ -50,6 +50,11 @@ export const ALLOWED_CHILD_BLOCKS = [
 	'core/verse',
 	'core/video',
 	'amp/amp-story-text',
+];
+
+export const ALLOWED_CHILD_BLOCKS = [
+	...ALLOWED_MOVABLE_BLOCKS,
+	'amp/amp-story-cta',
 ];
 
 export const ALLOWED_BLOCKS = [

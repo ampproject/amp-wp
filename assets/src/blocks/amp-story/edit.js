@@ -26,7 +26,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../../constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
 
 const TEMPLATE = [
@@ -84,7 +84,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes } = this.props;
+		const { attributes, media, setAttributes, allowedBlocks } = this.props;
 
 		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint, poster } = attributes;
 
@@ -196,18 +196,24 @@ class EditPage extends Component {
 							</video>
 						</div>
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
 			</Fragment>
 		);
 	}
 }
 
-export default withSelect( ( select, props ) => {
-	const { mediaId } = props.attributes;
+export default withSelect( ( select, { clientId, attributes } ) => {
+	const { mediaId } = attributes;
 	const { getMedia } = select( 'core' );
+	const { getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+	const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
+	const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
+		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 	};
 } )( EditPage );

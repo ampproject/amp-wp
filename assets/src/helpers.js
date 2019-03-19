@@ -8,7 +8,7 @@ import uuid from 'uuid/v4';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -139,14 +139,17 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	addedAttributes.positionTop = {
-		type: 'number',
-		default: 0,
-	};
-	addedAttributes.positionLeft = {
-		type: 'number',
-		default: 5,
-	};
+	if ( ALLOWED_MOVABLE_BLOCKS.includes( name ) ) {
+		addedAttributes.positionTop = {
+			type: 'number',
+			default: 0,
+		};
+
+		addedAttributes.positionLeft = {
+			type: 'number',
+			default: 5,
+		};
+	}
 
 	return {
 		...settings,

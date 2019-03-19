@@ -3,13 +3,15 @@
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/editor';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
+import { compose } from '@wordpress/compose';
 
-const Shortcuts = ( { insertBlock } ) => {
+const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 	const blocks = [
 		'amp/amp-story-text',
 		'core/image',
+		'amp/amp-story-cta',
 	];
 
 	return (
@@ -23,13 +25,26 @@ const Shortcuts = ( { insertBlock } ) => {
 					onClick={ () => insertBlock( block ) }
 					label={ blockType.title }
 					labelPosition="bottom"
+					disabled={ ! canInsertBlockType( block ) }
 				/>
 			);
 		} )
 	);
 };
 
-export default withDispatch( ( dispatch, props, { select } ) => {
+const applyWithSelect = withSelect( ( select ) => {
+	const { getCurrentPage } = select( 'amp/story' );
+	const { canInsertBlockType, getBlockListSettings } = select( 'core/editor' );
+
+	return {
+		canInsertBlockType: ( name ) => {
+			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+			return canInsertBlockType( name, getCurrentPage() ) && getBlockListSettings( getCurrentPage() ).allowedBlocks.includes( name );
+		},
+	};
+} );
+
+const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const { getCurrentPage } = select( 'amp/story' );
 	const { getBlockOrder } = select( 'core/editor' );
 	const { insertBlock } = dispatch( 'core/editor' );
@@ -44,4 +59,9 @@ export default withDispatch( ( dispatch, props, { select } ) => {
 			insertBlock( insertedBlock, index, currentPage );
 		},
 	};
-} )( Shortcuts );
+} );
+
+export default compose(
+	applyWithSelect,
+	applyWithDispatch,
+)( Shortcuts );
