@@ -36,7 +36,7 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
-			$cta_layers = $node->getElementsByTagName( 'amp-story-cta-layer' );
+			$cta_layers     = $node->getElementsByTagName( 'amp-story-cta-layer' );
 			$num_cta_layers = $cta_layers->length;
 
 			for ( $j = $num_cta_layers - 1; $j >= 0; $j-- ) {
