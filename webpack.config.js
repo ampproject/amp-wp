@@ -1,73 +1,77 @@
 /* global process, require, module, __dirname */
 
+/**
+ * External dependencies
+ */
+const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
+const LiveReloadPlugin = require( 'webpack-livereload-plugin' );
 const path = require( 'path' );
 
-const externals = {
-	// Make localized data importable.
-	'amp-validation-i18n': 'ampValidationI18n',
-	jquery: 'jQuery',
-	lodash: 'lodash',
-	react: 'React',
-	'react-dom': 'ReactDOM',
-};
-
-// Define WordPress dependencies
-const wpDependencies = [
-	'blocks',
-	'components',
-	'compose',
-	'data',
-	'editor',
-	'edit-post',
-	'element',
-	'hooks',
-	'i18n',
-	'api-fetch',
-	'blocks',
-	'components',
-	'compose',
-	'date',
-	'editor',
-	'element',
-	'hooks',
-	'i18n',
-	'utils',
-	'data',
-	'viewport',
-	'core-data',
-	'plugins',
-	'edit-post',
-	'keycodes',
-	'wordcount',
-];
+/**
+ * WordPress dependencies
+ */
+const { camelCaseDash } = require( '@wordpress/scripts/utils' );
 
 /**
- * Given a string, returns a new string with dash separators converted to
- * camel-case equivalent. This is not as aggressive as `_.camelCase` in
- * converting to uppercase, where Lodash will convert letters following
- * numbers.
+ * Converts @wordpress/* string request into request object.
  *
- * @param {string} string Input dash-delimited string.
+ * Note this isn't the same as camel case because of the
+ * way that numbers don't trigger the capitalized next letter.
  *
- * @return {string} Camel-cased string.
+ * @example
+ * formatRequest( '@wordpress/api-fetch' );
+ * // { this: [ 'wp', 'apiFetch' ] }
+ * formatRequest( '@wordpress/i18n' );
+ * // { this: [ 'wp', 'i18n' ] }
+ *
+ * @param {string} request Request name from import statement.
+ * @return {Object} Request object formatted for further processing.
  */
-function camelCaseDash( string ) {
-	return string.replace(
-		/-([a-z])/,
-		( match, letter ) => letter.toUpperCase()
-	);
-}
+const formatRequest = ( request ) => {
+	// '@wordpress/api-fetch' -> [ '@wordpress', 'api-fetch' ]
+	const [ , name ] = request.split( '/' );
 
-wpDependencies.forEach( ( name ) => {
-	externals[ `@wordpress/${ name }` ] = {
+	// { this: [ 'wp', 'apiFetch' ] }
+	return {
 		this: [ 'wp', camelCaseDash( name ) ],
 	};
-} );
+};
+
+const wordpressExternals = ( context, request, callback ) => {
+	if ( /^@wordpress\//.test( request ) ) {
+		callback( null, formatRequest( request ), 'this' );
+	} else {
+		callback();
+	}
+};
+
+const externals = [
+	{
+		// Make localized data importable.
+		'amp-validation-i18n': 'ampValidationI18n',
+		react: 'React',
+		'react-dom': 'ReactDOM',
+		moment: 'moment',
+		jquery: 'jQuery',
+		lodash: 'lodash',
+		'lodash-es': 'lodash',
+
+		// Distributed NPM packages may depend on Babel's runtime regenerator.
+		// In a WordPress context, the regenerator is assigned to the global
+		// scope via the `wp-polyfill` script. It is reassigned here as an
+		// externals to reduce the size of generated bundles.
+		//
+		// See: https://github.com/WordPress/gutenberg/issues/13890
+		'@babel/runtime/regenerator': 'regeneratorRuntime',
+	},
+	wordpressExternals,
+];
 
 const isProduction = process.env.NODE_ENV === 'production';
+const mode = isProduction ? 'production' : 'development';
 
-module.exports = {
-	mode: isProduction ? 'production' : 'development',
+const config = {
+	mode,
 	entry: {
 		'./assets/js/amp-blocks-compiled': './assets/src/blocks/index.js',
 		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle.js',
@@ -83,9 +87,19 @@ module.exports = {
 		libraryTarget: 'this',
 	},
 	externals,
+	resolve: {
+		alias: {
+			'lodash-es': 'lodash',
+		},
+	},
 	devtool: isProduction ? undefined : 'cheap-eval-source-map',
 	module: {
 		rules: [
+			{
+				test: /\.js$/,
+				use: 'source-map-loader',
+				enforce: 'pre',
+			},
 			{
 				test: /\.js$/,
 				exclude: /node_modules/,
@@ -99,4 +113,23 @@ module.exports = {
 			},
 		],
 	},
+	plugins: [
+		// WP_BUNDLE_ANALYZER global variable enables utility that represents bundle content
+		// as convenient interactive zoomable treemap.
+		process.env.WP_BUNDLE_ANALYZER && new BundleAnalyzerPlugin(),
+		// WP_LIVE_RELOAD_PORT global variable changes port on which live reload works
+		// when running watch mode.
+		! isProduction && new LiveReloadPlugin( { port: process.env.WP_LIVE_RELOAD_PORT || 35729 } ),
+	].filter( Boolean ),
+	stats: {
+		children: false,
+	},
 };
+
+if ( ! isProduction ) {
+	// WP_DEVTOOL global variable controls how source maps are generated.
+	// See: https://webpack.js.org/configuration/devtool/#devtool.
+	config.devtool = process.env.WP_DEVTOOL || 'source-map';
+}
+
+module.exports = config;
