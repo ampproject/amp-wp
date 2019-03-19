@@ -3,7 +3,3 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 .has-background {
 	padding: 10px !important;
 }
-
-amp-story-grid-layer > * {
-	width: auto !important;
-}
