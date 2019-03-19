@@ -18,6 +18,7 @@ import { registerBlockType } from '@wordpress/blocks';
  * Internal dependencies
  */
 import edit from './edit';
+import { getPercentageFromPixels } from '../../helpers';
 
 export const name = 'amp/amp-story-text';
 
@@ -131,12 +132,14 @@ export const settings = {
 			[ backgroundClass ]: backgroundClass,
 		} );
 
+		const userFontSize = fontSizeClass ? undefined : customFontSize;
+
 		const styles = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
-			fontSize: ampFitText ? autoFontSize : fontSizeClass ? undefined : customFontSize,
-			width,
-			height,
+			fontSize: ampFitText ? autoFontSize : userFontSize,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 
 		return (

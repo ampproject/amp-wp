@@ -14,7 +14,13 @@ import { _x } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, BLOCK_TAG_MAPPING } from './constants';
+import {
+	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_TOP_LEVEL_BLOCKS,
+	BLOCK_TAG_MAPPING,
+	STORY_PAGE_INNER_WIDTH,
+	STORY_PAGE_INNER_HEIGHT,
+} from './constants';
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -304,4 +310,20 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 		}
 	}
 	return minFontSize;
+};
+
+/**
+ * Get percentage of a distance compared to the full width / height of the page.
+ *
+ * @param {string} axis X or Y axis.
+ * @param {number} pixelValue Value in pixels.
+ * @return {number} Value in percentage.
+ */
+export const getPercentageFromPixels = ( axis, pixelValue ) => {
+	if ( 'x' === axis ) {
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 );
+	} else if ( 'y' === axis ) {
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
+	}
+	return 0;
 };

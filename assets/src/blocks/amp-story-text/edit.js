@@ -101,6 +101,7 @@ class TextBlockEdit extends Component {
 
 		const minTextHeight = 20;
 		const minTextWidth = 30;
+		const userFontSize = fontSize.size ? fontSize.size + 'px' : undefined;
 
 		return (
 			<Fragment>
@@ -120,9 +121,9 @@ class TextBlockEdit extends Component {
 						/>
 						{ ! ampFitText && (
 							<FontSizePicker
-							value={ fontSize.size }
-							onChange={ setFontSize }
-						/>
+								value={ fontSize.size }
+								onChange={ setFontSize }
+							/>
 						) }
 						<SelectControl
 							label={ __( 'Select text type', 'amp' ) }
@@ -201,7 +202,7 @@ class TextBlockEdit extends Component {
 						style={ {
 							backgroundColor: backgroundColor.color,
 							color: textColor.color,
-							fontSize: ampFitText ? autoFontSize : fontSize.size ? fontSize.size + 'px' : undefined,
+							fontSize: ampFitText ? autoFontSize : userFontSize,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
