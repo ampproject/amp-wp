@@ -163,7 +163,6 @@ export const settings = {
 				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
 			</ContentTag>
 		);
-
 	},
 };
 
