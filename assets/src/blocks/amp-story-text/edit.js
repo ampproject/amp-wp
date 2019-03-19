@@ -8,7 +8,13 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import { PanelBody, ResizableBox, SelectControl, withFallbackStyles } from '@wordpress/components';
+import {
+	PanelBody,
+	ResizableBox,
+	SelectControl,
+	withFallbackStyles,
+	ToggleControl,
+} from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
 	RichText,
@@ -24,7 +30,7 @@ import {
  * Internal dependencies
  */
 import { FontFamilyPicker } from '../../components';
-import { maybeEnqueueFontStyle } from '../../helpers';
+import { maybeEnqueueFontStyle, calculateFontSize } from '../../helpers';
 
 const { getComputedStyle } = window;
 
@@ -45,43 +51,21 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 
 class TextBlockEdit extends Component {
 	componentDidUpdate() {
-		const { attributes, setFontSize, fontSize, isSelected } = this.props;
-		if ( isSelected ) {
-			/**
-			 * Calculates font size that fits to the text element based on the element's size.
-			 * Replicates amp-fit-text's logic in the editor.
-			 *
-			 * @see https://github.com/ampproject/amphtml/blob/e7a1b3ff97645ec0ec482192205134bd0735943c/extensions/amp-fit-text/0.1/amp-fit-text.js
-			 *
-			 * @param {Object} measurer HTML element.
-			 * @param {number} expectedHeight Maximum height.
-			 * @param {number} expectedWidth Maximum width.
-			 * @param {number} maxFontSize Maximum font size.
-			 * @param {number} minFontSize Minimum font size.
-			 * @return {number} Calculated font size.
-			 */
-			const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
-				maxFontSize++;
-				// Binomial search for the best font size.
-				while ( maxFontSize - minFontSize > 1 ) {
-					const mid = Math.floor( ( minFontSize + maxFontSize ) / 2 );
-					measurer.style.fontSize = mid + 'px';
-					const currentHeight = measurer.offsetHeight;
-					const currentWidth = measurer.offsetWidth;
-					if ( currentHeight > expectedHeight || currentWidth > expectedWidth ) {
-						maxFontSize = mid;
-					} else {
-						minFontSize = mid;
-					}
-				}
-				return minFontSize;
-			};
+		const { attributes, isSelected, setAttributes } = this.props;
+		const {
+			height,
+			width,
+			autoFontSize,
+			ampFitText,
+		} = attributes;
+
+		if ( isSelected && ampFitText ) {
 			// Check if the font size is OK, if not, update the font size if not.
 			const element = document.querySelector( `#block-${ this.props.clientId } .block-editor-rich-text__editable` );
 			if ( element ) {
-				const fitFontSize = calculateFontSize( element, attributes.height, attributes.width, maxLimitFontSize, minLimitFontSize );
-				if ( fontSize.size !== fitFontSize ) {
-					setFontSize( fitFontSize );
+				const fitFontSize = calculateFontSize( element, height, width, maxLimitFontSize, minLimitFontSize );
+				if ( autoFontSize !== fitFontSize ) {
+					setAttributes( { autoFontSize: fitFontSize } );
 				}
 			}
 		}
@@ -109,6 +93,8 @@ class TextBlockEdit extends Component {
 			content,
 			type,
 			ampFontFamily,
+			ampFitText,
+			autoFontSize,
 			height,
 			width,
 		} = attributes;
@@ -127,10 +113,17 @@ class TextBlockEdit extends Component {
 								setAttributes( { ampFontFamily: value } );
 							} }
 						/>
-						<FontSizePicker
+						<ToggleControl
+							label={ __( 'Automatically fit text to container', 'amp' ) }
+							checked={ ampFitText }
+							onChange={ () => ( setAttributes( { ampFitText: ! ampFitText } ) ) }
+						/>
+						{ ! ampFitText && (
+							<FontSizePicker
 							value={ fontSize.size }
 							onChange={ setFontSize }
 						/>
+						) }
 						<SelectControl
 							label={ __( 'Select text type', 'amp' ) }
 							value={ type }
@@ -208,14 +201,14 @@ class TextBlockEdit extends Component {
 						style={ {
 							backgroundColor: backgroundColor.color,
 							color: textColor.color,
-							fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+							fontSize: ampFitText ? autoFontSize : fontSize.size ? fontSize.size + 'px' : undefined,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
 							'has-background': backgroundColor.color,
 							[ backgroundColor.class ]: backgroundColor.class,
 							[ textColor.class ]: textColor.class,
-							[ fontSize.class ]: fontSize.class,
+							[ fontSize.class ]: autoFontSize ? undefined : fontSize.class,
 						} ) }
 						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 					/>

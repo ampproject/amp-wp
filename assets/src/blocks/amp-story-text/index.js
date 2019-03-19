@@ -50,6 +50,13 @@ const schema = {
 	customFontSize: {
 		type: 'number',
 	},
+	autoFontSize: {
+		type: 'number',
+	},
+	ampFitText: {
+		type: 'boolean',
+		default: true,
+	},
 	ampFontFamily: {
 		type: 'string',
 	},
@@ -101,6 +108,8 @@ export const settings = {
 			content,
 			fontSize,
 			customFontSize,
+			ampFitText,
+			autoFontSize,
 			backgroundColor,
 			textColor,
 			customBackgroundColor,
@@ -117,7 +126,7 @@ export const settings = {
 		const className = classnames( {
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
-			[ fontSizeClass ]: fontSizeClass,
+			[ fontSizeClass ]: ampFitText ? undefined : fontSizeClass,
 			[ textClass ]: textClass,
 			[ backgroundClass ]: backgroundClass,
 		} );
@@ -125,7 +134,7 @@ export const settings = {
 		const styles = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
-			fontSize: fontSizeClass ? undefined : customFontSize,
+			fontSize: ampFitText ? autoFontSize : fontSizeClass ? undefined : customFontSize,
 			width,
 			height,
 		};
