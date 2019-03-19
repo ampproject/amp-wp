@@ -11,9 +11,6 @@ import {
 } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch } from '@wordpress/data';
-import {
-	MediaUploadCheck,
-} from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -59,12 +56,10 @@ class BlockDropZone extends Component {
 
 	render() {
 		return (
-			<MediaUploadCheck>
-				<DropZone
-					className="editor-block-drop-zone"
-					onDrop={ this.onDrop }
-				/>
-			</MediaUploadCheck>
+			<DropZone
+				className="editor-block-drop-zone"
+				onDrop={ this.onDrop }
+			/>
 		);
 	}
 }
