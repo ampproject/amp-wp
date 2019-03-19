@@ -43,22 +43,6 @@ const blockAttributes = {
 	customTextColor: {
 		type: 'string',
 	},
-	positionTop: {
-		type: 'number',
-		default: 80,
-	},
-	positionLeft: {
-		type: 'number',
-		default: 0,
-	},
-	width: {
-		type: 'number',
-		default: 100,
-	},
-	height: {
-		type: 'number',
-		default: 20,
-	},
 };
 
 export const name = 'amp/amp-story-cta';

@@ -686,6 +686,17 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	position: absolute;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-cta"] {
+	top: 80%;
+	left: 0;
+	width: 100%;
+	height: 20%;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-cta"] .editor-block-mover {
+	display: none;
+}
+
 /*
  * 10. Custom Components
  */
