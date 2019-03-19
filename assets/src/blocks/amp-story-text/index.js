@@ -34,7 +34,7 @@ const schema = {
 	content: {
 		type: 'string',
 		source: 'html',
-		selector: 'p,h1,h2',
+		selector: '.amp-text-content',
 		default: '',
 	},
 	type: {
@@ -125,6 +125,7 @@ export const settings = {
 		const fontSizeClass = getFontSizeClass( fontSize );
 
 		const className = classnames( {
+			'amp-text-content': ! ampFitText,
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
 			[ fontSizeClass ]: ampFitText ? undefined : fontSizeClass,
@@ -142,14 +143,27 @@ export const settings = {
 			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 
+		if ( ! ampFitText ) {
+			return (
+				<RichText.Content
+					tagName={ tagName }
+					style={ styles }
+					className={ className }
+					value={ content }
+				/>
+			);
+		}
+
+		const ContentTag = tagName;
+
 		return (
-			<RichText.Content
-				tagName={ tagName }
+			<ContentTag
 				style={ styles }
-				className={ className }
-				value={ content }
-			/>
+				className={ className }>
+				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
+			</ContentTag>
 		);
+
 	},
 };
 
