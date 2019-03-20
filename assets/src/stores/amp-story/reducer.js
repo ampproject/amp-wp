@@ -30,7 +30,7 @@ export function animations( state = {}, action ) {
 
 	switch ( action.type ) {
 		case 'ADD_ANIMATION':
-			const parent = isValidAnimationPredecessor( { animationOrder: state }, page, item, predecessor ) ? predecessor : undefined;
+			const parent = isValidAnimationPredecessor( { animations: state }, page, item, predecessor ) ? predecessor : undefined;
 
 			if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder[ entryIndex( item ) ].parent = parent;

@@ -26,7 +26,7 @@ export function isValidAnimationPredecessor( state, page, item, predecessor ) {
 		return true;
 	}
 
-	const pageAnimationOrder = state.animationOrder[ page ] || [];
+	const pageAnimationOrder = state.animations[ page ] || [];
 	const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor );
 
 	const hasCycle = ( a, b ) => {
