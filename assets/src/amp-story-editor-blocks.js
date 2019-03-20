@@ -39,15 +39,10 @@ import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, getTagName } from './helpers';
 import store from './stores/amp-story';
 
-const context = require.context( './blocks', true, /index\.js$/ );
+const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 
 context.keys().forEach( ( modulePath ) => {
 	const { name, settings } = context( modulePath );
-
-	if ( ! name.includes( 'story' ) ) {
-		return;
-	}
-
 	registerBlockType( name, settings );
 } );
 
