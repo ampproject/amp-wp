@@ -61,7 +61,7 @@ const config = {
 	plugins: [
 		...defaultConfig.plugins,
 		new MiniCssExtractPlugin( {
-			filename: '[name].css',
+			filename: '../css/[name]-compiled.css',
 		} ),
 	],
 	optimization: {
