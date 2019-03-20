@@ -216,6 +216,7 @@ class AMP_Story_Post_Type {
 	public static function filter_editor_print_styles_array( $handles ) {
 		if (
 			! function_exists( 'get_current_screen' ) ||
+			! get_current_screen() ||
 			self::POST_TYPE_SLUG !== get_current_screen()->post_type ||
 			! get_current_screen()->is_block_editor
 		) {
