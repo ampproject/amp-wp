@@ -18,6 +18,7 @@
 	8. Block mover
 	9. General block editor components
 	10. Custom Components
+	11. Text Block
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -670,6 +671,11 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	left: -100px;
 	top: -50px;
 	border: none;
+	background: transparent;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > .editor-block-drop-zone .components-drop-zone__content {
+	display: none;
 }
 
 div[data-type="amp/amp-story-page"] .wp-block-image {
@@ -768,11 +774,6 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
  * Custom block mover.
  */
 
-.post-type-amp_story .editor-block-list__layout .editor-block-mover.is-visible,
-.post-type-amp_story .editor-block-list__layout .editor-block-mover {
-	display: none;
-}
-
 .amp-story-editor-block-mover {
 	position: absolute;
 	width: 30px;
@@ -791,6 +792,48 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 .amp-story-editor-block-mover.is-visible,
 div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
 	opacity: 1;
+}
+
+/**
+ * 11. Text Block.
+ */
+.amp-story-text__resize-container .components-resizable-box__handle-right {
+	right: -26px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+.amp-story-text__resize-container .components-resizable-box__handle-right::before {
+	margin: 14px 0;
+}
+.amp-story-text__resize-container .components-resizable-box__handle-bottom {
+	bottom: -26px;
+	width: 50px;
+	left: calc(50% - 25px);
+}
+.amp-story-text__resize-container .components-resizable-box__handle-bottom::before {
+	margin: 0 auto;
+}
+
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
+	width: initial;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
+.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle{
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
+	opacity: 100;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit
+{
+	display: inline-block;
 }
 
 /*

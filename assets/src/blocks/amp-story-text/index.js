@@ -17,6 +17,7 @@ import {
  * Internal dependencies
  */
 import edit from './edit';
+import { getPercentageFromPixels } from '../../helpers';
 
 export const name = 'amp/amp-story-text';
 
@@ -32,7 +33,7 @@ const schema = {
 	content: {
 		type: 'string',
 		source: 'html',
-		selector: 'p,h1,h2',
+		selector: '.amp-text-content',
 		default: '',
 	},
 	type: {
@@ -49,6 +50,13 @@ const schema = {
 	customFontSize: {
 		type: 'number',
 	},
+	autoFontSize: {
+		type: 'number',
+	},
+	ampFitText: {
+		type: 'boolean',
+		default: true,
+	},
 	ampFontFamily: {
 		type: 'string',
 	},
@@ -63,6 +71,14 @@ const schema = {
 	},
 	customBackgroundColor: {
 		type: 'string',
+	},
+	height: {
+		default: 50,
+		type: 'number',
+	},
+	width: {
+		default: 250,
+		type: 'number',
 	},
 };
 
@@ -92,10 +108,14 @@ export const settings = {
 			content,
 			fontSize,
 			customFontSize,
+			ampFitText,
+			autoFontSize,
 			backgroundColor,
 			textColor,
 			customBackgroundColor,
 			customTextColor,
+			width,
+			height,
 			tagName,
 		} = attributes;
 
@@ -104,26 +124,43 @@ export const settings = {
 		const fontSizeClass = getFontSizeClass( fontSize );
 
 		const className = classnames( {
+			'amp-text-content': ! ampFitText,
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
-			[ fontSizeClass ]: fontSizeClass,
+			[ fontSizeClass ]: ampFitText ? undefined : fontSizeClass,
 			[ textClass ]: textClass,
 			[ backgroundClass ]: backgroundClass,
 		} );
 
+		const userFontSize = fontSizeClass ? undefined : customFontSize;
+
 		const styles = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
-			fontSize: fontSizeClass ? undefined : customFontSize,
+			fontSize: ampFitText ? autoFontSize : userFontSize,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 
+		if ( ! ampFitText ) {
+			return (
+				<RichText.Content
+					tagName={ tagName }
+					style={ styles }
+					className={ className }
+					value={ content }
+				/>
+			);
+		}
+
+		const ContentTag = tagName;
+
 		return (
-			<RichText.Content
-				tagName={ tagName }
+			<ContentTag
 				style={ styles }
-				className={ className }
-				value={ content }
-			/>
+				className={ className }>
+				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
+			</ContentTag>
 		);
 	},
 };
