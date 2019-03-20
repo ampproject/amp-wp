@@ -7,7 +7,6 @@ import { every } from 'lodash';
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import {
@@ -18,7 +17,6 @@ import {
 	unregisterBlockType,
 	registerBlockType,
 } from '@wordpress/blocks';
-const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 /**
  * Internal dependencies
@@ -30,30 +28,60 @@ import {
 	withWrapperProps,
 	withActivePageState,
 	withStoryBlockDropZone,
-	BlockNavigation,
-	EditorCarousel,
-	StoryControls,
-	Shortcuts,
 } from './components';
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, getTagName } from './helpers';
+import {
+	maybeEnqueueFontStyle,
+	setBlockParent,
+	addAMPAttributes,
+	addAMPExtraProps,
+	getTotalAnimationDuration,
+	renderStoryComponents,
+	getTagName,
+} from './helpers';
+
+import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
+
 import store from './stores/amp-story';
 
 const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+const {
+	getSelectedBlockClientId,
+	getBlocksByClientId,
+	getClientIdsWithDescendants,
+	getBlockRootClientId,
+	getBlockOrder,
+	getBlock,
+	getBlockAttributes,
+} = select( 'core/editor' );
+
+const {
+	isReordering,
+	getBlockOrder: getCustomBlockOrder,
+	getCurrentPage,
+	getAnimatedBlocks,
+} = select( 'amp/story' );
 
 context.keys().forEach( ( modulePath ) => {
 	const { name, settings } = context( modulePath );
 	registerBlockType( name, settings );
 } );
+const {
+	moveBlockToPosition,
+	updateBlockAttributes,
+} = dispatch( 'core/editor' );
 
-const { getBlockOrder, getBlock, getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
+const {
+	setCurrentPage,
+	addAnimation,
+	changeAnimationType,
+	changeAnimationDuration,
+	changeAnimationDelay,
+} = dispatch( 'amp/story' );
 
 /**
  * Initialize editor integration.
  */
 domReady( () => {
-	const { addAnimation, setCurrentPage } = dispatch( 'amp/story' );
-
 	// Ensure that the default block is page when no block is selected.
 	setDefaultBlockName( 'amp/amp-story-page' );
 
@@ -70,15 +98,19 @@ domReady( () => {
 	const firstPage = allBlocks.find( ( { name } ) => name === 'amp/amp-story-page' );
 	setCurrentPage( firstPage ? firstPage.clientId : undefined );
 
+	// Set initial animation order state for all child blocks.
 	for ( const block of allBlocks ) {
 		const page = getBlockRootClientId( block.clientId );
 
-		// Set initial animation order state.
 		if ( page ) {
-			const ampAnimationAfter = block.attributes.ampAnimationAfter;
+			const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
 			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+
+			changeAnimationType( page, block.clientId, ampAnimationType );
+			changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+			changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 		}
 
 		// Load all needed fonts.
@@ -93,75 +125,6 @@ domReady( () => {
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 } );
 
-/**
- * Add some additional elements needed to render our custom UI controls.
- */
-function renderStoryComponents() {
-	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
-
-	if ( editorBlockList ) {
-		const ampStoryWrapper = document.createElement( 'div' );
-		ampStoryWrapper.id = 'amp-story-editor';
-
-		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
-
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
-
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
-		/**
-		 * The intended layout is as follows:
-		 *
-		 * - Post title
-		 * - AMP story wrapper element (needed for overflow styling)
-		 * - - Story controls
-		 * - - Block list
-		 * - - Block navigation
-		 * - - Carousel controls
-		 */
-		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-		ampStoryWrapper.appendChild( storyControls );
-		ampStoryWrapper.appendChild( editorBlockList );
-		ampStoryWrapper.appendChild( blockNavigation );
-		ampStoryWrapper.appendChild( editorCarousel );
-
-		render(
-			<StoryControls />,
-			storyControls
-		);
-
-		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
-			blockNavigation
-		);
-
-		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
-			editorCarousel
-		);
-	}
-
-	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
-
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
-
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
-	}
-}
-
 const positionTopLimit = 75;
 const positionTopHighest = 0;
 const positionTopGap = 10;
@@ -169,7 +132,7 @@ const positionTopGap = 10;
 /**
  * Set initial positioning if the selected block is an unmodified block.
  *
- * @param {number} clientId Selected block's ID.
+ * @param {string} clientId Block ID.
  */
 function maybeSetInitialPositioning( clientId ) {
 	const block = getBlock( clientId );
@@ -198,6 +161,43 @@ function maybeSetInitialPositioning( clientId ) {
 		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
 
 		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+}
+
+/**
+ * Verify and perhaps update autoAdvanceAfterMedia attribute for pages.
+ *
+ * For pages with autoAdvanceAfter set to 'media',
+ * verify that the referenced media block still exists.
+ * If not, find another media block to be used for the
+ * autoAdvanceAfterMedia attribute.
+ *
+ * @param {string} clientId Block ID.
+ */
+function maybeUpdateAutoAdvanceAfterMedia( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_TOP_LEVEL_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	if ( 'media' !== block.attributes.autoAdvanceAfter ) {
+		return;
+	}
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
+	const mediaBlock = block.attributes.autoAdvanceAfterMedia && innerBlocks.find( ( { attributes } ) => attributes.anchor === block.attributes.autoAdvanceAfterMedia );
+
+	if ( mediaBlock ) {
+		return;
+	}
+
+	const firstMediaBlock = innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) );
+	const autoAdvanceAfterMedia = firstMediaBlock ? firstMediaBlock.attributes.anchor : '';
+
+	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
+		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
 	}
 }
 
@@ -232,9 +232,6 @@ let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
-	const { getSelectedBlockClientId } = select( 'core/editor' );
-	const { getCurrentPage } = select( 'amp/story' );
-	const { setCurrentPage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -273,13 +270,12 @@ subscribe( () => {
 
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
+		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
 } );
-
-const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
@@ -292,17 +288,41 @@ store.subscribe( () => {
 		}
 	}
 
-	const animationOrder = getAnimationOrder();
+	const animatedBlocks = getAnimatedBlocks();
 
-	for ( const page in animationOrder ) {
-		if ( ! animationOrder.hasOwnProperty( page ) ) {
+	// Update pages and blocks based on updated animation data.
+	for ( const page in animatedBlocks ) {
+		if ( ! animatedBlocks.hasOwnProperty( page ) || ! getBlock( page ) ) {
 			continue;
 		}
 
-		for ( const item of animationOrder[ page ] ) {
-			const parentBlock = item.parent ? getBlock( item.parent ) : undefined;
+		const pageAttributes = getBlockAttributes( page );
 
-			updateBlockAttributes( item.id, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
+		const animatedBlocksPerPage = animatedBlocks[ page ].filter( ( { id } ) => page === getBlockRootClientId( id ) );
+
+		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+
+		if ( 'time' === pageAttributes.autoAdvanceAfter ) {
+			// Enforce minimum value for manually set time.
+			if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
+				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+			}
+		} else {
+			updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+		}
+
+		for ( const item of animatedBlocksPerPage ) {
+			const { id, parent, animationType, duration, delay } = item;
+
+			const parentBlock = parent ? getBlock( parent ) : undefined;
+
+			updateBlockAttributes( id, {
+				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
+				ampAnimationType: animationType,
+				ampAnimationDuration: duration,
+				ampAnimationDelay: delay,
+			} );
 		}
 	}
 } );
