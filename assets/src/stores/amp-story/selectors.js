@@ -22,7 +22,7 @@ export function getAnimatedBlocks( state ) {
  * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
 export function isValidAnimationPredecessor( state, page, item, predecessor ) {
-	if ( undefined === predecessor ) {
+	if ( undefined === predecessor || ! state.animations ) {
 		return true;
 	}
 
