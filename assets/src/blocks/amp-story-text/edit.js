@@ -50,7 +50,6 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 } );
 
 class TextBlockEdit extends Component {
-
 	constructor() {
 		super( ...arguments );
 
