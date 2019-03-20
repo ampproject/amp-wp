@@ -40,8 +40,8 @@ export default function AnimationControls( {
 					onAnimationTypeChange( value );
 
 					// Also update these values as these can change per type.
-					onAnimationDurationChange( ANIMATION_DURATION_DEFAULTS[ value ] || undefined );
-					onAnimationDelayChange( undefined );
+					onAnimationDurationChange( ANIMATION_DURATION_DEFAULTS[ value ] || 0 );
+					onAnimationDelayChange( 0 );
 				} }
 			/>
 			{ animationType && (
