@@ -56,6 +56,7 @@
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
     "lodash": "4.17.11",
+    "mini-css-extract-plugin": "^0.5.0",
     "npm-run-all": "4.1.5",
     "source-map-loader": "^0.2.4",
     "svg-inline-loader": "^0.8.0",
