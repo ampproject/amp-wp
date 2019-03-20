@@ -85,7 +85,7 @@ export const settings = {
 
 		let advanceAfter;
 
-		if ( [ 'auto', 'time' ].includes( autoAdvanceAfter ) ) {
+		if ( [ 'auto', 'time' ].includes( autoAdvanceAfter ) && autoAdvanceAfterDuration ) {
 			advanceAfter = parseInt( autoAdvanceAfterDuration ) + 's';
 		} else if ( 'media' === autoAdvanceAfter ) {
 			advanceAfter = autoAdvanceAfterMedia;
