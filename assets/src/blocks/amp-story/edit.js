@@ -35,7 +35,6 @@ import {
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
-	MEDIA_INNER_BLOCKS,
 } from '../../constants';
 
 const TEMPLATE = [
@@ -124,7 +123,7 @@ class EditPage extends Component {
 			{ value: '', label: __( 'Manual', 'amp' ) },
 			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
 			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-			{ value: 'media', label: __( 'After media has played', 'amp' ) }
+			{ value: 'media', label: __( 'After media has played', 'amp' ) },
 		];
 
 		return (
