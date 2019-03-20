@@ -27,7 +27,7 @@ export default function AnimationControls( {
 	animationDelay,
 	animationAfter,
 } ) {
-	const placeHolder = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
 	return (
 		<Fragment>
@@ -36,7 +36,13 @@ export default function AnimationControls( {
 				label={ __( 'Animation Type', 'amp' ) }
 				value={ animationType }
 				options={ AMP_ANIMATION_TYPE_OPTIONS }
-				onChange={ onAnimationTypeChange }
+				onChange={ ( value ) => {
+					onAnimationTypeChange( value );
+
+					// Also update these values as these can change per type.
+					onAnimationDurationChange( ANIMATION_DURATION_DEFAULTS[ value ] || 0 );
+					onAnimationDelayChange( 0 );
+				} }
 			/>
 			{ animationType && (
 				<Fragment>
@@ -47,13 +53,13 @@ export default function AnimationControls( {
 						onChange={ onAnimationDurationChange }
 						min="0"
 						max="5000"
-						placeholder={ placeHolder }
-						initialPosition={ placeHolder }
+						placeholder={ DEFAULT_ANIMATION_DURATION }
+						initialPosition={ DEFAULT_ANIMATION_DURATION }
 					/>
 					<RangeControl
 						key="delay"
 						label={ __( 'Delay (ms)', 'amp' ) }
-						value={ animationDelay }
+						value={ animationDelay || 0 }
 						onChange={ onAnimationDelayChange }
 						min="0"
 						max="5000"

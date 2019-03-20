@@ -5,24 +5,8 @@
  *
  * @return {Array} Animation order.
  */
-export function getAnimationOrder( state ) {
-	return state.animationOrder || {};
-}
-
-/**
- * Returns an item's predecessor in the animation order.
- *
- * @param {Object} state Editor state.
- * @param {string} page  ID of the page the item is in.
- * @param {string} item  ID of the animated item.
- *
- * @return {?string} The predecessor's ID.
- */
-export function getAnimationPredecessor( state, page, item ) {
-	const pageAnimationOrder = state.animationOrder[ page ] || [];
-	const found = pageAnimationOrder.find( ( { id } ) => id === item );
-
-	return found ? found.parent : undefined;
+export function getAnimatedBlocks( state ) {
+	return state.animations || {};
 }
 
 /**
@@ -38,11 +22,11 @@ export function getAnimationPredecessor( state, page, item ) {
  * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
 export function isValidAnimationPredecessor( state, page, item, predecessor ) {
-	if ( undefined === predecessor ) {
+	if ( undefined === predecessor || ! state.animations ) {
 		return true;
 	}
 
-	const pageAnimationOrder = state.animationOrder[ page ] || [];
+	const pageAnimationOrder = state.animations[ page ] || [];
 	const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor );
 
 	const hasCycle = ( a, b ) => {

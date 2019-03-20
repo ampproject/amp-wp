@@ -11,23 +11,26 @@ import { isValidAnimationPredecessor } from './selectors';
 const { getBlock, getBlockOrder } = select( 'core/editor' );
 
 /**
- * Reducer handling animation order changes.
+ * Reducer handling animation state changes.
+ *
+ * For each page, its animated elements with their
+ * data (ID, duration, delay, predecessor) are stored.
  *
  * @param {Object} state  Current state.
  * @param {Object} action Dispatched action.
  *
  * @return {Object} Updated state.
  */
-export function animationOrder( state = {}, action ) {
+export function animations( state = {}, action ) {
 	const newAnimationOrder = { ...state };
-	const { page, item, predecessor } = action;
+	const { page, item, predecessor, animationType, duration, delay } = action;
 	const pageAnimationOrder = newAnimationOrder[ page ] || [];
 
 	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
 
 	switch ( action.type ) {
 		case 'ADD_ANIMATION':
-			const parent = isValidAnimationPredecessor( { animationOrder: state }, page, item, predecessor ) ? predecessor : undefined;
+			const parent = isValidAnimationPredecessor( { animations: state }, page, item, predecessor ) ? predecessor : undefined;
 
 			if ( entryIndex( item ) !== -1 ) {
 				pageAnimationOrder[ entryIndex( item ) ].parent = parent;
@@ -40,14 +43,40 @@ export function animationOrder( state = {}, action ) {
 				[ page ]: pageAnimationOrder,
 			};
 
-		case 'REMOVE_ANIMATION':
+		case 'CHANGE_ANIMATION_TYPE':
 			if ( entryIndex( item ) !== -1 ) {
-				const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
-				pageAnimationOrder[ entryIndex( item ) ].parent = undefined;
+				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
 
-				for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
-					pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+				// If animation was disabled, update all successors.
+				if ( ! animationType ) {
+					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+
+					for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
+						pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+					}
 				}
+			} else {
+				pageAnimationOrder.push( { id: item, animationType } );
+			}
+
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
+
+		case 'CHANGE_ANIMATION_DURATION':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].duration = duration;
+			}
+
+			return {
+				...newAnimationOrder,
+				[ page ]: pageAnimationOrder,
+			};
+
+		case 'CHANGE_ANIMATION_DELAY':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].delay = delay;
 			}
 
 			return {
@@ -124,4 +153,4 @@ export function blocks( state = {}, action ) {
 	return state;
 }
 
-export default combineReducers( { animationOrder, currentPage, blocks } );
+export default combineReducers( { animations, currentPage, blocks } );

@@ -8,12 +8,19 @@ import uuid from 'uuid/v4';
 /**
  * WordPress dependencies
  */
+import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
+import {
+	BlockNavigation,
+	EditorCarousel,
+	StoryControls,
+	Shortcuts,
+} from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
@@ -115,12 +122,13 @@ export const addAMPAttributes = ( settings, name ) => {
 			source: 'attribute',
 			selector: BLOCK_TAG_MAPPING[ name ],
 			attribute: 'animate-in-delay',
-			default: '0ms',
+			default: 0,
 		};
 		addedAttributes.ampAnimationDuration = {
 			source: 'attribute',
 			selector: BLOCK_TAG_MAPPING[ name ],
 			attribute: 'animate-in-duration',
+			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
 			source: 'attribute',
@@ -188,8 +196,10 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
+	const newProps = { ...props };
+
 	// Always add anchor ID regardless of block support. Needed for animations.
-	props.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || uuid();
 
 	if ( attributes.ampAnimationType ) {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
@@ -225,9 +235,103 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	return {
-		...props,
+		...newProps,
 		...ampAttributes,
 	};
+};
+/**
+ * Given a list of animated blocks, calculates the total duration
+ * of all animations based on the durations and the delays.
+ *
+ * @param {Array} animatedBlocks List of animated blocks.
+ *
+ * @return {number} Total animation duration time.
+ */
+export const getTotalAnimationDuration = ( animatedBlocks ) => {
+	const getLongestAnimation = ( parentBlockId ) => {
+		return animatedBlocks
+			.filter( ( { parent, animationType } ) => parent === parentBlockId && animationType )
+			.map( ( { duration, delay } ) => {
+				const animationDelay = delay ? parseInt( delay ) : 0;
+				const animationDuration = duration ? parseInt( duration ) : 0;
+
+				return animationDelay + animationDuration;
+			} )
+			.reduce( ( max, current ) => Math.max( max, current ), 0 );
+	};
+
+	const levels = [ ...new Set( animatedBlocks.map( ( { parent } ) => parent ) ) ];
+
+	return levels.map( getLongestAnimation ).reduce( ( sum, duration ) => sum + duration, 0 );
+};
+
+/**
+ * Add some additional elements needed to render our custom UI controls.
+ */
+export const renderStoryComponents = () => {
+	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
+	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
+
+	if ( editorBlockList ) {
+		const ampStoryWrapper = document.createElement( 'div' );
+		ampStoryWrapper.id = 'amp-story-editor';
+
+		const blockNavigation = document.createElement( 'div' );
+		blockNavigation.id = 'amp-root-navigation';
+
+		const editorCarousel = document.createElement( 'div' );
+		editorCarousel.id = 'amp-story-editor-carousel';
+
+		const storyControls = document.createElement( 'div' );
+		storyControls.id = 'amp-story-controls';
+
+		/**
+		 * The intended layout is as follows:
+		 *
+		 * - Post title
+		 * - AMP story wrapper element (needed for overflow styling)
+		 * - - Story controls
+		 * - - Block list
+		 * - - Block navigation
+		 * - - Carousel controls
+		 */
+		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
+		ampStoryWrapper.appendChild( storyControls );
+		ampStoryWrapper.appendChild( editorBlockList );
+		ampStoryWrapper.appendChild( blockNavigation );
+		ampStoryWrapper.appendChild( editorCarousel );
+
+		render(
+			<StoryControls />,
+			storyControls
+		);
+
+		render(
+			<div key="blockNavigation" className="block-navigation">
+				<BlockNavigation />
+			</div>,
+			blockNavigation
+		);
+
+		render(
+			<div key="pagesCarousel" className="editor-carousel">
+				<EditorCarousel />
+			</div>,
+			editorCarousel
+		);
+	}
+
+	if ( editorBlockNavigation ) {
+		const shortcuts = document.createElement( 'div' );
+		shortcuts.id = 'amp-story-shortcuts';
+
+		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+
+		render(
+			<Shortcuts />,
+			shortcuts
+		);
+	}
 };
 
 // Todo: Make these customizable?
