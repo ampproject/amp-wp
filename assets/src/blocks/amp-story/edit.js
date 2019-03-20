@@ -126,6 +126,14 @@ class EditPage extends Component {
 			{ value: 'media', label: __( 'After media has played', 'amp' ) },
 		];
 
+		let autoAdvanceAfterHelp;
+
+		if ( 'media' === autoAdvanceAfter ) {
+			autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
+		} else if ( 'auto' === autoAdvanceAfter ) {
+			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
+		}
+
 		return (
 			<Fragment>
 				<InspectorControls key="controls">
@@ -213,7 +221,7 @@ class EditPage extends Component {
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
 							label={ __( 'Advance to next page', 'amp' ) }
-							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first media block encountered on the page', 'amp' ) : undefined }
+							help={ autoAdvanceAfterHelp }
 							value={ autoAdvanceAfter }
 							options={ autoAdvanceAfterOptions }
 							onChange={ ( value ) => {
