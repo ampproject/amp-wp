@@ -223,7 +223,7 @@ class EditPage extends Component {
 								label={ __( 'Time in seconds', 'amp' ) }
 								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
 								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
-								min={ totalAnimationDuration }
+								min={ Math.max( totalAnimationDuration, 1 ) }
 								initialPosition={ totalAnimationDuration }
 								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page', 'amp' ) : undefined }
 							/>
