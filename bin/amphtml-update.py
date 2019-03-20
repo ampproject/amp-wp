@@ -376,6 +376,11 @@ def ParseRules(out_dir):
 			for list in field_val:
 				descendant_lists[list.name] = []
 				for val in list.tag:
+
+					# Skip tags specific to transformed AMP.
+					if val in ( 'I-AMPHTML-SIZER', ):
+						continue
+
 					descendant_lists[list.name].append( val.lower() )
 
 	logging.info('... done')
