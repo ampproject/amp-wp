@@ -288,18 +288,16 @@ store.subscribe( () => {
 
 		const animatedBlocksPerPage = animatedBlocks[ page ].filter( ( { id } ) => page === getBlockRootClientId( id ) );
 
-		if ( [ 'auto', 'time' ].includes( pageAttributes.autoAdvanceAfter ) ) {
-			const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
-			const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
-			if ( 'time' === pageAttributes.autoAdvanceAfter ) {
-				// Enforce minimum value for manually set time.
-				if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
-					updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
-				}
-			} else {
+		if ( 'time' === pageAttributes.autoAdvanceAfter ) {
+			// Enforce minimum value for manually set time.
+			if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
 				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 			}
+		} else {
+			updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 		}
 
 		for ( const item of animatedBlocksPerPage ) {
