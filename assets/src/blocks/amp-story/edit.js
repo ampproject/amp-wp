@@ -93,7 +93,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes, totalAnimationDuration, hasMediaBlocks } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
 
 		const {
 			backgroundColor,
@@ -124,11 +124,8 @@ class EditPage extends Component {
 			{ value: '', label: __( 'Manual', 'amp' ) },
 			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
 			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
+			{ value: 'media', label: __( 'After media has played', 'amp' ) }
 		];
-
-		if ( hasMediaBlocks ) {
-			autoAdvanceAfterOptions.push( { value: 'media', label: __( 'After media has played', 'amp' ) } );
-		}
 
 		return (
 			<Fragment>
@@ -217,7 +214,7 @@ class EditPage extends Component {
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
 							label={ __( 'Advance to next page', 'amp' ) }
-							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first video encountered on the page', 'amp' ) : undefined }
+							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first media block encountered on the page', 'amp' ) : undefined }
 							value={ autoAdvanceAfter }
 							options={ autoAdvanceAfterOptions }
 							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
@@ -252,7 +249,7 @@ class EditPage extends Component {
 
 export default withSelect( ( select, { attributes, clientId } ) => {
 	const { getMedia } = select( 'core' );
-	const { getBlockRootClientId, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+	const { getBlockRootClientId } = select( 'core/editor' );
 	const { getAnimatedBlocks } = select( 'amp/story' );
 
 	const { mediaId } = attributes;
@@ -262,11 +259,8 @@ export default withSelect( ( select, { attributes, clientId } ) => {
 	const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 	const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
-	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
-
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
-		hasMediaBlocks: innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) ) !== undefined,
 	};
 } )( EditPage );
