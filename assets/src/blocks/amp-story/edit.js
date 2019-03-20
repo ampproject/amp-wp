@@ -216,7 +216,10 @@ class EditPage extends Component {
 							help={ 'media' === autoAdvanceAfter ? __( 'Based on the first media block encountered on the page', 'amp' ) : undefined }
 							value={ autoAdvanceAfter }
 							options={ autoAdvanceAfterOptions }
-							onChange={ ( value ) => setAttributes( { autoAdvanceAfter: value } ) }
+							onChange={ ( value ) => {
+								setAttributes( { autoAdvanceAfter: value } );
+								setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+							} }
 						/>
 						{ 'time' === autoAdvanceAfter && (
 							<RangeControl
