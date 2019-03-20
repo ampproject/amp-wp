@@ -44,19 +44,17 @@ export function animations( state = {}, action ) {
 			};
 
 		case 'CHANGE_ANIMATION_TYPE':
-			// Animation was disabled, update all successors.
-			if ( ! animationType ) {
-				if ( entryIndex( item ) !== -1 ) {
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
+
+				// If animation was disabled, update all successors.
+				if ( ! animationType ) {
 					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
 
 					for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
 						pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
 					}
-
-					pageAnimationOrder.splice( entryIndex( item ), 1 );
 				}
-			} else if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
 			} else {
 				pageAnimationOrder.push( { id: item, animationType } );
 			}
