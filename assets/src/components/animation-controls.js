@@ -60,7 +60,6 @@ export default function AnimationControls( {
 					/>
 					<AnimationOrderPicker
 						key="order"
-						label={ __( 'Begin after', 'amp' ) }
 						value={ animationAfter }
 						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }
