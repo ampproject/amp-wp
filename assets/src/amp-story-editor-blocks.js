@@ -10,7 +10,14 @@ import { addFilter } from '@wordpress/hooks';
 import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import {
+	createBlock,
+	getDefaultBlockName,
+	setDefaultBlockName,
+	getBlockTypes,
+	unregisterBlockType,
+	registerBlockType,
+} from '@wordpress/blocks';
 const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
 
 /**
@@ -31,6 +38,18 @@ import {
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, getTagName } from './helpers';
 import store from './stores/amp-story';
+
+const context = require.context( './blocks', true, /index\.js$/ );
+
+context.keys().forEach( ( modulePath ) => {
+	const { name, settings } = context( modulePath );
+
+	if ( ! name.includes( 'story' ) ) {
+		return;
+	}
+
+	registerBlockType( name, settings );
+} );
 
 const { getBlockOrder, getBlock, getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
 
