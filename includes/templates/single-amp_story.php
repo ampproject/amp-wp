@@ -16,7 +16,7 @@ the_post();
 		<?php
 		wp_enqueue_scripts();
 		wp_scripts()->do_items( array( 'amp-runtime' ) ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
-		wp_styles()->do_items( array( 'wp-block-library' ) ); // @todo We need to allow a theme to enqueue their own AMP story styles.
+		wp_styles()->do_items();
 		?>
 		<?php rel_canonical(); ?>
 		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -55,7 +55,7 @@ the_post();
 
 		<?php
 		// Note that \AMP_Story_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
-		wp_styles()->do_items();
+		print_late_styles();
 		?>
 	</body>
 </html>
