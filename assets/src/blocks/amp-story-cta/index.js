@@ -80,7 +80,7 @@ export const settings = {
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
 
-		const buttonClasses = classnames( 'wp-block-button__link', {
+		const buttonClasses = classnames( 'amp-block-story-cta__link', {
 			'has-text-color': textColor || customTextColor,
 			[ textClass ]: textClass,
 			'has-background': backgroundColor || customBackgroundColor,
