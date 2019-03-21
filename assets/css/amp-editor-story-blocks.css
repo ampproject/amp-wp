@@ -818,21 +818,20 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	width: initial;
 }
 
-.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
-.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle{
+.editor-block-list__block.is-typing .components-resizable-box__handle,
+.editor-block-list__block .components-resizable-box__handle {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
 }
 
-.wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
-.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
+.editor-block-list__block.is-selected .components-resizable-box__handle,
+.editor-block-list__block.is-hovered .components-resizable-box__handle {
 	opacity: 1;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
-div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit
-{
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit {
 	display: inline-block;
 }
 
@@ -840,18 +839,24 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
  * RotatableBox
  */
 
-.wp-block[data-type="amp/amp-story-text"] .rotatable-box-wrap {
+.editor-block-list__block.is-typing .rotatable-box-wrap,
+.editor-block-list__block .rotatable-box-wrap {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
 }
 
-.wp-block[data-type="amp/amp-story-text"]:hover  .rotatable-box-wrap,
-.wp-block[data-type="amp/amp-story-text"] .rotatable-box-wrap:hover {
+.editor-block-list__block.selected .rotatable-box-wrap,
+.editor-block-list__block.is-hovered .rotatable-box-wrap {
 	opacity: 1;
 }
 
-.rotatable-box-wrap {
+.editor-block-list__block.is-typing,
+.editor-block-list__block.is-selected {
+	transform: none !important;
+}
+
+.editor-block-list__block .rotatable-box-wrap {
 	box-shadow: -1px 0 rgba(66,88,99,.4);
 	width: 0;
 	height: 25px;
@@ -861,7 +866,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	border-left: 1px solid #007cba;
 }
 
-.rotatable-box-wrap .rotatable-box-wrap__handle {
+.editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
 	display: block;
 	opacity: 1;
 	transition: opacity .3s;
