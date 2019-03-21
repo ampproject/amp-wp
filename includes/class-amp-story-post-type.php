@@ -237,10 +237,9 @@ class AMP_Story_Post_Type {
 				}
 
 				// Disable the active theme's style.
-				if ( false !== strpos( $dep->src, get_stylesheet_directory_uri() ) ) {
+				if ( self::is_theme_stylesheet( $dep->src ) ) {
 					return false;
 				}
-
 				return true;
 			}
 		);
@@ -336,14 +335,44 @@ class AMP_Story_Post_Type {
 		if ( self::POST_TYPE_SLUG === $post->post_type ) {
 			unset( $editor_settings['colors'] );
 		}
+
 		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
 			foreach ( $editor_settings['styles'] as $key => $style ) {
-				if ( isset( $style['baseURL'] ) && false !== strpos( $style['baseURL'], get_stylesheet_directory_uri() ) ) {
+
+				// If the baseURL is not set or if the URL doesn't include theme styles, move to next.
+				if ( ! isset( $style['baseURL'] ) || ! self::is_theme_stylesheet( $style['baseURL'] ) ) {
+					continue;
+				}
+
+				/**
+				 * Filters the editor style to allow whitelisting it for AMP Stories editor.
+				 *
+				 * @param bool   $whitelisted If to whitelist the stylesheet.
+				 * @param string $base_url    The URL for the stylesheet.
+				 */
+				if ( false === apply_filters( 'amp_stories_whitelist_editor_style', false, $style['baseURL'] ) ) {
 					unset( $editor_settings['styles'][ $key ] );
 				}
 			}
 		}
 		return $editor_settings;
+	}
+
+	/**
+	 * Checks if a stylesheet is from the theme or parent theme.
+	 *
+	 * @param string $url Stylesheet URL.
+	 * @return bool If the stylesheet comes from the theme.
+	 */
+	public static function is_theme_stylesheet( $url ) {
+
+		if (
+			false !== strpos( $url, get_stylesheet_directory_uri() ) ||
+			false !== strpos( $url, get_template_directory_uri() )
+		) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
