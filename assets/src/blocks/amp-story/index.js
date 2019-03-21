@@ -8,44 +8,54 @@ import { InnerBlocks } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import { BLOCK_ICONS } from '../../constants';
+import { BLOCK_ICONS, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
 import EditPage from './edit';
-import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from './constants';
 
 export const name = 'amp/amp-story-page';
+
+const schema = {
+	anchor: {
+		source: 'attribute',
+		selector: 'amp-story-page',
+		attribute: 'id',
+	},
+	backgroundColor: {
+		default: '#ffffff',
+	},
+	mediaId: {
+		type: 'number',
+	},
+	mediaUrl: {
+		type: 'string',
+		source: 'attribute',
+		selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
+		attribute: 'src',
+	},
+	mediaType: {
+		type: 'string',
+	},
+	poster: {
+		type: 'string',
+	},
+	focalPoint: {
+		type: 'object',
+	},
+	autoAdvanceAfter: {
+		type: 'string',
+	},
+	autoAdvanceAfterDuration: {
+		type: 'number',
+	},
+	autoAdvanceAfterMedia: {
+		type: 'string',
+	},
+};
 
 export const settings = {
 	title: __( 'Page', 'amp' ),
 	category: 'layout',
 	icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
-	attributes: {
-		anchor: {
-			source: 'attribute',
-			selector: 'amp-story-page',
-			attribute: 'id',
-		},
-		backgroundColor: {
-			default: '#ffffff',
-		},
-		mediaId: {
-			type: 'number',
-		},
-		mediaUrl: {
-			type: 'string',
-			source: 'attribute',
-			selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
-			attribute: 'src',
-		},
-		mediaType: {
-			type: 'string',
-		},
-		poster: {
-			type: 'string',
-		},
-		focalPoint: {
-			type: 'object',
-		},
-	},
+	attributes: schema,
 
 	/*
      * <amp-story-page>:
@@ -62,10 +72,27 @@ export const settings = {
 	edit: EditPage,
 
 	save( { attributes } ) {
-		const { anchor, backgroundColor, mediaUrl, mediaType, poster } = attributes;
+		const {
+			anchor,
+			backgroundColor,
+			mediaUrl,
+			mediaType,
+			poster,
+			autoAdvanceAfter,
+			autoAdvanceAfterDuration,
+			autoAdvanceAfterMedia,
+		} = attributes;
+
+		let advanceAfter;
+
+		if ( [ 'auto', 'time' ].includes( autoAdvanceAfter ) && autoAdvanceAfterDuration ) {
+			advanceAfter = parseInt( autoAdvanceAfterDuration ) + 's';
+		} else if ( 'media' === autoAdvanceAfter ) {
+			advanceAfter = autoAdvanceAfterMedia;
+		}
 
 		return (
-			<amp-story-page style={ { backgroundColor } } id={ anchor }>
+			<amp-story-page style={ { backgroundColor } } id={ anchor } auto-advance-after={ advanceAfter }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">

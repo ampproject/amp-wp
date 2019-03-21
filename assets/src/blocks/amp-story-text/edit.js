@@ -50,6 +50,12 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 } );
 
 class TextBlockEdit extends Component {
+	constructor() {
+		super( ...arguments );
+
+		this.onReplace = this.onReplace.bind( this );
+	}
+
 	componentDidUpdate() {
 		const { attributes, isSelected, setAttributes } = this.props;
 		const {
@@ -69,6 +75,20 @@ class TextBlockEdit extends Component {
 				}
 			}
 		}
+	}
+
+	onReplace( blocks ) {
+		const { attributes, onReplace, name } = this.props;
+		onReplace( blocks.map( ( block, index ) => (
+			index === 0 && block.name === name ?
+				{ ...block,
+					attributes: {
+						...attributes,
+						...block.attributes,
+					},
+				} :
+				block
+		) ) );
 	}
 
 	render() {
@@ -199,6 +219,7 @@ class TextBlockEdit extends Component {
 						tagName="p"
 						value={ content }
 						onChange={ ( value ) => setAttributes( { content: value } ) }
+						onReplace={ this.onReplace }
 						style={ {
 							backgroundColor: backgroundColor.color,
 							color: textColor.color,
