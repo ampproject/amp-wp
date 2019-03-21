@@ -280,6 +280,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
+									<h2 scale-start="1.0" scale-end="200.1" translate-x="100px" translate-y="200px">Scaled</h2>
 								</amp-story-grid-layer>
 								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
 							</amp-story-page>
@@ -402,6 +403,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<amp-carousel width="450" height="300" delay="100" arrows [slide]="foo" autoplay loop lightbox></amp-carousel>',
 				null,
 				array( 'amp-bind', 'amp-carousel', 'amp-lightbox-gallery' ),
+			),
+
+			'base_carousel' => array(
+				'
+					<amp-base-carousel width="4" height="3" auto-advance="true" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
+						<div lightbox-thumbnail-id="food">first slide</div>
+						<div lightbox-exclude>second slide</div>
+					</amp-base-carousel>
+				',
+				null,
+				array( 'amp-base-carousel' ),
 			),
 
 			'amp-dailymotion'  => array(
@@ -1377,6 +1389,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				',
 				null,
 				array( 'amp-action-macro' ),
+			),
+
+			'amp-smart-links' => array(
+				'<amp-smartlinks layout="nodisplay" nrtv-account-name="examplepublisher" linkmate exclusive-links link-attribute="href" link-selector="a"></amp-smartlinks>',
+				null,
+				array( 'amp-smartlinks' ),
 			),
 		);
 	}

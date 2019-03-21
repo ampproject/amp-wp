@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "00f2b0db8672dd862a26ce2ea959e801",
+    "content-hash": "556b9a4a59bdec1c162c5e6451ae0020",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -123,6 +123,11 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
+            "extra": {
+                "patches_applied": {
+                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
@@ -321,16 +326,16 @@
         },
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.4.0",
+            "version": "3.4.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "379deb987e26c7cd103a7b387aea178baec96e48"
+                "reference": "5b4333b4010625d29580eb4a41f1e53251be6baa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/379deb987e26c7cd103a7b387aea178baec96e48",
-                "reference": "379deb987e26c7cd103a7b387aea178baec96e48",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/5b4333b4010625d29580eb4a41f1e53251be6baa",
+                "reference": "5b4333b4010625d29580eb4a41f1e53251be6baa",
                 "shasum": ""
             },
             "require": {
@@ -363,12 +368,12 @@
                 }
             ],
             "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
-            "homepage": "http://www.squizlabs.com/php-codesniffer",
+            "homepage": "https://github.com/squizlabs/PHP_CodeSniffer",
             "keywords": [
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-12-19T23:57:18+00:00"
+            "time": "2019-03-19T03:22:27+00:00"
         },
         {
             "name": "wp-coding-standards/wpcs",
@@ -460,7 +465,11 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^5.4 || ^7.0"
+        "php": "^5.4 || ^7.0",
+        "ext-dom": "*",
+        "ext-iconv": "*",
+        "ext-intl": "*",
+        "ext-libxml": "*"
     },
     "platform-dev": [],
     "platform-overrides": {
