@@ -151,7 +151,10 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			if ( 'amp_story' !== currentPost.type ) {
 				return;
 			}
-			if ( ! module.hasPortraitSrcNotice && ! currentPost.featured_media ) {
+
+			const editedFeaturedMedia = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
+			const hasFeaturedMedia = currentPost.featured_media || editedFeaturedMedia;
+			if ( ! module.hasPortraitSrcNotice && ! hasFeaturedMedia ) {
 				module.hasPortraitSrcNotice = true;
 				wp.data.dispatch( 'core/notices' ).createNotice(
 					'warning',
@@ -160,7 +163,7 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						id: storyPortraitErrorNoticeId,
 					}
 				);
-			} else if ( module.hasPortraitSrcNotice && currentPost.featured_media ) {
+			} else if ( module.hasPortraitSrcNotice && hasFeaturedMedia ) {
 				module.hasPortraitSrcNotice = null;
 				wp.data.dispatch( 'core/notices' ).removeNotice( storyPortraitErrorNoticeId );
 			}
