@@ -846,7 +846,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	transition: opacity .3s;
 }
 
-.editor-block-list__block.selected .rotatable-box-wrap,
+.editor-block-list__block.is-selected .rotatable-box-wrap,
 .editor-block-list__block.is-hovered .rotatable-box-wrap {
 	opacity: 1;
 }
