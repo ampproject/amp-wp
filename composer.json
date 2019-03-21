@@ -1,19 +1,23 @@
 {
   "name": "ampproject/amp-wp",
+  "type": "wordpress-plugin",
   "description": "WordPress plugin for adding AMP support.",
   "homepage": "https://github.com/ampproject/amp-wp",
-  "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "require": {
     "php": "^5.4 || ^7.0",
-    "sabberworm/php-css-parser": "8.3.0",
+    "ext-dom": "*",
+    "ext-iconv": "*",
+    "ext-intl": "*",
+    "ext-libxml": "*",
+    "cweagans/composer-patches": "1.6.5",
     "fasterimage/fasterimage": "1.4.0",
-    "cweagans/composer-patches": "~1.6"
+    "sabberworm/php-css-parser": "8.3.0"
   },
   "require-dev": {
-    "wp-coding-standards/wpcs": "2.0.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
     "phpcompatibility/php-compatibility": "9.1.1",
+    "wp-coding-standards/wpcs": "2.0.0",
     "xwp/wp-dev-lib": "1.0.3"
   },
   "config": {
