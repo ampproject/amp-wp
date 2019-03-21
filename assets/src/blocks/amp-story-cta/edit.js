@@ -82,7 +82,7 @@ class ButtonEdit extends Component {
 						onChange={ ( value ) => setAttributes( { text: value } ) }
 						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
 						className={ classnames(
-							'wp-block-button__link', {
+							'amp-block-story-cta__link', {
 								'has-background': backgroundColor.color,
 								[ backgroundColor.class ]: backgroundColor.class,
 								'has-text-color': textColor.color,
@@ -127,7 +127,7 @@ class ButtonEdit extends Component {
 				</div>
 				{ isSelected && (
 					<form
-						className="block-library-button__inline-link"
+						className="amp-block-story-cta__inline-link"
 						onSubmit={ ( event ) => event.preventDefault() }>
 						<Dashicon icon="admin-links" />
 						<URLInput

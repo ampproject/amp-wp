@@ -847,6 +847,110 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	display: inline-block;
 }
 
+/**
+ * CTA Block
+ */
+
+.block-editor-block-list__block[data-type="amp/amp-story-cta"][data-align="center"] {
+	text-align: center;
+}
+
+.block-editor-block-list__block[data-type="amp/amp-story-cta"][data-align="right"] {
+	/*!rtl:ignore*/
+	text-align: right;
+}
+
+.wp-block-amp-amp-story-cta {
+	display: inline-block;
+	margin-bottom: 0;
+	position: relative;
+}
+
+.wp-block-amp-amp-story-cta [contenteditable] {
+	cursor: text;
+}
+
+.wp-block-amp-amp-story-cta:not(.has-text-color):not(.is-style-outline) .block-editor-rich-text__editable[data-is-placeholder-visible="true"] + .block-editor-rich-text__editable {
+	color: #fff;
+}
+
+.wp-block-amp-amp-story-cta .block-editor-rich-text__editable[data-is-placeholder-visible="true"] + .block-editor-rich-text__editable {
+	opacity: 0.8;
+}
+
+.block-editor-block-preview__content .wp-block-amp-amp-story-cta {
+	max-width: 100%;
+}
+
+.wp-block-amp-amp-story-cta .block-editor-rich-text__editable[data-is-placeholder-visible="true"] {
+	height: auto;
+}
+
+.wp-block-amp-amp-story-cta .amp-block-story-cta__link {
+	max-width: 100%;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+
+.amp-block-story-cta__link {
+	background-color: #32373c;
+	border: none;
+	box-shadow: none;
+	color: inherit;
+	cursor: pointer;
+	display: inline-block;
+	font-size: 18px;
+	margin: 0;
+	padding: 12px 24px;
+	text-align: center;
+	text-decoration: none;
+	white-space: normal;
+	overflow-wrap: break-word;
+}
+
+.amp-block-story-cta__inline-link {
+	background: #fff;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	font-family: -apple-system, BlinkMacSystemFont,"Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell,"Helvetica Neue", sans-serif;
+	font-size: 13px;
+	line-height: 1.4;
+	width: calc( 300px + 2px + 2 * 36px );
+}
+
+.amp-block-story-cta__inline-link .block-editor-url-input {
+	width: auto;
+}
+
+.amp-block-story-cta__inline-link .block-editor-url-input__suggestions {
+	width: calc( 300px + 2px );
+	z-index: 10;
+}
+
+.amp-block-story-cta__inline-link > .dashicon {
+	width: 36px;
+}
+
+.amp-block-story-cta__inline-link .dashicon {
+	color: #8f98a1;
+}
+
+.amp-block-story-cta__inline-link .block-editor-url-input input[type="text"]::placeholder {
+	color: #8f98a1;
+}
+
+[data-align="center"] .amp-block-story-cta__inline-link {
+	margin-left: auto;
+	margin-right: auto;
+}
+
+[data-align="right"] .amp-block-story-cta__inline-link {
+	margin-left: auto;
+	margin-right: 0;
+}
+
 /*
  * 100. Shame
  */
