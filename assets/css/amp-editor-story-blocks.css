@@ -97,11 +97,6 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
  * Fix the page editor size to the ratio of the stories.
  */
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"] {
-	padding: 0;
-	margin: 60px 30px 0;
-}
-
 @media (min-width: 600px) {
 	div[data-type="amp/amp-story-page"] .editor-block-list__block {
 		margin: 0;
@@ -115,6 +110,12 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 	max-width: 338px;
 	height: 553px;
 	position: relative;
+}
+
+#amp-story-editor .wp-block[data-type="amp/amp-story-page"] {
+	padding: 0;
+	margin: 60px 30px 0;
+	height: 563px;
 }
 
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
@@ -301,7 +302,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div {
-		height: 543px;
+		height: 553px;
 	}
 
 	.amp-story-editor-carousel-navigation {
