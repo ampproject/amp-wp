@@ -365,15 +365,11 @@ class AMP_Story_Post_Type {
 	 * @return bool If the stylesheet comes from the theme.
 	 */
 	public static function is_theme_stylesheet( $url ) {
-
-		if (
+		return (
 			0 === strpos( $url, get_stylesheet_directory_uri() )
 			||
 			0 === strpos( $url, get_template_directory_uri() )
-		) {
-			return true;
-		}
-		return false;
+		);
 	}
 
 	/**
