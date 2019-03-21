@@ -82,6 +82,8 @@ class RotatableBox extends Component {
 
 		e.preventDefault();
 
+		this.elementRef.current.style.transform = 'rotate(0deg)';
+
 		this.setState(
 			{
 				isRotating: false,
