@@ -167,6 +167,10 @@ export const addAMPAttributes = ( settings, name ) => {
 		type: 'number',
 		default: 5,
 	};
+	addedAttributes.rotationAngle = {
+		type: 'number',
+		default: 0,
+	};
 
 	return {
 		...settings,
@@ -231,6 +235,17 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes.style = {
 			...style,
 			...positionStyle,
+		};
+	}
+
+	if ( attributes.rotationAngle ) {
+		const rotationAngle = parseInt( attributes.rotationAngle );
+		const rotationStyle = {
+			transform: `rotate(${ rotationAngle }deg)`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...rotationStyle,
 		};
 	}
 

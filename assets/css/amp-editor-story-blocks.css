@@ -827,7 +827,7 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 
 .wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
 .wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
-	opacity: 100;
+	opacity: 1;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
@@ -836,6 +836,55 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	display: inline-block;
 }
 
+/**
+ * RotatableBox
+ */
+
+.wp-block[data-type="amp/amp-story-text"] .rotatable-box-wrap {
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block[data-type="amp/amp-story-text"]:hover  .rotatable-box-wrap,
+.wp-block[data-type="amp/amp-story-text"] .rotatable-box-wrap:hover {
+	opacity: 1;
+}
+
+.rotatable-box-wrap {
+	box-shadow: -1px 0 rgba(66,88,99,.4);
+	width: 0;
+	height: 25px;
+	position: absolute;
+	bottom: -40px;
+	margin-left: 50%;
+	border-left: 1px solid #007cba;
+}
+
+.rotatable-box-wrap .rotatable-box-wrap__handle {
+	display: block;
+	opacity: 1;
+	transition: opacity .3s;
+	position: absolute;
+	bottom: -20px;
+	left: calc(50% - 26px);
+	width: 50px;
+	height: 24px;
+	padding: 4px;
+	cursor: move;
+}
+
+.rotatable-box-wrap .rotatable-box-wrap__handle::before {
+	background: #0085ba;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	content: "";
+	cursor: inherit;
+	display: block;
+	height: 16px;
+	width: 16px;
+	margin: 0 auto;
+}
 /*
  * 100. Shame
  */
