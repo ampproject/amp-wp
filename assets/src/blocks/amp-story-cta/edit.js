@@ -15,6 +15,7 @@ import { compose } from '@wordpress/compose';
 import {
 	Dashicon,
 	IconButton,
+	PanelBody,
 	withFallbackStyles,
 } from '@wordpress/components';
 import {
@@ -24,7 +25,15 @@ import {
 	InspectorControls,
 	withColors,
 	PanelColorSettings,
+	withFontSizes,
+	FontSizePicker,
 } from '@wordpress/editor';
+
+/**
+ * Internal dependencies
+ */
+import { FontFamilyPicker } from '../../components';
+import { maybeEnqueueFontStyle } from '../../helpers';
 
 const { getComputedStyle } = window;
 
@@ -65,37 +74,33 @@ class ButtonEdit extends Component {
 			setAttributes,
 			isSelected,
 			className,
+			fontSize,
+			setFontSize,
 		} = this.props;
 
 		const {
 			text,
 			url,
-			title,
+			ampFontFamily,
 		} = attributes;
 
 		return (
 			<Fragment>
-				<div className={ className } title={ title } ref={ this.bindRef }>
-					<RichText
-						placeholder={ __( 'Add text…', 'amp' ) }
-						value={ text }
-						onChange={ ( value ) => setAttributes( { text: value } ) }
-						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
-						className={ classnames(
-							'amp-block-story-cta__link', {
-								'has-background': backgroundColor.color,
-								[ backgroundColor.class ]: backgroundColor.class,
-								'has-text-color': textColor.color,
-								[ textColor.class ]: textColor.class,
-							}
-						) }
-						style={ {
-							backgroundColor: backgroundColor.color,
-							color: textColor.color,
-						} }
-						keepPlaceholderOnFocus
-					/>
+				<div className={ className } ref={ this.bindRef }>
 					<InspectorControls>
+						<PanelBody title={ __( 'Text Settings', 'amp' ) }>
+							<FontFamilyPicker
+								name={ ampFontFamily }
+								onChange={ ( value ) => {
+									maybeEnqueueFontStyle( value );
+									setAttributes( { ampFontFamily: value } );
+								} }
+							/>
+							<FontSizePicker
+								value={ fontSize.size }
+								onChange={ setFontSize }
+							/>
+						</PanelBody>
 						<PanelColorSettings
 							title={ __( 'Color Settings', 'amp' ) }
 							colorSettings={ [
@@ -124,6 +129,26 @@ class ButtonEdit extends Component {
 							/>
 						</PanelColorSettings>
 					</InspectorControls>
+					<RichText
+						placeholder={ __( 'Add text…', 'amp' ) }
+						value={ text }
+						onChange={ ( value ) => setAttributes( { text: value } ) }
+						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
+						className={ classnames(
+							'amp-block-story-cta__link', {
+								'has-background': backgroundColor.color,
+								[ backgroundColor.class ]: backgroundColor.class,
+								'has-text-color': textColor.color,
+								[ textColor.class ]: textColor.class,
+							}
+						) }
+						style={ {
+							backgroundColor: backgroundColor.color,
+							color: textColor.color,
+							fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+						} }
+						keepPlaceholderOnFocus
+					/>
 				</div>
 				{ isSelected && (
 					<form
@@ -144,5 +169,6 @@ class ButtonEdit extends Component {
 
 export default compose( [
 	withColors( 'backgroundColor', { textColor: 'color' } ),
+	withFontSizes( 'fontSize' ),
 	applyFallbackStyles,
 ] )( ButtonEdit );

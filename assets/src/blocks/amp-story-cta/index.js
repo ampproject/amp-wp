@@ -11,15 +11,16 @@ import { __ } from '@wordpress/i18n';
 import {
 	RichText,
 	getColorClassName,
+	getFontSizeClass,
 } from '@wordpress/editor';
+import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
-import { registerBlockType } from '@wordpress/blocks';
 
-const blockAttributes = {
+const schema = {
 	url: {
 		type: 'string',
 		source: 'attribute',
@@ -43,6 +44,18 @@ const blockAttributes = {
 	customTextColor: {
 		type: 'string',
 	},
+	fontSize: {
+		type: 'string',
+	},
+	customFontSize: {
+		type: 'number',
+	},
+	autoFontSize: {
+		type: 'number',
+	},
+	ampFontFamily: {
+		type: 'string',
+	},
 };
 
 export const name = 'amp/amp-story-cta';
@@ -58,7 +71,7 @@ export const settings = {
 
 	keywords: [ __( 'call to action', 'amp' ), __( 'cta', 'amp' ), __( 'button', 'amp' ) ],
 
-	attributes: blockAttributes,
+	attributes: schema,
 
 	supports: {
 		align: true,
@@ -75,30 +88,35 @@ export const settings = {
 			textColor,
 			customBackgroundColor,
 			customTextColor,
+			fontSize,
+			customFontSize,
 		} = attributes;
 
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+		const fontSizeClass = getFontSizeClass( fontSize );
 
-		const buttonClasses = classnames( 'amp-block-story-cta__link', {
+		const className = classnames( 'amp-block-story-cta__link', {
 			'has-text-color': textColor || customTextColor,
 			[ textClass ]: textClass,
 			'has-background': backgroundColor || customBackgroundColor,
 			[ backgroundClass ]: backgroundClass,
+			[ fontSizeClass ]: fontSizeClass,
 		} );
 
-		const buttonStyle = {
+		const styles = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
+			fontSize: fontSizeClass ? undefined : customFontSize,
 		};
 
 		return (
 			<amp-story-cta-layer>
 				<RichText.Content
 					tagName="a"
-					className={ buttonClasses }
+					className={ className }
 					href={ url }
-					style={ buttonStyle }
+					style={ styles }
 					value={ text }
 				/>
 			</amp-story-cta-layer>
