@@ -19,6 +19,16 @@ class RotatableBox extends Component {
 		this.onRotateStop = this.onRotateStop.bind( this );
 	}
 
+	componentDidMount() {
+		document.addEventListener( 'mouseup', this.onRotateStop );
+		document.addEventListener( 'mousemove', this.onRotate );
+	}
+
+	componentWillUnmount() {
+		document.removeEventListener( 'mouseup', this.onRotateStop );
+		document.removeEventListener( 'mousemove', this.onRotate );
+	}
+
 	onRotateStart( e ) {
 		if ( ( e.button && 2 === e.button ) || ( e.which && 3 === e.which ) ) {
 			return;
@@ -85,8 +95,6 @@ class RotatableBox extends Component {
 			<div
 				className={ this.props.className }
 				ref={ this.elementRef }
-				onMouseMove={ this.onRotate }
-				onMouseUp={ this.onRotateStop }
 			>
 				<div className="rotatable-box-wrap">
 					<div
