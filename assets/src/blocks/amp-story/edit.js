@@ -21,11 +21,7 @@ import {
 	BaseControl,
 	FocalPointPicker,
 } from '@wordpress/components';
-import {
-	dispatch,
-	select,
-	withSelect,
-} from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -56,7 +52,6 @@ class EditPage extends Component {
 		}
 
 		let mediaType;
-		const { editPost } = dispatch( 'core/editor' );
 
 		// For media selections originated from a file upload.
 		if ( media.media_type ) {
@@ -84,12 +79,7 @@ class EditPage extends Component {
 		} );
 
 		if ( IMAGE_BACKGROUND_TYPE === mediaType ) {
-			const featuredMedia = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
 			this.props.setAttributes( { poster: undefined } );
-
-			if ( ! featuredMedia ) {
-				editPost( { featured_media: media.id } );
-			}
 		}
 	}
 
