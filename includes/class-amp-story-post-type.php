@@ -478,6 +478,14 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
+		wp_enqueue_style(
+			'amp-stories-frontend',
+			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
 		self::enqueue_general_styles();
 	}
 
