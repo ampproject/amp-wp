@@ -367,8 +367,9 @@ class AMP_Story_Post_Type {
 	public static function is_theme_stylesheet( $url ) {
 
 		if (
-			false !== strpos( $url, get_stylesheet_directory_uri() ) ||
-			false !== strpos( $url, get_template_directory_uri() )
+			0 === strpos( $url, get_stylesheet_directory_uri() )
+			||
+			0 === strpos( $url, get_template_directory_uri() )
 		) {
 			return true;
 		}
