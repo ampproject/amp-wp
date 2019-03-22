@@ -88,28 +88,40 @@ class AMP_Image_Dimension_Extractor {
 			return false;
 		}
 
+		$normalized_url = $url;
+
 		if ( 0 === strpos( $url, '//' ) ) {
-			return set_url_scheme( $url, 'http' );
+			$normalized_url = set_url_scheme( $url, 'http' );
+		} else {
+			$parsed = wp_parse_url( $url );
+			if ( ! isset( $parsed['host'] ) ) {
+				$path = '';
+				if ( isset( $parsed['path'] ) ) {
+					$path .= $parsed['path'];
+				}
+				if ( isset( $parsed['query'] ) ) {
+					$path .= '?' . $parsed['query'];
+				}
+				$home      = home_url();
+				$home_path = wp_parse_url( $home, PHP_URL_PATH );
+				if ( ! empty( $home_path ) ) {
+					$home = substr( $home, 0, - strlen( $home_path ) );
+				}
+				$normalized_url = $home . $path;
+			}
 		}
 
-		$parsed = wp_parse_url( $url );
-		if ( ! isset( $parsed['host'] ) ) {
-			$path = '';
-			if ( isset( $parsed['path'] ) ) {
-				$path .= $parsed['path'];
-			}
-			if ( isset( $parsed['query'] ) ) {
-				$path .= '?' . $parsed['query'];
-			}
-			$home      = home_url();
-			$home_path = wp_parse_url( $home, PHP_URL_PATH );
-			if ( ! empty( $home_path ) ) {
-				$home = substr( $home, 0, - strlen( $home_path ) );
-			}
-			$url = $home . $path;
-		}
+		/**
+		 * Apply filters on the normalized image URL for dimension extraction.
+		 *
+		 * @since 1.1
+		 *
+		 * @param string $normalized_url Normalized image URL.
+		 * @param string $url            Original image URL.
+		 */
+		$normalized_url = apply_filters( 'amp_normalized_dimension_extractor_image_url', $normalized_url, $url );
 
-		return $url;
+		return $normalized_url;
 	}
 
 	/**
