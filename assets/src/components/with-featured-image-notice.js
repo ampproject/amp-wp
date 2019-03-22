@@ -38,7 +38,7 @@ export default ( PostFeaturedImage ) => {
 				<Fragment>
 					<Notice status="warning">
 						<span>
-							{ __( 'Featured image is used as poster-portrait-src and is mandatory', 'amp' ) }
+							{ __( 'Selecting a featured image is required.', 'amp' ) }
 						</span>
 					</Notice>
 					{ postFeaturedImage }
