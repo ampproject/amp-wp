@@ -52,7 +52,7 @@ export default ( initialPlaceholder ) => {
 				}
 
 				// Conditionally set the uploaded image as the featured image.
-				const media = wp.data.select( 'core' ).getMedia( selectedBlock.attributes.id );
+				const media = select( 'core' ).getMedia( selectedBlock.attributes.id );
 				if ( media && media.media_details && hasMinimumDimensions( media.media_details ) && 'core/image' === selectedBlock.name ) {
 					dispatch( 'core/editor' ).editPost( { featured_media: selectedBlock.attributes.id } );
 				}
