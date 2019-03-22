@@ -70,7 +70,7 @@ function amp_get_permalink( $post_id ) {
 	// When theme support is present, the plain query var should always be used.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
+		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
