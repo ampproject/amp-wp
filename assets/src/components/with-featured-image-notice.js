@@ -9,11 +9,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Conditionally displays a notice above the post's 'Featured Image' component.
  *
- * If there is no featured image, display a notice.
+ * If there is no featured image, this displays a notice.
  * This displays in the sidebar, in the 'Document' panel.
  *
  * @param {Function} PostFeaturedImage The featured image component, appearing in the sidebar.
- * @return {Function} The PostFeaturedImage component, wrapped in a Notice if there's not featured image.
+ * @return {Function} The PostFeaturedImage component, wrapped in a Notice if there's no featured image.
  */
 export default ( PostFeaturedImage ) => {
 	return withSelect( ( select ) => {
