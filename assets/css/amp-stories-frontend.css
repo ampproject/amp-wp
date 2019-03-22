@@ -1,0 +1,74 @@
+/**
+ * Front-end styling for AMP Stories.
+ */
+
+/* Text sizes to match the editor styles. */
+body,
+p {
+    font-size: 16px;
+    line-height: 1.8;
+    font-weight: normal;
+}
+.wp-block-quote cite {
+    color: #6c7781;
+    font-size: 13px;
+    font-style: normal;
+}
+
+amp-story-grid-layer {
+    padding: 0;
+}
+
+.wp-block-quote {
+    border-left: 4px solid #000;
+    padding-left: 1em;
+}
+
+.wp-block-pullquote {
+    border-top: 4px solid #555d66;
+    border-bottom: 4px solid #555d66;
+    color: #40464d;
+}
+
+.wp-block-pullquote p {
+    font-size: 20px;
+    line-height: 1.6;
+}
+
+.wp-block-pullquote cite {
+    text-transform: uppercase;
+    font-size: 13px;
+    font-style: normal;
+}
+
+.wp-block-pullquote.alignleft {
+    text-align: left;
+    width: initial;
+}
+
+.wp-block-pullquote.alignright {
+    text-align: right;
+    width: initial;
+}
+
+.wp-block-code {
+    font-family: Menlo, Consolas, monaco, monospace;
+    font-size: 14px;
+    color: #23282d;
+    padding: 0.8em 1em;
+    border: 1px solid #e2e4e7;
+    border-radius: 4px;
+}
+
+.wp-block-table {
+    width: initial;
+    min-width: 240px;
+    border-collapse: collapse;
+}
+
+.wp-block-table td,
+.wp-block-table th {
+    padding: 0.5em;
+    border: 1px solid #000;
+    font-size: 16px;
+}

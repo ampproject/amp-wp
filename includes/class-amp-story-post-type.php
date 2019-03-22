@@ -486,6 +486,15 @@ class AMP_Story_Post_Type {
 			false
 		);
 
+		// Also enqueue this since it's possible to embed another story into a story.
+		wp_enqueue_style(
+			'amp-story-card',
+			amp_get_asset_url( 'css/amp-story-card.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
 		self::enqueue_general_styles();
 	}
 
