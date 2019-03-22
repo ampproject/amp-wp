@@ -21,12 +21,14 @@ import {
 	withActivePageState,
 	BlockNavigation,
 	EditorCarousel,
+	withPrePublishNotice,
 	StoryControls,
 	Shortcuts,
 } from './components';
 import { ALLOWED_BLOCKS } from './constants';
 import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
 import store from './stores/amp-story';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Initialize editor integration.
@@ -216,6 +218,8 @@ store.subscribe( () => {
 		}
 	}
 } );
+
+registerPlugin( 'amp-featured-image-pre-publish', { render: withPrePublishNotice } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );

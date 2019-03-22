@@ -12,6 +12,7 @@ export { default as withAttributes } from './with-attributes';
 export { default as withBlockName } from './with-block-name';
 export { default as withHasSelectedInnerBlock } from './with-has-selected-inner-block';
 export { default as withPageNumber } from './with-page-number';
+export { default as withPrePublishNotice } from './with-pre-publish-notice';
 export { default as withPlaceholderFeaturedImage } from './with-placeholder-featured-image';
 export { default as withUploadFeaturedImage } from './with-upload-featured-image';
 export { default as withFeaturedImageNotice } from './with-featured-image-notice';
