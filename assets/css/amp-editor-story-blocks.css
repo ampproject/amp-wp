@@ -1,6 +1,7 @@
 /*------------------------------------------------------------------
 [Table of contents]
 
+	0. General editor layout styles.
 	1. Style story pages wrapper
 	2. Selected state
 		2.1 Selected label
@@ -24,6 +25,18 @@
 
 -------------------------------------------------------------------*/
 
+/*
+ * 0. General editor layout styles.
+ */
+@media screen and (min-width: 1280px) {
+	.edit-post-visual-editor {
+		max-width: 1024px;
+		margin: 0 auto;
+	}
+	#amp-story-editor {
+		min-width: 800px;
+	}
+}
 
 /*
  * 1. Style story pages wrapper.
