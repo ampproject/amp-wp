@@ -4,6 +4,8 @@ export { default as BlockNavigation } from './block-navigation';
 export { default as EditorCarousel } from './editor-carousel';
 export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';
+export { default as StoryBlockDropZone } from './story-block-drop-zone';
+export { default as StoryBlockMover } from './block-mover';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as hasMinimumDimensions } from './has-minimum-dimensions';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
@@ -17,5 +19,8 @@ export { default as withPlaceholderFeaturedImage } from './with-placeholder-feat
 export { default as withUploadFeaturedImage } from './with-upload-featured-image';
 export { default as withFeaturedImageNotice } from './with-featured-image-notice';
 export { default as withParentBlock } from './with-parent-block';
+export { default as withIsReordering } from './with-is-reordering';
+export { default as withSelectedBlock } from './with-selected-block';
 export { default as withWrapperProps } from './with-wrapper-props';
 export { default as withActivePageState } from './with-active-page-state';
+export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';

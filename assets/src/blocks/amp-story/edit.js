@@ -20,14 +20,22 @@ import {
 	Button,
 	BaseControl,
 	FocalPointPicker,
+	SelectControl,
+	RangeControl,
 } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { ALLOWED_MEDIA_TYPES, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE, POSTER_ALLOWED_MEDIA_TYPES } from './constants';
+import { getTotalAnimationDuration } from '../../helpers';
+import {
+	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MEDIA_TYPES,
+	IMAGE_BACKGROUND_TYPE,
+	VIDEO_BACKGROUND_TYPE,
+	POSTER_ALLOWED_MEDIA_TYPES,
+} from '../../constants';
 
 const TEMPLATE = [
 	[ 'amp/amp-story-text' ],
@@ -84,9 +92,18 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
 
-		const { backgroundColor, mediaId, mediaType, mediaUrl, focalPoint, poster } = attributes;
+		const {
+			backgroundColor,
+			mediaId,
+			mediaType,
+			mediaUrl,
+			focalPoint,
+			poster,
+			autoAdvanceAfter,
+			autoAdvanceAfterDuration,
+		} = attributes;
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -95,10 +112,26 @@ class EditPage extends Component {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',
+			backgroundSize: 'cover',
 		};
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
 			style.backgroundImage = `url(${ poster })`;
+		}
+
+		const autoAdvanceAfterOptions = [
+			{ value: '', label: __( 'Manual', 'amp' ) },
+			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
+			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
+			{ value: 'media', label: __( 'After media has played', 'amp' ) },
+		];
+
+		let autoAdvanceAfterHelp;
+
+		if ( 'media' === autoAdvanceAfter ) {
+			autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
+		} else if ( 'auto' === autoAdvanceAfter ) {
+			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
 		return (
@@ -125,7 +158,7 @@ class EditPage extends Component {
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Upload Media', 'amp' ) }
+												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
 									/>
@@ -185,6 +218,28 @@ class EditPage extends Component {
 							) }
 						</Fragment>
 					</PanelBody>
+					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
+						<SelectControl
+							label={ __( 'Advance to next page', 'amp' ) }
+							help={ autoAdvanceAfterHelp }
+							value={ autoAdvanceAfter }
+							options={ autoAdvanceAfterOptions }
+							onChange={ ( value ) => {
+								setAttributes( { autoAdvanceAfter: value } );
+								setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+							} }
+						/>
+						{ 'time' === autoAdvanceAfter && (
+							<RangeControl
+								label={ __( 'Time in seconds', 'amp' ) }
+								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
+								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
+								min={ Math.max( totalAnimationDuration, 1 ) }
+								initialPosition={ totalAnimationDuration }
+								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page', 'amp' ) : undefined }
+							/>
+						) }
+					</PanelBody>
 				</InspectorControls>
 				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
@@ -202,11 +257,20 @@ class EditPage extends Component {
 	}
 }
 
-export default withSelect( ( select, props ) => {
-	const { mediaId } = props.attributes;
+export default withSelect( ( select, { attributes, clientId } ) => {
 	const { getMedia } = select( 'core' );
+	const { getBlockRootClientId } = select( 'core/editor' );
+	const { getAnimatedBlocks } = select( 'amp/story' );
+
+	const { mediaId } = attributes;
+
+	const animatedBlocks = getAnimatedBlocks();
+	const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
+	const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+	const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
+		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
 } )( EditPage );

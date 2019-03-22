@@ -5,24 +5,46 @@
  *
  * @return {Array} Animation order.
  */
-export function getAnimationOrder( state ) {
-	return state.animationOrder || {};
+export function getAnimatedBlocks( state ) {
+	return state.animations || {};
 }
 
 /**
- * Returns an item's predecessor in the animation order.
+ * Determines whether a given predecessor -> item combination is valid.
  *
- * @param {Object} state Editor state.
- * @param {string} page  ID of the page the item is in.
- * @param {string} item  ID of the animated item.
+ * Returns false if the predecessor itself is not animated or if it would result in a cycle.
  *
- * @return {?string} The predecessor's ID.
+ * @param {Object} state       Editor state.
+ * @param {string} page        ID of the page the item is in.
+ * @param {string} item        ID of the animated item.
+ * @param {string} predecessor ID of the animated item's predecessor.
+ *
+ * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
-export function getAnimationPredecessor( state, page, item ) {
-	const pageAnimationOrder = state.animationOrder[ page ] || [];
-	const found = pageAnimationOrder.find( ( { id } ) => id === item );
+export function isValidAnimationPredecessor( state, page, item, predecessor ) {
+	if ( undefined === predecessor || ! state.animations ) {
+		return true;
+	}
 
-	return found ? found.parent : undefined;
+	const pageAnimationOrder = state.animations[ page ] || [];
+	const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor );
+
+	const hasCycle = ( a, b ) => {
+		let parent = b;
+
+		while ( parent !== undefined ) {
+			if ( parent === a ) {
+				return true;
+			}
+
+			const parentItem = pageAnimationOrder.find( ( { id } ) => id === parent );
+			parent = parentItem ? parentItem.parent : undefined;
+		}
+
+		return false;
+	};
+
+	return predecessorEntry && ! hasCycle( item, predecessor );
 }
 
 /**

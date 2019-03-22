@@ -1,11 +1,15 @@
 /**
+ * External dependencies
+ */
+import { every } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
-import { render } from '@wordpress/element';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -19,24 +23,58 @@ import {
 	withFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
-	BlockNavigation,
-	EditorCarousel,
 	withPrePublishNotice,
-	StoryControls,
-	Shortcuts,
+	withStoryBlockDropZone,
 } from './components';
-import { ALLOWED_BLOCKS } from './constants';
-import { maybeEnqueueFontStyle, setBlockParent, addAMPAttributes, addAMPExtraProps, disableBlockDropZone } from './helpers';
+import {
+	maybeEnqueueFontStyle,
+	setBlockParent,
+	addAMPAttributes,
+	addAMPExtraProps,
+	getTotalAnimationDuration,
+	renderStoryComponents,
+	getTagName,
+} from './helpers';
+
+import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
+
 import store from './stores/amp-story';
 import { registerPlugin } from '@wordpress/plugins';
+
+const {
+	getSelectedBlockClientId,
+	getBlocksByClientId,
+	getClientIdsWithDescendants,
+	getBlockRootClientId,
+	getBlockOrder,
+	getBlock,
+	getBlockAttributes,
+} = select( 'core/editor' );
+
+const {
+	isReordering,
+	getBlockOrder: getCustomBlockOrder,
+	getCurrentPage,
+	getAnimatedBlocks,
+} = select( 'amp/story' );
+
+const {
+	moveBlockToPosition,
+	updateBlockAttributes,
+} = dispatch( 'core/editor' );
+
+const {
+	setCurrentPage,
+	addAnimation,
+	changeAnimationType,
+	changeAnimationDuration,
+	changeAnimationDelay,
+} = dispatch( 'amp/story' );
 
 /**
  * Initialize editor integration.
  */
 domReady( () => {
-	const { getBlocksByClientId, getClientIdsWithDescendants, getBlockRootClientId } = select( 'core/editor' );
-	const { addAnimation, setCurrentPage } = dispatch( 'amp/story' );
-
 	// Ensure that the default block is page when no block is selected.
 	setDefaultBlockName( 'amp/amp-story-page' );
 
@@ -53,15 +91,19 @@ domReady( () => {
 	const firstPage = allBlocks.find( ( { name } ) => name === 'amp/amp-story-page' );
 	setCurrentPage( firstPage ? firstPage.clientId : undefined );
 
+	// Set initial animation order state for all child blocks.
 	for ( const block of allBlocks ) {
 		const page = getBlockRootClientId( block.clientId );
 
-		// Set initial animation order state.
 		if ( page ) {
-			const ampAnimationAfter = block.attributes.ampAnimationAfter;
+			const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
 			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
 
 			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+
+			changeAnimationType( page, block.clientId, ampAnimationType );
+			changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+			changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 		}
 
 		// Load all needed fonts.
@@ -76,83 +118,113 @@ domReady( () => {
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 } );
 
+const positionTopLimit = 75;
+const positionTopHighest = 0;
+const positionTopGap = 10;
+
 /**
- * Add some additional elements needed to render our custom UI controls.
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {string} clientId Block ID.
  */
-function renderStoryComponents() {
-	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
-	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
+function maybeSetInitialPositioning( clientId ) {
+	const block = getBlock( clientId );
 
-	if ( editorBlockList ) {
-		const ampStoryWrapper = document.createElement( 'div' );
-		ampStoryWrapper.id = 'amp-story-editor';
-
-		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
-
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
-
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
-		/**
-		 * The intended layout is as follows:
-		 *
-		 * - Post title
-		 * - AMP story wrapper element (needed for overflow styling)
-		 * - - Story controls
-		 * - - Block list
-		 * - - Block navigation
-		 * - - Carousel controls
-		 */
-		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-		ampStoryWrapper.appendChild( storyControls );
-		ampStoryWrapper.appendChild( editorBlockList );
-		ampStoryWrapper.appendChild( blockNavigation );
-		ampStoryWrapper.appendChild( editorCarousel );
-
-		render(
-			<StoryControls />,
-			storyControls
-		);
-
-		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
-			blockNavigation
-		);
-
-		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
-			editorCarousel
-		);
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
 	}
 
-	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
+		return;
+	}
 
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
 
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
+	// Only set the position if the block was unmodified before.
+	if ( isUnmodified ) {
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
+
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
 	}
 }
 
-const { getBlockOrder, getBlock } = select( 'core/editor' );
+/**
+ * Verify and perhaps update autoAdvanceAfterMedia attribute for pages.
+ *
+ * For pages with autoAdvanceAfter set to 'media',
+ * verify that the referenced media block still exists.
+ * If not, find another media block to be used for the
+ * autoAdvanceAfterMedia attribute.
+ *
+ * @param {string} clientId Block ID.
+ */
+function maybeUpdateAutoAdvanceAfterMedia( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_TOP_LEVEL_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	if ( 'media' !== block.attributes.autoAdvanceAfter ) {
+		return;
+	}
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
+	const mediaBlock = block.attributes.autoAdvanceAfterMedia && innerBlocks.find( ( { attributes } ) => attributes.anchor === block.attributes.autoAdvanceAfterMedia );
+
+	if ( mediaBlock ) {
+		return;
+	}
+
+	const firstMediaBlock = innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) );
+	const autoAdvanceAfterMedia = firstMediaBlock ? firstMediaBlock.attributes.anchor : '';
+
+	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
+		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
+	}
+}
+
+/**
+ * Determines the HTML tag name that should be used for text blocks.
+ *
+ * This is based on the block's attributes, as well as the surrounding context.
+ *
+ * For example, there can only be one <h1> tag on a page.
+ * Also, font size takes precedence over text length as it's a stronger signal for semantic meaning.
+ *
+ * @param {string} clientId Block ID.
+ */
+function maybeSetTagName( clientId ) {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'amp/amp-story-text' !== block.name ) {
+		return;
+	}
+
+	const siblings = getBlocksByClientId( getBlockOrder( clientId ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const canUseH1 = ! siblings.some( ( { attributes } ) => attributes.tagName === 'h1' );
+
+	const tagName = getTagName( block.attributes, canUseH1 );
+
+	if ( block.attributes.tagName !== tagName ) {
+		updateBlockAttributes( clientId, { tagName } );
+	}
+}
 
 let blockOrder = getBlockOrder();
+let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
-	const { getSelectedBlockClientId } = select( 'core/editor' );
-	const { getCurrentPage } = select( 'amp/story' );
-	const { setCurrentPage } = dispatch( 'amp/story' );
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
@@ -188,10 +260,15 @@ subscribe( () => {
 	if ( newlyAddedPages ) {
 		setCurrentPage( newlyAddedPages );
 	}
-} );
 
-const { isReordering, getBlockOrder: getCustomBlockOrder, getAnimationOrder } = select( 'amp/story' );
-const { moveBlockToPosition, updateBlockAttributes } = dispatch( 'core/editor' );
+	for ( const block of allBlocksWithChildren ) {
+		maybeSetInitialPositioning( block );
+		maybeUpdateAutoAdvanceAfterMedia( block );
+		maybeSetTagName( block );
+	}
+
+	allBlocksWithChildren = getClientIdsWithDescendants();
+} );
 
 store.subscribe( () => {
 	const editorBlockOrder = getBlockOrder();
@@ -204,17 +281,41 @@ store.subscribe( () => {
 		}
 	}
 
-	const animationOrder = getAnimationOrder();
+	const animatedBlocks = getAnimatedBlocks();
 
-	for ( const page in animationOrder ) {
-		if ( ! animationOrder.hasOwnProperty( page ) ) {
+	// Update pages and blocks based on updated animation data.
+	for ( const page in animatedBlocks ) {
+		if ( ! animatedBlocks.hasOwnProperty( page ) || ! getBlock( page ) ) {
 			continue;
 		}
 
-		for ( const item of animationOrder[ page ] ) {
-			const parentBlock = item.parent ? getBlock( item.parent ) : undefined;
+		const pageAttributes = getBlockAttributes( page );
 
-			updateBlockAttributes( item.id, { ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined } );
+		const animatedBlocksPerPage = animatedBlocks[ page ].filter( ( { id } ) => page === getBlockRootClientId( id ) );
+
+		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+
+		if ( 'time' === pageAttributes.autoAdvanceAfter ) {
+			// Enforce minimum value for manually set time.
+			if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
+				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+			}
+		} else {
+			updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
+		}
+
+		for ( const item of animatedBlocksPerPage ) {
+			const { id, parent, animationType, duration, delay } = item;
+
+			const parentBlock = parent ? getBlock( parent ) : undefined;
+
+			updateBlockAttributes( id, {
+				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
+				ampAnimationType: animationType,
+				ampAnimationDuration: duration,
+				ampAnimationDelay: delay,
+			} );
 		}
 	}
 } );
@@ -232,4 +333,4 @@ addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNot
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
-addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/disableBlockDropZone', disableBlockDropZone );
+addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

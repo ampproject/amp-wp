@@ -27,6 +27,12 @@ import Slabo27 from '../images/font-names/slabo-27.svg';
 import SourceSansPro from '../images/font-names/source-sans-pro.svg';
 import Ubuntu from '../images/font-names/ubuntu.svg';
 
+export const STORY_PAGE_INNER_WIDTH = 328;
+export const STORY_PAGE_INNER_HEIGHT = 553;
+
+const storyPageBorderWidth = 10;
+export const STORY_PAGE_WIDTH = STORY_PAGE_INNER_WIDTH + storyPageBorderWidth;
+
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 ];
@@ -50,6 +56,12 @@ export const ALLOWED_BLOCKS = [
 	...ALLOWED_TOP_LEVEL_BLOCKS,
 	...ALLOWED_CHILD_BLOCKS,
 ];
+
+export const IMAGE_BACKGROUND_TYPE = 'image';
+export const VIDEO_BACKGROUND_TYPE = 'video';
+export const ALLOWED_MEDIA_TYPES = [ 'image', 'video' ];
+export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
+export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
 
 export const BLOCK_ICONS = {
 	'amp/amp-story-page': <svg id="story-page-icon" viewBox="0 0 24 24"><g id="icon" fill="#181D21"><path id="page" d="M18.4 21H5.6V3h7.8l5 4.9V21zM7.1 19.5h9.8V8.6l-4-4.1H7.1v15z" /><path id="corner" d="M11.5 5.4v4.3h4.4" /></g></svg>,

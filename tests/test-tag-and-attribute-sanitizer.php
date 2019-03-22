@@ -280,6 +280,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
+									<h2 scale-start="1.0" scale-end="200.1" translate-x="100px" translate-y="200px">Scaled</h2>
 								</amp-story-grid-layer>
 								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
 							</amp-story-page>
@@ -404,10 +405,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-bind', 'amp-carousel', 'amp-lightbox-gallery' ),
 			),
 
+			'base_carousel' => array(
+				'
+					<amp-base-carousel width="4" height="3" auto-advance="true" layout="responsive" heights="(min-width: 600px) calc(100% * 4 * 3 / 2), calc(100% * 3 * 3 / 2)" visible-count="(min-width: 600px) 4, 3" advance-count="(min-width: 600px) 4, 3">
+						<div lightbox-thumbnail-id="food">first slide</div>
+						<div lightbox-exclude>second slide</div>
+					</amp-base-carousel>
+				',
+				null,
+				array( 'amp-base-carousel' ),
+			),
+
 			'amp-dailymotion'  => array(
-				'<amp-dailymotion data-videoid="x3rdtfy" width="500" height="281"></amp-dailymotion><h4>Default (responsive)</h4><amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" layout="responsive"></amp-dailymotion><h4>Custom</h4><amp-dailymotion data-videoid="x3rdtfy" data-endscreen-enable="false" data-sharing-enable="false" data-ui-highlight="444444" data-ui-logo="false" data-info="false" width="640" height="360"></amp-dailymotion>',
-				'<amp-dailymotion data-videoid="x3rdtfy" width="500" height="281"></amp-dailymotion><h4>Default (responsive)</h4><amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" layout="responsive"></amp-dailymotion><h4>Custom</h4><amp-dailymotion data-videoid="x3rdtfy" data-endscreen-enable="false" data-sharing-enable="false" data-ui-highlight="444444" data-ui-logo="false" data-info="false" width="640" height="360"></amp-dailymotion>',
-				array( 'amp-dailymotion' ),
+				'<amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" dock></amp-dailymotion><h4>Default (responsive)</h4><amp-dailymotion data-videoid="x3rdtfy" width="500" height="281" layout="responsive"></amp-dailymotion><h4>Custom</h4><amp-dailymotion data-videoid="x3rdtfy" data-endscreen-enable="false" data-sharing-enable="false" data-ui-highlight="444444" data-ui-logo="false" data-info="false" width="640" height="360"></amp-dailymotion>',
+				null,
+				array( 'amp-dailymotion', 'amp-video-docking' ),
 			),
 
 			// Try to test for NAME_VALUE_PARENT_DISPATCH.
@@ -798,6 +810,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="http://example.com" rel="wp-att-1686">Link</a>',
 			),
 
+			'a_with_invalid_name' => array(
+				'<a name=shadowRoot>Shadow Root!</a>',
+				'<a>Shadow Root!</a>',
+			),
+
 			'a_with_attachment_rel_plus_another_valid_value' => array(
 				'<a href="http://example.com" rel="attachment wp-att-1686">Link</a>',
 			),
@@ -1077,9 +1094,122 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 
-			'amp-addthis' => array(
-				'<amp-addthis width="320" height="92" data-pub-id="ra-59c2c366435ef478" data-widget-id="0fyg"></amp-addthis>',
+			'amp-addthis-valid' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-59c2c366435ef478"
+					  data-widget-id="0fyg">
+					</amp-addthis>
+				',
 				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-responsive-layout' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  layout="responsive"
+					  data-pub-id="ra-59c3d23bf51957fd"
+					  data-widget-id="o2x1">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-custom-share-attributes' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-59c2c366435ef478"
+					  data-widget-id="0fyg"
+					  data-share-title="This Title Will Be Shared"
+					  data-share-url="https://www.addthis.com"
+					  data-share-media="https://i.imgur.com/yNlQWRM.jpg"
+					  data-share-description="This is the description that will be shared.">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-wordpress-mode' => array(
+				'
+					<!-- AddThis WordPress Mode -->
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-5c1a9eed18daaf81"
+					  data-class-name="at-above-post"
+					  data-widget-id="g7wl">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-wordpress-mode-no-render-without-class-name' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-5c1a9eed18daaf81"
+					  data-class-name=""
+					  data-widget-id="g7wl">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-inline-using-widget-id' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-5adf5f2869f63c7c"
+					  data-widget-id="1o1v">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-inline-using-product-code' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-5adf5f2869f63c7c"
+					  data-product-code="shin">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-floating-using-product-code' => array(
+				'
+					<amp-addthis
+					  width="320"
+					  height="92"
+					  data-pub-id="ra-5adf5ec1cb6be565"
+					  data-widget-type="floating"
+					  data-product-code="shfs">
+					</amp-addthis>
+				',
+				null,
+				array( 'amp-addthis' ),
+			),
+
+			'amp-addthis-with-invalid-attribute' => array(
+				'<amp-addthis width="320" height="240" data-pub-id="ra-5adf5f2869f63c7c" data-product-code="shin" data-share-url="mailto:foo@example.com"></amp-addthis>',
+				'<amp-addthis width="320" height="240" data-pub-id="ra-5adf5f2869f63c7c" data-product-code="shin" data-share-url=""></amp-addthis>',
 				array( 'amp-addthis' ),
 			),
 
@@ -1249,6 +1379,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-mustache' ),
 			),
+
+			'amp-action-macro' => array(
+				// @todo Should calling AMP.setState() automatically cause the amp-bind extension to be added?
+				'
+					<amp-action-macro id="closeNavigations" execute="AMP.setState({nav1: \'close\', nav2: \'close})"></amp-action-macro>
+					<button on="tap:closeNavigations.execute()">Close all</button>
+					<div on="tap:closeNavigations.execute()">Close all</div>
+				',
+				null,
+				array( 'amp-action-macro' ),
+			),
+
+			'amp-smart-links' => array(
+				'<amp-smartlinks layout="nodisplay" nrtv-account-name="examplepublisher" linkmate exclusive-links link-attribute="href" link-selector="a"></amp-smartlinks>',
+				null,
+				array( 'amp-smartlinks' ),
+			),
 		);
 	}
 
@@ -1293,11 +1440,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		$this->assertEquals(
-			preg_split( '/(?<=>)|(?=<)/', $expected ),
-			preg_split( '/(?<=>)|(?=<)/', $content )
-		);
+
+		$this->assertEqualMarkup( $expected, $content );
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
 
@@ -1399,14 +1543,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-		$content = preg_replace( '/(?<=>)\s+(?=<)/', '', $content );
-		preg_match_all( '#<.+?>#', $expected, $expected_matches );
-		preg_match_all( '#<.+?>#', $content, $content_matches );
-		$this->assertEquals(
-			$expected_matches,
-			$content_matches
-		);
-		$this->assertEquals( $expected, $content );
+
+		$this->assertEqualMarkup( $expected, $content );
+
 		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
 	}
 
@@ -1526,5 +1665,23 @@ EOB;
 			);
 			$sanitizer->sanitize();
 		}
+	}
+
+	/**
+	 * Assert markup is equal.
+	 *
+	 * @param string $expected Expected markup.
+	 * @param string $actual   Actual markup.
+	 */
+	public function assertEqualMarkup( $expected, $actual ) {
+		$actual   = preg_replace( '/\s+/', ' ', $actual );
+		$expected = preg_replace( '/\s+/', ' ', $expected );
+		$actual   = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $actual ) );
+		$expected = preg_replace( '/(?<=>)\s+(?=<)/', '', trim( $expected ) );
+
+		$this->assertEquals(
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $expected, -1, PREG_SPLIT_DELIM_CAPTURE ) ),
+			array_filter( preg_split( '#(<[^>]+>|[^<>]+)#', $actual, -1, PREG_SPLIT_DELIM_CAPTURE ) )
+		);
 	}
 }

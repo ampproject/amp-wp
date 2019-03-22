@@ -17,18 +17,56 @@ export function addAnimation( page, item, predecessor ) {
 }
 
 /**
- * Returns an action object in signalling that a given item is no longer animated.
+ * Returns an action object in signalling that an item's animation type has changed.
  *
- * @param {string} page ID of the page the item is in.
- * @param {string} item ID of the animated item.
+ * @param {string} page          ID of the page the item is in.
+ * @param {string} item          ID of the animated item.
+ * @param {string} animationType Animation type value.
  *
  * @return {Object} Action object.
  */
-export function removeAnimation( page, item ) {
+export function changeAnimationType( page, item, animationType ) {
 	return {
-		type: 'REMOVE_ANIMATION',
+		type: 'CHANGE_ANIMATION_TYPE',
 		page,
 		item,
+		animationType,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an item's animation duration has changed.
+ *
+ * @param {string} page     ID of the page the item is in.
+ * @param {string} item     ID of the animated item.
+ * @param {number} duration Animation delay value
+ *
+ * @return {Object} Action object.
+ */
+export function changeAnimationDuration( page, item, duration ) {
+	return {
+		type: 'CHANGE_ANIMATION_DURATION',
+		page,
+		item,
+		duration,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an item's animation delay has changed.
+ *
+ * @param {string} page  ID of the page the item is in.
+ * @param {string} item  ID of the animated item.
+ * @param {number} delay Animation delay value
+ *
+ * @return {Object} Action object.
+ */
+export function changeAnimationDelay( page, item, delay ) {
+	return {
+		type: 'CHANGE_ANIMATION_DELAY',
+		page,
+		item,
+		delay,
 	};
 }
 

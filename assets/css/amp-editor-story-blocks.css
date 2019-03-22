@@ -18,6 +18,7 @@
 	8. Block mover
 	9. General block editor components
 	10. Custom Components
+	11. Text Block
 	100. Shame
 		100.1 Gutenberg - Warning div not clickable
 
@@ -98,7 +99,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] {
 	padding: 0;
-	margin: 60px 0 0;
+	margin: 60px 30px 0;
 }
 
 @media (min-width: 600px) {
@@ -110,14 +111,16 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"],
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
-	margin: auto;
 	width: 100%;
 	max-width: 338px;
 	height: 553px;
+	position: relative;
 }
 
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-block-list__layout > .block-list-appender {
 	width: 316px;
+	margin: 0 auto;
+	display: none;
 }
 
 /*
@@ -258,7 +261,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		display: flex;
 		align-items: center;
 		transform: none;
-		transition: transform 300ms linear;
+		transition: transform 300ms ease-in-out;
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] {
@@ -295,6 +298,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		font-size: 12px;
 		color: #666;
 		letter-spacing: 1px;
+	}
+
+	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div {
+		height: 543px;
 	}
 
 	.amp-story-editor-carousel-navigation {
@@ -433,7 +440,12 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
-		margin: 0;
+		margin: -32px 0 0 0;
+		height: 267px;
+	}
+
+	.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper > div {
+		height: 267px;
 	}
 
 	.amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {
@@ -480,6 +492,100 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 	#amp-root-navigation .components-icon-button .dashicon {
 		margin-right: 5px;
+	}
+
+	:root {
+		--block-settings-sidebar-width: 280px;
+		--admin-menu-expanded-sidebar-width: 160px;
+		--admin-menu-collapsed-sidebar-width: 36px;
+		--amp-story-content-width: 338px;
+		--block-editor-horizontal-margin: 40px;
+		--scrollbar-width: 20px;
+		--block-navigation-right-margin: 20px;
+	}
+
+	/* Navigator in the context of the open sidebar, settings hidden. */
+	.post-type-amp_story:not(.folded) .edit-post-layout #amp-root-navigation {
+		max-width: calc(
+			calc(
+				100vw
+				-
+				var(--admin-menu-expanded-sidebar-width)
+				-
+				var(--amp-story-content-width)
+				-
+				calc( var(--block-editor-horizontal-margin) * 2 )
+				-
+				var( --scrollbar-width )
+			) / 2
+			-
+			var(--block-navigation-right-margin)
+		);
+	}
+
+	.post-type-amp_story.folded .edit-post-layout #amp-root-navigation {
+		max-width: calc(
+			calc(
+				100vw
+				-
+				var(--admin-menu-collapsed-sidebar-width)
+				-
+				var(--amp-story-content-width)
+				-
+				calc( var(--block-editor-horizontal-margin) * 2 )
+				-
+				var( --scrollbar-width )
+			) / 2
+			-
+			var(--block-navigation-right-margin)
+		);
+	}
+
+	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
+	.post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-root-navigation {
+		max-width: calc(
+			calc(
+				100vw
+				-
+				var(--admin-menu-expanded-sidebar-width)
+				-
+				var(--block-settings-sidebar-width)
+				-
+				var(--amp-story-content-width)
+				-
+				calc( var(--block-editor-horizontal-margin) * 2 )
+				-
+				var( --scrollbar-width )
+			) / 2
+			-
+			var(--block-navigation-right-margin)
+		);
+	}
+
+	/* Navigator in the context of folded sidebar, settings hidden. */
+	.post-type-amp_story.folded #amp-root-navigation {
+		max-width: calc( 100vw - var(--admin-menu-collapsed-sidebar-width) - var(--amp-story-content-width) );
+	}
+
+	/* Navigator in the context of folded sidebar, settings shown. */
+	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-root-navigation {
+		max-width: calc(
+			calc(
+				100vw
+				-
+				var(--admin-menu-collapsed-sidebar-width)
+				-
+				var(--block-settings-sidebar-width)
+				-
+				var(--amp-story-content-width)
+				-
+				calc( var(--block-editor-horizontal-margin) * 2 )
+				-
+				var( --scrollbar-width )
+			) / 2
+			-
+			var(--block-navigation-right-margin)
+		);
 	}
 
 	.editor-block-navigation__container {
@@ -544,6 +650,40 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 #editor-amp-story-page-poster__help {
 	margin-top: 0;
+}
+
+/*
+ * Make all the inner blocks positioned with absolute.
+ * @todo Add exception for CTA block once it's added back.
+ */
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
+	position: absolute;
+}
+
+.editor-block-list__block .editor-block-list__layout {
+	margin: 0;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"][data-amp-selected="parent"] .editor-block-drop-zone {
+	height: 583px;
+	width: 438px;
+	margin: 0;
+	left: -100px;
+	top: -50px;
+	border: none;
+	background: transparent;
+}
+
+.editor-block-list__layout div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > .editor-block-drop-zone .components-drop-zone__content {
+	display: none;
+}
+
+div[data-type="amp/amp-story-page"] .wp-block-image {
+	margin-top: 0;
+}
+
+#amp-story-editor .components-draggable__clone {
+	position: absolute;
 }
 
 /*
@@ -631,6 +771,72 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 /*
+ * Custom block mover.
+ */
+
+.amp-story-editor-block-mover {
+	position: absolute;
+	width: 30px;
+	height: 100%;
+	max-height: 112px;
+	top: -15px;
+	z-index: 80;
+	padding-right: 2px;
+	left: -45px;
+	margin-top: -8px;
+	opacity: 0;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.amp-story-editor-block-mover.is-visible,
+div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
+	opacity: 1;
+}
+
+/**
+ * 11. Text Block.
+ */
+.amp-story-text__resize-container .components-resizable-box__handle-right {
+	right: -26px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+.amp-story-text__resize-container .components-resizable-box__handle-right::before {
+	margin: 14px 0;
+}
+.amp-story-text__resize-container .components-resizable-box__handle-bottom {
+	bottom: -26px;
+	width: 50px;
+	left: calc(50% - 25px);
+}
+.amp-story-text__resize-container .components-resizable-box__handle-bottom::before {
+	margin: 0 auto;
+}
+
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
+	width: initial;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
+.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle{
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
+	opacity: 100;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit
+{
+	display: inline-block;
+}
+
+/*
  * 100. Shame
  */
 
@@ -648,5 +854,5 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 }
 
 div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
-    display: none;
+	display: none;
 }

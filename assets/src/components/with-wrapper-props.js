@@ -6,8 +6,8 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS } from '../constants';
-import { withAttributes, withBlockName, withHasSelectedInnerBlock, withParentBlock } from '.';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
+import { withAttributes, withBlockName, withHasSelectedInnerBlock, withParentBlock } from './';
 
 const wrapperWithSelect = compose(
 	withAttributes,
@@ -54,6 +54,23 @@ const withWrapperProps = ( BlockListBlock ) => {
 			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
 			'data-font-family': attributes.ampFontFamily || undefined,
 		};
+
+		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
+			let style = {
+				top: `${ attributes.positionTop }%`,
+				left: `${ attributes.positionLeft }%`,
+			};
+			if ( props.wrapperProps && props.wrapperProps.style ) {
+				style = {
+					...style,
+					...props.wrapperProps.style,
+				};
+			}
+			wrapperProps = {
+				...wrapperProps,
+				style,
+			};
+		}
 
 		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 	} );
