@@ -813,7 +813,6 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Style_Sanitizer'             => array(
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
 		),
-		'AMP_Story_Sanitizer'             => array(),
 		'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	);
 
