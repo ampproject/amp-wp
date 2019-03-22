@@ -9,6 +9,11 @@ import { dispatch, select } from '@wordpress/data';
 import { delay } from 'lodash';
 
 /**
+ * Internal dependencies
+ */
+import { hasMinimumDimensions } from './';
+
+/**
  * Gets a wrapped version of MediaPlaceholder.
  *
  * On uploading an image, if there is no featured image, set it to the selected image.
@@ -36,9 +41,19 @@ export default ( initialPlaceholder ) => {
 		 */
 		componentWillUnmount() {
 			const featuredMedia = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
+			if ( featuredMedia ) {
+				return;
+			}
+
 			delay( () => {
 				const selectedBlock = select( 'core/editor' ).getSelectedBlock();
-				if ( ! featuredMedia && selectedBlock && 'core/image' === selectedBlock.name && selectedBlock.attributes.id ) {
+				if ( ! selectedBlock || ! selectedBlock.attributes.id ) {
+					return;
+				}
+
+				// Conditionally set the uploaded image as the featured image.
+				const media = wp.data.select( 'core' ).getMedia( selectedBlock.attributes.id );
+				if ( media && media.media_details && hasMinimumDimensions( media.media_details ) && 'core/image' === selectedBlock.name ) {
 					dispatch( 'core/editor' ).editPost( { featured_media: selectedBlock.attributes.id } );
 				}
 			}, 1000 );
