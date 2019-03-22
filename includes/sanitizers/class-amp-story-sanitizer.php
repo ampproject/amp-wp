@@ -44,7 +44,7 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 
 				// The first page in a story must not have a CTA layer.
 				if ( 0 === $i ) {
-					$cta_layer_node->parentNode->removeChild( $cta_layer_node );
+					$this->remove_invalid_child( $cta_layer_node );
 					continue;
 				}
 
@@ -54,7 +54,7 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// There can only be one CTA layer.
-				$cta_layer_node->parentNode->removeChild( $cta_layer_node );
+				$this->remove_invalid_child( $cta_layer_node );
 			}
 		}
 	}
