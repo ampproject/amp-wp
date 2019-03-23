@@ -68,58 +68,35 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render_categories_block( $attributes ) {
-		$archives_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/categories' );
-		if ( empty( $attributes['displayAsDropdown'] ) && isset( $archives_block->original_render_callback ) ) {
-			return call_user_func( $archives_block->original_render_callback, $attributes );
+		$block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/categories' );
+		if ( ! isset( $block->original_render_callback ) ) {
+			return '';
 		}
+
+		$rendered = call_user_func( $block->original_render_callback, $attributes );
 
 		static $block_id = 0;
 		$block_id++;
 
-		$align = 'center';
-		if ( isset( $attributes['align'] ) && in_array( $attributes['align'], array( 'left', 'right', 'full' ), true ) ) {
-			$align = $attributes['align'];
-		}
+		$form_id = "wp-block-categories-dropdown-{$block_id}-form";
 
-		$args = array(
-			'echo'         => false,
-			'hierarchical' => ! empty( $attributes['showHierarchy'] ),
-			'orderby'      => 'name',
-			'show_count'   => ! empty( $attributes['showPostCounts'] ),
-			'title_li'     => '',
+		// Remove output of build_dropdown_script_block_core_categories().
+		$rendered = preg_replace( '#<script.+?</script>#s', '', $rendered );
+
+		$form = sprintf(
+			'<form action="%s" method="get" target="_top" id="%s">',
+			esc_url( home_url() ),
+			esc_attr( $form_id )
 		);
 
-		$id                       = 'wp-block-categories-dropdown-' . $block_id;
-		$form_id                  = $id . '-form';
-		$args['id']               = $id;
-		$args['show_option_none'] = __( 'Select Category', 'amp' );
-		$wrapper_markup           = '<div class="%1$s">%2$s</div>';
-		$items_markup             = wp_dropdown_categories( $args );
-		$type                     = 'dropdown';
-
-		$items_markup = preg_replace(
-			'/(?<=<select\b)/',
-			sprintf( ' on="change:%s.submit"', esc_attr( $form_id ) ),
-			$items_markup,
+		$rendered = preg_replace(
+			'#(<select)(.+</select>)#s',
+			$form . '$1' . sprintf( ' on="change:%1$s.submit"', esc_attr( $form_id ) ) . '$2</form>',
+			$rendered,
 			1
 		);
 
-		$class = "wp-block-categories wp-block-categories-{$type} align{$align}";
-
-		$block_content = sprintf(
-			$wrapper_markup,
-			esc_attr( $class ),
-			$items_markup
-		);
-
-		$block_content = sprintf(
-			'<form action="%s" method="get" target="_top" id="%s">%s</form>',
-			esc_url( home_url() ),
-			esc_attr( $form_id ),
-			$block_content
-		);
-
-		return $block_content;
+		return $rendered;
 	}
 
 	/**
@@ -133,84 +110,26 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render_archives_block( $attributes ) {
-		$archives_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/archives' );
-		if ( empty( $attributes['displayAsDropdown'] ) && isset( $archives_block->original_render_callback ) ) {
-			return call_user_func( $archives_block->original_render_callback, $attributes );
+		$block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/archives' );
+		if ( ! isset( $block->original_render_callback ) ) {
+			return '';
 		}
 
-		$show_post_count = ! empty( $attributes['showPostCounts'] );
+		$rendered = call_user_func( $block->original_render_callback, $attributes );
 
+		// Eliminate use of uniqid(). Core should be using wp_unique_id() here.
 		static $block_id = 0;
 		$block_id++;
+		$rendered = preg_replace( '/(?<="wp-block-archives-)\w+(?=")/', $block_id, $rendered );
 
-		$class = 'wp-block-archives';
-
-		if ( isset( $attributes['align'] ) ) {
-			$class .= " align{$attributes['align']}";
-		}
-
-		if ( isset( $attributes['className'] ) ) {
-			$class .= " {$attributes['className']}";
-		}
-
-		$class .= ' wp-block-archives-dropdown';
-
-		$dropdown_id = 'wp-block-categories-dropdown-' . $block_id;
-		$title       = __( 'Archives' );
-
-		/** This filter is documented in wp-includes/widgets/class-wp-widget-archives.php */
-		$dropdown_args = apply_filters(
-			'widget_archives_dropdown_args',
-			array(
-				'type'            => 'monthly',
-				'format'          => 'option',
-				'show_post_count' => $show_post_count,
-			)
+		// Replace onchange with on attribute.
+		$rendered = preg_replace(
+			'/onchange=".+?"/',
+			'on="change:AMP.navigateTo(url=event.value)"',
+			$rendered
 		);
 
-		$dropdown_args['echo'] = 0;
-
-		switch ( $dropdown_args['type'] ) {
-			case 'yearly':
-				$label = __( 'Select Year' );
-				break;
-			case 'monthly':
-				$label = __( 'Select Month' );
-				break;
-			case 'daily':
-				$label = __( 'Select Day' );
-				break;
-			case 'weekly':
-				$label = __( 'Select Week' );
-				break;
-			default:
-				$label = __( 'Select Post' );
-				break;
-		}
-
-		$block_content  = sprintf(
-			'<label class="screen-reader-text" for="%s">%s</label>',
-			esc_attr( $dropdown_id ),
-			esc_html( $title )
-		);
-		$block_content .= sprintf(
-			'<select id="%s" on="change:AMP.navigateTo(url=event.value)">',
-			esc_attr( $dropdown_id )
-		);
-		$block_content .= sprintf(
-			'<option value="">%s</option>',
-			esc_html( $label )
-		);
-		$block_content .= wp_get_archives( $dropdown_args );
-		$block_content .= '</select>';
-
-		$block_content = sprintf(
-			'<div class="%1$s">%2$s</div>',
-			esc_attr( $class ),
-			$block_content
-		);
-
-		return $block_content;
+		return $rendered;
 	}
 
 }
