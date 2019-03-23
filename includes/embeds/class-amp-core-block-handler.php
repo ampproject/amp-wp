@@ -13,31 +13,14 @@
 class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 
 	/**
-	 * Upgraded blocks.
+	 * Render methods for blocks.
 	 *
 	 * @var array
 	 */
-	protected $registered_blocks = array();
-
-	/**
-	 * AMP_Core_Block_Handler constructor.
-	 *
-	 * @param array $args Args.
-	 */
-	public function __construct( array $args = array() ) {
-		parent::__construct( $args );
-
-		$this->registered_blocks = array(
-			'core/categories' => array(
-				'render_callback'      => array( $this, 'render_categories_block' ),
-				'core_render_callback' => 'render_block_core_categories',
-			),
-			'core/archives'   => array(
-				'render_callback'      => array( $this, 'render_archives_block' ),
-				'core_render_callback' => 'render_block_core_archives',
-			),
-		);
-	}
+	protected $block_render_methods = array(
+		'core/categories' => 'render_categories_block',
+		'core/archives'   => 'render_archives_block',
+	);
 
 	/**
 	 * Register embed.
@@ -48,10 +31,11 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$registry = WP_Block_Type_Registry::get_instance();
-		foreach ( $this->registered_blocks as $block_name => $args ) {
+		foreach ( $this->block_render_methods as $block_name => $render_method ) {
 			$block = $registry->get_registered( $block_name );
-			if ( $block && $args['core_render_callback'] === $block->render_callback ) {
-				$block->render_callback = $args['render_callback'];
+			if ( $block ) {
+				$block->original_render_callback = $block->render_callback;
+				$block->render_callback          = array( $this, $render_method );
 			}
 		}
 	}
@@ -65,10 +49,10 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$registry = WP_Block_Type_Registry::get_instance();
-		foreach ( $this->registered_blocks as $block_name => $args ) {
+		foreach ( array_keys( $this->block_render_methods ) as $block_name ) {
 			$block = $registry->get_registered( $block_name );
-			if ( $block && $args['render_callback'] === $block->render_callback ) {
-				$block->render_callback = $args['core_render_callback'];
+			if ( $block && isset( $block->original_render_callback ) ) {
+				$block->render_callback = $block->original_render_callback;
 			}
 		}
 	}
@@ -84,8 +68,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render_categories_block( $attributes ) {
-		if ( empty( $attributes['displayAsDropdown'] ) ) {
-			return call_user_func( $this->registered_blocks['core/categories']['core_render_callback'], $attributes );
+		$archives_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/categories' );
+		if ( empty( $attributes['displayAsDropdown'] ) && isset( $archives_block->original_render_callback ) ) {
+			return call_user_func( $archives_block->original_render_callback, $attributes );
 		}
 
 		static $block_id = 0;
@@ -148,8 +133,9 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Rendered.
 	 */
 	public function render_archives_block( $attributes ) {
-		if ( empty( $attributes['displayAsDropdown'] ) ) {
-			return call_user_func( $this->registered_blocks['core/archives']['core_render_callback'], $attributes );
+		$archives_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/archives' );
+		if ( empty( $attributes['displayAsDropdown'] ) && isset( $archives_block->original_render_callback ) ) {
+			return call_user_func( $archives_block->original_render_callback, $attributes );
 		}
 
 		$show_post_count = ! empty( $attributes['showPostCounts'] );
