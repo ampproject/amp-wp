@@ -38,7 +38,7 @@ export default ( BlockEdit ) => {
 
 		// Conditionally set the selected image as the featured image.
 		const media = select( 'core' ).getMedia( selectedMediaId );
-		if ( media && media.media_details && hasMinimumDimensions( media.media_details ) ) {
+		if ( media && media.media_details && hasMinimumDimensions( media.media_details, { largeDimension: 928, smallDimension: 696 } ) ) {
 			dispatch( 'core/editor' ).editPost( { featured_media: selectedMediaId } );
 		}
 	} )( ( props ) => {
