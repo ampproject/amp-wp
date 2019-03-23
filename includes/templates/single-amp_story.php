@@ -33,10 +33,19 @@ the_post();
 
 		// @todo poster-portrait-src can't be empty.
 		$poster_portrait_src = null;
+		$thumbnail_id        = get_post_thumbnail_id();
 		if ( has_post_thumbnail() ) {
-			$src = wp_get_attachment_image_src( get_post_thumbnail_id(), 'amp-story-poster-portrait' );
-			if ( $src ) {
-				$poster_portrait_src = $src[0];
+			$portrait_img = wp_get_attachment_image_src( $thumbnail_id, 'amp-story-poster-portrait' );
+			if ( $portrait_img ) {
+				$poster_portrait_src = $portrait_img[0];
+			}
+			$square_img = wp_get_attachment_image_src( $thumbnail_id, 'amp-story-poster-square' );
+			if ( $square_img ) {
+				$poster_square_src = $square_img[0];
+			}
+			$landscape_img = wp_get_attachment_image_src( $thumbnail_id, 'amp-story-poster-landscape' );
+			if ( $landscape_img ) {
+				$poster_landscape_src = $landscape_img[0];
 			}
 		}
 
@@ -48,6 +57,12 @@ the_post();
 			title="<?php the_title_attribute(); ?>"
 			<?php if ( ! empty( $poster_portrait_src ) ) : ?>
 				poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
+			<?php endif; ?>
+			<?php if ( ! empty( $poster_square_src ) ) : ?>
+				poster-square-src="<?php echo esc_url( $poster_square_src ); ?>"
+			<?php endif; ?>
+			<?php if ( ! empty( $poster_landscape_src ) ) : ?>
+				poster-landscape-src="<?php echo esc_url( $poster_landscape_src ); ?>"
 			<?php endif; ?>
 		>
 			<?php the_content(); ?>
