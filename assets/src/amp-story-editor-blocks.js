@@ -18,8 +18,7 @@ import {
 	withAmpStorySettings,
 	withAnimationControls,
 	withPageNumber,
-	withPlaceholderFeaturedImage,
-	withUploadFeaturedImage,
+	withEditFeaturedImage,
 	withFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
@@ -327,8 +326,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', add
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
-addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addUploadFeaturedImage', withPlaceholderFeaturedImage );
-addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addUploadFeaturedImage', withUploadFeaturedImage );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withEditFeaturedImage );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
