@@ -27,6 +27,7 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		}
 
 		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 
 		$registry = WP_Block_Type_Registry::get_instance();
 
