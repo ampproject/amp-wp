@@ -19,20 +19,27 @@ import { hasMinimumDimensions } from './';
  */
 export default ( BlockEdit ) => {
 	return withSelect( ( select, ownProps ) => {
-		if ( 'core/image' !== ownProps.name && 'amp/amp-story-page' !== ownProps.name ) {
+		const isCorrectBlock = ( 'core/image' === ownProps.name || 'amp/amp-story-page' === ownProps.name );
+		if ( ! isCorrectBlock || ! ownProps.attributes ) {
 			return;
 		}
 
-		// Confirm that this ID is from the selected block.
+		const selectedMediaId = ownProps.attributes.mediaId || ownProps.attributes.id;
 		const selectedBlock = select( 'core/editor' ).getSelectedBlock();
-		if ( ! selectedBlock || ! selectedBlock.attributes.id || ! ownProps.attributes || ownProps.attributes.id !== selectedBlock.attributes.id ) {
+		if ( ! selectedMediaId || ! selectedBlock || ! selectedBlock.attributes ) {
+			return;
+		}
+
+		// Check that the media is from the selected block.
+		const selectedBlockMediaId = selectedBlock.attributes.mediaId || selectedBlock.attributes.id;
+		if ( ! selectedBlockMediaId || selectedBlockMediaId !== selectedMediaId ) {
 			return;
 		}
 
 		// Conditionally set the selected image as the featured image.
-		const media = select( 'core' ).getMedia( ownProps.attributes.id );
+		const media = select( 'core' ).getMedia( selectedMediaId );
 		if ( media && media.media_details && hasMinimumDimensions( media.media_details ) ) {
-			dispatch( 'core/editor' ).editPost( { featured_media: ownProps.attributes.id } );
+			dispatch( 'core/editor' ).editPost( { featured_media: selectedMediaId } );
 		}
 	} )( ( props ) => {
 		return (
