@@ -29,32 +29,28 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 
-		$registry = WP_Block_Type_Registry::get_instance();
-
-		$props = array( 'displayAsDropdown' => true );
-
-		$categories_block = $registry->get_registered( 'core/categories' );
-		$archives_block   = $registry->get_registered( 'core/archives' );
+		$categories_block = '<!-- wp:categories {"displayAsDropdown":true,"showHierarchy":true,"showPostCounts":true} /-->';
+		$archives_block   = '<!-- wp:archives {"displayAsDropdown":true,"showPostCounts":true} /-->';
 
 		$handler->register_embed();
-		$rendered = $categories_block->render( $props );
+		$rendered = do_blocks( $categories_block );
 		$this->assertContains( '<select', $rendered );
 		$this->assertNotContains( 'onchange', $rendered );
 		$this->assertContains( 'on="change', $rendered );
-		if ( $archives_block ) {
-			$rendered = $archives_block->render( $props );
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
+			$rendered = do_blocks( $archives_block );
 			$this->assertContains( '<select', $rendered );
 			$this->assertNotContains( 'onchange', $rendered );
 			$this->assertContains( 'on="change', $rendered );
 		}
 
 		$handler->unregister_embed();
-		$rendered = $categories_block->render( $props );
+		$rendered = do_blocks( $categories_block );
 		$this->assertContains( '<select', $rendered );
 		$this->assertContains( 'onchange', $rendered );
 		$this->assertNotContains( 'on="change', $rendered );
-		if ( $archives_block ) {
-			$rendered = $archives_block->render( $props );
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
+			$rendered = do_blocks( $archives_block );
 			$this->assertContains( '<select', $rendered );
 			$this->assertContains( 'onchange', $rendered );
 			$this->assertNotContains( 'on="change', $rendered );
