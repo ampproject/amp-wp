@@ -3,7 +3,6 @@
  */
 import { Notice } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -16,15 +15,16 @@ import getFeaturedImageMessage from './get-featured-image-message';
  * If there is no featured image, this displays a notice.
  * This displays in the sidebar, in the 'Document' panel.
  *
- * @param {Function} PostFeaturedImage The featured image component, appearing in the sidebar.
- * @return {Function} The PostFeaturedImage component, wrapped in a Notice if there's no featured image.
+ * @param {Function} validateImageSize A function that determines whether the media size is correct.
+ * @param {string} invalidSizeMessage The message to display in the Notice if the size is wrong.
+ * @return {Function} The PostFeaturedImage component, with in a Notice if there's no featured image.
  */
 export default ( validateImageSize, invalidSizeMessage ) => {
 	return ( PostFeaturedImage ) => {
 		return ( props ) => {
 			const featuredImageMessage = getFeaturedImageMessage( validateImageSize, invalidSizeMessage );
 			const postFeaturedImage = (
-				<PostFeaturedImage {...props} />
+				<PostFeaturedImage { ...props } />
 			);
 
 			if ( ! featuredImageMessage ) {
