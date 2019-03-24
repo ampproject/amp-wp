@@ -19,4 +19,4 @@ export default ( media ) => {
 			( media.height < largeDimension && media.width >= largeDimension )
 		)
 	);
-}
+};
