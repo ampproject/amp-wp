@@ -10,6 +10,7 @@ export { default as FontFamilyPicker } from './font-family-picker';
 export { default as hasMinimumStoryPosterDimensions } from './has-minimum-story-poster-dimensions';
 export { default as getFeaturedImageMessage } from './get-featured-image-message';
 export { default as getFeaturedImageNotice } from './get-featured-image-notice';
+export { default as getPrePublishNotice } from './get-pre-publish-notice';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
 export { default as withAnimationControls } from './with-animation-controls';
 export { default as withAttributes } from './with-attributes';

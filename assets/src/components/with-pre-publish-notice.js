@@ -1,30 +1,14 @@
 /**
  * WordPress dependencies
  */
-import { Notice } from '@wordpress/components';
-import { select } from '@wordpress/data';
-import { PluginPrePublishPanel } from '@wordpress/edit-post';
-import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
-export default function() {
-	const featuredMedia = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
-	if ( featuredMedia ) {
-		return PluginPrePublishPanel;
-	}
+/**
+ * Internal dependencies
+ */
+import { getPrePublishNotice, hasMinimumStoryPosterDimensions } from './';
 
-	return (
-		<Fragment>
-			<PluginPrePublishPanel
-				title={ __( 'Featured Image', 'amp' ) }
-				initialOpen="true"
-			>
-				<Notice status="warning">
-					<span>
-						{ __( 'There is no featured image, which is required for an AMP Story.', 'amp' ) }
-					</span>
-				</Notice>
-			</PluginPrePublishPanel>
-		</Fragment>
-	);
-}
+export default getPrePublishNotice(
+	hasMinimumStoryPosterDimensions,
+	__( 'The featured image must have minimum dimensions of 696px x 928px, 928px x 696px, or 928px x 928px', 'amp' )
+);

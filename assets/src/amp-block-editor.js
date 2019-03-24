@@ -13,7 +13,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { getFeaturedImageNotice } from './components';
+import { getFeaturedImageNotice, getPrePublishNotice } from './components';
 
 /**
  * Exported via wp_localize_script().
@@ -110,14 +110,27 @@ function ComposedAMPToggle() {
 const hasMinimumFeaturedImageWidth = ( media ) => {
 	return ( media.width && media.width >= 1200 );
 }
+const featuredImageMessage = __( 'The featured image should have a width of at least 1200px.', 'amp' );
 
+// Display a notice in the Featured Image panel if none exists or its width is too small.
 addFilter(
 	'editor.PostFeaturedImage',
 	'ampEditorBlocks/addPostFeaturedImageNotice',
 	getFeaturedImageNotice(
 		hasMinimumFeaturedImageWidth,
-		__( 'The featured image should have a width of at least 1200px', 'amp' )
+		featuredImageMessage
 	)
+);
+
+// On clicking 'Publish,' display a notice if no featured image exists or its width is too small.
+registerPlugin(
+	'amp-post-featured-image-pre-publish',
+	{
+		render: getPrePublishNotice(
+			hasMinimumFeaturedImageWidth,
+			featuredImageMessage
+		),
+	}
 );
 
 export default registerPlugin( 'amp', {

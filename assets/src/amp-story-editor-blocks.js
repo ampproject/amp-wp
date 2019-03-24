@@ -319,7 +319,7 @@ store.subscribe( () => {
 	}
 } );
 
-registerPlugin( 'amp-featured-image-pre-publish', { render: withPrePublishNotice } );
+registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
