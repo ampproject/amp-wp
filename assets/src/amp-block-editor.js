@@ -6,8 +6,14 @@ import { FormToggle, Notice } from '@wordpress/components';
 import { Fragment, RawHTML } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
+import { addFilter } from '@wordpress/hooks';
 import { compose, withInstanceId } from '@wordpress/compose';
 import { registerPlugin } from '@wordpress/plugins';
+
+/**
+ * Internal dependencies
+ */
+import { getFeaturedImageNotice } from './components';
 
 /**
  * Exported via wp_localize_script().
@@ -94,6 +100,25 @@ function ComposedAMPToggle() {
 		withInstanceId,
 	] )( AMPToggle );
 }
+
+/**
+ * Whether the image has the minimum width for a featured image.
+ *
+ * This should have a width of at least 1200 pixels
+ * to satisfy the requirement of Google Search for Schema.org metadata.
+ */
+const hasMinimumFeaturedImageWidth = ( media ) => {
+	return ( media.width && media.width >= 1200 );
+}
+
+addFilter(
+	'editor.PostFeaturedImage',
+	'ampEditorBlocks/addPostFeaturedImageNotice',
+	getFeaturedImageNotice(
+		hasMinimumFeaturedImageWidth,
+		__( 'The featured image should have a width of at least 1200px', 'amp' )
+	)
+);
 
 export default registerPlugin( 'amp', {
 	icon: 'hidden',
