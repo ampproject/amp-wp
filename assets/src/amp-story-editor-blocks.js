@@ -19,7 +19,7 @@ import {
 	withAnimationControls,
 	withPageNumber,
 	withEditFeaturedImage,
-	withFeaturedImageNotice,
+	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
 	withPrePublishNotice,
@@ -327,7 +327,7 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', with
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
-addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withFeaturedImageNotice );
+addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );

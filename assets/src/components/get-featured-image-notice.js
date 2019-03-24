@@ -2,9 +2,13 @@
  * WordPress dependencies
  */
 import { Notice } from '@wordpress/components';
-import { withSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+
+/**
+ * Internal dependencies
+ */
+import getFeaturedImageMessage from './get-featured-image-message';
 
 /**
  * Conditionally displays a notice above the post's 'Featured Image' component.
@@ -15,22 +19,15 @@ import { __ } from '@wordpress/i18n';
  * @param {Function} PostFeaturedImage The featured image component, appearing in the sidebar.
  * @return {Function} The PostFeaturedImage component, wrapped in a Notice if there's no featured image.
  */
-export default ( PostFeaturedImage ) => {
-	return withSelect( ( select ) => {
-		return {
-			currentPost: select( 'core/editor' ).getCurrentPost(),
-			editedFeaturedMedia: select( 'core/editor' ).getEditedPostAttribute( 'featured_media' ),
-		};
-	} )( ( ownProps ) => {
-		const { currentPost, editedFeaturedMedia } = ownProps,
-			hasFeaturedMedia = currentPost.featured_media || editedFeaturedMedia;
-
-		function AmpNoticeBlockEdit( props ) {
+export default ( validateImageSize, invalidSizeMessage ) => {
+	return ( PostFeaturedImage ) => {
+		return ( props ) => {
+			const featuredImageMessage = getFeaturedImageMessage( validateImageSize, invalidSizeMessage );
 			const postFeaturedImage = (
-				<PostFeaturedImage { ...props } />
+				<PostFeaturedImage {...props} />
 			);
 
-			if ( hasFeaturedMedia ) {
+			if ( ! featuredImageMessage ) {
 				return postFeaturedImage;
 			}
 
@@ -38,13 +35,12 @@ export default ( PostFeaturedImage ) => {
 				<Fragment>
 					<Notice status="warning">
 						<span>
-							{ __( 'Selecting a featured image is required.', 'amp' ) }
+							{ featuredImageMessage }
 						</span>
 					</Notice>
 					{ postFeaturedImage }
 				</Fragment>
 			);
-		}
-		return AmpNoticeBlockEdit( ownProps );
-	} );
+		};
+	};
 };

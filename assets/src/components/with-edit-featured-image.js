@@ -6,7 +6,7 @@ import { dispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { hasMinimumDimensions } from './';
+import { hasMinimumStoryPosterDimensions } from './';
 
 /**
  * Gets a wrapped version of a block's edit component that conditionally sets the featured image.
@@ -38,7 +38,7 @@ export default ( BlockEdit ) => {
 
 		// Conditionally set the selected image as the featured image.
 		const media = select( 'core' ).getMedia( selectedMediaId );
-		if ( media && media.media_details && hasMinimumDimensions( media.media_details, { largeDimension: 928, smallDimension: 696 } ) ) {
+		if ( media && media.media_details && hasMinimumStoryPosterDimensions( media.media_details ) ) {
 			dispatch( 'core/editor' ).editPost( { featured_media: selectedMediaId } );
 		}
 	} )( ( props ) => {
