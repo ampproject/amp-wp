@@ -155,16 +155,6 @@ class AMP_Story_Post_Type {
 			)
 		);
 
-		add_filter(
-			'amp_content_sanitizers',
-			function( $sanitizers ) {
-				if ( is_singular( self::POST_TYPE_SLUG ) ) {
-					$sanitizers['AMP_Story_Sanitizer'] = array();
-				}
-				return $sanitizers;
-			}
-		);
-
 		self::maybe_flush_rewrite_rules();
 	}
 

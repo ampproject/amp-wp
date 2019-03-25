@@ -243,6 +243,27 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...ampAttributes,
 	};
 };
+
+/**
+ * Wraps all movable blocks in a grid layer.
+ *
+ * @param {Object} element
+ * @param {Object} blockType
+ *
+ * @return {Object} The element.
+ */
+export const wrapBlocksInGridLayer = ( element, blockType ) => {
+	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+		return element;
+	}
+
+	return (
+		<amp-story-grid-layer template="vertical">
+			{ element }
+		</amp-story-grid-layer>
+	);
+};
+
 /**
  * Given a list of animated blocks, calculates the total duration
  * of all animations based on the durations and the delays.

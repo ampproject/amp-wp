@@ -30,6 +30,7 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
+	wrapBlocksInGridLayer,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -323,4 +324,5 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNum
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

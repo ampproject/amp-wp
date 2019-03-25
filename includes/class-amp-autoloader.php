@@ -84,7 +84,6 @@ class AMP_Autoloader {
 		'AMP_Tag_And_Attribute_Sanitizer'    => 'includes/sanitizers/class-amp-tag-and-attribute-sanitizer',
 		'AMP_Video_Sanitizer'                => 'includes/sanitizers/class-amp-video-sanitizer',
 		'AMP_Core_Theme_Sanitizer'           => 'includes/sanitizers/class-amp-core-theme-sanitizer',
-		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
 		'AMP_Customizer_Design_Settings'     => 'includes/settings/class-amp-customizer-design-settings',
 		'AMP_Customizer_Settings'            => 'includes/settings/class-amp-customizer-settings',
 		'AMP_Content'                        => 'includes/templates/class-amp-content',
