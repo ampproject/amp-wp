@@ -57,6 +57,7 @@
     "@wordpress/element": "2.3.0",
     "@wordpress/hooks": "2.2.0",
     "@wordpress/i18n": "3.3.0",
+    "@wordpress/keycodes": "2.2.0",
     "@wordpress/plugins": "2.2.0",
     "@wordpress/wordcount": "2.2.0",
     "classnames": "2.2.6"
