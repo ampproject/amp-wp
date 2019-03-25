@@ -28,11 +28,12 @@
 /*
  * 0. General editor layout styles.
  */
+.edit-post-visual-editor {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
 @media screen and (min-width: 1280px) {
-	.edit-post-visual-editor {
-		max-width: 1024px;
-		margin: 0 auto;
-	}
 	#amp-story-editor {
 		min-width: 820px;
 	}
@@ -476,7 +477,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 	#amp-root-navigation {
 		position: absolute;
-		left: 5px;
+		left: 50px;
 		top: 218px;
 		width: 300px;
 		z-index: 80;
