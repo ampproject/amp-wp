@@ -6,6 +6,7 @@ export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';
 export { default as StoryBlockDropZone } from './story-block-drop-zone';
 export { default as StoryBlockMover } from './block-mover';
+export { default as TemplateInserter } from './template-inserter';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
 export { default as withAnimationControls } from './with-animation-controls';

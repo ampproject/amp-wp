@@ -691,6 +691,37 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
  */
 
 /*
+ * Template Inserter Component.
+ */
+.amp-stories__template-inserter__popover.components-popover .components-popover__content:not(.is-mobile) {
+	width: 386px;
+	max-height: 600px;
+	left: -100px;
+	padding: 2px;
+}
+
+.amp-stories__template-inserter__popover.components-popover.is-top .components-popover__content {
+	bottom: initial;
+}
+
+.amp-stories__editor-inserter__results li {
+	display: block;
+	list-style-type: none;
+	width: 160px;
+	height: 268px;
+	float: left;
+	margin: 15px;
+}
+
+.amp-stories__editor-inserter__results li amp-story-page,
+.amp-stories__editor-inserter__results li amp-story-grid-layer {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+
+/*
  * Preview Picker component
  *
  * Styling derived form font size picker in Gutenberg

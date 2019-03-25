@@ -3,6 +3,8 @@
  * to add new pages and start/stop reordering pages.
  */
 
+import { TemplateInserter } from './';
+
 /**
  * WordPress dependencies
  */
@@ -38,25 +40,9 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 
 	return (
 		<Fragment>
-			<Inserter
-				rootClientId=""
-				clientId=""
-				isAppender={ false }
-				position="bottom left"
+			<TemplateInserter
 				title={ __( 'Add New Page', 'amp' ) }
 				style={ { position: 'relative' } }
-				renderToggle={ ( { onToggle, disabled, isOpen } ) => (
-					<IconButton
-						icon="insert"
-						label={ __( 'Add New Page', 'amp' ) }
-						labelPosition="bottom left"
-						onClick={ onToggle }
-						className="editor-inserter__toggle"
-						aria-haspopup="true"
-						aria-expanded={ isOpen }
-						disabled={ disabled }
-					/>
-				) }
 			/>
 			<IconButton
 				className="amp-story-controls-reorder"
