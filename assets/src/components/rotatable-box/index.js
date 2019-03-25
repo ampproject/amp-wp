@@ -53,25 +53,22 @@ class RotatableBox extends Component {
 
 		const { top, left, width, height } = this.elementRef.current.getBoundingClientRect();
 
-		const rad2deg = ( 180 / Math.PI );
-
 		const centerX = left + ( width / 2 );
 		const centerY = top + ( height / 2 );
 
 		const x = e.clientX - centerX;
 		const y = e.clientY - centerY;
 
-		const angle = rad2deg * Math.atan2( y, x );
+		const rad2deg = ( 180 / Math.PI );
+		const angle = -( rad2deg * Math.atan2( x, y ) );
 
-		const normalizedAngle = parseInt( angle > 0 ? angle : 360 + angle );
-
-		this.elementRef.current.style.transform = `rotate(${ normalizedAngle }deg)`;
+		this.elementRef.current.style.transform = `rotate(${ angle }deg)`;
 
 		this.setState(
 			{
-				angle: normalizedAngle,
+				angle,
 			},
-			() => this.props.onRotate && this.props.onRotate( e, this.elementRef.current, normalizedAngle )
+			() => this.props.onRotate && this.props.onRotate( e, this.elementRef.current, angle )
 		);
 	}
 
