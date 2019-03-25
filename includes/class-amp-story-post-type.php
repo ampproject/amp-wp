@@ -157,6 +157,17 @@ class AMP_Story_Post_Type {
 			)
 		);
 
+		// Omit the core theme sanitizer for the story template.
+		add_filter(
+			'amp_content_sanitizers',
+			function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
+				}
+				return $sanitizers;
+			}
+		);
+
 		self::maybe_flush_rewrite_rules();
 	}
 
