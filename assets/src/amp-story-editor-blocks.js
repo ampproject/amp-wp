@@ -43,7 +43,6 @@ import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_I
 
 import store from './stores/amp-story';
 
-const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 const {
 	getSelectedBlockClientId,
 	getBlocksByClientId,
@@ -61,10 +60,6 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
-context.keys().forEach( ( modulePath ) => {
-	const { name, settings } = context( modulePath );
-	registerBlockType( name, settings );
-} );
 const {
 	moveBlockToPosition,
 	updateBlockAttributes,
@@ -336,3 +331,11 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+
+const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+
+// Block types need to be register *after* all the filters have been applied.
+context.keys().forEach( ( modulePath ) => {
+	const { name, settings } = context( modulePath );
+	registerBlockType( name, settings );
+} );
