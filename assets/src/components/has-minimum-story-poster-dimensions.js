@@ -1,7 +1,7 @@
 /**
  * Gets whether the AMP story's featured image has the right minimum dimensions.
  *
- * The featured image populates teh AMP story poster image.
+ * The featured image populates the AMP story poster image.
  * The 3 minimum dimensions for that are 696px x 928px, 928px x 696px, or 928px x 928px.
  *
  * @param {Object} media A media object with width and height values.

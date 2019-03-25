@@ -11,6 +11,13 @@ import { __ } from '@wordpress/i18n';
  */
 import { getFeaturedImageMessage } from './';
 
+/**
+ * Conditionally adds a notice to the pre-publish panel for the featured image.
+ *
+ * @param {Function} validateImageSize A function to validate whether the size is correct.
+ * @param {string} invalidSizeMessage A message to display in a Notice if the size is wrong.
+ * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
+ */
 export default ( validateImageSize, invalidSizeMessage ) => {
 	return () => {
 		const featuredImageMessage = getFeaturedImageMessage( validateImageSize, invalidSizeMessage );
