@@ -887,6 +887,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	height: 24px;
 	padding: 4px;
 	cursor: move;
+	background: transparent;
+	border: none;
 }
 
 .rotatable-box-wrap .rotatable-box-wrap__handle::before {

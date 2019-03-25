@@ -129,8 +129,9 @@ class RotatableBox extends Component {
 				ref={ this.elementRef }
 			>
 				<div className="rotatable-box-wrap">
-					<div
-						role="button"
+					<button
+						role="switch"
+						aria-checked={ this.state.isRotating }
 						onMouseDown={ this.onRotateStart }
 						className="rotatable-box-wrap__handle"
 					/>
