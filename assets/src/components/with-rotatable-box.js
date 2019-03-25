@@ -7,6 +7,8 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
+import { dispatch } from '@wordpress/data';
+import { Component } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -21,40 +23,57 @@ import { RotatableBox } from './';
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return ( props ) => {
-			const {
-				attributes,
-				name,
-				setAttributes,
-				isSelected,
-				toggleSelection,
-			} = props;
+		return class extends Component {
+			constructor() {
+				super( ...arguments );
 
-			const { rotationAngle } = attributes;
-
-			if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
-				return <BlockEdit { ...props } />;
+				this.state = {
+					isRotating: false,
+				};
 			}
 
-			return (
-				<RotatableBox
-					className={ classnames(
-						'amp-story-text__rotate-container',
-						{ 'is-selected': isSelected }
-					) }
-					angle={ rotationAngle }
-					onRotateStop={ ( event, element, angle ) => {
-						setAttributes( {
-							rotationAngle: angle,
-						} );
-						toggleSelection( true );
-					} }
-					onRotateStart={ () => {
-						toggleSelection( false );
-					} }>
-					<BlockEdit { ...props } />
-				</RotatableBox>
-			);
+			render() {
+				const {
+					attributes,
+					name,
+					setAttributes,
+					toggleSelection,
+				} = this.props;
+
+				const { rotationAngle } = attributes;
+				const { clearSelectedBlock } = dispatch( 'core/editor' );
+
+				if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+					return <BlockEdit { ...this.props } />;
+				}
+
+				return (
+					<RotatableBox
+						className={ classnames(
+							'amp-story-editor__rotate-container',
+							{ 'is-rotating': this.state.isRotating }
+						) }
+						angle={ rotationAngle }
+						onRotateStart={ () => {
+							this.setState( { isRotating: true } );
+							setAttributes( {
+								rotationAngle: 0,
+							} );
+							toggleSelection( false );
+						} }
+						onRotateStop={ ( event, element, angle ) => {
+							this.setState( { isRotating: false } );
+							setAttributes( {
+								rotationAngle: angle,
+							} );
+							toggleSelection( true );
+							clearSelectedBlock();
+						} }
+					>
+						<BlockEdit { ...this.props } />
+					</RotatableBox>
+				);
+			}
 		};
 	},
 	'withRotatableBox'
