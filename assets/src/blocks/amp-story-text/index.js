@@ -10,14 +10,16 @@ import { __ } from '@wordpress/i18n';
 import {
 	RichText,
 	getColorClassName,
+	getFontSize,
 } from '@wordpress/editor';
 import { registerBlockType } from '@wordpress/blocks';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
-import { getPercentageFromPixels, getFontSizeFromSlug } from '../../helpers';
+import { getPercentageFromPixels } from '../../helpers';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 
 export const name = 'amp/amp-story-text';
@@ -132,7 +134,9 @@ export const settings = {
 		} );
 
 		// Calculate fontsize using vw to make it responsive.
-		const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
+		const { fontSizes } = select( 'core/block-editor' ).getSettings();
+		// Get the font size in px based on the slug with fallback to customFontSize.
+		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 		const styles = {
