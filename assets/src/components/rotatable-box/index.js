@@ -2,6 +2,10 @@
  * WordPress dependencies
  */
 import { Component, createRef } from '@wordpress/element';
+import { withSpokenMessages } from '@wordpress/components';
+import { compose, withGlobalEvents } from '@wordpress/compose';
+import { ESCAPE, LEFT, RIGHT } from '@wordpress/keycodes';
+import { __, sprintf } from '@wordpress/i18n';
 
 class RotatableBox extends Component {
 	constructor( props ) {
@@ -9,6 +13,7 @@ class RotatableBox extends Component {
 
 		this.state = {
 			isRotating: false,
+			initialAngle: props.angle || 0,
 			angle: props.angle || 0,
 		};
 
@@ -17,16 +22,42 @@ class RotatableBox extends Component {
 		this.onRotateStart = this.onRotateStart.bind( this );
 		this.onRotate = this.onRotate.bind( this );
 		this.onRotateStop = this.onRotateStop.bind( this );
+		this.onKeyUp = this.onKeyUp.bind( this );
 	}
 
-	componentDidMount() {
-		document.addEventListener( 'mouseup', this.onRotateStop );
-		document.addEventListener( 'mousemove', this.onRotate );
-	}
+	onKeyUp( e ) {
+		if ( ! this.state.isRotating ) {
+			return;
+		}
 
-	componentWillUnmount() {
-		document.removeEventListener( 'mouseup', this.onRotateStop );
-		document.removeEventListener( 'mousemove', this.onRotate );
+		e.preventDefault();
+
+		const { keyCode } = e;
+
+		if ( ESCAPE === keyCode ) {
+			this.elementRef.current.style.transform = 'rotate(0deg)';
+
+			this.setState(
+				{
+					isRotating: false,
+					angle: this.state.initialAngle,
+				},
+				() => this.props.onRotateStop && this.props.onRotateStop( e, this.elementRef.current, this.state.initialAngle )
+			);
+		} else if ( LEFT === keyCode || RIGHT === keyCode ) {
+			const angle = LEFT === keyCode ? this.state.angle - 30 : this.state.angle + 30;
+
+			this.elementRef.current.style.transform = `rotate(${ angle }deg)`;
+
+			this.props.speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), angle ) );
+
+			this.setState(
+				{
+					angle,
+				},
+				() => this.props.onRotate && this.props.onRotate( e, this.elementRef.current, angle )
+			);
+		}
 	}
 
 	onRotateStart( e ) {
@@ -35,6 +66,8 @@ class RotatableBox extends Component {
 		}
 
 		e.preventDefault();
+
+		this.elementRef.current.style.transform = `rotate(${ this.state.angle }deg)`;
 
 		this.setState(
 			{
@@ -97,6 +130,7 @@ class RotatableBox extends Component {
 			>
 				<div className="rotatable-box-wrap">
 					<div
+						role="button"
 						onMouseDown={ this.onRotateStart }
 						className="rotatable-box-wrap__handle"
 					/>
@@ -107,4 +141,11 @@ class RotatableBox extends Component {
 	}
 }
 
-export default RotatableBox;
+export default compose(
+	withSpokenMessages,
+	withGlobalEvents( {
+		mousemove: 'onRotate',
+		mouseup: 'onRotateStop',
+		keyup: 'onKeyUp',
+	} ),
+)( RotatableBox );
