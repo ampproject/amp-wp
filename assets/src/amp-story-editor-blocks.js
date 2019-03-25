@@ -21,6 +21,7 @@ import {
 	withWrapperProps,
 	withActivePageState,
 	withStoryBlockDropZone,
+	withCallToActionValidation,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -326,3 +327,4 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', with
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
