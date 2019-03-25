@@ -34,7 +34,7 @@
 		margin: 0 auto;
 	}
 	#amp-story-editor {
-		min-width: 800px;
+		min-width: 820px;
 	}
 }
 
@@ -825,6 +825,9 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 /**
  * 11. Text Block.
  */
+.wp-block[data-type="amp/amp-story-text"] p {
+	margin: 0;
+}
 .amp-story-text__resize-container .components-resizable-box__handle-right {
 	right: -26px;
 	height: 50px;
