@@ -825,8 +825,8 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	transition: opacity .3s;
 }
 
-.editor-block-list__block.is-selected .components-resizable-box__handle,
-.editor-block-list__block.is-hovered .components-resizable-box__handle {
+.editor-inner-blocks .editor-block-list__block.is-selected .components-resizable-box__handle,
+.editor-inner-blocks .editor-block-list__block.is-hovered .components-resizable-box__handle {
 	opacity: 1;
 }
 
