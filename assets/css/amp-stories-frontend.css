@@ -8,6 +8,7 @@ p {
     font-size: 16px;
     line-height: 1.8;
     font-weight: normal;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 .wp-block-quote cite {
     color: #6c7781;
