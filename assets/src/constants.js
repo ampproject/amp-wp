@@ -50,7 +50,7 @@ export const ALLOWED_CHILD_BLOCKS = [
 	'core/verse',
 	'core/video',
 	'amp/amp-story-text',
-	'core/template', // Reusable blocks.
+	'core/block', // Reusable blocks.
 ];
 
 export const ALLOWED_BLOCKS = [

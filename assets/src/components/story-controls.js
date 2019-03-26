@@ -3,6 +3,9 @@
  * to add new pages and start/stop reordering pages.
  */
 
+/**
+ * Internal dependencies
+ */
 import { TemplateInserter } from './';
 
 /**
