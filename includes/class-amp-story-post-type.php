@@ -318,6 +318,8 @@ class AMP_Story_Post_Type {
 			false
 		);
 
+		wp_styles()->add_data( 'amp-story-editor', 'rtl', true );
+
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			$translations = wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {

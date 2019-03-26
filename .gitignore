@@ -5,6 +5,7 @@ node_modules
 wiki
 amp.zip
 assets/css/*-compiled.css
+assets/css/*-compiled-rtl.css
 assets/css/*.map
 assets/js/*-compiled.js
 assets/js/*.map

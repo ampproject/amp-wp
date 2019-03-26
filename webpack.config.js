@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 
 /**
  * WordPress dependencies
@@ -54,6 +55,7 @@ const config = {
 				use: [
 					MiniCssExtractPlugin.loader,
 					'css-loader',
+					'postcss-loader',
 				],
 			},
 		],
@@ -62,6 +64,9 @@ const config = {
 		...defaultConfig.plugins,
 		new MiniCssExtractPlugin( {
 			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
 		} ),
 	],
 	optimization: {
