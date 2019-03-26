@@ -14,7 +14,6 @@ import { TemplateInserter } from './';
 import { __ } from '@wordpress/i18n';
 import { IconButton, Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { Inserter } from '@wordpress/editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -43,10 +42,7 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 
 	return (
 		<Fragment>
-			<TemplateInserter
-				title={ __( 'Add New Page', 'amp' ) }
-				style={ { position: 'relative' } }
-			/>
+			<TemplateInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
 				icon="sort"
