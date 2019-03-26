@@ -122,13 +122,13 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( 'amp-story-poster-portrait', 300, 400, true );
+		add_image_size( 'amp-story-poster-portrait', 696, 928, true );
 
 		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-square', 100, 100, true );
+		add_image_size( 'amp-story-poster-square', 928, 928, true );
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
+		add_image_size( 'amp-story-poster-landscape', 928, 696, true );
 
 		// Limit the styles that are printed in a story.
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
