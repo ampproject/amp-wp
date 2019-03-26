@@ -56,9 +56,6 @@ export default createHigherOrderComponent(
 						angle={ rotationAngle }
 						onRotateStart={ () => {
 							this.setState( { isRotating: true } );
-							setAttributes( {
-								rotationAngle: 0,
-							} );
 							toggleSelection( false );
 						} }
 						onRotateStop={ ( event, element, angle ) => {
