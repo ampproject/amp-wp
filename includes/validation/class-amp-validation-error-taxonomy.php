@@ -27,39 +27,39 @@ class AMP_Validation_Error_Taxonomy {
 	const ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK = 2; // === 0b10.
 
 	/**
-	 * Accepted validation error bit mask.
+	 * Removed validation error bit mask.
 	 *
 	 * @var int
 	 */
-	const ACCEPTED_VALIDATION_ERROR_BIT_MASK = 1; // === 0b01.
+	const REMOVED_VALIDATION_ERROR_BIT_MASK = 1; // === 0b01.
 
 	/**
-	 * Term group for new validation_error terms which are rejected (not auto-accepted).
+	 * Term group for new validation_error terms which are kept (not auto-removed).
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_NEW_REJECTED_STATUS = 0; // == 0b00 == ^ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ^ACCEPTED_VALIDATION_ERROR_BIT_MASK.
+	const VALIDATION_ERROR_NEW_KEPT_STATUS = 0; // == 0b00 == ^ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ^REMOVED_VALIDATION_ERROR_BIT_MASK.
 
 	/**
-	 * Term group for new validation_error terms which are auto-accepted.
+	 * Term group for new validation_error terms which are auto-removed.
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_NEW_ACCEPTED_STATUS = 1; // == 0b01 == ^ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ACCEPTED_VALIDATION_ERROR_BIT_MASK.
+	const VALIDATION_ERROR_NEW_REMOVED_STATUS = 1; // == 0b01 == ^ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | REMOVED_VALIDATION_ERROR_BIT_MASK.
 
 	/**
 	 * Term group for validation_error terms that the accepts and thus can be sanitized and does not disable AMP.
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_ACK_ACCEPTED_STATUS = 3; // == 0b11 == ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ACCEPTED_VALIDATION_ERROR_BIT_MASK.
+	const VALIDATION_ERROR_ACK_REMOVED_STATUS = 3; // == 0b11 == ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | REMOVED_VALIDATION_ERROR_BIT_MASK.
 
 	/**
 	 * Term group for validation_error terms that the user flags as being blockers to enabling AMP.
 	 *
 	 * @var int
 	 */
-	const VALIDATION_ERROR_ACK_REJECTED_STATUS = 2; // == 0b10 == ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ^ACCEPTED_VALIDATION_ERROR_BIT_MASK.
+	const VALIDATION_ERROR_ACK_KEPT_STATUS = 2; // == 0b10 == ACKNOWLEDGED_VALIDATION_ERROR_BIT_MASK | ^REMOVED_VALIDATION_ERROR_BIT_MASK.
 
 	/**
 	 * Action name for ignoring a validation error.
@@ -377,10 +377,10 @@ class AMP_Validation_Error_Taxonomy {
 
 		$statuses = array_intersect(
 			array(
-				self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-				self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-				self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-				self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+				self::VALIDATION_ERROR_NEW_KEPT_STATUS,
+				self::VALIDATION_ERROR_NEW_REMOVED_STATUS,
+				self::VALIDATION_ERROR_ACK_REMOVED_STATUS,
+				self::VALIDATION_ERROR_ACK_KEPT_STATUS,
 			),
 			$statuses
 		);
@@ -435,9 +435,9 @@ class AMP_Validation_Error_Taxonomy {
 	public static function is_validation_error_sanitized( $error ) {
 		$sanitization = self::get_validation_error_sanitization( $error );
 		return (
-			self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status']
+			self::VALIDATION_ERROR_ACK_REMOVED_STATUS === $sanitization['status']
 			||
-			self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status']
+			self::VALIDATION_ERROR_NEW_REMOVED_STATUS === $sanitization['status']
 		);
 	}
 
@@ -458,15 +458,15 @@ class AMP_Validation_Error_Taxonomy {
 		$term_data = self::prepare_validation_error_taxonomy_term( $error );
 		$term      = self::get_term( $term_data['slug'] );
 		$statuses  = array(
-			self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-			self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-			self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
-			self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
+			self::VALIDATION_ERROR_NEW_KEPT_STATUS,
+			self::VALIDATION_ERROR_NEW_REMOVED_STATUS,
+			self::VALIDATION_ERROR_ACK_REMOVED_STATUS,
+			self::VALIDATION_ERROR_ACK_KEPT_STATUS,
 		);
 		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
 			$term_status = $term->term_group;
 		} else {
-			$term_status = AMP_Validation_Manager::is_sanitization_auto_accepted() ? self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS : self::VALIDATION_ERROR_NEW_REJECTED_STATUS;
+			$term_status = AMP_Validation_Manager::is_sanitization_auto_removed() ? self::VALIDATION_ERROR_NEW_REMOVED_STATUS : self::VALIDATION_ERROR_NEW_KEPT_STATUS;
 		}
 
 		$forced = false;
@@ -481,7 +481,7 @@ class AMP_Validation_Error_Taxonomy {
 		/**
 		 * Filters whether the validation error should be sanitized.
 		 *
-		 * Returning true this indicates that the validation error is acceptable
+		 * Returning true indicates that the validation error is acceptable
 		 * and should not be considered a blocker to render AMP. Returning null
 		 * means that the default status should be used.
 		 *
@@ -500,7 +500,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( null !== $sanitized ) {
 			$forced = 'with_filter';
-			$status = $sanitized ? self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS : self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			$status = $sanitized ? self::VALIDATION_ERROR_ACK_REMOVED_STATUS : self::VALIDATION_ERROR_ACK_KEPT_STATUS;
 		}
 
 		return compact( 'status', 'forced', 'term_status' );
@@ -512,7 +512,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @since 1.0
 	 * @see AMP_Core_Theme_Sanitizer::get_acceptable_errors()
 	 *
-	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are accepted.
+	 * @param array|true $acceptable_errors Acceptable validation errors, where keys are codes and values are either `true` or sparse array to check as subset. If just true, then all validation errors are removed.
 	 */
 	public static function accept_validation_errors( $acceptable_errors ) {
 		if ( empty( $acceptable_errors ) ) {
@@ -567,7 +567,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * Get the count of validation error terms, optionally restricted by term group (e.g. accepted or rejected).
+	 * Get the count of validation error terms, optionally restricted by term group (e.g. removed or kept).
 	 *
 	 * @param array $args  {
 	 *    Args passed into wp_count_terms().
@@ -812,7 +812,7 @@ class AMP_Validation_Error_Taxonomy {
 			'bulk_actions-edit-' . self::TAXONOMY_SLUG,
 			function( $bulk_actions ) {
 				unset( $bulk_actions['delete'] );
-				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Accept', 'amp' );
+				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION ] = __( 'Remove', 'amp' );
 				$bulk_actions[ AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION ] = __( 'Reject', 'amp' );
 				return $bulk_actions;
 			}
@@ -833,7 +833,7 @@ class AMP_Validation_Error_Taxonomy {
 							sprintf(
 								'<h3>%s</h3><p>%s</p>',
 								esc_html__( 'Status', 'amp' ),
-								esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+								esc_html__( 'A removed validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 							)
 						)
 					),
@@ -1212,7 +1212,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Renders the error status filter <select> element.
 	 *
 	 * There is a difference how the errors are counted, depending on which screen this is on.
-	 * For example: Accepted Errors (10).
+	 * For example: Removed Errors (10).
 	 * This status filter <select> element is rendered on the validation error post page (Errors by URL),
 	 * and the validation error taxonomy page (Error Index).
 	 * On the taxonomy page, this simply needs to count the number of terms with a given type.
@@ -1224,9 +1224,9 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( 'edit-tags' === $screen_base ) {
 			$total_term_count        = self::get_validation_error_count();
-			$ack_rejected_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ) ) );
-			$ack_accepted_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ) ) );
-			$new_term_count          = $total_term_count - $ack_rejected_term_count - $ack_accepted_term_count;
+			$ack_kept_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_KEPT_STATUS ) ) );
+			$ack_removed_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_REMOVED_STATUS ) ) );
+			$new_term_count          = $total_term_count - $ack_kept_term_count - $ack_removed_term_count;
 
 		} elseif ( 'edit' === $screen_base ) {
 			$args = array(
@@ -1245,29 +1245,29 @@ class AMP_Validation_Error_Taxonomy {
 					$args,
 					array(
 						self::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
-							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
-							self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
+							self::VALIDATION_ERROR_NEW_REMOVED_STATUS,
+							self::VALIDATION_ERROR_NEW_KEPT_STATUS,
 						),
 					)
 				)
 			);
 			$new_term_count = $with_new_query->found_posts;
 
-			$with_rejected_query     = new WP_Query(
+			$with_kept_query     = new WP_Query(
 				array_merge(
 					$args,
-					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_REJECTED_STATUS )
+					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_KEPT_STATUS )
 				)
 			);
-			$ack_rejected_term_count = $with_rejected_query->found_posts;
+			$ack_kept_term_count = $with_kept_query->found_posts;
 
-			$with_accepted_query     = new WP_Query(
+			$with_removed_query     = new WP_Query(
 				array_merge(
 					$args,
-					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS )
+					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_REMOVED_STATUS )
 				)
 			);
-			$ack_accepted_term_count = $with_accepted_query->found_posts;
+			$ack_removed_term_count = $with_removed_query->found_posts;
 		} else {
 			return;
 		}
@@ -1313,67 +1313,67 @@ class AMP_Validation_Error_Taxonomy {
 					number_format_i18n( $new_term_count )
 				);
 			}
-			$value = self::VALIDATION_ERROR_NEW_REJECTED_STATUS . ',' . self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+			$value = self::VALIDATION_ERROR_NEW_KEPT_STATUS . ',' . self::VALIDATION_ERROR_NEW_REMOVED_STATUS;
 			?>
 			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $new_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$accepted_term_text = sprintf(
-					/* translators: %s: the accepted term count. */
+				$removed_term_text = sprintf(
+					/* translators: %s: the removed term count. */
 					_nx(
-						'With Accepted Error <span class="count">(%s)</span>',
-						'With Accepted Errors <span class="count">(%s)</span>',
-						$ack_accepted_term_count,
+						'With Removed Error <span class="count">(%s)</span>',
+						'With Removed Errors <span class="count">(%s)</span>',
+						$ack_removed_term_count,
 						'terms',
 						'amp'
 					),
-					number_format_i18n( $ack_accepted_term_count )
+					number_format_i18n( $ack_removed_term_count )
 				);
 			} else {
-				$accepted_term_text = sprintf(
-					/* translators: %s: the accepted term count. */
+				$removed_term_text = sprintf(
+					/* translators: %s: the removed term count. */
 					_nx(
-						'Accepted Error <span class="count">(%s)</span>',
-						'Accepted Errors <span class="count">(%s)</span>',
-						$ack_accepted_term_count,
+						'Removed Error <span class="count">(%s)</span>',
+						'Removed Errors <span class="count">(%s)</span>',
+						$ack_removed_term_count,
 						'terms',
 						'amp'
 					),
-					number_format_i18n( $ack_accepted_term_count )
+					number_format_i18n( $ack_removed_term_count )
 				);
 			}
-			$value = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+			$value = self::VALIDATION_ERROR_ACK_REMOVED_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $accepted_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $removed_term_text ); ?></option>
 			<?php
 			if ( 'edit' === $screen_base ) {
-				$rejected_term_text = sprintf(
-					/* translators: %s: the rejected term count. */
+				$kept_term_text = sprintf(
+					/* translators: %s: the kept term count. */
 					_nx(
-						'With Rejected Error <span class="count">(%s)</span>',
-						'With Rejected Errors <span class="count">(%s)</span>',
-						$ack_rejected_term_count,
+						'With Kept Error <span class="count">(%s)</span>',
+						'With Kept Errors <span class="count">(%s)</span>',
+						$ack_kept_term_count,
 						'terms',
 						'amp'
 					),
-					number_format_i18n( $ack_rejected_term_count )
+					number_format_i18n( $ack_kept_term_count )
 				);
 			} else {
-				$rejected_term_text = sprintf(
-					/* translators: %s: the rejected term count. */
+				$kept_term_text = sprintf(
+					/* translators: %s: the kept term count. */
 					_nx(
-						'Rejected Error <span class="count">(%s)</span>',
-						'Rejected Errors <span class="count">(%s)</span>',
-						$ack_rejected_term_count,
+						'Kept Error <span class="count">(%s)</span>',
+						'Kept Errors <span class="count">(%s)</span>',
+						$ack_kept_term_count,
 						'terms',
 						'amp'
 					),
-					number_format_i18n( $ack_rejected_term_count )
+					number_format_i18n( $ack_kept_term_count )
 				);
 			}
-			$value = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			$value = self::VALIDATION_ERROR_ACK_KEPT_STATUS;
 			?>
-			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $rejected_term_text ); ?></option>
+			<option value="<?php echo esc_attr( $value ); ?>" <?php selected( $error_status_filter_value, $value ); ?>><?php echo wp_kses_post( $kept_term_text ); ?></option>
 		</select>
 		<?php
 	}
@@ -1510,10 +1510,10 @@ class AMP_Validation_Error_Taxonomy {
 			$message  = null;
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
 				$message = sprintf(
-					/* translators: %s is number of errors accepted */
+					/* translators: %s is number of errors removed */
 					_n(
-						'Accepted %s error. It will no longer block related URLs from being served as AMP.',
-						'Accepted %s errors. They will no longer block related URLs from being served as AMP.',
+						'Removed %s error. It will no longer block related URLs from being served as AMP.',
+						'Removed %s errors. They will no longer block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1521,10 +1521,10 @@ class AMP_Validation_Error_Taxonomy {
 				);
 			} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $actioned ) {
 				$message = sprintf(
-					/* translators: %s is number of errors rejected */
+					/* translators: %s is number of errors kept */
 					_n(
-						'Rejected %s error. It will continue to block related URLs from being served as AMP.',
-						'Rejected %s errors. They will continue to block related URLs from being served as AMP.',
+						'Kept %s error. It will continue to block related URLs from being served as AMP.',
+						'Kept %s errors. They will continue to block related URLs from being served as AMP.',
 						number_format_i18n( $count ),
 						'amp'
 					),
@@ -1604,9 +1604,9 @@ class AMP_Validation_Error_Taxonomy {
 			}
 
 			// @todo We should consider reversing the order.
-			// Only add the 'Reject' and 'Accept' links to the index page, not the individual URL page.
+			// Only add the 'Reject' and 'Remove' links to the index page, not the individual URL page.
 			$sanitization = self::get_validation_error_sanitization( json_decode( $term->description, true ) );
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_REJECTED_STATUS !== $sanitization['term_status'] ) {
+			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_KEPT_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
@@ -1616,14 +1616,14 @@ class AMP_Validation_Error_Taxonomy {
 					esc_html__( 'Reject', 'amp' )
 				);
 			}
-			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $sanitization['term_status'] ) {
+			if ( 'edit-tags.php' === $pagenow && self::VALIDATION_ERROR_ACK_REMOVED_STATUS !== $sanitization['term_status'] ) {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
 						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
-					esc_html__( 'Accept', 'amp' )
+					esc_html__( 'Remove', 'amp' )
 				);
 			}
 		}
@@ -1637,7 +1637,7 @@ class AMP_Validation_Error_Taxonomy {
 		$menu_item_label = esc_html__( 'Error Index', 'amp' );
 		$new_error_count = self::get_validation_error_count(
 			array(
-				'group' => array( self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ),
+				'group' => array( self::VALIDATION_ERROR_NEW_KEPT_STATUS, self::VALIDATION_ERROR_NEW_REMOVED_STATUS ),
 			)
 		);
 		if ( $new_error_count ) {
@@ -1787,17 +1787,17 @@ class AMP_Validation_Error_Taxonomy {
 					$select_name = sprintf( '%s[%s]', AMP_Validation_Manager::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR, $term->slug );
 
 					switch ( $term->term_group ) {
-						case self::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+						case self::VALIDATION_ERROR_NEW_KEPT_STATUS:
 							$img_src = 'baseline-error-red';
 							break;
-						case self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
+						case self::VALIDATION_ERROR_NEW_REMOVED_STATUS:
 							$img_src = 'baseline-error-green';
 							break;
-						case self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
+						case self::VALIDATION_ERROR_ACK_REMOVED_STATUS:
 							$img_src = 'baseline-check-circle-green';
 							break;
-						case self::VALIDATION_ERROR_ACK_REJECTED_STATUS:
-							$img_src = 'error-rejected';
+						case self::VALIDATION_ERROR_ACK_KEPT_STATUS:
+							$img_src = 'error-kept';
 							break;
 					}
 
@@ -1812,22 +1812,22 @@ class AMP_Validation_Error_Taxonomy {
 						<?php esc_html_e( 'Status:', 'amp' ); ?>
 					</label>
 					<select class="amp-validation-error-status" id="<?php echo esc_attr( $select_name ); ?>" name="<?php echo esc_attr( $select_name ); ?>">
-						<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $term->term_group ) : ?>
+						<?php if ( self::VALIDATION_ERROR_NEW_REMOVED_STATUS === $term->term_group || self::VALIDATION_ERROR_NEW_KEPT_STATUS === $term->term_group ) : ?>
 
-								<?php if ( self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $term->term_group ) : ?>
+								<?php if ( self::VALIDATION_ERROR_NEW_REMOVED_STATUS === $term->term_group ) : ?>
 								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-green.svg' ) ); ?>">
-									<?php esc_html_e( 'New Accepted', 'amp' ); ?>
+									<?php esc_html_e( 'New Removed', 'amp' ); ?>
 								<?php else : ?>
 								<option disabled selected value="" data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-error-red.svg' ) ); ?>">
-									<?php esc_html_e( 'New Rejected', 'amp' ); ?>
+									<?php esc_html_e( 'New Kept', 'amp' ); ?>
 								<?php endif; ?>
 							</option>
 						<?php endif; ?>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
-							<?php esc_html_e( 'Accepted', 'amp' ); ?>
+						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REMOVED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REMOVED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/baseline-check-circle-green.svg' ) ); ?>">
+							<?php esc_html_e( 'Removed', 'amp' ); ?>
 						</option>
-						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_REJECTED_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-rejected.svg' ) ); ?>">
-							<?php esc_html_e( 'Rejected', 'amp' ); ?>
+						<option value="<?php echo esc_attr( self::VALIDATION_ERROR_ACK_KEPT_STATUS ); ?>" <?php selected( self::VALIDATION_ERROR_ACK_KEPT_STATUS, $term->term_group ); ?> data-status-icon="<?php echo esc_url( amp_get_asset_url( 'images/error-kept.svg' ) ); ?>">
+							<?php esc_html_e( 'Kept', 'amp' ); ?>
 						</option>
 					</select>
 					<?php
@@ -2134,7 +2134,7 @@ class AMP_Validation_Error_Taxonomy {
 	}
 
 	/**
-	 * On the single URL page, handles the bulk actions of 'Accept' and 'Reject'
+	 * On the single URL page, handles the bulk actions of 'Remove' and 'Reject'
 	 *
 	 * On /wp-admin/post.php, this handles these bulk actions.
 	 * This page is more like an edit-tags.php page, in that it has a WP_Terms_List_Table of amp_validation_error terms.
@@ -2160,7 +2160,7 @@ class AMP_Validation_Error_Taxonomy {
 			self::handle_validation_error_update( null, $action, $term_ids );
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
-			// If this is an inline action, like 'Reject' or 'Accept'.
+			// If this is an inline action, like 'Reject' or 'Remove'.
 			self::handle_validation_error_update( null, $action, array( $single_term_id ) );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
@@ -2187,9 +2187,9 @@ class AMP_Validation_Error_Taxonomy {
 	public static function handle_validation_error_update( $redirect_to, $action, $term_ids ) {
 		$term_group = null;
 		if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS;
+			$term_group = self::VALIDATION_ERROR_ACK_REMOVED_STATUS;
 		} elseif ( self::VALIDATION_ERROR_REJECT_ACTION === $action ) {
-			$term_group = self::VALIDATION_ERROR_ACK_REJECTED_STATUS;
+			$term_group = self::VALIDATION_ERROR_ACK_KEPT_STATUS;
 		}
 
 		if ( $term_group ) {
@@ -2286,18 +2286,18 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return string Status text.
 	 */
 	public static function get_status_text_with_icon( $sanitization ) {
-		if ( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack accepted';
-			$text  = __( 'Accepted', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'ack rejected';
-			$text  = __( 'Rejected', 'amp' );
-		} elseif ( self::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] ) {
-			$class = 'new rejected';
-			$text  = __( 'New Rejected', 'amp' );
+		if ( self::VALIDATION_ERROR_ACK_REMOVED_STATUS === $sanitization['term_status'] ) {
+			$class = 'ack removed';
+			$text  = __( 'Removed', 'amp' );
+		} elseif ( self::VALIDATION_ERROR_ACK_KEPT_STATUS === $sanitization['term_status'] ) {
+			$class = 'ack kept';
+			$text  = __( 'Kept', 'amp' );
+		} elseif ( self::VALIDATION_ERROR_NEW_KEPT_STATUS === $sanitization['term_status'] ) {
+			$class = 'new kept';
+			$text  = __( 'New Kept', 'amp' );
 		} else {
-			$class = 'new accepted';
-			$text  = __( 'New Accepted', 'amp' );
+			$class = 'new removed';
+			$text  = __( 'New Removed', 'amp' );
 		}
 		return sprintf( '<span class="status-text %s">%s</span>', esc_attr( $class ), esc_html( $text ) );
 	}

@@ -192,9 +192,9 @@ class AMP_Validation_Manager {
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
 
-		// Add filter to auto-accept tree shaking validation error.
-		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
-			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
+		// Add filter to auto-remove tree shaking validation error.
+		if ( AMP_Options_Manager::get_option( 'remove_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_remove_sanitization' ) ) {
+			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_removed' ), 10, 2 );
 		}
 
 		if ( self::$should_locate_sources ) {
@@ -218,22 +218,22 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
+	 * Return whether sanitization is forcibly removed, whether because in native mode or via user option.
 	 *
-	 * @return bool Whether sanitization is forcibly accepted.
+	 * @return bool Whether sanitization is forcibly removed.
 	 */
-	public static function is_sanitization_auto_accepted() {
-		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
+	public static function is_sanitization_auto_removed() {
+		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_remove_sanitization' );
 	}
 
 	/**
-	 * Filter a tree-shaking validation error as accepted for sanitization.
+	 * Filter a tree-shaking validation error as removed for sanitization.
 	 *
 	 * @param bool  $sanitized Sanitized.
 	 * @param array $error     Error.
 	 * @return bool Sanitized.
 	 */
-	public static function filter_tree_shaking_validation_error_as_accepted( $sanitized, $error ) {
+	public static function filter_tree_shaking_validation_error_as_removed( $sanitized, $error ) {
 		if ( AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] ) {
 			$sanitized = true;
 		}
@@ -249,13 +249,13 @@ class AMP_Validation_Manager {
 	 * - Second submenu item: link to validate the URL.
 	 *
 	 * When on paired AMP response:
-	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors which are being forcibly sanitized.
+	 * - Icon: CHECK MARK if no unremoved validation errors on page, or WARNING SIGN if there are unremoved validation errors which are being forcibly sanitized.
 	 *         Otherwise, if there are unsanitized validation errors then a redirect to the non-AMP version will be done.
 	 * - Parent admin item and first submenu item: link to non-AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
 	 * When on native AMP response:
-	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors.
+	 * - Icon: CHECK MARK if no unremoved validation errors on page, or WARNING SIGN if there are unremoved validation errors.
 	 * - Parent admin and first submenu item: link to validate the URL.
 	 *
 	 * @see AMP_Validation_Manager::finalize_validation() Where the emoji is updated.
@@ -327,7 +327,7 @@ class AMP_Validation_Manager {
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
 
 		if ( is_amp_endpoint() ) {
-			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unremoved errors.
 		} elseif ( $error_count > 0 ) {
 			$icon = '&#x274C;'; // CROSS MARK.
 		} else {
@@ -683,7 +683,7 @@ class AMP_Validation_Manager {
 			$field['review_link'] = get_edit_post_link( $validation_status_post->ID, 'raw' );
 			foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $validation_status_post ) as $result ) {
 				$field['results'][] = array(
-					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $result['status'],
+					'sanitized'   => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS === $result['status'],
 					'error'       => $result['data'],
 					'status'      => $result['status'],
 					'term_status' => $result['term_status'],
@@ -761,14 +761,14 @@ class AMP_Validation_Manager {
 
 		$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 		$sanitized    = (
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status']
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS === $sanitization['status']
 			||
-			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status']
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS === $sanitization['status']
 		);
 
 		/*
 		 * Ignore validation errors which are forcibly sanitized by filter. This includes tree shaking error
-		 * accepted by options and via AMP_Validation_Error_Taxonomy::accept_validation_errors()).
+		 * removed by options and via AMP_Validation_Error_Taxonomy::remove_validation_errors()).
 		 * This was introduced in <https://github.com/ampproject/amp-wp/pull/1413> to prevent forcibly-sanitized
 		 * validation errors from being reported, to avoid noise and wasted storage. It was inadvertently
 		 * reverted in de7b04b but then restored as part of <https://github.com/ampproject/amp-wp/pull/1413>.
@@ -824,14 +824,14 @@ class AMP_Validation_Manager {
 			return;
 		}
 
-		// Show all validation errors which have not been explicitly acknowledged as accepted.
+		// Show all validation errors which have not been explicitly acknowledged as removed.
 		$validation_errors  = array();
 		$has_rejected_error = false;
 		foreach ( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $invalid_url_post ) as $error ) {
 			$needs_moderation = (
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $error['status'] || // @todo Show differently since moderated?
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $error['status'] ||
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $error['status']
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS === $error['status']
 			);
 			if ( $needs_moderation ) {
 				$validation_errors[] = $error['data'];
@@ -857,21 +857,21 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
-		if ( self::is_sanitization_auto_accepted() ) {
+		// Auto-removal is from either checking 'Automatically remove sanitization...' or from being in Native mode.
+		if ( self::is_sanitization_auto_removed() ) {
 			if ( ! $has_rejected_error ) {
-				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+				esc_html_e( 'However, your site is configured to automatically remove sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be removed or rejected.', 'amp' );
 			} else {
 				/*
-				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
-				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
+				 * Even if the 'auto_remove_sanitization' option is true, if there are non-removed errors in non-Native mode, it will redirect to a non-AMP page.
+				 * For example, the errors could have been stored as 'New Rejected' when auto-remove was false, and now auto-remove is true.
 				 * In that case, this will block serving AMP.
 				 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
 				 */
-				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
+				esc_html_e( 'Though your site is configured to automatically remove sanitization errors, there are rejected error(s). This could be because auto-removal of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be removed or rejected.', 'amp' );
 			}
 		} else {
-			esc_html_e( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+			esc_html_e( 'Non-removed validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 		}
 
 		echo sprintf(
@@ -1172,8 +1172,8 @@ class AMP_Validation_Manager {
 			unset( $source['reflection'] ); // Omit from stored source.
 
 			$function      = $registered_widget['callback'];
-			$accepted_args = 2; // For the $instance and $args arguments.
-			$callback      = compact( 'function', 'accepted_args', 'source' );
+			$removed_args = 2; // For the $instance and $args arguments.
+			$callback      = compact( 'function', 'removed_args', 'source' );
 
 			$registered_widget['callback'] = self::wrapped_callback( $callback );
 		}
@@ -1485,7 +1485,7 @@ class AMP_Validation_Manager {
 	 *     The callback data.
 	 *
 	 *     @type callable $function
-	 *     @type int      $accepted_args
+	 *     @type int      $removed_args
 	 *     @type array    $source
 	 * }
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
@@ -1495,7 +1495,7 @@ class AMP_Validation_Manager {
 			global $wp_styles, $wp_scripts;
 
 			$function      = $callback['function'];
-			$accepted_args = $callback['accepted_args'];
+			$removed_args = $callback['removed_args'];
 			$args          = func_get_args();
 
 			$before_styles_enqueued = array();
@@ -1515,7 +1515,7 @@ class AMP_Validation_Manager {
 			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
-			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
+			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $removed_args ) ) );
 			if ( $has_buffer_started ) {
 				ob_end_flush();
 			}
@@ -1632,18 +1632,18 @@ class AMP_Validation_Manager {
 
 		/*
 		 * Override AMP status in admin bar set in \AMP_Validation_Manager::add_admin_bar_menu_items()
-		 * when there are validation errors which have not been explicitly accepted.
+		 * when there are validation errors which have not been explicitly removed.
 		 */
 		if ( is_admin_bar_showing() && self::$amp_admin_bar_item_added ) {
 			$error_count = 0;
 			foreach ( self::$validation_results as $validation_result ) {
 				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $validation_result['error'] );
 
-				$is_unaccepted = 'with_preview' === $validation_status['forced'] ?
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['status']
+				$is_unremoved = 'with_preview' === $validation_status['forced'] ?
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS !== $validation_status['status']
 					:
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status'];
-				if ( $is_unaccepted ) {
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS !== $validation_status['term_status'];
+				if ( $is_unremoved ) {
 					$error_count++;
 				}
 			}
@@ -1742,7 +1742,7 @@ class AMP_Validation_Manager {
 			if ( ! empty( $css_validation_errors ) ) {
 				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
-			$sanitizers['AMP_Style_Sanitizer']['accept_tree_shaking'] = AMP_Options_Manager::get_option( 'accept_tree_shaking' );
+			$sanitizers['AMP_Style_Sanitizer']['remove_tree_shaking'] = AMP_Options_Manager::get_option( 'remove_tree_shaking' );
 		}
 
 		return $sanitizers;
@@ -1763,7 +1763,7 @@ class AMP_Validation_Manager {
 			return $validity;
 		}
 		$validation_errors = wp_list_pluck( $validity['results'], 'error' );
-		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unaccepted validation errors.
+		if ( is_array( $validity ) && count( $validation_errors ) > 0 ) { // @todo This should only warn when there are unremoved validation errors.
 			AMP_Validated_URL_Post_Type::store_validation_errors(
 				$validation_errors,
 				$validity['url'],
@@ -1989,7 +1989,7 @@ class AMP_Validation_Manager {
 
 		$data = array(
 			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'isSanitizationAutoRemoved' => self::is_sanitization_auto_removed(),
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {

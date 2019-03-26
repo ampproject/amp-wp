@@ -353,8 +353,8 @@ class AMP_Validated_URL_Post_Type {
 			array(
 				'post_type'              => self::POST_TYPE_SLUG,
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS,
 				),
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
@@ -379,14 +379,14 @@ class AMP_Validated_URL_Post_Type {
 	 * @param array              $args {
 	 *     Args.
 	 *
-	 *     @type bool $ignore_accepted Exclude validation errors that are accepted. Default false.
+	 *     @type bool $ignore_removed Exclude validation errors that are removed. Default false.
 	 * }
 	 * @return array List of errors, with keys for term, data, status, and (sanitization) forced.
 	 */
 	public static function get_invalid_url_validation_errors( $url, $args = array() ) {
 		$args = array_merge(
 			array(
-				'ignore_accepted' => false,
+				'ignore_removed' => false,
 			),
 			$args
 		);
@@ -419,7 +419,7 @@ class AMP_Validated_URL_Post_Type {
 			}
 
 			$sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $stored_validation_error['data'] );
-			if ( $args['ignore_accepted'] && ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['status'] ) ) {
+			if ( $args['ignore_removed'] && ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS === $sanitization['status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS === $sanitization['status'] ) ) {
 				continue;
 			}
 
@@ -459,31 +459,31 @@ class AMP_Validated_URL_Post_Type {
 			$result[] = sprintf(
 				/* translators: %1$s is the status, %2$s is the count */
 				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
-				esc_html__( 'New Rejected', 'amp' ),
+				esc_html__( 'New Kept', 'amp' ),
 				number_format_i18n( $counts['new_rejected'] )
 			);
 		}
-		if ( $counts['new_accepted'] ) {
+		if ( $counts['new_removed'] ) {
 			$result[] = sprintf(
 				/* translators: %1$s is the status, %2$s is the count */
-				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
-				esc_html__( 'New Accepted', 'amp' ),
-				number_format_i18n( $counts['new_accepted'] )
+				'<span class="status-text new new-removed">%1$s: %2$s</span>',
+				esc_html__( 'New Removed', 'amp' ),
+				number_format_i18n( $counts['new_removed'] )
 			);
 		}
-		if ( $counts['ack_accepted'] ) {
+		if ( $counts['ack_removed'] ) {
 			$result[] = sprintf(
 				/* translators: 1. Title, 2. %s is count */
-				'<span class="status-text accepted">%1$s: %2$s</span>',
-				esc_html__( 'Accepted', 'amp' ),
-				number_format_i18n( $counts['ack_accepted'] )
+				'<span class="status-text removed">%1$s: %2$s</span>',
+				esc_html__( 'Removed', 'amp' ),
+				number_format_i18n( $counts['ack_removed'] )
 			);
 		}
 		if ( $counts['ack_rejected'] ) {
 			$result[] = sprintf(
 				/* translators: %s is count */
 				'<span class="status-text rejected">%1$s: %2$s</span>',
-				esc_html__( 'Rejected', 'amp' ),
+				esc_html__( 'Kept', 'amp' ),
 				number_format_i18n( $counts['ack_rejected'] )
 			);
 		}
@@ -669,7 +669,7 @@ class AMP_Validated_URL_Post_Type {
 				$term = AMP_Validation_Error_Taxonomy::get_term( $term_slug );
 				if ( ! ( $term instanceof WP_Term ) ) {
 					/*
-					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS.
+					 * The default term_group is 0 so that is AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS.
 					 * If sanitization auto-acceptance is enabled, then the term_group will be updated below.
 					 */
 					$r = wp_insert_term( $term_slug, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG, wp_slash( $term_data ) );
@@ -693,8 +693,8 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							)
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() ) {
-						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_removed() ) {
+						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS;
 						wp_update_term(
 							$term_id,
 							AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
@@ -844,7 +844,7 @@ class AMP_Validated_URL_Post_Type {
 						sprintf(
 							'<h3>%s</h3><p>%s</p>',
 							__( 'Status', 'amp' ),
-							__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+							__( 'A removed validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 						)
 					)
 				),
@@ -889,7 +889,7 @@ class AMP_Validated_URL_Post_Type {
 					sprintf(
 						'<h3>%s</h3><p>%s</p>',
 						esc_html__( 'Status', 'amp' ),
-						esc_html__( 'An accepted validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
+						esc_html__( 'A removed validation error is one that will not block a URL from being served as AMP; the validation error will be sanitized, normally resulting in the offending markup being stripped from the response to ensure AMP validity.', 'amp' )
 					)
 				)
 			),
@@ -1139,7 +1139,7 @@ class AMP_Validated_URL_Post_Type {
 				$validity['url'],
 				wp_array_slice_assoc( $validity, array( 'queried_object' ) )
 			);
-			$unaccepted_error_count = count(
+			$unremoved_error_count = count(
 				array_filter(
 					$validation_errors,
 					function( $error ) {
@@ -1147,7 +1147,7 @@ class AMP_Validated_URL_Post_Type {
 					}
 				)
 			);
-			if ( $unaccepted_error_count > 0 ) {
+			if ( $unremoved_error_count > 0 ) {
 				$remaining_invalid_urls[] = $validity['url'];
 			}
 		}
@@ -1191,10 +1191,10 @@ class AMP_Validated_URL_Post_Type {
 			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors_remain ) {
-				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL still has unremoved validation errors.', 'The rechecked URLs still have unremoved validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'notice-warning';
 			} else {
-				$message = _n( 'The rechecked URL is free of unaccepted validation errors.', 'The rechecked URLs are free of unaccepted validation errors.', $count_urls_tested, 'amp' );
+				$message = _n( 'The rechecked URL is free of unremoved validation errors.', 'The rechecked URLs are free of unremoved validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'updated';
 			}
 
@@ -1285,62 +1285,62 @@ class AMP_Validated_URL_Post_Type {
 			$accept_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
-						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION,
+						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REMOVE_ACTION,
 						'term_id' => $error->term_id,
 					)
 				),
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACCEPT_ACTION
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REMOVE_ACTION
 			);
 			$reject_all_url   = wp_nonce_url(
 				add_query_arg(
 					array(
-						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION,
+						'action'  => AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_KEEP_ACTION,
 						'term_id' => $error->term_id,
 					)
 				),
-				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION
+				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_KEEP_ACTION
 			);
 
 			if ( ! $sanitization['forced'] ) {
 				echo '<div class="notice accept-reject-error">';
 
-				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS === $sanitization['term_status'] ) {
+				if ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
+						$info = __( 'Keeping an error means that any URL on which it occurs will not be served as AMP.', 'amp' );
 					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
+						$info = __( 'Keeping an error means that any URL on which it occurs will redirect to the non-AMP version.', 'amp' );
 					}
 					printf(
 						'<p>%s</p><a class="button button-primary reject" href="%s">%s</a>',
-						esc_html__( 'Reject this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_html__( 'Keep this validation error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' )
+						esc_html__( 'Keep', 'amp' )
 					);
-				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS === $sanitization['term_status'] ) {
+				} elseif ( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS === $sanitization['term_status'] || AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_KEPT_STATUS === $sanitization['term_status'] ) {
 					if ( amp_is_canonical() ) {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
+						$info = __( 'Removing all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					} else {
-						$info = __( 'Accepting all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
+						$info = __( 'Removing all validation errors which occur on a URL will allow it to be served as AMP.', 'amp' );
 					}
 					printf(
 						'<p>%s</p><a class="button button-primary accept" href="%s">%s</a>',
-						esc_html__( 'Accept this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_html__( 'Remove this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
+						esc_html__( 'Remove', 'amp' )
 					);
 				} else {
 					if ( amp_is_canonical() ) {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will not be served as AMP. If all errors occurring on a URL are accepted, then it will be served as AMP.', 'amp' );
+						$info = __( 'Keeping an error means that any URL on which it occurs will not be served as AMP. If all errors occurring on a URL are removed, then it will be served as AMP.', 'amp' );
 					} else {
-						$info = __( 'Rejecting an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are accepted, then it will not redirect.', 'amp' );
+						$info = __( 'Keeping an error means that any URL on which it occurs will redirect to the non-AMP version. If all errors occurring on a URL are removed, then it will not redirect.', 'amp' );
 					}
 					printf(
 						'<p>%s</p><a class="button reject" href="%s">%s</a><a class="button button-primary accept" href="%s">%s</a>',
-						esc_html__( 'Accept or Reject this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
+						esc_html__( 'Remove or Keep this error for all instances.', 'amp' ) . ' ' . esc_html( $info ),
 						esc_url( $reject_all_url ),
-						esc_html__( 'Reject', 'amp' ),
+						esc_html__( 'Keep', 'amp' ),
 						esc_url( $accept_all_url ),
-						esc_html__( 'Accept', 'amp' )
+						esc_html__( 'Remove', 'amp' )
 					);
 				}
 				echo '</div>';
@@ -1563,7 +1563,7 @@ class AMP_Validated_URL_Post_Type {
 
 		/*
 		 * Re-check the post after the validation status change. This is particularly important for validation errors like
-		 * 'removed_unused_css_rules' since whether it is accepted will determine whether other validation errors are triggered
+		 * 'removed_unused_css_rules' since whether it is removed will determine whether other validation errors are triggered
 		 * such as in this case 'excessive_css'.
 		 */
 		if ( $updated_count > 0 ) {
@@ -1867,8 +1867,8 @@ class AMP_Validated_URL_Post_Type {
 		</form>
 
 		<div id="accept-reject-buttons" class="hidden">
-			<button type="button" class="button action accept"><?php esc_html_e( 'Accept', 'amp' ); ?></button>
-			<button type="button" class="button action reject"><?php esc_html_e( 'Reject', 'amp' ); ?></button>
+			<button type="button" class="button action accept"><?php esc_html_e( 'Remove', 'amp' ); ?></button>
+			<button type="button" class="button action reject"><?php esc_html_e( 'Keep', 'amp' ); ?></button>
 			<div id="vertical-divider"></div>
 		</div>
 		<div id="url-post-filter" class="alignleft actions">
@@ -2010,8 +2010,8 @@ class AMP_Validated_URL_Post_Type {
 			array(
 				'post_type'              => self::POST_TYPE_SLUG,
 				AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS,
+					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS,
 				),
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
@@ -2027,8 +2027,8 @@ class AMP_Validated_URL_Post_Type {
 							array(
 								'post_type' => self::POST_TYPE_SLUG,
 								AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
+									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS,
+									AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS,
 								),
 							),
 							'edit.php'
@@ -2244,8 +2244,8 @@ class AMP_Validated_URL_Post_Type {
 
 		$validation_errors           = self::get_invalid_url_validation_errors( $post );
 		$counts                      = self::count_invalid_url_validation_errors( $validation_errors );
-		$are_there_unaccepted_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
-		return ! $are_there_unaccepted_errors;
+		$are_there_unremoved_errors = ( $counts['new_rejected'] || $counts['ack_rejected'] );
+		return ! $are_there_unremoved_errors;
 	}
 
 	/**
@@ -2257,21 +2257,21 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	protected static function count_invalid_url_validation_errors( $validation_errors ) {
 		$counts = array_fill_keys(
-			array( 'new_accepted', 'ack_accepted', 'new_rejected', 'ack_rejected' ),
+			array( 'new_removed', 'ack_removed', 'new_rejected', 'ack_rejected' ),
 			0
 		);
 		foreach ( $validation_errors as $error ) {
 			switch ( $error['term']->term_group ) {
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_KEPT_STATUS:
 					$counts['new_rejected']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS:
-					$counts['new_accepted']++;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REMOVED_STATUS:
+					$counts['new_removed']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS:
-					$counts['ack_accepted']++;
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REMOVED_STATUS:
+					$counts['ack_removed']++;
 					break;
-				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS:
+				case AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_KEPT_STATUS:
 					$counts['ack_rejected']++;
 					break;
 			}
