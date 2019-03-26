@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Dropdown, IconButton, Spinner } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
@@ -28,10 +28,13 @@ class TemplateInserter extends Component {
 	}
 
 	componentDidMount() {
-		// @todo Improve handling the requests.
-		if ( ! this.state.reusableBlocks ) {
-			this.getReusableBlocks();
-		}
+		// This is used for making sure that once the response finishes the component actually still exists.
+		this.isComponentMounted = true;
+		this.getReusableBlocks();
+	}
+
+	componentWillUnmount() {
+		this.isComponentMounted = false;
 	}
 
 	onToggle( isOpen ) {
@@ -44,17 +47,31 @@ class TemplateInserter extends Component {
 	}
 
 	getReusableBlocks() {
+		if ( ! this.isComponentMounted ) {
+			return;
+		}
+
+		if ( null !== this.state.reusableBlocks ) {
+			this.setState( { reusableBlocks: null } );
+		}
+
 		// @todo We only need reusable blocks that can be used by AMP Stories.
-		return apiFetch( {
-			path: `/wp/v2/${ blocksRestBase }`,
+		const blocksRequest = this.lastRequest = apiFetch( {
+			path: `/wp/v2/${ blocksRestBase }?search=amp-story-page`,
 		} )
 			.then( ( response ) => {
-				if ( response ) {
+				// Check if it's the result of the last request.
+				if ( this.isComponentMounted && blocksRequest === this.lastRequest && response ) {
 					this.setState( { reusableBlocks: response } );
 				}
 			} )
 			.catch( ( error ) => {
-				debugger;
+				if ( this.isComponentMounted && blocksRequest === this.lastRequest ) {
+					this.setState( { reusableBlocks: {
+						error: true,
+						message: error.message,
+					} } );
+				}
 			} );
 	}
 
@@ -92,6 +109,15 @@ class TemplateInserter extends Component {
 					if ( ! reusableBlocks ) {
 						return (
 							<Spinner />
+						);
+					}
+
+					if ( reusableBlocks.error ) {
+						const errorMessage = sprintf( __( 'Loading templates failed: %s', 'amp' ), reusableBlocks.error.message );
+						return (
+							<div>
+								{ errorMessage }
+							</div>
 						);
 					}
 
