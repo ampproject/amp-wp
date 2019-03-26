@@ -38,7 +38,6 @@ export const ALLOWED_TOP_LEVEL_BLOCKS = [
 ];
 
 export const ALLOWED_CHILD_BLOCKS = [
-	'core/audio',
 	'core/code',
 	'core/embed',
 	'core/image',
