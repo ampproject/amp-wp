@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { Component, createRef } from '@wordpress/element';
-import { withSpokenMessages } from '@wordpress/components';
+import { withSpokenMessages, Button } from '@wordpress/components';
 import { compose, withGlobalEvents } from '@wordpress/compose';
 import { ESCAPE, LEFT, RIGHT } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
@@ -129,12 +129,16 @@ class RotatableBox extends Component {
 				ref={ this.elementRef }
 			>
 				<div className="rotatable-box-wrap">
-					<button
+					<Button
 						role="switch"
 						aria-checked={ this.state.isRotating }
 						onMouseDown={ this.onRotateStart }
 						className="rotatable-box-wrap__handle"
-					/>
+					>
+						<span className="screen-reader-text">
+							{ __( 'Rotate Block', 'amp' ) }
+						</span>
+					</Button>
 				</div>
 				{ this.props.children }
 			</div>
