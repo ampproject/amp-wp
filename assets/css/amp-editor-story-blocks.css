@@ -624,6 +624,35 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 }
 
+#amp-root-navigation .editor-block-navigation__item:hover {
+	color: #191e23;
+	border: none;
+	box-shadow: none;
+	background: #f3f4f5;
+}
+
+#amp-root-navigation .components-button.editor-block-navigation__item-button {
+	display: flex;
+	align-items: center;
+	width: 100%;
+	padding: 6px;
+	text-align: left;
+	color: #40464d;
+	border-radius: 4px;
+}
+
+#amp-root-navigation li {
+	margin-bottom: 6px;
+}
+
+#amp-root-navigation .block-editor-block-icon {
+	margin-right: 6px;
+}
+
+#amp-root-navigation .editor-block-navigation__container {
+	padding: 7px;
+}
+
 /*
  * 8. Block mover
  * Disable the block mover at all times for page blocks.
@@ -829,6 +858,11 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 .wp-block[data-type="amp/amp-story-text"] p {
 	margin: 0;
 }
+
+.wp-block-amp-story-text .editor-rich-text__editable {
+	width: 100%;
+}
+
 .amp-story-text__resize-container .components-resizable-box__handle-right {
 	right: -26px;
 	height: 50px;
