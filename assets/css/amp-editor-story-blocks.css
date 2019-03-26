@@ -251,6 +251,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Hides the toggler and shows the navigator by default on large screens.
  */
 
+#amp-root-navigation {
+	font-family: sans-serif;
+}
+
 @media( max-width: 960px) {
 	.editor-block-list__block-edit > div > .editor-selectors {
 		display: none;
@@ -313,6 +317,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		font-size: 12px;
 		color: #666;
 		letter-spacing: 1px;
+		font-family: sans-serif;
 	}
 
 	.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div {
