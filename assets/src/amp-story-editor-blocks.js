@@ -22,6 +22,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withRotatableBox,
+	withIsRotatingClassName,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -322,6 +323,7 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', with
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withRotatableBox', withRotatableBox );
+addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withIsRotatingClassName', withIsRotatingClassName );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );

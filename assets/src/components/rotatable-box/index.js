@@ -1,10 +1,15 @@
 /**
+ * External dependencies
+ */
+import classnames from 'classnames';
+
+/**
  * WordPress dependencies
  */
 import { Component, createRef } from '@wordpress/element';
 import { withSpokenMessages, Button } from '@wordpress/components';
 import { compose, withGlobalEvents } from '@wordpress/compose';
-import { ESCAPE, LEFT, RIGHT } from '@wordpress/keycodes';
+import { ESCAPE, LEFT, RIGHT, ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
 
 class RotatableBox extends Component {
@@ -13,8 +18,8 @@ class RotatableBox extends Component {
 
 		this.state = {
 			isRotating: false,
-			initialAngle: props.angle || 0,
-			angle: 0,
+			initialAngle: props.initialAngle,
+			angle: props.angle,
 		};
 
 		this.elementRef = createRef();
@@ -49,6 +54,7 @@ class RotatableBox extends Component {
 
 			this.elementRef.current.style.transform = `rotate(${ angle }deg)`;
 
+			/* translators: %s: degrees */
 			this.props.speak( sprintf( __( 'Rotating block by %s degrees', 'amp' ), angle ) );
 
 			this.setState(
@@ -57,17 +63,26 @@ class RotatableBox extends Component {
 				},
 				() => this.props.onRotate && this.props.onRotate( e, this.elementRef.current, angle )
 			);
+		} else if ( ENTER === keyCode ) {
+			/* translators: %s: degrees */
+			this.props.speak( sprintf( __( 'Saving block rotation of %s degrees', 'amp' ), this.state.angle ) );
+
+			this.onRotateStop( e );
 		}
 	}
 
 	onRotateStart( e ) {
+		if ( this.state.isRotating ) {
+			return;
+		}
+
 		if ( ( e.button && 2 === e.button ) || ( e.which && 3 === e.which ) ) {
 			return;
 		}
 
 		e.preventDefault();
 
-		this.elementRef.current.style.transform = `rotate(${ this.state.angle }deg)`;
+		this.elementRef.current.style.transform = `rotate(${ this.props.angle }deg)`;
 
 		this.setState(
 			{
@@ -93,7 +108,7 @@ class RotatableBox extends Component {
 		const y = e.clientY - centerY;
 
 		const rad2deg = ( 180 / Math.PI );
-		const angle = -( rad2deg * Math.atan2( x, y ) );
+		const angle = parseInt( -( rad2deg * Math.atan2( x, y ) ) );
 
 		this.elementRef.current.style.transform = `rotate(${ angle }deg)`;
 
@@ -123,9 +138,11 @@ class RotatableBox extends Component {
 	}
 
 	render() {
+		const className = classnames( this.props.className, { 'is-rotating': this.state.isRotating } );
+
 		return (
 			<div
-				className={ this.props.className }
+				className={ className }
 				ref={ this.elementRef }
 			>
 				<div className="rotatable-box-wrap">

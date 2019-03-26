@@ -43,7 +43,6 @@ const TEMPLATE = [
 
 class EditPage extends Component {
 	constructor( props ) {
-		// Call parent constructor.
 		super( props );
 
 		if ( ! props.attributes.anchor ) {

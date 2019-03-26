@@ -91,3 +91,14 @@ export function getBlockIndex( state, page ) {
 export function isReordering( state ) {
 	return state.blocks.isReordering || false;
 }
+
+/**
+ * Returns the block that is currently being rotated, if any.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {?string} The rotating block's client ID.
+ */
+export function getRotatingBlock( state ) {
+	return state.rotatingBlock || null;
+}

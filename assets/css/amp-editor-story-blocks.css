@@ -57,23 +57,23 @@ div[data-type="amp/amp-story-page"]::after {
  * as gray was not visible in a multi-layer setup.
  */
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .editor-block-list__block-edit::before {
+.editor-block-list__layout div[data-type="amp/amp-story-page"].is-selected > .block-editor-block-list__block-edit::before {
 	outline: 1px solid #007cba;
 }
 
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit::before,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit::before
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block.is-selected > .block-editor-block-list__block-edit::before,
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block.is-typing > .block-editor-block-list__block-edit::before
 {
 	outline: 1px solid #007cba;
 }
 
-div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .editor-block-list__block-edit::before {
+div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > div > .editor-inner-blocks > .editor-block-list__layout > .is-selected > .block-editor-block-list__block-edit::before {
 	outline: 1px solid #007cba;
 }
 
 /* Remove one default outline as it was unnecessary with the above implementation. */
 
-.editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit::before {
+.editor-block-list__layout .block-editor-block-list__block .block-editor-block-list__block-edit::before {
 	outline: none;
 }
 
@@ -87,7 +87,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 	 pointer-events: none;
  }
 
- .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
+ .block-editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
 	 opacity: 1;
 	 animation: none;
  }
@@ -103,7 +103,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 }
 
 @media (min-width: 600px) {
-	div[data-type="amp/amp-story-page"] .editor-block-list__block {
+	div[data-type="amp/amp-story-page"] .block-editor-block-list__block {
 		margin: 0;
 		padding: 0;
 	}
@@ -128,12 +128,12 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
  * Setup on top of each other layering on the story children.
  */
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block:first-child .editor-block-list__block-edit {
+.editor-block-list__layout div[data-type="amp/amp-story-page"].block-editor-block-list__block:first-child .block-editor-block-list__block-edit {
 	margin: 0;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit,
-.editor-block-list__layout .editor-block-list__layout .editor-block-list__block .editor-block-list__block-edit {
+.editor-block-list__layout div[data-type="amp/amp-story-page"].block-editor-block-list__block .block-editor-block-list__block-edit,
+.editor-block-list__layout .editor-block-list__layout .block-editor-block-list__block .block-editor-block-list__block-edit {
 	margin: 0;
 }
 
@@ -174,7 +174,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	justify-items: start;
 }
 
-.amp-grid-template-vertical .editor-block-list__block {
+.amp-grid-template-vertical .block-editor-block-list__block {
 	width: 100%;
 }
 
@@ -184,8 +184,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * while editing on top of varying colored background.
  */
 
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block.is-selected > .block-editor-block-list__block-edit .editor-rich-text,
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block.is-typing > .block-editor-block-list__block-edit .editor-rich-text {
 	text-shadow:
 		0.05em 0 rgba( 255, 255, 255, 0.8 ),
 		0 0.05em rgba( 255, 255, 255, 0.8 ),
@@ -197,8 +197,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
 }
 
-.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
-.amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
+.amp-grid-template .editor-block-list__layout .block-editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
 	opacity: 0.9;
 	text-shadow:
 		0.05em 0 rgba( 255, 255, 255, 0.8 ),
@@ -237,7 +237,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  */
 
 @media( max-width: 960px) {
-	.editor-block-list__block-edit > div > .editor-selectors {
+	.block-editor-block-list__block-edit > div > .editor-selectors {
 		display: none;
 	}
 
@@ -614,7 +614,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
  * Disable the block mover at all times for page blocks.
  */
 
-[data-type="amp/amp-story-page"] > .editor-block-list__block-edit > .editor-block-mover {
+[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit > .editor-block-mover {
 	display: none !important;
 }
 
@@ -660,7 +660,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	position: absolute;
 }
 
-.editor-block-list__block .editor-block-list__layout {
+.block-editor-block-list__block .editor-block-list__layout {
 	margin: 0;
 }
 
@@ -818,16 +818,16 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	width: initial;
 }
 
-.editor-inner-blocks .editor-block-list__block .amp-story-editor__rotate-container.is-rotating .components-resizable-box__handle,
-.editor-inner-blocks .editor-block-list__block.is-typing .components-resizable-box__handle,
-.editor-inner-blocks .editor-block-list__block .components-resizable-box__handle {
+.editor-inner-blocks .block-editor-block-list__block.is-typing .components-resizable-box__handle,
+.editor-inner-blocks .block-editor-block-list__block .components-resizable-box__handle {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
 }
 
-.editor-inner-blocks .editor-block-list__block.is-selected .components-resizable-box__handle,
-.editor-inner-blocks .editor-block-list__block.is-hovered .components-resizable-box__handle {
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .components-resizable-box__handle,
+.editor-inner-blocks .block-editor-block-list__block.is-selected .components-resizable-box__handle,
+.editor-inner-blocks .block-editor-block-list__block.is-hovered .components-resizable-box__handle {
 	opacity: 1;
 }
 
@@ -840,33 +840,38 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
  * RotatableBox
  */
 
-.amp-story-editor__rotate-container.is-rotating .editor-block-mover {
-	opacity: 0 !important;
-}
-
-.editor-block-list__block.is-typing .rotatable-box-wrap,
-.editor-block-list__block .rotatable-box-wrap {
+.block-editor-block-list__block.is-typing .rotatable-box-wrap,
+.block-editor-block-list__block .rotatable-box-wrap {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
 }
 
-.amp-story-editor__rotate-container.is-rotating .rotatable-box-wrap,
-.editor-inner-blocks .editor-block-list__block.is-selected .rotatable-box-wrap,
-.editor-inner-blocks .editor-block-list__block.is-hovered .rotatable-box-wrap {
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .rotatable-box-wrap,
+.editor-inner-blocks .block-editor-block-list__block.is-selected .rotatable-box-wrap,
+.editor-inner-blocks .block-editor-block-list__block.is-hovered .rotatable-box-wrap {
 	opacity: 1;
 }
 
-.editor-block-list__block {
+.block-editor-block-list__block {
 	transition: transform .3s ease-in-out;
 }
 
-.editor-block-list__block.is-typing,
-.editor-block-list__block.is-selected {
+.block-editor-block-list__block.is-rotating,
+.block-editor-block-list__block.is-typing,
+.block-editor-block-list__block.is-selected {
 	transform: rotate(0deg) !important;
 }
 
-.editor-block-list__block .rotatable-box-wrap {
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-list__insertion-point,
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .editor-block-mover,
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-list__breadcrumb,
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-contextual-toolbar,
+.block-editor-block-list__layout .block-editor-block-list__block.is-rotating > .block-editor-block-list__block-edit::before {
+	display: none !important;
+}
+
+.block-editor-block-list__block .rotatable-box-wrap {
 	box-shadow: -1px 0 rgba(66,88,99,.4);
 	width: 0;
 	height: 25px;
@@ -876,7 +881,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	border-left: 1px solid #007cba;
 }
 
-.editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
+.block-editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
 	display: block;
 	opacity: 1;
 	transition: opacity .3s;
@@ -911,11 +916,11 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
  * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
  */
 
-.editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > :not(.editor-warning) {
+.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > :not(.editor-warning) {
 	pointer-events: all;
 }
 
-.editor-block-list__layout .editor-block-list__block.has-warning .editor-block-list__block-edit > div > div:not(.editor-warning) {
+.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > div > div:not(.editor-warning) {
 	pointer-events: none;
 }
 

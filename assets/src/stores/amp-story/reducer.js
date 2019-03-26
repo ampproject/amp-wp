@@ -153,4 +153,25 @@ export function blocks( state = {}, action ) {
 	return state;
 }
 
-export default combineReducers( { animations, currentPage, blocks } );
+/**
+ * Reducer handling block rotation.
+ *
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
+ *
+ * @return {Object} Updated state.
+ */
+export function rotatingBlock( state = {}, action ) {
+	const { block } = action;
+	switch ( action.type ) {
+		case 'START_BLOCK_ROTATION':
+			return block;
+
+		case 'STOP_BLOCK_ROTATION':
+			return undefined;
+	}
+
+	return state;
+}
+
+export default combineReducers( { animations, currentPage, blocks, rotatingBlock } );
