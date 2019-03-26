@@ -14,7 +14,7 @@ class RotatableBox extends Component {
 		this.state = {
 			isRotating: false,
 			initialAngle: props.angle || 0,
-			angle: props.angle || 0,
+			angle: 0,
 		};
 
 		this.elementRef = createRef();
