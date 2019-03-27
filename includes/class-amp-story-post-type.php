@@ -149,6 +149,9 @@ class AMP_Story_Post_Type {
 		// Register the Latest Stories block.
 		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
 
+		// The AJAX handler for when an image is cropped and sent via POST.
+		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
+
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
 			'amp/amp-story-text',
@@ -1077,5 +1080,124 @@ class AMP_Story_Post_Type {
 		}
 
 		return $minimum_height;
+	}
+
+	/**
+	 * Crops the image and returns the object as JSON.
+	 *
+	 * Forked from Custom_Image_Header::ajax_header_crop().
+	 */
+	public static function crop_featured_image() {
+		check_ajax_referer( 'image_editor-' . $_POST['id'], 'nonce' );
+
+		if ( ! current_user_can( 'edit_theme_options' ) ) {
+			wp_send_json_error();
+		}
+
+		$crop_details = $_POST['cropDetails'];
+
+		$dimensions = array(
+			'dst_width'  => 696,
+			'dst_height' => 928,
+		);
+
+		$attachment_id = absint( $_POST['id'] );
+
+		$cropped = wp_crop_image(
+			$attachment_id,
+			intval( $crop_details['x1'] ),
+			intval( $crop_details['y1'] ),
+			intval( $crop_details['width'] ),
+			intval( $crop_details['height'] ),
+			intval( $dimensions['dst_width'] ),
+			intval( $dimensions['dst_height'] )
+		);
+
+		if ( ! $cropped || is_wp_error( $cropped ) ) {
+			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.' ) ) );
+		}
+
+		/** This filter is documented in wp-admin/custom-header.php */
+		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
+
+		$object = self::create_attachment_object( $cropped, $attachment_id );
+
+		unset( $object['ID'] );
+
+		$new_attachment_id = self::insert_attachment( $object, $cropped );
+
+		$object['attachment_id'] = $new_attachment_id;
+		$object['url']           = wp_get_attachment_url( $new_attachment_id );
+
+		$object['width']  = $dimensions['dst_width'];
+		$object['height'] = $dimensions['dst_height'];
+
+		wp_send_json_success( $object );
+	}
+
+	/**
+	 * Create an attachment 'object'.
+	 *
+	 * Forked from Custom_Image_Header::create_attachment_object() in Core.
+	 *
+	 * @param string $cropped Cropped image URL.
+	 * @param int    $parent_attachment_id Attachment ID of parent image.
+	 * @return array Attachment object.
+	 */
+	public static function create_attachment_object( $cropped, $parent_attachment_id ) {
+		$parent     = get_post( $parent_attachment_id );
+		$parent_url = wp_get_attachment_url( $parent->ID );
+		$url        = str_replace( basename( $parent_url ), basename( $cropped ), $parent_url );
+		try {
+			$size = getimagesize( $cropped );
+		} catch ( Exception $error ) {
+			$e = $error;
+		}
+
+		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
+		$object     = array(
+			'ID'             => $parent_attachment_id,
+			'post_title'     => basename( $cropped ),
+			'post_mime_type' => $image_type,
+			'guid'           => $url,
+			'context'        => 'custom-header',
+			'post_parent'    => $parent_attachment_id,
+		);
+
+		return $object;
+	}
+
+	/**
+	 * Insert an attachment and its metadata.
+	 *
+	 * Forked from Custom_Image_Header::insert_attachment() in Core.
+	 *
+	 * @param array  $object  Attachment object.
+	 * @param string $cropped Cropped image URL.
+	 * @return int Attachment ID.
+	 */
+	public static function insert_attachment( $object, $cropped ) {
+		$parent_id = isset( $object['post_parent'] ) ? $object['post_parent'] : null;
+		unset( $object['post_parent'] );
+
+		$attachment_id = wp_insert_attachment( $object, $cropped );
+		$metadata      = wp_generate_attachment_metadata( $attachment_id, $cropped );
+
+		// If this is a crop, save the original attachment ID as metadata.
+		if ( $parent_id ) {
+			$metadata['attachment_parent'] = $parent_id;
+		}
+
+		/**
+		 * Filters the header image attachment metadata.
+		 *
+		 * @see wp_generate_attachment_metadata()
+		 * @param array $metadata Attachment metadata.
+		 */
+		$metadata = apply_filters( 'wp_header_image_attachment_metadata', $metadata );
+
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $attachment_id;
 	}
 }
