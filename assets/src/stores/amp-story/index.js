@@ -27,7 +27,6 @@ export default registerStore(
 				order: [],
 				isReordering: false,
 			},
-			reusableBlocks: [],
 		},
 	}
 );

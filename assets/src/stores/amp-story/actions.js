@@ -134,9 +134,3 @@ export function resetOrder() {
 		type: 'RESET_ORDER',
 	};
 }
-
-export function getReusableBlocks() {
-	return {
-		type: 'GET_REUSABLE_BLOCKS',
-	}
-}

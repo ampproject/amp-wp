@@ -32,9 +32,10 @@ class TemplateInserter extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
+		// This check is needed to make sure that the blocks are loaded in time.
 		if ( prevProps.reusableBlocks !== this.props.reusableBlocks || prevProps.allBlocks !== this.props.allBlocks ) {
 			this.setState( {
-				reusableBlocks: this.props.reusableBlocks
+				reusableBlocks: this.props.reusableBlocks,
 			} );
 		}
 	}
