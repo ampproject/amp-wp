@@ -57,6 +57,10 @@ export const settings = {
 	icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
 	attributes: schema,
 
+	supports: {
+		reusable: true,
+	},
+
 	/*
      * <amp-story-page>:
      *   mandatory_parent: "AMP-STORY"

@@ -1,20 +1,20 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton, Spinner } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { dispatch } from '@wordpress/data';
-import { parse, createBlock } from '@wordpress/blocks';
-const { apiFetch } = wp;
-
-const blocksRestBase = 'blocks';
+import { withSelect, withDispatch } from '@wordpress/data';
+import { createBlock, cloneBlock } from '@wordpress/blocks';
+import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
 import pageIcon from './icon';
+
+const storyPageBlockName = 'amp/amp-story-page';
 
 class TemplateInserter extends Component {
 	constructor() {
@@ -28,13 +28,15 @@ class TemplateInserter extends Component {
 	}
 
 	componentDidMount() {
-		// This is used for making sure that once the response finishes the component actually still exists.
-		this.isComponentMounted = true;
-		this.getReusableBlocks();
+		this.props.fetchReusableBlocks();
 	}
 
-	componentWillUnmount() {
-		this.isComponentMounted = false;
+	componentDidUpdate( prevProps ) {
+		if ( prevProps.reusableBlocks !== this.props.reusableBlocks || prevProps.allBlocks !== this.props.allBlocks ) {
+			this.setState( {
+				reusableBlocks: this.props.reusableBlocks
+			} );
+		}
 	}
 
 	onToggle( isOpen ) {
@@ -46,37 +48,8 @@ class TemplateInserter extends Component {
 		}
 	}
 
-	getReusableBlocks() {
-		if ( ! this.isComponentMounted ) {
-			return;
-		}
-
-		if ( null !== this.state.reusableBlocks ) {
-			this.setState( { reusableBlocks: null } );
-		}
-
-		// @todo We only need reusable blocks that can be used by AMP Stories.
-		const blocksRequest = this.lastRequest = apiFetch( {
-			path: `/wp/v2/${ blocksRestBase }?search=amp-story-page`,
-		} )
-			.then( ( response ) => {
-				// Check if it's the result of the last request.
-				if ( this.isComponentMounted && blocksRequest === this.lastRequest && response ) {
-					this.setState( { reusableBlocks: response } );
-				}
-			} )
-			.catch( ( error ) => {
-				if ( this.isComponentMounted && blocksRequest === this.lastRequest ) {
-					this.setState( { reusableBlocks: {
-						error: true,
-						message: error.message,
-					} } );
-				}
-			} );
-	}
-
 	render() {
-		const { insertBlocks, insertBlock } = dispatch( 'core/block-editor' );
+		const { insertBlock, getBlock } = this.props;
 		return (
 			<Dropdown
 				className="editor-inserter block-editor-inserter"
@@ -94,32 +67,23 @@ class TemplateInserter extends Component {
 					/>
 				) }
 				renderContent={ ( { onClose } ) => {
-					const onSelect = ( name, content ) => {
-						if ( 'core/block' === name ) {
-							const blocks = parse( content );
-							insertBlocks( blocks );
-						} else {
-							const block = createBlock( name );
-							insertBlock( block );
-						}
-						onClose();
+					const isStoryBlock = ( clientId ) => {
+						const block = getBlock( clientId );
+						return block && storyPageBlockName === block.name;
 					};
 
-					const reusableBlocks = this.state.reusableBlocks;
-					if ( ! reusableBlocks ) {
+					const onSelect = ( item ) => {
+						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
+						onClose();
+						// Clone block to avoid duplicate ID-s.
+						insertBlock( cloneBlock( block ) );
+					};
+					if ( ! this.state.reusableBlocks ) {
 						return (
 							<Spinner />
 						);
 					}
-
-					if ( reusableBlocks.error ) {
-						const errorMessage = sprintf( __( 'Loading templates failed: %s', 'amp' ), reusableBlocks.error.message );
-						return (
-							<div>
-								{ errorMessage }
-							</div>
-						);
-					}
+					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
 						<div key="template-list" className="amp-stories__editor-inserter__menu">
@@ -135,18 +99,18 @@ class TemplateInserter extends Component {
 											icon={ pageIcon }
 											label={ __( 'Blank Page', 'amp' ) }
 											onClick={ () => {
-												onSelect( 'amp/amp-story-page' );
+												onSelect( null );
 											} }
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ reusableBlocks && reusableBlocks.map( ( item ) =>
+									{ storyTemplates && storyTemplates.map( ( item ) =>
 										<BlockPreview
 											key="template-preview"
 											name="core/block"
 											attributes={ { ref: item.id } }
 											onClick={ () => {
-												onSelect( 'core/block', item.content.raw );
+												onSelect( item );
 											} }
 										/>
 									) }
@@ -160,4 +124,33 @@ class TemplateInserter extends Component {
 	}
 }
 
-export default TemplateInserter;
+export default compose(
+	withSelect( ( select ) => {
+		const {
+			__experimentalGetReusableBlocks: getReusableBlocks,
+		} = select( 'core/editor' );
+
+		const {
+			getBlock,
+			getBlocks,
+		} = select( 'core/block-editor' );
+
+		return {
+			reusableBlocks: getReusableBlocks(),
+			getBlock,
+			allBlocks: getBlocks(),
+		};
+	} ),
+	withDispatch( ( dispatch ) => {
+		const {
+			__experimentalFetchReusableBlocks: fetchReusableBlocks,
+		} = dispatch( 'core/editor' );
+
+		const { insertBlock } = dispatch( 'core/block-editor' );
+
+		return {
+			fetchReusableBlocks,
+			insertBlock,
+		};
+	} )
+)( TemplateInserter );

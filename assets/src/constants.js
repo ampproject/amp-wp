@@ -35,6 +35,8 @@ export const STORY_PAGE_WIDTH = STORY_PAGE_INNER_WIDTH + storyPageBorderWidth;
 
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
+	'core/block', // Reusable blocks.
+	'core/template', // Reusable blocks.
 ];
 
 export const ALLOWED_CHILD_BLOCKS = [
@@ -51,6 +53,7 @@ export const ALLOWED_CHILD_BLOCKS = [
 	'core/video',
 	'amp/amp-story-text',
 	'core/block', // Reusable blocks.
+	'core/template', // Reusable blocks.
 ];
 
 export const ALLOWED_BLOCKS = [
