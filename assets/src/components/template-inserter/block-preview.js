@@ -19,9 +19,9 @@ import { Disabled } from '@wordpress/components';
  */
 function BlockPreview( props ) {
 	return (
-		<button onClick={ props.onClick } className="components-button editor-block-preview block-editor-block-preview">
+		<li onClick={ props.onClick } className="components-button editor-block-preview block-editor-block-preview">
 			<BlockPreviewContent { ...props } />
-		</button>
+		</li>
 	);
 }
 

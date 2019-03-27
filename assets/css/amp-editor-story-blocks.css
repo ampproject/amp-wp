@@ -699,10 +699,30 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	padding: 2px;
 	transform: translateX(-90%);
 }
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::before {
+	border: 8px solid #e2e4e7;
+}
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::after {
+	border: 8px solid #fff;
+}
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::before,
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::after {
+	border-bottom-style: solid;
+	border-left-color: transparent;
+	border-right-color: transparent;
+	border-top: none;
+	margin-left: -10px;
+}
 
 @media (min-width: 782px) {
 	.amp-stories__template-inserter__popover.block-editor-inserter__popover:not(.is-mobile) > .components-popover__content {
 		overflow-y: scroll;
+	}
+}
+
+@media (min-width: 600px) {
+	.amp-stories__template-inserter__popover .block-editor-block-list__block .block-editor-block-list__block-edit {
+		margin: 0;
 	}
 }
 
@@ -718,6 +738,9 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 
 .amp-stories__template-inserter__popover.components-popover.is-top .components-popover__content {
 	bottom: initial;
+}
+.amp-stories__template-inserter__popover.components-popover:not(.is-without-arrow):not(.is-mobile).is-top {
+	margin-top: 44px;
 }
 
 .amp-stories__editor-inserter__results li {
@@ -761,6 +784,31 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 
 .amp-stories__editor-inserter__results .block-editor-block-preview {
 	pointer-events: initial;
+}
+
+.amp-stories__editor-inserter__results .block-list-appender,
+.amo-stories__editor-inserter__results .editor-block-list__insertion-point {
+	display: none;
+}
+
+.amp-stories__editor-inserter__results .block-editor-block-preview .block-editor-block-preview__content .components-disabled {
+	transform: initial;
+	text-align: initial;
+}
+.amp-stories__editor-inserter__results .components-disabled,
+.amp-stories__editor-inserter__results .components-disabled div:first-of-type,
+.amp-stories__editor-inserter__results .components-disabled .editor-inner-blocks {
+	padding: 0;
+	height: 100%;
+	width: 100%;
+}
+
+.amp-stories__editor-inserter__results .block-editor-block-preview .wp-block {
+	transform: scale(0.48) translateX(-40%) translateY(-40%);
+}
+
+.amp-stories__editor-inserter__results .block-editor-block-types-list {
+	padding: 10px;
 }
 
 

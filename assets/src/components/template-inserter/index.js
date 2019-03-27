@@ -54,7 +54,7 @@ class TemplateInserter extends Component {
 		return (
 			<Dropdown
 				className="editor-inserter block-editor-inserter"
-				contentClassName="amp-stories__template-inserter__popover is-bottom editor-inserter__popover block-editor-inserter__popover"
+				contentClassName="amp-stories__template-inserter__popover is-from-top is-bottom editor-inserter__popover"
 				onToggle={ this.onToggle }
 				expandOnMobile
 				renderToggle={ ( { onToggle, isOpen } ) => (
