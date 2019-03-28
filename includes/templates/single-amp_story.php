@@ -16,7 +16,7 @@ the_post();
 		<?php
 		wp_enqueue_scripts();
 		wp_scripts()->do_items( array( 'amp-runtime' ) ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
-		wp_styles()->do_items( array( 'wp-block-library' ) ); // @todo We need to allow a theme to enqueue their own AMP story styles.
+		wp_styles()->do_items();
 		?>
 		<?php rel_canonical(); ?>
 		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
@@ -31,12 +31,19 @@ the_post();
 		}
 		$publisher = isset( $metadata['publisher']['name'] ) ? $metadata['publisher']['name'] : get_option( 'blogname' );
 
-		// @todo poster-portrait-src can't be empty.
-		$poster_portrait_src = null;
-		if ( has_post_thumbnail() ) {
-			$src = wp_get_attachment_image_src( get_post_thumbnail_id(), 'amp-story-poster-portrait' );
-			if ( $src ) {
-				$poster_portrait_src = $src[0];
+		// There is a fallback poster-portrait image added via a filter, in case there's no featured image.
+		$thumbnail_id        = get_post_thumbnail_id();
+		$portrait_img        = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
+		$poster_portrait_src = $portrait_img[0];
+
+		if ( $thumbnail_id ) {
+			$square_img = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_SQUARE_IMAGE_SIZE );
+			if ( $square_img ) {
+				$poster_square_src = $square_img[0];
+			}
+			$landscape_img = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
+			if ( $landscape_img ) {
+				$poster_landscape_src = $landscape_img[0];
 			}
 		}
 
@@ -46,8 +53,12 @@ the_post();
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
-			<?php if ( ! empty( $poster_portrait_src ) ) : ?>
-				poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
+			poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
+			<?php if ( ! empty( $poster_square_src ) ) : ?>
+				poster-square-src="<?php echo esc_url( $poster_square_src ); ?>"
+			<?php endif; ?>
+			<?php if ( ! empty( $poster_landscape_src ) ) : ?>
+				poster-landscape-src="<?php echo esc_url( $poster_landscape_src ); ?>"
 			<?php endif; ?>
 		>
 			<?php the_content(); ?>
@@ -55,7 +66,7 @@ the_post();
 
 		<?php
 		// Note that \AMP_Story_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
-		wp_styles()->do_items();
+		print_late_styles();
 		?>
 	</body>
 </html>

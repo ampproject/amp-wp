@@ -20,19 +20,19 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<ul key="navigation-list" className="editor-block-navigation__list" role="list">
+		<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
 			{ blocks.map( ( block ) => {
 				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
 
-				let className = 'editor-block-navigation__item-button';
+				let className = 'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button';
 				if ( isSelected ) {
 					className += ' is-selected';
 				}
 
 				return (
 					<li key={ block.clientId }>
-						<div className="editor-block-navigation__item">
+						<div className="editor-block-navigation__item block-editor-block-navigation__item">
 							<Button
 								className={ className }
 								onClick={ () => selectBlock( block.clientId ) }
@@ -60,7 +60,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 	return (
 		<NavigableMenu
 			role="presentation"
-			className="editor-block-navigation__container"
+			className="editor-block-navigation__container block-editor-block-navigation__container"
 		>
 			<p className="editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
 			{ hasBlocks && (

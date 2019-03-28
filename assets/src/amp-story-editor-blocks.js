@@ -18,8 +18,11 @@ import {
 	withAmpStorySettings,
 	withAnimationControls,
 	withPageNumber,
+	withEditFeaturedImage,
+	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
+	withPrePublishNotice,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 } from './components';
@@ -37,6 +40,7 @@ import {
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
 
 import store from './stores/amp-story';
+import { registerPlugin } from '@wordpress/plugins';
 
 const {
 	getSelectedBlockClientId,
@@ -317,11 +321,15 @@ store.subscribe( () => {
 	}
 } );
 
+registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
+
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
+addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );

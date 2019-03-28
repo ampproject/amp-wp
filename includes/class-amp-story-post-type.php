@@ -25,6 +25,20 @@ class AMP_Story_Post_Type {
 	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
 
 	/**
+	 * The image size for the poster-landscape-src.
+	 *
+	 * @var string
+	 */
+	const STORY_LANDSCAPE_IMAGE_SIZE = 'amp-story-poster-landscape';
+
+	/**
+	 * The image size for the poster-square-src.
+	 *
+	 * @var string
+	 */
+	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
+
+	/**
 	 * The slug of the story card CSS file.
 	 *
 	 * @var string
@@ -37,6 +51,13 @@ class AMP_Story_Post_Type {
 	 * @var string
 	 */
 	const REWRITE_SLUG = 'stories';
+
+	/**
+	 * AMP Stories style handle.
+	 *
+	 * @var string
+	 */
+	const AMP_STORIES_STYLE_HANDLE = 'amp-story-style';
 
 	/**
 	 * Registers the post type to store URLs with validation errors.
@@ -106,25 +127,29 @@ class AMP_Story_Post_Type {
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_block_styles' ) );
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_stories_styles' ) );
 
-		// Remove support for custom color palettes.
+		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', array( __CLASS__, 'filter_block_editor_settings' ), 10, 2 );
 
 		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( 'amp-story-poster-portrait', 300, 400, true );
+		add_image_size( self::STORY_CARD_IMAGE_SIZE, 696, 928, true );
 
 		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-square', 100, 100, true );
+		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, 928, 928, true );
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
+		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, 928, 696, true );
+
+		// In case there is no featured image for the poster-portrait-src, add a fallback image.
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
 
 		// Limit the styles that are printed in a story.
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
+		add_filter( 'print_styles_array', array( __CLASS__, 'filter_editor_print_styles_array' ) );
 
 		// Select the single-amp_story.php template for AMP Stories.
 		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
@@ -160,6 +185,17 @@ class AMP_Story_Post_Type {
 			function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
+				}
+				return $sanitizers;
+			}
+		);
+
+		// Omit the core theme sanitizer for the story template.
+		add_filter(
+			'amp_content_sanitizers',
+			function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
 				}
 				return $sanitizers;
 			}
@@ -216,11 +252,45 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Filter which styles will be used in the edit page of an AMP Story.
+	 *
+	 * @param array $handles Style handles.
+	 * @return array Styles to print.
+	 */
+	public static function filter_editor_print_styles_array( $handles ) {
+		if (
+			! function_exists( 'get_current_screen' ) ||
+			! get_current_screen() ||
+			self::POST_TYPE_SLUG !== get_current_screen()->post_type ||
+			! get_current_screen()->is_block_editor
+		) {
+			return $handles;
+		}
+
+		return array_filter(
+			$handles,
+			function( $handle ) {
+				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
+					return false;
+				}
+				$dep = wp_styles()->registered[ $handle ];
+
+				// If we have amp-stories as dependency, allow the style.
+				if ( is_array( $dep->deps ) && in_array( self::AMP_STORIES_STYLE_HANDLE, $dep->deps, true ) ) {
+					return true;
+				}
+
+				// Disable the active theme's style.
+				if ( self::is_theme_stylesheet( $dep->src ) ) {
+					return false;
+				}
+				return true;
+			}
+		);
+	}
+
+	/**
 	 * Filter which styles will be printed on an AMP Story.
-	 *
-	 * At the moment, this will only allow Google fonts to be printed.
-	 *
-	 * @todo We will need to allow sites to enqueue story-specific styles beyond fonts.
 	 *
 	 * @param array $handles Style handles.
 	 * @return array Styles to print.
@@ -242,7 +312,11 @@ class AMP_Story_Post_Type {
 					return true;
 				}
 
-				if ( 'wp-block-library' === $handle ) {
+				if ( 'wp-block-library' === $handle || self::AMP_STORIES_STYLE_HANDLE === $handle ) {
+					return true;
+				}
+
+				if ( in_array( self::AMP_STORIES_STYLE_HANDLE, $dep->deps, true ) ) {
 					return true;
 				}
 
@@ -259,15 +333,6 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		// This CSS is separate since it's used both in front-end and in the editor.
-		$amp_stories_handle = 'amp-story-style';
-		wp_enqueue_style(
-			$amp_stories_handle,
-			amp_get_asset_url( 'css/amp-stories.css' ),
-			array(),
-			AMP__VERSION
-		);
-
 		wp_enqueue_style(
 			'amp-editor-story-blocks-style',
 			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
@@ -275,10 +340,25 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
+		self::enqueue_general_styles();
+	}
+
+	/**
+	 * Enqueue styles that are needed for frontend and editor both.
+	 */
+	public static function enqueue_general_styles() {
+		// This CSS is separate since it's used both in front-end and in the editor.
+		wp_enqueue_style(
+			self::AMP_STORIES_STYLE_HANDLE,
+			amp_get_asset_url( 'css/amp-stories.css' ),
+			array(),
+			AMP__VERSION
+		);
+
 		$fonts = self::get_fonts();
 		foreach ( $fonts as $font ) {
 			wp_add_inline_style(
-				$amp_stories_handle,
+				self::AMP_STORIES_STYLE_HANDLE,
 				self::get_inline_font_style_rule( $font )
 			);
 		}
@@ -287,7 +367,8 @@ class AMP_Story_Post_Type {
 	/**
 	 * Filters the settings to pass to the block editor.
 	 *
-	 * Used to remove support for custom color palettes for AMP stories.
+	 * Removes support for custom color palettes for AMP stories.
+	 * Removes custom theme stylesheets for editing AMP Stories.
 	 *
 	 * @param array   $editor_settings Default editor settings.
 	 * @param WP_Post $post            Post being edited.
@@ -298,7 +379,61 @@ class AMP_Story_Post_Type {
 		if ( self::POST_TYPE_SLUG === $post->post_type ) {
 			unset( $editor_settings['colors'] );
 		}
+
+		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
+			foreach ( $editor_settings['styles'] as $key => $style ) {
+
+				// If the baseURL is not set or if the URL doesn't include theme styles, move to next.
+				if ( ! isset( $style['baseURL'] ) || ! self::is_theme_stylesheet( $style['baseURL'] ) ) {
+					continue;
+				}
+
+				/**
+				 * Filters the editor style to allow whitelisting it for AMP Stories editor.
+				 *
+				 * @param bool   $whitelisted If to whitelist the stylesheet.
+				 * @param string $base_url    The URL for the stylesheet.
+				 */
+				if ( false === apply_filters( 'amp_stories_whitelist_editor_style', false, $style['baseURL'] ) ) {
+					unset( $editor_settings['styles'][ $key ] );
+				}
+			}
+		}
 		return $editor_settings;
+	}
+
+	/**
+	 * Checks if a stylesheet is from the theme or parent theme.
+	 *
+	 * @param string $url Stylesheet URL.
+	 * @return bool If the stylesheet comes from the theme.
+	 */
+	public static function is_theme_stylesheet( $url ) {
+		return (
+			0 === strpos( $url, get_stylesheet_directory_uri() )
+			||
+			0 === strpos( $url, get_template_directory_uri() )
+		);
+	}
+
+	/**
+	 * If there's no featured image for the poster-portrait-src, this adds a fallback.
+	 *
+	 * @param array|false  $image The featured image, or false.
+	 * @param int          $attachment_id The ID of the image.
+	 * @param string|array $size The size of the image.
+	 * @return array|false The featured image, or false.
+	 */
+	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
+		unset( $attachment_id );
+		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
+			return array(
+				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
+				928,
+				696,
+			);
+		}
+		return $image;
 	}
 
 	/**
@@ -401,14 +536,30 @@ class AMP_Story_Post_Type {
 	 *
 	 * @see /assets/css/amp-stories.css
 	 */
-	public static function add_custom_block_styles() {
+	public static function add_custom_stories_styles() {
 		$post = get_post();
 		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
-		$css_src      = AMP__DIR__ . '/assets/css/amp-stories.css';
-		$css_contents = file_get_contents( $css_src ); // phpcs:ignore -- It's a local filesystem path not a remote request.
-		wp_add_inline_style( 'wp-block-library', $css_contents );
+
+		wp_enqueue_style(
+			'amp-stories-frontend',
+			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
+		// Also enqueue this since it's possible to embed another story into a story.
+		wp_enqueue_style(
+			'amp-story-card',
+			amp_get_asset_url( 'css/amp-story-card.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
+		self::enqueue_general_styles();
 	}
 
 	/**
