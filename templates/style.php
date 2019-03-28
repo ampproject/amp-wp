@@ -44,11 +44,7 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 	margin: 0 auto;
 }
 
-.amp-wp-unknown-size img {
-	/** Worst case scenario when we can't figure out dimensions for an image. **/
-	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
-	object-fit: contain;
-}
+<?php echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions ?>
 
 /* Template Styles */
 
