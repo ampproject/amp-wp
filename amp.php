@@ -343,7 +343,7 @@ function amp_maybe_add_actions() {
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
 			/*
-			 * Temporary redirect is used for admin users because classic mode and AMP support can be enabled by user at any time,
+			 * Temporary redirect is used for admin users because reader mode and AMP support can be enabled by user at any time,
 			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
 			 */
 			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );

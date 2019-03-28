@@ -4,15 +4,15 @@
 ![Banner](wp-assets/banner-1544x500.png)
 Enable AMP on your WordPress site, the WordPress way.
 
-**Contributors:** [automattic](https://profiles.wordpress.org/automattic), [xwp](https://profiles.wordpress.org/xwp), [google](https://profiles.wordpress.org/google), [westonruter](https://profiles.wordpress.org/westonruter), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [batmoo](https://profiles.wordpress.org/batmoo), [stubgo](https://profiles.wordpress.org/stubgo), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry), [joshuawold](https://profiles.wordpress.org/joshuawold), [postphotos](https://profiles.wordpress.org/postphotos)  
-**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
-**Requires at least:** 4.9  
-**Tested up to:** 5.1  
-**Stable tag:** 1.0.2  
-**License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
-**Requires PHP:** 5.4  
+**Contributors:** [automattic](https://profiles.wordpress.org/automattic), [xwp](https://profiles.wordpress.org/xwp), [google](https://profiles.wordpress.org/google), [westonruter](https://profiles.wordpress.org/westonruter), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [batmoo](https://profiles.wordpress.org/batmoo), [stubgo](https://profiles.wordpress.org/stubgo), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry), [joshuawold](https://profiles.wordpress.org/joshuawold), [postphotos](https://profiles.wordpress.org/postphotos)
+**Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)
+**Requires at least:** 4.9
+**Tested up to:** 5.1
+**Stable tag:** 1.0.2
+**License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)
+**Requires PHP:** 5.4
 
-[![Build Status](https://travis-ci.org/ampproject/amp-wp.svg?branch=develop)](https://travis-ci.org/ampproject/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com) 
+[![Build Status](https://travis-ci.org/ampproject/amp-wp.svg?branch=develop)](https://travis-ci.org/ampproject/amp-wp) [![Built with Grunt](https://cdn.gruntjs.com/builtwith.svg)](http://gruntjs.com)
 
 ## Description ##
 
@@ -32,8 +32,8 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 ## Installation ##
 
 1. Upload the folder to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. If you currently use older versions of the plugin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Paired` or `Native` mode.
 
 ## Getting Started ##
 
@@ -51,13 +51,13 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-2.png)
 
-### Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+### Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
 
-![Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
+![Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
 
-### Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+### Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
 
-![Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
+![Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
 
 ### Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 

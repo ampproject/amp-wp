@@ -474,7 +474,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		ob_start();
 		amp_add_generator_metadata();
 		$output = ob_get_clean();
-		$this->assertContains( 'mode=classic', $output );
+		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );

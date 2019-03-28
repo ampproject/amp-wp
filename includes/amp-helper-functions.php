@@ -369,7 +369,7 @@ function amp_add_generator_metadata() {
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'paired';
 	} else {
-		$mode = 'classic';
+		$mode = 'reader';
 	}
 	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
 }

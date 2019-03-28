@@ -28,8 +28,8 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 == Installation ==
 
 1. Upload the folder to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. If you currently use older versions of the plugin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Paired` or `Native` mode.
 
 == Getting Started ==
 
@@ -41,8 +41,8 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 1. Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
 1. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
-1. Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
-1. Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+1. Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+1. Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
 1. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 1. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
 1. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.

@@ -186,11 +186,11 @@ class AMP_Options_Menu {
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
 						<label for="theme_support_disabled">
-							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+							<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php esc_html_e( 'Display AMP responses in a simplified reader mode design that does not match your theme\'s templates.', 'amp' ); ?>
 
 						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">

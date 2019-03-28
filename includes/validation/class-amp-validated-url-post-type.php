@@ -1235,7 +1235,7 @@ class AMP_Validated_URL_Post_Type {
 			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 				$template_mode = 'paired';
 			} else {
-				$template_mode = 'classic';
+				$template_mode = 'reader';
 			}
 			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
@@ -1250,7 +1250,7 @@ class AMP_Validated_URL_Post_Type {
 					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
 				);
 			} else {
-				$message = __( 'The site is using classic AMP mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
+				$message = __( 'The site is using AMP reader mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
 			}
 
 			$class = 'info';

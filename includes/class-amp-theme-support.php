@@ -314,7 +314,7 @@ class AMP_Theme_Support {
 				$old_url = amp_get_current_url();
 				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 				if ( $old_url !== $new_url ) {
-					// A temporary redirect is used for admin users to allow them to see changes between classic and paired modes.
+					// A temporary redirect is used for admin users to allow them to see changes between reader mode and paired modes.
 					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 					// @codeCoverageIgnoreStart
 					if ( $exit ) {
