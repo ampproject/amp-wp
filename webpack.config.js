@@ -70,7 +70,7 @@ module.exports = {
 	mode: isProduction ? 'production' : 'development',
 	entry: {
 		'./assets/js/amp-blocks-compiled': './assets/src/blocks/index.js',
-		'./assets/js/amp-block-editor-toggle-compiled': './assets/src/amp-block-editor-toggle.js',
+		'./assets/js/amp-block-editor-compiled': './assets/src/amp-block-editor.js',
 		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle.js',
 		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details.js',
 		'./assets/js/amp-story-editor-blocks-compiled': './assets/src/amp-story-editor-blocks.js',

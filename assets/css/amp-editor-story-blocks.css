@@ -1,6 +1,7 @@
 /*------------------------------------------------------------------
 [Table of contents]
 
+	0. General editor layout styles.
 	1. Style story pages wrapper
 	2. Selected state
 		2.1 Selected label
@@ -24,6 +25,23 @@
 
 -------------------------------------------------------------------*/
 
+/*
+ * 0. General editor layout styles.
+ */
+.edit-post-visual-editor {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+@media screen and (min-width: 1280px) {
+	#amp-story-editor {
+		min-width: 820px;
+	}
+}
+
+#amp-story-editor {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
 
 /*
  * 1. Style story pages wrapper.
@@ -82,15 +100,15 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
  * Show label while the layer is selected
  */
 
- .editor-block-list__breadcrumb {
-	 z-index: 6;
-	 pointer-events: none;
- }
+.editor-block-list__breadcrumb {
+	z-index: 6;
+	pointer-events: none;
+}
 
- .editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
-	 opacity: 1;
-	 animation: none;
- }
+.editor-block-list__block:hover .editor-block-list__breadcrumb .components-toolbar {
+	opacity: 1;
+	animation: none;
+}
 
 /*
  * 3. Story page dimensions.
@@ -130,6 +148,7 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block:first-child .editor-block-list__block-edit {
 	margin: 0;
+	max-width: 100%;
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"].editor-block-list__block .editor-block-list__block-edit,
@@ -187,28 +206,28 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 .amp-grid-template .editor-block-list__layout .editor-block-list__block.is-selected > .editor-block-list__block-edit .editor-rich-text,
 .amp-grid-template .editor-block-list__layout .editor-block-list__block.is-typing > .editor-block-list__block-edit .editor-rich-text {
 	text-shadow:
-		0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+			0.05em 0 rgba( 255, 255, 255, 0.8 ),
+			0 0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+			0 -0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+			0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+			0.05em 0.05em rgba( 255, 255, 255, 0.8 );
 }
 
 .amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce,
 .amp-grid-template .editor-block-list__layout .editor-block-list__block .editor-rich-text__tinymce + .editor-rich-text__tinymce p {
 	opacity: 0.9;
 	text-shadow:
-		0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0 rgba( 255, 255, 255, 0.8 ),
-		0 -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
-		0.05em 0.05em rgba( 255, 255, 255, 0.8 );
+			0.05em 0 rgba( 255, 255, 255, 0.8 ),
+			0 0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em 0 rgba( 255, 255, 255, 0.8 ),
+			0 -0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+			-0.05em 0.05em rgba( 255, 255, 255, 0.8 ),
+			0.05em -0.05em rgba( 255, 255, 255, 0.8 ),
+			0.05em 0.05em rgba( 255, 255, 255, 0.8 );
 }
 
 /*
@@ -294,7 +313,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		position: absolute;
 		top: -3em;
 		text-transform: uppercase;
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 12px;
 		color: #666;
 		letter-spacing: 1px;
@@ -463,7 +482,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 	#amp-root-navigation {
 		position: absolute;
-		left: 5px;
+		left: 50px;
 		top: 218px;
 		width: 300px;
 		z-index: 80;
@@ -508,7 +527,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	/* Navigator in the context of the open sidebar, settings hidden. */
 	.post-type-amp_story:not(.folded) .edit-post-layout #amp-root-navigation {
 		max-width: calc(
-			calc(
+				calc(
 				100vw
 				-
 				var(--admin-menu-expanded-sidebar-width)
@@ -518,15 +537,15 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 				calc( var(--block-editor-horizontal-margin) * 2 )
 				-
 				var( --scrollbar-width )
-			) / 2
-			-
-			var(--block-navigation-right-margin)
+				) / 2
+				-
+				var(--block-navigation-right-margin)
 		);
 	}
 
 	.post-type-amp_story.folded .edit-post-layout #amp-root-navigation {
 		max-width: calc(
-			calc(
+				calc(
 				100vw
 				-
 				var(--admin-menu-collapsed-sidebar-width)
@@ -536,16 +555,16 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 				calc( var(--block-editor-horizontal-margin) * 2 )
 				-
 				var( --scrollbar-width )
-			) / 2
-			-
-			var(--block-navigation-right-margin)
+				) / 2
+				-
+				var(--block-navigation-right-margin)
 		);
 	}
 
 	/* Navigator in the context of minimum available space - open sidebar, settings shown. */
 	.post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-root-navigation {
 		max-width: calc(
-			calc(
+				calc(
 				100vw
 				-
 				var(--admin-menu-expanded-sidebar-width)
@@ -557,9 +576,9 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 				calc( var(--block-editor-horizontal-margin) * 2 )
 				-
 				var( --scrollbar-width )
-			) / 2
-			-
-			var(--block-navigation-right-margin)
+				) / 2
+				-
+				var(--block-navigation-right-margin)
 		);
 	}
 
@@ -571,7 +590,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	/* Navigator in the context of folded sidebar, settings shown. */
 	.post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-root-navigation {
 		max-width: calc(
-			calc(
+				calc(
 				100vw
 				-
 				var(--admin-menu-collapsed-sidebar-width)
@@ -583,9 +602,9 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 				calc( var(--block-editor-horizontal-margin) * 2 )
 				-
 				var( --scrollbar-width )
-			) / 2
-			-
-			var(--block-navigation-right-margin)
+				) / 2
+				-
+				var(--block-navigation-right-margin)
 		);
 	}
 
@@ -685,6 +704,20 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 
 #amp-story-editor .components-draggable__clone {
 	position: absolute;
+}
+
+/* Pullquote block adjustments */
+.wp-block[data-type="core/pullquote"][data-align="wide"],
+.wp-block[data-type="core/pullquote"][data-align="full"] {
+	width: 100%;
+	max-width: 100%;
+}
+.block-editor-inner-blocks .wp-block[data-type="core/pullquote"] .block-editor-block-list__block-edit {
+	display: block;
+}
+
+#amp-story-editor .block-editor-block-list__layout .block-editor-block-list__block[data-align="full"] {
+	margin: 0;
 }
 
 /*
@@ -948,6 +981,14 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 /**
  * 11. Text Block.
  */
+.wp-block[data-type="amp/amp-story-text"] p {
+	margin: 0;
+}
+
+.wp-block-amp-story-text .editor-rich-text__editable {
+	width: 100%;
+}
+
 .amp-story-text__resize-container .components-resizable-box__handle-right {
 	right: -26px;
 	height: 50px;

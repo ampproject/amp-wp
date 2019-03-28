@@ -25,6 +25,20 @@ class AMP_Story_Post_Type {
 	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
 
 	/**
+	 * The image size for the poster-landscape-src.
+	 *
+	 * @var string
+	 */
+	const STORY_LANDSCAPE_IMAGE_SIZE = 'amp-story-poster-landscape';
+
+	/**
+	 * The image size for the poster-square-src.
+	 *
+	 * @var string
+	 */
+	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
+
+	/**
 	 * The slug of the story card CSS file.
 	 *
 	 * @var string
@@ -122,13 +136,16 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( 'amp-story-poster-portrait', 300, 400, true );
+		add_image_size( self::STORY_CARD_IMAGE_SIZE, 696, 928, true );
 
 		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-square', 100, 100, true );
+		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, 928, 928, true );
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( 'amp-story-poster-landscape', 400, 300, true );
+		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, 928, 696, true );
+
+		// In case there is no featured image for the poster-portrait-src, add a fallback image.
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
 
 		// Limit the styles that are printed in a story.
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
@@ -155,6 +172,17 @@ class AMP_Story_Post_Type {
 			array(
 				'render_callback' => array( __CLASS__, 'render_text_block' ),
 			)
+		);
+
+		// Omit the core theme sanitizer for the story template.
+		add_filter(
+			'amp_content_sanitizers',
+			function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
+				}
+				return $sanitizers;
+			}
 		);
 
 		self::maybe_flush_rewrite_rules();
@@ -373,6 +401,26 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * If there's no featured image for the poster-portrait-src, this adds a fallback.
+	 *
+	 * @param array|false  $image The featured image, or false.
+	 * @param int          $attachment_id The ID of the image.
+	 * @param string|array $size The size of the image.
+	 * @return array|false The featured image, or false.
+	 */
+	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
+		unset( $attachment_id );
+		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
+			return array(
+				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
+				928,
+				696,
+			);
+		}
+		return $image;
+	}
+
+	/**
 	 * Registers the story card styling.
 	 *
 	 * This can't take place on the 'wp_enqueue_scripts' hook, as the /embed endpoint doesn't trigger that.
@@ -477,6 +525,23 @@ class AMP_Story_Post_Type {
 		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
+
+		wp_enqueue_style(
+			'amp-stories-frontend',
+			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
+		// Also enqueue this since it's possible to embed another story into a story.
+		wp_enqueue_style(
+			'amp-story-card',
+			amp_get_asset_url( 'css/amp-story-card.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
 
 		self::enqueue_general_styles();
 	}
