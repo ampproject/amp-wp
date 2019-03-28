@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getFeaturedImageMessage } from './';
+import { getFeaturedImageMessage } from '../helpers';
 
 /**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
