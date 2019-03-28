@@ -10,7 +10,8 @@ import uuid from 'uuid/v4';
  */
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
-import { _x } from '@wordpress/i18n';
+import { __, _x } from '@wordpress/i18n';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -445,4 +446,49 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
 	}
 	return 0;
+};
+
+/**
+ * Gets the message for an invalid featured image, if it is invalid.
+ *
+ * @param {Function} validateImageSize A function to validate whether the size is correct.
+ * @param {string} invalidSizeMessage A message to display in a Notice if the size is wrong.
+ * @return {string|null} A message about the invalid featured image, or null if it's valid.
+ */
+export const getFeaturedImageMessage = ( validateImageSize, invalidSizeMessage ) => {
+	const currentPost = select( 'core/editor' ).getCurrentPost();
+	const editedFeaturedMedia = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
+	const featuredMedia = currentPost.featured_media || editedFeaturedMedia;
+
+	if ( ! featuredMedia ) {
+		return __( 'Selecting a featured image is required.', 'amp' );
+	}
+
+	const media = select( 'core' ).getMedia( featuredMedia );
+	if ( ! media || ! media.media_details || ! validateImageSize( media.media_details ) ) {
+		return invalidSizeMessage;
+	}
+};
+
+/**
+ * Gets whether the AMP story's featured image has the right minimum dimensions.
+ *
+ * The featured image populates the AMP story poster image.
+ * The 3 minimum dimensions for that are 696px x 928px, 928px x 696px, or 928px x 928px.
+ *
+ * @param {Object} media A media object with width and height values.
+ * @return {boolean} Whether the media has the minimum dimensions.
+ */
+export const hasMinimumStoryPosterDimensions = ( media ) => {
+	const largeDimension = 928;
+	const smallDimension = 696;
+	return (
+		( media.width && media.height )	&&
+		( media.width >= smallDimension && media.height >= smallDimension )	&&
+		(
+			( media.width >= largeDimension && media.height >= largeDimension ) ||
+			( media.width < largeDimension && media.height >= largeDimension ) ||
+			( media.height < largeDimension && media.width >= largeDimension )
+		)
+	);
 };
