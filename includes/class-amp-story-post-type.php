@@ -157,6 +157,17 @@ class AMP_Story_Post_Type {
 			)
 		);
 
+		// Omit the core theme sanitizer for the story template.
+		add_filter(
+			'amp_content_sanitizers',
+			function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
+				}
+				return $sanitizers;
+			}
+		);
+
 		self::maybe_flush_rewrite_rules();
 	}
 
@@ -477,6 +488,23 @@ class AMP_Story_Post_Type {
 		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
 			return;
 		}
+
+		wp_enqueue_style(
+			'amp-stories-frontend',
+			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
+
+		// Also enqueue this since it's possible to embed another story into a story.
+		wp_enqueue_style(
+			'amp-story-card',
+			amp_get_asset_url( 'css/amp-story-card.css' ),
+			array( self::AMP_STORIES_STYLE_HANDLE ),
+			AMP__VERSION,
+			false
+		);
 
 		self::enqueue_general_styles();
 	}

@@ -117,11 +117,19 @@ class TextBlockEdit extends Component {
 			autoFontSize,
 			height,
 			width,
+			tagName,
 		} = attributes;
 
 		const minTextHeight = 20;
 		const minTextWidth = 30;
-		const userFontSize = fontSize.size ? fontSize.size + 'px' : undefined;
+		let userFontSize = fontSize.size ? fontSize.size + 'px' : undefined;
+		if ( undefined === userFontSize ) {
+			if ( 'h1' === tagName ) {
+				userFontSize = 2 + 'rem';
+			} else if ( 'h2' === tagName ) {
+				userFontSize = 1.5 + 'rem';
+			}
+		}
 
 		return (
 			<Fragment>
@@ -224,6 +232,7 @@ class TextBlockEdit extends Component {
 							backgroundColor: backgroundColor.color,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize : userFontSize,
+							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
