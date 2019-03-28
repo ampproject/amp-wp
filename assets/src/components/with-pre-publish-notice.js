@@ -6,7 +6,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getPrePublishNotice, hasMinimumStoryPosterDimensions } from './';
+import { getPrePublishNotice } from './';
+import { hasMinimumStoryPosterDimensions } from '../helpers';
 
 export default getPrePublishNotice(
 	hasMinimumStoryPosterDimensions,
