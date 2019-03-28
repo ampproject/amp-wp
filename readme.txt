@@ -40,15 +40,15 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 == Screenshots ==
 
 1. Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
-1. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
-1. Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
-1. Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
-1. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
-1. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
-1. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-1. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
-1. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
-1. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
+2. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
+3. Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+4. Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+5. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+6. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
+7. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+8. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
+9. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+10. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 
