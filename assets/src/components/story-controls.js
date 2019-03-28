@@ -7,6 +7,7 @@
  * Internal dependencies
  */
 import { TemplateInserter } from './';
+import { ICONS } from './../constants';
 
 /**
  * WordPress dependencies
@@ -45,7 +46,7 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 			<TemplateInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
-				icon="sort"
+				icon={ ICONS.reorder }
 				label={ __( 'Reorder Pages', 'amp' ) }
 				onClick={ startReordering }
 			/>

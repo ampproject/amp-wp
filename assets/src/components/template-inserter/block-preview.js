@@ -18,11 +18,15 @@ import { Disabled } from '@wordpress/components';
  * @return {WPElement} Rendered element.
  */
 function BlockPreview( props ) {
+	// @todo Probably there's a better way to handle this.
+	// Disable reason: This should be a button, however, there can be buttons within Pages, too. Buttons shouldn't be within buttons.
+	/* eslint-disable */
 	return (
-		<li onClick={ props.onClick } className="components-button editor-block-preview block-editor-block-preview">
+		<a onClick={ props.onClick } className="components-button editor-block-preview block-editor-block-preview">
 			<BlockPreviewContent { ...props } />
-		</li>
+		</a>
 	);
+	/* eslint-enable */
 }
 
 export function BlockPreviewContent( { name, attributes } ) {

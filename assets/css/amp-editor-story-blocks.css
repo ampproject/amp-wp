@@ -352,6 +352,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 	#amp-story-controls {
 		text-align: right;
+		padding-right: 20px;
 	}
 
 	#amp-story-controls .amp-story-controls-reorder {
@@ -693,6 +694,33 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 /*
  * Template Inserter Component.
  */
+
+#amp-story-controls .editor-inserter__amp-inserter {
+	height: 48px;
+	width: 48px;
+	background-color: #0085BA;
+	border-radius: 50%;
+	margin-right: 10px;
+}
+
+#amp-story-controls .editor-inserter__amp-inserter span:first-of-type,
+.amp-story-controls-reorder span:first-of-type {
+	display: none;
+}
+
+#amp-story-controls .editor-inserter__amp-inserter svg {
+	margin: 0 auto;
+}
+
+.amp-story-controls-reorder {
+	box-sizing: border-box;
+	height: 49px;
+	width: 49px;
+	border: 1px solid #AAAEB3;
+	border-radius: 50%;
+	margin-right: 10px;
+}
+
 .amp-stories__template-inserter__popover.components-popover .components-popover__content:not(.is-mobile) {
 	width: 386px;
 	height: 400px;
@@ -706,12 +734,14 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	border: 8px solid #fff;
 }
 .components-popover:not(.is-without-arrow):not(.is-mobile).is-top::before,
-.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::after {
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-bottom::before,
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::after,
+.components-popover:not(.is-without-arrow):not(.is-mobile).is-bottom::after {
 	border-bottom-style: solid;
 	border-left-color: transparent;
 	border-right-color: transparent;
 	border-top: none;
-	margin-left: -10px;
+	margin-left: -15px;
 }
 
 @media (min-width: 782px) {
@@ -740,7 +770,7 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	bottom: initial;
 }
 .amp-stories__template-inserter__popover.components-popover:not(.is-without-arrow):not(.is-mobile).is-top {
-	margin-top: 44px;
+	margin-top: 55px;
 }
 
 .amp-stories__editor-inserter__results li {
@@ -810,7 +840,6 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 .amp-stories__editor-inserter__results .block-editor-block-types-list {
 	padding: 10px;
 }
-
 
 /*
  * Preview Picker component

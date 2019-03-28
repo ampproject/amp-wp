@@ -75,11 +75,11 @@ export const setBlockParent = ( props ) => {
 		// Only amp/amp-story-page blocks can be on the top level.
 		return {
 			...props,
-			parent: [ 'amp/amp-story-page' ],
+			parent: [ 'amp/amp-story-page', 'core/block' ],
 		};
 	}
 
-	if ( name !== 'amp/amp-story-page' ) {
+	if ( name !== 'amp/amp-story-page' && name !== 'core/block' ) {
 		// Do not allow inserting any of the blocks if they're not AMP Story blocks.
 		return {
 			...props,
