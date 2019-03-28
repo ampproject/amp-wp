@@ -127,8 +127,10 @@ blockquote p:last-child {
 
 .amp-wp-header div {
 	color: <?php echo sanitize_hex_color( $header_color ); ?>;
+	display: flex;
 	font-size: 1em;
 	font-weight: 400;
+	justify-content: space-between;
 	margin: 0 auto;
 	max-width: calc(840px - 32px);
 	padding: .875em 16px;
@@ -138,6 +140,11 @@ blockquote p:last-child {
 .amp-wp-header a {
 	color: <?php echo sanitize_hex_color( $header_color ); ?>;
 	text-decoration: none;
+}
+
+.amp-wp-header .amp-wp-canonical-link {
+	font-size: 0.8em;
+	text-decoration: underline;
 }
 
 /* Site Icon */

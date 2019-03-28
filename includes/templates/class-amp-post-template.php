@@ -267,23 +267,25 @@ class AMP_Post_Template {
 
 		$this->add_data(
 			array(
-				'post'                    => $this->post,
-				'post_id'                 => $this->ID,
-				'post_title'              => $post_title,
-				'post_publish_timestamp'  => $post_publish_timestamp,
-				'post_modified_timestamp' => $post_modified_timestamp,
-				'post_author'             => $post_author,
+				'post'                     => $this->post,
+				'post_id'                  => $this->ID,
+				'post_title'               => $post_title,
+				'post_publish_timestamp'   => $post_publish_timestamp,
+				'post_modified_timestamp'  => $post_modified_timestamp,
+				'post_author'              => $post_author,
+				'post_canonical_link_url'  => get_permalink( $this->ID ),
+				'post_canonical_link_text' => __( 'Exit Reader Mode', 'amp' ),
 			)
 		);
 
 		$this->build_post_featured_image();
-		$this->build_post_commments_data();
+		$this->build_post_comments_data();
 	}
 
 	/**
 	 * Buuild post comments data.
 	 */
-	private function build_post_commments_data() {
+	private function build_post_comments_data() {
 		if ( ! post_type_supports( $this->post->post_type, 'comments' ) ) {
 			return;
 		}
