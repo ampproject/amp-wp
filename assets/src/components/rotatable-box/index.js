@@ -108,7 +108,7 @@ class RotatableBox extends Component {
 		const y = e.clientY - centerY;
 
 		const rad2deg = ( 180 / Math.PI );
-		const angle = parseInt( -( rad2deg * Math.atan2( x, y ) ) );
+		const angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
 
 		this.elementRef.current.style.transform = `rotate(${ angle }deg)`;
 
