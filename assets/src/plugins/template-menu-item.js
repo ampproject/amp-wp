@@ -53,7 +53,7 @@ export function registerTemplateSaveMenuItem() {
 		render: ( ) => (
 			<PluginBlockSettingsMenuItem
 				allowedBlockNames={ [ 'amp/amp-story-page' ] }
-				icon="wordpress-alt"
+				icon="welcome-add-page"
 				label={ __( 'Save as Template', 'amp' ) }
 				onClick={ addTemplate }
 			/>
