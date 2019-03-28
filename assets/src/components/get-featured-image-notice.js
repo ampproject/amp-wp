@@ -33,7 +33,10 @@ export default ( validateImageSize, invalidSizeMessage ) => {
 
 			return (
 				<Fragment>
-					<Notice status="warning">
+					<Notice
+						status="warning"
+						isDismissible={ false }
+					>
 						<span>
 							{ featuredImageMessage }
 						</span>

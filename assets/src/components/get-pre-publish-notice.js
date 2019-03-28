@@ -31,7 +31,10 @@ export default ( validateImageSize, invalidSizeMessage ) => {
 					title={ __( 'Featured Image', 'amp' ) }
 					initialOpen="true"
 				>
-					<Notice status="warning">
+					<Notice
+						status="warning"
+						isDismissible={ false }
+					>
 						<span>
 							{ featuredImageMessage }
 						</span>
