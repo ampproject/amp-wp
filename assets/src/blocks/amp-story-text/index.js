@@ -10,14 +10,16 @@ import { __ } from '@wordpress/i18n';
 import {
 	RichText,
 	getColorClassName,
-	getFontSizeClass,
+	getFontSize,
 } from '@wordpress/editor';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
 import { getPercentageFromPixels } from '../../helpers';
+import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 
 export const name = 'amp/amp-story-text';
 
@@ -121,23 +123,25 @@ export const settings = {
 
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
-		const fontSizeClass = getFontSizeClass( fontSize );
 
 		const className = classnames( {
 			'amp-text-content': ! ampFitText,
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
-			[ fontSizeClass ]: ampFitText ? undefined : fontSizeClass,
 			[ textClass ]: textClass,
 			[ backgroundClass ]: backgroundClass,
 		} );
 
-		const userFontSize = fontSizeClass ? undefined : customFontSize;
+		// Calculate fontsize using vw to make it responsive.
+		const { fontSizes } = select( 'core/block-editor' ).getSettings();
+		// Get the font size in px based on the slug with fallback to customFontSize.
+		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 		const styles = {
 			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
 			color: textClass ? undefined : customTextColor,
-			fontSize: ampFitText ? autoFontSize : userFontSize,
+			fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
 			width: `${ getPercentageFromPixels( 'x', width ) }%`,
 			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
