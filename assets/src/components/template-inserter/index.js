@@ -108,7 +108,7 @@ class TemplateInserter extends Component {
 									</div>
 									{ storyTemplates && storyTemplates.map( ( item ) =>
 										<BlockPreview
-											key="template-preview"
+											key={ `template-preview-${ item.id }` }
 											name="core/block"
 											attributes={ { ref: item.id } }
 											onClick={ () => {
