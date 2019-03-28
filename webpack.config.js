@@ -31,7 +31,7 @@ const config = {
 	],
 	entry: {
 		'amp-blocks': './assets/src/amp-blocks.js',
-		'amp-block-editor-toggle': './assets/src/amp-block-editor-toggle.js',
+		'amp-block-editor': './assets/src/amp-block-editor.js',
 		'amp-validation-detail-toggle': './assets/src/amp-validation-detail-toggle.js',
 		'amp-validation-single-error-url-details': './assets/src/amp-validation-single-error-url-details.js',
 		'amp-stories': './assets/src/amp-story-editor-blocks.js',

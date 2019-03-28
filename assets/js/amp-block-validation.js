@@ -65,7 +65,6 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			module.store = module.registerStore();
 
 			wp.data.subscribe( module.handleValidationErrorsStateChange );
-			wp.data.subscribe( module.handleAMPStoryChange );
 		},
 
 		/**
@@ -137,33 +136,6 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return false;
-		},
-
-		/**
-		 * Handles admin notices for AMP Stories.
-		 */
-		handleAMPStoryChange: function handleAMPStoryChange() {
-			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost(),
-				storyPortraitErrorNoticeId = 'amp-story-portrait-errors-notice';
-			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
-				return;
-			}
-			if ( 'amp_story' !== currentPost.type ) {
-				return;
-			}
-			if ( ! module.hasPortraitSrcNotice && ! currentPost.featured_media ) {
-				module.hasPortraitSrcNotice = true;
-				wp.data.dispatch( 'core/notices' ).createNotice(
-					'warning',
-					wp.i18n.__( 'Featured image is used as poster-portrait-src and is mandatory', 'amp' ),
-					{
-						id: storyPortraitErrorNoticeId,
-					}
-				);
-			} else if ( module.hasPortraitSrcNotice && currentPost.featured_media ) {
-				module.hasPortraitSrcNotice = null;
-				wp.data.dispatch( 'core/notices' ).removeNotice( storyPortraitErrorNoticeId );
-			}
 		},
 
 		/**
