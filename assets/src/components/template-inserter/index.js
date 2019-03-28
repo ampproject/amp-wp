@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton, Spinner } from '@wordpress/components';
+import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createBlock, cloneBlock } from '@wordpress/blocks';
@@ -24,7 +24,7 @@ class TemplateInserter extends Component {
 		this.onToggle = this.onToggle.bind( this );
 
 		this.state = {
-			reusableBlocks: null,
+			reusableBlocks: [],
 		};
 	}
 
@@ -80,11 +80,7 @@ class TemplateInserter extends Component {
 						// Clone block to avoid duplicate ID-s.
 						insertBlock( cloneBlock( block ) );
 					};
-					if ( ! this.state.reusableBlocks ) {
-						return (
-							<Spinner />
-						);
-					}
+
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
