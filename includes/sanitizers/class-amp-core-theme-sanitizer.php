@@ -1084,9 +1084,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Output image styles for twentynineteen.
 	 *
-	 * When <img> tags have an 'aligncenter' class, AMP_Img_Sanitizer::handle_centering() wraps theme in <figure class="aligncenter">.
-	 * This ensures that the image inside it is centered.
-	 *
 	 * @since 1.0
 	 */
 	public static function add_twentynineteen_image_styles() {
@@ -1096,9 +1093,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				ob_start();
 				?>
 				<style>
-					figure.aligncenter {
-						text-align: center
-					}
+					/* TODO: Remove? */
 				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );

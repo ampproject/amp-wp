@@ -261,15 +261,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
-		$new_node = $this->handle_centering( $img_node );
-		$node->parentNode->replaceChild( $new_node, $node );
+		$node->parentNode->replaceChild( $img_node, $node );
 
 		// Preserve original node in noscript for no-JS environments.
 		$noscript = $this->dom->createElement( 'noscript' );
 		$noscript->appendChild( $node );
 		$img_node->appendChild( $noscript );
 
-		$this->add_auto_width_to_figure( $new_node );
+		$this->add_auto_width_to_figure( $img_node );
 	}
 
 	/**
@@ -312,45 +311,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
-	}
-
-	/**
-	 * Handles an issue with the aligncenter class.
-	 *
-	 * If the <amp-img> has the class aligncenter, this strips the class and wraps it in a <figure> to center the image.
-	 * There was an issue where the aligncenter class overrode the "display: inline-block" rule of AMP's layout="intrinsic" attribute.
-	 * So this strips that class, and instead wraps the image in a <figure> to center it.
-	 *
-	 * @since 0.7
-	 * @see https://github.com/ampproject/amp-wp/issues/1104
-	 *
-	 * @param DOMElement $node The <amp-img> node.
-	 * @return DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
-	 */
-	public function handle_centering( $node ) {
-		$align_class = 'aligncenter';
-		$classes     = $node->getAttribute( 'class' );
-		$width       = $node->getAttribute( 'width' );
-
-		// If this doesn't have a width attribute, centering it in the <figure> wrapper won't work.
-		if ( empty( $width ) || ! in_array( $align_class, preg_split( '/\s+/', trim( $classes ) ), true ) ) {
-			return $node;
-		}
-
-		// Strip the class, and wrap the <amp-img> in a <figure>.
-		$classes = trim( str_replace( $align_class, '', $classes ) );
-		$node->setAttribute( 'class', $classes );
-		$figure = AMP_DOM_Utils::create_node(
-			$this->dom,
-			'figure',
-			array(
-				'class' => $align_class,
-				'style' => "max-width: {$width}px;",
-			)
-		);
-		$figure->appendChild( $node );
-
-		return $figure;
 	}
 
 	/**
