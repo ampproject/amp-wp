@@ -13,7 +13,7 @@ import {
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 import { Component, Fragment } from '@wordpress/element';
 import {
 	PanelBody,

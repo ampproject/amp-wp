@@ -420,6 +420,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_validate_non_amp_theme() {
+		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
@@ -1543,6 +1544,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $wp_widget_factory, $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
+		wp_scripts();
+		wp_styles();
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::init();
@@ -1698,6 +1701,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
 	public function test_prepare_response_to_add_html5_doctype_and_amp_attribute() {
+		wp_scripts();
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );

@@ -22,9 +22,7 @@ import {
 	Spinner,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-	InspectorControls,
-} from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
 
 const blockName = 'amp/amp-latest-stories';

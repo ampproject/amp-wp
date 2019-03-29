@@ -37,19 +37,23 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test single url returns expected dimensions.
+	 * Test single url returns expected dimensions and that the normalization runs as expected.
 	 *
 	 * @covers \AMP_Image_Dimension_Extractor::extract()
 	 */
 	public function test__single_url() {
+		$source_url = 'https://example.com/image.png';
+		$cdn_url    = 'https://cdn.example.com/image.png';
+		$expected   = array( 100, 101 );
+
 		add_action(
 			'amp_extract_image_dimensions_batch_callbacks_registered',
-			function() {
+			function() use ( $cdn_url ) {
 				add_filter(
 					'amp_extract_image_dimensions_batch',
-					function() {
+					function() use ( $cdn_url ) {
 						return array(
-							'https://example.com/image.png' => array(
+							$cdn_url => array(
 								100,
 								101,
 							),
@@ -60,10 +64,21 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			9999 // Run after the `disable_downloads`.
 		);
 
-		$source_url = 'https://example.com/image.png';
-		$expected   = array( 100, 101 );
+		$ran_filter_count = 0;
+		add_filter(
+			'amp_normalized_dimension_extractor_image_url',
+			function ( $url, $original_url ) use ( $source_url, $cdn_url, &$ran_filter_count ) {
+				$this->assertSame( $source_url, $url );
+				$this->assertSame( $source_url, $original_url );
+				$ran_filter_count++;
+				return $cdn_url;
+			},
+			10,
+			2
+		);
 
 		$actual = AMP_Image_Dimension_Extractor::extract( $source_url );
+		$this->assertSame( 1, $ran_filter_count );
 
 		$this->assertEquals( $expected, $actual );
 	}

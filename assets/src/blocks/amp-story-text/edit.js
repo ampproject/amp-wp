@@ -24,7 +24,7 @@ import {
 	withColors,
 	PanelColorSettings,
 	ContrastChecker,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -136,7 +136,7 @@ class TextBlockEdit extends Component {
 				<InspectorControls>
 					<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 						<FontFamilyPicker
-							name={ ampFontFamily }
+							value={ ampFontFamily }
 							onChange={ ( value ) => {
 								maybeEnqueueFontStyle( value );
 								setAttributes( { ampFontFamily: value } );
