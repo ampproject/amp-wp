@@ -86,8 +86,7 @@ class AMP_Analytics_Options_Submenu {
 			.amp-analytics-options.notice {
 				width: 300px;
 			}
-		</style>;
-
+		</style>
 		<?php
 	}
 }
