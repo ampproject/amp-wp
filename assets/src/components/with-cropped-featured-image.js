@@ -42,14 +42,15 @@ export default ( InitialMediaUpload ) => {
 		}
 
 		/**
-		 * Mainly copied from customize-controls.js.
+		 * Mainly copied from customize-controls.js, like most of this class.
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		init() {
+			const calculateImageSelectOptions = this.calculateImageSelectOptions;
 			this.frame = wp.media( {
 				button: {
-					text: __( 'Select and crop', 'amp' ),
+					text: __( 'Select', 'amp' ),
 					close: false,
 				},
 				states: [
@@ -63,7 +64,7 @@ export default ( InitialMediaUpload ) => {
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),
 					new wp.media.controller.Cropper( {
-						imgSelectOptions: this.calculateImageSelectOptions,
+						imgSelectOptions: calculateImageSelectOptions,
 						control: this,
 					} ),
 				],
@@ -88,13 +89,14 @@ export default ( InitialMediaUpload ) => {
 				flexWidth = false,
 				flexHeight = false,
 				realWidth = attachment.get( 'width' ),
-				realHeight = attachment.get( 'height' ),
-				ratio = xInit / yInit,
+				realHeight = attachment.get( 'height' );
+
+			let xInit = parseInt( EXPECTED_WIDTH, 10 ),
+				yInit = parseInt( EXPECTED_HEIGHT, 10 );
+
+			const ratio = xInit / yInit,
 				xImg = xInit,
 				yImg = yInit;
-
-			let xInit = parseInt( EXPECTED_WIDTH, 10 );
-			let yInit = parseInt( EXPECTED_HEIGHT, 10 );
 
 			controller.set( 'canSkipCrop', ! control.mustBeCropped( flexWidth, flexHeight, xInit, yInit, realWidth, realHeight ) );
 
@@ -175,12 +177,12 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Return whether the image must be cropped, based on required dimensions.
 		 *
-		 * @param {boolean} flexW
-		 * @param {boolean} flexH
-		 * @param {number}  dstW
-		 * @param {number}  dstH
-		 * @param {number}  imgW
-		 * @param {number}  imgH
+		 * @param {boolean} flexW Whether there should be flexible width.
+		 * @param {boolean} flexH Whether there should be flexible height.
+		 * @param {number}  dstW The expected width.
+		 * @param {number}  dstH The expected height.
+		 * @param {number}  imgW The actual width.
+		 * @param {number}  imgH The actual height.
 		 * @return {boolean} Whether the image must be cropped.
 		 */
 		mustBeCropped( flexW, flexH, dstW, dstH, imgW, imgH ) {
@@ -215,9 +217,9 @@ export default ( InitialMediaUpload ) => {
 		onCropped( croppedImage ) {
 			const url = croppedImage.url,
 				attachmentId = croppedImage.attachment_id,
-				w = croppedImage.width,
-				h = croppedImage.height;
-			this.setImageFromURL( url, attachmentId, w, h );
+				width = croppedImage.width,
+				height = croppedImage.height;
+			this.setImageFromURL( url, attachmentId, width, height );
 		}
 
 		/**
@@ -227,9 +229,9 @@ export default ( InitialMediaUpload ) => {
 		 */
 		onSkippedCrop( selection ) {
 			const url = selection.get( 'url' ),
-				w = selection.get( 'width' ),
-				h = selection.get( 'height' );
-			this.setImageFromURL( url, selection.id, w, h );
+				width = selection.get( 'width' ),
+				height = selection.get( 'height' );
+			this.setImageFromURL( url, selection.id, width, height );
 		}
 
 		/**
