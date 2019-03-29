@@ -15,6 +15,7 @@ const EXPECTED_HEIGHT = 928;
 /**
  * Gets a wrapped version of MediaUpload.
  *
+ * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
  * Mostly copied from customize-controls.js.
  *
@@ -34,7 +35,7 @@ export default ( InitialMediaUpload ) => {
 		constructor() {
 			super( ...arguments );
 
-			// This class should only apply to the MediaUpload in the Featured Image section, though this isn't the best way to check.
+			// This class should only be present in the MediaUpload for the Featured Image.
 			if ( this.props.modalClass && 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
 				this.init = this.init.bind( this );
 				this.init();
@@ -44,10 +45,12 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Mainly copied from customize-controls.js, like most of this class.
 		 *
+		 * Overwrites the Media Library frame, this.frame.
+		 * Adds the ability to crop the featured image.
+		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		init() {
-			const calculateImageSelectOptions = this.calculateImageSelectOptions;
 			this.frame = wp.media( {
 				button: {
 					text: __( 'Select', 'amp' ),
@@ -64,7 +67,7 @@ export default ( InitialMediaUpload ) => {
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),
 					new wp.media.controller.Cropper( {
-						imgSelectOptions: calculateImageSelectOptions,
+						imgSelectOptions: this.calculateImageSelectOptions,
 						control: this,
 					} ),
 				],
@@ -186,23 +189,13 @@ export default ( InitialMediaUpload ) => {
 		 * @return {boolean} Whether the image must be cropped.
 		 */
 		mustBeCropped( flexW, flexH, dstW, dstH, imgW, imgH ) {
-			if ( true === flexW && true === flexH ) {
-				return false;
-			}
-
-			if ( true === flexW && dstH === imgH ) {
-				return false;
-			}
-
-			if ( true === flexH && dstW === imgW ) {
-				return false;
-			}
-
-			if ( dstW === imgW && dstH === imgH ) {
-				return false;
-			}
-
-			if ( imgW <= dstW ) {
+			if (
+				( true === flexW && true === flexH ) ||
+				( true === flexW && dstH === imgH ) ||
+				( true === flexH && dstW === imgW ) ||
+				( dstW === imgW && dstH === imgH ) ||
+				( imgW <= dstW )
+			) {
 				return false;
 			}
 
