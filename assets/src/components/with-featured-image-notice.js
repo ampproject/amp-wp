@@ -9,10 +9,10 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { hasMinimumStoryPosterDimensions } from '../helpers';
+import { hasMinimumFeaturedImageWidth } from '../helpers';
 
 /**
- * Higher-order component that is used for filtering the PostFeaturedImage component for AMP stories.
+ * Higher-order component that is used for filtering the PostFeaturedImage component.
  *
  * Used to display notices in case the image does not meet minimum requirements.
  *
@@ -23,11 +23,9 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			if ( media && hasMinimumStoryPosterDimensions( media ) ) {
+			if ( ! media || hasMinimumFeaturedImageWidth( media ) ) {
 				return <PostFeaturedImage { ...props } />;
 			}
-
-			const message = ! media ? __( 'Selecting a featured image is required.', 'amp' ) : __( 'The featured image must have minimum dimensions of 696px x 928px, 928px x 696px, or 928px x 928px', 'amp' );
 
 			return (
 				<Fragment>
@@ -36,7 +34,7 @@ export default createHigherOrderComponent(
 						isDismissible={ false }
 					>
 						<span>
-							{ message }
+							{ __( 'The featured image should have a width of at least 1200px.', 'amp' ) }
 						</span>
 					</Notice>
 					<PostFeaturedImage { ...props } />
@@ -44,5 +42,5 @@ export default createHigherOrderComponent(
 			);
 		};
 	},
-	'withStoryFeaturedImageNotice'
+	'withFeaturedImageNotice'
 );

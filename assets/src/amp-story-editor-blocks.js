@@ -22,8 +22,8 @@ import {
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
-	withPrePublishNotice,
 	withStoryBlockDropZone,
+	StoryPrePublishPanel,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -319,7 +319,12 @@ store.subscribe( () => {
 	}
 } );
 
-registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
+registerPlugin(
+	'amp-story-featured-image-pre-publish',
+	{
+		render: StoryPrePublishPanel,
+	}
+);
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
