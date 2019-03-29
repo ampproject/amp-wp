@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
 import { InnerBlocks } from '@wordpress/editor';
 
 /**
@@ -113,8 +112,3 @@ export const settings = {
 		);
 	},
 };
-
-/**
- * Register block.
- */
-export default registerBlockType( name,	settings );

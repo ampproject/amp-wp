@@ -12,7 +12,6 @@ import {
 	getColorClassName,
 	getFontSize,
 } from '@wordpress/editor';
-import { registerBlockType } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
 
 /**
@@ -169,5 +168,3 @@ export const settings = {
 		);
 	},
 };
-
-registerBlockType( name, settings );

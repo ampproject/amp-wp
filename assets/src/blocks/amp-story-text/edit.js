@@ -136,7 +136,7 @@ class TextBlockEdit extends Component {
 				<InspectorControls>
 					<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 						<FontFamilyPicker
-							name={ ampFontFamily }
+							value={ ampFontFamily }
 							onChange={ ( value ) => {
 								maybeEnqueueFontStyle( value );
 								setAttributes( { ampFontFamily: value } );

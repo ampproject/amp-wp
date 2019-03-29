@@ -77,8 +77,6 @@ module.exports = function( grunt ) {
 		// Clear out all existing compiled files first.
 		grunt.task.run( 'clean' );
 
-		grunt.task.run( 'shell:webpack_production' );
-
 		spawnQueue.push(
 			{
 				cmd: 'git',

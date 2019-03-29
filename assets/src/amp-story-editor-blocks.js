@@ -9,7 +9,14 @@ import { every } from 'lodash';
 import { addFilter } from '@wordpress/hooks';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import {
+	createBlock,
+	getDefaultBlockName,
+	setDefaultBlockName,
+	getBlockTypes,
+	unregisterBlockType,
+	registerBlockType,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -332,3 +339,11 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+
+const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+
+// Block types need to be register *after* all the filters have been applied.
+context.keys().forEach( ( modulePath ) => {
+	const { name, settings } = context( modulePath );
+	registerBlockType( name, settings );
+} );
