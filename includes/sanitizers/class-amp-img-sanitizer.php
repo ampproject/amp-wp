@@ -257,6 +257,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		// Remove sizes attribute since it causes headaches in AMP and because AMP will generate it for us. See <https://github.com/ampproject/amphtml/issues/21371>.
+		unset( $new_attributes['sizes'] );
+
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
 
