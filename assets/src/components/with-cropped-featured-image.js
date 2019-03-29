@@ -89,8 +89,6 @@ export default ( InitialMediaUpload ) => {
 		 */
 		calculateImageSelectOptions( attachment, controller ) {
 			const control = controller.get( 'control' ),
-				flexWidth = false,
-				flexHeight = false,
 				realWidth = attachment.get( 'width' ),
 				realHeight = attachment.get( 'height' );
 
@@ -101,7 +99,7 @@ export default ( InitialMediaUpload ) => {
 				xImg = xInit,
 				yImg = yInit;
 
-			controller.set( 'canSkipCrop', ! control.mustBeCropped( flexWidth, flexHeight, xInit, yInit, realWidth, realHeight ) );
+			controller.set( 'canSkipCrop', ! control.mustBeCropped( xInit, yInit, realWidth, realHeight ) );
 
 			if ( realWidth / realHeight > ratio ) {
 				yInit = realHeight;
@@ -111,10 +109,11 @@ export default ( InitialMediaUpload ) => {
 				yInit = xInit / ratio;
 			}
 
-			const x1 = ( realWidth - xInit ) / 2;
-			const y1 = ( realHeight - yInit ) / 2;
+			const x1 = ( realWidth - xInit ) / 2,
+				y1 = ( realHeight - yInit ) / 2;
 
-			const imgSelectOptions = {
+			return {
+				aspectRatio: xInit + ':' + yInit,
 				handles: true,
 				keys: true,
 				instance: true,
@@ -128,22 +127,6 @@ export default ( InitialMediaUpload ) => {
 				x2: xInit + x1,
 				y2: yInit + y1,
 			};
-
-			if ( flexHeight === false && flexWidth === false ) {
-				imgSelectOptions.aspectRatio = xInit + ':' + yInit;
-			}
-
-			if ( true === flexHeight ) {
-				delete imgSelectOptions.minHeight;
-				imgSelectOptions.maxWidth = realWidth;
-			}
-
-			if ( true === flexWidth ) {
-				delete imgSelectOptions.minWidth;
-				imgSelectOptions.maxHeight = realHeight;
-			}
-
-			return imgSelectOptions;
 		}
 
 		/**
@@ -180,22 +163,14 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Return whether the image must be cropped, based on required dimensions.
 		 *
-		 * @param {boolean} flexW Whether there should be flexible width.
-		 * @param {boolean} flexH Whether there should be flexible height.
 		 * @param {number}  dstW The expected width.
 		 * @param {number}  dstH The expected height.
 		 * @param {number}  imgW The actual width.
 		 * @param {number}  imgH The actual height.
 		 * @return {boolean} Whether the image must be cropped.
 		 */
-		mustBeCropped( flexW, flexH, dstW, dstH, imgW, imgH ) {
-			if (
-				( true === flexW && true === flexH ) ||
-				( true === flexW && dstH === imgH ) ||
-				( true === flexH && dstW === imgW ) ||
-				( dstW === imgW && dstH === imgH ) ||
-				( imgW <= dstW )
-			) {
+		mustBeCropped( dstW, dstH, imgW, imgH ) {
+			if ( ( dstW === imgW && dstH === imgH ) || ( imgW <= dstW )	) {
 				return false;
 			}
 
