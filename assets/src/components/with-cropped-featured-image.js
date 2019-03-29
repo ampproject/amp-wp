@@ -76,6 +76,9 @@ export default ( InitialMediaUpload ) => {
 			this.frame.on( 'select', this.onSelectImage, this );
 			this.frame.on( 'cropped', this.onCropped, this );
 			this.frame.on( 'skippedcrop', this.onSkippedCrop, this );
+			this.frame.on( 'close', () => {
+				this.init();
+			}, this );
 		}
 
 		/**
