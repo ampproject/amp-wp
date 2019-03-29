@@ -23,18 +23,20 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			if ( ! media || hasMinimumFeaturedImageWidth( media ) ) {
+			if ( media && hasMinimumFeaturedImageWidth( media ) ) {
 				return <PostFeaturedImage { ...props } />;
 			}
+
+			const message = ! media ? __( 'Selecting a featured image is required for appearance in Google Search.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
 
 			return (
 				<Fragment>
 					<Notice
-						status="warning"
+						status="notice"
 						isDismissible={ false }
 					>
 						<span>
-							{ __( 'The featured image should have a width of at least 1200px.', 'amp' ) }
+							{ message }
 						</span>
 					</Notice>
 					<PostFeaturedImage { ...props } />

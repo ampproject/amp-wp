@@ -27,7 +27,7 @@ export default createHigherOrderComponent(
 				return <PostFeaturedImage { ...props } />;
 			}
 
-			const message = ! media ? __( 'Selecting a featured image is required.', 'amp' ) : __( 'The featured image must have minimum dimensions of 696px x 928px, 928px x 696px, or 928px x 928px', 'amp' );
+			const message = ! media ? __( 'Selecting a featured image is required.', 'amp' ) : __( 'The featured image must have minimum dimensions of 696px x 928px, 928px x 696px, or 928px x 928px.', 'amp' );
 
 			return (
 				<Fragment>

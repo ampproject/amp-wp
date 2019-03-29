@@ -18,9 +18,11 @@ import { hasMinimumFeaturedImageWidth } from '../helpers';
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
 const PrePublishPanel = ( { featuredMedia } ) => {
-	if ( ! featuredMedia || hasMinimumFeaturedImageWidth( featuredMedia ) ) {
+	if ( featuredMedia && hasMinimumFeaturedImageWidth( featuredMedia ) ) {
 		return null;
 	}
+
+	const message = ! featuredMedia ? __( 'Selecting a featured image is required for appearance in Google Search.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
 
 	return (
 		<Fragment>
@@ -29,11 +31,11 @@ const PrePublishPanel = ( { featuredMedia } ) => {
 				initialOpen="true"
 			>
 				<Notice
-					status="warning"
+					status="notice"
 					isDismissible={ false }
 				>
 					<span>
-						{ __( 'The featured image should have a width of at least 1200px.', 'amp' ) }
+						{ message }
 					</span>
 				</Notice>
 			</PluginPrePublishPanel>
