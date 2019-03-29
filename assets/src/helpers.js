@@ -10,8 +10,7 @@ import uuid from 'uuid/v4';
  */
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
-import { __, _x } from '@wordpress/i18n';
-import { select } from '@wordpress/data';
+import { _x } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
