@@ -1087,6 +1087,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 */
 	public static function add_twentynineteen_image_styles() {
+
+		// Make sure the featured image gets responsive layout.
+		add_filter(
+			'wp_get_attachment_image_attributes',
+			function( $attributes ) {
+				if ( preg_match( '/(^|\s)(attachment-post-thumbnail)(\s|$)/', $attributes['class'] ) ) {
+					$attributes['data-amp-layout'] = 'responsive';
+				}
+				return $attributes;
+			}
+		);
+
 		add_action(
 			'wp_enqueue_scripts',
 			function() {
