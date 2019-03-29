@@ -9,7 +9,7 @@
 import { __ } from '@wordpress/i18n';
 import { IconButton, Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { Inserter } from '@wordpress/editor';
+import { Inserter } from '@wordpress/block-editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 

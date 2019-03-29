@@ -11,7 +11,7 @@ import {
 	RichText,
 	getColorClassName,
 	getFontSize,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 
 /**

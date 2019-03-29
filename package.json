@@ -20,6 +20,7 @@
   },
   "private": true,
   "dependencies": {
+    "@wordpress/block-editor": "1.1.0",
     "@wordpress/blocks": "6.2.0",
     "@wordpress/components": "7.2.0",
     "@wordpress/compose": "3.2.0",

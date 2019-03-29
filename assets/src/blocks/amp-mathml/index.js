@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PlainText } from '@wordpress/editor';
+import { PlainText } from '@wordpress/block-editor';
 
 export const name = 'amp/amp-mathml';
 

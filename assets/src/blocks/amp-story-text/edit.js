@@ -24,7 +24,7 @@ import {
 	withColors,
 	PanelColorSettings,
 	ContrastChecker,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies

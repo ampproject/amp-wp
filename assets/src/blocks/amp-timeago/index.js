@@ -8,7 +8,7 @@ import moment from 'moment';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, BlockAlignmentToolbar, BlockControls } from '@wordpress/editor';
+import { InspectorControls, BlockAlignmentToolbar, BlockControls } from '@wordpress/block-editor';
 import {
 	DateTimePicker,
 	PanelBody,

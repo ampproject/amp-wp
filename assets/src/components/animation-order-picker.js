@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { BlockIcon } from '@wordpress/editor';
+import { BlockIcon } from '@wordpress/block-editor';
 import { Fragment } from '@wordpress/element';
 
 /**
