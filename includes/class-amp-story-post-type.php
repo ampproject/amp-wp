@@ -1193,7 +1193,7 @@ class AMP_Story_Post_Type {
 			'post_title'     => basename( $cropped ),
 			'post_mime_type' => $image_type,
 			'guid'           => $url,
-			'context'        => 'custom-header',
+			'context'        => 'amp-story-poster',
 			'post_parent'    => $parent_attachment_id,
 		);
 
