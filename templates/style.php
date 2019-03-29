@@ -34,6 +34,7 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 
 .aligncenter {
 	display: block;
+	text-align: center;
 	margin-left: auto;
 	margin-right: auto;
 }
@@ -279,6 +280,11 @@ blockquote p:last-child {
 }
 
 /* AMP Media */
+
+.alignwide,
+.alignfull {
+	clear: both;
+}
 
 amp-carousel {
 	background: <?php echo sanitize_hex_color( $border_color ); ?>;
