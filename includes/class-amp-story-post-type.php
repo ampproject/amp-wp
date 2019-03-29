@@ -1090,7 +1090,7 @@ class AMP_Story_Post_Type {
 	public static function crop_featured_image() {
 		check_ajax_referer( 'image_editor-' . $_POST['id'], 'nonce' );
 
-		if ( ! current_user_can( 'edit_theme_options' ) ) {
+		if ( ! current_user_can( 'edit_posts' ) ) {
 			wp_send_json_error();
 		}
 
@@ -1114,23 +1114,19 @@ class AMP_Story_Post_Type {
 		);
 
 		if ( ! $cropped || is_wp_error( $cropped ) ) {
-			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.' ) ) );
+			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.', 'default' ) ) );
 		}
 
 		/** This filter is documented in wp-admin/custom-header.php */
 		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
-
-		$object = self::create_attachment_object( $cropped, $attachment_id );
-
+		$object  = self::create_attachment_object( $cropped, $attachment_id );
 		unset( $object['ID'] );
 
-		$new_attachment_id = self::insert_attachment( $object, $cropped );
-
+		$new_attachment_id       = self::insert_attachment( $object, $cropped );
 		$object['attachment_id'] = $new_attachment_id;
 		$object['url']           = wp_get_attachment_url( $new_attachment_id );
-
-		$object['width']  = $dimensions['dst_width'];
-		$object['height'] = $dimensions['dst_height'];
+		$object['width']         = $dimensions['dst_width'];
+		$object['height']        = $dimensions['dst_height'];
 
 		wp_send_json_success( $object );
 	}
@@ -1151,7 +1147,7 @@ class AMP_Story_Post_Type {
 		try {
 			$size = getimagesize( $cropped );
 		} catch ( Exception $error ) {
-			$e = $error;
+			unset( $error );
 		}
 
 		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
@@ -1187,15 +1183,6 @@ class AMP_Story_Post_Type {
 		if ( $parent_id ) {
 			$metadata['attachment_parent'] = $parent_id;
 		}
-
-		/**
-		 * Filters the header image attachment metadata.
-		 *
-		 * @see wp_generate_attachment_metadata()
-		 * @param array $metadata Attachment metadata.
-		 */
-		$metadata = apply_filters( 'wp_header_image_attachment_metadata', $metadata );
-
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		return $attachment_id;
