@@ -97,8 +97,21 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$style = (string) $node->getAttribute( 'style' );
+			// Determine if dimensions are specified, and populate them from styles if defined.
+			$has_width = is_numeric( $node->getAttribute( 'width' ) );
+			if ( ! $has_width && $style && preg_match( '#(?:^|;)\s*width:\s*(\d+(?:\.\d+)?)px#', $style, $matches ) ) {
+				$has_width = true;
+				$node->setAttribute( 'width', (string) $matches[1] );
+			}
+			$has_height = is_numeric( $node->getAttribute( 'height' ) );
+			if ( ! $has_height && $style && preg_match( '#(?:^|;)\s*height:\s*(\d+(?:\.\d+)?)px#', $style, $matches ) ) {
+				$has_height = true;
+				$node->setAttribute( 'height', (string) $matches[1] );
+			}
+
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+			if ( ! $has_width || ! $has_height ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
