@@ -64,7 +64,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				),
 			),
 			'add_twentynineteen_masthead_styles' => array(),
-			'add_twentynineteen_image_styles'    => array(),
+			'adjust_twentynineteen_images'       => array(),
 		),
 
 		// Twenty Seventeen.
@@ -1024,11 +1024,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Output image styles for twentynineteen.
+	 * Adjust images in twentynineteen.
 	 *
-	 * @since 1.0
+	 * @since 1.1
 	 */
-	public static function add_twentynineteen_image_styles() {
+	public static function adjust_twentynineteen_images() {
 
 		// Make sure the featured image gets responsive layout.
 		add_filter(
@@ -1039,21 +1039,6 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				return $attributes;
 			}
-		);
-
-		add_action(
-			'wp_enqueue_scripts',
-			function() {
-				ob_start();
-				?>
-				<style>
-					/* TODO: Remove? */
-				</style>
-				<?php
-				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
-				wp_add_inline_style( get_template() . '-style', $styles );
-			},
-			11
 		);
 	}
 }
