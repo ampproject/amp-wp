@@ -275,8 +275,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$noscript = $this->dom->createElement( 'noscript' );
 		$noscript->appendChild( $node );
 		$img_node->appendChild( $noscript );
-
-		$this->add_auto_width_to_figure( $img_node );
 	}
 
 	/**
@@ -319,38 +317,5 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
-	}
-
-	/**
-	 * Add an inline style to set the `<figure>` element's width to `auto` instead of `fit-content`.
-	 *
-	 * @since 1.0
-	 * @see https://github.com/ampproject/amp-wp/issues/1086
-	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 */
-	protected function add_auto_width_to_figure( $node ) {
-		$figure = $node->parentNode;
-		if ( ! ( $figure instanceof DOMElement ) || 'figure' !== $figure->tagName ) {
-			return;
-		}
-
-		$class = $figure->getAttribute( 'class' );
-		// Target only the <figure> with a 'wp-block-image' class attribute.
-		if ( false === strpos( $class, 'wp-block-image' ) ) {
-			return;
-		}
-
-		// Target only <figure> without a 'is-resized' class attribute.
-		if ( false !== strpos( $class, 'is-resized' ) ) {
-			return;
-		}
-
-		$new_style = 'width: auto;';
-		if ( $figure->hasAttribute( 'style' ) ) {
-			$figure->setAttribute( 'style', $new_style . $figure->getAttribute( 'style' ) );
-		} else {
-			$figure->setAttribute( 'style', $new_style );
-		}
 	}
 }
