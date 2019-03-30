@@ -139,6 +139,12 @@ export default ( InitialMediaUpload ) => {
 		onSelectImage() {
 			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
 
+			if ( ! this.doAllowCrop( attachment ) ) {
+				this.setImageFromURL( attachment.url, attachment.id, attachment.width, attachment.height );
+				this.frame.close();
+				return;
+			}
+
 			if ( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) {
 				wp.ajax.post( 'crop-image', {
 					nonce: attachment.nonces.edit,
@@ -161,6 +167,20 @@ export default ( InitialMediaUpload ) => {
 			} else {
 				this.frame.setState( 'cropper' );
 			}
+		}
+
+		/**
+		 * Whether there should be an option to crop at all.
+		 *
+		 * If an image has a width of less than 696 or a height of less than 928,
+		 * there's no way to have the correct image size without distorting it.
+		 * So this can allow preventing the crop option when choosing a featured image.
+		 *
+		 * @param {Object} attachment The attachment object to evaluate.
+		 * @return {boolean} Whether to allow cropping.
+		 */
+		doAllowCrop( attachment ) {
+			return ( attachment.width && attachment.height && attachment.width > EXPECTED_WIDTH && attachment.height > EXPECTED_HEIGHT );
 		}
 
 		/**
