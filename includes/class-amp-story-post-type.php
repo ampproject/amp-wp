@@ -147,6 +147,9 @@ class AMP_Story_Post_Type {
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
 
+		// If the image is for a poster-square-src or poster-landscape-src, this ensures that it's not too small.
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'ensure_correct_poster_size' ), 10, 3 );
+
 		// Limit the styles that are printed in a story.
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_editor_print_styles_array' ) );
@@ -419,6 +422,31 @@ class AMP_Story_Post_Type {
 				928,
 				696,
 			);
+		}
+		return $image;
+	}
+
+	/**
+	 * Helps to ensure that the poster-square-src and poster-landscape-src images aren't too small.
+	 *
+	 * These values come from the featured image.
+	 * But the featured image is often cropped down to 696 x 928.
+	 * So from that, it's not possible to get a 928 x 928 image, for example.
+	 * So instead, use the source image that was cropped, instead of the cropped image.
+	 * This is more likely to produce the right size image.
+	 *
+	 * @param array|false  $image The featured image, or false.
+	 * @param int          $attachment_id The ID of the image.
+	 * @param string|array $size The size of the image.
+	 * @return array|false The featured image, or false.
+	 */
+	public static function ensure_correct_poster_size( $image, $attachment_id, $size ) {
+		if ( self::STORY_LANDSCAPE_IMAGE_SIZE === $size || self::STORY_SQUARE_IMAGE_SIZE === $size ) {
+			$attachment_meta = wp_get_attachment_metadata( $attachment_id );
+			// The source image that was cropped.
+			if ( ! empty( $attachment_meta['attachment_parent'] ) ) {
+				return wp_get_attachment_image_src( $attachment_meta['attachment_parent'], $size );
+			}
 		}
 		return $image;
 	}
