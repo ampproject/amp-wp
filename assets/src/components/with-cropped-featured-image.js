@@ -180,7 +180,7 @@ export default ( InitialMediaUpload ) => {
 		 * @return {boolean} Whether to allow cropping.
 		 */
 		doAllowCrop( attachment ) {
-			return ( attachment.width && attachment.height && attachment.width > EXPECTED_WIDTH && attachment.height > EXPECTED_HEIGHT );
+			return ( attachment.width && attachment.height && attachment.width >= EXPECTED_WIDTH && attachment.height >= EXPECTED_HEIGHT );
 		}
 
 		/**
