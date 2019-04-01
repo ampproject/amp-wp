@@ -433,16 +433,19 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 };
 
 /**
- * Gets whether the AMP story's featured image has the right minimum dimensions.
+ * Determines whether whether the image has the minimum width for an AMP story featured image.
  *
  * The featured image will be used for the poster-portrait-src.
- * It should have a width of at least 696px and a height of at least 928px.
+ * For this, it should have a width of at least 696px and a height of at least 928px.
+ *
+ * It also should have a width of at least 1200 pixels
+ * to satisfy the requirement of Google Search for Schema.org metadata.
  *
  * @param {Object} media A media object with width and height values.
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const minWidth = 696;
+	const minWidth = 1200;
 	const minHeight = 928;
 
 	return (
@@ -452,7 +455,7 @@ export const hasMinimumStoryPosterDimensions = ( media ) => {
 };
 
 /**
- * Whether the image has the minimum width for a featured image.
+ * Determines whether the image has the minimum width for a featured image.
  *
  * This should have a width of at least 1200 pixels
  * to satisfy the requirement of Google Search for Schema.org metadata.
