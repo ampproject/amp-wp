@@ -32,6 +32,7 @@ class AMP_Autoloader {
 		'AMP_Editor_Blocks'                  => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                  => 'includes/class-amp-theme-support',
 		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
+		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
 		'AMP_HTTP'                           => 'includes/class-amp-http',
 		'AMP_Comment_Walker'                 => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'            => 'includes/admin/class-amp-customizer',
