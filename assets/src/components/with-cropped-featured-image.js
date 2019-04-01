@@ -9,7 +9,7 @@ import { dispatch } from '@wordpress/data';
  */
 import { now } from 'lodash';
 
-const EXPECTED_WIDTH = 696;
+const EXPECTED_WIDTH = 696; // @todo This may be wrong as 1200px is expected for featured image?
 const EXPECTED_HEIGHT = 928;
 
 /**

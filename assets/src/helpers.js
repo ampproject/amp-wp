@@ -433,6 +433,27 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 };
 
 /**
+ * Get minimum dimensions for a featured image.
+ *
+ * @link https://developers.google.com/search/docs/data-types/article#article_types
+ *
+ * @return {Object} Minimum dimensions including width and height.
+ */
+export const getMinimumFeaturedImageDimensions = () => {
+	// "Images should be at least 1200 pixels wide."
+	const width = 1200;
+
+	// "For best results, provide multiple high-resolution images (minimum of 800,000 pixels
+	// when multiplying width and height) with the following aspect ratios: 16x9, 4x3, and 1x1."
+	// Given this requirement, make ensure that the image can successfully be cropped into such
+	// an aspect ratio by making sure that it has the. The 16/9 aspect ratio is chosen because it
+	// has the smallest height for the given width.
+	const height = width * ( 9 / 16 );
+
+	return { width, height };
+};
+
+/**
  * Determines whether whether the image has the minimum width for an AMP story featured image.
  *
  * The featured image will be used for the poster-portrait-src.
@@ -445,8 +466,9 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const minWidth = 1200;
-	const minHeight = 928;
+	const minFeaturedImageDimensions = getMinimumFeaturedImageDimensions();
+	const minWidth = minFeaturedImageDimensions.width;
+	const minHeight = minFeaturedImageDimensions.height; // @todo This needs to be Math.max( 928, minFeaturedImageDimensions.height ).
 
 	return (
 		( media.width && media.height )	&&
@@ -455,14 +477,19 @@ export const hasMinimumStoryPosterDimensions = ( media ) => {
 };
 
 /**
- * Determines whether the image has the minimum width for a featured image.
+ * Whether the image meets the requirements for use as featured image.
  *
- * This should have a width of at least 1200 pixels
- * to satisfy the requirement of Google Search for Schema.org metadata.
+ * This should satisfy the requirements of Google Search for Schema.org metadata.
+ *
  *
  * @param {Object} media A media object with width and height values.
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumFeaturedImageWidth = ( media ) => {
-	return media.width && media.width >= 1200;
+	if ( ! media || ! media.width || ! media.height ) {
+		return false;
+	}
+	const minFeaturedImageDimensions = getMinimumFeaturedImageDimensions();
+
+	return media.width >= minFeaturedImageDimensions.width && media.height >= minFeaturedImageDimensions.height;
 };

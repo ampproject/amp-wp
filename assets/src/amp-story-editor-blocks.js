@@ -341,7 +341,7 @@ registerPlugin(
 				<PrePublishPanel
 					validationCallback={ hasMinimumStoryPosterDimensions }
 					missingMediaMessage={ __( 'Selecting a featured image is required.', 'amp' ) }
-					invalidMediaMessage={ __( 'The featured image must have minimum dimensions of 696px x 928px.', 'amp' ) }
+					invalidMediaMessage={ __( 'The featured image must have minimum dimensions of 696 by 928 pixels.', 'amp' ) /* @todo This is not accurate. The width is now 1200 pixels. */ }
 					status="warning"
 				/>
 			);

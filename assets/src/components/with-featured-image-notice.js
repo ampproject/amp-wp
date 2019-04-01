@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import {__, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
@@ -9,7 +9,7 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { hasMinimumFeaturedImageWidth } from '../helpers';
+import { hasMinimumFeaturedImageWidth, getMinimumFeaturedImageDimensions } from '../helpers';
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component.
@@ -27,7 +27,12 @@ export default createHigherOrderComponent(
 				return <PostFeaturedImage { ...props } />;
 			}
 
-			const message = ! media ? __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) : __( 'The featured image should have a width of at least 1200 pixels.', 'amp' );
+			const minDimensions = getMinimumFeaturedImageDimensions();
+
+			const message = ! media ?
+				__( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) :
+				/* translators: %1$s: Minimum width, %2$s: Minimum height. */
+				sprintf( __( 'The featured image should have a width of at least %1$s by %2$s pixels.', 'amp' ), minDimensions.width, minDimensions.height );
 
 			return (
 				<Fragment>
