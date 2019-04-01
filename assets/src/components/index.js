@@ -1,6 +1,7 @@
 export { default as AnimationControls } from './animation-controls';
 export { default as AnimationOrderPicker } from './animation-order-picker';
 export { default as BlockNavigation } from './block-navigation';
+export { default as BlockPreview } from './block-preview';
 export { default as EditorCarousel } from './editor-carousel';
 export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton } from '@wordpress/components';
+import { Dropdown, IconButton, Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createBlock, cloneBlock } from '@wordpress/blocks';
@@ -11,7 +11,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import BlockPreview from './block-preview';
+import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import { ICONS } from './../../constants';
 
@@ -102,16 +102,20 @@ class TemplateInserter extends Component {
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ storyTemplates && storyTemplates.map( ( item ) =>
-										<BlockPreview
+									{ storyTemplates && storyTemplates.map( ( item ) => (
+										<Button
 											key={ `template-preview-${ item.id }` }
-											name="core/block"
-											attributes={ { ref: item.id } }
 											onClick={ () => {
 												onSelect( item );
 											} }
-										/>
-									) }
+											className="components-button block-editor-block-preview"
+										>
+											<BlockPreview
+												name="core/block"
+												attributes={ { ref: item.id } }
+											/>
+										</Button>
+									) ) }
 								</div>
 							</div>
 						</div>

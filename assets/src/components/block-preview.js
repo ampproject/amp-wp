@@ -6,14 +6,16 @@ import { Disabled } from '@wordpress/components';
 import { BlockEdit } from '@wordpress/editor';
 
 /**
- * BlockPreview component that is used within the reordering UI.
+ * Block Preview Component: It renders a preview given a block name and attributes.
  *
- * @return {Object} Block preview.
+ * @param {Object} props Component props.
+ *
+ * @return {WPElement} Rendered element.
  */
-const BlockPreview = ( { clientId, name, attributes, innerBlocks } ) => {
+const BlockPreview = ( { clientId, name, attributes, innerBlocks = [] } ) => {
 	const block = createBlock( name, attributes, innerBlocks );
 	return (
-		<Disabled className="editor-block-preview__content editor-styles-wrapper" aria-hidden>
+		<Disabled className="block-editor-block-preview__content editor-styles-wrapper" aria-hidden>
 			<BlockEdit
 				name={ name }
 				focus={ false }
