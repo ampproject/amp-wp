@@ -9,7 +9,14 @@ import { every } from 'lodash';
 import { addFilter } from '@wordpress/hooks';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import {
+	createBlock,
+	getDefaultBlockName,
+	setDefaultBlockName,
+	getBlockTypes,
+	unregisterBlockType,
+	registerBlockType,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -21,6 +28,7 @@ import {
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
+	withCroppedFeaturedImage,
 	withActivePageState,
 	withPrePublishNotice,
 	withStoryBlockDropZone,
@@ -41,6 +49,10 @@ import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_I
 
 import store from './stores/amp-story';
 import { registerPlugin } from '@wordpress/plugins';
+
+// Register plugin.
+// @todo Consider importing automatically, especially in case of more plugins.
+import './plugins/template-menu-item';
 
 const {
 	getSelectedBlockClientId,
@@ -334,5 +346,14 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', with
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+
+const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+
+// Block types need to be register *after* all the filters have been applied.
+context.keys().forEach( ( modulePath ) => {
+	const { name, settings } = context( modulePath );
+	registerBlockType( name, settings );
+} );

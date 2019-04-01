@@ -2,9 +2,13 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { Dashicon, BaseControl, Button, Dropdown, NavigableMenu } from '@wordpress/components';
-import { BlockIcon } from '@wordpress/editor';
+import { BlockIcon } from '@wordpress/block-editor';
 import { Fragment } from '@wordpress/element';
+
+/**
+ * Internal dependencies
+ */
+import { PreviewPicker } from './';
 
 function ButtonContent( { option, displayIcon = true } ) {
 	const { label: name, block, blockType } = option;
@@ -13,7 +17,7 @@ function ButtonContent( { option, displayIcon = true } ) {
 		return name;
 	}
 
-	let label = block.clientId;
+	let label;
 
 	// Todo: Cover more special cases if needed.
 	switch ( block.name ) {
@@ -21,7 +25,9 @@ function ButtonContent( { option, displayIcon = true } ) {
 			if ( block.attributes.url ) {
 				const content = block.attributes.url.slice( block.attributes.url.lastIndexOf( '/' ) ).slice( 0, 30 );
 
-				label = content.length > 0 ? content : label;
+				if ( content.length > 0 ) {
+					label = content;
+				}
 			}
 
 			break;
@@ -31,7 +37,7 @@ function ButtonContent( { option, displayIcon = true } ) {
 			label = content.length > 0 ? content : blockType.title;
 			break;
 		default:
-			label = block.clientId;
+			label = blockType.title;
 	}
 
 	return (
@@ -51,61 +57,31 @@ function AnimationOrderPicker( {
 	value = '',
 	options,
 	onChange,
-	label,
 } ) {
 	const defaultOption = {
 		value: '',
 		label: __( 'Immediately', 'amp' ),
 	};
 
-	options.unshift( defaultOption );
-
-	const currentOption = options.find( ( option ) => value && option.value === value ) || defaultOption;
-	/* translators: %s: block name */
-	const ariaLabel = currentOption ? sprintf( __( 'Begin after: %s', 'amp' ), currentOption.label ) : __( 'Begin immediately', 'amp' );
-
 	return (
-		<BaseControl label={ label || __( 'Begin after', 'amp' ) }>
-			<div className="components-preview-picker__buttons">
-				<Dropdown
-					className="components-preview-picker__dropdown"
-					contentClassName="components-preview-picker__dropdown-content"
-					position="bottom"
-					renderToggle={ ( { isOpen, onToggle } ) => (
-						<Button
-							className="components-preview-picker__selector"
-							isLarge
-							onClick={ onToggle }
-							aria-expanded={ isOpen }
-							aria-label={ ariaLabel }
-						>
-							<ButtonContent option={ currentOption } displayIcon={ false } />
-						</Button>
-					) }
-					renderContent={ () => (
-						<NavigableMenu>
-							{ options.map( ( option ) => {
-								const isSelected = option.value === currentOption.value;
-
-								return (
-									<Button
-										key={ option.value }
-										onClick={ () => onChange( option.value === '' ? undefined : option.block.clientId ) }
-										role="menuitemradio"
-										aria-checked={ isSelected }
-									>
-										{ isSelected && <Dashicon icon="saved" /> }
-										<span className="components-preview-picker__dropdown-animation-order">
-											<ButtonContent option={ option } />
-										</span>
-									</Button>
-								);
-							} ) }
-						</NavigableMenu>
-					) }
-				/>
-			</div>
-		</BaseControl>
+		<PreviewPicker
+			value={ value }
+			options={ options }
+			defaultOption={ defaultOption }
+			onChange={ ( { value: selectedValue, block } ) => onChange( selectedValue === '' ? undefined : block.clientId ) }
+			label={ __( 'Begin after', 'amp' ) }
+			ariaLabel={ ( { value: currentValue, blockType } ) => ! currentValue ? __( 'Begin immediately', 'amp' ) : sprintf( __( 'Begin after: %s', 'amp' ), blockType.title ) }
+			renderToggle={ ( currentOption ) => (
+				<ButtonContent option={ currentOption } displayIcon={ false } />
+			) }
+			renderOption={ ( option ) => {
+				return (
+					<span className="components-preview-picker__dropdown-label">
+						<ButtonContent option={ option } />
+					</span>
+				);
+			} }
+		/>
 	);
 }
 

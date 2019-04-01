@@ -147,6 +147,9 @@ class AMP_Story_Post_Type {
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
 
+		// If the image is for a poster-square-src or poster-landscape-src, this ensures that it's not too small.
+		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'ensure_correct_poster_size' ), 10, 3 );
+
 		// Limit the styles that are printed in a story.
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
 		add_filter( 'print_styles_array', array( __CLASS__, 'filter_editor_print_styles_array' ) );
@@ -165,6 +168,9 @@ class AMP_Story_Post_Type {
 
 		// Register the Latest Stories block.
 		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
+
+		// The AJAX handler for when an image is cropped and sent via POST.
+		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		register_block_type(
@@ -409,13 +415,38 @@ class AMP_Story_Post_Type {
 	 * @return array|false The featured image, or false.
 	 */
 	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
-		unset( $attachment_id );
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return array(
 				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
 				928,
 				696,
 			);
+		}
+
+		return $image;
+	}
+
+	/**
+	 * Helps to ensure that the poster-square-src and poster-landscape-src images aren't too small.
+	 *
+	 * These values come from the featured image.
+	 * But the featured image is often cropped down to 696 x 928.
+	 * So from that, it's not possible to get a 928 x 928 image, for example.
+	 * So instead, use the source image that was cropped, instead of the cropped image.
+	 * This is more likely to produce the right size image.
+	 *
+	 * @param array|false  $image The featured image, or false.
+	 * @param int          $attachment_id The ID of the image.
+	 * @param string|array $size The size of the image.
+	 * @return array|false The featured image, or false.
+	 */
+	public static function ensure_correct_poster_size( $image, $attachment_id, $size ) {
+		if ( self::STORY_LANDSCAPE_IMAGE_SIZE === $size || self::STORY_SQUARE_IMAGE_SIZE === $size ) {
+			$attachment_meta = wp_get_attachment_metadata( $attachment_id );
+			// The source image that was cropped.
+			if ( ! empty( $attachment_meta['attachment_parent'] ) ) {
+				return wp_get_attachment_image_src( $attachment_meta['attachment_parent'], $size );
+			}
 		}
 		return $image;
 	}
@@ -445,22 +476,15 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		// @todo Name the script better to distinguish.
 		wp_enqueue_script(
-			'amp-story-editor-blocks',
-			amp_get_asset_url( 'js/amp-story-editor-blocks-compiled.js' ),
+			'amp-story-editor',
+			amp_get_asset_url( 'js/amp-stories-compiled.js' ),
 			array( 'wp-dom-ready', 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
 			AMP__VERSION,
 			false
 		);
 
-		wp_enqueue_script(
-			'amp-editor-story-blocks-build',
-			amp_get_asset_url( 'js/amp-story-blocks-compiled.js' ),
-			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-			AMP__VERSION,
-			false
-		);
+		wp_styles()->add_data( 'amp-story-editor', 'rtl', true );
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			$translations = wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
@@ -471,14 +495,14 @@ class AMP_Story_Post_Type {
 
 		if ( ! empty( $translations ) ) {
 			wp_add_inline_script(
-				'amp-editor-story-blocks-build',
+				'amp-story-editor',
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'before'
 			);
 		}
 
 		wp_localize_script(
-			'amp-story-editor-blocks',
+			'amp-story-editor',
 			'ampStoriesFonts',
 			self::get_fonts()
 		);
@@ -1114,5 +1138,111 @@ class AMP_Story_Post_Type {
 		}
 
 		return $minimum_height;
+	}
+
+	/**
+	 * Crops the image and returns the object as JSON.
+	 *
+	 * Forked from Custom_Image_Header::ajax_header_crop().
+	 */
+	public static function crop_featured_image() {
+		check_ajax_referer( 'image_editor-' . $_POST['id'], 'nonce' );
+
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			wp_send_json_error();
+		}
+
+		$crop_details = $_POST['cropDetails'];
+
+		$dimensions = array(
+			'dst_width'  => 696,
+			'dst_height' => 928,
+		);
+
+		$attachment_id = absint( $_POST['id'] );
+
+		$cropped = wp_crop_image(
+			$attachment_id,
+			intval( $crop_details['x1'] ),
+			intval( $crop_details['y1'] ),
+			intval( $crop_details['width'] ),
+			intval( $crop_details['height'] ),
+			intval( $dimensions['dst_width'] ),
+			intval( $dimensions['dst_height'] )
+		);
+
+		if ( ! $cropped || is_wp_error( $cropped ) ) {
+			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.', 'default' ) ) );
+		}
+
+		/** This filter is documented in wp-admin/custom-header.php */
+		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
+		$object  = self::create_attachment_object( $cropped, $attachment_id );
+		unset( $object['ID'] );
+
+		$new_attachment_id       = self::insert_attachment( $object, $cropped );
+		$object['attachment_id'] = $new_attachment_id;
+		$object['url']           = wp_get_attachment_url( $new_attachment_id );
+		$object['width']         = $dimensions['dst_width'];
+		$object['height']        = $dimensions['dst_height'];
+
+		wp_send_json_success( $object );
+	}
+
+	/**
+	 * Create an attachment 'object'.
+	 *
+	 * Forked from Custom_Image_Header::create_attachment_object() in Core.
+	 *
+	 * @param string $cropped Cropped image URL.
+	 * @param int    $parent_attachment_id Attachment ID of parent image.
+	 * @return array Attachment object.
+	 */
+	public static function create_attachment_object( $cropped, $parent_attachment_id ) {
+		$parent     = get_post( $parent_attachment_id );
+		$parent_url = wp_get_attachment_url( $parent->ID );
+		$url        = str_replace( basename( $parent_url ), basename( $cropped ), $parent_url );
+		try {
+			$size = getimagesize( $cropped );
+		} catch ( Exception $error ) {
+			unset( $error );
+		}
+
+		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
+		$object     = array(
+			'ID'             => $parent_attachment_id,
+			'post_title'     => basename( $cropped ),
+			'post_mime_type' => $image_type,
+			'guid'           => $url,
+			'context'        => 'amp-story-poster',
+			'post_parent'    => $parent_attachment_id,
+		);
+
+		return $object;
+	}
+
+	/**
+	 * Insert an attachment and its metadata.
+	 *
+	 * Forked from Custom_Image_Header::insert_attachment() in Core.
+	 *
+	 * @param array  $object  Attachment object.
+	 * @param string $cropped Cropped image URL.
+	 * @return int Attachment ID.
+	 */
+	public static function insert_attachment( $object, $cropped ) {
+		$parent_id = isset( $object['post_parent'] ) ? $object['post_parent'] : null;
+		unset( $object['post_parent'] );
+
+		$attachment_id = wp_insert_attachment( $object, $cropped );
+		$metadata      = wp_generate_attachment_metadata( $attachment_id, $cropped );
+
+		// If this is a crop, save the original attachment ID as metadata.
+		if ( $parent_id ) {
+			$metadata['attachment_parent'] = $parent_id;
+		}
+		wp_update_attachment_metadata( $attachment_id, $metadata );
+
+		return $attachment_id;
 	}
 }

@@ -32,33 +32,22 @@ the_post();
 		$publisher = isset( $metadata['publisher']['name'] ) ? $metadata['publisher']['name'] : get_option( 'blogname' );
 
 		// There is a fallback poster-portrait image added via a filter, in case there's no featured image.
-		$thumbnail_id        = get_post_thumbnail_id();
-		$portrait_img        = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
-		$poster_portrait_src = $portrait_img[0];
-
-		if ( $thumbnail_id ) {
-			$square_img = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_SQUARE_IMAGE_SIZE );
-			if ( $square_img ) {
-				$poster_square_src = $square_img[0];
-			}
-			$landscape_img = wp_get_attachment_image_src( $thumbnail_id, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
-			if ( $landscape_img ) {
-				$poster_landscape_src = $landscape_img[0];
-			}
-		}
-
+		$thumbnail_id     = get_post_thumbnail_id();
+		$poster_portrait  = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
+		$poster_square    = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_SQUARE_IMAGE_SIZE );
+		$poster_landscape = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
 		?>
 		<amp-story
 			standalone
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
-			poster-portrait-src="<?php echo esc_url( $poster_portrait_src ); ?>"
-			<?php if ( ! empty( $poster_square_src ) ) : ?>
-				poster-square-src="<?php echo esc_url( $poster_square_src ); ?>"
+			poster-portrait-src="<?php echo esc_url( $poster_portrait ); ?>"
+			<?php if ( $poster_square ) : ?>
+				poster-square-src="<?php echo esc_url( $poster_square ); ?>"
 			<?php endif; ?>
-			<?php if ( ! empty( $poster_landscape_src ) ) : ?>
-				poster-landscape-src="<?php echo esc_url( $poster_landscape_src ); ?>"
+			<?php if ( $poster_landscape ) : ?>
+				poster-landscape-src="<?php echo esc_url( $poster_landscape ); ?>"
 			<?php endif; ?>
 		>
 			<?php the_content(); ?>

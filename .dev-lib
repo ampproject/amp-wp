@@ -9,9 +9,7 @@ if [[ ! -z $TRAVIS ]]; then
 fi
 
 function after_wp_install {
-	if [[ $WP_VERSION == 4.* ]]; then
-		echo -n "Installing Gutenberg..."
-		svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
-		echo "done"
-	fi
+	echo -n "Installing Gutenberg..."
+	svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
+	echo "done"
 }

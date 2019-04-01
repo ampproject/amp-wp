@@ -11,8 +11,7 @@ import {
 	RichText,
 	getColorClassName,
 	getFontSize,
-} from '@wordpress/editor';
-import { registerBlockType } from '@wordpress/blocks';
+} from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 
 /**
@@ -27,6 +26,7 @@ export const name = 'amp/amp-story-text';
 const supports = {
 	className: false,
 	anchor: true,
+	reusable: true,
 };
 
 const schema = {
@@ -169,5 +169,3 @@ export const settings = {
 		);
 	},
 };
-
-registerBlockType( name, settings );

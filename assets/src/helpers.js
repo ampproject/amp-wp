@@ -473,22 +473,17 @@ export const getFeaturedImageMessage = ( validateImageSize, invalidSizeMessage )
 /**
  * Gets whether the AMP story's featured image has the right minimum dimensions.
  *
- * The featured image populates the AMP story poster image.
- * The 3 minimum dimensions for that are 696px x 928px, 928px x 696px, or 928px x 928px.
+ * The featured image will be used for the poster-portrait-src.
+ * It should have a width of at least 696px and a height of at least 928px.
  *
  * @param {Object} media A media object with width and height values.
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const largeDimension = 928;
-	const smallDimension = 696;
+	const minWidth = 696;
+	const minHeight = 928;
 	return (
 		( media.width && media.height )	&&
-		( media.width >= smallDimension && media.height >= smallDimension )	&&
-		(
-			( media.width >= largeDimension && media.height >= largeDimension ) ||
-			( media.width < largeDimension && media.height >= largeDimension ) ||
-			( media.height < largeDimension && media.width >= largeDimension )
-		)
+		( media.width >= minWidth && media.height >= minHeight )
 	);
 };

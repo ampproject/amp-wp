@@ -2,14 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { registerBlockType } from '@wordpress/blocks';
-import { InnerBlocks } from '@wordpress/editor';
+import { InnerBlocks } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
-import { BLOCK_ICONS, IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
+import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
 import EditPage from './edit';
+import blockIcon from '../../../images/amp-story-page-icon.svg';
 
 export const name = 'amp/amp-story-page';
 
@@ -54,8 +54,12 @@ const schema = {
 export const settings = {
 	title: __( 'Page', 'amp' ),
 	category: 'layout',
-	icon: BLOCK_ICONS[ 'amp/amp-story-page' ],
+	icon: blockIcon( { width: 24, height: 24 } ),
 	attributes: schema,
+
+	supports: {
+		reusable: true,
+	},
 
 	/*
      * <amp-story-page>:
@@ -113,8 +117,3 @@ export const settings = {
 		);
 	},
 };
-
-/**
- * Register block.
- */
-export default registerBlockType( name,	settings );

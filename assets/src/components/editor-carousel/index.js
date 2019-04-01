@@ -25,6 +25,11 @@ class EditorCarousel extends Component {
 
 	translateWrapper() {
 		const wrapper = document.querySelector( '.editor-writing-flow .editor-block-list__layout' );
+
+		if ( ! wrapper ) {
+			return;
+		}
+
 		if ( this.props.isReordering ) {
 			wrapper.style.display = 'none';
 		} else {
