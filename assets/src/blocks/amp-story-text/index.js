@@ -11,8 +11,7 @@ import {
 	RichText,
 	getColorClassName,
 	getFontSize,
-} from '@wordpress/editor';
-import { registerBlockType } from '@wordpress/blocks';
+} from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 
 /**
@@ -170,5 +169,3 @@ export const settings = {
 		);
 	},
 };
-
-registerBlockType( name, settings );

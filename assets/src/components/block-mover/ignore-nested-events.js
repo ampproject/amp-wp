@@ -1,6 +1,6 @@
 /**
- * This file is a direct copy from WordPress cores @wordpress/editor package.
- * It is copied since at this moment it's not made avaiable for public usage.
+ * This file is a direct copy from WordPress cores @wordpress/block-editor package.
+ * It is copied since at this moment it's not made available for public usage.
  */
 
 /**

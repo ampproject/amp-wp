@@ -852,6 +852,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * Elements.
 		 *
 		 * @var DOMElement $link
+		 * @var DOMElement $element
 		 * @var DOMElement $navigation_top
 		 * @var DOMElement $navigation_top_fixed
 		 */
@@ -869,6 +870,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
+		foreach ( $this->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
+			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
+		}
 
 		$attributes = array(
 			'layout'              => 'nodisplay',
