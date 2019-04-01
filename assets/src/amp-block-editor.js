@@ -14,6 +14,7 @@ import { registerPlugin } from '@wordpress/plugins';
  * Internal dependencies
  */
 import { PrePublishPanel, withFeaturedImageNotice } from './components';
+import { hasMinimumFeaturedImageWidth } from './helpers';
 
 /**
  * Exported via wp_localize_script().
@@ -112,7 +113,16 @@ addFilter(
 registerPlugin(
 	'amp-post-featured-image-pre-publish',
 	{
-		render: PrePublishPanel,
+		render: () => {
+			return (
+				<PrePublishPanel
+					validationCallback={ hasMinimumFeaturedImageWidth }
+					missingMediaMessage={ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) }
+					invalidMediaMessage={ __( 'The featured image should have a width of at least 1200px.', 'amp' ) }
+					status="notice"
+				/>
+			);
+		},
 	}
 );
 

@@ -17,6 +17,7 @@ import {
 	unregisterBlockType,
 	registerBlockType,
 } from '@wordpress/blocks';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -31,7 +32,7 @@ import {
 	withCroppedFeaturedImage,
 	withActivePageState,
 	withStoryBlockDropZone,
-	StoryPrePublishPanel,
+	PrePublishPanel,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -41,6 +42,7 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
+	hasMinimumStoryPosterDimensions,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -334,7 +336,16 @@ store.subscribe( () => {
 registerPlugin(
 	'amp-story-featured-image-pre-publish',
 	{
-		render: StoryPrePublishPanel,
+		render: () => {
+			return (
+				<PrePublishPanel
+					validationCallback={ hasMinimumStoryPosterDimensions }
+					missingMediaMessage={ __( 'Selecting a featured image is required.', 'amp' ) }
+					invalidMediaMessage={ __( 'The featured image must have minimum dimensions of 696px x 928px.', 'amp' ) }
+					status="notice"
+				/>
+			);
+		},
 	}
 );
 

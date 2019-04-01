@@ -10,7 +10,6 @@ export { default as StoryBlockMover } from './block-mover';
 export { default as TemplateInserter } from './template-inserter';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as PrePublishPanel } from './pre-publish-panel';
-export { default as StoryPrePublishPanel } from './story-pre-publish-panel';
 export { default as PreviewPicker } from './preview-picker';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
 export { default as withAnimationControls } from './with-animation-controls';

@@ -8,21 +8,16 @@ import { withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Internal dependencies
- */
-import { hasMinimumFeaturedImageWidth } from '../helpers';
-
-/**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
  *
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
-const PrePublishPanel = ( { featuredMedia } ) => {
-	if ( featuredMedia && hasMinimumFeaturedImageWidth( featuredMedia ) ) {
+const PrePublishPanel = ( { featuredMedia, validationCallback, missingMediaMessage, invalidMediaMessage, status } ) => {
+	if ( featuredMedia && validationCallback( featuredMedia ) ) {
 		return null;
 	}
 
-	const message = ! featuredMedia ? __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
+	const message = ! featuredMedia ? missingMediaMessage : invalidMediaMessage;
 
 	return (
 		<Fragment>
@@ -31,7 +26,7 @@ const PrePublishPanel = ( { featuredMedia } ) => {
 				initialOpen="true"
 			>
 				<Notice
-					status="notice"
+					status={ status }
 					isDismissible={ false }
 				>
 					<span>
