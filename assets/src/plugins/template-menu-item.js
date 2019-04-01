@@ -49,7 +49,6 @@ const addTemplate = () => {
  */
 export function registerTemplateSaveMenuItem() {
 	// @todo Change icon.
-	// @todo allowedBlockNames restriction is not working properly.
 	registerPlugin( 'amp-story', {
 		render: ( ) => (
 			<PluginBlockSettingsMenuItem
