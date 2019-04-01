@@ -555,7 +555,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handle_updated_theme_support_option for paired mode.
+	 * Test handle_updated_theme_support_option for transitional mode.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
 	 * @covers \amp_admin_get_preview_permalink()
@@ -592,7 +592,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', $filter );
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Paired mode activated!', $new_error['message'] );
+		$this->assertStringStartsWith( 'Transitional mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			array(

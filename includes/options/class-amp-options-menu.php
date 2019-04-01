@@ -138,10 +138,11 @@ class AMP_Options_Menu {
 	 * @since 1.0
 	 */
 	public function render_theme_support() {
-		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
-		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
-		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
-		$reader_description = __( 'Generates AMP content using simplified templates, which are light but may not match the look-and-feel of your site.', 'amp' );
+		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		$native_description       = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
+		$transitional_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
+		$reader_description       = __( 'Generates AMP content using simplified templates, which are light but may not match the look-and-feel of your site.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -154,15 +155,15 @@ class AMP_Options_Menu {
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
 					<?php echo wp_kses_post( $native_description ); ?>
 				<?php else : ?>
-					<strong><?php esc_html_e( 'Paired:', 'amp' ); ?></strong>
-					<?php echo wp_kses_post( $paired_description ); ?>
+					<strong><?php esc_html_e( 'Transitional:', 'amp' ); ?></strong>
+					<?php echo wp_kses_post( $transitional_description ); ?>
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
 			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
+						<p><?php esc_html_e( 'Your active theme is known to work well in transitional or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
 				<dl>
@@ -176,13 +177,13 @@ class AMP_Options_Menu {
 						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
-						<label for="theme_support_paired">
-							<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
+						<label for="theme_support_transitional">
+							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo wp_kses_post( $paired_description ); ?>
+						<?php echo wp_kses_post( $transitional_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
@@ -200,7 +201,7 @@ class AMP_Options_Menu {
 									echo wp_kses_post(
 										sprintf(
 											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
-											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
+											__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
 												esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),

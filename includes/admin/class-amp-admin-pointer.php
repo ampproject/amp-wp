@@ -130,7 +130,7 @@ class AMP_Admin_Pointer {
 						'<h3>%s</h3><p><strong>%s</strong></p><p>%s</p>',
 						__( 'AMP', 'amp' ),
 						__( 'New AMP Template Modes', 'amp' ),
-						__( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Paired&#8221; and &#8220;Native&#8221; modes.', 'amp' )
+						__( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Transitional&#8221; and &#8220;Native&#8221; modes.', 'amp' )
 					),
 					'position' => array(
 						'edge'  => 'left',

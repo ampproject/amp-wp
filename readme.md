@@ -33,7 +33,7 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 1. Upload the folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Paired` or `Native` mode.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Transitional` or `Native` mode.
 
 ## Getting Started ##
 
@@ -55,9 +55,9 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
 
-### Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+### Switch from Reader mode to Transitional or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
 
-![Switch from Reader mode to Paired or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
+![Switch from Reader mode to Transitional or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
 
 ### Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 

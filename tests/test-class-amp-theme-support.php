@@ -164,14 +164,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			)
 		);
 
-		// Test paired mode singular, where not on endpoint that it causes amphtml link to be added.
+		// Test transitional mode singular, where not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertFalse( is_amp_endpoint() );
 		AMP_Theme_Support::finish_init();
 		$this->assertEquals( 10, has_action( 'wp_head', 'amp_add_amphtml_link' ) );
 
-		// Test paired mode homepage, where still not on endpoint that it causes amphtml link to be added.
+		// Test transitional mode homepage, where still not on endpoint that it causes amphtml link to be added.
 		remove_action( 'wp_head', 'amp_add_amphtml_link' );
 		$this->go_to( home_url() );
 		$this->assertFalse( is_amp_endpoint() );
@@ -234,11 +234,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test ensure_proper_amp_location for paired.
+	 * Test ensure_proper_amp_location for transitional.
 	 *
 	 * @covers AMP_Theme_Support::ensure_proper_amp_location()
 	 */
-	public function test_ensure_proper_amp_location_paired() {
+	public function test_ensure_proper_amp_location_transitional() {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
@@ -326,12 +326,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
 
-		// Paired support is not available if theme support is not present or canonical.
+		// Transitional support is not available if theme support is not present or canonical.
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 
-		// Paired mode is available once template_dir is supplied.
+		// Transitional mode is available once template_dir is supplied.
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
@@ -340,7 +340,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		$this->assertTrue( AMP_Theme_Support::is_paired_available() );
 
-		// Paired mode not available when post does not support AMP.
+		// Transitional mode not available when post does not support AMP.
 		add_filter( 'amp_skip_post', '__return_true' );
 		$this->assertFalse( AMP_Theme_Support::is_paired_available() );
 		$this->assertTrue( is_singular() );
@@ -918,7 +918,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<div submit-success>', $output );
 		$this->assertContains( '<div submit-error>', $output );
 
-		// Test paired AMP.
+		// Test transitional AMP.
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(

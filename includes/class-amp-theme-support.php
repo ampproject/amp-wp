@@ -248,7 +248,7 @@ class AMP_Theme_Support {
 		if ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
-			 * Temporary redirect is used for admin users because implied paired mode and template support can be
+			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
 			 */
@@ -305,8 +305,8 @@ class AMP_Theme_Support {
 			}
 		} else {
 			/*
-			 * When in AMP paired mode *with* theme support, then the proper AMP URL has the 'amp' URL param
-			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in paired mode
+			 * When in AMP transitional mode *with* theme support, then the proper AMP URL has the 'amp' URL param
+			 * and not the /amp/ endpoint. The URL param is now the exclusive way to mark AMP in transitional mode
 			 * when amp theme support present. This is important for plugins to be able to reliably call
 			 * is_amp_endpoint() before the parse_query action.
 			 */
@@ -314,7 +314,7 @@ class AMP_Theme_Support {
 				$old_url = amp_get_current_url();
 				$new_url = add_query_arg( amp_get_slug(), '', amp_remove_endpoint( $old_url ) );
 				if ( $old_url !== $new_url ) {
-					// A temporary redirect is used for admin users to allow them to see changes between reader mode and paired modes.
+					// A temporary redirect is used for admin users to allow them to see changes between reader mode and transitional modes.
 					wp_safe_redirect( $new_url, current_user_can( 'manage_options' ) ? 302 : 301 );
 					// @codeCoverageIgnoreStart
 					if ( $exit ) {
@@ -358,7 +358,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Determines whether paired mode is available.
+	 * Determines whether transitional mode is available.
 	 *
 	 * When 'amp' theme support has not been added or canonical mode is enabled, then this returns false.
 	 *
@@ -1075,7 +1075,7 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Prepends template hierarchy with template_dir for AMP paired mode templates.
+	 * Prepends template hierarchy with template_dir for AMP transitional mode templates.
 	 *
 	 * @param array $templates Template hierarchy.
 	 * @return array Templates.

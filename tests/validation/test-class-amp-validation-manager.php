@@ -603,7 +603,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
 		$output = ob_get_clean();
 
-		// In 'Paired' mode with 'auto_accept_sanitization' set to false.
+		// In 'Transitional' mode with 'auto_accept_sanitization' set to false.
 		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.';
 		$this->assertContains( 'notice notice-warning', $output );
 		$this->assertContains( '<code>script</code>', $output );

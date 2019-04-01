@@ -243,12 +243,12 @@ class AMP_Validation_Manager {
 	/**
 	 * Add menu items to admin bar for AMP.
 	 *
-	 * When on a non-AMP response (paired mode), then the admin bar item should include:
+	 * When on a non-AMP response (transitional mode), then the admin bar item should include:
 	 * - Icon: LINK SYMBOL when AMP not known to be invalid and sanitization is not forced, or CROSS MARK when AMP is known to be valid.
 	 * - Parent admin item and first submenu item: link to AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
-	 * When on paired AMP response:
+	 * When on transitional AMP response:
 	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors which are being forcibly sanitized.
 	 *         Otherwise, if there are unsanitized validation errors then a redirect to the non-AMP version will be done.
 	 * - Parent admin item and first submenu item: link to non-AMP version.

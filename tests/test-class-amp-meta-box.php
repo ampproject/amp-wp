@@ -132,7 +132,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
 
-		// This is not in AMP 'canonical mode' but rather reader or paired mode.
+		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		$this->instance->render_status( $post );
