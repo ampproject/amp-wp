@@ -28,6 +28,7 @@ import {
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
+	withCroppedFeaturedImage,
 	withActivePageState,
 	withPrePublishNotice,
 	withStoryBlockDropZone,
@@ -337,6 +338,7 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', with
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 
