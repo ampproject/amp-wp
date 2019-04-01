@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 843;
+	private static $spec_file_revision = 846;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -106,6 +106,7 @@ class AMP_Allowed_Tags_Generated {
 			'amp-live-list',
 			'amp-pixel',
 			'amp-timeago',
+			'amp-twitter',
 			'amp-video',
 			'article',
 			'aside',
@@ -1386,6 +1387,9 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'autoplay' => array(),
+					'data-dynamic' => array(
+						'value_regex' => '[a-z]+',
+					),
 					'data-outstream' => array(
 						'value_regex' => '[0-9]+',
 					),
@@ -1398,7 +1402,7 @@ class AMP_Allowed_Tags_Generated {
 						'value_regex' => '[0-9]+',
 					),
 					'data-playlist' => array(
-						'value_regex' => '[0-9]+',
+						'value_regex' => '.+',
 					),
 					'data-video' => array(
 						'value_regex' => '[0-9]+',
@@ -6078,7 +6082,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -6168,7 +6172,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -6293,7 +6297,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -6338,7 +6342,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'xml:lang' => array(),
 					'xml:space' => array(),
@@ -6593,7 +6597,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -6682,7 +6686,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -6774,7 +6778,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -6857,7 +6861,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -6943,7 +6947,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7026,7 +7030,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7055,7 +7059,7 @@ class AMP_Allowed_Tags_Generated {
 				'attr_spec_list' => array(
 					'in' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'xml:lang' => array(),
 					'xml:space' => array(),
@@ -7130,7 +7134,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7240,7 +7244,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7475,7 +7479,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -7560,7 +7564,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7646,7 +7650,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -7765,7 +7769,7 @@ class AMP_Allowed_Tags_Generated {
 					'g2' => array(),
 					'k' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'u1' => array(),
 					'u2' => array(),
@@ -7912,7 +7916,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -8782,7 +8786,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -8870,7 +8874,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -9246,7 +9250,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -9332,7 +9336,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -9863,7 +9867,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'xml:lang' => array(),
 					'xml:space' => array(),
@@ -10093,7 +10097,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -10181,7 +10185,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -10296,7 +10300,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -10381,7 +10385,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -10503,7 +10507,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -10612,7 +10616,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -14068,7 +14072,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -14247,7 +14251,7 @@ class AMP_Allowed_Tags_Generated {
 					'stop-color' => array(),
 					'stop-opacity' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 				),
 				'tag_spec' => array(
@@ -14262,7 +14266,7 @@ class AMP_Allowed_Tags_Generated {
 					'stop-color' => array(),
 					'stop-opacity' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 				),
 				'tag_spec' => array(
@@ -14303,7 +14307,7 @@ class AMP_Allowed_Tags_Generated {
 				'cdata' => array(
 					'blacklisted_cdata_regex' => array(
 						'error_message' => 'CSS !important',
-						'regex' => '!important',
+						'regex' => '!\\s*important',
 					),
 					'css_spec' => array(
 						'allowed_at_rules' => array(
@@ -14510,7 +14514,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -14601,7 +14605,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -14682,7 +14686,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'text-anchor' => array(),
 					'text-decoration' => array(),
@@ -14910,7 +14914,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -15053,7 +15057,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -15143,7 +15147,7 @@ class AMP_Allowed_Tags_Generated {
 			array(
 				'attr_spec_list' => array(
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'xml:lang' => array(),
 					'xml:space' => array(),
@@ -15543,7 +15547,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -15647,7 +15651,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -15751,7 +15755,7 @@ class AMP_Allowed_Tags_Generated {
 					'stroke-opacity' => array(),
 					'stroke-width' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'systemlanguage' => array(),
 					'text-anchor' => array(),
@@ -15837,7 +15841,7 @@ class AMP_Allowed_Tags_Generated {
 					'externalresourcesrequired' => array(),
 					'preserveaspectratio' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'viewbox' => array(),
 					'viewtarget' => array(),
@@ -15860,7 +15864,7 @@ class AMP_Allowed_Tags_Generated {
 					'g2' => array(),
 					'k' => array(),
 					'style' => array(
-						'blacklisted_value_regex' => '!important',
+						'blacklisted_value_regex' => '!\\s*important',
 					),
 					'u1' => array(),
 					'u2' => array(),
@@ -16033,7 +16037,7 @@ class AMP_Allowed_Tags_Generated {
 		'rev' => array(),
 		'role' => array(),
 		'style' => array(
-			'blacklisted_value_regex' => '(!important|<!--)',
+			'blacklisted_value_regex' => '(!\\s*important|<!--)',
 		),
 		'subscriptions-action' => array(
 			'requires_extension' => array(
@@ -16276,6 +16280,7 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'animate-in-timing-function' => array(),
 				'scale-end' => array(
 					'value_regex' => '[0-9]+([.][0-9]+)?',
 				),
@@ -16327,6 +16332,7 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'animate-in-timing-function' => array(),
 				'data-tooltip-icon' => array(
 					'value_url' => array(
 						'protocol' => array(
@@ -16334,6 +16340,11 @@ class AMP_Allowed_Tags_Generated {
 							'https',
 							'data',
 						),
+					),
+				),
+				'interactive' => array(
+					'value' => array(
+						'',
 					),
 				),
 				'scale-end' => array(
@@ -16419,6 +16430,7 @@ class AMP_Allowed_Tags_Generated {
 				'animate-in-after' => array(),
 				'animate-in-delay' => array(),
 				'animate-in-duration' => array(),
+				'animate-in-timing-function' => array(),
 				'data-tooltip-icon' => array(
 					'value_url' => array(
 						'protocol' => array(
@@ -16429,6 +16441,11 @@ class AMP_Allowed_Tags_Generated {
 					),
 				),
 				'grid-area' => array(),
+				'interactive' => array(
+					'value' => array(
+						'',
+					),
+				),
 				'justify-content' => array(
 					'value' => array(
 						'center',
