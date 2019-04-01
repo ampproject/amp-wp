@@ -48,6 +48,10 @@ import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_I
 import store from './stores/amp-story';
 import { registerPlugin } from '@wordpress/plugins';
 
+// Register plugin.
+// @todo Consider importing automatically, especially in case of more plugins.
+import './plugins/template-menu-item';
+
 const {
 	getSelectedBlockClientId,
 	getBlocksByClientId,

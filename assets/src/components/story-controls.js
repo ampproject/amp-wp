@@ -9,9 +9,14 @@
 import { __ } from '@wordpress/i18n';
 import { IconButton, Button } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
-import { Inserter } from '@wordpress/block-editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+
+/**
+ * Internal dependencies
+ */
+import { TemplateInserter } from './';
+import reorderIcon from '../../images/reorder.svg';
 
 function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
 	if ( isReordering ) {
@@ -38,29 +43,10 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 
 	return (
 		<Fragment>
-			<Inserter
-				rootClientId=""
-				clientId=""
-				isAppender={ false }
-				position="bottom left"
-				title={ __( 'Add New Page', 'amp' ) }
-				style={ { position: 'relative' } }
-				renderToggle={ ( { onToggle, disabled, isOpen } ) => (
-					<IconButton
-						icon="insert"
-						label={ __( 'Add New Page', 'amp' ) }
-						labelPosition="bottom left"
-						onClick={ onToggle }
-						className="editor-inserter__toggle"
-						aria-haspopup="true"
-						aria-expanded={ isOpen }
-						disabled={ disabled }
-					/>
-				) }
-			/>
+			<TemplateInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
-				icon="sort"
+				icon={ reorderIcon( { width: 24, height: 19 } ) }
 				label={ __( 'Reorder Pages', 'amp' ) }
 				onClick={ startReordering }
 			/>
