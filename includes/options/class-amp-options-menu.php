@@ -141,6 +141,7 @@ class AMP_Options_Menu {
 		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
 		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
 		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
+		$reader_description = __( 'Generates AMP content using simplified templates, which are light but may not match the look-and-feel of your site.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -190,7 +191,7 @@ class AMP_Options_Menu {
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in a simplified reader mode design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php echo wp_kses_post( $reader_description ); ?>
 
 						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
