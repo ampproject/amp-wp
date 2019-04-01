@@ -27,7 +27,7 @@ export default createHigherOrderComponent(
 				return <PostFeaturedImage { ...props } />;
 			}
 
-			const message = ! media ? __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
+			const message = ! media ? __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) : __( 'The featured image should have a width of at least 1200 pixels.', 'amp' );
 
 			return (
 				<Fragment>

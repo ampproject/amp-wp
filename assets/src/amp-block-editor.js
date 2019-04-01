@@ -118,7 +118,7 @@ registerPlugin(
 				<PrePublishPanel
 					validationCallback={ hasMinimumFeaturedImageWidth }
 					missingMediaMessage={ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) }
-					invalidMediaMessage={ __( 'The featured image should have a width of at least 1200px.', 'amp' ) }
+					invalidMediaMessage={ __( 'The featured image should have a width of at least 1200 pixels.', 'amp' ) }
 					status="notice"
 				/>
 			);
