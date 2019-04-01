@@ -46,7 +46,7 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 			<TemplateInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
-				icon={ reorderIcon( { width: 24, height: 19 } )  }
+				icon={ reorderIcon( { width: 24, height: 19 } ) }
 				label={ __( 'Reorder Pages', 'amp' ) }
 				onClick={ startReordering }
 			/>
