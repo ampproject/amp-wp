@@ -9,7 +9,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import BlockPreview from './block-preview';
+import { BlockPreview } from '../';
 
 /**
  * Parses drag & drop events to ensure the event contains valid transfer data.
