@@ -26,6 +26,7 @@ export const name = 'amp/amp-story-text';
 const supports = {
 	className: false,
 	anchor: true,
+	reusable: true,
 };
 
 const schema = {
@@ -45,6 +46,9 @@ const schema = {
 	tagName: {
 		type: 'string',
 		default: 'p',
+	},
+	align: {
+		type: 'string',
 	},
 	fontSize: {
 		type: 'string',
@@ -108,6 +112,7 @@ export const settings = {
 	save( { attributes } ) {
 		const {
 			content,
+			align,
 			fontSize,
 			customFontSize,
 			ampFitText,
@@ -144,6 +149,7 @@ export const settings = {
 			fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
 			width: `${ getPercentageFromPixels( 'x', width ) }%`,
 			height: `${ getPercentageFromPixels( 'y', height ) }%`,
+			textAlign: align,
 		};
 
 		if ( ! ampFitText ) {
