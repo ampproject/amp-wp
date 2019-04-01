@@ -22,7 +22,7 @@ const PrePublishPanel = ( { featuredMedia } ) => {
 		return null;
 	}
 
-	const message = ! featuredMedia ? __( 'Selecting a featured image is required for appearance in Google Search.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
+	const message = ! featuredMedia ? __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) : __( 'The featured image should have a width of at least 1200px.', 'amp' );
 
 	return (
 		<Fragment>
