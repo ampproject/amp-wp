@@ -12,7 +12,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import BlockPreview from './block-preview';
-import pageIcon from './icon';
+import pageIcon from '../../../images/add-page-inserter.svg';
 import { ICONS } from './../../constants';
 
 const storyPageBlockName = 'amp/amp-story-page';
@@ -94,7 +94,7 @@ class TemplateInserter extends Component {
 								<div role="list" className="editor-block-types-list block-editor-block-types-list">
 									<div className="editor-block-preview block-editor-block-preview">
 										<IconButton
-											icon={ pageIcon }
+											icon={ pageIcon( { width: 86, height: 96 } ) }
 											label={ __( 'Blank Page', 'amp' ) }
 											onClick={ () => {
 												onSelect( null );
