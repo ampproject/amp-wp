@@ -265,18 +265,24 @@ class AMP_Post_Template {
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
-		$this->add_data(
-			array(
-				'post'                     => $this->post,
-				'post_id'                  => $this->ID,
-				'post_title'               => $post_title,
-				'post_publish_timestamp'   => $post_publish_timestamp,
-				'post_modified_timestamp'  => $post_modified_timestamp,
-				'post_author'              => $post_author,
-				'post_canonical_link_url'  => get_permalink( $this->ID ),
-				'post_canonical_link_text' => __( 'Exit Reader Mode', 'amp' ),
-			)
+		$data = array(
+			'post'                     => $this->post,
+			'post_id'                  => $this->ID,
+			'post_title'               => $post_title,
+			'post_publish_timestamp'   => $post_publish_timestamp,
+			'post_modified_timestamp'  => $post_modified_timestamp,
+			'post_author'              => $post_author,
+			'post_canonical_link_url'  => '',
+			'post_canonical_link_text' => '',
 		);
+
+		$customizer_settings = AMP_Customizer_Settings::get_settings();
+		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
+			$data['post_canonical_link_url']  = get_permalink( $this->ID );
+			$data['post_canonical_link_text'] = __( 'Exit Reader Mode', 'amp' );
+		}
+
+		$this->add_data( $data );
 
 		$this->build_post_featured_image();
 		$this->build_post_comments_data();
