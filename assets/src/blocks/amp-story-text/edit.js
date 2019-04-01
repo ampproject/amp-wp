@@ -24,6 +24,8 @@ import {
 	withColors,
 	PanelColorSettings,
 	ContrastChecker,
+	BlockControls,
+	AlignmentToolbar,
 } from '@wordpress/block-editor';
 
 /**
@@ -112,6 +114,7 @@ class TextBlockEdit extends Component {
 			placeholder,
 			content,
 			type,
+			align,
 			ampFontFamily,
 			ampFitText,
 			autoFontSize,
@@ -133,6 +136,12 @@ class TextBlockEdit extends Component {
 
 		return (
 			<Fragment>
+				<BlockControls>
+					<AlignmentToolbar
+						value={ align }
+						onChange={ ( value ) => setAttributes( { align: value } ) }
+					/>
+				</BlockControls>
 				<InspectorControls>
 					<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 						<FontFamilyPicker
@@ -233,6 +242,7 @@ class TextBlockEdit extends Component {
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
+							textAlign: align,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
