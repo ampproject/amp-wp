@@ -415,7 +415,6 @@ class AMP_Story_Post_Type {
 	 * @return array|false The featured image, or false.
 	 */
 	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
-		unset( $attachment_id );
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return array(
 				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
@@ -423,6 +422,7 @@ class AMP_Story_Post_Type {
 				696,
 			);
 		}
+
 		return $image;
 	}
 
