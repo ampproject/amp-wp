@@ -80,8 +80,9 @@
   },
   "scripts": {
     "build": "npm-run-all build:*",
+    "build:prepare": "grunt clean",
     "build:js": "wp-scripts build",
-    "build:prepare": "grunt build",
+    "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
     "check-engines": "wp-scripts check-engines",
     "check-licenses": "wp-scripts check-licenses --production",
