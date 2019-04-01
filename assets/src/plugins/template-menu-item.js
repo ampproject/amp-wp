@@ -56,6 +56,7 @@ export function registerTemplateSaveMenuItem() {
 				allowedBlockNames={ [ 'amp/amp-story-page' ] }
 				icon="welcome-add-page"
 				label={ __( 'Save as Template', 'amp' ) }
+				role="menuitem"
 				onClick={ addTemplate }
 			/>
 		),
