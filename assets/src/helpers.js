@@ -444,6 +444,7 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 export const hasMinimumStoryPosterDimensions = ( media ) => {
 	const minWidth = 696;
 	const minHeight = 928;
+
 	return (
 		( media.width && media.height )	&&
 		( media.width >= minWidth && media.height >= minHeight )
@@ -460,5 +461,5 @@ export const hasMinimumStoryPosterDimensions = ( media ) => {
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumFeaturedImageWidth = ( media ) => {
-	return ( media.width && media.width >= 1200 );
+	return media.width && media.width >= 1200;
 };

@@ -13,7 +13,7 @@ import { __ } from '@wordpress/i18n';
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
 const PrePublishPanel = ( { featuredMedia, validationCallback, missingMediaMessage, invalidMediaMessage, status } ) => {
-	if ( featuredMedia && validationCallback( featuredMedia ) ) {
+	if ( featuredMedia && validationCallback( featuredMedia.media_details ) ) {
 		return null;
 	}
 
@@ -44,6 +44,6 @@ export default withSelect( ( select ) => {
 	const featuredMedia = currentPost.featured_media || editedFeaturedMedia;
 
 	return {
-		featuredMedia,
+		featuredMedia: featuredMedia ? select( 'core' ).getMedia( featuredMedia ) : null,
 	};
 } )( PrePublishPanel );

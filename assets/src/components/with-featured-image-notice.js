@@ -23,7 +23,7 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			if ( media && hasMinimumFeaturedImageWidth( media ) ) {
+			if ( media && hasMinimumFeaturedImageWidth( media.media_details ) ) {
 				return <PostFeaturedImage { ...props } />;
 			}
 
