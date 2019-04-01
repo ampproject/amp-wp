@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
-import { BlockIcon } from '@wordpress/editor';
+import { BlockIcon } from '@wordpress/block-editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
 import { compose } from '@wordpress/compose';

@@ -1,102 +1,110 @@
-/* global process, require, module, __dirname */
-
+/**
+ * External dependencies
+ */
 const path = require( 'path' );
-
-const externals = {
-	// Make localized data importable.
-	'amp-validation-i18n': 'ampValidationI18n',
-	jquery: 'jQuery',
-	lodash: 'lodash',
-	react: 'React',
-	'react-dom': 'ReactDOM',
-};
-
-// Define WordPress dependencies
-const wpDependencies = [
-	'blocks',
-	'components',
-	'compose',
-	'data',
-	'editor',
-	'edit-post',
-	'element',
-	'hooks',
-	'i18n',
-	'api-fetch',
-	'blocks',
-	'components',
-	'compose',
-	'date',
-	'editor',
-	'element',
-	'hooks',
-	'i18n',
-	'utils',
-	'data',
-	'viewport',
-	'core-data',
-	'plugins',
-	'edit-post',
-	'keycodes',
-	'wordcount',
-];
+const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 
 /**
- * Given a string, returns a new string with dash separators converted to
- * camel-case equivalent. This is not as aggressive as `_.camelCase` in
- * converting to uppercase, where Lodash will convert letters following
- * numbers.
- *
- * @param {string} string Input dash-delimited string.
- *
- * @return {string} Camel-cased string.
+ * WordPress dependencies
  */
-function camelCaseDash( string ) {
-	return string.replace(
-		/-([a-z])/,
-		( match, letter ) => letter.toUpperCase()
-	);
+const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+
+function recursiveIssuer( m ) {
+	if ( m.issuer ) {
+		return recursiveIssuer( m.issuer );
+	} else if ( m.name ) {
+		return m.name;
+	}
+	return false;
 }
 
-wpDependencies.forEach( ( name ) => {
-	externals[ `@wordpress/${ name }` ] = {
-		this: [ 'wp', camelCaseDash( name ) ],
-	};
-} );
-
-const isProduction = process.env.NODE_ENV === 'production';
-
-module.exports = {
-	mode: isProduction ? 'production' : 'development',
+const config = {
+	...defaultConfig,
+	externals: [
+		...defaultConfig.externals,
+		{
+			// Make localized data importable.
+			'amp-validation-i18n': 'ampValidationI18n',
+			'amp-stories-fonts': 'ampStoriesFonts',
+		},
+	],
 	entry: {
-		'./assets/js/amp-blocks-compiled': './assets/src/blocks/index.js',
-		'./assets/js/amp-block-editor-compiled': './assets/src/amp-block-editor.js',
-		'./assets/js/amp-validation-detail-toggle-compiled': './assets/src/amp-validation-detail-toggle.js',
-		'./assets/js/amp-validation-single-error-url-details-compiled': './assets/src/amp-validation-single-error-url-details.js',
-		'./assets/js/amp-story-editor-blocks-compiled': './assets/src/amp-story-editor-blocks.js',
-		'./assets/js/amp-story-blocks-compiled': './assets/src/blocks/stories.js',
+		'amp-blocks': './assets/src/amp-blocks.js',
+		'amp-block-editor': './assets/src/amp-block-editor.js',
+		'amp-validation-detail-toggle': './assets/src/amp-validation-detail-toggle.js',
+		'amp-validation-single-error-url-details': './assets/src/amp-validation-single-error-url-details.js',
+		'amp-stories': './assets/src/amp-story-editor-blocks.js',
 	},
 	output: {
-		path: path.resolve( __dirname ),
-		filename: '[name].js',
+		path: path.resolve( process.cwd(), 'assets', 'js' ),
+		filename: '[name]-compiled.js',
 		library: 'AMP',
 		libraryTarget: 'this',
 	},
-	externals,
-	devtool: isProduction ? undefined : 'cheap-eval-source-map',
 	module: {
+		...defaultConfig.module,
 		rules: [
-			{
-				test: /\.js$/,
-				exclude: /node_modules/,
-				use: {
-					loader: 'babel-loader',
-				},
-			},
+			...defaultConfig.module.rules,
 			{
 				test: /\.svg$/,
 				loader: 'svg-inline-loader',
 			},
+			{
+				test: /\.css$/,
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
+			},
 		],
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
+	],
+	optimization: {
+		splitChunks: {
+			cacheGroups: {
+				blocks: {
+					name: 'amp-blocks',
+					test: ( m, c, entry = 'amp-blocks' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					chunks: 'all',
+					enforce: true,
+				},
+				blocksEditorToggle: {
+					name: 'amp-blocks-editor-toggle',
+					test: ( m, c, entry = 'amp-blocks-editor-toggle' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					chunks: 'all',
+					enforce: true,
+				},
+				validationDetailToggle: {
+					name: 'amp-validation-detail-toggle',
+					test: ( m, c, entry = 'amp-validation-detail-toggle' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					chunks: 'all',
+					enforce: true,
+				},
+				validationSingleDetails: {
+					name: 'amp-validation-single-error-url-details',
+					test: ( m, c, entry = 'amp-validation-single-error-url-details' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					chunks: 'all',
+					enforce: true,
+				},
+				stories: {
+					name: 'amp-stories',
+					test: ( m, c, entry = 'amp-stories' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					chunks: 'all',
+					enforce: true,
+				},
+			},
+		},
+	},
 };
+
+module.exports = config;

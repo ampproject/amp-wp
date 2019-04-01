@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { InspectorControls } from '@wordpress/editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import { Fragment } from '@wordpress/element';
 import { PanelBody, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';

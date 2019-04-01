@@ -9,7 +9,14 @@ import { every } from 'lodash';
 import { addFilter } from '@wordpress/hooks';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
-import { createBlock, getDefaultBlockName, setDefaultBlockName, getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
+import {
+	createBlock,
+	getDefaultBlockName,
+	setDefaultBlockName,
+	getBlockTypes,
+	unregisterBlockType,
+	registerBlockType,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -21,6 +28,7 @@ import {
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
+	withCroppedFeaturedImage,
 	withActivePageState,
 	withPrePublishNotice,
 	withStoryBlockDropZone,
@@ -332,7 +340,16 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', with
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
+
+const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+
+// Block types need to be register *after* all the filters have been applied.
+context.keys().forEach( ( modulePath ) => {
+	const { name, settings } = context( modulePath );
+	registerBlockType( name, settings );
+} );
