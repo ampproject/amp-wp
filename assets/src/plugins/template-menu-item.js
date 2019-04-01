@@ -49,13 +49,13 @@ const addTemplate = () => {
  */
 export function registerTemplateSaveMenuItem() {
 	// @todo Change icon.
-	// @todo allowedBlockNames restriction is not working properly.
 	registerPlugin( 'amp-story', {
 		render: ( ) => (
 			<PluginBlockSettingsMenuItem
-				allowedBlockNames={ [ 'amp/amp-story-page' ] }
+				allowedBlocks={ [ 'amp/amp-story-page' ] }
 				icon="welcome-add-page"
 				label={ __( 'Save as Template', 'amp' ) }
+				role="menuitem"
 				onClick={ addTemplate }
 			/>
 		),
