@@ -466,9 +466,8 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const minFeaturedImageDimensions = getMinimumFeaturedImageDimensions();
-	const minWidth = minFeaturedImageDimensions.width;
-	const minHeight = minFeaturedImageDimensions.height; // @todo This needs to be Math.max( 928, minFeaturedImageDimensions.height ).
+	const minWidth = 696; // @todo Needs to incorporate Math.max( 696, getMinimumFeaturedImageDimensions().width );
+	const minHeight = 928; // @todo This needs to be Math.max( 928, getMinimumFeaturedImageDimensions().height ).
 
 	return (
 		( media.width && media.height )	&&

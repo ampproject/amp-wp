@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {__, sprintf } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
