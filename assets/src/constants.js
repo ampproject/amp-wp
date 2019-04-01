@@ -66,35 +66,6 @@ export const ALLOWED_MEDIA_TYPES = [ 'image', 'video' ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
 
-export const BLOCK_ICONS = {
-	'amp/amp-story-page': <svg id="story-page-icon" viewBox="0 0 24 24"><g id="icon" fill="#181D21"><path id="page" d="M18.4 21H5.6V3h7.8l5 4.9V21zM7.1 19.5h9.8V8.6l-4-4.1H7.1v15z" /><path id="corner" d="M11.5 5.4v4.3h4.4" /></g></svg>,
-};
-
-export const ICONS = {
-	'add-template': <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-		<g id="AMP-1.0-Beta-V1" fill="none" fillRule="evenodd">
-			<g id="AMP-Beta---01" transform="translate(-1220 -154)" fill="#FFF">
-				<g id="Header" transform="translate(166 135)">
-					<g id="add-template-button" transform="translate(1038 3)">
-						<path d="M25,23 L32,23 L32,25 L25,25 L25,32 L23,32 L23,25 L16,25 L16,23 L23,23 L23,16 L25,16 L25,23 Z" id="add-template-icon" />
-					</g>
-				</g>
-			</g>
-		</g>
-	</svg>,
-	reorder: <svg width="24" height="19" viewBox="0 0 24 19" xmlns="http://www.w3.org/2000/svg">
-		<g id="AMP-1.0-Beta-V1" fill="none" fillRule="evenodd">
-			<g id="AMP-Beta---01" transform="translate(-1276 -153)" fill="#555D66" fillRule="nonzero">
-				<g id="Header" transform="translate(166 135)">
-					<g id="reorder-button" transform="translate(1098 3)">
-						<path d="M26,15 L36,15 L36,17 L26,17 L26,15 Z M26,22 L36,22 L36,24 L26,24 L26,22 Z M26,29 L36,29 L36,31 L26,31 L26,29 Z M24,30 L19,34 L19,30.931 C15.06,30.436 12,27.072 12,23 C12,18.589 15.589,15 20,15 L23,15 L23,17 L20,17 C16.691,17 14,19.691 14,23 C14,25.967 16.167,28.431 19,28.91 L19,26 L24,30 Z" id="reorder-icon" />
-					</g>
-				</g>
-			</g>
-		</g>
-	</svg>,
-};
-
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,
 	'fade-in': 500,

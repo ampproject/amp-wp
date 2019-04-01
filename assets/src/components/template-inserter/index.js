@@ -13,7 +13,7 @@ import { compose } from '@wordpress/compose';
  */
 import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
-import { ICONS } from './../../constants';
+import addTemplateIcon from '../../../images/add-template.svg';
 
 const storyPageBlockName = 'amp/amp-story-page';
 
@@ -60,7 +60,7 @@ class TemplateInserter extends Component {
 				expandOnMobile
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<IconButton
-						icon={ ICONS[ 'add-template' ] }
+						icon={ addTemplateIcon( { width: 16, height: 16 } ) }
 						label={ __( 'Insert Template', 'amp' ) }
 						onClick={ onToggle }
 						className="editor-inserter__amp-inserter"
