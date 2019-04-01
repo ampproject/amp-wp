@@ -74,9 +74,6 @@ module.exports = function( grunt ) {
 		const spawnQueue = [];
 		const stdout = [];
 
-		// Clear out all existing compiled files first.
-		grunt.task.run( 'clean' );
-
 		spawnQueue.push(
 			{
 				cmd: 'git',
