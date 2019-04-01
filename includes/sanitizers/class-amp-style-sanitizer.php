@@ -461,6 +461,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
+			if ( 'amp-geo-' === substr( $class_name, 0, 8 ) || 'amp-iso-country-' === substr( $class_name, 0, 16 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-geo' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
 			// Class names for amp-image-lightbox, see <https://www.ampproject.org/docs/reference/components/amp-image-lightbox#styling>.
 			if ( 'amp-image-lightbox-caption' === $class_name ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-image-lightbox' ) ) ) {

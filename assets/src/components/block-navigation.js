@@ -6,7 +6,7 @@ import { Button, NavigableMenu } from '@wordpress/components';
 import { getBlockType } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { BlockIcon } from '@wordpress/editor';
+import { BlockIcon } from '@wordpress/block-editor';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (

@@ -3,7 +3,7 @@
  */
 import { createBlock } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
-import { BlockEdit } from '@wordpress/editor';
+import { BlockEdit } from '@wordpress/block-editor';
 
 /**
  * BlockPreview component that is used within the reordering UI.

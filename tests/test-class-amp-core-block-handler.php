@@ -15,97 +15,45 @@
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 	/**
-	 * Instance of the tested class.
-	 *
-	 * @var AMP_Core_Block_Handler.
-	 */
-	public $instance;
-
-	/**
-	 * Test block name.
-	 *
-	 * @var string
-	 */
-	public $test_block = 'core/test';
-
-	/**
-	 * Teardown.
-	 */
-	public function tearDown() {
-		if ( function_exists( 'register_block_type' ) ) {
-			$this->unregister_dummy_block();
-		}
-
-		parent::tearDown();
-	}
-
-	/**
-	 * Register test block.
-	 */
-	public function register_dummy_block() {
-		$settings = array(
-			'render_callback' => '__return_true',
-		);
-		register_block_type( $this->test_block, $settings );
-	}
-
-	/**
-	 * Unregister test block.
-	 */
-	public function unregister_dummy_block() {
-		unregister_block_type( $this->test_block );
-	}
-
-	/**
 	 * Test register_embed().
+	 *
+	 * @covers AMP_Core_Block_Handler::register_embed()
+	 * @covers AMP_Core_Block_Handler::unregister_embed()
 	 */
-	public function test_register_embed() {
+	public function test_register_and_unregister_embed() {
 
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}
 
-		$this->register_dummy_block();
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 
-		$this->instance             = new AMP_Core_Block_Handler();
-		$this->instance->block_name = $this->test_block;
+		$categories_block = '<!-- wp:categories {"displayAsDropdown":true,"showHierarchy":true,"showPostCounts":true} /-->';
+		$archives_block   = '<!-- wp:archives {"displayAsDropdown":true,"showPostCounts":true} /-->';
 
-		$registry = WP_Block_Type_Registry::get_instance();
-		$block    = $registry->get_registered( $this->test_block );
-
-		$this->assertEquals( '__return_true', $block->render_callback );
-
-		$this->instance->register_embed();
-
-		$registry = WP_Block_Type_Registry::get_instance();
-		$block    = $registry->get_registered( $this->test_block );
-
-		$this->assertTrue( is_array( $block->render_callback ) );
-
-		$this->unregister_dummy_block();
-	}
-
-	/**
-	 * Test unregister_embed().
-	 */
-	public function test_unregister_embed() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestIncomplete( 'Files needed for testing missing.' );
+		$handler->register_embed();
+		$rendered = do_blocks( $categories_block );
+		$this->assertContains( '<select', $rendered );
+		$this->assertNotContains( 'onchange', $rendered );
+		$this->assertContains( 'on="change', $rendered );
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
+			$rendered = do_blocks( $archives_block );
+			$this->assertContains( '<select', $rendered );
+			$this->assertNotContains( 'onchange', $rendered );
+			$this->assertContains( 'on="change', $rendered );
 		}
 
-		$this->register_dummy_block();
-
-		$this->instance             = new AMP_Core_Block_Handler();
-		$this->instance->block_name = $this->test_block;
-
-		$this->instance->register_embed();
-		$this->instance->unregister_embed();
-
-		$registry = WP_Block_Type_Registry::get_instance();
-		$block    = $registry->get_registered( $this->test_block );
-
-		$this->assertEquals( '__return_true', $block->render_callback );
-
-		$this->unregister_dummy_block();
+		$handler->unregister_embed();
+		$rendered = do_blocks( $categories_block );
+		$this->assertContains( '<select', $rendered );
+		$this->assertContains( 'onchange', $rendered );
+		$this->assertNotContains( 'on="change', $rendered );
+		if ( WP_Block_Type_Registry::get_instance()->is_registered( 'core/archives' ) ) {
+			$rendered = do_blocks( $archives_block );
+			$this->assertContains( '<select', $rendered );
+			$this->assertContains( 'onchange', $rendered );
+			$this->assertNotContains( 'on="change', $rendered );
+		}
 	}
 }

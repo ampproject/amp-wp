@@ -413,6 +413,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
 					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head><body><p>Hello!</p></body></html>
 				',
@@ -437,6 +441,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
 					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -449,6 +457,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-sidebar id="sidebar1" layout="nodisplay" side="right"><nav toolbar="(max-width: 767px)" toolbar-target="target-element"><ul><li></li></ul></nav></amp-sidebar>
 						<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
+						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
 					</body>
 					</html>
 				',
@@ -464,6 +473,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-sidebar-toolbar-target-hidden{color:lavender}',
 					'.amp-sticky-ad-close-button{color:aliceblue}',
 					'.amp-docked-video-shadow{color:azure}',
+					'.amp-geo-pending{color:saddlebrown}',
+					'.amp-geo-no-group{color:ghostwhite}',
+					'.amp-geo-group-foo{color:peru}',
+					'.amp-iso-country-us{color:oldlace}',
 					'', // Because no non-existent.
 				),
 				array(),
