@@ -386,8 +386,8 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	}
 
 	.amp-story-controls-reorder-cancel {
-		padding-top: 2px;
-		padding-bottom: 2px;
+		padding-top: 5px;
+		padding-bottom: 5px;
 		margin-right: 20px;
 		display: inline-flex;
 	}
