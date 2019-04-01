@@ -342,7 +342,7 @@ registerPlugin(
 					validationCallback={ hasMinimumStoryPosterDimensions }
 					missingMediaMessage={ __( 'Selecting a featured image is required.', 'amp' ) }
 					invalidMediaMessage={ __( 'The featured image must have minimum dimensions of 696px x 928px.', 'amp' ) }
-					status="notice"
+					status="warning"
 				/>
 			);
 		},
