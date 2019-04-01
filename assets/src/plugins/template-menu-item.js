@@ -52,7 +52,7 @@ export function registerTemplateSaveMenuItem() {
 	registerPlugin( 'amp-story', {
 		render: ( ) => (
 			<PluginBlockSettingsMenuItem
-				allowedBlockNames={ [ 'amp/amp-story-page' ] }
+				allowedBlocks={ [ 'amp/amp-story-page' ] }
 				icon="welcome-add-page"
 				label={ __( 'Save as Template', 'amp' ) }
 				role="menuitem"
