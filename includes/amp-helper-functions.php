@@ -1112,7 +1112,7 @@ function amp_start_app_shell_content() {
 		 *
 		 * @param string $content_placeholder Content placeholder.
 		 */
-		echo apply_filters( 'amp_app_shell_content_placeholder', $content_placeholder ); // WPCS: XSS OK.
+		echo apply_filters( 'amp_app_shell_content_placeholder', $content_placeholder ); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
 
 		ob_start();
 	}
