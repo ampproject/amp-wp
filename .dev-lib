@@ -10,6 +10,12 @@ fi
 
 function after_wp_install {
 	echo -n "Installing Gutenberg..."
-	svn export -q https://plugins.svn.wordpress.org/gutenberg/trunk/ "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
+	if [[ "$WP_VERSION" = "4.9" ]]; then
+		# The last version that supported WordPress 4.9:
+		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/tags/4.9.0/
+	else
+		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/trunk/
+	fi
+	svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
 	echo "done"
 }
