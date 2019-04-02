@@ -3,7 +3,7 @@
 class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
-			'no_embed' => array(
+			'no_embed'   => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
@@ -31,7 +31,7 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
 				array( 'amp-vine' => true ),
 			),

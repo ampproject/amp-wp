@@ -20,7 +20,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		data: {
 			i18n: {},
 			ampValidityRestField: '',
-			isCanonical: false
+			isSanitizationAutoAccepted: false
 		},
 
 		/**
@@ -38,7 +38,8 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		lastStates: {
 			noticesAreReset: false,
 			validationErrors: [],
-			blockOrder: []
+			blockOrder: [],
+			blockValidationErrors: {}
 		},
 
 		/**
@@ -145,7 +146,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		handleValidationErrorsStateChange: function handleValidationErrorsStateChange() {
-			var currentPost, validationErrors, blockValidationErrors, noticeElement, noticeMessage, blockErrorCount, ampValidity;
+			var currentPost, validationErrors, blockValidationErrors, noticeOptions, noticeMessage, blockErrorCount, ampValidity, rejectedErrors;
 
 			if ( ! module.isAMPEnabled() ) {
 				if ( ! module.lastStates.noticesAreReset ) {
@@ -171,8 +172,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					return (
 						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
 						1 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS */ === result.status ||
-						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status || // eslint-disable-line no-magic-numbers
-						3 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+						2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
 					);
 				} ),
 				function( result ) {
@@ -195,6 +195,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			module.resetWarningNotice();
 
 			noticeMessage = wp.i18n.sprintf(
+				/* translators: %s: number of issues */
 				wp.i18n._n(
 					'There is %s issue from AMP validation which needs review.',
 					'There are %s issues from AMP validation which need review.',
@@ -206,59 +207,79 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
+				module.lastStates.blockValidationErrors = blockValidationErrors.byClientId;
 				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
 					noticeMessage += ' ' + wp.i18n.sprintf(
+						/* translators: %s: number of block errors. */
 						wp.i18n._n(
-							'And %s is directly due to content here.',
-							'And %s are directly due to content here.',
+							'%s issue is directly due to content here.',
+							'%s issues are directly due to content here.',
 							blockErrorCount,
 							'amp'
 						),
 						blockErrorCount
 					);
+				} else if ( validationErrors.length === 1 ) {
+					noticeMessage += ' ' + wp.i18n.__( 'The issue is not directly due to content here.', 'amp' );
 				} else {
-					noticeMessage += ' ' + wp.i18n.sprintf(
-						wp.i18n._n(
-							'But it is not directly due to content here.',
-							'But none are directly due to content here.',
-							validationErrors.length,
-							'amp'
-						),
-						validationErrors.length
-					);
+					noticeMessage += ' ' + wp.i18n.__( 'The issues are not directly due to content here.', 'amp' );
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
 				module.resetBlockNotices();
 
-				noticeMessage += ' ' + wp.i18n._n(
-					'It may not be due to content here.',
-					'Some may be due to content here.',
-					validationErrors.length,
-					'amp'
-				);
+				if ( validationErrors.length === 1 ) {
+					noticeMessage += ' ' + wp.i18n.__( 'The issue may not be due to content here', 'amp' );
+				} else {
+					noticeMessage += ' ' + wp.i18n.__( 'Some issues may be due to content here.', 'amp' );
+				}
 			}
 
+			rejectedErrors = _.filter( ampValidity.results, function( result ) {
+				return (
+					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
+					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
+				);
+			} );
+
 			noticeMessage += ' ';
-			if ( module.data.isCanonical ) {
-				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served.', 'amp' );
+			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+			if ( module.data.isSanitizationAutoAccepted ) {
+				if ( 0 === rejectedErrors.length ) {
+					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+				} else {
+					noticeMessage += wp.i18n._n(
+						'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+						validationErrors.length,
+						'amp'
+					);
+				}
 			} else {
 				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
 
-			noticeElement = wp.element.createElement( 'p', {}, [
-				noticeMessage + ' ',
-				ampValidity.review_link && wp.element.createElement(
-					'a',
-					{ key: 'review_link', href: ampValidity.review_link, target: '_blank' },
-					wp.i18n.__( 'Review issues', 'amp' )
-				)
-			] );
+			noticeOptions = {
+				id: 'amp-errors-notice'
+			};
+			if ( ampValidity.review_link ) {
+				noticeOptions.actions = [
+					{
+						label: wp.i18n.__( 'Review issues', 'amp' ),
+						url: ampValidity.review_link
+					}
+				];
+			}
 
-			module.validationWarningNoticeId = wp.data.dispatch( 'core/editor' ).createWarningNotice( noticeElement, { spokenMessage: noticeMessage } ).notice.id;
+			// Display notice if there were validation errors.
+			if ( validationErrors.length > 0 ) {
+				wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+			}
+
+			module.validationWarningNoticeId = noticeOptions.id;
 		},
 
 		/**
@@ -303,7 +324,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		resetWarningNotice: function resetWarningNotice() {
 			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/editor' ).removeNotice( module.validationWarningNoticeId );
+				wp.data.dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
 				module.validationWarningNoticeId = null;
 			}
 		},
@@ -340,12 +361,13 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Object} Validation errors grouped by block ID other ones.
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
-			var blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			var acceptedStatus, blockValidationErrorsByClientId, editorSelect, currentPost, blockOrder, validationErrors, otherValidationErrors;
+			acceptedStatus = 3; // eslint-disable-line no-magic-numbers
 			editorSelect = wp.data.select( 'core/editor' );
 			currentPost = editorSelect.getCurrentPost();
 			validationErrors = _.map(
 				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
-					return result.term_status !== 1; // If not accepted by the user.
+					return result.term_status !== acceptedStatus; // If not accepted by the user.
 				} ),
 				function( result ) {
 					return result.error;
@@ -448,55 +470,64 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {Function} The edit() method, conditionally wrapped in a notice for AMP validation error(s).
 		 */
 		conditionallyAddNotice: function conditionallyAddNotice( BlockEdit ) {
-			function AmpNoticeBlockEdit( props ) {
-				var edit, details;
-				edit = wp.element.createElement(
-					BlockEdit,
-					props
-				);
+			return function( ownProps ) {
+				var validationErrors,
+					mergedProps;
+				function AmpNoticeBlockEdit( props ) {
+					var edit, details;
+					edit = wp.element.createElement(
+						BlockEdit,
+						props
+					);
 
-				if ( 0 === props.ampBlockValidationErrors.length ) {
-					return edit;
+					if ( 0 === props.ampBlockValidationErrors.length ) {
+						return edit;
+					}
+
+					details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
+						wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
+							wp.i18n._n(
+								'There is %s issue from AMP validation.',
+								'There are %s issues from AMP validation.',
+								props.ampBlockValidationErrors.length,
+								'amp'
+							),
+							props.ampBlockValidationErrors.length
+						) ),
+						wp.element.createElement(
+							'ul',
+							{ key: 'list', className: 'amp-block-validation-errors__list' },
+							_.map( props.ampBlockValidationErrors, function( error, key ) {
+								return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
+							} )
+						)
+					] );
+
+					return wp.element.createElement(
+						wp.element.Fragment, {},
+						wp.element.createElement(
+							wp.components.Notice,
+							{
+								status: 'warning',
+								isDismissible: false
+							},
+							details
+						),
+						edit
+					);
 				}
 
-				details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
-					wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
-						wp.i18n._n(
-							'There is %s issue from AMP validation.',
-							'There are %s issues from AMP validation.',
-							props.ampBlockValidationErrors.length,
-							'amp'
-						),
-						props.ampBlockValidationErrors.length
-					) ),
-					wp.element.createElement(
-						'ul',
-						{ key: 'list', className: 'amp-block-validation-errors__list' },
-						_.map( props.ampBlockValidationErrors, function( error, key ) {
-							return wp.element.createElement( 'li', { key: key }, module.getValidationErrorMessage( error ) );
-						} )
-					)
-				] );
+				if ( ! module.lastStates.blockValidationErrors[ ownProps.clientId ] ) {
+					validationErrors = wp.data.select( module.storeName ).getBlockValidationErrors( ownProps.clientId );
+					module.lastStates.blockValidationErrors[ ownProps.clientId ] = validationErrors;
+				}
 
-				return wp.element.createElement(
-					wp.element.Fragment, {},
-					wp.element.createElement(
-						wp.components.Notice,
-						{
-							status: 'warning',
-							isDismissible: false
-						},
-						details
-					),
-					edit
-				);
-			}
-
-			return wp.data.withSelect( function( select, ownProps ) {
-				return _.extend( {}, ownProps, {
-					ampBlockValidationErrors: select( module.storeName ).getBlockValidationErrors( ownProps.clientId )
+				mergedProps = _.extend( {}, ownProps, {
+					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ]
 				} );
-			} )( AmpNoticeBlockEdit );
+
+				return AmpNoticeBlockEdit( mergedProps );
+			};
 		}
 	};
 

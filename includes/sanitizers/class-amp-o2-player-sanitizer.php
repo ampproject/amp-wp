@@ -98,7 +98,8 @@ class AMP_O2_Player_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $o2_attributes ) ) {
 			$component_attributes = array_merge(
-				$o2_attributes, array(
+				$o2_attributes,
+				array(
 					'data-macros' => 'm.playback=click',
 					'layout'      => 'responsive',
 					'width'       => self::$width,

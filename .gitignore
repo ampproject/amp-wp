@@ -1,10 +1,9 @@
 .DS_Store
-vendor
-build
+/vendor
+/build
 node_modules
 wiki
 amp.zip
-**/*-compiled.js
-languages/*.pot
-languages/*.php
+assets/js/*-compiled.js
 built
+/amphtml

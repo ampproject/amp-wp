@@ -1,7 +1,0 @@
-**/*.min.js
-**/node_modules/**
-**/vendor/**
-**/assets/js/*-compiled.js
-**/assets/js/amp-wp-app-shell.js
-**/assets/js/amp-service-worker-offline-commenting.js
-**/assets/js/amp-service-worker-runtime-precaching.js

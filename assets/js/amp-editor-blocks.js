@@ -37,7 +37,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'responsive',
 					label: __( 'Responsive', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -50,7 +49,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'fill',
 					label: __( 'Fill', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -58,7 +56,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'flex-item',
 					label: __( 'Flex Item', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/soundcloud'
 					]
 				},
@@ -67,7 +64,6 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 					value: 'intrinsic',
 					label: __( 'Intrinsic', 'amp' ),
 					notAvailable: [
-						'core/audio',
 						'core-embed/youtube',
 						'core-embed/facebook',
 						'core-embed/instagram',
@@ -83,8 +79,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			defaultHeight: 400,
 			mediaBlocks: [
 				'core/image',
-				'core/video',
-				'core/audio'
+				'core/video'
 			],
 			textBlocks: [
 				'core/paragraph',
@@ -230,25 +225,21 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				settings.attributes = {};
 			}
 			settings.attributes.ampFitText = {
-				type: 'boolean',
 				default: false
 			};
 			settings.attributes.minFont = {
-				type: 'number',
 				default: component.data.fontSizes.small,
 				source: 'attribute',
 				selector: 'amp-fit-text',
 				attribute: 'min-font-size'
 			};
 			settings.attributes.maxFont = {
-				type: 'number',
 				default: component.data.fontSizes.larger,
 				source: 'attribute',
 				selector: 'amp-fit-text',
 				attribute: 'max-font-size'
 			};
 			settings.attributes.height = {
-				type: 'number',
 				default: 50,
 				source: 'attribute',
 				selector: 'amp-fit-text',
@@ -325,10 +316,10 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return [
-				inspectorControls,
 				el( BlockEdit, _.extend( {
 					key: 'original'
-				}, props ) )
+				}, props ) ),
+				inspectorControls
 			];
 		};
 	};
@@ -502,13 +493,12 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 				el( TextControl, {
 					label: __( 'Height' ),
 					value: height,
-					type: 'number',
 					min: 1,
 					onChange: function( nextHeight ) {
 						props.setAttributes( { height: nextHeight } );
 					}
 				} ),
-				maxFont > height && el(
+				parseInt( maxFont ) > parseInt( height ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -525,13 +515,13 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 							if ( ! nextMinFont ) {
 								nextMinFont = component.data.fontSizes.small; // @todo Supplying fallbackFontSize should be done automatically by the component?
 							}
-							if ( nextMinFont <= maxFont ) {
+							if ( parseInt( nextMinFont ) <= parseInt( maxFont ) ) {
 								props.setAttributes( { minFont: nextMinFont } );
 							}
 						}
 					} )
 				),
-				minFont > maxFont && el(
+				parseInt( minFont ) > parseInt( maxFont ) && el(
 					wp.components.Notice,
 					{
 						status: 'error',
@@ -633,7 +623,7 @@ var ampEditorBlocks = ( function() { // eslint-disable-line no-unused-vars
 		var ampCarousel = props.attributes.ampCarousel,
 			el = wp.element.createElement,
 			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Display as AMP carousel' );
+			label = __( 'Display as carousel' );
 
 		return el( ToggleControl, {
 			label: label,

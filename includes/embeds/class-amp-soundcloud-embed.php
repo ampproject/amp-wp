@@ -17,7 +17,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_HEIGHT = 200; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase
+	protected $DEFAULT_HEIGHT = 200;
 
 	/**
 	 * Register embed.
@@ -81,9 +81,11 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			$query = array();
 			parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 			if ( ! empty( $query['url'] ) ) {
-				$embed = $this->render( array(
-					'track_id' => $this->get_track_id_from_url( $query['url'] ),
-				) );
+				$embed = $this->render(
+					array(
+						'track_id' => $this->get_track_id_from_url( $query['url'] ),
+					)
+				);
 			}
 		}
 		return $embed;
@@ -133,10 +135,13 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @global WP_Embed $wp_embed
 	 */
 	public function render( $args ) {
-		$args = wp_parse_args( $args, array(
-			'track_id' => false,
-			'url'      => null,
-		) );
+		$args = wp_parse_args(
+			$args,
+			array(
+				'track_id' => false,
+				'url'      => null,
+			)
+		);
 
 		if ( empty( $args['track_id'] ) ) {
 			return $this->render_embed_fallback( $args['url'] );
@@ -161,7 +166,8 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @returns string
 	 */
 	private function render_embed_fallback( $url ) {
-		return AMP_HTML_Utils::build_tag( 'a',
+		return AMP_HTML_Utils::build_tag(
+			'a',
 			array(
 				'href'  => esc_url( $url ),
 				'class' => 'amp-wp-embed-fallback',

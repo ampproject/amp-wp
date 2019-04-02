@@ -1,10 +1,10 @@
 <?php
 /**
  * Plugin Name: AMP
- * Description: Add AMP support to your WordPress site.
- * Plugin URI: https://github.com/automattic/amp-wp
+ * Description: Enable AMP on your WordPress site, the WordPress way.
+ * Plugin URI: https://amp-wp.org
  * Author: WordPress.com VIP, XWP, Google, and contributors
- * Author URI: https://github.com/Automattic/amp-wp/graphs/contributors
+ * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
  * Version: 1.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
@@ -21,11 +21,19 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p>
+			<?php
+			sprintf(
+				/* translators: %s: required PHP version */
+				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
+				'5.4+'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
 	return;
 }
@@ -33,12 +41,20 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
 /**
  * Print admin notice regarding DOM extension is not installed.
  *
- * @since 1.1
+ * @since 1.0
  */
 function _amp_print_php_dom_document_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install DOM extension.', 'amp' ); ?></p>
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
+					'DOM'
+				);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -48,25 +64,86 @@ if ( ! class_exists( 'DOMDocument' ) ) {
 }
 
 /**
+ * Print admin notice regarding DOM extension is not installed.
+ *
+ * @since 1.0.1
+ */
+function _amp_print_php_missing_iconv_notice() {
+	?>
+	<div class="notice notice-error">
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
+					'iconv'
+				);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( ! function_exists( 'iconv' ) ) {
+	add_action( 'admin_notices', '_amp_print_php_missing_iconv_notice' );
+	return;
+}
+
+/**
  * Print admin notice when composer install has not been performed.
  *
  * @since 1.0
  */
-function _amp_print_composer_install_admin_notice() {
+function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install` to finish installation.', 'amp' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: %s: composer install && npm install && npm run build */
+				__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				'<code>composer install && npm install && npm run build</code>'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) ) {
-	add_action( 'admin_notices', '_amp_print_composer_install_admin_notice' );
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
 	return;
 }
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
 define( 'AMP__VERSION', '1.1-alpha' );
+
+/**
+ * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
+ *
+ * @since 1.0
+ */
+function _amp_incorrect_plugin_slug_admin_notice() {
+	$actual_slug = basename( AMP__DIR__ );
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %1$s is the current directory name, and %2$s is the required directory name */
+					__( 'You appear to have installed the AMP plugin incorrectly. It is currently installed in the <code>%1$s</code> directory, but it needs to be placed in a directory named <code>%2$s</code>. Please rename the directory. This is important for WordPress plugin auto-updates.', 'amp' ),
+					$actual_slug,
+					'amp'
+				)
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( 'amp' !== basename( AMP__DIR__ ) ) {
+	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
+}
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
@@ -177,7 +254,7 @@ function amp_init() {
 	AMP_Validation_Manager::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
-	if ( defined( 'WP_CLI' ) ) {
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
 
@@ -270,13 +347,26 @@ function amp_maybe_add_actions() {
 	$post = get_queried_object();
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
+			/*
+			 * Temporary redirect is used for admin users because classic mode and AMP support can be enabled by user at any time,
+			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
+			 */
+			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );
 			exit;
 		}
 		return;
 	}
 
 	if ( $is_amp_endpoint ) {
+
+		// Prevent infinite URL space under /amp/ endpoint.
+		global $wp;
+		wp_parse_str( $wp->matched_query, $path_args );
+		if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
+			wp_safe_redirect( amp_get_permalink( $post->ID ), 301 );
+			exit;
+		}
+
 		amp_prepare_render();
 	} else {
 		amp_add_frontend_actions();
@@ -408,7 +498,6 @@ function amp_add_frontend_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }

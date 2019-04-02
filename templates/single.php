@@ -25,7 +25,7 @@ $this->load_parts( array( 'html-start' ) );
 	<?php $this->load_parts( array( 'featured-image' ) ); ?>
 
 	<div class="amp-wp-article-content">
-		<?php echo $this->get( 'post_amp_content' ); // WPCS: XSS ok. Handled in AMP_Content::transform(). ?>
+		<?php echo $this->get( 'post_amp_content' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 	</div>
 
 	<footer class="amp-wp-article-footer">

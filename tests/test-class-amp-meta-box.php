@@ -77,14 +77,16 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
 	 */
 	public function test_enqueue_block_assets() {
-		if ( ! function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$this->markTestSkipped( 'Gutenberg is not available' );
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available' );
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
-		$GLOBALS['post'] = self::factory()->post->create_and_get( array(
-			'post_type' => 'draft',
-		) );
+		$GLOBALS['post'] = self::factory()->post->create_and_get(
+			array(
+				'post_type' => 'draft',
+			)
+		);
 		$this->instance->enqueue_block_assets();
 		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
 
@@ -119,9 +121,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_render_status() {
 		$post = $this->factory()->post->create_and_get();
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		wp_set_current_user(
+			$this->factory()->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$amp_status_markup = '<div class="misc-pub-section misc-amp-status"';
 		$checkbox_enabled  = '<input id="amp-status-enabled" type="radio" name="amp_status" value="enabled"  checked=\'checked\'>';
@@ -162,9 +168,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		wp_set_current_user( $this->factory()->user->create( array(
-			'role' => 'subscriber',
-		) ) );
+		wp_set_current_user(
+			$this->factory()->user->create(
+				array(
+					'role' => 'subscriber',
+				)
+			)
+		);
 
 		ob_start();
 		$this->instance->render_status( $post );
@@ -273,9 +283,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Setup for success.
-		wp_set_current_user( $this->factory->user->create( array(
-			'role' => 'administrator',
-		) ) );
+		wp_set_current_user(
+			$this->factory->user->create(
+				array(
+					'role' => 'administrator',
+				)
+			)
+		);
 		$_POST[ AMP_Post_Meta_Box::NONCE_NAME ]        = wp_create_nonce( AMP_Post_Meta_Box::NONCE_ACTION );
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'disabled';
 
@@ -288,19 +302,23 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// Test post update success to disable.
 		$post_id = $this->factory->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
-		wp_update_post( array(
-			'ID'         => $post_id,
-			'post_title' => 'updated',
-		) );
+		wp_update_post(
+			array(
+				'ID'         => $post_id,
+				'post_title' => 'updated',
+			)
+		);
 		$this->assertTrue( (bool) get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Test post update success to enable.
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'enabled';
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
-		wp_update_post( array(
-			'ID'         => $post_id,
-			'post_title' => 'updated',
-		) );
+		wp_update_post(
+			array(
+				'ID'         => $post_id,
+				'post_title' => 'updated',
+			)
+		);
 		$this->assertEquals( AMP_Post_Meta_Box::ENABLED_STATUS, get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}
 

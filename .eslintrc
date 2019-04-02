@@ -5,6 +5,7 @@
 		"eslint:recommended",
 		"plugin:react/recommended"
 	],
+	"parser": "babel-eslint",
 	"parserOptions": {
 		"ecmaVersion": 6,
 		"sourceType": "module",
@@ -26,7 +27,8 @@
 	},
 	"settings": {
 		"react": {
-			"pragma": "wp"
+			"pragma": "wp",
+			"version": "16.6"
 		}
 	},
 	"rules": {
