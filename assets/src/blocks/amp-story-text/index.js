@@ -8,7 +8,6 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import {
-	RichText,
 	getColorClassName,
 	getFontSize,
 } from '@wordpress/block-editor';
