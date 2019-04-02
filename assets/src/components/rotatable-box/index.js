@@ -28,7 +28,7 @@ class RotatableBox extends Component {
 	}
 
 	componentDidMount() {
-		this.elementRef = document.getElementById( this.props.elementRef );
+		this.elementRef = document.getElementById( this.props.blockElementId );
 	}
 
 	onKeyUp( e ) {

@@ -50,7 +50,7 @@ export default createHigherOrderComponent(
 
 			return (
 				<RotatableBox
-					elementRef={ `block-${ clientId }` }
+					blockElementId={ `block-${ clientId }` }
 					initialAngle={ rotationAngle }
 					className="amp-story-editor__rotate-container"
 					angle={ isSelected ? 0 : rotationAngle }
