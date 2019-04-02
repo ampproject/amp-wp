@@ -13,6 +13,9 @@ import {
 	getFontSize,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import {
+	RawHTML,
+} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -152,24 +155,24 @@ export const settings = {
 			textAlign: align,
 		};
 
+		const ContentTag = tagName;
+
 		if ( ! ampFitText ) {
 			return (
-				<RichText.Content
-					tagName={ tagName }
+				<ContentTag
 					style={ styles }
 					className={ className }
-					value={ content }
-				/>
+				>
+					<RawHTML>{ content }</RawHTML>
+				</ContentTag>
 			);
 		}
-
-		const ContentTag = tagName;
 
 		return (
 			<ContentTag
 				style={ styles }
 				className={ className }>
-				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
+				<amp-fit-text layout="fill" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
 			</ContentTag>
 		);
 	},
