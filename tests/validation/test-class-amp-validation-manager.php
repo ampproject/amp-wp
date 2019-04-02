@@ -709,6 +709,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_block_data() {
+		$latest_posts_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/latest-posts' );
+
+		$reflection_function = new ReflectionFunction( $latest_posts_block->render_callback );
+		$is_gutenberg = false !== strpos( $reflection_function->getFileName(), 'gutenberg' );
+
 		return array(
 			'paragraph'    => array(
 				"<!-- wp:paragraph -->\n<p>Latest posts:</p>\n<!-- /wp:paragraph -->",
@@ -721,9 +726,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			'latest_posts' => array(
 				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"render_block_core_latest_posts"}-->',
-					version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ? 'plugin' : 'core',
-					version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ? 'gutenberg' : 'wp-includes'
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}-->',
+					$is_gutenberg ? 'plugin' : 'core',
+					$is_gutenberg ? 'gutenberg' : 'wp-includes',
+					$latest_posts_block->render_callback
 				),
 				array(
 					'element' => 'ul',
