@@ -26,22 +26,39 @@ class AMP_Service_Worker {
 			return;
 		}
 
+		// Shim support for service worker installation from PWA feature plugin.
+		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
+		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
+		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
+
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
 		if ( isset( $theme_support['service_worker'] ) && false === $theme_support['service_worker'] ) {
 			return;
 		}
 
-		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
-		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
-		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
+		/*
+		 * The default-enabled options reflect which features are not commented-out in the AMP-by-Example service worker.
+		 * See <https://github.com/ampproject/amp-by-example/blob/e093edb401b1617859b5365e80b639d81b06f058/boilerplate-generator/templates/files/serviceworkerJs.js>.
+		 */
+		$enabled_options = array(
+			'cdn_script_caching'   => true,
+			'image_caching'        => false,
+			'google_fonts_caching' => false,
+		);
+		if ( is_array( $theme_support['service_worker'] ) ) {
+			$enabled_options = array_merge(
+				$enabled_options,
+				$theme_support['service_worker']
+			);
+		}
 
-		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['cdn_script_caching'] ) ) {
+		if ( $enabled_options['cdn_script_caching'] ) {
 			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_cdn_script_caching' ) );
 		}
-		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['image_caching'] ) ) {
+		if ( $enabled_options['image_caching'] ) {
 			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_caching' ) );
 		}
-		if ( true === $theme_support['service_worker'] || ! empty( $theme_support['service_worker']['google_fonts_caching'] ) ) {
+		if ( $enabled_options['google_fonts_caching'] ) {
 			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_google_fonts_caching' ) );
 		}
 	}
