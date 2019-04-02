@@ -680,6 +680,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'',
 			),
 
+			'non_empty_parent_nodes_of_non_whitelisted_tags_removed' => array(
+				'<div><span><span class="not-empty"><invalid_tag></invalid_tag></span></span></div>',
+				'<div><span><span class="not-empty"></span></span></div>',
+			),
+
 			'replace_non_whitelisted_node_with_children' => array(
 				'<p>This is some text <invalid_tag>with a disallowed tag</invalid_tag> in the middle of it.</p>',
 				'<p>This is some text with a disallowed tag in the middle of it.</p>',
