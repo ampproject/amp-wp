@@ -189,7 +189,7 @@ class AMP_Theme_Support {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'nav_menu_toggle', 'nav_menu_dropdown', 'app_shell'  );
+			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'nav_menu_toggle', 'nav_menu_dropdown', 'app_shell' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong(
@@ -313,23 +313,29 @@ class AMP_Theme_Support {
 
 		// When inner app shell is requested, it is always an AMP request. Do not allow AMP when getting outer app shell for now (but this should be allowed in the future).
 		if ( 'outer' === $requested_app_shell_component ) {
-			add_action( 'template_redirect', function() {
-				if ( ! is_amp_endpoint() ) {
-					return;
+			add_action(
+				'template_redirect',
+				function() {
+					if ( ! is_amp_endpoint() ) {
+						return;
+					}
+					wp_die(
+						esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
+						esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
+						array( 'response' => 400 )
+					);
 				}
-				wp_die(
-					esc_html__( 'Outer app shell can only be requested of the non-AMP version (thus requires paired mode).', 'amp' ),
-					esc_html__( 'AMP Outer App Shell Problem', 'amp' ),
-					array( 'response' => 400 )
-				);
-			} );
+			);
 		}
 
 		// @todo This query param should be standardized and then this can be handled in the same place as WP_Service_Worker_Navigation_Routing_Component::filter_title_for_streaming_header().
 		if ( 'outer' === $requested_app_shell_component ) {
-			add_filter( 'pre_get_document_title', function() {
-				return __( 'Loading...', 'amp' );
-			} );
+			add_filter(
+				'pre_get_document_title',
+				function() {
+					return __( 'Loading...', 'amp' );
+				}
+			);
 		}
 
 		// Enqueue scripts for (outer) app shell, including precached app shell and normal site navigation prior to service worker installation.
