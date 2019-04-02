@@ -27,7 +27,7 @@ class AMP_Service_Worker {
 		}
 
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
-		if ( empty( $theme_support['service_worker'] ) ) {
+		if ( isset( $theme_support['service_worker'] ) && false === $theme_support['service_worker'] ) {
 			return;
 		}
 
