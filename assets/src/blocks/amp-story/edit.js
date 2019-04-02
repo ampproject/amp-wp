@@ -28,7 +28,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration } from '../../helpers';
+import { getTotalAnimationDuration, addBackgroundColorToOverlay } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -91,21 +91,64 @@ class EditPage extends Component {
 		}
 	}
 
+	removeBackgroundColors() {
+		const { attributes, setAttributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+		backgroundColors.pop();
+		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+	}
+
+	setBackgroundColors( value, index ) {
+		const { attributes, setAttributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+		backgroundColors[ index ] = {
+			color: value,
+		};
+		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+	}
+
+	getOverlayColorSettings() {
+		const { attributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+		if ( ! backgroundColors.length ) {
+			return [
+				{
+					value: undefined,
+					onChange: ( value ) => {
+						this.setBackgroundColors( value, 0 );
+					},
+					label: __( 'Color', 'amp' ),
+				},
+			];
+		}
+		const backgroundColorSettings = [];
+		backgroundColors.forEach( ( color, key ) => {
+			backgroundColorSettings[ key ] = {
+				value: color.color,
+				onChange: ( value ) => {
+					this.setBackgroundColors( value, key );
+				},
+				label: __( 'Color', 'amp' ),
+			};
+		} );
+		return backgroundColorSettings;
+	}
+
 	render() {
 		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
 
 		const {
-			gradientBottomColor,
 			mediaId,
 			mediaType,
 			mediaUrl,
 			focalPoint,
-			overlayColor,
 			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
 		} = attributes;
+
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -135,16 +178,13 @@ class EditPage extends Component {
 			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
-		const overlayStyle = {
+		let overlayStyle = {
 			width: '100%',
 			height: '100%',
+			position: 'absolute',
 		};
-		if ( ! gradientBottomColor && overlayColor ) {
-			overlayStyle.backgroundColor = overlayColor;
-			overlayStyle.opacity = overlayOpacity / 100;
-		} else if ( gradientBottomColor ) {
-			const topColor = overlayColor ? overlayColor : 'transparent';
-			overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ topColor }, ${ gradientBottomColor })`;
+		if ( 0 < backgroundColors.length ) {
+			overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
 			overlayStyle.opacity = overlayOpacity / 100;
 		}
 
@@ -152,21 +192,25 @@ class EditPage extends Component {
 			<Fragment>
 				<InspectorControls key="controls">
 					<PanelColorSettings
-						title={ __( 'Overlay Settings', 'amp' ) }
+						title={ __( 'Background Color', 'amp' ) }
 						initialOpen={ false }
-						colorSettings={ [
-							{
-								value: overlayColor,
-								onChange: ( value ) => setAttributes( { overlayColor: value } ),
-								label: __( 'Color', 'amp' ),
-							},
-							{
-								value: gradientBottomColor,
-								onChange: ( value ) => setAttributes( { gradientBottomColor: value } ),
-								label: __( 'Bottom Color: Use for Gradient Only', 'amp' ),
-							},
-						] }
+						colorSettings={ this.getOverlayColorSettings() }
 					>
+						{ 2 > backgroundColors.length &&
+						<Button
+							onClick={ () => this.setBackgroundColors( null, 1 ) }
+							isSmall>
+							{ __( 'Add Gradient', 'amp' ) }
+						</Button>
+						}
+						{ 2 === backgroundColors.length &&
+						<Button
+							onClick={ () => this.removeBackgroundColors( 1 ) }
+							isLink
+							isDestructive>
+							{ __( 'Remove Gradient', 'amp' ) }
+						</Button>
+						}
 						<RangeControl
 							label={ __( 'Opacity', 'amp' ) }
 							value={ overlayOpacity }
@@ -279,7 +323,7 @@ class EditPage extends Component {
 							</video>
 						</div>
 					) }
-					{ ( overlayColor || gradientBottomColor ) && (
+					{ backgroundColors.length > 0 && (
 						<div style={ overlayStyle }></div>
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />

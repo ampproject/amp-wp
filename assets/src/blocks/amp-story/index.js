@@ -7,6 +7,7 @@ import { InnerBlocks } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
+import { addBackgroundColorToOverlay } from '../../helpers';
 import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
 import EditPage from './edit';
 import blockIcon from '../../../images/amp-story-page-icon.svg';
@@ -46,8 +47,8 @@ const schema = {
 	autoAdvanceAfterMedia: {
 		type: 'string',
 	},
-	overlayColor: {
-		default: null,
+	backgroundColors: {
+		default: '[]',
 	},
 	overlayOpacity: {
 		default: 50,
@@ -85,9 +86,7 @@ export const settings = {
 	save( { attributes } ) {
 		const {
 			anchor,
-			overlayColor,
 			overlayOpacity,
-			gradientBottomColor,
 			mediaUrl,
 			mediaType,
 			poster,
@@ -95,6 +94,8 @@ export const settings = {
 			autoAdvanceAfterDuration,
 			autoAdvanceAfterMedia,
 		} = attributes;
+
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
 
 		let advanceAfter;
 
@@ -104,14 +105,10 @@ export const settings = {
 			advanceAfter = autoAdvanceAfterMedia;
 		}
 
-		const overlayStyle = {
-			opacity: overlayOpacity / 100,
-		};
-		if ( ! gradientBottomColor && overlayColor ) {
-			overlayStyle.backgroundColor = overlayColor;
-		} else if ( gradientBottomColor ) {
-			const topColor = overlayColor ? overlayColor : 'transparent';
-			overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ topColor }, ${ gradientBottomColor })`;
+		let overlayStyle = {};
+		if ( 0 < backgroundColors.length ) {
+			overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
+			overlayStyle.opacity = overlayOpacity / 100;
 		}
 
 		return (
