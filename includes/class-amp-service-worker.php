@@ -83,7 +83,7 @@ class AMP_Service_Worker {
 	 */
 	public static function add_cdn_script_caching( $service_workers ) {
 		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.1' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Please update to PWA v0.2. Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.1' );
 			return;
 		}
 
@@ -125,7 +125,7 @@ class AMP_Service_Worker {
 	 */
 	public static function add_image_caching( $service_workers ) {
 		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.1' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Please update to PWA v0.2. Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.1' );
 			return;
 		}
 
@@ -157,6 +157,10 @@ class AMP_Service_Worker {
 	 * @param WP_Service_Worker_Scripts $service_workers Service workers.
 	 */
 	public static function add_google_fonts_caching( $service_workers ) {
+		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Please update to PWA v0.2. Expected argument to be WP_Service_Worker_Scripts.', 'amp' ), '1.1' );
+			return;
+		}
 
 		// The PWA plugin also automatically adds runtime caching for Google Fonts when WP_SERVICE_WORKER_INTEGRATIONS_ENABLED is set.
 		if ( class_exists( 'WP_Service_Worker_Fonts_Integration' ) ) {
