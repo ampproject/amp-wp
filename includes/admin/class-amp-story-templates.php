@@ -28,8 +28,9 @@ class AMP_Story_Templates {
 		if ( true === AMP_Options_Manager::get_option( 'has_created_templates' ) ) {
 			return;
 		}
-		// @todo Update the option to true so that it wouldn't import again.
 		$this->import_story_templates();
+		// @todo This is commented out for testing purposes until the PR gets ready.
+		// AMP_Options_Manager::update_option( 'has_created_templates', true );
 	}
 
 	/**
@@ -61,10 +62,10 @@ class AMP_Story_Templates {
 	public static function get_story_templates() {
 		return array(
 			array(
-				'title'   => __( 'Template 0', 'amp' ),
-				'content' => '<!-- wp:amp/amp-story-page {"mediaId":58,"mediaType":"image","autoAdvanceAfterDuration":0} -->
-<amp-story-page style="background-color:#ffffff" id="b4a914ac-febe-4315-b648-87e58abb9b61" class="wp-block-amp-amp-story-page"><amp-story-grid-layer template="fill"><amp-img layout="fill" src="https://amp.wordpress.test/wp-content/uploads/2018/12/2017-thumb.gif"></amp-img></amp-story-grid-layer><amp-story-grid-layer template="vertical"><!-- wp:amp/amp-story-text {"tagName":"h1","autoFontSize":28,"textColor":"very-light-gray","positionTop":10} -->
-<h1 style="font-size:28px;width:76%;height:9%;position:absolute;top:10%;left:5%" class="has-text-color has-very-light-gray-color" id="890a40b8-1396-4d37-b61d-bc357c6c3850"><amp-fit-text layout="fill" class="amp-text-content">Hello Templates!</amp-fit-text></h1>
+				'title'   => __( 'Default Template 1', 'amp' ),
+				'content' => '<!-- wp:amp/amp-story-page {"backgroundColor":"#313131","autoAdvanceAfterDuration":0} -->
+<amp-story-page style="background-color:#313131" id="e7ae309f-d9f1-480a-a35e-7a495c2e09f7" class="wp-block-amp-amp-story-page"><amp-story-grid-layer template="vertical"><!-- wp:amp/amp-story-text {"tagName":"h1","autoFontSize":28,"ampFontFamily":"Garamond","textColor":"very-light-gray","positionTop":27,"positionLeft":13} -->
+<h1 style="font-size:28px;width:76%;height:9%;position:absolute;top:27%;left:13%" class="has-text-color has-very-light-gray-color" id="ddce50c3-5776-44c5-9d9b-0d6d4b12d88e" data-font-family="Garamond"><amp-fit-text layout="fill" class="amp-text-content">Hello, Templates!</amp-fit-text></h1>
 <!-- /wp:amp/amp-story-text --></amp-story-grid-layer></amp-story-page>
 <!-- /wp:amp/amp-story-page -->',
 			),
