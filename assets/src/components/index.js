@@ -30,4 +30,3 @@ export { default as withCroppedFeaturedImage } from './with-cropped-featured-ima
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';
 export { default as withRotatableBox } from './with-rotatable-box';
-export { default as withIsRotatingClassName } from './with-is-rotating-class-name';

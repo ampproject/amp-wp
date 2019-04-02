@@ -23,7 +23,6 @@ export default registerStore(
 		actions,
 		initialState: {
 			animations: {},
-			rotatingBlock: undefined,
 			blocks: {
 				order: [],
 				isReordering: false,

@@ -33,7 +33,6 @@ import {
 	withPrePublishNotice,
 	withStoryBlockDropZone,
 	withRotatableBox,
-	withIsRotatingClassName,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -341,7 +340,6 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', with
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withRotatableBox', withRotatableBox );
-addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withIsRotatingClassName', withIsRotatingClassName );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );

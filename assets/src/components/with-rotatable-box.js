@@ -10,14 +10,17 @@ import { withDispatch } from '@wordpress/data';
 import { ALLOWED_CHILD_BLOCKS } from '../constants';
 import { RotatableBox } from './';
 
-const applyWithDispatch = withDispatch( ( dispatch, { clientId } ) => {
-	const { startBlockRotation, stopBlockRotation } = dispatch( 'amp/story' );
+const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection } ) => {
 	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 
 	return {
-		startBlockRotation: () => startBlockRotation( clientId ),
-		stopBlockRotation: () => stopBlockRotation( clientId ),
-		clearSelectedBlock,
+		startBlockRotation: () => toggleSelection( false ),
+		stopBlockRotation: () => {
+			toggleSelection( true );
+
+			clearSelectedBlock();
+			document.activeElement.blur();
+		},
 	};
 } );
 
@@ -30,14 +33,13 @@ export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return applyWithDispatch( function( props ) {
 			const {
+				clientId,
 				attributes,
 				name,
 				setAttributes,
-				toggleSelection,
+				isSelected,
 				startBlockRotation,
 				stopBlockRotation,
-				isSelected,
-				clearSelectedBlock,
 			} = props;
 
 			const { rotationAngle } = attributes;
@@ -48,22 +50,19 @@ export default createHigherOrderComponent(
 
 			return (
 				<RotatableBox
+					elementRef={ `block-${ clientId }` }
 					initialAngle={ rotationAngle }
 					className="amp-story-editor__rotate-container"
 					angle={ isSelected ? 0 : rotationAngle }
 					onRotateStart={ () => {
 						startBlockRotation();
-						toggleSelection( false );
 					} }
-					onRotateStop={ ( event, element, angle ) => {
-						stopBlockRotation();
+					onRotateStop={ ( event, angle ) => {
 						setAttributes( {
 							rotationAngle: angle,
 						} );
-						toggleSelection( true );
 
-						clearSelectedBlock();
-						document.activeElement.blur();
+						stopBlockRotation();
 					} }
 				>
 					<BlockEdit { ...props } />
