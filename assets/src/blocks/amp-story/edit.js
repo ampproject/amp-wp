@@ -95,11 +95,13 @@ class EditPage extends Component {
 		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
 
 		const {
-			backgroundColor,
+			gradientBottomColor,
 			mediaId,
 			mediaType,
 			mediaUrl,
 			focalPoint,
+			overlayColor,
+			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
@@ -108,7 +110,6 @@ class EditPage extends Component {
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
-			backgroundColor,
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',
@@ -134,20 +135,48 @@ class EditPage extends Component {
 			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
+		const overlayStyle = {
+			width: '100%',
+			height: '100%',
+		};
+		if ( ! gradientBottomColor && overlayColor ) {
+			overlayStyle.backgroundColor = overlayColor;
+			overlayStyle.opacity = overlayOpacity / 100;
+		} else if ( gradientBottomColor ) {
+			const topColor = overlayColor ? overlayColor : 'transparent';
+			overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ topColor }, ${ gradientBottomColor })`;
+			overlayStyle.opacity = overlayOpacity / 100;
+		}
+
 		return (
 			<Fragment>
 				<InspectorControls key="controls">
 					<PanelColorSettings
-						title={ __( 'Color Settings', 'amp' ) }
+						title={ __( 'Overlay Settings', 'amp' ) }
 						initialOpen={ false }
 						colorSettings={ [
 							{
-								value: backgroundColor,
-								onChange: ( value ) => setAttributes( { backgroundColor: value } ),
-								label: __( 'Background Color', 'amp' ),
+								value: overlayColor,
+								onChange: ( value ) => setAttributes( { overlayColor: value } ),
+								label: __( 'Color', 'amp' ),
+							},
+							{
+								value: gradientBottomColor,
+								onChange: ( value ) => setAttributes( { gradientBottomColor: value } ),
+								label: __( 'Bottom Color: Use for Gradient Only', 'amp' ),
 							},
 						] }
-					/>
+					>
+						<RangeControl
+							label={ __( 'Opacity', 'amp' ) }
+							value={ overlayOpacity }
+							onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
+							min={ 0 }
+							max={ 100 }
+							step={ 5 }
+							required
+						/>
+					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<Fragment>
 							<BaseControl>
@@ -249,6 +278,9 @@ class EditPage extends Component {
 								<source src={ mediaUrl } type={ media.mime_type } />
 							</video>
 						</div>
+					) }
+					{ ( overlayColor || gradientBottomColor ) && (
+						<div style={ overlayStyle }></div>
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />
 				</div>

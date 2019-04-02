@@ -19,9 +19,6 @@ const schema = {
 		selector: 'amp-story-page',
 		attribute: 'id',
 	},
-	backgroundColor: {
-		default: '#ffffff',
-	},
 	mediaId: {
 		type: 'number',
 	},
@@ -47,6 +44,16 @@ const schema = {
 		type: 'number',
 	},
 	autoAdvanceAfterMedia: {
+		type: 'string',
+	},
+	overlayColor: {
+		default: null,
+	},
+	overlayOpacity: {
+		default: 50,
+	},
+	gradientBottomColor: {
+		default: null,
 		type: 'string',
 	},
 };
@@ -78,7 +85,9 @@ export const settings = {
 	save( { attributes } ) {
 		const {
 			anchor,
-			backgroundColor,
+			overlayColor,
+			overlayOpacity,
+			gradientBottomColor,
 			mediaUrl,
 			mediaType,
 			poster,
@@ -95,8 +104,18 @@ export const settings = {
 			advanceAfter = autoAdvanceAfterMedia;
 		}
 
+		const overlayStyle = {
+			opacity: overlayOpacity / 100,
+		};
+		if ( ! gradientBottomColor && overlayColor ) {
+			overlayStyle.backgroundColor = overlayColor;
+		} else if ( gradientBottomColor ) {
+			const topColor = overlayColor ? overlayColor : 'transparent';
+			overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ topColor }, ${ gradientBottomColor })`;
+		}
+
 		return (
-			<amp-story-page style={ { backgroundColor } } id={ anchor } auto-advance-after={ advanceAfter }>
+			<amp-story-page style={ { backgroundColor: '#ffffff' } } id={ anchor } auto-advance-after={ advanceAfter }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">
@@ -109,6 +128,8 @@ export const settings = {
 						</amp-story-grid-layer>
 					)
 				}
+				<amp-story-grid-layer template="fill" style={ overlayStyle }>
+				</amp-story-grid-layer>
 				<amp-story-grid-layer template="vertical">
 					<InnerBlocks.Content />
 				</amp-story-grid-layer>
