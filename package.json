@@ -9,8 +9,8 @@
   "license": "GPL-2.0+",
   "private": true,
   "devDependencies": {
-    "@wordpress/dom-ready": "2.1.0",
-    "@wordpress/i18n": "3.2.0",
+    "@wordpress/dom-ready": "2.2.0",
+    "@wordpress/i18n": "3.3.0",
     "babel-core": "6.26.3",
     "babel-eslint": "10.0.1",
     "babel-loader": "7.1.5",
@@ -19,10 +19,10 @@
     "babel-plugin-transform-runtime": "6.23.0",
     "babel-preset-env": "1.7.0",
     "cross-env": "5.2.0",
-    "eslint": "5.15.1",
+    "eslint": "5.16.0",
     "eslint-config-wordpress": "2.0.0",
     "eslint-plugin-react": "7.12.4",
-    "grunt": "1.0.3",
+    "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "3.0.1",
@@ -30,7 +30,7 @@
     "npm-run-all": "4.1.5",
     "timeago.js": "3.0.2",
     "webpack": "4.29.6",
-    "webpack-cli": "3.2.3"
+    "webpack-cli": "3.3.0"
   },
   "main": "blocks/index.js",
   "scripts": {

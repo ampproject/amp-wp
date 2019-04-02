@@ -663,32 +663,32 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			function() {
 				ob_start();
 				?>
-			<style>
-			.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-				height: auto;
-				left: 50%;
-				max-width: 1000%;
-				min-height: 100%;
-				min-width: 100vw;
-				position: absolute;
-				top: 50%;
-				transform: translateX(-50%) translateY(-50%);
-				width: auto;
-				z-index: 1;
-				/* When image filters are active, make it grayscale to colorize it blue. */
-			}
-
-			@supports (object-fit: cover) {
+				<style>
 				.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
-					height: 100%;
-					left: 0;
-					object-fit: cover;
-					top: 0;
-					transform: none;
-					width: 100%;
+					height: auto;
+					left: 50%;
+					max-width: 1000%;
+					min-height: 100%;
+					min-width: 100vw;
+					position: absolute;
+					top: 50%;
+					transform: translateX(-50%) translateY(-50%);
+					width: auto;
+					z-index: 1;
+					/* When image filters are active, make it grayscale to colorize it blue. */
 				}
-			}
-			</style>
+
+				@supports (object-fit: cover) {
+					.site-header.featured-image .site-featured-image .post-thumbnail amp-img > img {
+						height: 100%;
+						left: 0;
+						object-fit: cover;
+						top: 0;
+						transform: none;
+						width: 100%;
+					}
+				}
+				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
@@ -718,7 +718,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
 				ob_start();
 				?>
-			<style>
+				<style>
 				.has-header-image .custom-header-media amp-img > img,
 				.has-header-video .custom-header-media amp-video > video{
 					position: fixed;
@@ -794,7 +794,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						display: block;
 					}
 				}
-			</style>
+				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
@@ -816,7 +816,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			function() {
 				ob_start();
 				?>
-			<style>
+				<style>
 				/* Override the display: block in twentyseventeen/style.css, as <amp-img> is usually inline-block. */
 				.single-featured-image-header amp-img {
 					display: inline-block;
@@ -826,7 +826,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				.single-featured-image-header {
 					text-align: center;
 				}
-			</style>
+				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
@@ -852,6 +852,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 * Elements.
 		 *
 		 * @var DOMElement $link
+		 * @var DOMElement $element
 		 * @var DOMElement $navigation_top
 		 * @var DOMElement $navigation_top_fixed
 		 */
@@ -869,6 +870,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$navigation_top->parentNode->insertBefore( $navigation_top_fixed, $navigation_top->nextSibling );
+		foreach ( $this->xpath->query( './/*[ @id ]', $navigation_top_fixed ) as $element ) {
+			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
+		}
 
 		$attributes = array(
 			'layout'              => 'nodisplay',
@@ -944,7 +948,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			function() use ( $args ) {
 				ob_start();
 				?>
-			<style>
+				<style>
 				/* Override no-js selector in parent theme. */
 				.no-js .main-navigation ul ul {
 					display: none;
@@ -1068,7 +1072,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					}
 
 				<?php endif; ?>
-			</style>
+				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
@@ -1084,20 +1088,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * This ensures that the image inside it is centered.
 	 *
 	 * @since 1.0
-	 *
-	 * @param array $args Arguments.
 	 */
-	public static function add_twentynineteen_image_styles( $args = array() ) {
+	public static function add_twentynineteen_image_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() use ( $args ) {
+			function() {
 				ob_start();
 				?>
-			<style>
-				figure.aligncenter {
-					text-align: center
-				}
-			</style>
+				<style>
+					figure.aligncenter {
+						text-align: center
+					}
+				</style>
 				<?php
 				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );

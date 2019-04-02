@@ -1034,6 +1034,8 @@ function amp_get_schemaorg_metadata() {
  * Output schema.org metadata.
  *
  * @since 0.7
+ * @since 1.1 we pass `JSON_UNESCAPED_UNICODE` to `wp_json_encode`.
+ * @see https://github.com/ampproject/amp-wp/issues/1969
  */
 function amp_print_schemaorg_metadata() {
 	$metadata = amp_get_schemaorg_metadata();
@@ -1041,7 +1043,7 @@ function amp_print_schemaorg_metadata() {
 		return;
 	}
 	?>
-	<script type="application/ld+json"><?php echo wp_json_encode( $metadata ); ?></script>
+	<script type="application/ld+json"><?php echo wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE ); ?></script>
 	<?php
 }
 

@@ -77,6 +77,9 @@ class AMP_Editor_Blocks {
 		}
 
 		foreach ( $tags as &$tag ) {
+			if ( ! is_array( $tag ) ) {
+				continue;
+			}
 			$tag['data-amp-layout']              = true;
 			$tag['data-amp-noloading']           = true;
 			$tag['data-amp-lightbox']            = true;

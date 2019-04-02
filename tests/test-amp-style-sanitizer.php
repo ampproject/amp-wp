@@ -399,6 +399,88 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
+			'dynamic_classes_preserved_always' => array(
+				'
+					<html amp><head>
+					<style> .amp-viewer { color: blue; } </style>
+					<style> .amp-referrer-www-google-com { color: red; } </style>
+					<style> .amp-active { color: green } </style>
+					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-form-submit-success { color: green; } </style>
+					<style> .amp-access-laterpay-container { color: purple} </style>
+					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .amp-live-list-item-new { color: lime} </style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
+					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .non-existent { color: black; } </style>
+					</head><body><p>Hello!</p></body></html>
+				',
+				array(
+					'.amp-viewer{color:blue}',
+					'.amp-referrer-www-google-com{color:red}',
+					'', // Because there is no <form>, <amp-carousel>, and no non-existent.
+				),
+				array(),
+			),
+			'dynamic_classes_preserved_conditionally' => array(
+				'
+					<html amp><head>
+					<style> .amp-viewer { color: blue; } </style>
+					<style> .amp-referrer-www-google-com { color: red; } </style>
+					<style> .amp-active { color: green } </style>
+					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-form-submit-success { color: green; } </style>
+					<style> .amp-access-laterpay-container { color: purple} </style>
+					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .amp-live-list-item-new { color: lime} </style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
+					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .non-existent { color: black; } </style>
+					</head>
+					<body>
+						<amp-user-notification  layout="nodisplay"  id="amp-user-notification1"  data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"  data-dismiss-href="https://foo.com/api/dismissed">  This  site  uses  cookies  to  personalize  content.  <a  href="">Learn  more.</a>  <button  on="tap:amp-user-notification1.dismiss">I  accept</button>  </amp-user-notification>
+						<amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img></amp-carousel>
+						<form action="https://example.com/" target="_top" method="get"><input name="search" type="search" required></form>
+						<section amp-access="NOT error AND NOT access" amp-access-hide><div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div></section>
+						<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+						<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"> <div update class="outer-container"> <div class="inner-container"> <button class="btn" on="tap:my-live-list.update">Click me!</button> </div> </div> <div items></div> </amp-live-list>
+						<amp-sidebar id="sidebar1" layout="nodisplay" side="right"><nav toolbar="(max-width: 767px)" toolbar-target="target-element"><ul><li></li></ul></nav></amp-sidebar>
+						<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>
+						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
+						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
+					</body>
+					</html>
+				',
+				array(
+					'.amp-viewer{color:blue}',
+					'.amp-referrer-www-google-com{color:red}',
+					'.amp-active{color:green}',
+					'.amp-carousel-slide{outline:solid 1px red}',
+					'.amp-form-submit-success{color:green}',
+					'.amp-access-laterpay-container{color:purple}',
+					'.amp-image-lightbox-caption{color:brown}',
+					'.amp-live-list-item-new{color:lime}',
+					'.amp-sidebar-toolbar-target-hidden{color:lavender}',
+					'.amp-sticky-ad-close-button{color:aliceblue}',
+					'.amp-docked-video-shadow{color:azure}',
+					'.amp-geo-pending{color:saddlebrown}',
+					'.amp-geo-no-group{color:ghostwhite}',
+					'.amp-geo-group-foo{color:peru}',
+					'.amp-iso-country-us{color:oldlace}',
+					'', // Because no non-existent.
+				),
+				array(),
+			),
 		);
 	}
 
