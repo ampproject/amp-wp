@@ -42,7 +42,7 @@ class RotatableBox extends Component {
 
 		if ( ESCAPE === keyCode ) {
 			this.elementRef.classList.remove( 'is-rotating' );
-			this.elementRef.style.transform = 'rotate(0deg)';
+			this.elementRef.style.transform = `rotate(${ this.props.initialAngle }deg)`;
 
 			this.setState(
 				{
