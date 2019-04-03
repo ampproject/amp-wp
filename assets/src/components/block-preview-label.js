@@ -9,7 +9,7 @@ export default ( { label: name, block, blockType, displayIcon = true, alignIcon 
 		return name;
 	}
 
-	let label;
+	let label = blockType.title;
 	let content;
 
 	// Todo: Cover more special cases if needed.
@@ -29,8 +29,6 @@ export default ( { label: name, block, blockType, displayIcon = true, alignIcon 
 
 			label = content.length > 0 ? content : blockType.title;
 			break;
-		default:
-			label = blockType.title;
 	}
 
 	return (
