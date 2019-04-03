@@ -39,7 +39,8 @@
 	}
 }
 
-#amp-story-editor {
+#amp-story-editor,
+.amp-story-page-preview .editor-styles-wrapper {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
@@ -410,6 +411,10 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 		max-width: 169px;
 		height: 277px;
 		margin: 0 10px;
+	}
+
+	.amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page .wp-block {
+		transform: scale(0.48) translateX(-40%) translateY(-40%);
 	}
 
 	.amp-story-reorderer .amp-story-reorderer-item .components-drop-zone {
