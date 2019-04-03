@@ -33,6 +33,7 @@ import {
  */
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle, calculateFontSize } from '../../helpers';
+import './edit.css';
 
 const { getComputedStyle } = window;
 

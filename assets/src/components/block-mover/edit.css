@@ -1,0 +1,19 @@
+.amp-story-editor-block-mover {
+	position: absolute;
+	width: 30px;
+	height: 100%;
+	max-height: 112px;
+	top: -15px;
+	z-index: 80;
+	padding-right: 2px;
+	left: -45px;
+	margin-top: -8px;
+	opacity: 0;
+	animation: none;
+	transition: opacity .3s;
+}
+
+.amp-story-editor-block-mover.is-visible,
+div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
+	opacity: 1;
+}
