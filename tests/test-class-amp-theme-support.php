@@ -462,6 +462,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_incorrect_usage_get_template_availability() {
 		global $wp_query;
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
 
 		// Test no query available.
 		$wp_query     = null;
@@ -489,6 +490,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability_with_available_callback() {
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
 		$this->go_to( get_permalink( $this->factory()->post->create() ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
@@ -533,6 +535,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::get_template_availability()
 	 */
 	public function test_get_template_availability() {
+		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
 		global $wp_query;
 		$post_id = $this->factory()->post->create();
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
@@ -1305,6 +1308,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \amp_render_scripts()
 	 */
 	public function test_prepare_response() {
+		remove_action( 'wp_print_scripts', 'wp_print_service_workers', 9 );
+
+		add_filter(
+			'home_url',
+			function ( $url ) {
+				return set_url_scheme( $url, 'https' );
+			}
+		);
+
 		wp();
 		$prepare_response_args = array(
 			'enable_response_caching' => false,
@@ -1348,8 +1360,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
 
-			'<link rel="icon" href="http://example.org/favicon.png" sizes="32x32">',
-			'<link rel="icon" href="http://example.org/favicon.png" sizes="192x192">',
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
+			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
 
 			'#<style amp-custom>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
 			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',

@@ -7,6 +7,7 @@ import { every } from 'lodash';
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import {
@@ -16,6 +17,7 @@ import {
 	getBlockTypes,
 	unregisterBlockType,
 	registerBlockType,
+	registerBlockStyle,
 } from '@wordpress/blocks';
 
 /**
@@ -129,6 +131,16 @@ domReady( () => {
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
+
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'rounded',
+		label: __( 'Rounded', 'amp' ),
+	} );
+
+	registerBlockStyle( 'core/image', {
+		name: 'rounded',
+		label: __( 'Rounded', 'amp' ),
+	} );
 } );
 
 const positionTopLimit = 75;

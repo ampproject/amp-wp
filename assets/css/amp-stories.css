@@ -40,3 +40,10 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 .amp-block-story-cta__link:visited {
 	color: inherit;
 }
+
+.is-style-rounded {
+    border-radius: 5px;
+}
+.is-style-rounded img {
+	border-radius: 5px;
+}

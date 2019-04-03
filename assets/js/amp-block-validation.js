@@ -294,7 +294,7 @@ const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return (
-				module.lastStates.validationErrors.length !== validationErrors.length				||
+				module.lastStates.validationErrors.length !== validationErrors.length ||
 				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
 			);
 		},
