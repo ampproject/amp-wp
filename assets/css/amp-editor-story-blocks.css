@@ -141,6 +141,10 @@ div[data-type="amp/amp-story-page"][data-amp-selected="parent"] > div > div > di
 	display: none;
 }
 
+#amp-story-editor .block-editor-block-list__block>.block-editor-block-list__insertion-point {
+	display: none !important;
+}
+
 /*
  * 4. Layers stacking.
  * Setup on top of each other layering on the story children.
