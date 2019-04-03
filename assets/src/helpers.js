@@ -476,19 +476,25 @@ export const hasMinimumStoryPosterDimensions = ( media ) => {
 /**
  * Adds either background color or gradient to style depending on the settings.
  *
- * @todo This is strictly for two colors at this moment, add option for more.
- *
  * @param {Object} overlayStyle Original style.
  * @param {Array} backgroundColors Array of color settings.
  * @return {Object} Adjusted style.
  */
 export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) => {
-	if ( 1 === backgroundColors.length ) {
-		overlayStyle.backgroundColor = backgroundColors[ 0 ].color;
+	const validBackgroundColors = backgroundColors.filter( Boolean );
+
+	if ( ! validBackgroundColors ) {
+		return overlayStyle;
+	}
+
+	if ( 1 === validBackgroundColors.length ) {
+		overlayStyle.backgroundColor = validBackgroundColors[ 0 ].color;
 	} else {
-		const topColor = backgroundColors[ 0 ].color ? backgroundColors[ 0 ].color : 'transparent';
-		const bottomColor = backgroundColors[ 1 ].color ? backgroundColors[ 1 ].color : 'transparent';
-		overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ topColor }, ${ bottomColor })`;
+		const gradientList = validBackgroundColors.map( ( { color } ) => {
+			return color || 'transparent';
+		} ).join( ', ' );
+
+		overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ gradientList })`;
 	}
 	return overlayStyle;
 };

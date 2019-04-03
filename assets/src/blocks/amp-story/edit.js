@@ -6,7 +6,7 @@ import uuid from 'uuid/v4';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	PanelColorSettings,
@@ -91,10 +91,10 @@ class EditPage extends Component {
 		}
 	}
 
-	removeBackgroundColors() {
+	removeBackgroundColor( index ) {
 		const { attributes, setAttributes } = this.props;
 		const backgroundColors = JSON.parse( attributes.backgroundColors );
-		backgroundColors.pop();
+		backgroundColors.splice( index, 1 );
 		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
 	}
 
@@ -110,6 +110,7 @@ class EditPage extends Component {
 	getOverlayColorSettings() {
 		const { attributes } = this.props;
 		const backgroundColors = JSON.parse( attributes.backgroundColors );
+
 		if ( ! backgroundColors.length ) {
 			return [
 				{
@@ -121,16 +122,21 @@ class EditPage extends Component {
 				},
 			];
 		}
+
 		const backgroundColorSettings = [];
-		backgroundColors.forEach( ( color, key ) => {
-			backgroundColorSettings[ key ] = {
-				value: color.color,
+		const useNumberedLabels = backgroundColors.length > 1;
+
+		backgroundColors.forEach( ( color, index ) => {
+			backgroundColorSettings[ index ] = {
+				value: color ? color.color : undefined,
 				onChange: ( value ) => {
-					this.setBackgroundColors( value, key );
+					this.setBackgroundColors( value, index );
 				},
-				label: __( 'Color', 'amp' ),
+				/* translators: %s: color number */
+				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) :  __( 'Color', 'amp' ),
 			};
 		} );
+
 		return backgroundColorSettings;
 	}
 
@@ -147,8 +153,6 @@ class EditPage extends Component {
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
 		} = attributes;
-
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -183,10 +187,13 @@ class EditPage extends Component {
 			height: '100%',
 			position: 'absolute',
 		};
-		if ( 0 < backgroundColors.length ) {
-			overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
-			overlayStyle.opacity = overlayOpacity / 100;
-		}
+
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+
+		overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
+		overlayStyle.opacity = overlayOpacity / 100;
+
+		const colorSettings = this.getOverlayColorSettings();
 
 		return (
 			<Fragment>
@@ -194,23 +201,25 @@ class EditPage extends Component {
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
 						initialOpen={ false }
-						colorSettings={ this.getOverlayColorSettings() }
+						colorSettings={ colorSettings }
 					>
-						{ 2 > backgroundColors.length &&
-						<Button
-							onClick={ () => this.setBackgroundColors( null, 1 ) }
-							isSmall>
-							{ __( 'Add Gradient', 'amp' ) }
-						</Button>
-						}
-						{ 2 === backgroundColors.length &&
-						<Button
-							onClick={ () => this.removeBackgroundColors( 1 ) }
-							isLink
-							isDestructive>
-							{ __( 'Remove Gradient', 'amp' ) }
-						</Button>
-						}
+						<p>
+							{ backgroundColors.length < 2 &&
+							<Button
+								onClick={ () => this.setBackgroundColors( null, 1 ) }
+								isSmall>
+								{ __( 'Add Gradient', 'amp' ) }
+							</Button>
+							}
+							{ backgroundColors.length > 1 &&
+							<Button
+								onClick={ () => this.removeBackgroundColor( backgroundColors.length - 1 ) }
+								isLink
+								isDestructive>
+								{ __( 'Remove Gradient', 'amp' ) }
+							</Button>
+							}
+						</p>
 						<RangeControl
 							label={ __( 'Opacity', 'amp' ) }
 							value={ overlayOpacity }
