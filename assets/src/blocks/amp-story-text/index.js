@@ -66,6 +66,10 @@ const schema = {
 	ampFontFamily: {
 		type: 'string',
 	},
+	ampRoundedCorners: {
+		type: 'boolean',
+		default: false,
+	},
 	textColor: {
 		type: 'string',
 	},
@@ -116,6 +120,7 @@ export const settings = {
 			fontSize,
 			customFontSize,
 			ampFitText,
+			ampRoundedCorners,
 			autoFontSize,
 			backgroundColor,
 			textColor,
@@ -135,6 +140,7 @@ export const settings = {
 			'has-background': backgroundColor || customBackgroundColor,
 			[ textClass ]: textClass,
 			[ backgroundClass ]: backgroundClass,
+			'amp-story__has-rounded-corners': ampRoundedCorners,
 		} );
 
 		// Calculate fontsize using vw to make it responsive.

@@ -158,6 +158,10 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'boolean',
 			default: false,
 		};
+		addedAttributes.ampRoundedCorners = {
+			type: 'boolean',
+			default: false,
+		};
 	}
 
 	addedAttributes.positionTop = {
@@ -220,6 +224,10 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 
 	if ( attributes.ampFontFamily ) {
 		ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
+	}
+
+	if ( 'core/image' === blockType.name && attributes.ampRoundedCorners ) {
+		ampAttributes[ 'data-rounded-corners' ] = true;
 	}
 
 	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {

@@ -117,6 +117,7 @@ class TextBlockEdit extends Component {
 			align,
 			ampFontFamily,
 			ampFitText,
+			ampRoundedCorners,
 			autoFontSize,
 			height,
 			width,
@@ -172,6 +173,12 @@ class TextBlockEdit extends Component {
 								{ value: 'h1', label: __( 'Heading 1', 'amp' ) },
 								{ value: 'h2', label: __( 'Heading 2', 'amp' ) },
 							] }
+						/>
+						<ToggleControl
+							key="rounded"
+							label={ __( 'Display rounded corners', 'amp' ) }
+							checked={ ampRoundedCorners }
+							onChange={ () => setAttributes( { ampRoundedCorners: ! attributes.ampRoundedCorners } ) }
 						/>
 					</PanelBody>
 					<PanelColorSettings
@@ -250,6 +257,7 @@ class TextBlockEdit extends Component {
 							[ backgroundColor.class ]: backgroundColor.class,
 							[ textColor.class ]: textColor.class,
 							[ fontSize.class ]: autoFontSize ? undefined : fontSize.class,
+							'amp-story__has-rounded-corners': ampRoundedCorners,
 						} ) }
 						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 					/>
