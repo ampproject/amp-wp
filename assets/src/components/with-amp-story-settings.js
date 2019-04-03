@@ -22,7 +22,7 @@ export default createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 
-			const { ampShowImageCaption, ampRoundedCorners } = attributes;
+			const { ampShowImageCaption } = attributes;
 			const isImageBlock = 'core/image' === name;
 
 			return (
@@ -41,12 +41,6 @@ export default createHigherOrderComponent(
 							<PanelBody
 								title={ __( 'Story Settings', 'amp' ) }
 							>
-								<ToggleControl
-									key="rounded"
-									label={ __( 'Display rounded corners', 'amp' ) }
-									checked={ ampRoundedCorners }
-									onChange={ () => props.setAttributes( { ampRoundedCorners: ! attributes.ampRoundedCorners } ) }
-								/>
 								<ToggleControl
 									key="position"
 									label={ __( 'Show or hide the caption', 'amp' ) }

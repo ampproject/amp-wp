@@ -231,12 +231,11 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['animate-in']           = true;
-			$allowed_tag['animate-in-duration']  = true;
-			$allowed_tag['animate-in-delay']     = true;
-			$allowed_tag['animate-in-after']     = true;
-			$allowed_tag['data-font-family']     = true;
-			$allowed_tag['data-rounded-corners'] = true;
+			$allowed_tag['animate-in']          = true;
+			$allowed_tag['animate-in-duration'] = true;
+			$allowed_tag['animate-in-delay']    = true;
+			$allowed_tag['animate-in-after']    = true;
+			$allowed_tag['data-font-family']    = true;
 		}
 
 		return $allowed_tags;

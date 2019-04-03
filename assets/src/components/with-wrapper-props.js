@@ -53,7 +53,6 @@ const withWrapperProps = ( BlockListBlock ) => {
 			...props.wrapperProps,
 			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
 			'data-font-family': attributes.ampFontFamily || undefined,
-			'data-rounded-corners': attributes.ampRoundedCorners ? 'true' : undefined,
 		};
 
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
