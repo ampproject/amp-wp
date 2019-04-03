@@ -2,51 +2,11 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { BlockIcon } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
-import { PreviewPicker } from './';
-
-function ButtonContent( { option, displayIcon = true } ) {
-	const { label: name, block, blockType } = option;
-
-	if ( ! block ) {
-		return name;
-	}
-
-	let label;
-
-	// Todo: Cover more special cases if needed.
-	switch ( block.name ) {
-		case 'core/image':
-			if ( block.attributes.url ) {
-				const content = block.attributes.url.slice( block.attributes.url.lastIndexOf( '/' ) ).slice( 0, 30 );
-
-				if ( content.length > 0 ) {
-					label = content;
-				}
-			}
-
-			break;
-		case 'amp/amp-story-text':
-			const content = block.attributes.content.length > 0 ? block.attributes.content.replace( /<[^<>]+>/g, ' ' ).slice( 0, 30 ) : '';
-
-			label = content.length > 0 ? content : blockType.title;
-			break;
-		default:
-			label = blockType.title;
-	}
-
-	return (
-		<Fragment>
-			{ label.length > 20 ? `${ label.substr( 0, 20 ) }…` : label }
-			{ displayIcon && <BlockIcon icon={ blockType.icon } /> }
-		</Fragment>
-	);
-}
+import { PreviewPicker, BlockPreviewLabel } from './';
 
 /**
  * Animation order picker component.
@@ -72,12 +32,19 @@ function AnimationOrderPicker( {
 			label={ __( 'Begin after', 'amp' ) }
 			ariaLabel={ ( { value: currentValue, blockType } ) => ! currentValue ? __( 'Begin immediately', 'amp' ) : sprintf( __( 'Begin after: %s', 'amp' ), blockType.title ) }
 			renderToggle={ ( currentOption ) => (
-				<ButtonContent option={ currentOption } displayIcon={ false } />
+				<BlockPreviewLabel
+					{ ...currentOption }
+					displayIcon={ false }
+					alignIcon="right"
+				/>
 			) }
 			renderOption={ ( option ) => {
 				return (
 					<span className="components-preview-picker__dropdown-label">
-						<ButtonContent option={ option } />
+						<BlockPreviewLabel
+							{ ...option }
+							alignIcon="right"
+						/>
 					</span>
 				);
 			} }
