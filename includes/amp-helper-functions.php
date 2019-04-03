@@ -256,6 +256,11 @@ function is_amp_endpoint() {
 		return false;
 	}
 
+	// Always return false when requesting service worker.
+	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+		return false;
+	}
+
 	$did_parse_query = did_action( 'parse_query' );
 
 	if ( ! $did_parse_query ) {

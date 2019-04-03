@@ -22,7 +22,8 @@
 	"globals": {
 		"wp": true,
 		"window": true,
-		"document": true
+		"document": true,
+		"Set": true
 	},
 	"settings": {
 		"react": {

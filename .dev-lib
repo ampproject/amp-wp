@@ -18,4 +18,9 @@ function after_wp_install {
 	fi
 	svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
 	echo "done"
+
+	echo -n "Installing PWA 0.2-alpha2..."
+	wget -O "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip" https://github.com/xwp/pwa-wp/releases/download/0.2-alpha2/pwa.zip
+	unzip -d "$WP_CORE_DIR/src/wp-content/plugins/pwa/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
+	echo "done"
 }
