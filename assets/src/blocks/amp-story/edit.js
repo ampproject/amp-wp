@@ -133,7 +133,7 @@ class EditPage extends Component {
 					this.setBackgroundColors( value, index );
 				},
 				/* translators: %s: color number */
-				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) :  __( 'Color', 'amp' ),
+				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
 			};
 		} );
 
