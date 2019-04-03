@@ -53,10 +53,6 @@ const schema = {
 	overlayOpacity: {
 		default: 50,
 	},
-	gradientBottomColor: {
-		default: null,
-		type: 'string',
-	},
 };
 
 export const settings = {
