@@ -6,6 +6,6 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 
 .amp-story__has-rounded-corners,
 div[data-rounded-corners="true"] figure.wp-block-image,
-div[data-rounded-corners="true"] img {
+.wp-block-image[data-rounded-corners="true"] img {
 	border-radius: 8px;
 }
