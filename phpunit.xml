@@ -7,7 +7,7 @@
 	convertWarningsToExceptions="true"
 	>
 	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php" />
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
 		<testsuite name="amp-wp">

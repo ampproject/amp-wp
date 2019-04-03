@@ -281,6 +281,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<amp-story-grid-layer template="vertical">
 									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
 									<h2 scale-start="1.0" scale-end="200.1" translate-x="100px" translate-y="200px">Scaled</h2>
+									<amp-twitter width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
+									<amp-twitter interactive width="375" height="472" layout="responsive" data-tweetid="885634330868850689"></amp-twitter>
 								</amp-story-grid-layer>
 								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
 							</amp-story-page>
@@ -311,7 +313,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return array(
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						array( 'amp-story', 'amp-analytics' ),
+						array( 'amp-story', 'amp-analytics', 'amp-twitter' ),
 					);
 				}
 			),
@@ -372,12 +374,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'button' => array(
 				'<button on="tap:AMP.setState(foo=\'foo\', isButtonDisabled=true, textClass=\'redBackground\', imgSrc=\'https://ampbyexample.com/img/Shetland_Sheepdog.jpg\', imgSize=200, imgAlt=\'Sheepdog\', videoSrc=\'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4\')">Click me</button>',
-				'<button on="tap:AMP.setState(foo=\'foo\', isButtonDisabled=true, textClass=\'redBackground\', imgSrc=\'https://ampbyexample.com/img/Shetland_Sheepdog.jpg\', imgSize=200, imgAlt=\'Sheepdog\', videoSrc=\'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4\')">Click me</button>',
+				null,
 			),
 
 			'brid-player' => array(
-				'<amp-brid-player data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
-				'<amp-brid-player data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
+				'<amp-brid-player data-dynamic="abc" data-partner="264" data-player="4144" data-video="13663" layout="responsive" width="480" height="270"></amp-brid-player>',
+				null,
 				array( 'amp-brid-player' ),
 			),
 
@@ -676,6 +678,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'empty_parent_nodes_of_non_whitelisted_tags_removed' => array(
 				'<div><span><span><invalid_tag></invalid_tag></span></span></div>',
 				'',
+			),
+
+			'non_empty_parent_nodes_of_non_whitelisted_tags_removed' => array(
+				'<div><span><span class="not-empty"><invalid_tag></invalid_tag></span></span></div>',
+				'<div><span><span class="not-empty"></span></span></div>',
 			),
 
 			'replace_non_whitelisted_node_with_children' => array(
