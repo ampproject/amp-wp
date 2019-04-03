@@ -7,6 +7,7 @@ import { InnerBlocks } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
+import { addBackgroundColorToOverlay } from '../../helpers';
 import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
 import EditPage from './edit';
 import blockIcon from '../../../images/amp-story-page-icon.svg';
@@ -18,9 +19,6 @@ const schema = {
 		source: 'attribute',
 		selector: 'amp-story-page',
 		attribute: 'id',
-	},
-	backgroundColor: {
-		default: '#ffffff',
 	},
 	mediaId: {
 		type: 'number',
@@ -48,6 +46,12 @@ const schema = {
 	},
 	autoAdvanceAfterMedia: {
 		type: 'string',
+	},
+	backgroundColors: {
+		default: '[]',
+	},
+	overlayOpacity: {
+		default: 50,
 	},
 };
 
@@ -78,7 +82,7 @@ export const settings = {
 	save( { attributes } ) {
 		const {
 			anchor,
-			backgroundColor,
+			overlayOpacity,
 			mediaUrl,
 			mediaType,
 			poster,
@@ -86,6 +90,8 @@ export const settings = {
 			autoAdvanceAfterDuration,
 			autoAdvanceAfterMedia,
 		} = attributes;
+
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
 
 		let advanceAfter;
 
@@ -95,8 +101,14 @@ export const settings = {
 			advanceAfter = autoAdvanceAfterMedia;
 		}
 
+		let overlayStyle = {};
+		if ( 0 < backgroundColors.length ) {
+			overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
+			overlayStyle.opacity = overlayOpacity / 100;
+		}
+
 		return (
-			<amp-story-page style={ { backgroundColor } } id={ anchor } auto-advance-after={ advanceAfter }>
+			<amp-story-page style={ { backgroundColor: '#ffffff' } } id={ anchor } auto-advance-after={ advanceAfter }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">
@@ -109,6 +121,7 @@ export const settings = {
 						</amp-story-grid-layer>
 					)
 				}
+				<amp-story-grid-layer template="fill" style={ overlayStyle }>
 				<InnerBlocks.Content />
 			</amp-story-page>
 		);

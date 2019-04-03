@@ -6,7 +6,11 @@ import { Button, NavigableMenu } from '@wordpress/components';
 import { getBlockType } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { BlockIcon } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { BlockPreviewLabel } from './';
 
 /**
  * Internal dependencies
@@ -37,9 +41,11 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 								className={ className }
 								onClick={ () => selectBlock( block.clientId ) }
 							>
-								<BlockIcon icon={ blockType.icon } showColors />
-								{ blockType.title }
-								{ isSelected && <span className="screen-reader-text">{ __( '(selected block)', 'amp' ) }</span> }
+								<BlockPreviewLabel
+									block={ block }
+									blockType={ blockType }
+									accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
+								/>
 							</Button>
 						</div>
 					</li>
