@@ -8,13 +8,11 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import {
+	RichText,
 	getColorClassName,
 	getFontSize,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import {
-	RawHTML,
-} from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -154,24 +152,24 @@ export const settings = {
 			textAlign: align,
 		};
 
-		const ContentTag = tagName;
-
 		if ( ! ampFitText ) {
 			return (
-				<ContentTag
+				<RichText.Content
+					tagName={ tagName }
 					style={ styles }
 					className={ className }
-				>
-					<RawHTML>{ content }</RawHTML>
-				</ContentTag>
+					value={ content }
+				/>
 			);
 		}
+
+		const ContentTag = tagName;
 
 		return (
 			<ContentTag
 				style={ styles }
 				className={ className }>
-				<amp-fit-text layout="fill" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
+				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
 			</ContentTag>
 		);
 	},
