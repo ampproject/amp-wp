@@ -171,7 +171,7 @@ class AMP_Theme_Support {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'nav_menu_toggle', 'nav_menu_dropdown' );
+			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong(

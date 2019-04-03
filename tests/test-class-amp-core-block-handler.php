@@ -25,6 +25,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Missing required render_block filter.' );
+		}
 
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
