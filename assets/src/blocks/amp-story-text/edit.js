@@ -33,7 +33,7 @@ import {
  * Internal dependencies
  */
 import { FontFamilyPicker } from '../../components';
-import { maybeEnqueueFontStyle, calculateFontSize } from '../../helpers';
+import { maybeEnqueueFontStyle, calculateFontSize, getRgbaFromHex } from '../../helpers';
 
 const { getComputedStyle } = window;
 
@@ -182,7 +182,10 @@ class TextBlockEdit extends Component {
 						colorSettings={ [
 							{
 								value: backgroundColor.color,
-								onChange: setBackgroundColor,
+								onChange: ( value ) => {
+									setAttributes( { backgroundHexValue: value } );
+									setBackgroundColor( value );
+								},
 								label: __( 'Background Color', 'amp' ),
 							},
 							{
@@ -201,15 +204,15 @@ class TextBlockEdit extends Component {
 								fontSize: fontSize.size,
 							} }
 						/>
+						<RangeControl
+							label={ __( 'Background Opacity', 'amp' ) }
+							value={ opacity }
+							onChange={ ( value ) => setAttributes( { opacity: value } ) }
+							min={ 5 }
+							max={ 100 }
+							step={ 5 }
+						/>
 					</PanelColorSettings>
-					<RangeControl
-						label={ __( 'Opacity', 'amp' ) }
-						value={ opacity }
-						onChange={ ( value ) => setAttributes( { opacity: value } ) }
-						min={ 0 }
-						max={ 100 }
-						step={ 5 }
-					/>
 				</InspectorControls>
 				<ResizableBox
 					className={ classnames(
@@ -248,12 +251,11 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { content: value } ) }
 						onReplace={ this.onReplace }
 						style={ {
-							backgroundColor: backgroundColor.color,
+							backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? getRgbaFromHex( backgroundColor.color, opacity ) : backgroundColor.color,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 							textAlign: align,
-							opacity: opacity / 100,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,

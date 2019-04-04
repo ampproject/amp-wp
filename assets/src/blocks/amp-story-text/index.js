@@ -18,7 +18,7 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import edit from './edit';
-import { getPercentageFromPixels } from '../../helpers';
+import { getPercentageFromPixels, getRgbaFromHex } from '../../helpers';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 
 export const name = 'amp/amp-story-text';
@@ -72,6 +72,9 @@ const schema = {
 	customTextColor: {
 		type: 'string',
 	},
+	backgroundHexValue: {
+		type: 'string',
+	},
 	backgroundColor: {
 		type: 'string',
 	},
@@ -122,6 +125,7 @@ export const settings = {
 			ampFitText,
 			autoFontSize,
 			backgroundColor,
+			backgroundHexValue,
 			textColor,
 			customBackgroundColor,
 			customTextColor,
@@ -139,7 +143,7 @@ export const settings = {
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
 			[ textClass ]: textClass,
-			[ backgroundClass ]: backgroundClass,
+			[ backgroundClass ]: ( ! opacity || 100 === opacity ) ? backgroundClass : undefined,
 		} );
 
 		// Calculate fontsize using vw to make it responsive.
@@ -148,14 +152,21 @@ export const settings = {
 		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
+		let appliedBackgroundColor;
+		// If we need to assign opacity.
+		if ( 100 !== opacity && ( backgroundColor || customBackgroundColor ) ) {
+			appliedBackgroundColor = getRgbaFromHex( backgroundHexValue, opacity );
+		} else if ( ! backgroundClass ) {
+			appliedBackgroundColor = customBackgroundColor;
+		}
+
 		const styles = {
-			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
+			backgroundColor: appliedBackgroundColor,
 			color: textClass ? undefined : customTextColor,
 			fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
 			width: `${ getPercentageFromPixels( 'x', width ) }%`,
 			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 			textAlign: align,
-			opacity: opacity / 100,
 		};
 
 		if ( ! ampFitText ) {
