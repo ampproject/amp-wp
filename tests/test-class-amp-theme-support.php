@@ -838,7 +838,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
-		$this->assertEquals( 10, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
+		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
 
 		$this->assertEquals( 1000, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'dequeue_customize_preview_scripts' ) ) );
 		$this->assertEquals( 10, has_filter( 'customize_partial_render', array( self::TESTED_CLASS, 'filter_customize_partial_render' ) ) );
