@@ -518,6 +518,6 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 		r,
 		g,
 		b,
-		opacity / 100
+		opacity / 100,
 	];
 };
