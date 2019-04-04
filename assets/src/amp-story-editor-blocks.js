@@ -137,7 +137,7 @@ domReady( () => {
 
 	registerBlockStyle( 'amp/amp-story-text', {
 		name: 'tip',
-		label: __( 'Tip', 'amp' ),
+		label: __( 'Half Rounded', 'amp' ),
 	} );
 
 	registerBlockStyle( 'core/image', {
