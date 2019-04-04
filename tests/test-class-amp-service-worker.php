@@ -246,6 +246,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertEquals( 'exited', $exception->getMessage() );
 		$output = ob_get_clean();
 		$this->assertContains( '<script>navigator.serviceWorker.register', $output );
+
+		// Go back home to clean up 🤷!
+		$this->go_to( home_url() );
 	}
 
 }

@@ -167,7 +167,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'image_center_aligned'                     => array(
 				'<img class="aligncenter" src="http://placehold.it/350x150" width="350" height="150" />',
-				'<figure class="aligncenter" style="max-width: 350px;"><amp-img class="amp-wp-enforced-sizes" src="http://placehold.it/350x150" width="350" height="150" layout="intrinsic"><noscript><img class="aligncenter" src="http://placehold.it/350x150" width="350" height="150"></noscript></amp-img></figure>',
+				'<amp-img class="aligncenter amp-wp-enforced-sizes" src="http://placehold.it/350x150" width="350" height="150" layout="intrinsic"><noscript><img class="aligncenter" src="http://placehold.it/350x150" width="350" height="150"></noscript></amp-img>',
 			),
 
 			'image_left_aligned'                       => array(
@@ -187,22 +187,22 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'wide_image'                               => array(
 				'<figure class="wp-block-image"><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" /></figure>',
-				'<figure class="wp-block-image" style="width: auto;"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
+				'<figure class="wp-block-image"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
 			),
 
 			'wide_image_center_aligned'                => array(
 				'<figure class="wp-block-image aligncenter"><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" /></figure>',
-				'<figure class="wp-block-image aligncenter" style="width: auto;"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
+				'<figure class="wp-block-image aligncenter"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
 			),
 
 			'wide_image_left_aligned_custom_style'     => array(
 				'<figure class="wp-block-image alignleft" style="border:solid 1px red;"><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" /></figure>',
-				'<figure class="wp-block-image alignleft" style="width: auto;border:solid 1px red;"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
+				'<figure class="wp-block-image alignleft" style="border:solid 1px red;"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
 			),
 
 			'wide_image_right_aligned'                 => array(
 				'<figure class="wp-block-image alignright"><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" /></figure>',
-				'<figure class="wp-block-image alignright" style="width: auto;"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
+				'<figure class="wp-block-image alignright"><amp-img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967 amp-wp-enforced-sizes" width="580" height="300" layout="intrinsic"><noscript><img src="http://placehold.it/580x300" alt="Image Alignment 580x300" class="wp-image-967" width="580" height="300"></noscript></amp-img></figure>',
 			),
 
 			'wide_image_is_resized'                    => array(
@@ -212,6 +212,16 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_img_with_noscript_fallback'           => array(
 				'<amp-img src="http://placehold.it/100x100" layout="fixed" width="100" height="100"><noscript><img src="http://placehold.it/100x100" width="100" height="100"></noscript></amp-img>',
+				null,
+			),
+
+			'img_with_sizes_attribute_removed'         => array(
+				'<img width="825" height="510" src="http://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw">',
+				'<amp-img width="825" height="510" src="http://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image amp-wp-enforced-sizes" alt="" layout="intrinsic"><noscript><img width="825" height="510" src="http://placehold.it/825x510" class="attachment-post-thumbnail size-post-thumbnail wp-post-image" alt="" sizes="(max-width: 34.9rem) calc(100vw - 2rem), (max-width: 53rem) calc(8 * (100vw / 12)), (min-width: 53rem) calc(6 * (100vw / 12)), 100vw"></noscript></amp-img>',
+			),
+
+			'amp_img_with_sizes_attribute_retained'    => array(
+				'<amp-img width="825" height="510" src="http://placehold.it/825x510" alt="" layout="intrinsic"></amp-img>',
 				null,
 			),
 		);
@@ -229,10 +239,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$expected = $source;
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$img_count = $dom->getElementsByTagName( 'img' )->length;
 		$sanitizer = new AMP_Img_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
+
+		$xpath = new DOMXPath( $dom );
+		$this->assertEquals( $img_count ? 1 : 0, $xpath->query( '/html/head/meta[ @name = "amp-experiments-opt-in" ][ @content = "amp-img-auto-sizes" ]' )->length );
 	}
 
 	/**
@@ -275,58 +289,5 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$whitelist_sanitizer->get_scripts()
 		);
 		$this->assertEquals( $expected, $scripts );
-	}
-
-	/**
-	 * Test handle_centering
-	 *
-	 * @covers AMP_Img_Sanitizer::handle_centering()
-	 */
-	public function test_handle_centering() {
-		$dom                = new DOMDocument();
-		$align_center_class = 'aligncenter';
-		$align_left_class   = 'alignleft';
-		$sanitizer          = new AMP_Img_Sanitizer( $dom );
-		$width              = 300;
-
-		$amp_img = AMP_DOM_Utils::create_node(
-			$dom,
-			'amp-img',
-			array(
-				'class' => $align_left_class,
-				'width' => $width,
-			)
-		);
-
-		// There's no aligncenter class, so the node shouldn't change.
-		$this->assertEquals( $amp_img, $sanitizer->handle_centering( $amp_img ) );
-
-		$amp_img = AMP_DOM_Utils::create_node(
-			$dom,
-			'amp-img',
-			array(
-				'class' => $align_left_class,
-			)
-		);
-
-		// There's no width attribute, so the node shouldn't change.
-		$this->assertEquals( $amp_img, $sanitizer->handle_centering( $amp_img ) );
-
-		$centered_amp_img = AMP_DOM_Utils::create_node(
-			$dom,
-			'amp-img',
-			array(
-				'class' => $align_center_class,
-				'width' => $width,
-			)
-		);
-		$processed_tag    = $sanitizer->handle_centering( $centered_amp_img );
-		$child            = $processed_tag->firstChild;
-
-		$this->assertEquals( 'figure', $processed_tag->nodeName );
-		$this->assertEquals( $align_center_class, $processed_tag->getAttribute( 'class' ) );
-		$this->assertEquals( "max-width: {$width}px;", $processed_tag->getAttribute( 'style' ) );
-		$this->assertEquals( 'amp-img', $child->nodeName );
-		$this->assertFalse( strpos( $child->getAttribute( 'class' ), $align_center_class ) );
 	}
 }
