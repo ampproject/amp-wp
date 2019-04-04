@@ -4,9 +4,11 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 	padding: 10px !important;
 }
 
-.is-style-rounded {
+.is-style-rounded,
+.is-style-rounded img {
     border-radius: 5px;
 }
-.is-style-rounded img {
-	border-radius: 5px;
+
+.is-style-tip {
+	border-radius: 3pt 3pt 20pt 20pt;
 }

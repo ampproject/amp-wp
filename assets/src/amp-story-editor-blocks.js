@@ -135,6 +135,11 @@ domReady( () => {
 		label: __( 'Rounded', 'amp' ),
 	} );
 
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'tip',
+		label: __( 'Tip', 'amp' ),
+	} );
+
 	registerBlockStyle( 'core/image', {
 		name: 'rounded',
 		label: __( 'Rounded', 'amp' ),
