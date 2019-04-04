@@ -788,7 +788,9 @@ function amp_get_content_sanitizers( $post = null ) {
 			'template'   => get_template(),
 			'stylesheet' => get_stylesheet(),
 		),
-		'AMP_Img_Sanitizer'               => array(),
+		'AMP_Img_Sanitizer'               => array(
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
+		),
 		'AMP_Form_Sanitizer'              => array(),
 		'AMP_Comments_Sanitizer'          => array(
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
