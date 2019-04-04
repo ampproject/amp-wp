@@ -21,7 +21,7 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'amp-story-page';
 
 	/**
-	 * Sanitize the AMP elements contained by <figure> element where necessary.
+	 * Sanitize the AMP elements contained by <amp-story-page> element where necessary.
 	 *
 	 * @since 0.2
 	 */
@@ -36,21 +36,32 @@ class AMP_Story_Sanitizer extends AMP_Base_Sanitizer {
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
+			if ( ! $node ) {
+				continue;
+			}
+
 			$cta_layers     = $node->getElementsByTagName( 'amp-story-cta-layer' );
 			$num_cta_layers = $cta_layers->length;
 
+			/**
+			 * Sanitizes usage of Call-to-Action layers.
+			 *
+			 * Does not use the remove_invalid_child() method
+			 * since the withCallToActionValidation HOC in the editor
+			 * already warns the user about improper usage.
+			 */
 			for ( $j = $num_cta_layers - 1; $j >= 0; $j-- ) {
 				$cta_layer_node = $cta_layers->item( $j );
 
 				// The first page in a story must not have a CTA layer.
 				if ( 0 === $i ) {
-					$this->remove_invalid_child( $cta_layer_node );
+					$cta_layer_node->parentNode->removeChild( $cta_layer_node );
 					continue;
 				}
 
 				if ( $j > 0 ) {
 					// There can only be one CTA layer.
-					$this->remove_invalid_child( $cta_layer_node );
+					$cta_layer_node->parentNode->removeChild( $cta_layer_node );
 				}
 			}
 		}
