@@ -136,7 +136,7 @@ domReady( () => {
 	} );
 
 	registerBlockStyle( 'amp/amp-story-text', {
-		name: 'tip',
+		name: 'half-rounded',
 		label: __( 'Half Rounded', 'amp' ),
 	} );
 
