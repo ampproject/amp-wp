@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import uuid from 'uuid/v4';
 
 /**
  * WordPress dependencies
@@ -48,9 +49,14 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 	};
 } );
 
-class ButtonEdit extends Component {
-	constructor() {
+class CallToActionEdit extends Component {
+	constructor( props ) {
 		super( ...arguments );
+
+		if ( ! props.attributes.anchor ) {
+			this.props.setAttributes( { anchor: uuid() } );
+		}
+
 		this.nodeRef = null;
 		this.bindRef = this.bindRef.bind( this );
 	}
@@ -171,4 +177,4 @@ export default compose( [
 	withColors( 'backgroundColor', { textColor: 'color' } ),
 	withFontSizes( 'fontSize' ),
 	applyFallbackStyles,
-] )( ButtonEdit );
+] )( CallToActionEdit );
