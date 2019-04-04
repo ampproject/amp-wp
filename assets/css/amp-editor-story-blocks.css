@@ -1130,6 +1130,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	width: calc( 300px + 2px + 2 * 36px );
 	position: absolute;
 	z-index: 10;
+	margin-top: -1.5em;
 }
 
 .amp-block-story-cta__inline-link .block-editor-url-input {
