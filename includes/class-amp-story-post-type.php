@@ -846,6 +846,9 @@ class AMP_Story_Post_Type {
 	public static function render_block_with_google_fonts( $props, $content ) {
 		$prop_name = 'ampFontFamily';
 
+		// Prevent adding br tags outside of the amp-story-grid-layer.
+		$content = trim( $content );
+
 		$content = nl2br( $content, false );
 
 		// Short-circuit if no font family present.
