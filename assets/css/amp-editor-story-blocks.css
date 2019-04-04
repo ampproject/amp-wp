@@ -1056,6 +1056,20 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	text-align: right;
 }
 
+.block-editor-block-list__block[data-type="amp/amp-story-cta"] .block-editor-block-list__block-edit {
+	width: 100%;
+}
+
+.block-editor-block-list__block[data-type="amp/amp-story-cta"] .block-editor-block-list__block-edit:before {
+	left: 0;
+	right: 0;
+}
+
+.block-editor-block-list__block[data-type="amp/amp-story-cta"] .block-editor-block-contextual-toolbar {
+	margin-left: -1px;
+	margin-right: 0;
+}
+
 .wp-block-amp-amp-story-cta {
 	display: inline-block;
 	margin-bottom: 0;
@@ -1114,6 +1128,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	font-size: 13px;
 	line-height: 1.4;
 	width: calc( 300px + 2px + 2 * 36px );
+	position: absolute;
+	z-index: 10;
 }
 
 .amp-block-story-cta__inline-link .block-editor-url-input {

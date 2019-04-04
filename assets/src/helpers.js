@@ -109,7 +109,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: 'amp-story-grid-layer > *',
+			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
 		},
 	};
 

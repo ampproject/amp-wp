@@ -43,12 +43,8 @@ const TEMPLATE = [
 ];
 
 class EditPage extends Component {
-	constructor( props ) {
+	constructor() {
 		super( ...arguments );
-
-		if ( ! props.attributes.anchor ) {
-			this.props.setAttributes( { anchor: uuid() } );
-		}
 
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
