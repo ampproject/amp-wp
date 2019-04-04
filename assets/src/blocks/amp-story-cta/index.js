@@ -13,7 +13,6 @@ import {
 	getColorClassName,
 	getFontSizeClass,
 } from '@wordpress/editor';
-import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -123,5 +122,3 @@ export const settings = {
 		);
 	},
 };
-
-registerBlockType( name, settings );
