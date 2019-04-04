@@ -137,6 +137,11 @@ domReady( () => {
 		label: __( 'Rounded', 'amp' ),
 	} );
 
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'half-rounded',
+		label: __( 'Half Rounded', 'amp' ),
+	} );
+
 	registerBlockStyle( 'core/image', {
 		name: 'rounded',
 		label: __( 'Rounded', 'amp' ),

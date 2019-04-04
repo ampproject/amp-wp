@@ -41,9 +41,11 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 	color: inherit;
 }
 
-.is-style-rounded {
+.is-style-rounded,
+.is-style-rounded img {
     border-radius: 5px;
 }
-.is-style-rounded img {
-	border-radius: 5px;
+
+.is-style-half-rounded {
+	border-radius: 4px 4px 26px 26px;
 }
