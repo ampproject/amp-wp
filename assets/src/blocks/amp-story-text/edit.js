@@ -136,6 +136,8 @@ class TextBlockEdit extends Component {
 			}
 		}
 
+		const [ r, g, b, a ] = getRgbaFromHex( backgroundColor.color, opacity );
+
 		return (
 			<Fragment>
 				<BlockControls>
@@ -251,7 +253,7 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { content: value } ) }
 						onReplace={ this.onReplace }
 						style={ {
-							backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? getRgbaFromHex( backgroundColor.color, opacity ) : backgroundColor.color,
+							backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',

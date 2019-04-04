@@ -155,7 +155,8 @@ export const settings = {
 		let appliedBackgroundColor;
 		// If we need to assign opacity.
 		if ( 100 !== opacity && ( backgroundColor || customBackgroundColor ) ) {
-			appliedBackgroundColor = getRgbaFromHex( backgroundHexValue, opacity );
+			const [ r, g, b, a ] = getRgbaFromHex( backgroundHexValue, opacity );
+			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
 		} else if ( ! backgroundClass ) {
 			appliedBackgroundColor = customBackgroundColor;
 		}
