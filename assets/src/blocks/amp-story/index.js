@@ -121,7 +121,7 @@ export const settings = {
 						</amp-story-grid-layer>
 					)
 				}
-				<amp-story-grid-layer template="fill" style={ overlayStyle }>
+				<amp-story-grid-layer template="fill" style={ overlayStyle }></amp-story-grid-layer>
 				<InnerBlocks.Content />
 			</amp-story-page>
 		);
