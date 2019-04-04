@@ -14,6 +14,7 @@ import {
 	SelectControl,
 	withFallbackStyles,
 	ToggleControl,
+	RangeControl,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
@@ -121,6 +122,7 @@ class TextBlockEdit extends Component {
 			height,
 			width,
 			tagName,
+			opacity,
 		} = attributes;
 
 		const minTextHeight = 20;
@@ -200,6 +202,14 @@ class TextBlockEdit extends Component {
 							} }
 						/>
 					</PanelColorSettings>
+					<RangeControl
+						label={ __( 'Opacity', 'amp' ) }
+						value={ opacity }
+						onChange={ ( value ) => setAttributes( { opacity: value } ) }
+						min={ 0 }
+						max={ 100 }
+						step={ 5 }
+					/>
 				</InspectorControls>
 				<ResizableBox
 					className={ classnames(
@@ -243,6 +253,7 @@ class TextBlockEdit extends Component {
 							fontSize: ampFitText ? autoFontSize : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 							textAlign: align,
+							opacity: opacity / 100,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,

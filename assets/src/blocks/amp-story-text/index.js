@@ -78,6 +78,10 @@ const schema = {
 	customBackgroundColor: {
 		type: 'string',
 	},
+	opacity: {
+		default: 100,
+		type: 'number',
+	},
 	height: {
 		default: 50,
 		type: 'number',
@@ -124,6 +128,7 @@ export const settings = {
 			width,
 			height,
 			tagName,
+			opacity,
 		} = attributes;
 
 		const textClass = getColorClassName( 'color', textColor );
@@ -150,6 +155,7 @@ export const settings = {
 			width: `${ getPercentageFromPixels( 'x', width ) }%`,
 			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 			textAlign: align,
+			opacity: opacity / 100,
 		};
 
 		if ( ! ampFitText ) {
