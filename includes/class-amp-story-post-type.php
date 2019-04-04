@@ -830,6 +830,8 @@ class AMP_Story_Post_Type {
 	public static function render_text_block( $props, $content ) {
 		$prop_name = 'ampFontFamily';
 
+		$content = nl2br( $content, false );
+
 		// Short-circuit if no font family present.
 		if ( empty( $props[ $prop_name ] ) ) {
 			return $content;
