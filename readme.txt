@@ -29,7 +29,7 @@ With the official AMP plugin for WordPress, the WordPress ecosystem is provided 
 
 1. Upload the folder to the `/wp-content/plugins/` directory.
 2. Activate the plugin through the 'Plugins' menu in WordPress.
-3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Transitional` or `Native` mode.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Transitional` or `Native` mode. Depending on your theme/plugins, some development work may be required.
 
 == Getting Started ==
 
