@@ -23,7 +23,7 @@ function _amp_print_php_version_admin_notice() {
 	<div class="notice notice-error">
 		<p>
 			<?php
-			sprintf(
+			printf(
 				/* translators: %s: required PHP version */
 				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
 				'5.4+'
