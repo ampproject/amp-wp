@@ -34,10 +34,16 @@ class AMP_Customizer_Design_Settings {
 	/**
 	 * Returns whether the AMP design settings are enabled.
 	 *
+	 * @since 1.1 This always return false when AMP theme support is present.
 	 * @since 0.6
+	 *
 	 * @return bool AMP Customizer design settings enabled.
 	 */
 	public static function is_amp_customizer_enabled() {
+
+		if ( current_theme_supports( 'amp' ) ) {
+			return false;
+		}
 
 		/**
 		 * Filter whether to enable the AMP default template design settings.
