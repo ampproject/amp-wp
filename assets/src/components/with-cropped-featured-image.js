@@ -9,11 +9,33 @@ import { dispatch } from '@wordpress/data';
  */
 import { now } from 'lodash';
 
+/**
+ * Internal dependencies
+ */
+import { getMinimumStoryPosterDimensions, getMinimumFeaturedImageDimensions } from '../helpers';
+
 const EXPECTED_WIDTH = 696; // @todo This may be wrong as 1200px is expected for featured image?
 const EXPECTED_HEIGHT = 928;
 
+const getMinimumDimensions = () => {
+	const posterImageDimensions = getMinimumStoryPosterDimensions();
+	const featuredImageDimensions = getMinimumFeaturedImageDimensions();
+
+	//( posterImageDimensions.height / posterImageDimensions.width ) *
+	let width = Math.max( posterImageDimensions.width, featuredImageDimensions.width );
+	let height = Math.max( posterImageDimensions.height, featuredImageDimensions.height );
+
+	// @todo Adjust the width or height to make sure the aspect ratio of posterImageDimensions is preserved.
+	if ( width / height ) {
+
+	}
+
+
+
+};
+
 /**
- * Gets a wrapped version of MediaUpload.
+ * Gets a wrapped version of MediaUpload to crop images for AMP Stories.
  *
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
@@ -63,6 +85,9 @@ export default ( InitialMediaUpload ) => {
 						multiple: false,
 						date: false,
 						priority: 20,
+						// @todo minWidth:
+						// @todo minHeight:
+						// @todo ratio?
 						suggestedWidth: EXPECTED_WIDTH,
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),

@@ -454,6 +454,20 @@ export const getMinimumFeaturedImageDimensions = () => {
 };
 
 /**
+ * Get minimum dimensions for a story poster.
+ *
+ * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
+ *
+ * @return {Object} Minimum dimensions including width and height.
+ */
+export const getMinimumStoryPosterDimensions = () => {
+	const width = 696;
+	const height = 928;
+
+	return { width, height };
+};
+
+/**
  * Determines whether whether the image has the minimum width for an AMP story featured image.
  *
  * The featured image will be used for the poster-portrait-src.
@@ -466,12 +480,10 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @return {boolean} Whether the media has the minimum dimensions.
  */
 export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const minWidth = 696; // @todo Needs to incorporate Math.max( 696, getMinimumFeaturedImageDimensions().width );
-	const minHeight = 928; // @todo This needs to be Math.max( 928, getMinimumFeaturedImageDimensions().height ).
-
+	const minDimensions = getMinimumStoryPosterDimensions();
 	return (
 		( media.width && media.height )	&&
-		( media.width >= minWidth && media.height >= minHeight )
+		( media.width >= minDimensions.width && media.height >= minDimensions.height )
 	);
 };
 
