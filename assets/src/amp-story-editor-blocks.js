@@ -144,6 +144,11 @@ domReady( () => {
 		name: 'rounded',
 		label: __( 'Rounded', 'amp' ),
 	} );
+
+	registerBlockStyle( 'core/quote', {
+		name: 'light',
+		label: __( 'Light', 'amp' ),
+	} );
 } );
 
 const positionTopLimit = 75;

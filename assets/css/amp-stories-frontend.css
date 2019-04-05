@@ -10,19 +10,9 @@ p {
     font-weight: normal;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
-.wp-block-quote cite {
-    color: #6c7781;
-    font-size: 13px;
-    font-style: normal;
-}
 
 amp-story-grid-layer {
     padding: 0;
-}
-
-.wp-block-quote {
-    border-left: 4px solid #000;
-    padding-left: 1em;
 }
 
 .wp-block-pullquote {
@@ -72,4 +62,37 @@ amp-story-grid-layer {
     padding: 0.5em;
     border: 1px solid #000;
     font-size: 16px;
+}
+
+/* Quote block */
+.wp-block-quote {
+    padding: 50px 10px 10px 10px;
+    width: 90%;
+}
+
+.wp-block-quote cite {
+    font-size: 16px;
+    margin-top: 24px;
+    display: block;
+    color: #6c7781;
+}
+
+.wp-block-quote p {
+    line-height: 36px;
+    font-weight: bold;
+    font-size: 32px;
+    font-family: "Source Sans Pro", sans-serif;
+}
+
+.wp-block-quote:before {
+    content: " ";
+    position: absolute;
+    border-left: 104px solid black;
+    border-right: 104px solid black;
+    white-space: pre;
+    height: 1px;
+    left: calc(25% - 50px);
+    opacity: 0.2;
+    top: 0;
+    width: 100px;
 }

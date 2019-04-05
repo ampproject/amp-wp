@@ -12,3 +12,12 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 .is-style-half-rounded {
 	border-radius: 4px 4px 26px 26px;
 }
+
+.is-style-light p,
+.is-style-light.wp-block-quote cite,
+.is-style-light .wp-block-quote__citation {
+	color: #ffffff;
+}
+.is-style-light.wp-block-quote:before {
+	border-color: #ffffff;
+}
