@@ -90,8 +90,8 @@ class AMP_Story_Templates {
 	public static function get_story_templates() {
 		return array(
 			array(
-				'title' => __( 'Default Template 1', 'amp' ),
-				'name'  => 'example-template',
+				'title' => __( 'Template: Travel Tip', 'amp' ),
+				'name'  => 'travel-tip',
 			),
 		);
 	}
