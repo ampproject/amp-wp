@@ -402,6 +402,13 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$this->go_to( home_url( '?feed=rss' ) );
 		$this->assertFalse( is_amp_endpoint() );
+
+		if ( class_exists( 'WP_Service_Workers' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
+			$this->go_to( home_url( "?p=$post_id" ) );
+			global $wp_query;
+			$wp_query->set( WP_Service_Workers::QUERY_VAR, WP_Service_Workers::SCOPE_FRONT );
+			$this->assertFalse( is_amp_endpoint() );
+		}
 	}
 
 	/**
@@ -523,7 +530,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		wp_print_scripts();
 		$output = ob_get_clean();
 
-		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 

@@ -23,7 +23,7 @@ function _amp_print_php_version_admin_notice() {
 	<div class="notice notice-error">
 		<p>
 			<?php
-			sprintf(
+			printf(
 				/* translators: %s: required PHP version */
 				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
 				'5.4+'
@@ -247,6 +247,7 @@ function amp_init() {
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
+	AMP_Service_Worker::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {

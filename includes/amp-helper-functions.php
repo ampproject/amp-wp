@@ -256,6 +256,11 @@ function is_amp_endpoint() {
 		return false;
 	}
 
+	// Always return false when requesting service worker.
+	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+		return false;
+	}
+
 	$did_parse_query = did_action( 'parse_query' );
 
 	if ( ! $did_parse_query ) {
@@ -783,7 +788,9 @@ function amp_get_content_sanitizers( $post = null ) {
 			'template'   => get_template(),
 			'stylesheet' => get_stylesheet(),
 		),
-		'AMP_Img_Sanitizer'               => array(),
+		'AMP_Img_Sanitizer'               => array(
+			'align_wide_support' => current_theme_supports( 'align-wide' ),
+		),
 		'AMP_Form_Sanitizer'              => array(),
 		'AMP_Comments_Sanitizer'          => array(
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
