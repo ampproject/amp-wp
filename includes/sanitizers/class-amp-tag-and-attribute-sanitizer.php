@@ -1973,7 +1973,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( $node && $parent ) {
 			$this->remove_invalid_child( $node );
 		}
-		while ( $parent && ! $parent->hasChildNodes() && $this->root_element !== $parent ) {
+
+		// @todo Does this parent removal even make sense anymore?
+		while ( $parent && ! $parent->hasChildNodes() && ! $parent->hasAttributes() && $this->root_element !== $parent ) {
 			$node   = $parent;
 			$parent = $parent->parentNode;
 			if ( $parent ) {

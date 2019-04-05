@@ -249,6 +249,7 @@ function amp_init() {
 	AMP_Validation_Manager::init();
 	AMP_Post_Type_Support::add_post_type_support();
 	AMP_Story_Post_Type::register();
+	AMP_Service_Worker::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
