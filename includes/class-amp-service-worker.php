@@ -45,7 +45,7 @@ class AMP_Service_Worker {
 			'image_caching'        => false,
 			'google_fonts_caching' => false,
 		);
-		if ( is_array( $theme_support['service_worker'] ) ) {
+		if ( isset( $theme_support['service_worker'] ) && is_array( $theme_support['service_worker'] ) ) {
 			$enabled_options = array_merge(
 				$enabled_options,
 				$theme_support['service_worker']
