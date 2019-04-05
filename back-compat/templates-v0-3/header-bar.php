@@ -5,8 +5,7 @@
  * @package AMP
  */
 
-$site_icon_url      = $this->get( 'site_icon_url' );
-$canonical_link_url = $this->get( 'post_canonical_link_url' );
+$site_icon_url = $this->get( 'site_icon_url' );
 ?>
 
 <nav class="amp-wp-title-bar">
@@ -18,11 +17,5 @@ $canonical_link_url = $this->get( 'post_canonical_link_url' );
 
 			<?php echo esc_html( $this->get( 'blog_name' ) ); ?>
 		</a>
-		<?php if ( $canonical_link_url ) : ?>
-			<?php $canonical_link_text = $this->get( 'post_canonical_link_text' ); ?>
-			<a class="amp-wp-canonical-link" href="<?php echo esc_url( $canonical_link_url ); ?>">
-				<?php echo esc_html( $canonical_link_text ); ?>
-			</a>
-		<?php endif; ?>
 	</div>
 </nav>

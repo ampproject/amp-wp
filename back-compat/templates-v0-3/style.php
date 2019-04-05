@@ -193,8 +193,6 @@ nav.amp-wp-title-bar {
 }
 
 nav.amp-wp-title-bar div {
-	display: flex;
-	justify-content: space-between;
 	line-height: 54px;
 	color: <?php echo esc_html( $this->get_customizer_setting( 'navbar_color', self::DEFAULT_NAVBAR_COLOR ) ); ?>;
 }
@@ -202,11 +200,6 @@ nav.amp-wp-title-bar div {
 nav.amp-wp-title-bar a {
 	color: <?php echo esc_html( $this->get_customizer_setting( 'navbar_color', self::DEFAULT_NAVBAR_COLOR ) ); ?>;
 	text-decoration: none;
-}
-
-nav.amp-wp-title-bar .amp-wp-canonical-link {
-	font-size: 20px;
-	text-decoration: underline;
 }
 
 nav.amp-wp-title-bar .amp-wp-site-icon {
