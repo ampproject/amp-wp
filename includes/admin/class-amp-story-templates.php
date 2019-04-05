@@ -37,6 +37,7 @@ class AMP_Story_Templates {
 		}
 
 		add_filter( 'rest_wp_block_query', array( $this, 'filter_rest_wp_block_query' ), 10, 2 );
+		add_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
 
 		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
@@ -77,7 +78,11 @@ class AMP_Story_Templates {
 						)
 					)
 				);
+				if ( ! $post_id ) {
+					continue;
+				}
 				wp_set_object_terms( $post_id, self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY );
+				add_post_meta( $post_id, 'amp_template_unmodified', true );
 			}
 		}
 	}
@@ -192,5 +197,20 @@ class AMP_Story_Templates {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Flag template as modified when it's being saved.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+	public function flag_template_as_modified( $post_id ) {
+		if ( ! has_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY, $post_id ) ) {
+			return;
+		}
+
+		if ( true === (bool) get_post_meta( $post_id, 'amp_template_unmodified', true ) ) {
+			update_post_meta( $post_id, 'amp_template_unmodified', false );
+		}
 	}
 }
