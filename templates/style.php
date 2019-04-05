@@ -124,10 +124,8 @@ blockquote p:last-child {
 
 .amp-wp-header div {
 	color: <?php echo sanitize_hex_color( $header_color ); ?>;
-	display: flex;
 	font-size: 1em;
 	font-weight: 400;
-	justify-content: space-between;
 	margin: 0 auto;
 	max-width: calc(840px - 32px);
 	padding: .875em 16px;
@@ -139,12 +137,20 @@ blockquote p:last-child {
 	text-decoration: none;
 }
 
-.amp-wp-header .amp-wp-canonical-link {
-	font-size: 0.8em;
-	text-decoration: underline;
-}
-
-/* Site Icon */
+<?php if ( $this->get( 'post_canonical_link_url' ) ) : ?>
+	.amp-wp-header .amp-wp-canonical-link {
+		font-size: 0.8em;
+		text-decoration: underline;
+		position: absolute;
+		<?php
+		$distance = 18;
+		if ( $this->get( 'site_icon_url' ) ) {
+			$distance += 32 + 10; // Width of site icon with margin.
+		}
+		printf( '%s: %dpx;', is_rtl() ? 'left' : 'right', $distance ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+	}
+<?php endif; ?>
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/

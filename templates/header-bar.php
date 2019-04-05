@@ -17,6 +17,7 @@
 				<?php echo esc_html( wptexturize( $this->get( 'blog_name' ) ) ); ?>
 			</span>
 		</a>
+
 		<?php $canonical_link_url = $this->get( 'post_canonical_link_url' ); ?>
 		<?php if ( $canonical_link_url ) : ?>
 			<?php $canonical_link_text = $this->get( 'post_canonical_link_text' ); ?>
