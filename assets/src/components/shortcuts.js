@@ -16,6 +16,10 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 
 	return (
 		blocks.map( ( block ) => {
+			if ( ! canInsertBlockType( block ) ) {
+				return null;
+			}
+
 			const blockType = getBlockType( block );
 
 			return (
@@ -25,7 +29,6 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 					onClick={ () => insertBlock( block ) }
 					label={ blockType.title }
 					labelPosition="bottom"
-					disabled={ ! canInsertBlockType( block ) }
 				/>
 			);
 		} )
