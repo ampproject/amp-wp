@@ -10,6 +10,7 @@ const Shortcuts = ( { insertBlock } ) => {
 	const blocks = [
 		'amp/amp-story-text',
 		'core/image',
+		'amp/amp-story-title',
 	];
 
 	return (
