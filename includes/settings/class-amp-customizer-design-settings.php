@@ -123,7 +123,7 @@ class AMP_Customizer_Design_Settings {
 			array(
 				'type'              => 'option',
 				'default'           => false,
-				'sanitize_callback' => array( __CLASS__, 'sanitize_boolean' ),
+				'sanitize_callback' => 'rest_sanitize_boolean',
 				'transport'         => 'postMessage',
 			)
 		);
@@ -368,15 +368,5 @@ class AMP_Customizer_Design_Settings {
 		}
 
 		return $value;
-	}
-
-	/**
-	 * Sanitize boolean.
-	 *
-	 * @param mixed $value Value to sanitize.
-	 * @return bool Sanitized value.
-	 */
-	public static function sanitize_boolean( $value ) {
-		return (bool) $value;
 	}
 }
