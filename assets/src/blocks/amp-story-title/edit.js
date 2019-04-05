@@ -14,7 +14,6 @@ import HeadingToolbar from './heading-toolbar';
 import { __ } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
 import { select } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
 import {
 	RichText,
 	BlockControls,
@@ -25,7 +24,6 @@ export default function StoryTitleEdit( {
 	attributes,
 	setAttributes,
 	mergeBlocks,
-	insertBlocksAfter,
 	onReplace,
 	className,
 } ) {
@@ -57,17 +55,6 @@ export default function StoryTitleEdit( {
 				value={ displayTitle }
 				onChange={ ( value ) => setAttributes( { content: value } ) }
 				onMerge={ mergeBlocks }
-				unstableOnSplit={
-					insertBlocksAfter ?
-						( before, after, ...blocks ) => {
-							setAttributes( { content: before } );
-							insertBlocksAfter( [
-								...blocks,
-								createBlock( 'core/paragraph', { content: after } ),
-							] );
-						} :
-						undefined
-				}
 				onRemove={ () => onReplace( [] ) }
 				style={ { textAlign: align } }
 				formattingControls={ [] }
