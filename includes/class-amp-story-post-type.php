@@ -879,9 +879,10 @@ class AMP_Story_Post_Type {
 	 * Used for a slide in the Latest Stories block.
 	 *
 	 * @param WP_Post $post The AMP story post.
+	 * @param string  $size The size of the image.
 	 * @return void
 	 */
-	public static function the_single_story_card( $post ) {
+	public static function the_single_story_card( $post, $size ) {
 		$thumbnail_id = get_post_thumbnail_id( $post );
 		if ( ! $thumbnail_id ) {
 			return;
@@ -904,7 +905,7 @@ class AMP_Story_Post_Type {
 			<?php
 			echo wp_get_attachment_image(
 				$thumbnail_id,
-				self::STORY_CARD_IMAGE_SIZE,
+				$size,
 				false,
 				array(
 					'alt'   => get_the_title( $post ),
@@ -981,7 +982,7 @@ class AMP_Story_Post_Type {
 		ob_start();
 		?>
 		<div class="amp-story-embed">
-			<?php self::the_single_story_card( $post ); ?>
+			<?php self::the_single_story_card( $post, self::STORY_CARD_IMAGE_SIZE ); ?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -1064,7 +1065,7 @@ class AMP_Story_Post_Type {
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php self::the_single_story_card( $post ); ?>
+						<?php self::the_single_story_card( $post, self::STORY_LANDSCAPE_IMAGE_SIZE ); ?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;

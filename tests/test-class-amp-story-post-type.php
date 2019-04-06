@@ -29,19 +29,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
-		$featured_image_dimensions = array( 100, 200, 400 );
+		$featured_image_dimensions = array( 1200, 1300, 1400 );
 		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
 			ob_start();
-			AMP_Story_Post_Type::the_single_story_card( $story );
+			AMP_Story_Post_Type::the_single_story_card( $story, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
 			$card_markup    = ob_get_clean();
 			$featured_image = get_post_thumbnail_id( $story );
 			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
 			$this->assertContains(
 				wp_get_attachment_image(
 					$featured_image,
-					AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
+					AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
 					false,
 					array(
 						'alt'   => get_the_title( $story ),

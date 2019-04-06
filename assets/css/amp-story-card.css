@@ -77,7 +77,6 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 /* Styling for when an AMP story is embedded in a post, like with the WordPress (embed) block. */
 .amp-story-embed {
 	position: relative;
-	width: max-content;
 	border-radius: 0.5rem;
 	overflow-x: hidden;
 }
