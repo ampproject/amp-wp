@@ -137,7 +137,7 @@ blockquote p:last-child {
 	text-decoration: none;
 }
 
-<?php if ( $this->get( 'post_canonical_link_url' ) ) : ?>
+<?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
 	.amp-wp-header .amp-wp-canonical-link {
 		font-size: 0.8em;
 		text-decoration: underline;
