@@ -242,7 +242,7 @@ function post_supports_amp( $post ) {
  * This function cannot be called before the parse_query action because it needs to be able
  * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
  * present, this function returns true just if the query var is present. If theme support is
- * present, then it returns true in paired mode if an AMP template is available and the query
+ * present, then it returns true in transitional mode if an AMP template is available and the query
  * var is present, or else in native mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
@@ -372,9 +372,9 @@ function amp_add_generator_metadata() {
 	if ( amp_is_canonical() ) {
 		$mode = 'native';
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$mode = 'paired';
+		$mode = 'transitional';
 	} else {
-		$mode = 'classic';
+		$mode = 'reader';
 	}
 	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
 }
@@ -566,7 +566,7 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  *
  * This explicitly triggers a CORS request, and gets back a non-opaque response, ensuring that a service
  * worker caching the external stylesheet will not inflate the storage quota. This must be done in AMP
- * and non-AMP alike because in paired mode the service worker could cache the font stylesheets in a
+ * and non-AMP alike because in transitional mode the service worker could cache the font stylesheets in a
  * non-AMP document without CORS (crossorigin="anonymous") in which case the service worker could then
  * fail to serve the cached font resources in an AMP document with the warning:
  *
@@ -619,7 +619,7 @@ function amp_get_analytics( $analytics = array() ) {
 	 * Add amp-analytics tags.
 	 *
 	 * This filter allows you to easily insert any amp-analytics tags without needing much heavy lifting.
-	 * This filter should be used to alter entries for paired mode.
+	 * This filter should be used to alter entries for transitional mode.
 	 *
 	 * @since 0.7
 	 *

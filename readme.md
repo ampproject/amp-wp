@@ -27,13 +27,15 @@ Features and capabilities provided by the plugin include:
 - **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
 - **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
 
+The plugin can be configured to follow one of three different template modes: Native, Transitional, and Reader. When configured to operate in Reader and Transitional modes, a given post/page will have a canonical URL as well as a corresponding (paired) AMP URL. The AMP plugin is not serving as a mobile theme; it does not redirect mobile devices to the AMP version. Instead, the AMP version is served to mobile visitors when they find the content on platforms such as Twitter, Pinterest, Google Search, and others.
+
 With the official AMP plugin for WordPress, the WordPress ecosystem is provided with the capabilities and tools it needs to build world-class AMP experiences without deviating from its standard, flexible, and well-known content creation workflow.
 
 ## Installation ##
 
 1. Upload the folder to the `/wp-content/plugins/` directory.
-1. Activate the plugin through the 'Plugins' menu in WordPress.
-1. If you currently use older versions of the plugin in `Classic mode`, it is strongly encouraged to migrate to `Paired` or `Native mode`.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. If you currently use older versions of the plugin in `Reader` mode, it is strongly encouraged to migrate to `Transitional` or `Native` mode. Depending on your theme/plugins, some development work may be required.
 
 ## Getting Started ##
 
@@ -51,13 +53,13 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 
 ![Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.](wp-assets/screenshot-2.png)
 
-### Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
+### Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
 
-![Classic templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
+![Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.](wp-assets/screenshot-3.png)
 
-### Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+### Switch from Reader mode to Transitional or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
 
-![Switch from Classic to Paired or Native modes in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
+![Switch from Reader mode to Transitional or Native mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.](wp-assets/screenshot-4.png)
 
 ### Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
 

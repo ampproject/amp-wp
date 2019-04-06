@@ -138,9 +138,11 @@ class AMP_Options_Menu {
 	 * @since 1.0
 	 */
 	public function render_theme_support() {
-		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
-		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
-		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
+		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		$native_description       = __( 'Integrates AMP as the framework for your site, using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, some development work may be required.', 'amp' );
+		$transitional_description = __( 'Generates AMP content reusing the active theme’s templates, allowing for each canonical URL to have a corresponding (paired) AMP URL. Depending on your theme/plugins, some development work may be required.', 'amp' );
+		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -153,15 +155,15 @@ class AMP_Options_Menu {
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
 					<?php echo wp_kses_post( $native_description ); ?>
 				<?php else : ?>
-					<strong><?php esc_html_e( 'Paired:', 'amp' ); ?></strong>
-					<?php echo wp_kses_post( $paired_description ); ?>
+					<strong><?php esc_html_e( 'Transitional:', 'amp' ); ?></strong>
+					<?php echo wp_kses_post( $transitional_description ); ?>
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
 			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
+						<p><?php esc_html_e( 'Your active theme is known to work well in transitional or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
 				<dl>
@@ -175,22 +177,22 @@ class AMP_Options_Menu {
 						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
-						<label for="theme_support_paired">
-							<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
+						<label for="theme_support_transitional">
+							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo wp_kses_post( $paired_description ); ?>
+						<?php echo wp_kses_post( $transitional_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
 						<label for="theme_support_disabled">
-							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+							<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php echo wp_kses_post( $reader_description ); ?>
 
 						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
@@ -199,7 +201,7 @@ class AMP_Options_Menu {
 									echo wp_kses_post(
 										sprintf(
 											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
-											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
+											__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
 												esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
