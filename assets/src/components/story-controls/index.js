@@ -64,10 +64,14 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
+		const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 		const { startReordering, saveOrder, resetOrder } = dispatch( 'amp/story' );
 
 		return {
-			startReordering,
+			startReordering: () => {
+				clearSelectedBlock();
+				startReordering();
+			},
 			saveOrder,
 			resetOrder,
 		};
