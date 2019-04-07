@@ -176,8 +176,24 @@ class AMP_Story_Post_Type {
 		register_block_type(
 			'amp/amp-story-text',
 			array(
-				'render_callback' => array( __CLASS__, 'render_text_block' ),
+				'render_callback' => array( __CLASS__, 'render_block_with_google_fonts' ),
 			)
+		);
+		register_block_type(
+			'amp/amp-story-cta',
+			array(
+				'render_callback' => array( __CLASS__, 'render_block_with_google_fonts' ),
+			)
+		);
+
+		add_filter(
+			'amp_content_sanitizers',
+			function( $sanitizers ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$sanitizers['AMP_Story_Sanitizer'] = array();
+				}
+				return $sanitizers;
+			}
 		);
 
 		// Omit the core theme sanitizer for the story template.
@@ -827,8 +843,11 @@ class AMP_Story_Post_Type {
 	 * @param string $content Content.
 	 * @return string Text block.
 	 */
-	public static function render_text_block( $props, $content ) {
+	public static function render_block_with_google_fonts( $props, $content ) {
 		$prop_name = 'ampFontFamily';
+
+		// Prevent adding br tags outside of the amp-story-grid-layer.
+		$content = trim( $content );
 
 		$content = nl2br( $content, false );
 
@@ -839,7 +858,7 @@ class AMP_Story_Post_Type {
 
 		// Short-circuit if there is no Google Font or the font is already enqueued.
 		$font = self::get_font( $props[ $prop_name ] );
-		if ( ! $font || ! isset( $font['handle'] ) || ! isset( $font['src'] ) || wp_style_is( $font['handle'], 'enqueued' ) ) {
+		if ( ! $font || ! isset( $font['handle'] ) || ! isset( $font['src'] ) || wp_style_is( $font['handle'] ) ) {
 			return $content;
 		}
 
