@@ -70,7 +70,7 @@ function amp_get_permalink( $post_id ) {
 	// When theme support is present, the plain query var should always be used.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
+		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
@@ -294,6 +294,16 @@ function is_amp_endpoint() {
 		return true;
 	}
 
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
@@ -311,20 +321,6 @@ function is_amp_endpoint() {
 	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
-	}
-
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
-	}
-
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		return true;
 	}
 
 	if ( ! did_action( 'wp' ) ) {
@@ -815,7 +811,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 		),
-		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => array(),
 		'AMP_Style_Sanitizer'             => array(
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
