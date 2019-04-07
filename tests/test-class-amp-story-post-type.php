@@ -29,7 +29,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
-		$featured_image_dimensions = array( 1200, 1300, 1400 );
+		$featured_image_dimensions = array( array( 1200, 1300 ), array( 1300, 1400 ), array( 1400, 1500 ) );
 		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
@@ -138,7 +138,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
 		// The conditional is now satisfied, so this should return the overriden callback.
-		$story_posts    = $this->create_story_posts_with_featured_images( array( 400 ) );
+		$story_posts    = $this->create_story_posts_with_featured_images( array( 400, 400 ) );
 		$amp_story_post = reset( $story_posts );
 		$correct_url    = get_post_permalink( $amp_story_post );
 		$correct_block  = array(
@@ -228,7 +228,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		// Create mock AMP story posts to test.
 		$minimum_height = 200;
-		$dimensions     = array( $minimum_height, 300, 500 );
+		$dimensions     = array( array( $minimum_height, 200 ), array( 300, 400 ), array( 500, 600 ) );
 		$this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = AMP_Story_Post_Type::render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
@@ -245,34 +245,42 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test get_featured_image_minimum_height.
+	 * Test get_story_carousel_height.
 	 *
-	 * @covers \AMP_Editor_Blocks::get_featured_image_minimum_height()
+	 * @covers \AMP_Editor_Blocks::get_story_carousel_height()
 	 */
-	public function test_get_featured_image_minimum_height() {
-		$expected_min_height = 300;
-		$dimensions          = array(
-			$expected_min_height,
-			400,
-			500,
-			600,
-		);
+	public function test_get_story_carousel_height() {
+		add_image_size( AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE, AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION, AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION, true );
+
+		$portrait_dimensions = array( AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION, AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION );
+		$dimensions          = array( $portrait_dimensions );
 		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
-		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_featured_image_minimum_height( $stories ) );
+		$this->assertEquals( AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION, AMP_Story_Post_Type::get_story_carousel_height( $stories ) );
 
 		// When an empty array() is passed, the minimum height should be 0.
-		$this->assertEquals( 0, AMP_Story_Post_Type::get_featured_image_minimum_height( array() ) );
+		$this->assertEquals( 0, AMP_Story_Post_Type::get_story_carousel_height( array() ) );
+
+		// When there is a small $content_width global value, that should reduce the height that this returns.
+		$content_width            = 300;
+		$GLOBALS['content_width'] = $content_width;
+		$expected_min_height      = $content_width * AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION / AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION;
+		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_story_carousel_height( $stories ) );
 	}
 
 	/**
 	 * Creates amp_story posts with featured images of given heights.
 	 *
-	 * @param array $dimensions An array of strings.
+	 * @param array $featured_images[][] {
+	 *     The featured image dimensions.
+	 *
+	 *     @type int width
+	 *     @type int height
+	 * }
 	 * @return array $posts An array of WP_Post objects of the amp_story post type.
 	 */
-	public function create_story_posts_with_featured_images( $dimensions ) {
+	public function create_story_posts_with_featured_images( $featured_images ) {
 		$stories = array();
-		foreach ( $dimensions as $dimension ) {
+		foreach ( $featured_images as $dimensions ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
@@ -291,8 +299,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			wp_update_attachment_metadata(
 				$thumbnail_id,
 				array(
-					'width'  => $dimension,
-					'height' => $dimension,
+					'width'  => $dimensions[0],
+					'height' => $dimensions[1],
 				)
 			);
 		}

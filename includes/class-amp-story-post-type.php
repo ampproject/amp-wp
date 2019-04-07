@@ -39,6 +39,20 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
+	 * The large dimension of the AMP Story poster images.
+	 *
+	 * @var int
+	 */
+	const STORY_LARGE_IMAGE_DIMENSION = 928;
+
+	/**
+	 * The large dimension of the AMP Story poster images.
+	 *
+	 * @var int
+	 */
+	const STORY_SMALL_IMAGE_DIMENSION = 696;
+
+	/**
 	 * The slug of the story card CSS file.
 	 *
 	 * @var string
@@ -136,13 +150,13 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( self::STORY_CARD_IMAGE_SIZE, 696, 928, true );
+		add_image_size( self::STORY_CARD_IMAGE_SIZE, self::STORY_SMALL_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
 
 		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, 928, 928, true );
+		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, 928, 696, true );
+		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
@@ -418,8 +432,8 @@ class AMP_Story_Post_Type {
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return array(
 				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
-				928,
-				696,
+				self::STORY_LARGE_IMAGE_DIMENSION,
+				self::STORY_SMALL_IMAGE_DIMENSION,
 			);
 		}
 
@@ -1049,7 +1063,6 @@ class AMP_Story_Post_Type {
 			'meta_key'         => '_thumbnail_id',
 		);
 		$story_query     = new WP_Query( $args );
-		$min_height      = self::get_featured_image_minimum_height( $story_query->posts );
 		$class           = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
@@ -1059,13 +1072,13 @@ class AMP_Story_Post_Type {
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
 			<?php if ( $is_amp_carousel ) : ?>
-				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( self::get_story_carousel_height( $story_query->posts ) ); ?>" type="carousel" class="latest-stories-carousel">
 			<?php else : ?>
 				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php self::the_single_story_card( $post, self::STORY_LANDSCAPE_IMAGE_SIZE ); ?>
+						<?php self::the_single_story_card( $post, self::STORY_CARD_IMAGE_SIZE ); ?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;
@@ -1106,8 +1119,9 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Gets the smallest height of any of the featured images.
+	 * Gets the height of the Latest Stories carousel, as <amp-carousel> requires a height attribute.
 	 *
+	 * Gets the smallest height of any of the featured images.
 	 * This iterates through all of the posts, to find their featured image.
 	 * Then, this returns the smallest height.
 	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
@@ -1116,9 +1130,8 @@ class AMP_Story_Post_Type {
 	 * @param array $posts An array or WP_Post objects.
 	 * @return int $minimum_dimension The smallest dimension of a featured image.
 	 */
-	public static function get_featured_image_minimum_height( $posts ) {
-		$index = 2;
-
+	public static function get_story_carousel_height( $posts ) {
+		$image_index    = 2;
 		$minimum_height = 0;
 		foreach ( $posts as $post ) {
 			$thumbnail_id = get_post_thumbnail_id( $post->ID );
@@ -1128,18 +1141,22 @@ class AMP_Story_Post_Type {
 
 			$image = wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE );
 			if (
-				isset( $image[ $index ] )
+				isset( $image[ $image_index ] )
 				&&
 				(
 					! $minimum_height
 					||
-					$image[ $index ] < $minimum_height
+					$image[ $image_index ] < $minimum_height
 				)
 			) {
-				$minimum_height = $image[ $index ];
+				$minimum_height = $image[ $image_index ];
 			}
 		}
 
+		if ( ! empty( $GLOBALS['content_width'] ) ) {
+			$minimum_height_per_content_width = intval( $GLOBALS['content_width'] ) * self::STORY_LARGE_IMAGE_DIMENSION / self::STORY_SMALL_IMAGE_DIMENSION;
+			return min( $minimum_height_per_content_width, $minimum_height );
+		}
 		return $minimum_height;
 	}
 
@@ -1158,8 +1175,8 @@ class AMP_Story_Post_Type {
 		$crop_details = $_POST['cropDetails'];
 
 		$dimensions = array(
-			'dst_width'  => 696,
-			'dst_height' => 928,
+			'dst_width'  => self::STORY_SMALL_IMAGE_DIMENSION,
+			'dst_height' => self::STORY_LARGE_IMAGE_DIMENSION,
 		);
 
 		$attachment_id = absint( $_POST['id'] );
