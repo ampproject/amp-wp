@@ -906,6 +906,47 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test handling of stylesheets with @font-face that have data: url source.
+	 *
+	 * Also confirm that class-based tree-shaking is working.
+	 *
+	 * @link https://github.com/ampproject/amp-wp/pull/2079
+	 *
+	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
+	 */
+	public function test_font_data_url_handling_without_file_sources() {
+		$theme = new WP_Theme( 'twentynineteen', ABSPATH . 'wp-content/themes' );
+		if ( $theme->errors() ) {
+			$this->markTestSkipped( 'Twenty Nineteen is not installed.' );
+		}
+
+		$html  = '<html amp><head><meta charset="utf-8">';
+		$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$html .= '</head><body></body></html>';
+
+		$dom         = AMP_DOM_Utils::get_dom( $html );
+		$error_codes = array();
+		$sanitizer   = new AMP_Style_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
+		$sanitizer->sanitize();
+		$this->assertEquals( array(), $error_codes );
+		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertCount( 1, $actual_stylesheets );
+
+		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
+		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
+		$this->assertNotContains( 'data:', $actual_stylesheets[0] );
+		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
+		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
+		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
+	}
+
+	/**
 	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
