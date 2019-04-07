@@ -1067,18 +1067,20 @@ class AMP_Story_Post_Type {
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
+		$size       = self::STORY_CARD_IMAGE_SIZE;
+		$min_height = self::get_story_carousel_height( $story_query->posts, $size );
 
 		ob_start();
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
 			<?php if ( $is_amp_carousel ) : ?>
-				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( self::get_story_carousel_height( $story_query->posts ) ); ?>" type="carousel" class="latest-stories-carousel">
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="slides" class="latest-stories-carousel">
 			<?php else : ?>
 				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php self::the_single_story_card( $post, self::STORY_CARD_IMAGE_SIZE ); ?>
+						<?php self::the_single_story_card( $post, $size ); ?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;
@@ -1127,11 +1129,12 @@ class AMP_Story_Post_Type {
 	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
 	 * this will return 100.
 	 *
-	 * @param array $posts An array or WP_Post objects.
+	 * @param array  $posts An array or WP_Post objects.
+	 * @param string $size The size of the image.
 	 * @return int $minimum_dimension The smallest dimension of a featured image.
 	 */
-	public static function get_story_carousel_height( $posts ) {
-		$image_index    = 2;
+	public static function get_story_carousel_height( $posts, $size ) {
+		$height_index   = 2;
 		$minimum_height = 0;
 		foreach ( $posts as $post ) {
 			$thumbnail_id = get_post_thumbnail_id( $post->ID );
@@ -1139,20 +1142,21 @@ class AMP_Story_Post_Type {
 				continue;
 			}
 
-			$image = wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE );
+			$image = wp_get_attachment_image_src( $thumbnail_id, $size );
 			if (
-				isset( $image[ $image_index ] )
+				isset( $image[ $height_index ] )
 				&&
 				(
 					! $minimum_height
 					||
-					$image[ $image_index ] < $minimum_height
+					$image[ $height_index ] < $minimum_height
 				)
 			) {
-				$minimum_height = $image[ $image_index ];
+				$minimum_height = $image[ $height_index ];
 			}
 		}
 
+		// If the global $content_width is narrow enough, proportionally reduce the height.
 		if ( ! empty( $GLOBALS['content_width'] ) ) {
 			$minimum_height_per_content_width = intval( $GLOBALS['content_width'] ) * self::STORY_LARGE_IMAGE_DIMENSION / self::STORY_SMALL_IMAGE_DIMENSION;
 			return min( $minimum_height_per_content_width, $minimum_height );

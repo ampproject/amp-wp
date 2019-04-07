@@ -252,19 +252,20 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function test_get_story_carousel_height() {
 		add_image_size( AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE, AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION, AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION, true );
 
+		$size                = AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE;
 		$portrait_dimensions = array( AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION, AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION );
 		$dimensions          = array( $portrait_dimensions );
 		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
-		$this->assertEquals( AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION, AMP_Story_Post_Type::get_story_carousel_height( $stories ) );
+		$this->assertEquals( AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION, AMP_Story_Post_Type::get_story_carousel_height( $stories, $size ) );
 
 		// When an empty array() is passed, the minimum height should be 0.
-		$this->assertEquals( 0, AMP_Story_Post_Type::get_story_carousel_height( array() ) );
+		$this->assertEquals( 0, AMP_Story_Post_Type::get_story_carousel_height( array(), $size ) );
 
 		// When there is a small $content_width global value, that should reduce the height that this returns.
 		$content_width            = 300;
 		$GLOBALS['content_width'] = $content_width;
 		$expected_min_height      = $content_width * AMP_Story_Post_Type::STORY_LARGE_IMAGE_DIMENSION / AMP_Story_Post_Type::STORY_SMALL_IMAGE_DIMENSION;
-		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_story_carousel_height( $stories ) );
+		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_story_carousel_height( $stories, $size ) );
 	}
 
 	/**
