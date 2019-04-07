@@ -1831,7 +1831,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$font_basename = null;
 		$properties    = $ruleset->getRules( 'font-family' );
 		if ( isset( $properties[0] ) ) {
-			$font_family = trim( $properties[0]->getValue(), '""' );
+			$font_family = trim( $properties[0]->getValue(), '"\'' );
 
 			// Remove all non-word characters from the font family to serve as the filename.
 			$font_basename = preg_replace( '/[^A-Za-z0-9_\-]/', '', $font_family ); // Same as sanitize_key() minus case changes.
