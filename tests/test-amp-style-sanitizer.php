@@ -318,7 +318,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					)
 				),
 				array(
-					'form [submit-success] b,div[submit-failure] b{color:green}',
+					'form [submit-success] b{color:green}', // The [submit-failure] selector is removed because there is no div[submit-failure].
 					'amp-live-list li .highlighted{background:yellow}',
 					'',
 					'body amp-list .portland{color:blue}',
@@ -358,7 +358,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 			'unamerican_lang_attribute_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
-				'<html amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
+				'<html lang="en-US" amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
 				array(
 					'html[lang=en-US]{color:red}html[lang="en-US"]{color:white}html[lang^=en]{color:blue}',
 				),
@@ -1045,7 +1045,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			@media screen {}
 			</style>
 		';
-		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
+		$html .= '</head><body><span class="b" data-value="">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
 		$error_codes = array();

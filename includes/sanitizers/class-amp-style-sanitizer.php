@@ -1505,7 +1505,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						 * such as with `.social-navigation a[href*="example.com"]:before`.
 						 */
 						$reduced_selector = preg_replace_callback(
-							'/\[([A-Za-z0-9_-]+)(\W?=[\]]+)?\]/',
+							'/\[([A-Za-z0-9_:-]+)(\W?=[^\]]+)?\]/',
 							function( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_ATTRIBUTES ][] = $matches[1];
 								return '';
