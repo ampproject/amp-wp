@@ -1940,8 +1940,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				/*
-				 * Guess some based on the font name in a fonts directory based on precedence of Twenty Nineteen.
-				 * The NonBreakingSpaceOverride woff2 font file is located at fonts/NonBreakingSpaceOverride.woff2.
+				 * Guess some font file URLs based on the font name in a fonts directory based on precedence of Twenty Nineteen.
+				 * For example, the NonBreakingSpaceOverride woff2 font file is located at fonts/NonBreakingSpaceOverride.woff2.
 				 */
 				if ( $stylesheet_base_url && $font_basename ) {
 					$guessed_urls[] = $stylesheet_base_url . sprintf( 'fonts/%s.%s', $font_basename, $extension );
