@@ -93,7 +93,7 @@ export default compose(
 		const blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 
 		return {
-			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ),
+			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse(),
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};
