@@ -558,7 +558,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Check whether the attributes exist.
 	 *
 	 * @since 1.1
-	 * @todo Make $attribute_names into $attributes as an associative array and implement lookups of specific values.
+	 * @todo Make $attribute_names into $attributes as an associative array and implement lookups of specific values. Since attribute values can vary (e.g. with amp-bind), this may not be feasible.
 	 *
 	 * @param string[] $attribute_names Attribute names.
 	 * @return bool Whether all supplied attributes are used.
@@ -1463,8 +1463,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
 						$reduced_selector = preg_replace( '/:[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
-						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
-						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
+						/*
+						 * Gather attribute names while removing attribute selectors to eliminate false negative,
+						 * such as with `.social-navigation a[href*="example.com"]:before`.
+						 */
+						$reduced_selector = preg_replace_callback(
+							'/\[([A-Za-z0-9_-]+)(\W?=[\]]+)?\]/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ]['attribute_names'][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
 
 						// Ignore any selector terms that occur under a dynamic selector.
 						if ( $dynamic_selector_pattern ) {
@@ -2610,6 +2620,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 									empty( $parsed_selector['tags'] )
 									||
 									$this->has_used_tag_names( $parsed_selector['tags'] )
+								)
+								&&
+								// If all attribute names are used in the doc.
+								(
+									empty( $parsed_selector['attribute_names'] )
+									||
+									$this->has_used_attributes( $parsed_selector['attribute_names'] )
 								)
 							)
 						);
