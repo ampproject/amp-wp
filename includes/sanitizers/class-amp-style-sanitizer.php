@@ -48,6 +48,42 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const INLINE_SPECIFICITY_MULTIPLIER = 5; // @todo The correctness of using "5" should be validated.
 
 	/**
+	 * Array index for tag names extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_TAGS = 0;
+
+	/**
+	 * Array index for class names extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_CLASSES = 1;
+
+	/**
+	 * Array index for IDs extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_IDS = 2;
+
+	/**
+	 * Array index for attributes extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_ATTRIBUTES = 3;
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -1106,7 +1142,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v15'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v16'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1456,6 +1492,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
+					// @todo The following logic could be made much more robust of PHP-CSS-Parser did parsing of selectors. See <https://github.com/sabberworm/PHP-CSS-Parser/pull/138#issuecomment-418193262>.
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
 						$selectors_parsed[ $selector ] = array();
@@ -1470,7 +1507,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$reduced_selector = preg_replace_callback(
 							'/\[([A-Za-z0-9_-]+)(\W?=[\]]+)?\]/',
 							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ]['attribute_names'][] = $matches[1];
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_ATTRIBUTES ][] = $matches[1];
 								return '';
 							},
 							$reduced_selector
@@ -1481,25 +1518,29 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
 						}
 
+						// Extract class names.
 						$reduced_selector = preg_replace_callback(
 							'/\.([a-zA-Z0-9_-]+)/',
 							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ]['classes'][] = $matches[1];
-								return '';
-							},
-							$reduced_selector
-						);
-						$reduced_selector = preg_replace_callback(
-							'/#([a-zA-Z0-9_-]+)/',
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ]['ids'][] = $matches[1];
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = $matches[1];
 								return '';
 							},
 							$reduced_selector
 						);
 
+						// Extract IDs.
+						$reduced_selector = preg_replace_callback(
+							'/#([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_IDS ][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						// Extract tag names.
 						if ( preg_match_all( '/[a-zA-Z0-9_-]+/', $reduced_selector, $matches ) ) {
-							$selectors_parsed[ $selector ]['tags'] = $matches[0];
+							$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ] = $matches[0];
 						}
 					}
 
@@ -2596,18 +2637,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							(
 								// If all class names are used in the doc.
 								(
-									empty( $parsed_selector['classes'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
 									||
-									$this->has_used_class_name( $parsed_selector['classes'] )
+									$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
 								)
 								&&
 								// If all IDs are used in the doc.
 								(
-									empty( $parsed_selector['ids'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
 									||
 									0 === count(
 										array_filter(
-											$parsed_selector['ids'],
+											$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
 											function( $id ) use ( $dom ) {
 												return ! $dom->getElementById( $id );
 											}
@@ -2617,16 +2658,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 								&&
 								// If tag names are present in the doc.
 								(
-									empty( $parsed_selector['tags'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
 									||
-									$this->has_used_tag_names( $parsed_selector['tags'] )
+									$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
 								)
 								&&
 								// If all attribute names are used in the doc.
 								(
-									empty( $parsed_selector['attribute_names'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 									||
-									$this->has_used_attributes( $parsed_selector['attribute_names'] )
+									$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 								)
 							)
 						);
