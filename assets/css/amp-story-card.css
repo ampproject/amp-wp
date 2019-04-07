@@ -80,3 +80,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	border-radius: 0.5rem;
 	overflow-x: hidden;
 }
+
+.amp-block-latest-stories .latest-stories__meta {
+	width: calc( 100% - 2rem );
+}
