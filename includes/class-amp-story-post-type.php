@@ -46,7 +46,7 @@ class AMP_Story_Post_Type {
 	const STORY_LARGE_IMAGE_DIMENSION = 928;
 
 	/**
-	 * The large dimension of the AMP Story poster images.
+	 * The small dimension of the AMP Story poster images.
 	 *
 	 * @var int
 	 */
@@ -895,13 +895,15 @@ class AMP_Story_Post_Type {
 	 * Outputs a card of a single AMP story.
 	 *
 	 * Used for a slide in the Latest Stories block.
+	 * The 'disable_link' parameter can prevent a link from appearing in the block editor.
+	 * So on clicking the story card, it does not redirect to the story's URL.
 	 *
 	 * @param array $args {
 	 *     The arguments to create a single story card.
 	 *
 	 *     @type WP_Post post The post in which to search for the featured image.
 	 *     @type string  size The size of the image.
-	 *     @type bool    disable_link Whether to disable the link in the <a> wrapping the card.
+	 *     @type bool    disable_link Whether to disable the link in the card container.
 	 * }
 	 */
 	public static function the_single_story_card( $args ) {
