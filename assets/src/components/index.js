@@ -2,6 +2,7 @@ export { default as AnimationControls } from './animation-controls';
 export { default as AnimationOrderPicker } from './animation-order-picker';
 export { default as BlockNavigation } from './block-navigation';
 export { default as BlockPreview } from './block-preview';
+export { default as BlockPreviewLabel } from './block-preview-label';
 export { default as EditorCarousel } from './editor-carousel';
 export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';
@@ -30,3 +31,4 @@ export { default as withCroppedFeaturedImage } from './with-cropped-featured-ima
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';
 export { default as withRotatableBox } from './with-rotatable-box';
+export { default as withCallToActionValidation } from './with-call-to-action-validation';

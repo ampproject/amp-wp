@@ -1793,11 +1793,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
-		if ( amp_is_canonical() ) {
-			$url = remove_query_arg( amp_get_slug(), $url );
-		} else {
-			$url = add_query_arg( amp_get_slug(), '', $url );
-		}
 
 		$added_query_vars = array(
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -1848,13 +1843,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			// Ensure the redirect URL is formatted for the AMP.
-			if ( amp_is_canonical() ) {
-				$location_header = remove_query_arg( amp_get_slug(), $location_header );
-			} else {
-				$location_header = add_query_arg( amp_get_slug(), '', $location_header );
-			}
-			$validation_url = add_query_arg( $added_query_vars, $location_header );
+			$validation_url = $location_header;
 		}
 
 		if ( is_wp_error( $r ) ) {

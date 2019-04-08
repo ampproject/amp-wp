@@ -7,6 +7,7 @@ import { every } from 'lodash';
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
+import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import {
@@ -16,6 +17,7 @@ import {
 	getBlockTypes,
 	unregisterBlockType,
 	registerBlockType,
+	registerBlockStyle,
 } from '@wordpress/blocks';
 
 /**
@@ -33,6 +35,7 @@ import {
 	withPrePublishNotice,
 	withStoryBlockDropZone,
 	withRotatableBox,
+	withCallToActionValidation,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -42,6 +45,7 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
+	wrapBlocksInGridLayer,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -128,6 +132,21 @@ domReady( () => {
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
+
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'rounded',
+		label: __( 'Rounded', 'amp' ),
+	} );
+
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'half-rounded',
+		label: __( 'Half Rounded', 'amp' ),
+	} );
+
+	registerBlockStyle( 'core/image', {
+		name: 'rounded',
+		label: __( 'Rounded', 'amp' ),
+	} );
 } );
 
 const positionTopLimit = 75;
@@ -346,7 +365,9 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 
 const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 

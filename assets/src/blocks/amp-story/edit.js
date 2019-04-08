@@ -6,7 +6,7 @@ import uuid from 'uuid/v4';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	PanelColorSettings,
@@ -28,10 +28,11 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration } from '../../helpers';
+import { getTotalAnimationDuration, addBackgroundColorToOverlay } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
+	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
@@ -43,7 +44,7 @@ const TEMPLATE = [
 
 class EditPage extends Component {
 	constructor( props ) {
-		super( props );
+		super( ...arguments );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: uuid() } );
@@ -90,15 +91,64 @@ class EditPage extends Component {
 		}
 	}
 
+	removeBackgroundColor( index ) {
+		const { attributes, setAttributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+		backgroundColors.splice( index, 1 );
+		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+	}
+
+	setBackgroundColors( value, index ) {
+		const { attributes, setAttributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+		backgroundColors[ index ] = {
+			color: value,
+		};
+		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
+	}
+
+	getOverlayColorSettings() {
+		const { attributes } = this.props;
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+
+		if ( ! backgroundColors.length ) {
+			return [
+				{
+					value: undefined,
+					onChange: ( value ) => {
+						this.setBackgroundColors( value, 0 );
+					},
+					label: __( 'Color', 'amp' ),
+				},
+			];
+		}
+
+		const backgroundColorSettings = [];
+		const useNumberedLabels = backgroundColors.length > 1;
+
+		backgroundColors.forEach( ( color, index ) => {
+			backgroundColorSettings[ index ] = {
+				value: color ? color.color : undefined,
+				onChange: ( value ) => {
+					this.setBackgroundColors( value, index );
+				},
+				/* translators: %s: color number */
+				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
+			};
+		} );
+
+		return backgroundColorSettings;
+	}
+
 	render() {
-		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
 
 		const {
-			backgroundColor,
 			mediaId,
 			mediaType,
 			mediaUrl,
 			focalPoint,
+			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
@@ -107,7 +157,6 @@ class EditPage extends Component {
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
-			backgroundColor,
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
 			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
 			backgroundRepeat: 'no-repeat',
@@ -133,20 +182,54 @@ class EditPage extends Component {
 			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
+		let overlayStyle = {
+			width: '100%',
+			height: '100%',
+			position: 'absolute',
+		};
+
+		const backgroundColors = JSON.parse( attributes.backgroundColors );
+
+		overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
+		overlayStyle.opacity = overlayOpacity / 100;
+
+		const colorSettings = this.getOverlayColorSettings();
+
 		return (
 			<Fragment>
 				<InspectorControls key="controls">
 					<PanelColorSettings
-						title={ __( 'Color Settings', 'amp' ) }
+						title={ __( 'Background Color', 'amp' ) }
 						initialOpen={ false }
-						colorSettings={ [
-							{
-								value: backgroundColor,
-								onChange: ( value ) => setAttributes( { backgroundColor: value } ),
-								label: __( 'Background Color', 'amp' ),
-							},
-						] }
-					/>
+						colorSettings={ colorSettings }
+					>
+						<p>
+							{ backgroundColors.length < 2 &&
+							<Button
+								onClick={ () => this.setBackgroundColors( null, 1 ) }
+								isSmall>
+								{ __( 'Add Gradient', 'amp' ) }
+							</Button>
+							}
+							{ backgroundColors.length > 1 &&
+							<Button
+								onClick={ () => this.removeBackgroundColor( backgroundColors.length - 1 ) }
+								isLink
+								isDestructive>
+								{ __( 'Remove Gradient', 'amp' ) }
+							</Button>
+							}
+						</p>
+						<RangeControl
+							label={ __( 'Opacity', 'amp' ) }
+							value={ overlayOpacity }
+							onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
+							min={ 0 }
+							max={ 100 }
+							step={ 5 }
+							required
+						/>
+					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<Fragment>
 							<BaseControl>
@@ -249,15 +332,23 @@ class EditPage extends Component {
 							</video>
 						</div>
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />
+					{ backgroundColors.length > 0 && (
+						<div style={ overlayStyle }></div>
+					) }
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
 			</Fragment>
 		);
 	}
 }
 
-export default withSelect( ( select, { attributes, clientId } ) => {
+export default withSelect( ( select, { clientId, attributes } ) => {
 	const { getMedia } = select( 'core' );
+	const { getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+	const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
+	const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
 	const { getBlockRootClientId } = select( 'core/editor' );
 	const { getAnimatedBlocks } = select( 'amp/story' );
 
@@ -270,6 +361,7 @@ export default withSelect( ( select, { attributes, clientId } ) => {
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
+		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
 } )( EditPage );
