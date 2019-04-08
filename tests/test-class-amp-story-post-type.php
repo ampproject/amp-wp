@@ -70,9 +70,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		);
 		$this->assertNotContains( '<a', ob_get_clean() );
 
-		// If the 'post' argument isn't an object, this shouldn't output anything.
+		// If the 'post' argument isn't either an int or a WP_Post, this shouldn't output anything.
 		ob_start();
-		AMP_Story_Post_Type::the_single_story_card( array( 'post' => $first_story->ID ) );
+		AMP_Story_Post_Type::the_single_story_card( array( 'post' => 'foo post' ) );
 		$this->assertEmpty( ob_get_clean() );
 	}
 

@@ -901,27 +901,32 @@ class AMP_Story_Post_Type {
 	 * @param array $args {
 	 *     The arguments to create a single story card.
 	 *
-	 *     @type WP_Post post The post in which to search for the featured image.
-	 *     @type string  size The size of the image.
-	 *     @type bool    disable_link Whether to disable the link in the card container.
+	 *     @type WP_Post|int post The post object or ID in which to search for the featured image.
+	 *     @type string      size The size of the image.
+	 *     @type bool        disable_link Whether to disable the link in the card container.
 	 * }
 	 */
 	public static function the_single_story_card( $args ) {
 		$args = wp_parse_args(
 			$args,
 			array(
-				'post'         => 0,
+				'post'         => null,
 				'size'         => 'full',
 				'disable_link' => false,
 			)
 		);
 
-		$thumbnail_id = get_post_thumbnail_id( $args['post'] );
-		if ( ! $thumbnail_id || ! is_object( $args['post'] ) ) {
+		$post = get_post( $args['post'] );
+		if ( ! $post ) {
 			return;
 		}
 
-		$author_id           = $args['post']->post_author;
+		$thumbnail_id = get_post_thumbnail_id( $post );
+		if ( ! $thumbnail_id || ! is_object( $post ) ) {
+			return;
+		}
+
+		$author_id           = $post->post_author;
 		$author_display_name = get_the_author_meta( 'display_name', $author_id );
 		$wrapper_tag_name    = $args['disable_link'] ? 'div' : 'a';
 		$avatar              = get_avatar(
@@ -936,7 +941,7 @@ class AMP_Story_Post_Type {
 		if ( ! $args['disable_link'] ) {
 			$href = sprintf(
 				'href="%s"',
-				esc_url( get_permalink( $args['post'] ) )
+				esc_url( get_permalink( $post ) )
 			);
 		}
 
@@ -948,12 +953,12 @@ class AMP_Story_Post_Type {
 				$args['size'],
 				false,
 				array(
-					'alt'   => get_the_title( $args['post'] ),
+					'alt'   => get_the_title( $post ),
 					'class' => 'latest-stories__featured-img',
 				)
 			);
 			?>
-			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $args['post'] ) ); ?></span>
+			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
 			<div class="latest-stories__meta">
 				<?php echo wp_kses_post( $avatar ); ?>
 				<span class="latest-stories__author">
@@ -962,7 +967,7 @@ class AMP_Story_Post_Type {
 						/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
-						esc_html( human_time_diff( get_post_time( 'U', false, $args['post'] ), current_time( 'timestamp' ) ) )
+						esc_html( human_time_diff( get_post_time( 'U', false, $post ), current_time( 'timestamp' ) ) )
 					);
 					?>
 				</span>
