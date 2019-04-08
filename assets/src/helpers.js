@@ -24,6 +24,7 @@ import {
 } from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
@@ -108,7 +109,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: '*',
+			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
 		},
 	};
 
@@ -160,14 +161,17 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	addedAttributes.positionTop = {
-		type: 'number',
-		default: 0,
-	};
-	addedAttributes.positionLeft = {
-		type: 'number',
-		default: 5,
-	};
+	if ( ALLOWED_MOVABLE_BLOCKS.includes( name ) ) {
+		addedAttributes.positionTop = {
+			type: 'number',
+			default: 0,
+		};
+
+		addedAttributes.positionLeft = {
+			type: 'number',
+			default: 5,
+		};
+	}
 
 	return {
 		...settings,
@@ -240,6 +244,27 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...ampAttributes,
 	};
 };
+
+/**
+ * Wraps all movable blocks in a grid layer.
+ *
+ * @param {Object} element
+ * @param {Object} blockType
+ *
+ * @return {Object} The element.
+ */
+export const wrapBlocksInGridLayer = ( element, blockType ) => {
+	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+		return element;
+	}
+
+	return (
+		<amp-story-grid-layer template="vertical">
+			{ element }
+		</amp-story-grid-layer>
+	);
+};
+
 /**
  * Given a list of animated blocks, calculates the total duration
  * of all animations based on the durations and the delays.
@@ -497,4 +522,27 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
 		overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ gradientList })`;
 	}
 	return overlayStyle;
+};
+
+/**
+ * Converts hex to rgba.
+ *
+ * @param {string} hex Hex value.
+ * @param {number} opacity Opacity.
+ * @return {Object} Rgba value.
+ */
+export const getRgbaFromHex = ( hex, opacity ) => {
+	if ( ! hex ) {
+		return [];
+	}
+	hex = hex.replace( '#', '' );
+	const r = parseInt( hex.substring( 0, 2 ), 16 );
+	const g = parseInt( hex.substring( 2, 4 ), 16 );
+	const b = parseInt( hex.substring( 4, 6 ), 16 );
+	return [
+		r,
+		g,
+		b,
+		opacity / 100,
+	];
 };

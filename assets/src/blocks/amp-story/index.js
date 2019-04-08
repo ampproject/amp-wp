@@ -121,12 +121,8 @@ export const settings = {
 						</amp-story-grid-layer>
 					)
 				}
-				<amp-story-grid-layer template="fill" style={ overlayStyle }>
-				</amp-story-grid-layer>
-				<amp-story-grid-layer template="vertical">
-					<InnerBlocks.Content />
-				</amp-story-grid-layer>
-				{ /* @todo Add amp-story-cta-layer */ }
+				<amp-story-grid-layer template="fill" style={ overlayStyle }></amp-story-grid-layer>
+				<InnerBlocks.Content />
 			</amp-story-page>
 		);
 	},
