@@ -120,7 +120,7 @@ class AMP_Story_Templates {
 			if ( $existing_template > 0 ) {
 				continue;
 			}
-			$post_content = file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			if ( ! empty( $post_content ) ) {
 				$post_id = wp_insert_post(
 					wp_slash(
@@ -153,6 +153,20 @@ class AMP_Story_Templates {
 				'title' => __( 'Template: Travel Tip', 'amp' ),
 				'name'  => 'travel-tip',
 			),
+			array(
+				'title' => __( 'Template: Quote', 'amp' ),
+				'name'  => 'quote',
+			),
+			array(
+				'title' => __( 'Template: Travel CTA', 'amp' ),
+				'name'  => 'travel-cta',
+			),
+			// @todo This needs redoing once we have automated blocks for post data.
+			array(
+				'title' => __( 'Template: Title Page', 'amp' ),
+				'name'  => 'title-page',
+			),
+
 		);
 	}
 
