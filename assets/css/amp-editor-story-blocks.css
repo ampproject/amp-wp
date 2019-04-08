@@ -761,6 +761,13 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	padding-top: 100px;
 }
 
+.block-editor-block-list__layout .block-editor-block-list__block [data-type="core/quote"] .block-editor-block-list__block-edit::before {
+	right: -5px;
+	left: -5px;
+	top: -5px;
+	bottom: -5px;
+}
+
 /*
  * 10. Custom Components
  */
