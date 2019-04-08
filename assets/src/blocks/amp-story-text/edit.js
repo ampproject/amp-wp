@@ -249,8 +249,16 @@ class TextBlockEdit extends Component {
 						identifier="content"
 						wrapperClassName="wp-block-amp-story-text"
 						tagName="p"
-						value={ content }
-						onChange={ ( value ) => setAttributes( { content: value } ) }
+						// Ensure line breaks are normalised to HTML.
+						value={ content.replace( /\n/g, '<br>' ) }
+						onChange={ ( nextContent ) => {
+							setAttributes( {
+								// Ensure line breaks are normalised to characters. This
+								// saves space, is easier to read, and ensures display
+								// filters work correctly.
+								content: nextContent.replace( /<br ?\/?>/g, '\n' ),
+							} );
+						} }
 						onReplace={ this.onReplace }
 						style={ {
 							backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,

@@ -34,6 +34,7 @@ import {
 	withActivePageState,
 	withPrePublishNotice,
 	withStoryBlockDropZone,
+	withCallToActionValidation,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -43,6 +44,7 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
+	wrapBlocksInGridLayer,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -133,6 +135,11 @@ domReady( () => {
 	registerBlockStyle( 'amp/amp-story-text', {
 		name: 'rounded',
 		label: __( 'Rounded', 'amp' ),
+	} );
+
+	registerBlockStyle( 'amp/amp-story-text', {
+		name: 'half-rounded',
+		label: __( 'Half Rounded', 'amp' ),
 	} );
 
 	registerBlockStyle( 'core/image', {
@@ -356,7 +363,9 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 
 const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 
