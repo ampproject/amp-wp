@@ -34,7 +34,12 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		foreach ( $stories as $story ) {
 			ob_start();
-			AMP_Story_Post_Type::the_single_story_card( $story, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
+			AMP_Story_Post_Type::the_single_story_card(
+				array(
+					'post' => $story,
+					'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+				)
+			);
 			$card_markup    = ob_get_clean();
 			$featured_image = get_post_thumbnail_id( $story );
 			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
@@ -50,7 +55,25 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 				),
 				$card_markup
 			);
+			// Because there's no 'disable_link' argument, this should have an <a> with an href.
+			$this->assertContains( '<a href=', $card_markup );
 		}
+
+		$first_story = reset( $stories );
+		ob_start();
+		AMP_Story_Post_Type::the_single_story_card(
+			array(
+				'post'         => $first_story,
+				'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+				'disable_link' => true,
+			)
+		);
+		$this->assertNotContains( '<a', ob_get_clean() );
+
+		// If the 'post' argument isn't an object, this shouldn't output anything.
+		ob_start();
+		AMP_Story_Post_Type::the_single_story_card( array( 'post' => $first_story->ID ) );
+		$this->assertEmpty( ob_get_clean() );
 	}
 
 	/**

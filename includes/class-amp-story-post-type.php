@@ -890,20 +890,35 @@ class AMP_Story_Post_Type {
 
 	/**
 	 * Outputs a card of a single AMP story.
+	 *
 	 * Used for a slide in the Latest Stories block.
 	 *
-	 * @param WP_Post $post The AMP story post.
-	 * @param string  $size The size of the image.
-	 * @return void
+	 * @param array $args {
+	 *     The arguments to create a single story card.
+	 *
+	 *     @type WP_Post post The post in which to search for the featured image.
+	 *     @type string  size The size of the image.
+	 *     @type bool    disable_link Whether to disable the link in the <a> wrapping the card.
+	 * }
 	 */
-	public static function the_single_story_card( $post, $size ) {
-		$thumbnail_id = get_post_thumbnail_id( $post );
-		if ( ! $thumbnail_id ) {
+	public static function the_single_story_card( $args ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'post'         => 0,
+				'size'         => 'full',
+				'disable_link' => false,
+			)
+		);
+
+		$thumbnail_id = get_post_thumbnail_id( $args['post'] );
+		if ( ! $thumbnail_id || ! is_object( $args['post'] ) ) {
 			return;
 		}
 
-		$author_id           = $post->post_author;
+		$author_id           = $args['post']->post_author;
 		$author_display_name = get_the_author_meta( 'display_name', $author_id );
+		$wrapper_tag_name    = $args['disable_link'] ? 'div' : 'a';
 		$avatar              = get_avatar(
 			$author_id,
 			24,
@@ -915,19 +930,19 @@ class AMP_Story_Post_Type {
 		);
 
 		?>
-		<a class="latest_stories__link" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+		<<?php echo esc_attr( $wrapper_tag_name ); ?> href="<?php echo $args['disable_link'] ? '' : esc_url( get_permalink( $args['post'] ) ); ?>" class="latest_stories__link">
 			<?php
 			echo wp_get_attachment_image(
 				$thumbnail_id,
-				$size,
+				$args['size'],
 				false,
 				array(
-					'alt'   => get_the_title( $post ),
+					'alt'   => get_the_title( $args['post'] ),
 					'class' => 'latest-stories__featured-img',
 				)
 			);
 			?>
-			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
+			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $args['post'] ) ); ?></span>
 			<div class="latest-stories__meta">
 				<?php echo wp_kses_post( $avatar ); ?>
 				<span class="latest-stories__author">
@@ -936,12 +951,12 @@ class AMP_Story_Post_Type {
 						/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
-						esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
+						esc_html( human_time_diff( get_post_time( 'U', false, $args['post'] ), current_time( 'timestamp' ) ) )
 					);
 					?>
 				</span>
 			</div>
-		</a>
+		</<?php echo esc_attr( $wrapper_tag_name ); ?>>
 		<?php
 	}
 
@@ -996,7 +1011,14 @@ class AMP_Story_Post_Type {
 		ob_start();
 		?>
 		<div class="amp-story-embed">
-			<?php self::the_single_story_card( $post, self::STORY_CARD_IMAGE_SIZE ); ?>
+			<?php
+			self::the_single_story_card(
+				array(
+					'post' => $post,
+					'size' => self::STORY_CARD_IMAGE_SIZE,
+				)
+			);
+			?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -1047,11 +1069,6 @@ class AMP_Story_Post_Type {
 	 * @return string $markup The rendered block markup.
 	 */
 	public static function render_block_latest_stories( $attributes ) {
-		/*
-		 * There should only be an <amp-carousel> on the front-end,
-		 * so the editor component passes useCarousel=false to <ServerSideRender>.
-		 * This detects whether this render_callback is called in the editor context.
-		 */
 		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
 		$args            = array(
 			'post_type'        => self::POST_TYPE_SLUG,
@@ -1080,7 +1097,15 @@ class AMP_Story_Post_Type {
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php self::the_single_story_card( $post, $size ); ?>
+						<?php
+						self::the_single_story_card(
+							array(
+								'post'         => $post,
+								'size'         => $size,
+								'disable_link' => true,
+							)
+						);
+						?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;
