@@ -1005,6 +1005,10 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	margin: 0;
 }
 
+.editor-styles-wrapper .wp-block-amp-story-text p.is-amp-fit-text {
+	line-height: 1.15em;
+}
+
 .wp-block-amp-story-text .editor-rich-text__editable {
 	width: 100%;
 }
