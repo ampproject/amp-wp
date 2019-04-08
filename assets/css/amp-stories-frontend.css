@@ -65,9 +65,9 @@ amp-story-grid-layer {
 }
 
 /* Quote block */
-.wp-block-quote {
+amp-story-grid-layer .wp-block-quote {
     padding: 100px 10px 10px 10px;
-    width: 90%;
+    width: initial;
 }
 
 .wp-block-quote cite {
