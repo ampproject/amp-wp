@@ -140,8 +140,8 @@ class AMP_Options_Menu {
 	public function render_theme_support() {
 		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
 
-		$native_description       = __( 'Integrates AMP as the framework for your site, using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, some development work may be required.', 'amp' );
-		$transitional_description = __( 'Generates AMP content reusing the active theme’s templates, allowing for each canonical URL to have a corresponding (paired) AMP URL. Depending on your theme/plugins, some development work may be required.', 'amp' );
+		$native_description       = __( 'Integrates AMP as the framework for your site by using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of development work may be required.', 'amp' );
+		$transitional_description = __( 'Uses the active theme’s templates to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively trasnsition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of development work may be required.', 'amp' );
 		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
