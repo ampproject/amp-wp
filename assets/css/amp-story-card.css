@@ -83,7 +83,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 }
 
 /* Override stye rules in Twenty Nineteen that set a wider max-width */
-.entry-content .amp-story-embed {
+div.amp-story-embed {
 	max-width: 696px;
 }
 
