@@ -1,9 +1,8 @@
-/* global ampStoriesFonts */
-
 /**
  * External dependencies
  */
 import uuid from 'uuid/v4';
+import ampStoriesFonts from 'amp-stories-fonts';
 
 /**
  * WordPress dependencies
@@ -21,6 +20,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
+	withMetaBlockEdit,
 } from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -541,4 +541,54 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 		b,
 		opacity / 100,
 	];
+};
+
+export const getMetaBlockSettings = ( { attribute, tagName = 'p', isUpdatable = false } ) => {
+	const supports = {
+		className: false,
+		anchor: true,
+		reusable: true,
+	};
+
+	const schema = {
+		align: {
+			type: 'string',
+		},
+		fontSize: {
+			type: 'string',
+		},
+		customFontSize: {
+			type: 'number',
+		},
+		ampFontFamily: {
+			type: 'string',
+		},
+		textColor: {
+			type: 'string',
+		},
+		customTextColor: {
+			type: 'string',
+		},
+		backgroundColor: {
+			type: 'string',
+		},
+		customBackgroundColor: {
+			type: 'string',
+		},
+		height: {
+			default: 50,
+			type: 'number',
+		},
+		width: {
+			default: 250,
+			type: 'number',
+		},
+	};
+
+	return {
+		supports,
+		attributes: schema,
+		save: () => null,
+		edit: withMetaBlockEdit( { attribute, tagName, isUpdatable } ),
+	};
 };

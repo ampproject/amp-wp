@@ -8,23 +8,13 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { Component, Fragment } from '@wordpress/element';
-import {
-	PanelBody,
-	ResizableBox,
-	SelectControl,
-	withFallbackStyles,
-	ToggleControl,
-	RangeControl,
-} from '@wordpress/components';
+import { SelectControl } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
 	RichText,
 	InspectorControls,
-	FontSizePicker,
 	withFontSizes,
 	withColors,
-	PanelColorSettings,
-	ContrastChecker,
 	BlockControls,
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
@@ -32,26 +22,12 @@ import {
 /**
  * Internal dependencies
  */
-import { FontFamilyPicker } from '../../components';
+import { ColorSettings, TextSettings, ResizableBox } from '../../components';
 import { maybeEnqueueFontStyle, calculateFontSize, getRgbaFromHex } from '../../helpers';
 import './edit.css';
 
-const { getComputedStyle } = window;
-
 const maxLimitFontSize = 54;
 const minLimitFontSize = 14;
-
-const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
-	const { textColor, backgroundColor, fontSize, customFontSize } = ownProps.attributes;
-	const editableNode = node.querySelector( '[contenteditable="true"]' );
-	const computedStyles = editableNode ? getComputedStyle( editableNode ) : null;
-
-	return {
-		fallbackBackgroundColor: backgroundColor || ! computedStyles ? undefined : computedStyles.backgroundColor,
-		fallbackTextColor: textColor || ! computedStyles ? undefined : computedStyles.color,
-		fallbackFontSize: fontSize || customFontSize || ! computedStyles ? undefined : parseInt( computedStyles.fontSize ) || undefined,
-	};
-} );
 
 class TextBlockEdit extends Component {
 	constructor() {
@@ -107,8 +83,6 @@ class TextBlockEdit extends Component {
 			textColor,
 			setBackgroundColor,
 			setTextColor,
-			fallbackTextColor,
-			fallbackBackgroundColor,
 			toggleSelection,
 		} = this.props;
 
@@ -124,6 +98,7 @@ class TextBlockEdit extends Component {
 			width,
 			tagName,
 			opacity,
+			customFontSize,
 		} = attributes;
 
 		const minTextHeight = 20;
@@ -148,25 +123,18 @@ class TextBlockEdit extends Component {
 					/>
 				</BlockControls>
 				<InspectorControls>
-					<PanelBody title={ __( 'Text Settings', 'amp' ) }>
-						<FontFamilyPicker
-							value={ ampFontFamily }
-							onChange={ ( value ) => {
-								maybeEnqueueFontStyle( value );
-								setAttributes( { ampFontFamily: value } );
-							} }
-						/>
-						<ToggleControl
-							label={ __( 'Automatically fit text to container', 'amp' ) }
-							checked={ ampFitText }
-							onChange={ () => ( setAttributes( { ampFitText: ! ampFitText } ) ) }
-						/>
-						{ ! ampFitText && (
-							<FontSizePicker
-								value={ fontSize.size }
-								onChange={ setFontSize }
-							/>
-						) }
+					<TextSettings
+						fontFamily={ ampFontFamily }
+						setFontFamily={ ( value ) => {
+							maybeEnqueueFontStyle( value );
+							setAttributes( { ampFontFamily: value } );
+						} }
+						fontSize={ fontSize }
+						setFontSize={ setFontSize }
+						customFontSize={ customFontSize }
+						fitText={ ampFitText }
+						setFitText={ () => ( setAttributes( { ampFitText: ! ampFitText } ) ) }
+					>
 						<SelectControl
 							label={ __( 'Select text type', 'amp' ) }
 							value={ type }
@@ -178,68 +146,25 @@ class TextBlockEdit extends Component {
 								{ value: 'h2', label: __( 'Heading 2', 'amp' ) },
 							] }
 						/>
-					</PanelBody>
-					<PanelColorSettings
-						title={ __( 'Color Settings', 'amp' ) }
-						initialOpen={ false }
-						colorSettings={ [
-							{
-								value: backgroundColor.color,
-								onChange: ( value ) => {
-									setAttributes( { backgroundHexValue: value } );
-									setBackgroundColor( value );
-								},
-								label: __( 'Background Color', 'amp' ),
-							},
-							{
-								value: textColor.color,
-								onChange: setTextColor,
-								label: __( 'Text Color', 'amp' ),
-							},
-						] }
-					>
-						<ContrastChecker
-							{ ...{
-								textColor: textColor.color,
-								backgroundColor: backgroundColor.color,
-								fallbackTextColor,
-								fallbackBackgroundColor,
-								fontSize: fontSize.size,
-							} }
-						/>
-						<RangeControl
-							label={ __( 'Background Opacity', 'amp' ) }
-							value={ opacity }
-							onChange={ ( value ) => setAttributes( { opacity: value } ) }
-							min={ 5 }
-							max={ 100 }
-							step={ 5 }
-						/>
-					</PanelColorSettings>
+					</TextSettings>
+					<ColorSettings
+						backgroundColor={ backgroundColor }
+						setBackgroundColor={ setBackgroundColor }
+						textColor={ textColor }
+						setTextColor={ setTextColor }
+						fontSize={ fontSize }
+						opacity={ opacity }
+						setOpacity={ ( value ) => setAttributes( { opacity: value } ) }
+					/>
 				</InspectorControls>
 				<ResizableBox
-					className={ classnames(
-						'amp-story-text__resize-container',
-						{ 'is-selected': isSelected }
-					) }
-					size={ {
-						height,
-						width,
-					} }
+					isSelected={ isSelected }
+					width={ width }
+					height={ height }
 					minHeight={ minTextHeight }
 					minWidth={ minTextWidth }
-					// Adding only right and bottom since otherwise it needs to change the top and left position, too.
-					enable={ {
-						top: false,
-						right: true,
-						bottom: true,
-						left: false,
-					} }
-					onResizeStop={ ( event, direction, elt, delta ) => {
-						setAttributes( {
-							width: parseInt( width + delta.width, 10 ),
-							height: parseInt( height + delta.height, 10 ),
-						} );
+					onResizeStop={ ( value ) => {
+						setAttributes( value );
 						toggleSelection( true );
 					} }
 					onResizeStart={ () => {
@@ -247,7 +172,6 @@ class TextBlockEdit extends Component {
 					} }
 				>
 					<RichText
-						identifier="content"
 						wrapperClassName="wp-block-amp-story-text"
 						tagName="p"
 						// Ensure line breaks are normalised to HTML.
@@ -286,5 +210,4 @@ class TextBlockEdit extends Component {
 export default compose(
 	withColors( 'backgroundColor', { textColor: 'color' } ),
 	withFontSizes( 'fontSize' ),
-	applyFallbackStyles
 )( TextBlockEdit );
