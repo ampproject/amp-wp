@@ -148,10 +148,10 @@ export const settings = {
 		const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
 
 		/*
-         * Calculate fontsize using vw to make it responsive.
-         *
-         * Get the font size in px based on the slug with fallback to customFontSize.
-         */
+		 * Calculate fontsize using vw to make it responsive.
+		 *
+		 * Get the font size in px based on the slug with fallback to customFontSize.
+		 */
 		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
