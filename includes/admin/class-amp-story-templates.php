@@ -39,14 +39,69 @@ class AMP_Story_Templates {
 		add_filter( 'rest_wp_block_query', array( $this, 'filter_rest_wp_block_query' ), 10, 2 );
 		add_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
 
+		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
+		add_filter( 'user_has_cap', array( $this, 'filter_user_has_cap' ), 10, 3 );
+		add_filter( 'pre_get_posts', array( $this, 'filter_pre_get_posts' ) );
+
 		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
 	}
 
 	/**
+	 * Temporarily hide editing option for Templates.
+	 *
+	 * @param  array  $allcaps Existing capabilities for the user.
+	 * @param  string $caps    Capabilities provided by map_meta_cap().
+	 * @param  array  $args    Arguments for current_user_can().
+	 * @return array Modified capabilities.
+	 */
+	public function filter_user_has_cap( $allcaps, $caps, $args ) {
+		if ( 'edit_post' === $args[0] && isset( $args[2] ) ) {
+			if ( has_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY, $args[2] ) ) {
+				unset( $allcaps['edit_others_posts'] );
+				unset( $allcaps['edit_published_posts'] );
+			}
+		}
+		return $allcaps;
+	}
+
+	/**
+	 * Temporarily filter pre_get_posts to not display templates in the list of reusable blocks.
+	 *
+	 * @param object $query WP_Query object.
+	 * @return object WP Query modified object.
+	 */
+	public function filter_pre_get_posts( $query ) {
+		global $pagenow;
+
+		if ( 'edit.php' !== $pagenow || ! $query->is_admin ) {
+			return $query;
+		}
+
+		if ( 'wp_block' !== $query->get( 'post_type' ) ) {
+			return $query;
+		}
+
+		$tax_query = $query->get( 'tax_query' );
+		if ( empty( $tax_query ) ) {
+			$tax_query = array();
+		}
+
+		$tax_query[] = array(
+			'taxonomy' => self::TEMPLATES_TAXONOMY,
+			'field'    => 'slug',
+			'terms'    => array( self::TEMPLATES_TERM ),
+			'operator' => 'NOT IN',
+		);
+
+		$query->set( 'tax_query', $tax_query );
+		return $query;
+	}
+
+	/**
 	 * Import story templates if they haven't been imported previously.
 	 */
-	public function maybe_import_story_templates() {
+	private function maybe_import_story_templates() {
 		if ( self::STORY_TEMPLATES_VERSION === AMP_Options_Manager::get_option( 'story_templates_version' ) ) {
 			return;
 		}
