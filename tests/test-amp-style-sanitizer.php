@@ -592,6 +592,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'div img.logo{border:solid 1px red}',
 				'', // The selector is removed because there is no div element.
 			),
+			'attribute_selectors' => array(
+				// @todo The [hidden] selector should not be removed even when the attribute is not present.
+				'<div id="content" tabindex="-1"></div><button type=button>Hello</button><a href="#">Top</a><span hidden></span>',
+				'[type="button"], [type="reset"], [type^="submit"] {color:red} a[href^=http]:after, a[href^="#"]:after { color:blue } [hidden] {display:none}#content[tabindex="-1"]:focus{ outline: solid 1px red; }',
+				'[type="button"],[type="reset"],[type^="submit"]{color:red}a[href^=http]:after,a[href^="#"]:after{color:blue}[hidden]{display:none}#content[tabindex="-1"]:focus{outline:solid 1px red}', // Any selector mentioning [type] or [href] will persist since value is not used for tree shaking.
+			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
 				'p + div.pb_feed{border:solid 1px blue}',
