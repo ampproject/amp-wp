@@ -1498,7 +1498,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$selectors_parsed[ $selector ] = array();
 
 						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
-						$reduced_selector = preg_replace( '/:[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
+						$reduced_selector = preg_replace( '/::?[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
 						/*
 						 * Gather attribute names while removing attribute selectors to eliminate false negative,
@@ -1539,9 +1539,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						);
 
 						// Extract tag names.
-						if ( preg_match_all( '/[a-zA-Z0-9_-]+/', $reduced_selector, $matches ) ) {
-							$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ] = $matches[0];
-						}
+						$reduced_selector = preg_replace_callback(
+							'/[a-zA-Z0-9_-]+/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ][] = $matches[0];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						// At this point, $reduced_selector should contain just the remnants of the selector, primarily combinators.
+						unset( $reduced_selector );
 					}
 
 					$stylesheet[] = array(
