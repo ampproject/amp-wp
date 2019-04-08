@@ -758,21 +758,7 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 .wp-block-quote,
 .wp-block-quote[style*="text-align: right"] {
 	border: none;
-	padding: 50px 10px 10px 10px;
-}
-
-.wp-block-quote:before {
-	content: " ";
-	position: absolute;
-	border-left: 84px solid black;
-	border-right: 84px solid black;
-	white-space: pre;
-	height: 1px;
-	left: calc(25% - 50px);
-	opacity: 0.2;
-	top: 0;
-	width: 100px;
-	box-sizing: unset;
+	padding-top: 100px;
 }
 
 /*

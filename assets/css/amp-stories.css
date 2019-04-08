@@ -55,6 +55,11 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 .is-style-light .wp-block-quote__citation {
 	color: #ffffff;
 }
-.is-style-light.wp-block-quote:before {
-	border-color: #ffffff;
+
+.wp-block-quote {
+	background: url("../images/quote-black.svg") center -23px no-repeat;
+}
+
+.is-style-light.wp-block-quote {
+	background-image: url("../images/quote-white.svg");
 }
