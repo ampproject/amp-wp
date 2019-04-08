@@ -32,6 +32,7 @@ import { getTotalAnimationDuration, addBackgroundColorToOverlay } from '../../he
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
+	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
@@ -43,8 +44,7 @@ const TEMPLATE = [
 
 class EditPage extends Component {
 	constructor( props ) {
-		// Call parent constructor.
-		super( props );
+		super( ...arguments );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: uuid() } );
@@ -141,7 +141,7 @@ class EditPage extends Component {
 	}
 
 	render() {
-		const { attributes, media, setAttributes, totalAnimationDuration } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
 
 		const {
 			mediaId,
@@ -335,15 +335,20 @@ class EditPage extends Component {
 					{ backgroundColors.length > 0 && (
 						<div style={ overlayStyle }></div>
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ ALLOWED_CHILD_BLOCKS } />
+					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
 			</Fragment>
 		);
 	}
 }
 
-export default withSelect( ( select, { attributes, clientId } ) => {
+export default withSelect( ( select, { clientId, attributes } ) => {
 	const { getMedia } = select( 'core' );
+	const { getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+	const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
+	const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
 	const { getBlockRootClientId } = select( 'core/editor' );
 	const { getAnimatedBlocks } = select( 'amp/story' );
 
@@ -356,6 +361,7 @@ export default withSelect( ( select, { attributes, clientId } ) => {
 
 	return {
 		media: mediaId ? getMedia( mediaId ) : null,
+		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
 } )( EditPage );

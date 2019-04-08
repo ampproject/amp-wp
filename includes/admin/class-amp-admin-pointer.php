@@ -105,6 +105,12 @@ class AMP_Admin_Pointer {
 	 * @return boolean Is dismissed.
 	 */
 	protected function is_pointer_dismissed() {
+
+		// Consider dismissed in v1.1, since admin pointer is only to educate about the new modes in 1.0.
+		if ( version_compare( strtok( AMP__VERSION, '-' ), '1.1', '>=' ) ) {
+			return true;
+		}
+
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
 		if ( empty( $dismissed ) ) {
 			return false;

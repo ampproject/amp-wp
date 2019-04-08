@@ -12,6 +12,11 @@ import { __ } from '@wordpress/i18n';
  */
 import { BlockPreviewLabel } from './';
 
+/**
+ * Internal dependencies
+ */
+import { ALLOWED_MOVABLE_BLOCKS } from '../constants';
+
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
 		/*
@@ -51,8 +56,8 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	);
 }
 
-function BlockNavigation( { elements, selectBlock, selectedBlockClientId, isReordering } ) {
-	const hasElements = elements.length > 0;
+function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReordering } ) {
+	const hasBlocks = blocks.length > 0;
 
 	if ( isReordering ) {
 		return null;
@@ -64,14 +69,14 @@ function BlockNavigation( { elements, selectBlock, selectedBlockClientId, isReor
 			className="editor-block-navigation__container block-editor-block-navigation__container"
 		>
 			<p className="editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
-			{ hasElements && (
+			{ hasBlocks && (
 				<BlockNavigationList
-					blocks={ elements }
+					blocks={ blocks }
 					selectedBlockClientId={ selectedBlockClientId }
 					selectBlock={ selectBlock }
 				/>
 			) }
-			{ ! hasElements && (
+			{ ! hasBlocks && (
 				<p className="editor-block-navigation__paragraph">
 					{ __( 'No blocks created yet.', 'amp' ) }
 				</p>
@@ -85,8 +90,10 @@ export default compose(
 		const { getCurrentPage, isReordering } = select( 'amp/story' );
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/editor' );
 
+		const blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
+
 		return {
-			elements: getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [],
+			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse(),
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};
