@@ -192,6 +192,8 @@ export const settings = {
 
 		const ContentTag = tagName;
 
+		styles.display = 'flex';
+
 		return (
 			<ContentTag
 				style={ styles }
