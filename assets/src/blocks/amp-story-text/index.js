@@ -11,6 +11,7 @@ import {
 	RichText,
 	getColorClassName,
 	getFontSize,
+	getColorObjectByAttributeValues,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 
@@ -72,9 +73,6 @@ const schema = {
 	customTextColor: {
 		type: 'string',
 	},
-	backgroundHexValue: {
-		type: 'string',
-	},
 	backgroundColor: {
 		type: 'string',
 	},
@@ -116,7 +114,7 @@ export const settings = {
 
 	edit,
 
-	save( { attributes } ) {
+	save: ( { attributes } ) => {
 		const {
 			content,
 			align,
@@ -125,7 +123,6 @@ export const settings = {
 			ampFitText,
 			autoFontSize,
 			backgroundColor,
-			backgroundHexValue,
 			textColor,
 			customBackgroundColor,
 			customTextColor,
@@ -138,25 +135,37 @@ export const settings = {
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
 
+		const hasOpacity = opacity && opacity < 100;
+
 		const className = classnames( {
 			'amp-text-content': ! ampFitText,
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
 			[ textClass ]: textClass,
-			[ backgroundClass ]: ( ! opacity || 100 === opacity ) ? backgroundClass : undefined,
+			[ backgroundClass ]: ! hasOpacity ? backgroundClass : undefined,
 		} );
 
-		// Calculate fontsize using vw to make it responsive.
-		const { fontSizes } = select( 'core/block-editor' ).getSettings();
-		// Get the font size in px based on the slug with fallback to customFontSize.
+		const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+
+		/*
+         * Calculate fontsize using vw to make it responsive.
+         *
+         * Get the font size in px based on the slug with fallback to customFontSize.
+         */
 		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 		let appliedBackgroundColor;
+
 		// If we need to assign opacity.
-		if ( 100 !== opacity && ( backgroundColor || customBackgroundColor ) ) {
-			const [ r, g, b, a ] = getRgbaFromHex( backgroundHexValue, opacity );
-			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+		if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
+			const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+
+			if ( hexColor ) {
+				const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
+
+				appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+			}
 		} else if ( ! backgroundClass ) {
 			appliedBackgroundColor = customBackgroundColor;
 		}
