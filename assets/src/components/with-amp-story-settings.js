@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ALLOWED_CHILD_BLOCKS } from '../constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../constants';
 import { withParentBlock, StoryBlockMover } from './';
 
 export default createHigherOrderComponent(
@@ -18,23 +18,29 @@ export default createHigherOrderComponent(
 		return withParentBlock( ( props ) => {
 			const { attributes, name, parentBlock } = props;
 
-			if ( -1 === ALLOWED_CHILD_BLOCKS.indexOf( name ) || ! parentBlock || 'amp/amp-story-page' !== parentBlock.name ) {
+			if ( ! parentBlock ||
+				! ALLOWED_CHILD_BLOCKS.includes( name ) ||
+				! ALLOWED_TOP_LEVEL_BLOCKS.includes( parentBlock.name )
+			) {
 				return <BlockEdit { ...props } />;
 			}
 
 			const { ampShowImageCaption } = attributes;
 			const isImageBlock = 'core/image' === name;
+			const isMovableBLock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			return (
 				<Fragment>
-					<StoryBlockMover
-						clientIds={ props.clientId }
-						blockElementId={ `block-${ props.clientId }` }
-						isFirst={ props.isFirst }
-						isLast={ props.isLast }
-						isFocused={ props.isFocused }
-						isDraggable={ ! props.isPartOfMultiSelection }
-					/>
+					{ isMovableBLock && (
+						<StoryBlockMover
+							clientIds={ props.clientId }
+							blockElementId={ `block-${ props.clientId }` }
+							isFirst={ props.isFirst }
+							isLast={ props.isLast }
+							isFocused={ props.isFocused }
+							isDraggable={ ! props.isPartOfMultiSelection }
+						/>
+					) }
 					<BlockEdit { ...props } />
 					{ isImageBlock && (
 						<InspectorControls>

@@ -14,6 +14,7 @@ import {
 	SelectControl,
 	withFallbackStyles,
 	ToggleControl,
+	RangeControl,
 } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import {
@@ -32,8 +33,9 @@ import {
  * Internal dependencies
  */
 import { FontFamilyPicker } from '../../components';
-import { maybeEnqueueFontStyle, calculateFontSize } from '../../helpers';
+import { maybeEnqueueFontStyle, calculateFontSize, getRgbaFromHex } from '../../helpers';
 import './edit.css';
+
 
 const { getComputedStyle } = window;
 
@@ -122,6 +124,7 @@ class TextBlockEdit extends Component {
 			height,
 			width,
 			tagName,
+			opacity,
 		} = attributes;
 
 		const minTextHeight = 20;
@@ -134,6 +137,8 @@ class TextBlockEdit extends Component {
 				userFontSize = 1.5 + 'rem';
 			}
 		}
+
+		const [ r, g, b, a ] = getRgbaFromHex( backgroundColor.color, opacity );
 
 		return (
 			<Fragment>
@@ -181,7 +186,10 @@ class TextBlockEdit extends Component {
 						colorSettings={ [
 							{
 								value: backgroundColor.color,
-								onChange: setBackgroundColor,
+								onChange: ( value ) => {
+									setAttributes( { backgroundHexValue: value } );
+									setBackgroundColor( value );
+								},
 								label: __( 'Background Color', 'amp' ),
 							},
 							{
@@ -199,6 +207,14 @@ class TextBlockEdit extends Component {
 								fallbackBackgroundColor,
 								fontSize: fontSize.size,
 							} }
+						/>
+						<RangeControl
+							label={ __( 'Background Opacity', 'amp' ) }
+							value={ opacity }
+							onChange={ ( value ) => setAttributes( { opacity: value } ) }
+							min={ 5 }
+							max={ 100 }
+							step={ 5 }
 						/>
 					</PanelColorSettings>
 				</InspectorControls>
@@ -247,7 +263,7 @@ class TextBlockEdit extends Component {
 						} }
 						onReplace={ this.onReplace }
 						style={ {
-							backgroundColor: backgroundColor.color,
+							backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
