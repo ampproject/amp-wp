@@ -292,6 +292,31 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test remove_title_from_embed.
+	 *
+	 * @covers \AMP_Editor_Blocks::remove_title_from_embed()
+	 */
+	public function test_remove_title_from_embed() {
+		$initial_output = '<iframe src="https://example.com/baz"></iframe>';
+		$wrong_post     = $this->factory()->post->create_and_get();
+
+		// The post type is not amp_story, so this should return the same $output it's passed.
+		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $initial_output, $wrong_post ) );
+
+		// The post type is correct, but the <blockquote> does not have the expected class, so this should again return the same $output.
+		$correct_post              = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$block_quote_without_class = '<blockquote>Example Title</blockquote>';
+		$output_with_blockquote    = $block_quote_without_class . $initial_output;
+		$this->assertEquals( $output_with_blockquote, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+
+		// All of the conditions are satisfied, so this should remove the <blockquote> and the elements it contains.
+		$correct_post           = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$block_quote            = '<blockquote class="wp-embedded-content">Example Title</blockquote>';
+		$output_with_blockquote = $block_quote . $initial_output;
+		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+	}
+
+	/**
 	 * Creates amp_story posts with featured images of given heights.
 	 *
 	 * @param array $featured_images[][] {

@@ -177,6 +177,9 @@ class AMP_Story_Post_Type {
 		// Enqueue the styling for the /embed endpoint.
 		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
 
+		// In the block editor, remove the title from above the AMP Stories embed.
+		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
+
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
@@ -928,9 +931,15 @@ class AMP_Story_Post_Type {
 				'class' => 'latest-stories__avatar',
 			)
 		);
+		if ( ! $args['disable_link'] ) {
+			$href = sprintf(
+				'href="%s"',
+				esc_url( get_permalink( $args['post'] ) )
+			);
+		}
 
 		?>
-		<<?php echo esc_attr( $wrapper_tag_name ); ?> href="<?php echo $args['disable_link'] ? '' : esc_url( get_permalink( $args['post'] ) ); ?>" class="latest_stories__link">
+		<<?php echo esc_attr( $wrapper_tag_name ); ?> <?php echo isset( $href ) ? wp_kses_post( $href ) : ''; ?> class="latest_stories__link">
 			<?php
 			echo wp_get_attachment_image(
 				$thumbnail_id,
@@ -1102,7 +1111,7 @@ class AMP_Story_Post_Type {
 							array(
 								'post'         => $post,
 								'size'         => $size,
-								'disable_link' => true,
+								'disable_link' => ! $is_amp_carousel,
 							)
 						);
 						?>
@@ -1293,5 +1302,20 @@ class AMP_Story_Post_Type {
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		return $attachment_id;
+	}
+
+	/**
+	 * For amp_story embeds, removes the title from above the <iframe>.
+	 *
+	 * @param string  $output The output to filter.
+	 * @param WP_Post $post The post for the embed.
+	 * @return string $output The filtered output.
+	 */
+	public static function remove_title_from_embed( $output, $post ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $output;
+		}
+
+		return preg_replace( '/<blockquote class="wp-embedded-content">.*?<\/blockquote>/', '', $output );
 	}
 }
