@@ -1515,6 +1515,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
 						$reduced_selector = preg_replace( '/::?[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
+						// Ignore any selector terms that occur under a dynamic selector.
+						if ( $dynamic_selector_pattern ) {
+							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
+						}
+
 						/*
 						 * Gather attribute names while removing attribute selectors to eliminate false negative,
 						 * such as with `.social-navigation a[href*="example.com"]:before`.
@@ -1527,11 +1532,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							},
 							$reduced_selector
 						);
-
-						// Ignore any selector terms that occur under a dynamic selector.
-						if ( $dynamic_selector_pattern ) {
-							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
-						}
 
 						// Extract class names.
 						$reduced_selector = preg_replace_callback(
