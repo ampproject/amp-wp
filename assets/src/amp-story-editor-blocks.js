@@ -18,6 +18,7 @@ import {
 	unregisterBlockType,
 	registerBlockType,
 	registerBlockStyle,
+	unregisterBlockStyle,
 } from '@wordpress/blocks';
 
 /**
@@ -152,6 +153,8 @@ domReady( () => {
 		name: 'light',
 		label: __( 'Light', 'amp' ),
 	} );
+
+	unregisterBlockStyle( 'core/quote', 'large' );
 } );
 
 const positionTopLimit = 75;
