@@ -30,11 +30,13 @@ const TextSettings = ( { children, fontSize, setFontSize, fontFamily, setFontFam
 				value={ fontFamily }
 				onChange={ setFontFamily }
 			/>
-			<ToggleControl
-				label={ __( 'Automatically fit text to container', 'amp' ) }
-				checked={ fitText }
-				onChange={ () => setFitText( ! fitText ) }
-			/>
+			{ fitText && (
+				<ToggleControl
+					label={ __( 'Automatically fit text to container', 'amp' ) }
+					checked={ fitText }
+					onChange={ () => setFitText( ! fitText ) }
+				/>
+			) }
 			{ ! fitText && (
 				<FontSizePicker
 					value={ fontSize.size }
