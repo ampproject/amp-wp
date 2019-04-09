@@ -51,7 +51,7 @@ class AMP_Editor_Blocks {
 			 * then the non-AMP blog page need to load the AMP runtime scripts so that the AMP components
 			 * in the posts displayed there will be rendered properly. This is only relevant on native AMP
 			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
-			 * presented in the Gutenberg inserter in paired mode. In general, using AMP components in
+			 * presented in the Gutenberg inserter in transitional mode. In general, using AMP components in
 			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized
 			 * as much as possible. For more, see <https://github.com/ampproject/amp-wp/issues/1192>.
 			 */

@@ -303,7 +303,7 @@ export const renderStoryComponents = () => {
 		ampStoryWrapper.id = 'amp-story-editor';
 
 		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
+		blockNavigation.id = 'amp-story-block-navigation';
 
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
@@ -333,16 +333,12 @@ export const renderStoryComponents = () => {
 		);
 
 		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
+			<BlockNavigation />,
 			blockNavigation
 		);
 
 		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
+			<EditorCarousel />,
 			editorCarousel
 		);
 	}
@@ -522,4 +518,27 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
 		overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ gradientList })`;
 	}
 	return overlayStyle;
+};
+
+/**
+ * Converts hex to rgba.
+ *
+ * @param {string} hex Hex value.
+ * @param {number} opacity Opacity.
+ * @return {Object} Rgba value.
+ */
+export const getRgbaFromHex = ( hex, opacity ) => {
+	if ( ! hex ) {
+		return [];
+	}
+	hex = hex.replace( '#', '' );
+	const r = parseInt( hex.substring( 0, 2 ), 16 );
+	const g = parseInt( hex.substring( 2, 4 ), 16 );
+	const b = parseInt( hex.substring( 4, 6 ), 16 );
+	return [
+		r,
+		g,
+		b,
+		opacity / 100,
+	];
 };

@@ -25,6 +25,7 @@ import { withInstanceId, compose } from '@wordpress/compose';
 import { upArrow, downArrow, dragHandle } from './icons';
 import { IconDragHandle } from './drag-handle';
 import IgnoreNestedEvents from './ignore-nested-events';
+import './edit.css';
 
 export class BlockMover extends Component {
 	constructor() {
