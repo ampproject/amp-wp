@@ -899,20 +899,15 @@ class AMP_Story_Post_Type {
 	public static function render_block_with_google_fonts( $block_content, $block ) {
 		$font_family_attribute = 'ampFontFamily';
 
-		// Prevent adding br tags outside of the amp-story-grid-layer.
-		$content = trim( $block_content );
-
-		$content = nl2br( $content, false );
-
 		// Short-circuit if no font family present.
 		if ( empty( $block['attrs'][ $font_family_attribute ] ) ) {
-			return $content;
+			return $block_content;
 		}
 
 		// Short-circuit if there is no Google Font or the font is already enqueued.
 		$font = self::get_font( $block['attrs'][ $font_family_attribute ] );
 		if ( ! isset( $font['handle'], $font['src'] ) || ! $font || wp_style_is( $font['handle'] ) ) {
-			return $content;
+			return $block_content;
 		}
 
 		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
@@ -925,7 +920,7 @@ class AMP_Story_Post_Type {
 			self::get_inline_font_style_rule( $font )
 		);
 
-		return $content;
+		return $block_content;
 	}
 
 	/**

@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { RichText } from '@wordpress/block-editor';
+import { RichText } from '@wordpress/block-editor';import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -122,6 +122,7 @@ export const settings = {
 					style={ styles }
 					className={ className }
 					value={ content }
+					format="string"
 				/>
 			);
 		}
@@ -130,11 +131,12 @@ export const settings = {
 
 		styles.display = 'flex';
 
+		// Uses RawHTML to mimic RichText.Content behavior.
 		return (
 			<ContentTag
 				style={ styles }
 				className={ className }>
-				<amp-fit-text layout="flex-item" className="amp-text-content">{ content }</amp-fit-text>
+				<amp-fit-text layout="flex-item" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
 			</ContentTag>
 		);
 	},
