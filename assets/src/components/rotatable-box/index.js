@@ -12,6 +12,11 @@ import { compose, withGlobalEvents } from '@wordpress/compose';
 import { ESCAPE, LEFT, RIGHT, ENTER } from '@wordpress/keycodes';
 import { __, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import './edit.css';
+
 class RotatableBox extends Component {
 	constructor( props ) {
 		super( props );

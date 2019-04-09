@@ -25,6 +25,7 @@ import { withInstanceId, compose } from '@wordpress/compose';
 import { upArrow, downArrow, dragHandle } from './icons';
 import { IconDragHandle } from './drag-handle';
 import IgnoreNestedEvents from './ignore-nested-events';
+import './edit.css';
 
 export class BlockMover extends Component {
 	constructor() {
@@ -49,7 +50,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { onMoveUp, onMoveDown, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientIds, blockElementId, instanceId } = this.props;
+		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientIds, blockElementId, instanceId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
@@ -61,9 +62,9 @@ export class BlockMover extends Component {
 				<div className={ classnames( 'amp-story-editor-block-mover editor-block-mover block-editor-block-mover', { 'is-visible': isFocused } ) }>
 					<IconButton
 						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isFirst ? null : onMoveUp }
+						onClick={ isFirst ? null : bringForward }
 						icon={ upArrow }
-						label={ __( 'Send Backward', 'amp' ) }
+						label={ __( 'Bring Forward', 'amp' ) }
 						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
 						aria-disabled={ isFirst }
 						onFocus={ this.onFocus }
@@ -80,9 +81,9 @@ export class BlockMover extends Component {
 					/>
 					<IconButton
 						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isLast ? null : onMoveDown }
+						onClick={ isLast ? null : sendBackward }
 						icon={ downArrow }
-						label={ __( 'Bring Forward', 'amp' ) }
+						label={ __( 'Send Backward', 'amp' ) }
 						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
 						aria-disabled={ isLast }
 						onFocus={ this.onFocus }
@@ -111,8 +112,8 @@ export default compose(
 	withDispatch( ( dispatch, { clientIds, rootClientId } ) => {
 		const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
 		return {
-			onMoveDown: partial( moveBlocksDown, clientIds, rootClientId ),
-			onMoveUp: partial( moveBlocksUp, clientIds, rootClientId ),
+			bringForward: partial( moveBlocksDown, clientIds, rootClientId ),
+			sendBackward: partial( moveBlocksUp, clientIds, rootClientId ),
 		};
 	} ),
 	withInstanceId,

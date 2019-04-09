@@ -7,7 +7,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { AMP_STORY_FONT_IMAGES } from '../constants';
-import { PreviewPicker } from './index';
+import { PreviewPicker } from './';
 
 /**
  * External dependencies

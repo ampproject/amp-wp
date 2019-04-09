@@ -10,12 +10,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { BlockPreviewLabel } from './';
+import { BlockPreviewLabel } from '../';
+import './edit.css';
 
 /**
  * Internal dependencies
  */
-import { ALLOWED_MOVABLE_BLOCKS } from '../constants';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
@@ -93,7 +94,7 @@ export default compose(
 		const blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 
 		return {
-			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ),
+			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse(),
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};

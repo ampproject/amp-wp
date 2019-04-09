@@ -40,6 +40,7 @@ import {
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
+	filterBlockAttributes,
 	addAMPAttributes,
 	addAMPExtraProps,
 	getTotalAnimationDuration,
@@ -368,6 +369,7 @@ addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAtt
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
+addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );
 
 const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 
