@@ -44,11 +44,24 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Filtered block content.
 	 */
 	public function filter_rendered_block( $block_content, $block ) {
-		if ( isset( $block['blockName'] ) && isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
+		if ( ! isset( $block['blockName'] ) ) {
+			return $block_content;
+		}
+		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$block_content = call_user_func(
 				array( $this, $this->block_ampify_methods[ $block['blockName'] ] ),
 				$block_content
 			);
+		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
+			/*
+			 * While the video block placeholder just outputs an empty video element, the placeholders for image and
+			 * audio blocks output empty <img> and <audio> respectively. These will result in AMP validation errors,
+			 * so we need to empty out the block content to prevent this from happening. Note that <source> is used
+			 * for <img> because eventually the image block could use <picture>.
+			 */
+			if ( ! preg_match( '/src=|<source/', $block_content ) ) {
+				$block_content = '';
+			}
 		}
 		return $block_content;
 	}

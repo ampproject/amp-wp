@@ -59,4 +59,29 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 			$this->assertNotContains( 'on="change', $rendered );
 		}
 	}
+
+	/**
+	 * Test that placeholder blocks don't result in validation errors.
+	 *
+	 * @covers \AMP_Core_Block_Handler::filter_rendered_block()
+	 */
+	public function test_placeholder_blocks() {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Missing required render_block filter.' );
+		}
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$audio_placeholder_block = "<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls></audio></figure>\n<!-- /wp:audio -->";
+		$audio_populated_block   = "<!-- wp:audio -->\n<figure class=\"wp-block-audio\"><audio controls src=\"https://wordpressdev.lndo.site/content/uploads/2019/02/do-you-know-I-am-batman.mp3\"></audio></figure>\n<!-- /wp:audio -->";
+		$this->assertEmpty( apply_filters( 'the_content', $audio_placeholder_block ) );
+		$this->assertNotEmpty( apply_filters( 'the_content', $audio_populated_block ) );
+
+		$image_placeholder_block = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img alt=\"\"/></figure>\n<!-- /wp:image -->";
+		$image_populated_block   = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"https://wordpressdev.lndo.site/content/uploads/2019/02/1200px-American_bison_k5680-1-1024x668.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->";
+		$this->assertEmpty( apply_filters( 'the_content', $image_placeholder_block ) );
+		$this->assertNotEmpty( apply_filters( 'the_content', $image_populated_block ) );
+	}
 }
