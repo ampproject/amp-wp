@@ -254,7 +254,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
  * @return {Object} The element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType ) => {
-	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
 	}
 
