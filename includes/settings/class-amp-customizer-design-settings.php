@@ -34,10 +34,16 @@ class AMP_Customizer_Design_Settings {
 	/**
 	 * Returns whether the AMP design settings are enabled.
 	 *
+	 * @since 1.1 This always return false when AMP theme support is present.
 	 * @since 0.6
+	 *
 	 * @return bool AMP Customizer design settings enabled.
 	 */
 	public static function is_amp_customizer_enabled() {
+
+		if ( current_theme_supports( 'amp' ) ) {
+			return false;
+		}
 
 		/**
 		 * Filter whether to enable the AMP default template design settings.
@@ -110,6 +116,17 @@ class AMP_Customizer_Design_Settings {
 				'transport'         => 'postMessage',
 			)
 		);
+
+		// Display exit link.
+		$wp_customize->add_setting(
+			'amp_customizer[display_exit_link]',
+			array(
+				'type'              => 'option',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'transport'         => 'postMessage',
+			)
+		);
 	}
 
 	/**
@@ -167,12 +184,24 @@ class AMP_Customizer_Design_Settings {
 			)
 		);
 
+		// Display exit link.
+		$wp_customize->add_control(
+			'amp_display_exit_link',
+			array(
+				'settings' => 'amp_customizer[display_exit_link]',
+				'label'    => __( 'Display link to exit reader mode?', 'amp' ),
+				'section'  => 'amp_design',
+				'type'     => 'checkbox',
+				'priority' => 40,
+			)
+		);
+
 		// Header.
 		$wp_customize->selective_refresh->add_partial(
 			'amp-wp-header',
 			array(
 				'selector'         => '.amp-wp-header',
-				'settings'         => array( 'blogname' ), // @todo Site Icon.
+				'settings'         => array( 'blogname', 'amp_customizer[display_exit_link]' ), // @todo Site Icon.
 				'render_callback'  => array( __CLASS__, 'render_header_bar' ),
 				'fallback_refresh' => false,
 			)
@@ -257,6 +286,7 @@ class AMP_Customizer_Design_Settings {
 				'header_color'            => self::DEFAULT_HEADER_COLOR,
 				'header_background_color' => self::DEFAULT_HEADER_BACKGROUND_COLOR,
 				'color_scheme'            => self::DEFAULT_COLOR_SCHEME,
+				'display_exit_link'       => false,
 			)
 		);
 
