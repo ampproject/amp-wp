@@ -16,7 +16,7 @@ import './edit.css';
 /**
  * Internal dependencies
  */
-import { ALLOWED_MOVABLE_BLOCKS } from '../constants';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
