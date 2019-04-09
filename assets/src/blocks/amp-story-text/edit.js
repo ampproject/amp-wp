@@ -34,6 +34,7 @@ import {
  */
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle, calculateFontSize, getRgbaFromHex } from '../../helpers';
+import './edit.css';
 
 const { getComputedStyle } = window;
 

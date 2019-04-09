@@ -37,6 +37,7 @@ import {
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
 } from '../../constants';
+import './edit.css';
 
 const TEMPLATE = [
 	[ 'amp/amp-story-text' ],

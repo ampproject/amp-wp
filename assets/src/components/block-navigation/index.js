@@ -10,12 +10,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { BlockPreviewLabel } from './';
+import { BlockPreviewLabel } from '../';
+import './edit.css';
 
 /**
  * Internal dependencies
  */
-import { ALLOWED_MOVABLE_BLOCKS } from '../constants';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
