@@ -35,6 +35,7 @@ import {
  */
 import { FontFamilyPicker } from '../../components';
 import { maybeEnqueueFontStyle } from '../../helpers';
+import './edit.css';
 
 const { getComputedStyle } = window;
 
