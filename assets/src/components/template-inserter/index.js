@@ -14,6 +14,7 @@ import { compose } from '@wordpress/compose';
 import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
+import './edit.css';
 
 const storyPageBlockName = 'amp/amp-story-page';
 

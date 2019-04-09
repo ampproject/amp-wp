@@ -8,6 +8,7 @@ import { DropZoneProvider } from '@wordpress/components';
  * Internal dependencies
  */
 import ReordererItem from './reorderer-item';
+import './edit.css';
 
 /**
  * Reorderer component.

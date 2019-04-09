@@ -6,7 +6,7 @@ import { BaseControl, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpre
 /**
  * Internal dependencies
  */
-import './style.css';
+import './edit.css';
 
 /**
  * Preview picker component.
