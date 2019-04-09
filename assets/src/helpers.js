@@ -245,6 +245,32 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	};
 };
 
+const blockContentDiv = document.createElement( 'div' );
+
+/**
+ * Filter block attributes to make sure that the className is taken even though it's wrapper in grid layer.
+ *
+ * @param {Object} blockAttributes Block attributes.
+ * @param {Object} blockType Block type.
+ * @param {string} innerHTML Inner HTML from saved content.
+ * @return {Object} Block attributes.
+ */
+export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) => {
+	if ( ! blockAttributes.className && innerHTML.includes( 'is-style-' ) && 0 === innerHTML.indexOf( '<amp-story-grid-layer' ) ) {
+		blockContentDiv.innerHTML = innerHTML;
+
+		// Lets check the first child of the amp-story-grid-layer for the className.
+		if (
+			blockContentDiv.children[ 0 ].children.length &&
+			blockContentDiv.children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
+		) {
+			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].className;
+		}
+	}
+
+	return blockAttributes;
+};
+
 /**
  * Wraps all movable blocks in a grid layer.
  *
@@ -254,14 +280,13 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
  *
  * @return {Object} The element.
  */
-export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
+export const wrapBlocksInGridLayer = ( element, blockType ) => {
 	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
 	}
 
-	// Add className to wrapper element since it's taken from the wrapper element.
 	return (
-		<amp-story-grid-layer className={ attributes.className } template="vertical">
+		<amp-story-grid-layer template="vertical">
 			{ element }
 		</amp-story-grid-layer>
 	);
