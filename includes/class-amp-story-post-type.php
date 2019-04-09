@@ -857,10 +857,12 @@ class AMP_Story_Post_Type {
 	/**
 	 * Renders the amp/amp-story-post-author block.
 	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
 	 * @return string Block content.
 	 */
-	public static function render_post_author_block() {
-		return get_the_author();
+	public static function render_post_author_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_author(), $content );
 	}
 
 	/**
@@ -868,19 +870,23 @@ class AMP_Story_Post_Type {
 	 *
 	 * @todo Consider allowing to change the date format in the block settings.
 	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
 	 * @return string Block content.
 	 */
-	public static function render_post_date_block() {
-		return get_the_date();
+	public static function render_post_date_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_date(), $content );
 	}
 
 	/**
 	 * Renders the amp/amp-story-post-title block.
 	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
 	 * @return string Block content.
 	 */
-	public static function render_post_title_block() {
-		return get_the_title();
+	public static function render_post_title_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_title(), $content );
 	}
 
 	/**

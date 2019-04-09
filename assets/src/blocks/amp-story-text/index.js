@@ -1,26 +1,17 @@
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	RichText,
-	getColorClassName,
-	getFontSize,
-	getColorObjectByAttributeValues,
-} from '@wordpress/block-editor';
-import { select } from '@wordpress/data';
+import { RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
-import { getPercentageFromPixels, getRgbaFromHex } from '../../helpers';
-import { STORY_PAGE_INNER_WIDTH } from '../../constants';
+import {
+	getClassNameFromBlockAttributes,
+	getStylesFromBlockAttributes,
+} from '../../helpers';
 
 export const name = 'amp/amp-story-text';
 
@@ -117,67 +108,12 @@ export const settings = {
 	save: ( { attributes } ) => {
 		const {
 			content,
-			align,
-			fontSize,
-			customFontSize,
 			ampFitText,
-			autoFontSize,
-			backgroundColor,
-			textColor,
-			customBackgroundColor,
-			customTextColor,
-			width,
-			height,
 			tagName,
-			opacity,
 		} = attributes;
 
-		const textClass = getColorClassName( 'color', textColor );
-		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
-
-		const hasOpacity = opacity && opacity < 100;
-
-		const className = classnames( {
-			'amp-text-content': ! ampFitText,
-			'has-text-color': textColor || customTextColor,
-			'has-background': backgroundColor || customBackgroundColor,
-			[ textClass ]: textClass,
-			[ backgroundClass ]: ! hasOpacity ? backgroundClass : undefined,
-		} );
-
-		const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
-
-		/*
-		 * Calculate fontsize using vw to make it responsive.
-		 *
-		 * Get the font size in px based on the slug with fallback to customFontSize.
-		 */
-		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
-		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
-
-		let appliedBackgroundColor;
-
-		// If we need to assign opacity.
-		if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
-			const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
-
-			if ( hexColor ) {
-				const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
-
-				appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
-			}
-		} else if ( ! backgroundClass ) {
-			appliedBackgroundColor = customBackgroundColor;
-		}
-
-		const styles = {
-			backgroundColor: appliedBackgroundColor,
-			color: textClass ? undefined : customTextColor,
-			fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
-			textAlign: align,
-		};
+		const className = getClassNameFromBlockAttributes( attributes );
+		const styles = getStylesFromBlockAttributes( attributes );
 
 		if ( ! ampFitText ) {
 			return (

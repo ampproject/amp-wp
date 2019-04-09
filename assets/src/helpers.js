@@ -2,7 +2,7 @@
  * External dependencies
  */
 import uuid from 'uuid/v4';
-import ampStoriesFonts from 'amp-stories-fonts';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -11,6 +11,7 @@ import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
 import { select } from '@wordpress/data';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -30,6 +31,7 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 } from './constants';
+import ampStoriesFonts from 'amp-stories-fonts';
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -543,6 +545,82 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 	];
 };
 
+export const getClassNameFromBlockAttributes = ( {
+	ampFitText,
+	backgroundColor,
+	textColor,
+	customBackgroundColor,
+	customTextColor,
+	opacity,
+} ) => {
+	const textClass = getColorClassName( 'color', textColor );
+	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+	const hasOpacity = opacity && opacity < 100;
+
+	return classnames( {
+		'amp-text-content': ! ampFitText,
+		'has-text-color': textColor || customTextColor,
+		'has-background': backgroundColor || customBackgroundColor,
+		[ textClass ]: textClass,
+		[ backgroundClass ]: ! hasOpacity ? backgroundClass : undefined,
+	} );
+};
+
+export const getStylesFromBlockAttributes = ( {
+	align,
+	fontSize,
+	customFontSize,
+	ampFitText,
+	autoFontSize,
+	backgroundColor,
+	textColor,
+	customBackgroundColor,
+	customTextColor,
+	width,
+	height,
+	opacity,
+} ) => {
+	const textClass = getColorClassName( 'color', textColor );
+	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+	const hasOpacity = opacity && opacity < 100;
+
+	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+
+	/*
+     * Calculate fontsize using vw to make it responsive.
+     *
+     * Get the font size in px based on the slug with fallback to customFontSize.
+     */
+	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+	const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
+
+	let appliedBackgroundColor;
+
+	// If we need to assign opacity.
+	if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
+		const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+
+		if ( hexColor ) {
+			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
+
+			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+		}
+	} else if ( ! backgroundClass ) {
+		appliedBackgroundColor = customBackgroundColor;
+	}
+
+	return {
+		backgroundColor: appliedBackgroundColor,
+		color: textClass ? undefined : customTextColor,
+		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
+		width: `${ getPercentageFromPixels( 'x', width ) }%`,
+		height: `${ getPercentageFromPixels( 'y', height ) }%`,
+		textAlign: align,
+	};
+};
+
 export const getMetaBlockSettings = ( { attribute, tagName = 'p', isEditable = false } ) => {
 	const supports = {
 		className: false,
@@ -588,7 +666,19 @@ export const getMetaBlockSettings = ( { attribute, tagName = 'p', isEditable = f
 	return {
 		supports,
 		attributes: schema,
-		save: () => null,
+		save: ( { attributes } ) => {
+			const className = getClassNameFromBlockAttributes( attributes );
+			const styles = getStylesFromBlockAttributes( attributes );
+
+			return (
+				<RichText.Content
+					tagName={ tagName }
+					style={ styles }
+					className={ className }
+					value="{content}" // Placeholder to be replaced server-side.
+				/>
+			);
+		},
 		edit: withMetaBlockEdit( { attribute, tagName, isEditable } ),
 	};
 };
