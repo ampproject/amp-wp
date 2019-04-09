@@ -274,6 +274,7 @@ class TextBlockEdit extends Component {
 							[ backgroundColor.class ]: backgroundColor.class,
 							[ textColor.class ]: textColor.class,
 							[ fontSize.class ]: autoFontSize ? undefined : fontSize.class,
+							'is-amp-fit-text': ampFitText,
 						} ) }
 						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 					/>

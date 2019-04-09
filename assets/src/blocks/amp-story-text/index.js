@@ -192,11 +192,13 @@ export const settings = {
 
 		const ContentTag = tagName;
 
+		styles.display = 'flex';
+
 		return (
 			<ContentTag
 				style={ styles }
 				className={ className }>
-				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
+				<amp-fit-text layout="flex-item" className="amp-text-content">{ content }</amp-fit-text>
 			</ContentTag>
 		);
 	},
