@@ -205,10 +205,25 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Attributes used in the document.
 	 *
+	 * This is initially populated with boolean attributes which can be mutated by AMP at runtime,
+	 * since they can by dynamically added at any time.
+	 *
 	 * @since 1.1
 	 * @var array
 	 */
-	private $used_attributes = array();
+	private $used_attributes = array(
+		'autofocus' => true,
+		'checked'   => true,
+		'controls'  => true,
+		'disabled'  => true,
+		'hidden'    => true,
+		'loop'      => true,
+		'multiple'  => true,
+		'open'      => true,
+		'readonly'  => true,
+		'required'  => true,
+		'selected'  => true,
+	);
 
 	/**
 	 * Tag names used in document.
