@@ -303,7 +303,7 @@ export const renderStoryComponents = () => {
 		ampStoryWrapper.id = 'amp-story-editor';
 
 		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
+		blockNavigation.id = 'amp-story-block-navigation';
 
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
@@ -333,16 +333,12 @@ export const renderStoryComponents = () => {
 		);
 
 		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
+			<BlockNavigation />,
 			blockNavigation
 		);
 
 		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
+			<EditorCarousel />,
 			editorCarousel
 		);
 	}

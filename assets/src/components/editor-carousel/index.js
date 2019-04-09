@@ -11,8 +11,9 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import Indicator from './indicator';
-import Reorderer from './reorderer';
+import { Reorderer } from '../';
 import { STORY_PAGE_WIDTH } from './../../constants';
+import './edit.css';
 
 const PAGE_MARGIN = 20;
 
