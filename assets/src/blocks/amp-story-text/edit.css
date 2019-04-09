@@ -16,3 +16,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 {
 	display: inline-block;
 }
+
+.editor-styles-wrapper .wp-block-amp-story-text p.is-amp-fit-text {
+	line-height: 1.15em;
+}
