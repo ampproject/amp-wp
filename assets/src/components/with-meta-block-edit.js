@@ -25,7 +25,7 @@ import { dateI18n, __experimentalGetSettings } from '@wordpress/date';
 import { ResizableBox, ColorSettings, TextSettings } from './';
 import { maybeEnqueueFontStyle } from '../helpers';
 
-// @todo: Use minimal <RichText> when props.isUpdatable is true.
+// @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
 const MetaBlockEdit = ( props ) => {
 	const {
@@ -124,7 +124,7 @@ const MetaBlockEdit = ( props ) => {
 	);
 };
 
-export default ( { attribute, tagName, isUpdatable } ) => {
+export default ( { attribute, tagName, isEditable } ) => {
 	return compose(
 		withSelect( ( select ) => {
 			const { getEditedPostAttribute } = select( 'core/editor' );
@@ -156,7 +156,7 @@ export default ( { attribute, tagName, isUpdatable } ) => {
 				blockContent,
 			};
 		} ),
-		// @todo: Implement isUpdatable handling to make this usable.
+		// @todo: Implement isEditable handling to make this usable.
 		withDispatch( ( dispatch ) => {
 			const { editPost } = dispatch( 'core/editor' );
 
@@ -170,7 +170,7 @@ export default ( { attribute, tagName, isUpdatable } ) => {
 		return (
 			<MetaBlockEdit
 				tagName={ tagName }
-				isUpdatable={ isUpdatable }
+				isEditable={ isEditable }
 				{ ...props }
 			/>
 		);

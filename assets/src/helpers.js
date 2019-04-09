@@ -543,7 +543,7 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 	];
 };
 
-export const getMetaBlockSettings = ( { attribute, tagName = 'p', isUpdatable = false } ) => {
+export const getMetaBlockSettings = ( { attribute, tagName = 'p', isEditable = false } ) => {
 	const supports = {
 		className: false,
 		anchor: true,
@@ -589,6 +589,6 @@ export const getMetaBlockSettings = ( { attribute, tagName = 'p', isUpdatable = 
 		supports,
 		attributes: schema,
 		save: () => null,
-		edit: withMetaBlockEdit( { attribute, tagName, isUpdatable } ),
+		edit: withMetaBlockEdit( { attribute, tagName, isEditable } ),
 	};
 };

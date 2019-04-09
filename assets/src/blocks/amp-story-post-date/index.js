@@ -22,6 +22,6 @@ export const settings = {
 	...getMetaBlockSettings( {
 		tagName: 'span',
 		attribute: 'date',
-		isUpdatable: true,
+		isEditable: false,
 	} ),
 };

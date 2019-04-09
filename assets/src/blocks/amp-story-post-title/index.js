@@ -22,6 +22,6 @@ export const settings = {
 	...getMetaBlockSettings( {
 		tagName: 'h1',
 		attribute: 'title',
-		isUpdatable: true,
+		isEditable: true,
 	} ),
 };
