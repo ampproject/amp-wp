@@ -250,16 +250,18 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
  *
  * @param {Object} element
  * @param {Object} blockType
+ * @param {Object} attributes Block attributes.
  *
  * @return {Object} The element.
  */
-export const wrapBlocksInGridLayer = ( element, blockType ) => {
+export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
 	}
 
+	// Add className to wrapper element since it's taken from the wrapper element.
 	return (
-		<amp-story-grid-layer template="vertical">
+		<amp-story-grid-layer className={ attributes.className } template="vertical">
 			{ element }
 		</amp-story-grid-layer>
 	);
