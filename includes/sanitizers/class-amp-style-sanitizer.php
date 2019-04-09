@@ -1163,7 +1163,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
-			$parsed = get_transient( $cache_key . $cache_group );
+			$parsed = get_transient( $cache_group . '-' . $cache_key );
 		}
 
 		/*
@@ -1192,7 +1192,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
 				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
-				set_transient( $cache_key . $cache_group, $parsed, MONTH_IN_SECONDS );
+				set_transient( $cache_group . '-' . $cache_key, $parsed, MONTH_IN_SECONDS );
 			}
 		}
 
