@@ -1,4 +1,10 @@
 /**
+ * This is a 1:1 copy of the InserterListItem component in @wordpress/block-editor.
+ *
+ * It is included here because the component is not exported to the public by that package.
+ */
+
+/**
  * External dependencies
  */
 import classnames from 'classnames';

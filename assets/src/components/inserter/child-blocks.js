@@ -1,4 +1,10 @@
 /**
+ * This is a 1:1 copy of the ChildBlocks component in @wordpress/block-editor.
+ *
+ * It is included here because the component is not exported to the public by that package.
+ */
+
+/**
  * WordPress dependencies
  */
 import { withSelect } from '@wordpress/data';
