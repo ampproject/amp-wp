@@ -6,7 +6,6 @@
 /**
  * External dependencies
  */
-import { first, partial, castArray } from 'lodash';
 import classnames from 'classnames';
 
 /**
@@ -113,8 +112,8 @@ export default compose(
 
 		return {
 			onDragEnd: clearSelectedBlock,
-			bringForward: partial( moveBlocksDown, clientId, rootClientId ),
-			sendBackward: partial( moveBlocksUp, clientId, rootClientId ),
+			bringForward: () => moveBlocksDown( clientId, rootClientId ),
+			sendBackward: () => moveBlocksUp( clientId, rootClientId ),
 		};
 	} ),
 	withInstanceId,
