@@ -110,8 +110,10 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch, { clientIds, rootClientId } ) => {
-		const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
+		const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
+
 		return {
+			onDragEnd: clearSelectedBlock,
 			bringForward: partial( moveBlocksDown, clientIds, rootClientId ),
 			sendBackward: partial( moveBlocksUp, clientIds, rootClientId ),
 		};
