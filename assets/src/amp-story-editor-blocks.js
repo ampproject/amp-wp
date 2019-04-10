@@ -133,10 +133,12 @@ domReady( () => {
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
 	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
 
-	registerBlockStyle( 'amp/amp-story-text', {
-		name: 'rounded',
-		label: __( 'Rounded', 'amp' ),
-	} );
+	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
+		registerBlockStyle( roundedBlock, {
+			name: 'rounded',
+			label: __( 'Rounded', 'amp' ),
+		} );
+	}
 
 	registerBlockStyle( 'amp/amp-story-text', {
 		name: 'half-rounded',
