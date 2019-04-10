@@ -180,7 +180,7 @@ class AMP_CLI {
 			} else {
 				WP_CLI::error(
 					sprintf(
-						'The current template mode is Classic, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
+						'Your templates are currently in Reader mode, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
 						self::FLAG_NAME_FORCE_VALIDATION
 					)
 				);

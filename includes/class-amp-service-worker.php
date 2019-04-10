@@ -45,7 +45,7 @@ class AMP_Service_Worker {
 			'image_caching'        => false,
 			'google_fonts_caching' => false,
 		);
-		if ( is_array( $theme_support['service_worker'] ) ) {
+		if ( isset( $theme_support['service_worker'] ) && is_array( $theme_support['service_worker'] ) ) {
 			$enabled_options = array_merge(
 				$enabled_options,
 				$theme_support['service_worker']
@@ -249,7 +249,16 @@ class AMP_Service_Worker {
 				remove_action( 'wp_print_scripts', 'wp_print_service_workers', $priority );
 			}
 		}
+
+		// Reader mode integration.
 		add_action( 'amp_post_template_footer', array( __CLASS__, 'install_service_worker' ) );
+		add_filter(
+			'amp_post_template_data',
+			function ( $data ) {
+				$data['amp_component_scripts']['amp-install-serviceworker'] = true;
+				return $data;
+			}
+		);
 	}
 
 	/**

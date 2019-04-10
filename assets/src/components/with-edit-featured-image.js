@@ -19,8 +19,10 @@ import { hasMinimumStoryPosterDimensions, hasMinimumFeaturedImageWidth } from '.
  */
 export default ( BlockEdit ) => {
 	return withSelect( ( select, ownProps ) => {
+		const featuredImage = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
 		const isCorrectBlock = ( 'core/image' === ownProps.name || 'amp/amp-story-page' === ownProps.name );
-		if ( ! isCorrectBlock || ! ownProps.attributes ) {
+
+		if ( featuredImage || ! isCorrectBlock || ! ownProps.attributes ) {
 			return;
 		}
 

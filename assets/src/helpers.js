@@ -23,6 +23,7 @@ import {
 } from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
@@ -107,7 +108,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: '*',
+			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
 		},
 	};
 
@@ -159,14 +160,17 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	addedAttributes.positionTop = {
-		type: 'number',
-		default: 0,
-	};
-	addedAttributes.positionLeft = {
-		type: 'number',
-		default: 5,
-	};
+	if ( ALLOWED_MOVABLE_BLOCKS.includes( name ) ) {
+		addedAttributes.positionTop = {
+			type: 'number',
+			default: 0,
+		};
+
+		addedAttributes.positionLeft = {
+			type: 'number',
+			default: 5,
+		};
+	}
 
 	return {
 		...settings,
@@ -239,6 +243,53 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		...ampAttributes,
 	};
 };
+
+const blockContentDiv = document.createElement( 'div' );
+
+/**
+ * Filter block attributes to make sure that the className is taken even though it's wrapper in grid layer.
+ *
+ * @param {Object} blockAttributes Block attributes.
+ * @param {Object} blockType Block type.
+ * @param {string} innerHTML Inner HTML from saved content.
+ * @return {Object} Block attributes.
+ */
+export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) => {
+	if ( ! blockAttributes.className && innerHTML.includes( 'is-style-' ) && 0 === innerHTML.indexOf( '<amp-story-grid-layer' ) ) {
+		blockContentDiv.innerHTML = innerHTML;
+
+		// Lets check the first child of the amp-story-grid-layer for the className.
+		if (
+			blockContentDiv.children[ 0 ].children.length &&
+			blockContentDiv.children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
+		) {
+			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].className;
+		}
+	}
+
+	return blockAttributes;
+};
+
+/**
+ * Wraps all movable blocks in a grid layer.
+ *
+ * @param {Object} element
+ * @param {Object} blockType
+ *
+ * @return {Object} The element.
+ */
+export const wrapBlocksInGridLayer = ( element, blockType ) => {
+	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+		return element;
+	}
+
+	return (
+		<amp-story-grid-layer template="vertical">
+			{ element }
+		</amp-story-grid-layer>
+	);
+};
+
 /**
  * Given a list of animated blocks, calculates the total duration
  * of all animations based on the durations and the delays.
@@ -277,7 +328,7 @@ export const renderStoryComponents = () => {
 		ampStoryWrapper.id = 'amp-story-editor';
 
 		const blockNavigation = document.createElement( 'div' );
-		blockNavigation.id = 'amp-root-navigation';
+		blockNavigation.id = 'amp-story-block-navigation';
 
 		const editorCarousel = document.createElement( 'div' );
 		editorCarousel.id = 'amp-story-editor-carousel';
@@ -307,16 +358,12 @@ export const renderStoryComponents = () => {
 		);
 
 		render(
-			<div key="blockNavigation" className="block-navigation">
-				<BlockNavigation />
-			</div>,
+			<BlockNavigation />,
 			blockNavigation
 		);
 
 		render(
-			<div key="pagesCarousel" className="editor-carousel">
-				<EditorCarousel />
-			</div>,
+			<EditorCarousel />,
 			editorCarousel
 		);
 	}
@@ -529,4 +576,27 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
 		overlayStyle.backgroundImage = `linear-gradient(to bottom, ${ gradientList })`;
 	}
 	return overlayStyle;
+};
+
+/**
+ * Converts hex to rgba.
+ *
+ * @param {string} hex Hex value.
+ * @param {number} opacity Opacity.
+ * @return {Object} Rgba value.
+ */
+export const getRgbaFromHex = ( hex, opacity ) => {
+	if ( ! hex ) {
+		return [];
+	}
+	hex = hex.replace( '#', '' );
+	const r = parseInt( hex.substring( 0, 2 ), 16 );
+	const g = parseInt( hex.substring( 2, 4 ), 16 );
+	const b = parseInt( hex.substring( 4, 6 ), 16 );
+	return [
+		r,
+		g,
+		b,
+		opacity / 100,
+	];
 };

@@ -34,16 +34,19 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	PrePublishPanel,
+	withCallToActionValidation,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
+	filterBlockAttributes,
 	addAMPAttributes,
 	addAMPExtraProps,
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
 	hasMinimumStoryPosterDimensions,
+	wrapBlocksInGridLayer,
 } from './helpers';
 
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
@@ -376,7 +379,10 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
+addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
+addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );
 
 const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 

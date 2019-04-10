@@ -15,8 +15,9 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { TemplateInserter } from './';
-import reorderIcon from '../../images/reorder.svg';
+import { TemplateInserter } from '../';
+import reorderIcon from '../../../images/reorder.svg';
+import './edit.css';
 
 function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
 	if ( isReordering ) {

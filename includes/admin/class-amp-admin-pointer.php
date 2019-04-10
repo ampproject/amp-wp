@@ -105,6 +105,12 @@ class AMP_Admin_Pointer {
 	 * @return boolean Is dismissed.
 	 */
 	protected function is_pointer_dismissed() {
+
+		// Consider dismissed in v1.1, since admin pointer is only to educate about the new modes in 1.0.
+		if ( version_compare( strtok( AMP__VERSION, '-' ), '1.1', '>=' ) ) {
+			return true;
+		}
+
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
 		if ( empty( $dismissed ) ) {
 			return false;
@@ -130,7 +136,7 @@ class AMP_Admin_Pointer {
 						'<h3>%s</h3><p><strong>%s</strong></p><p>%s</p>',
 						__( 'AMP', 'amp' ),
 						__( 'New AMP Template Modes', 'amp' ),
-						__( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Paired&#8221; and &#8220;Native&#8221; modes.', 'amp' )
+						__( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Transitional&#8221; and &#8220;Native&#8221; modes.', 'amp' )
 					),
 					'position' => array(
 						'edge'  => 'left',

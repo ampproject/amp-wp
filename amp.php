@@ -3,9 +3,9 @@
  * Plugin Name: AMP
  * Description: Enable AMP on your WordPress site, the WordPress way.
  * Plugin URI: https://amp-wp.org
- * Author: WordPress.com VIP, XWP, Google, and contributors
+ * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.1-alpha
+ * Version: 1.1-beta1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -23,7 +23,7 @@ function _amp_print_php_version_admin_notice() {
 	<div class="notice notice-error">
 		<p>
 			<?php
-			sprintf(
+			printf(
 				/* translators: %s: required PHP version */
 				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
 				'5.4+'
@@ -115,7 +115,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.1-alpha' );
+define( 'AMP__VERSION', '1.1-beta1' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -312,7 +312,7 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 /**
- * Conditionally add AMP actions or render the 'paired mode' template(s).
+ * Conditionally add AMP actions or render the transitional mode template(s).
  *
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
@@ -329,7 +329,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	// The remaining logic here is for paired mode running in themes that don't support AMP, the template system in AMP<=0.6.
+	// The remaining logic here is for transitional mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
@@ -350,7 +350,7 @@ function amp_maybe_add_actions() {
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
 			/*
-			 * Temporary redirect is used for admin users because classic mode and AMP support can be enabled by user at any time,
+			 * Temporary redirect is used for admin users because reader mode and AMP support can be enabled by user at any time,
 			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
 			 */
 			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );
@@ -423,13 +423,13 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      add_theme_support( AMP_Theme_Support::SLUG );
  *
  * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
- * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
+ * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired' => true,
  *      ) );
  *
- * Paired mode is also implied if you define a template_dir:
+ * Transitional mode is also implied if you define a template_dir:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'template_dir' => 'amp',
@@ -470,7 +470,7 @@ function amp_is_canonical() {
 		return empty( $args['paired'] );
 	}
 
-	// If there is a template_dir, then paired mode is implied.
+	// If there is a template_dir, then transitional mode is implied.
 	return empty( $args['template_dir'] );
 }
 

@@ -11,14 +11,16 @@ import {
 	RichText,
 	getColorClassName,
 	getFontSize,
+	getColorObjectByAttributeValues,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
-import { getPercentageFromPixels } from '../../helpers';
+import { getPercentageFromPixels, getRgbaFromHex } from '../../helpers';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 
 export const name = 'amp/amp-story-text';
@@ -78,6 +80,10 @@ const schema = {
 	customBackgroundColor: {
 		type: 'string',
 	},
+	opacity: {
+		default: 100,
+		type: 'number',
+	},
 	height: {
 		default: 50,
 		type: 'number',
@@ -109,7 +115,7 @@ export const settings = {
 
 	edit,
 
-	save( { attributes } ) {
+	save: ( { attributes } ) => {
 		const {
 			content,
 			align,
@@ -124,27 +130,49 @@ export const settings = {
 			width,
 			height,
 			tagName,
+			opacity,
 		} = attributes;
 
 		const textClass = getColorClassName( 'color', textColor );
 		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+		const hasOpacity = opacity && opacity < 100;
 
 		const className = classnames( {
 			'amp-text-content': ! ampFitText,
 			'has-text-color': textColor || customTextColor,
 			'has-background': backgroundColor || customBackgroundColor,
 			[ textClass ]: textClass,
-			[ backgroundClass ]: backgroundClass,
+			[ backgroundClass ]: ! hasOpacity ? backgroundClass : undefined,
 		} );
 
-		// Calculate fontsize using vw to make it responsive.
-		const { fontSizes } = select( 'core/block-editor' ).getSettings();
-		// Get the font size in px based on the slug with fallback to customFontSize.
+		const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+
+		/*
+		 * Calculate fontsize using vw to make it responsive.
+		 *
+		 * Get the font size in px based on the slug with fallback to customFontSize.
+		 */
 		const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 		const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
+		let appliedBackgroundColor;
+
+		// If we need to assign opacity.
+		if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
+			const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+
+			if ( hexColor ) {
+				const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
+
+				appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+			}
+		} else if ( ! backgroundClass ) {
+			appliedBackgroundColor = customBackgroundColor;
+		}
+
 		const styles = {
-			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
+			backgroundColor: appliedBackgroundColor,
 			color: textClass ? undefined : customTextColor,
 			fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
 			width: `${ getPercentageFromPixels( 'x', width ) }%`,
@@ -159,17 +187,21 @@ export const settings = {
 					style={ styles }
 					className={ className }
 					value={ content }
+					format="string"
 				/>
 			);
 		}
 
 		const ContentTag = tagName;
 
+		styles.display = 'flex';
+
+		// Uses RawHTML to mimic RichText.Content behavior.
 		return (
 			<ContentTag
 				style={ styles }
 				className={ className }>
-				<amp-fit-text layout="fill" className="amp-text-content">{ content }</amp-fit-text>
+				<amp-fit-text layout="flex-item" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
 			</ContentTag>
 		);
 	},

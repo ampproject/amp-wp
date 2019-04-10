@@ -124,7 +124,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
-		// In Paired Mode, the IDs should also include all of the newly-created posts.
+		// In Transitional Mode, the IDs should also include all of the newly-created posts.
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
