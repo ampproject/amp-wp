@@ -10,6 +10,11 @@
 	transition: opacity .3s;
 }
 
+.components-draggable__clone .block-editor-block-list__block .rotatable-box-wrap {
+	display: none;
+	opacity: 0;
+}
+
 .editor-inner-blocks .block-editor-block-list__block.is-rotating .rotatable-box-wrap,
 .editor-inner-blocks .block-editor-block-list__block.is-selected .rotatable-box-wrap,
 .editor-inner-blocks .block-editor-block-list__block.is-hovered .rotatable-box-wrap {
