@@ -1,4 +1,4 @@
-/* global ampStoriesFonts */
+/* global ampStoriesFonts, _ */
 
 /**
  * External dependencies
@@ -12,6 +12,7 @@ import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
 import { select } from '@wordpress/data';
+import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -567,4 +568,59 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 		b,
 		opacity / 100,
 	];
+};
+
+const emptyTemplateMapping = {
+	'amp/amp-story-text': {
+		content: '',
+	},
+	'amp/amp-story-page': {
+		mediaUrl: null,
+		mediaType: null,
+		focalPoint: {},
+	},
+	'core/image': {
+		url: null,
+	},
+	'amp/amp-story-cta': {
+		text: null,
+		link: null,
+	},
+	'core/quote': [
+
+	],
+};
+
+/**
+ * Gets a skeleton template block from pre-populated block.
+ *
+ * @param {Object} block Original block.
+ * @return {Object} Block.
+ */
+const getSkeletonTemplateBlock = ( block ) => {
+	if ( ! emptyTemplateMapping[ block.name ] ) {
+		return block.attributes;
+	}
+
+	const attributes = {};
+	_.each( block.attributes, function( value, key ) {
+		if ( undefined === emptyTemplateMapping[ block.name ][ key ] ) {
+			attributes[ key ] = value;
+		}
+	} );
+	return attributes;
+};
+
+/**
+ * Creates a skeleton template from pre-populated template.
+ *
+ * @param {Object} template Block.
+ * @return {Object} Skeleton template block.
+ */
+export const createSkeletonTemplate = ( template ) => {
+	const children = [];
+	template.innerBlocks.forEach( function( childBlock ) {
+		children.push( createBlock( childBlock.name, getSkeletonTemplateBlock( childBlock ) ) );
+	} );
+	return createBlock( template.name, getSkeletonTemplateBlock( template ), children );
 };
