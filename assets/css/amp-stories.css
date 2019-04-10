@@ -65,6 +65,10 @@ amp-story-grid-layer amp-img > img {
 	background: url("../images/quote-black.svg") center -23px no-repeat;
 }
 
+.wp-block-quote cite {
+	font-style: normal;
+}
+
 .is-style-white.wp-block-quote {
 	background-image: url("../images/quote-white.svg");
 }
