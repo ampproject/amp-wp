@@ -54,3 +54,21 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 amp-story-grid-layer amp-img > img {
 	object-position: inherit;
 }
+
+.is-style-white p,
+.is-style-white.wp-block-quote cite,
+.is-style-white .wp-block-quote__citation {
+	color: #ffffff;
+}
+
+.wp-block-quote {
+	background: url("../images/quote-black.svg") center -23px no-repeat;
+}
+
+.wp-block-quote cite {
+	font-style: normal;
+}
+
+.is-style-white.wp-block-quote {
+	background-image: url("../images/quote-white.svg");
+}

@@ -37,6 +37,41 @@
 	display: none !important;
 }
 
+/* Quote block adjustments */
+.wp-block-quote__citation {
+	font-size: 16px;
+	margin-top: 24px;
+	display: block;
+}
+
+.editor-styles-wrapper .wp-block-quote p {
+	line-height: 34px;
+	font-weight: bold;
+	font-size: 30px;
+	font-family: "Source Sans Pro", sans-serif;
+}
+
+.wp-block-quote,
+.wp-block-quote[style*="text-align: right"] {
+	border: none;
+	padding-top: 100px;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__block [data-type="core/quote"] .block-editor-block-list__block-edit::before {
+	right: -5px;
+	left: -5px;
+	top: -5px;
+	bottom: -5px;
+}
+
+:not(.amp-story-page-preview) :not(.amp-stories__editor-inserter__results) .components-disabled .wp-block-quote.is-style-white {
+	background-color: #313131;
+}
+
+.amp-story-reorderer-item .amp-story-page-preview .components-disabled .wp-block-quote.is-style-white,
+.amp-stories__editor-inserter__menu .amp-stories__editor-inserter__results .components-disabled .wp-block-quote.is-style-white {
+	background-color: initial;
+}
 /*
  * 100. Shame
  */
