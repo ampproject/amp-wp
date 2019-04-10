@@ -64,6 +64,15 @@
 	bottom: -5px;
 }
 
+.editor-block-styles__item.block-editor-block-styles__item[aria-label="White"] .block-editor-block-styles__item-preview,
+:not(.amp-story-page-preview) :not(.amp-stories__editor-inserter__results) .components-disabled .wp-block-quote.is-style-white {
+	background-color: #313131;
+}
+
+.amp-story-reorderer-item .amp-story-page-preview .components-disabled .wp-block-quote.is-style-white,
+.amp-stories__editor-inserter__menu .amp-stories__editor-inserter__results .components-disabled .wp-block-quote.is-style-white {
+	background-color: initial;
+}
 /*
  * 100. Shame
  */

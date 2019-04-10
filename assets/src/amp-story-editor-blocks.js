@@ -150,8 +150,8 @@ domReady( () => {
 	} );
 
 	registerBlockStyle( 'core/quote', {
-		name: 'light',
-		label: __( 'Light', 'amp' ),
+		name: 'white',
+		label: __( 'White', 'amp' ),
 	} );
 
 	unregisterBlockStyle( 'core/quote', 'large' );

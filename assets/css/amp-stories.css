@@ -55,9 +55,9 @@ amp-story-grid-layer amp-img > img {
 	object-position: inherit;
 }
 
-.is-style-light p,
-.is-style-light.wp-block-quote cite,
-.is-style-light .wp-block-quote__citation {
+.is-style-white p,
+.is-style-white.wp-block-quote cite,
+.is-style-white .wp-block-quote__citation {
 	color: #ffffff;
 }
 
@@ -65,6 +65,6 @@ amp-story-grid-layer amp-img > img {
 	background: url("../images/quote-black.svg") center -23px no-repeat;
 }
 
-.is-style-light.wp-block-quote {
+.is-style-white.wp-block-quote {
 	background-image: url("../images/quote-white.svg");
 }
