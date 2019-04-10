@@ -106,8 +106,7 @@ class AMP_Story_Templates {
 			return;
 		}
 		$this->import_story_templates();
-		// @todo This is commented out for testing purposes until the PR gets ready.
-		// AMP_Options_Manager::update_option( 'story_templates_version', self::STORY_TEMPLATES_VERSION );
+		AMP_Options_Manager::update_option( 'story_templates_version', self::STORY_TEMPLATES_VERSION );
 	}
 
 	/**
