@@ -3,12 +3,12 @@
  */
 import { withSelect } from '@wordpress/data';
 import { ifCondition, compose } from '@wordpress/compose';
+import { BlockIcon } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import BlockTypesList from '../block-types-list';
-import BlockIcon from '../block-icon';
 
 function ChildBlocks( { rootBlockIcon, rootBlockTitle, items, ...props } ) {
 	return (

@@ -4,9 +4,9 @@
 import classnames from 'classnames';
 
 /**
- * Internal dependencies
+ * WordPress dependencies
  */
-import BlockIcon from '../block-icon';
+import { BlockIcon } from '@wordpress/block-editor';
 
 function InserterListItem( {
 	icon,
