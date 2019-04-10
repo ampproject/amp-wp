@@ -1,19 +1,21 @@
-div[data-type="amp/amp-story-page"] {
-	border: 5px solid #eff0f1;
+.block-editor-block-list__layout .block-editor-block-list__block[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit > .block-editor-block-list__breadcrumb {
+	display: none;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__block[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit:before {
+	border: 3px solid #E3E5E7;
 	border-radius: 5px;
+	box-shadow: none;
 }
 
-div[data-type="amp/amp-story-page"]::after {
-	content: '';
-	position: absolute;
-	bottom: -5px;
-	left: 0;
-	width: 100%;
-	height: 5px;
-	background: #eff0f1;
-	transition: background-color 300ms linear;
+.block-editor-block-list__layout .block-editor-block-list__block.amp-page-active[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit:before {
+	border-color: #555d66;
 }
 
+.block-editor-block-list__layout .block-editor-block-list__block[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit > .block-editor-block-contextual-toolbar > .block-editor-block-toolbar {
+	left: 4px;
+	top: 3px;
+}
 
 /*
  * Disable the block mover at all times for page blocks.
