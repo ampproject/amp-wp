@@ -1,4 +1,14 @@
 /**
+ * This is an almost 1:1 copy of the InserterMenu component in @wordpress/block-editor.
+ *
+ * The main change here is that the blocks listed in the menu are not influenced by the currently selected block.
+ * Instead, all possible blocks are listed. The location where they can be inserted depends on whether they are
+ * top-level blocks (story page) or child-level blocks (text block, call-to-action, et al).
+ * Child-level blocks are inserted on the current page as determined by the getCurrentPage() selector, regardless
+ * of block selection.
+ */
+
+/**
  * External dependencies
  */
 import {
@@ -384,6 +394,13 @@ export default compose(
 		}
 		const destinationRootBlockName = getBlockName( destinationRootClientId );
 
+		/*
+		 * Filters inserter items to only show blocks that can be inserted given the context.
+		 *
+		 * - Pages can always be inserted
+		 * - Movable child blocks can always be inserted
+		 * - Special cases like Call-to-Action blocks can only inserted when not on the first page.
+		 */
 		const inserterItems = [ ...getInserterItems(), ...getInserterItems( destinationRootClientId ) ].filter( ( { name } ) => {
 			if ( ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) ) {
 				return true;
