@@ -390,7 +390,8 @@ export default compose(
 			}
 
 			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			return canInsertBlockType( name, getCurrentPage() ) && getBlockListSettings( destinationRootClientId ).allowedBlocks.includes( name );
+			const destinationBlockListSettings = getBlockListSettings( destinationRootClientId );
+			return canInsertBlockType( name, getCurrentPage() ) && destinationBlockListSettings && destinationBlockListSettings.allowedBlocks.includes( name );
 		} );
 
 		return {
