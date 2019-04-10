@@ -396,7 +396,7 @@ export default compose(
 
 		return {
 			rootChildBlocks: getChildBlockNames( destinationRootBlockName ),
-			items: inserterItems,
+			items: [ ...new Set( inserterItems ) ], // Make sure the items are unique.
 			destinationRootClientId,
 		};
 	} ),
