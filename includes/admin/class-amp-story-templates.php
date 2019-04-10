@@ -120,10 +120,10 @@ class AMP_Story_Templates {
 			if ( $existing_template > 0 ) {
 				continue;
 			}
-			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents, WordPress.XSS.EscapeOutput, WordPress.Security.EscapeOutput
 			if ( ! empty( $post_content ) ) {
 
-				$post_content = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates'), $post_content );
+				$post_content = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates' ), $post_content );
 
 				$post_id = wp_insert_post(
 					wp_slash(
