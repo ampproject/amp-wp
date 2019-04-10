@@ -1,11 +1,16 @@
 /**
+ * This is an almost 1:1 copy of the Inserter component in @wordpress/block-editor.
+ *
+ * It has been included here in a slightly modified way, namely without the hasItems
+ * limitation.
+ */
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { withSelect } from '@wordpress/data';
-import { compose, ifCondition } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -15,7 +20,7 @@ import InserterMenu from './menu';
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
 	<IconButton
 		icon="insert"
-		label={ __( 'Add block' ) }
+		label={ __( 'Add block', 'amp' ) }
 		labelPosition="bottom"
 		onClick={ onToggle }
 		className="editor-inserter__toggle block-editor-inserter__toggle"
@@ -92,7 +97,7 @@ class Inserter extends Component {
 				position={ position }
 				onToggle={ this.onToggle }
 				expandOnMobile
-				headerTitle={ __( 'Add a block' ) }
+				headerTitle={ __( 'Add a block', 'amp' ) }
 				renderToggle={ this.renderToggle }
 				renderContent={ this.renderContent }
 			/>
@@ -100,13 +105,4 @@ class Inserter extends Component {
 	}
 }
 
-export default compose( [
-	withSelect( ( select, { rootClientId } ) => {
-		const { hasInserterItems } = select( 'core/block-editor' );
-
-		return {
-			hasItems: hasInserterItems( rootClientId ),
-		};
-	} ),
-	ifCondition( ( { hasItems } ) => hasItems ),
-] )( Inserter );
+export default Inserter;
