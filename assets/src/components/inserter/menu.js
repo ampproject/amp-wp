@@ -398,6 +398,7 @@ export default compose(
 			rootChildBlocks: getChildBlockNames( destinationRootBlockName ),
 			items: [ ...new Set( inserterItems ) ], // Make sure the items are unique.
 			destinationRootClientId,
+			currentPage: getCurrentPage(),
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps, { select } ) => {
@@ -406,20 +407,25 @@ export default compose(
 		// Since it's a function only called when the event handlers are called,
 		// it's fine to extract it.
 		// eslint-disable-next-line no-restricted-syntax
-		function getInsertionIndex() {
+		function getInsertionIndex( name ) {
 			const {
 				getBlockIndex,
 				getBlockSelectionEnd,
 				getBlockOrder,
 			} = select( 'core/block-editor' );
-			const { clientId, destinationRootClientId, isAppender } = ownProps;
+			const { clientId, destinationRootClientId, isAppender, currentPage } = ownProps;
 
 			// If the clientId is defined, we insert at the position of the block.
 			if ( clientId ) {
 				return getBlockIndex( clientId, destinationRootClientId );
 			}
 
-			// If there a selected block, we insert after the selected block.
+			// If it's a page block, insert after current page.
+			if ( ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) ) {
+				return getBlockOrder().indexOf( currentPage ) + 1;
+			}
+
+			// If there is a selected block, we insert after the selected block.
 			const end = getBlockSelectionEnd();
 			if ( ! isAppender && end ) {
 				return getBlockIndex( end, destinationRootClientId ) + 1;
@@ -457,10 +463,11 @@ export default compose(
 				if ( ! isAppender && selectedBlock && isUnmodifiedDefaultBlock( selectedBlock ) ) {
 					replaceBlocks( selectedBlock.clientId, insertedBlock );
 				} else {
+					const rootClientId = ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) ? undefined : ownProps.destinationRootClientId;
 					insertBlock(
 						insertedBlock,
-						getInsertionIndex(),
-						ownProps.destinationRootClientId
+						getInsertionIndex( name ),
+						rootClientId,
 					);
 				}
 
