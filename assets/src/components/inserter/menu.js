@@ -40,6 +40,7 @@ import { addQueryArgs } from '@wordpress/url';
 import BlockPreview from '../block-preview';
 import BlockTypesList from '../block-types-list';
 import ChildBlocks from './child-blocks';
+import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
 
 const MAX_SUGGESTED_ITEMS = 9;
 
@@ -368,6 +369,8 @@ export default compose(
 		const {
 			getChildBlockNames,
 		} = select( 'core/blocks' );
+		const { getCurrentPage } = select( 'amp/story' );
+		const { canInsertBlockType, getBlockListSettings } = select( 'core/editor' );
 
 		let destinationRootClientId = rootClientId;
 		if ( ! destinationRootClientId && ! clientId && ! isAppender ) {
@@ -376,11 +379,23 @@ export default compose(
 				destinationRootClientId = getBlockRootClientId( end ) || undefined;
 			}
 		}
+		if ( ! destinationRootClientId ) {
+			destinationRootClientId = getCurrentPage();
+		}
 		const destinationRootBlockName = getBlockName( destinationRootClientId );
+
+		const inserterItems = [ ...getInserterItems(), ...getInserterItems( destinationRootClientId ) ].filter( ( { name } ) => {
+			if ( ALLOWED_TOP_LEVEL_BLOCKS.includes( name ) ) {
+				return true;
+			}
+
+			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
+			return canInsertBlockType( name, getCurrentPage() ) && getBlockListSettings( destinationRootClientId ).allowedBlocks.includes( name );
+		} );
 
 		return {
 			rootChildBlocks: getChildBlockNames( destinationRootBlockName ),
-			items: getInserterItems( destinationRootClientId ),
+			items: inserterItems,
 			destinationRootClientId,
 		};
 	} ),
