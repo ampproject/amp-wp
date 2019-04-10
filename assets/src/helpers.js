@@ -571,6 +571,7 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 };
 
 const emptyTemplateMapping = {
+	// @todo The list is not complete.
 	'amp/amp-story-text': {
 		content: '',
 	},

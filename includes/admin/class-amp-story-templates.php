@@ -157,10 +157,6 @@ class AMP_Story_Templates {
 				'name'  => 'travel-tip',
 			),
 			array(
-				'title' => __( 'Template: Fact Page', 'amp' ),
-				'name'  => 'fact',
-			),
-			array(
 				'title' => __( 'Template: Quote', 'amp' ),
 				'name'  => 'quote',
 			),
