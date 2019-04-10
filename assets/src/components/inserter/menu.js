@@ -110,8 +110,6 @@ export class InserterMenu extends Component {
 	}
 
 	componentDidMount() {
-		// This could be replaced by a resolver.
-		this.props.fetchReusableBlocks();
 		this.filter();
 	}
 
@@ -392,11 +390,6 @@ export default compose(
 			hideInsertionPoint,
 		} = dispatch( 'core/block-editor' );
 
-		// This should be an external action provided in the editor settings.
-		const {
-			__experimentalFetchReusableBlocks: fetchReusableBlocks,
-		} = dispatch( 'core/editor' );
-
 		// To avoid duplication, getInsertionIndex is extracted and used in two event handlers
 		// This breaks the withDispatch not containing any logic rule.
 		// Since it's a function only called when the event handlers are called,
@@ -426,7 +419,6 @@ export default compose(
 		}
 
 		return {
-			fetchReusableBlocks,
 			showInsertionPoint() {
 				const index = getInsertionIndex();
 				showInsertionPoint( ownProps.destinationRootClientId, index );
