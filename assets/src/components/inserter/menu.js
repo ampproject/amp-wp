@@ -232,7 +232,7 @@ export class InserterMenu extends Component {
 		}, 0 );
 
 		const resultsFoundMessage = sprintf(
-			_n( '%d result found.', '%d results found.', resultCount ),
+			_n( '%d result found.', '%d results found.', resultCount, 'amp' ),
 			resultCount
 		);
 
@@ -271,12 +271,12 @@ export class InserterMenu extends Component {
 				onKeyDown={ this.onKeyDown }
 			>
 				<label htmlFor={ `block-editor-inserter__search-${ instanceId }` } className="screen-reader-text">
-					{ __( 'Search for a block' ) }
+					{ __( 'Search for a block', 'amp' ) }
 				</label>
 				<input
 					id={ `block-editor-inserter__search-${ instanceId }` }
 					type="search"
-					placeholder={ __( 'Search for a block' ) }
+					placeholder={ __( 'Search for a block', 'amp' ) }
 					className="editor-inserter__search block-editor-inserter__search"
 					autoFocus
 					onChange={ this.onChangeSearchInput }
@@ -287,7 +287,7 @@ export class InserterMenu extends Component {
 					ref={ this.inserterResults }
 					tabIndex="0"
 					role="region"
-					aria-label={ __( 'Available block types' ) }
+					aria-label={ __( 'Available block types', 'amp' ) }
 				>
 
 					<ChildBlocks
@@ -299,7 +299,7 @@ export class InserterMenu extends Component {
 
 					{ !! suggestedItems.length &&
 						<PanelBody
-							title={ _x( 'Most Used', 'blocks' ) }
+							title={ _x( 'Most Used', 'blocks', 'amp' ) }
 							opened={ isPanelOpen( 'suggested' ) }
 							onToggle={ this.onTogglePanel( 'suggested' ) }
 							ref={ this.bindPanel( 'suggested' ) }
@@ -330,7 +330,7 @@ export class InserterMenu extends Component {
 					{ !! reusableItems.length && (
 						<PanelBody
 							className="editor-inserter__reusable-blocks-panel block-editor-inserter__reusable-blocks-panel"
-							title={ __( 'Reusable' ) }
+							title={ __( 'Reusable', 'amp' ) }
 							opened={ isPanelOpen( 'reusable' ) }
 							onToggle={ this.onTogglePanel( 'reusable' ) }
 							icon="controls-repeat"
@@ -341,12 +341,12 @@ export class InserterMenu extends Component {
 								className="editor-inserter__manage-reusable-blocks block-editor-inserter__manage-reusable-blocks"
 								href={ addQueryArgs( 'edit.php', { post_type: 'wp_block' } ) }
 							>
-								{ __( 'Manage All Reusable Blocks' ) }
+								{ __( 'Manage All Reusable Blocks', 'amp' ) }
 							</a>
 						</PanelBody>
 					) }
 					{ isEmpty( suggestedItems ) && isEmpty( reusableItems ) && isEmpty( itemsPerCategory ) && (
-						<p className="editor-inserter__no-results block-editor-inserter__no-results">{ __( 'No blocks found.' ) }</p>
+						<p className="editor-inserter__no-results block-editor-inserter__no-results">{ __( 'No blocks found.', 'amp' ) }</p>
 					) }
 				</div>
 
