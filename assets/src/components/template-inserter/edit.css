@@ -128,7 +128,15 @@
 }
 
 .amp-stories__editor-inserter__results .block-editor-block-preview .wp-block {
-	transform: scale(0.48) translateX(-40%) translateY(-40%);
+	height: initial !important;
+	position: absolute;
+	transform: scale(0.48) translateX(-55%) translateY(-40%);
+}
+
+@media (min-width: 600px) {
+	.amp-stories__editor-inserter__results .block-editor-block-list__layout .block-editor-block-list__block {
+		padding: 0;
+	}
 }
 
 .amp-stories__editor-inserter__results .block-editor-block-types-list {

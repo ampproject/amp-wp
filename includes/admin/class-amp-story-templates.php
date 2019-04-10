@@ -122,6 +122,9 @@ class AMP_Story_Templates {
 			}
 			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			if ( ! empty( $post_content ) ) {
+
+				$post_content = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates'), $post_content );
+
 				$post_id = wp_insert_post(
 					wp_slash(
 						array(
