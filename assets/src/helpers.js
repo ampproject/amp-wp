@@ -21,6 +21,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
+	Inserter,
 } from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -378,6 +379,17 @@ export const renderStoryComponents = () => {
 		render(
 			<Shortcuts />,
 			shortcuts
+		);
+
+		const customInserter = document.createElement( 'div' );
+		customInserter.id = 'amp-story-inserter';
+
+		const inserterWrapper = editorBlockNavigation.parentNode.parentNode.querySelector( '.block-editor-inserter' ).parentNode;
+		inserterWrapper.parentNode.replaceChild( customInserter, inserterWrapper );
+
+		render(
+			<Inserter position="bottom right" />,
+			customInserter
 		);
 	}
 };
