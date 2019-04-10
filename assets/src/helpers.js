@@ -570,8 +570,11 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 	];
 };
 
+/**
+ * Object of block attributes to set to default when inserting a template.
+ */
 const emptyTemplateMapping = {
-	// @todo The list is not complete.
+	// @todo This can use just arrays of attribute keys instead of object.
 	'amp/amp-story-text': {
 		content: '',
 	},
@@ -587,9 +590,10 @@ const emptyTemplateMapping = {
 		text: null,
 		link: null,
 	},
-	'core/quote': [
-
-	],
+	'core/quote': {
+		citation: null,
+		value: null,
+	},
 };
 
 /**
