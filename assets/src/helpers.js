@@ -647,7 +647,7 @@ export const getStylesFromBlockAttributes = ( {
 	};
 };
 
-export const getMetaBlockSettings = ( { attribute, tagName = 'p', isEditable = false } ) => {
+export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
 	const supports = {
 		className: false,
 		anchor: true,
@@ -705,6 +705,6 @@ export const getMetaBlockSettings = ( { attribute, tagName = 'p', isEditable = f
 				/>
 			);
 		},
-		edit: withMetaBlockEdit( { attribute, tagName, isEditable } ),
+		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
 };

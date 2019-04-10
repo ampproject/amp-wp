@@ -30,6 +30,7 @@ import { maybeEnqueueFontStyle } from '../helpers';
 const MetaBlockEdit = ( props ) => {
 	const {
 		blockContent,
+		placeholder,
 		attributes,
 		setAttributes,
 		className,
@@ -115,16 +116,17 @@ const MetaBlockEdit = ( props ) => {
 						[ backgroundColor.class ]: backgroundColor.class,
 						[ textColor.class ]: textColor.class,
 						[ fontSize.class ]: fontSize.class,
+						'is-empty': ! blockContent,
 					} ) }
 				>
-					{ blockContent }
+					{ blockContent || placeholder }
 				</ContentTag>
 			</ResizableBox>
 		</Fragment>
 	);
 };
 
-export default ( { attribute, tagName, isEditable } ) => {
+export default ( { attribute, placeholder, tagName, isEditable } ) => {
 	return compose(
 		withSelect( ( select ) => {
 			const { getEditedPostAttribute } = select( 'core/editor' );
@@ -145,7 +147,7 @@ export default ( { attribute, tagName, isEditable } ) => {
 				case 'author':
 					const author = getAuthors().find( ( { id } ) => id === attributeValue );
 
-					blockContent = author ? author.name : __( 'Unknown', 'amp' );
+					blockContent = author ? author.name : __( 'Anonymous', 'amp' );
 
 					break;
 				default:
@@ -154,6 +156,7 @@ export default ( { attribute, tagName, isEditable } ) => {
 
 			return {
 				blockContent,
+				placeholder,
 			};
 		} ),
 		// @todo: Implement isEditable handling to make this usable.

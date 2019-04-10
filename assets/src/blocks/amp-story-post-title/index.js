@@ -22,6 +22,7 @@ export const settings = {
 	...getMetaBlockSettings( {
 		tagName: 'h1',
 		attribute: 'title',
+		placeholder: __( 'Add title', 'amp' ),
 		isEditable: true,
 	} ),
 };
