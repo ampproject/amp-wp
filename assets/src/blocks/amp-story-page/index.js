@@ -82,6 +82,7 @@ export const settings = {
 	save( { attributes } ) {
 		const {
 			anchor,
+			focalPoint,
 			overlayOpacity,
 			mediaUrl,
 			mediaType,
@@ -107,13 +108,17 @@ export const settings = {
 			overlayStyle.opacity = overlayOpacity / 100;
 		}
 
+		const imgStyle = {
+			objectPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'initial',
+		};
+
 		return (
 			<amp-story-page style={ { backgroundColor: '#ffffff' } } id={ anchor } auto-advance-after={ advanceAfter }>
 				{
 					mediaUrl && (
 						<amp-story-grid-layer template="fill">
 							{ IMAGE_BACKGROUND_TYPE === mediaType && (
-								<amp-img layout="fill" src={ mediaUrl } />
+								<amp-img layout="fill" src={ mediaUrl } style={ imgStyle } />
 							) }
 							{ VIDEO_BACKGROUND_TYPE === mediaType && (
 								<amp-video layout="fill" src={ mediaUrl } poster={ poster } muted autoplay loop />
