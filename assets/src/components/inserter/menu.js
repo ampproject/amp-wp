@@ -385,11 +385,6 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch, ownProps, { select } ) => {
-		const {
-			showInsertionPoint,
-			hideInsertionPoint,
-		} = dispatch( 'core/block-editor' );
-
 		// To avoid duplication, getInsertionIndex is extracted and used in two event handlers
 		// This breaks the withDispatch not containing any logic rule.
 		// Since it's a function only called when the event handlers are called,
@@ -419,11 +414,18 @@ export default compose(
 		}
 
 		return {
-			showInsertionPoint() {
-				const index = getInsertionIndex();
-				showInsertionPoint( ownProps.destinationRootClientId, index );
+			showInsertionPoint: () => {
+				/*
+				 * @todo Create our own version of showInsertionPoint/hideInsertionPoint
+				 *       that works with our custom way of displaying and positioning blocks.
+				 *
+				 * This could be something like an opaque rectangle on the current page (like a text block),
+				 * or a vertical line next to the page (showing where the new page would be inserted).
+				 */
 			},
-			hideInsertionPoint,
+			hideInsertionPoint: () => {
+				// @todo Undo whatever showInsertionPoint() does.
+			},
 			onSelect( item ) {
 				const {
 					replaceBlocks,
