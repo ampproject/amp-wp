@@ -191,6 +191,12 @@ class AMP_Story_Post_Type {
 			function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
+
+					// Disable noscript fallbacks since not allowed in AMP Stories.
+					$sanitizers['AMP_Img_Sanitizer']['add_noscript_fallback']    = false;
+					$sanitizers['AMP_Audio_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Video_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Iframe_Sanitizer']['add_noscript_fallback'] = false; // Note that iframe is not yet allowed in an AMP Story.
 				}
 				return $sanitizers;
 			}
