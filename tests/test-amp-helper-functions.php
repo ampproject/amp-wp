@@ -348,7 +348,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$_GET['amp'] = '';
 		$this->assertTrue( is_amp_endpoint() );
-		unset( $_GET['amp'] );
+		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 

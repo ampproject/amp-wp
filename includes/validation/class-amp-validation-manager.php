@@ -303,7 +303,7 @@ class AMP_Validation_Manager {
 		 */
 		if ( ! is_amp_endpoint() ) {
 			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
+				$error_count = (int) $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 			if ( $error_count < 0 ) {
 				$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
@@ -523,9 +523,9 @@ class AMP_Validation_Manager {
 			&&
 			'post.php' === $pagenow
 			&&
-			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			&&
-			intval( $_POST['post_ID'] ) === (int) $post_id // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			(int) $_POST['post_ID'] === (int) $post_id // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		);
 
 		$should_validate_post = (
