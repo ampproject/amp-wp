@@ -168,12 +168,9 @@ export default createHigherOrderComponent(
 				<Fragment>
 					{ isMovableBLock && (
 						<StoryBlockMover
-							clientIds={ props.clientId }
+							clientId={ props.clientId }
 							blockElementId={ `block-${ props.clientId }` }
-							isFirst={ props.isFirst }
-							isLast={ props.isLast }
-							isFocused={ props.isFocused }
-							isDraggable={ ! props.isPartOfMultiSelection }
+							isDraggable={ ! props.isPartOfMultiSelection && isSelected }
 						/>
 					) }
 					{ ! isMovableBLock && ( <BlockEdit { ...props } /> ) }

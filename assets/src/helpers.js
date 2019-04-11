@@ -22,6 +22,7 @@ import {
 	StoryControls,
 	Shortcuts,
 	withMetaBlockEdit,
+	Inserter,
 } from './components';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -179,6 +180,10 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 250,
 			type: 'number',
 		};
+		addedAttributes.rotationAngle = {
+			type: 'number',
+			default: 0,
+		};
 	}
 
 	if ( isImageBlock ) {
@@ -277,6 +282,17 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes.style = {
 			...style,
 			...positionStyle,
+		};
+	}
+
+	if ( attributes.rotationAngle ) {
+		const rotationAngle = parseInt( attributes.rotationAngle );
+		const rotationStyle = {
+			transform: `rotate(${ rotationAngle }deg)`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...rotationStyle,
 		};
 	}
 
@@ -419,6 +435,17 @@ export const renderStoryComponents = () => {
 		render(
 			<Shortcuts />,
 			shortcuts
+		);
+
+		const customInserter = document.createElement( 'div' );
+		customInserter.id = 'amp-story-inserter';
+
+		const inserterWrapper = editorBlockNavigation.parentNode.parentNode.querySelector( '.block-editor-inserter' ).parentNode;
+		inserterWrapper.parentNode.replaceChild( customInserter, inserterWrapper );
+
+		render(
+			<Inserter position="bottom right" />,
+			customInserter
 		);
 	}
 };

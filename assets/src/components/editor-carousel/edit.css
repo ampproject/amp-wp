@@ -21,6 +21,10 @@
 	transition: transform 300ms ease-in-out;
 }
 
+#amp-story-editor > .editor-block-list__layout .block-list-appender {
+	display: none;
+}
+
 .amp-story-editor-carousel-navigation {
 	display: flex;
 	justify-content: space-between;
