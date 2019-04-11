@@ -95,6 +95,28 @@ export const setBlockParent = ( props ) => {
 	return props;
 };
 
+const getDefaultMinimumBlockHeight = ( name ) => {
+	switch ( name ) {
+		case 'core/quote':
+		case 'core/video':
+		case 'core/embed':
+			return 200;
+
+		case 'core/image':
+			return 215;
+
+		case 'core/pullquote':
+			return 215;
+
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			return 30;
+
+		default:
+			return 50;
+	}
+};
+
 /**
  * Add AMP attributes to every allowed AMP Story block.
  *
@@ -172,13 +194,13 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 
 		addedAttributes.height = {
-			default: 50,
 			type: 'number',
+			default: getDefaultMinimumBlockHeight( name ),
 		};
 
 		addedAttributes.width = {
-			default: 250,
 			type: 'number',
+			default: 250,
 		};
 		addedAttributes.rotationAngle = {
 			type: 'number',
