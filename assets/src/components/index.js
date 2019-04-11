@@ -13,6 +13,7 @@ export { default as TemplateInserter } from './template-inserter';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as RotatableBox } from './rotatable-box';
 export { default as PreviewPicker } from './preview-picker';
+export { default as Inserter } from './inserter';
 export { default as getFeaturedImageNotice } from './get-featured-image-notice';
 export { default as getPrePublishNotice } from './get-pre-publish-notice';
 export { default as withAmpStorySettings } from './with-amp-story-settings';
