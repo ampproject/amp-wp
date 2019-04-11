@@ -3,6 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
+import { every } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -10,8 +11,11 @@ import classnames from 'classnames';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
-import { select } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import {
+	createBlock,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -31,8 +35,18 @@ import {
 	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	MEDIA_INNER_BLOCKS,
 } from './constants';
 import ampStoriesFonts from 'amp-stories-fonts';
+
+const {
+	getBlocksByClientId,
+	getBlockRootClientId,
+	getBlockOrder,
+	getBlock,
+} = select( 'core/editor' );
+
+const { updateBlockAttributes } = dispatch( 'core/editor' );
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -772,4 +786,107 @@ const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroun
 	}
 
 	return appliedBackgroundColor;
+};
+
+/**
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetInitialPositioning = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
+		return;
+	}
+
+	const positionTopLimit = 75;
+	const positionTopHighest = 0;
+	const positionTopGap = 10;
+
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
+
+	// Only set the position if the block was unmodified before.
+	if ( isUnmodified ) {
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
+
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+};
+
+/**
+ * Verify and perhaps update autoAdvanceAfterMedia attribute for pages.
+ *
+ * For pages with autoAdvanceAfter set to 'media',
+ * verify that the referenced media block still exists.
+ * If not, find another media block to be used for the
+ * autoAdvanceAfterMedia attribute.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_TOP_LEVEL_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	if ( 'media' !== block.attributes.autoAdvanceAfter ) {
+		return;
+	}
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
+	const mediaBlock = block.attributes.autoAdvanceAfterMedia && innerBlocks.find( ( { attributes } ) => attributes.anchor === block.attributes.autoAdvanceAfterMedia );
+
+	if ( mediaBlock ) {
+		return;
+	}
+
+	const firstMediaBlock = innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) );
+	const autoAdvanceAfterMedia = firstMediaBlock ? firstMediaBlock.attributes.anchor : '';
+
+	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
+		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
+	}
+};
+
+/**
+ * Determines the HTML tag name that should be used for text blocks.
+ *
+ * This is based on the block's attributes, as well as the surrounding context.
+ *
+ * For example, there can only be one <h1> tag on a page.
+ * Also, font size takes precedence over text length as it's a stronger signal for semantic meaning.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetTagName = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'amp/amp-story-text' !== block.name ) {
+		return;
+	}
+
+	const siblings = getBlocksByClientId( getBlockOrder( clientId ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const canUseH1 = ! siblings.some( ( { attributes } ) => attributes.tagName === 'h1' );
+
+	const tagName = getTagName( block.attributes, canUseH1 );
+
+	if ( block.attributes.tagName !== tagName ) {
+		updateBlockAttributes( clientId, { tagName } );
+	}
 };
