@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
@@ -9,7 +8,7 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { hasMinimumFeaturedImageWidth, getMinimumFeaturedImageDimensions } from '../helpers';
+import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../helpers';
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component.
@@ -23,16 +22,11 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			if ( media && hasMinimumFeaturedImageWidth( media.media_details ) ) {
+			const errors = validateFeaturedImage( media, getMinimumFeaturedImageDimensions(), false );
+
+			if ( ! errors ) {
 				return <PostFeaturedImage { ...props } />;
 			}
-
-			const minDimensions = getMinimumFeaturedImageDimensions();
-
-			const message = ! media ?
-				__( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) :
-				/* translators: %1$s: Minimum width, %2$s: Minimum height. */
-				sprintf( __( 'The featured image should have a width of at least %1$s by %2$s pixels.', 'amp' ), minDimensions.width, minDimensions.height );
 
 			return (
 				<Fragment>
@@ -40,9 +34,13 @@ export default createHigherOrderComponent(
 						status="notice"
 						isDismissible={ false }
 					>
-						<span>
-							{ message }
-						</span>
+						{ errors.map( ( errorMessage, index ) => {
+							return (
+								<p key={ `error-${ index }` }>
+									{ errorMessage }
+								</p>
+							);
+						} ) }
 					</Notice>
 					<PostFeaturedImage { ...props } />
 				</Fragment>

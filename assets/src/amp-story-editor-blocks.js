@@ -34,7 +34,6 @@ import {
 	withCroppedFeaturedImage,
 	withActivePageState,
 	withStoryBlockDropZone,
-	PrePublishPanel,
 	withRotatableBox,
 	withCallToActionValidation,
 } from './components';
@@ -47,7 +46,6 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	getTagName,
-	hasMinimumStoryPosterDimensions,
 	wrapBlocksInGridLayer,
 } from './helpers';
 
@@ -55,6 +53,8 @@ import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_I
 
 import store from './stores/amp-story';
 import { registerPlugin } from '@wordpress/plugins';
+
+import { name as PrePublishPanelName, render as PrePublishPanelRender } from './plugins/amp-story-pre-publish-panel';
 
 // Register plugin.
 // @todo Consider importing automatically, especially in case of more plugins.
@@ -361,21 +361,7 @@ store.subscribe( () => {
 	}
 } );
 
-registerPlugin(
-	'amp-story-featured-image-pre-publish',
-	{
-		render: () => {
-			return (
-				<PrePublishPanel
-					validationCallback={ hasMinimumStoryPosterDimensions }
-					missingMediaMessage={ __( 'Selecting a featured image is required.', 'amp' ) }
-					invalidMediaMessage={ __( 'The featured image must have minimum dimensions of 696 by 928 pixels.', 'amp' ) /* @todo This is not accurate. The width is now 1200 pixels. */ }
-					status="warning"
-				/>
-			);
-		},
-	}
-);
+registerPlugin( PrePublishPanelName, { render: PrePublishPanelRender } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );

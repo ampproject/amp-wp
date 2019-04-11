@@ -1,35 +1,18 @@
 /**
+ * External dependencies
+ */
+import { now } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 
 /**
- * External dependencies
- */
-import { now } from 'lodash';
-
-/**
  * Internal dependencies
  */
-import { getMinimumStoryPosterDimensions, getMinimumFeaturedImageDimensions } from '../helpers';
-
-const EXPECTED_WIDTH = 696; // @todo This may be wrong as 1200px is expected for featured image?
-const EXPECTED_HEIGHT = 928;
-
-const getMinimumDimensions = () => {
-	const posterImageDimensions = getMinimumStoryPosterDimensions();
-	const featuredImageDimensions = getMinimumFeaturedImageDimensions();
-
-	//( posterImageDimensions.height / posterImageDimensions.width ) *
-	const width = Math.max( posterImageDimensions.width, featuredImageDimensions.width );
-	const height = Math.max( posterImageDimensions.height, featuredImageDimensions.height );
-
-	// @todo Adjust the width or height to make sure the aspect ratio of posterImageDimensions is preserved.
-	if ( width / height ) {
-
-	}
-};
+import { getMinimumStoryPosterDimensions } from '../helpers';
 
 /**
  * Gets a wrapped version of MediaUpload to crop images for AMP Stories.
@@ -42,6 +25,8 @@ const getMinimumDimensions = () => {
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload ) => {
+	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = getMinimumStoryPosterDimensions();
+
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
 	 *
@@ -82,9 +67,6 @@ export default ( InitialMediaUpload ) => {
 						multiple: false,
 						date: false,
 						priority: 20,
-						// @todo minWidth:
-						// @todo minHeight:
-						// @todo ratio?
 						suggestedWidth: EXPECTED_WIDTH,
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),

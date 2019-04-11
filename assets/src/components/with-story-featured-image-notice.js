@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
@@ -9,7 +8,7 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { hasMinimumStoryPosterDimensions } from '../helpers';
+import { validateFeaturedImage, getMinimumStoryPosterDimensions } from '../helpers';
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component for AMP stories.
@@ -23,13 +22,11 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			if ( media && hasMinimumStoryPosterDimensions( media.media_details ) ) {
+			const errors = validateFeaturedImage( media, getMinimumStoryPosterDimensions(), true );
+
+			if ( ! errors ) {
 				return <PostFeaturedImage { ...props } />;
 			}
-
-			const message = ! media ?
-				__( 'Selecting a featured image is required.', 'amp' ) :
-				__( 'The featured image must have minimum dimensions of 696 by 928 pixels.', 'amp' ); // @todo This is not accurate. The width is now 1200 pixels.
 
 			return (
 				<Fragment>
@@ -37,9 +34,13 @@ export default createHigherOrderComponent(
 						status="warning"
 						isDismissible={ false }
 					>
-						<span>
-							{ message }
-						</span>
+						{ errors.map( ( errorMessage, index ) => {
+							return (
+								<p key={ `error-${ index }` }>
+									{ errorMessage }
+								</p>
+							);
+						} ) }
 					</Notice>
 					<PostFeaturedImage { ...props } />
 				</Fragment>

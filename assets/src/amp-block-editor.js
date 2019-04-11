@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { FormToggle, Notice } from '@wordpress/components';
 import { Fragment, RawHTML } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
@@ -14,7 +14,7 @@ import { registerPlugin } from '@wordpress/plugins';
  * Internal dependencies
  */
 import { PrePublishPanel, withFeaturedImageNotice } from './components';
-import { hasMinimumFeaturedImageWidth, getMinimumFeaturedImageDimensions } from './helpers';
+import { getMinimumFeaturedImageDimensions } from './helpers';
 
 /**
  * Exported via wp_localize_script().
@@ -114,16 +114,10 @@ registerPlugin(
 	'amp-post-featured-image-pre-publish',
 	{
 		render: () => {
-			const minDimensions = getMinimumFeaturedImageDimensions();
 			return (
 				<PrePublishPanel
-					validationCallback={ hasMinimumFeaturedImageWidth }
-					missingMediaMessage={ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) }
-					invalidMediaMessage={
-						/* translators: %1$s: Minimum width, %2$s: Minimum height. */
-						sprintf( __( 'The featured image should have a width of at least %1$s by %2$s pixels.', 'amp' ), minDimensions.width, minDimensions.height )
-					}
-					status="notice"
+					dimensions={ getMinimumFeaturedImageDimensions() }
+					required={ false }
 				/>
 			);
 		},

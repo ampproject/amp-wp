@@ -8,16 +8,21 @@ import { withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
+ * Internal dependencies
+ */
+import { validateFeaturedImage } from '../helpers';
+
+/**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
  *
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
-const PrePublishPanel = ( { featuredMedia, validationCallback, missingMediaMessage, invalidMediaMessage, status } ) => {
-	if ( featuredMedia && validationCallback( featuredMedia.media_details ) ) {
+const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
+	const errors = validateFeaturedImage( featuredMedia, dimensions, required );
+
+	if ( ! errors ) {
 		return null;
 	}
-
-	const message = ! featuredMedia ? missingMediaMessage : invalidMediaMessage;
 
 	return (
 		<Fragment>
@@ -26,12 +31,16 @@ const PrePublishPanel = ( { featuredMedia, validationCallback, missingMediaMessa
 				initialOpen="true"
 			>
 				<Notice
-					status={ status }
+					status={ required ? 'warning' : 'notice' }
 					isDismissible={ false }
 				>
-					<span>
-						{ message }
-					</span>
+					{ errors.map( ( errorMessage, index ) => {
+						return (
+							<p key={ `error-${ index }` }>
+								{ errorMessage }
+							</p>
+						);
+					} ) }
 				</Notice>
 			</PluginPrePublishPanel>
 		</Fragment>
