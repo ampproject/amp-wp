@@ -18,8 +18,8 @@ export const settings = {
 	icon: 'clock',
 	keywords: [
 		__( 'post', 'amp' ),
-		__( 'publish', 'amp' ),
-		__( 'published', 'amp' ),
+		__( 'publish date', 'amp' ),
+		__( 'published date', 'amp' ),
 		__( 'date', 'amp' ),
 	],
 	...getMetaBlockSettings( {
