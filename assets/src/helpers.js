@@ -207,15 +207,18 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 5,
 		};
 
-		addedAttributes.height = {
-			type: 'number',
-			default: getDefaultMinimumBlockHeight( name ),
-		};
+		if ( ! isImageBlock ) {
+			addedAttributes.height = {
+				type: 'number',
+				default: getDefaultMinimumBlockHeight(name),
+			};
 
-		addedAttributes.width = {
-			type: 'number',
-			default: 250,
-		};
+			addedAttributes.width = {
+				type: 'number',
+				default: 250,
+			};
+		}
+
 		addedAttributes.rotationAngle = {
 			type: 'number',
 			default: 0,
