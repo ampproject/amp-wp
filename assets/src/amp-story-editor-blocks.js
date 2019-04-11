@@ -34,7 +34,6 @@ import {
 	withActivePageState,
 	withPrePublishNotice,
 	withStoryBlockDropZone,
-	withRotatableBox,
 	withCallToActionValidation,
 } from './components';
 import {
@@ -367,7 +366,6 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', se
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
-addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withRotatableBox', withRotatableBox );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );

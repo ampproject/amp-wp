@@ -19,7 +19,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls } from './';
+import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from './';
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../constants';
 import { maybeEnqueueFontStyle } from '../helpers';
 
@@ -73,11 +73,12 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
+const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { select } ) => {
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
-	} = select( 'core/editor' );
+	} = select( 'core/block-editor' );
+	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -102,6 +103,13 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 		onAnimationDelayChange( value ) {
 			changeAnimationDelay( page, item, value );
 		},
+		startBlockRotation: () => toggleSelection( false ),
+		stopBlockRotation: () => {
+			toggleSelection( true );
+
+			clearSelectedBlock();
+			document.activeElement.blur();
+		},
 	};
 } );
 
@@ -117,6 +125,7 @@ export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return enhance( ( props ) => {
 			const {
+				clientId,
 				name,
 				attributes,
 				isSelected,
@@ -136,6 +145,8 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
+				startBlockRotation,
+				stopBlockRotation,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -159,6 +170,7 @@ export default createHigherOrderComponent(
 				ampAnimationType,
 				ampAnimationDuration,
 				ampAnimationDelay,
+				rotationAngle,
 			} = attributes;
 
 			const minTextHeight = 20;
@@ -189,7 +201,24 @@ export default createHigherOrderComponent(
 								toggleSelection( false );
 							} }
 						>
-							<BlockEdit { ...props } />
+							<RotatableBox
+								blockElementId={ `block-${ clientId }` }
+								initialAngle={ rotationAngle }
+								className="amp-story-editor__rotate-container"
+								angle={ isSelected ? 0 : rotationAngle }
+								onRotateStart={ () => {
+									startBlockRotation();
+								} }
+								onRotateStop={ ( event, angle ) => {
+									setAttributes( {
+										rotationAngle: angle,
+									} );
+
+									stopBlockRotation();
+								} }
+							>
+								<BlockEdit { ...props } />
+							</RotatableBox>
 						</ResizableBox>
 					) }
 					{ isMovableBLock && (
