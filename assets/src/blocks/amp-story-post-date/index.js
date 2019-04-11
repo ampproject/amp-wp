@@ -13,11 +13,13 @@ export const name = 'amp/amp-story-post-date';
 
 export const settings = {
 	title: __( 'Story Date', 'amp' ),
-	description: __( 'Displays the date the story has been published on', 'amp' ),
+	description: __( 'Display the publish date of the story. Modify by changing the date in the document settings.', 'amp' ),
 	category: 'common',
 	icon: 'clock',
 	keywords: [
 		__( 'post', 'amp' ),
+		__( 'publish', 'amp' ),
+		__( 'published', 'amp' ),
 		__( 'date', 'amp' ),
 	],
 	...getMetaBlockSettings( {
