@@ -153,10 +153,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
-				$noscript = $this->dom->createElement( 'noscript' );
-				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
-				$noscript->appendChild( $old_node );
+
+				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+					$noscript = $this->dom->createElement( 'noscript' );
+					$noscript->appendChild( $old_node );
+					$new_node->appendChild( $noscript );
+				}
 			}
 
 			$this->did_convert_elements = true;

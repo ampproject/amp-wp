@@ -29,6 +29,17 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 			'simple_audio' => array(
 				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
 				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio></noscript></amp-audio>',
+				array(
+					'add_noscript_fallback' => true,
+				),
+			),
+
+			'simple_audio_without_noscript' => array(
+				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a></amp-audio>',
+				array(
+					'add_noscript_fallback' => false,
+				),
 			),
 
 			'autoplay_attribute' => array(
@@ -200,13 +211,14 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
+	 * @param array  $args     Args for sanitizer.
 	 */
-	public function test_converter( $source, $expected = null ) {
+	public function test_converter( $source, $expected = null, $args = array() ) {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Audio_Sanitizer( $dom );
+		$sanitizer = new AMP_Audio_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Script_Sanitizer( $dom );

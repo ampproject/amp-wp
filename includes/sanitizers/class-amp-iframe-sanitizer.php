@@ -109,12 +109,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$new_node->appendChild( $placeholder_node );
 			}
 
-			// Preserve original node in noscript for no-JS environments.
-			$node->setAttribute( 'src', $normalized_attributes['src'] );
 			$node->parentNode->replaceChild( $new_node, $node );
-			$noscript = $this->dom->createElement( 'noscript' );
-			$noscript->appendChild( $node );
-			$new_node->appendChild( $noscript );
+
+			// Preserve original node in noscript for no-JS environments.
+			if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+				$node->setAttribute( 'src', $normalized_attributes['src'] );
+				$noscript = $this->dom->createElement( 'noscript' );
+				$noscript->appendChild( $node );
+				$new_node->appendChild( $noscript );
+			}
 		}
 	}
 
