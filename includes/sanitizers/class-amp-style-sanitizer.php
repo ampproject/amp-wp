@@ -48,6 +48,42 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	const INLINE_SPECIFICITY_MULTIPLIER = 5; // @todo The correctness of using "5" should be validated.
 
 	/**
+	 * Array index for tag names extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_TAGS = 0;
+
+	/**
+	 * Array index for class names extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_CLASSES = 1;
+
+	/**
+	 * Array index for IDs extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_IDS = 2;
+
+	/**
+	 * Array index for attributes extracted from a selector.
+	 *
+	 * @private
+	 * @since 1.1
+	 * @see \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	const SELECTOR_EXTRACTED_ATTRIBUTES = 3;
+
+	/**
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
@@ -169,10 +205,25 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Attributes used in the document.
 	 *
+	 * This is initially populated with boolean attributes which can be mutated by AMP at runtime,
+	 * since they can by dynamically added at any time.
+	 *
 	 * @since 1.1
 	 * @var array
 	 */
-	private $used_attributes = array();
+	private $used_attributes = array(
+		'autofocus' => true,
+		'checked'   => true,
+		'controls'  => true,
+		'disabled'  => true,
+		'hidden'    => true,
+		'loop'      => true,
+		'multiple'  => true,
+		'open'      => true,
+		'readonly'  => true,
+		'required'  => true,
+		'selected'  => true,
+	);
 
 	/**
 	 * Tag names used in document.
@@ -558,7 +609,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Check whether the attributes exist.
 	 *
 	 * @since 1.1
-	 * @todo Make $attribute_names into $attributes as an associative array and implement lookups of specific values.
+	 * @todo Make $attribute_names into $attributes as an associative array and implement lookups of specific values. Since attribute values can vary (e.g. with amp-bind), this may not be feasible.
 	 *
 	 * @param string[] $attribute_names Attribute names.
 	 * @return bool Whether all supplied attributes are used.
@@ -1106,7 +1157,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v15'; // This should be bumped whenever the PHP-CSS-Parser is updated.
+		$cache_group = 'amp-parsed-stylesheet-v16'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1127,7 +1178,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		if ( wp_using_ext_object_cache() ) {
 			$parsed = wp_cache_get( $cache_key, $cache_group );
 		} else {
-			$parsed = get_transient( $cache_key . $cache_group );
+			$parsed = get_transient( $cache_group . '-' . $cache_key );
 		}
 
 		/*
@@ -1156,7 +1207,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				wp_cache_set( $cache_key, $parsed, $cache_group );
 			} else {
 				// The expiration is to ensure transient doesn't stick around forever since no LRU flushing like with external object cache.
-				set_transient( $cache_key . $cache_group, $parsed, MONTH_IN_SECONDS );
+				set_transient( $cache_group . '-' . $cache_key, $parsed, MONTH_IN_SECONDS );
 			}
 		}
 
@@ -1456,41 +1507,64 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
+					// @todo The following logic could be made much more robust if PHP-CSS-Parser did parsing of selectors. See <https://github.com/sabberworm/PHP-CSS-Parser/pull/138#issuecomment-418193262> and <https://github.com/ampproject/amp-wp/issues/2102>.
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
 						$selectors_parsed[ $selector ] = array();
 
 						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
-						$reduced_selector = preg_replace( '/:[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
-
-						// Remove attribute selectors to eliminate false negative, such as with `.social-navigation a[href*="example.com"]:before`.
-						$reduced_selector = preg_replace( '/\[\w.*?\]/', '', $reduced_selector );
+						$reduced_selector = preg_replace( '/::?[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
 						// Ignore any selector terms that occur under a dynamic selector.
 						if ( $dynamic_selector_pattern ) {
 							$reduced_selector = preg_replace( '#((?:' . $dynamic_selector_pattern . ')(?:\.[a-z0-9_-]+)*)[^a-z0-9_-].*#si', '$1', $reduced_selector . ' ' );
 						}
 
+						/*
+						 * Gather attribute names while removing attribute selectors to eliminate false negative,
+						 * such as with `.social-navigation a[href*="example.com"]:before`.
+						 */
 						$reduced_selector = preg_replace_callback(
-							'/\.([a-zA-Z0-9_-]+)/',
+							'/\[([A-Za-z0-9_:-]+)(\W?=[^\]]+)?\]/',
 							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ]['classes'][] = $matches[1];
-								return '';
-							},
-							$reduced_selector
-						);
-						$reduced_selector = preg_replace_callback(
-							'/#([a-zA-Z0-9_-]+)/',
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ]['ids'][] = $matches[1];
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_ATTRIBUTES ][] = $matches[1];
 								return '';
 							},
 							$reduced_selector
 						);
 
-						if ( preg_match_all( '/[a-zA-Z0-9_-]+/', $reduced_selector, $matches ) ) {
-							$selectors_parsed[ $selector ]['tags'] = $matches[0];
-						}
+						// Extract class names.
+						$reduced_selector = preg_replace_callback(
+							'/\.([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						// Extract IDs.
+						$reduced_selector = preg_replace_callback(
+							'/#([a-zA-Z0-9_-]+)/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_IDS ][] = $matches[1];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						// Extract tag names.
+						$reduced_selector = preg_replace_callback(
+							'/[a-zA-Z0-9_-]+/',
+							function( $matches ) use ( $selector, &$selectors_parsed ) {
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ][] = $matches[0];
+								return '';
+							},
+							$reduced_selector
+						);
+
+						// At this point, $reduced_selector should contain just the remnants of the selector, primarily combinators.
+						unset( $reduced_selector );
 					}
 
 					$stylesheet[] = array(
@@ -2586,18 +2660,18 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 							(
 								// If all class names are used in the doc.
 								(
-									empty( $parsed_selector['classes'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
 									||
-									$this->has_used_class_name( $parsed_selector['classes'] )
+									$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
 								)
 								&&
 								// If all IDs are used in the doc.
 								(
-									empty( $parsed_selector['ids'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
 									||
 									0 === count(
 										array_filter(
-											$parsed_selector['ids'],
+											$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
 											function( $id ) use ( $dom ) {
 												return ! $dom->getElementById( $id );
 											}
@@ -2607,9 +2681,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 								&&
 								// If tag names are present in the doc.
 								(
-									empty( $parsed_selector['tags'] )
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
 									||
-									$this->has_used_tag_names( $parsed_selector['tags'] )
+									$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+								)
+								&&
+								// If all attribute names are used in the doc.
+								(
+									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+									||
+									$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 								)
 							)
 						);
