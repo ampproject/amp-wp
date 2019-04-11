@@ -192,6 +192,8 @@ class AMP_Story_Post_Type {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
 				}
+				$sanitizers['AMP_Img_Sanitizer']['add_noscript_fallback']   = false;
+				$sanitizers['AMP_Video_Sanitizer']['add_noscript_fallback'] = false;
 				return $sanitizers;
 			}
 		);
