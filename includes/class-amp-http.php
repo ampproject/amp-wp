@@ -122,11 +122,11 @@ class AMP_HTTP {
 
 		// Scrub input vars.
 		foreach ( $query_vars as $query_var ) {
-			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore
+			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				continue;
 			}
-			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore
-			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] );
+			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$scrubbed = true;
 		}
 
