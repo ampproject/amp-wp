@@ -157,7 +157,7 @@ export default createHigherOrderComponent(
 
 			const isImageBlock = 'core/image' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
-			const isMovableBLock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
 				ampFontFamily,
@@ -178,15 +178,35 @@ export default createHigherOrderComponent(
 
 			return (
 				<Fragment>
-					{ isMovableBLock && (
+					{ isMovableBlock && (
 						<StoryBlockMover
 							clientId={ props.clientId }
 							blockElementId={ `block-${ props.clientId }` }
 							isDraggable={ ! props.isPartOfMultiSelection && isSelected }
 						/>
 					) }
-					{ ! isMovableBLock && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBLock && (
+					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
+					{ isImageBlock && (
+						<RotatableBox
+							blockElementId={ `block-${ clientId }` }
+							initialAngle={ rotationAngle }
+							className="amp-story-editor__rotate-container"
+							angle={ isSelected ? 0 : rotationAngle }
+							onRotateStart={ () => {
+								startBlockRotation();
+							} }
+							onRotateStop={ ( event, angle ) => {
+								setAttributes( {
+									rotationAngle: angle,
+								} );
+
+								stopBlockRotation();
+							} }
+						>
+							<BlockEdit { ...props } />
+						</RotatableBox>
+					) }
+					{ isMovableBlock && ! isImageBlock && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
@@ -221,7 +241,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBLock && (
+					{ isMovableBlock && (
 						<InspectorControls>
 							<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 								<FontFamilyPicker
