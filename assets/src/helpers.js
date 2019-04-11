@@ -1,9 +1,9 @@
-/* global ampStoriesFonts */
-
 /**
  * External dependencies
  */
 import uuid from 'uuid/v4';
+import classnames from 'classnames';
+import { every } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -11,7 +11,11 @@ import uuid from 'uuid/v4';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
-import { select } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import {
+	createBlock,
+} from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -21,6 +25,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
+	withMetaBlockEdit,
 	Inserter,
 } from './components';
 import {
@@ -30,7 +35,18 @@ import {
 	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	MEDIA_INNER_BLOCKS,
 } from './constants';
+import ampStoriesFonts from 'amp-stories-fonts';
+
+const {
+	getBlocksByClientId,
+	getBlockRootClientId,
+	getBlockOrder,
+	getBlock,
+} = select( 'core/editor' );
+
+const { updateBlockAttributes } = dispatch( 'core/editor' );
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -93,6 +109,28 @@ export const setBlockParent = ( props ) => {
 	return props;
 };
 
+const getDefaultMinimumBlockHeight = ( name ) => {
+	switch ( name ) {
+		case 'core/quote':
+		case 'core/video':
+		case 'core/embed':
+			return 200;
+
+		case 'core/image':
+			return 215;
+
+		case 'core/pullquote':
+			return 215;
+
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			return 30;
+
+		default:
+			return 50;
+	}
+};
+
 /**
  * Add AMP attributes to every allowed AMP Story block.
  *
@@ -101,9 +139,14 @@ export const setBlockParent = ( props ) => {
  * @return {Object} Settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
-	if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+
+	if ( ! isChildBlock ) {
 		return settings;
 	}
+
+	const isImageBlock = 'core/image' === name;
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 	const addedAttributes = {
 		anchor: {
@@ -112,7 +155,79 @@ export const addAMPAttributes = ( settings, name ) => {
 			attribute: 'id',
 			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
 		},
+		ampAnimationType: {
+			type: 'string',
+		},
+		ampAnimationDelay: {
+			type: 'number',
+			default: 0,
+		},
+		addedAttributes: {
+			type: 'number',
+			default: 0,
+		},
+		ampAnimationAfter: {
+			type: 'string',
+		},
+		fontSize: {
+			type: 'string',
+		},
+		customFontSize: {
+			type: 'number',
+		},
+		ampFontFamily: {
+			type: 'string',
+		},
+		textColor: {
+			type: 'string',
+		},
+		customTextColor: {
+			type: 'string',
+		},
+		backgroundColor: {
+			type: 'string',
+		},
+		customBackgroundColor: {
+			type: 'string',
+		},
+		opacity: {
+			type: 'number',
+			default: 100,
+		},
 	};
+
+	if ( isMovableBlock ) {
+		addedAttributes.positionTop = {
+			type: 'number',
+			default: 0,
+		};
+
+		addedAttributes.positionLeft = {
+			type: 'number',
+			default: 5,
+		};
+
+		addedAttributes.height = {
+			type: 'number',
+			default: getDefaultMinimumBlockHeight( name ),
+		};
+
+		addedAttributes.width = {
+			type: 'number',
+			default: 250,
+		};
+		addedAttributes.rotationAngle = {
+			type: 'number',
+			default: 0,
+		};
+	}
+
+	if ( isImageBlock ) {
+		addedAttributes.ampShowImageCaption = {
+			type: 'boolean',
+			default: false,
+		};
+	}
 
 	// Define selector according to mappings.
 	if ( BLOCK_TAG_MAPPING[ name ] ) {
@@ -137,44 +252,6 @@ export const addAMPAttributes = ( settings, name ) => {
 			source: 'attribute',
 			selector: BLOCK_TAG_MAPPING[ name ],
 			attribute: 'animate-in-after',
-		};
-	} else if ( 'core/list' === name ) {
-		addedAttributes.ampAnimationType = {
-			type: 'string',
-		};
-		addedAttributes.ampAnimationDelay = {
-			type: 'number',
-			default: 0,
-		};
-		addedAttributes.ampAnimationDuration = {
-			type: 'number',
-			default: 0,
-		};
-		addedAttributes.ampAnimationAfter = {
-			type: 'string',
-		};
-	}
-
-	if ( 'core/image' === name ) {
-		addedAttributes.ampShowImageCaption = {
-			type: 'boolean',
-			default: false,
-		};
-	}
-
-	if ( ALLOWED_MOVABLE_BLOCKS.includes( name ) ) {
-		addedAttributes.positionTop = {
-			type: 'number',
-			default: 0,
-		};
-
-		addedAttributes.positionLeft = {
-			type: 'number',
-			default: 5,
-		};
-		addedAttributes.rotationAngle = {
-			type: 'number',
-			default: 0,
 		};
 	}
 
@@ -296,7 +373,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @return {Object} The element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType ) => {
-	if ( ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
 	}
 
@@ -433,7 +510,11 @@ const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' )
  * @return {string} HTML tag name. Either p, h1, or h2.
  */
 export const getTagName = ( attributes, canUseH1 ) => {
-	const { fontSize, customFontSize, positionTop } = attributes;
+	const { fontSize, customFontSize, positionTop, type } = attributes;
+
+	if ( type && 'auto' !== type ) {
+		return type;
+	}
 
 	// Elements positioned that low on a page are unlikely to be headings.
 	if ( positionTop > 80 ) {
@@ -594,4 +675,222 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 		b,
 		opacity / 100,
 	];
+};
+
+export const getClassNameFromBlockAttributes = ( {
+	className,
+	ampFitText,
+	backgroundColor,
+	textColor,
+	customBackgroundColor,
+	customTextColor,
+	opacity,
+} ) => {
+	const textClass = getColorClassName( 'color', textColor );
+	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+	const hasOpacity = opacity && opacity < 100;
+
+	return classnames( className, {
+		'amp-text-content': ! ampFitText,
+		'has-text-color': textColor || customTextColor,
+		'has-background': backgroundColor || customBackgroundColor,
+		[ textClass ]: textClass,
+		[ backgroundClass ]: ! hasOpacity ? backgroundClass : undefined,
+	} );
+};
+
+export const getStylesFromBlockAttributes = ( {
+	align,
+	fontSize,
+	customFontSize,
+	ampFitText,
+	autoFontSize,
+	backgroundColor,
+	textColor,
+	customBackgroundColor,
+	customTextColor,
+	width,
+	height,
+	opacity,
+} ) => {
+	const textClass = getColorClassName( 'color', textColor );
+
+	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+
+	/*
+     * Calculate font size using vw to make it responsive.
+     *
+     * Get the font size in px based on the slug with fallback to customFontSize.
+     */
+	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
+
+	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
+
+	return {
+		backgroundColor: appliedBackgroundColor,
+		color: textClass ? undefined : customTextColor,
+		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
+		width: `${ getPercentageFromPixels( 'x', width ) }%`,
+		height: `${ getPercentageFromPixels( 'y', height ) }%`,
+		textAlign: align,
+	};
+};
+
+export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
+	const supports = {
+		anchor: true,
+		reusable: true,
+	};
+
+	const schema = {
+		align: {
+			type: 'string',
+		},
+	};
+
+	return {
+		supports,
+		attributes: schema,
+		save: ( { attributes } ) => {
+			const className = getClassNameFromBlockAttributes( attributes );
+			const styles = getStylesFromBlockAttributes( attributes );
+
+			return (
+				<RichText.Content
+					tagName={ tagName }
+					style={ styles }
+					className={ className }
+					value="{content}" // Placeholder to be replaced server-side.
+				/>
+			);
+		},
+		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
+	};
+};
+
+const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity ) => {
+	const hasOpacity = opacity && opacity < 100;
+	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+	let appliedBackgroundColor;
+
+	// If we need to assign opacity.
+	if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
+		const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+
+		if ( hexColor ) {
+			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
+
+			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+		}
+	} else if ( ! backgroundClass ) {
+		appliedBackgroundColor = customBackgroundColor;
+	}
+
+	return appliedBackgroundColor;
+};
+
+/**
+ * Set initial positioning if the selected block is an unmodified block.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetInitialPositioning = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	const parentBlock = getBlock( getBlockRootClientId( clientId ) );
+	// Short circuit if the top position is already set or the block has no parent.
+	if ( 0 !== block.attributes.positionTop || ! parentBlock ) {
+		return;
+	}
+
+	const positionTopLimit = 75;
+	const positionTopHighest = 0;
+	const positionTopGap = 10;
+
+	// Check if it's a new block.
+	const newBlock = createBlock( block.name );
+	const isUnmodified = every( newBlock.attributes, ( value, key ) => value === block.attributes[ key ] );
+
+	// Only set the position if the block was unmodified before.
+	if ( isUnmodified ) {
+		const highestPositionTop = parentBlock.innerBlocks
+			.map( ( childBlock ) => childBlock.attributes.positionTop )
+			.reduce( ( highestTop, positionTop ) => Math.max( highestTop, positionTop ), 0 );
+
+		// If it's more than the limit, set the new one.
+		const newPositionTop = highestPositionTop > positionTopLimit ? positionTopHighest : highestPositionTop + positionTopGap;
+
+		updateBlockAttributes( clientId, { positionTop: newPositionTop } );
+	}
+};
+
+/**
+ * Verify and perhaps update autoAdvanceAfterMedia attribute for pages.
+ *
+ * For pages with autoAdvanceAfter set to 'media',
+ * verify that the referenced media block still exists.
+ * If not, find another media block to be used for the
+ * autoAdvanceAfterMedia attribute.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || ! ALLOWED_TOP_LEVEL_BLOCKS.includes( block.name ) ) {
+		return;
+	}
+
+	if ( 'media' !== block.attributes.autoAdvanceAfter ) {
+		return;
+	}
+
+	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+
+	const mediaBlock = block.attributes.autoAdvanceAfterMedia && innerBlocks.find( ( { attributes } ) => attributes.anchor === block.attributes.autoAdvanceAfterMedia );
+
+	if ( mediaBlock ) {
+		return;
+	}
+
+	const firstMediaBlock = innerBlocks.find( ( { name } ) => MEDIA_INNER_BLOCKS.includes( name ) );
+	const autoAdvanceAfterMedia = firstMediaBlock ? firstMediaBlock.attributes.anchor : '';
+
+	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
+		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
+	}
+};
+
+/**
+ * Determines the HTML tag name that should be used for text blocks.
+ *
+ * This is based on the block's attributes, as well as the surrounding context.
+ *
+ * For example, there can only be one <h1> tag on a page.
+ * Also, font size takes precedence over text length as it's a stronger signal for semantic meaning.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetTagName = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'amp/amp-story-text' !== block.name ) {
+		return;
+	}
+
+	const siblings = getBlocksByClientId( getBlockOrder( clientId ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const canUseH1 = ! siblings.some( ( { attributes } ) => attributes.tagName === 'h1' );
+
+	const tagName = getTagName( block.attributes, canUseH1 );
+
+	if ( block.attributes.tagName !== tagName ) {
+		updateBlockAttributes( clientId, { tagName } );
+	}
 };
