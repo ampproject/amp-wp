@@ -6,7 +6,6 @@
 /**
  * External dependencies
  */
-import { first, partial, castArray } from 'lodash';
 import classnames from 'classnames';
 
 /**
@@ -14,7 +13,6 @@ import classnames from 'classnames';
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { getBlockType } from '@wordpress/blocks';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { withInstanceId, compose } from '@wordpress/compose';
@@ -50,7 +48,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientIds, blockElementId, instanceId } = this.props;
+		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientId, blockElementId, instanceId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
@@ -62,18 +60,18 @@ export class BlockMover extends Component {
 				<div className={ classnames( 'amp-story-editor-block-mover editor-block-mover block-editor-block-mover', { 'is-visible': isFocused } ) }>
 					<IconButton
 						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isFirst ? null : bringForward }
+						onClick={ isLast ? null : bringForward }
 						icon={ upArrow }
 						label={ __( 'Bring Forward', 'amp' ) }
 						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
-						aria-disabled={ isFirst }
+						aria-disabled={ isLast }
 						onFocus={ this.onFocus }
 						onBlur={ this.onBlur }
 					/>
 					<IconDragHandle
 						className="editor-block-mover__control block-editor-block-mover__control"
 						icon={ dragHandle }
-						clientId={ clientIds }
+						clientId={ clientId }
 						blockElementId={ blockElementId }
 						isVisible={ isDraggable }
 						onDragStart={ onDragStart }
@@ -81,11 +79,11 @@ export class BlockMover extends Component {
 					/>
 					<IconButton
 						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isLast ? null : sendBackward }
+						onClick={ isFirst ? null : sendBackward }
 						icon={ downArrow }
 						label={ __( 'Send Backward', 'amp' ) }
 						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
-						aria-disabled={ isLast }
+						aria-disabled={ isFirst }
 						onFocus={ this.onFocus }
 						onBlur={ this.onBlur }
 					/>
@@ -96,24 +94,26 @@ export class BlockMover extends Component {
 }
 
 export default compose(
-	withSelect( ( select, { clientIds } ) => {
-		const { getBlock, getBlockIndex, getTemplateLock, getBlockRootClientId } = select( 'core/block-editor' );
-		const firstClientId = first( castArray( clientIds ) );
-		const block = getBlock( firstClientId );
-		const rootClientId = getBlockRootClientId( first( castArray( clientIds ) ) );
+	withSelect( ( select, { clientId } ) => {
+		const { getBlockOrder, getBlockIndex, getTemplateLock, getBlockRootClientId } = select( 'core/block-editor' );
+		const rootClientId = getBlockRootClientId( clientId );
+		const blockClientIds = getBlockOrder( rootClientId );
+		const blockIndex = getBlockIndex( clientId, rootClientId );
 
 		return {
-			firstIndex: getBlockIndex( firstClientId, rootClientId ),
-			blockType: block ? getBlockType( block.name ) : null,
+			isFirst: 0 === blockIndex,
+			isLast: blockIndex === blockClientIds.length - 1,
 			isLocked: getTemplateLock( rootClientId ) === 'all',
 			rootClientId,
 		};
 	} ),
-	withDispatch( ( dispatch, { clientIds, rootClientId } ) => {
-		const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
+	withDispatch( ( dispatch, { clientId, rootClientId } ) => {
+		const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
+
 		return {
-			bringForward: partial( moveBlocksDown, clientIds, rootClientId ),
-			sendBackward: partial( moveBlocksUp, clientIds, rootClientId ),
+			onDragEnd: clearSelectedBlock,
+			bringForward: () => moveBlocksDown( clientId, rootClientId ),
+			sendBackward: () => moveBlocksUp( clientId, rootClientId ),
 		};
 	} ),
 	withInstanceId,
