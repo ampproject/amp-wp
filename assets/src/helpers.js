@@ -208,7 +208,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		if ( ! isImageBlock ) {
 			addedAttributes.height = {
 				type: 'number',
-				default: getDefaultMinimumBlockHeight(name),
+				default: getDefaultMinimumBlockHeight( name ),
 			};
 
 			addedAttributes.width = {
