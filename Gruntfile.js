@@ -93,6 +93,7 @@ module.exports = function( grunt ) {
 
 			paths.push( 'vendor/autoload.php' );
 			paths.push( 'assets/js/*-compiled.js' );
+			paths.push( 'assets/css/*-compiled.css' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
