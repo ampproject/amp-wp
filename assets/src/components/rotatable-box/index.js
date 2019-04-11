@@ -57,7 +57,12 @@ class RotatableBox extends Component {
 				() => this.props.onRotateStop && this.props.onRotateStop( e, this.props.initialAngle )
 			);
 		} else if ( LEFT === keyCode || RIGHT === keyCode ) {
-			const angle = LEFT === keyCode ? this.state.angle - 30 : this.state.angle + 30;
+			let angle = LEFT === keyCode ? this.state.angle - 30 : this.state.angle + 30;
+			if ( angle > 360 ) {
+				angle -= 360;
+			} else if ( angle <= -360 ) {
+				angle += 360;
+			}
 
 			this.elementRef.style.transform = `rotate(${ angle }deg)`;
 
