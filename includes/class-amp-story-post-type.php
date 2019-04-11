@@ -109,7 +109,7 @@ class AMP_Story_Post_Type {
 							array(
 								'amp/amp-story-text',
 								array(
-									'placeholder' => __( 'Write something!', 'amp' ),
+									'placeholder' => __( 'Write text…', 'amp' ),
 								),
 							),
 						),
