@@ -45,7 +45,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
+		'add_placeholder'       => false,
+		'add_noscript_fallback' => true,
 	);
 
 	/**

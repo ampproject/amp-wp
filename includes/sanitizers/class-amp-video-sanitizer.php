@@ -57,6 +57,11 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Node.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback.
