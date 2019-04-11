@@ -252,7 +252,7 @@ class AMP_Theme_Support {
 			 * enabled by user ay any time, so they will be able to make AMP available for this URL and see the change
 			 * without wrestling with the redirect cache.
 			 */
-			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			if ( isset( $_GET[ amp_get_slug() ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				self::redirect_non_amp_url( current_user_can( 'manage_options' ) ? 302 : 301, true );
 			}
 

@@ -21,6 +21,17 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'audio';
 
 	/**
+	 * Placeholder for default args.
+	 *
+	 * @since 1.2
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
@@ -135,10 +146,13 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
-				$noscript = $this->dom->createElement( 'noscript' );
-				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
-				$noscript->appendChild( $old_node );
+
+				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+					$noscript = $this->dom->createElement( 'noscript' );
+					$new_node->appendChild( $noscript );
+					$noscript->appendChild( $old_node );
+				}
 			}
 
 			$this->did_convert_elements = true;

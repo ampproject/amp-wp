@@ -7,13 +7,12 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
-import { withAttributes, withBlockName, withHasSelectedInnerBlock, withParentBlock } from './';
+import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
 const wrapperWithSelect = compose(
 	withAttributes,
 	withBlockName,
 	withHasSelectedInnerBlock,
-	withParentBlock
 );
 
 /**
@@ -59,6 +58,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 			let style = {
 				top: `${ attributes.positionTop }%`,
 				left: `${ attributes.positionLeft }%`,
+				transform: `rotate(${ attributes.rotationAngle }deg)`,
 			};
 			if ( props.wrapperProps && props.wrapperProps.style ) {
 				style = {

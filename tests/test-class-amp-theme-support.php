@@ -221,7 +221,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$e = null;
 
 		// Endpoint.
-		unset( $_GET[ amp_get_slug() ] );
+		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		set_query_var( amp_get_slug(), '' );
 		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
 		try {
@@ -253,7 +253,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( AMP_Theme_Support::ensure_proper_amp_location( false ) );
 
 		// Endpoint, redirect.
-		unset( $_GET[ amp_get_slug() ] );
+		unset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		set_query_var( amp_get_slug(), '' );
 		$_SERVER['REQUEST_URI'] = '/2016/01/24/foo/amp/';
 		try {

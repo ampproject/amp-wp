@@ -9,17 +9,17 @@
 
 get_header( 'embed' );
 
-if ( have_posts() ) :
-	while ( have_posts() ) :
+if ( have_posts() ) {
+	while ( have_posts() ) {
 		the_post();
 		?>
 		<div class="amp-story-embed">
 			<?php AMP_Story_Post_Type::the_single_story_card( get_post() ); ?>
 		</div>
 		<?php
-	endwhile;
-else :
+	}
+} else {
 	get_template_part( 'embed', '404' );
-endif;
+}
 
 get_footer( 'embed' );

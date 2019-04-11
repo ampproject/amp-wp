@@ -33,6 +33,17 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
+	 * Placeholder for default args.
+	 *
+	 * @since 1.2
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
@@ -57,6 +68,11 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Node.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback.
@@ -153,10 +169,13 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
-				$noscript = $this->dom->createElement( 'noscript' );
-				$new_node->appendChild( $noscript );
 				$node->parentNode->replaceChild( $new_node, $node );
-				$noscript->appendChild( $old_node );
+
+				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+					$noscript = $this->dom->createElement( 'noscript' );
+					$noscript->appendChild( $old_node );
+					$new_node->appendChild( $noscript );
+				}
 			}
 
 			$this->did_convert_elements = true;

@@ -88,7 +88,8 @@ class AMP_Story_Post_Type {
 					'not_found_in_trash' => __( 'No AMP Stories found in Trash.', 'amp' ),
 				),
 				'supports'     => array(
-					'title', // Used for amp-story[title[.
+					'title', // Used for amp-story[title].
+					'author', // Used for the amp/amp-story-post-author block.
 					'editor',
 					'thumbnail', // Used for poster images.
 					'amp',
@@ -108,7 +109,7 @@ class AMP_Story_Post_Type {
 							array(
 								'amp/amp-story-text',
 								array(
-									'placeholder' => __( 'Write something!', 'amp' ),
+									'placeholder' => __( 'Write text…', 'amp' ),
 								),
 							),
 						),
@@ -173,16 +174,26 @@ class AMP_Story_Post_Type {
 		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
+		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
+
 		register_block_type(
-			'amp/amp-story-text',
+			'amp/amp-story-post-author',
 			array(
-				'render_callback' => array( __CLASS__, 'render_block_with_google_fonts' ),
+				'render_callback' => array( __CLASS__, 'render_post_author_block' ),
 			)
 		);
+
 		register_block_type(
-			'amp/amp-story-cta',
+			'amp/amp-story-post-date',
 			array(
-				'render_callback' => array( __CLASS__, 'render_block_with_google_fonts' ),
+				'render_callback' => array( __CLASS__, 'render_post_date_block' ),
+			)
+		);
+
+		register_block_type(
+			'amp/amp-story-post-title',
+			array(
+				'render_callback' => array( __CLASS__, 'render_post_title_block' ),
 			)
 		);
 
@@ -191,6 +202,12 @@ class AMP_Story_Post_Type {
 			function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
+
+					// Disable noscript fallbacks since not allowed in AMP Stories.
+					$sanitizers['AMP_Img_Sanitizer']['add_noscript_fallback']    = false;
+					$sanitizers['AMP_Audio_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Video_Sanitizer']['add_noscript_fallback']  = false;
+					$sanitizers['AMP_Iframe_Sanitizer']['add_noscript_fallback'] = false; // Note that iframe is not yet allowed in an AMP Story.
 				}
 				return $sanitizers;
 			}
@@ -844,36 +861,72 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Include any required Google Font styles when rendering a Text block.
+	 * Renders the amp/amp-story-post-author block.
 	 *
-	 * @param array  $props   Props.
-	 * @param string $content Content.
-	 * @return string Text block.
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Block content.
 	 */
-	public static function render_block_with_google_fonts( $props, $content ) {
-		$prop_name = 'ampFontFamily';
+	public static function render_post_author_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_author(), $content );
+	}
+
+	/**
+	 * Renders the amp/amp-story-post-date block.
+	 *
+	 * @todo Consider allowing to change the date format in the block settings.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Block content.
+	 */
+	public static function render_post_date_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_date(), $content );
+	}
+
+	/**
+	 * Renders the amp/amp-story-post-title block.
+	 *
+	 * @param array  $attributes Block attributes. Default empty array.
+	 * @param string $content    Block content. Default empty string.
+	 * @return string Block content.
+	 */
+	public static function render_post_title_block( $attributes, $content ) {
+		return str_replace( '{content}', get_the_title(), $content );
+	}
+
+	/**
+	 * Include any required Google Font styles when rendering a block in AMP Stories.
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Block content.
+	 */
+	public static function render_block_with_google_fonts( $block_content, $block ) {
+		$font_family_attribute = 'ampFontFamily';
 
 		// Short-circuit if no font family present.
-		if ( empty( $props[ $prop_name ] ) ) {
-			return $content;
+		if ( empty( $block['attrs'][ $font_family_attribute ] ) ) {
+			return $block_content;
 		}
 
 		// Short-circuit if there is no Google Font or the font is already enqueued.
-		$font = self::get_font( $props[ $prop_name ] );
-		if ( ! $font || ! isset( $font['handle'] ) || ! isset( $font['src'] ) || wp_style_is( $font['handle'] ) ) {
-			return $content;
+		$font = self::get_font( $block['attrs'][ $font_family_attribute ] );
+		if ( ! isset( $font['handle'], $font['src'] ) || ! $font || wp_style_is( $font['handle'] ) ) {
+			return $block_content;
 		}
 
 		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
 			wp_register_style( $font['handle'], $font['src'], array(), null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		}
+
 		wp_enqueue_style( $font['handle'] );
 		wp_add_inline_style(
 			$font['handle'],
 			self::get_inline_font_style_rule( $font )
 		);
 
-		return $content;
+		return $block_content;
 	}
 
 	/**
