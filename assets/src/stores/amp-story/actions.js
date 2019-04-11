@@ -134,31 +134,3 @@ export function resetOrder() {
 		type: 'RESET_ORDER',
 	};
 }
-
-/**
- * Returns an action object in signalling that block rotation starts.
- *
- * @param {string} block Block client ID.
- *
- * @return {Object} Action object.
- */
-export function startBlockRotation( block ) {
-	return {
-		type: 'START_BLOCK_ROTATION',
-		block,
-	};
-}
-
-/**
- * Returns an action object in signalling that block rotation stops.
- *
- * @param {string} block Block client ID.
- *
- * @return {Object} Action object.
- */
-export function stopBlockRotation( block ) {
-	return {
-		type: 'STOP_BLOCK_ROTATION',
-		block,
-	};
-}
