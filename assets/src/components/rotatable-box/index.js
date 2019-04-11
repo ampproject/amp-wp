@@ -83,7 +83,9 @@ class RotatableBox extends Component {
 			return;
 		}
 
-		if ( ( e.button && 2 === e.button ) || ( e.which && 3 === e.which ) ) {
+		const isRightClick = ( e.button && 2 === e.button );
+
+		if ( isRightClick ) {
 			return;
 		}
 
