@@ -510,7 +510,11 @@ const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' )
  * @return {string} HTML tag name. Either p, h1, or h2.
  */
 export const getTagName = ( attributes, canUseH1 ) => {
-	const { fontSize, customFontSize, positionTop } = attributes;
+	const { fontSize, customFontSize, positionTop, type } = attributes;
+
+	if ( type && 'auto' !== type ) {
+		return type;
+	}
 
 	// Elements positioned that low on a page are unlikely to be headings.
 	if ( positionTop > 80 ) {

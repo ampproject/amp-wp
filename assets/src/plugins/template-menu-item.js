@@ -49,7 +49,7 @@ const addTemplate = () => {
 
 export const name = 'amp-story';
 
-export const render =  ( ) => (
+export const render = ( ) => (
 	<PluginBlockSettingsMenuItem
 		allowedBlocks={ [ 'amp/amp-story-page' ] }
 		icon="welcome-add-page"
