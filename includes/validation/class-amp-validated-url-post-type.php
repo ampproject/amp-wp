@@ -1907,8 +1907,8 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$post_id = intval( $_REQUEST['post'] );
-		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$post_id = (int) $_REQUEST['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 			$_REQUEST['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		}
 	}
