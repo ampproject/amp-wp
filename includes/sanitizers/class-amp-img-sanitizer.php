@@ -47,6 +47,17 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $anim_extension = '.gif';
 
 	/**
+	 * Placeholder for default args.
+	 *
+	 * @since 1.2
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
@@ -287,9 +298,11 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$node->parentNode->replaceChild( $img_node, $node );
 
 		// Preserve original node in noscript for no-JS environments.
-		$noscript = $this->dom->createElement( 'noscript' );
-		$noscript->appendChild( $node );
-		$img_node->appendChild( $noscript );
+		if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+			$noscript = $this->dom->createElement( 'noscript' );
+			$noscript->appendChild( $node );
+			$img_node->appendChild( $noscript );
+		}
 	}
 
 	/**

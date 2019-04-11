@@ -1,7 +1,10 @@
 /**
+ * Plugin for adding Templates (Reusable blocks) without converting the page itself to a reusable block.
+ */
+
+/**
  * WordPress dependencies
  */
-import { registerPlugin } from '@wordpress/plugins';
 import { PluginBlockSettingsMenuItem } from '@wordpress/edit-post';
 import { __ } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
@@ -44,22 +47,14 @@ const addTemplate = () => {
 	saveReusableBlock( reusableBlock.id );
 };
 
-/**
- * Register plugin for adding Templates (Reusable blocks) without converting the page itself to a reusable block.
- */
-export function registerTemplateSaveMenuItem() {
-	// @todo Change icon.
-	registerPlugin( 'amp-story', {
-		render: ( ) => (
-			<PluginBlockSettingsMenuItem
-				allowedBlocks={ [ 'amp/amp-story-page' ] }
-				icon="welcome-add-page"
-				label={ __( 'Save as Template', 'amp' ) }
-				role="menuitem"
-				onClick={ addTemplate }
-			/>
-		),
-	} );
-}
+export const name = 'amp-story';
 
-registerTemplateSaveMenuItem();
+export const render = ( ) => (
+	<PluginBlockSettingsMenuItem
+		allowedBlocks={ [ 'amp/amp-story-page' ] }
+		icon="welcome-add-page"
+		label={ __( 'Save as Template', 'amp' ) }
+		role="menuitem"
+		onClick={ addTemplate }
+	/>
+);

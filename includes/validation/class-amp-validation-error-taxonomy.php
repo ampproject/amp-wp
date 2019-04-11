@@ -1273,8 +1273,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$selected_groups = array();
-		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], array( 'multiple' => true ) ); // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], array( 'multiple' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		if ( ! empty( $selected_groups ) ) {
 			sort( $selected_groups );
@@ -1538,8 +1538,8 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// Show success message for clearing empty terms.
-		if ( isset( $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			$cleared_count = intval( $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ] );
+		if ( isset( $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$cleared_count = (int) $_GET[ self::VALIDATION_ERRORS_CLEARED_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			printf(
 				'<div class="notice notice-success is-dismissible"><p>%s</p></div>',
 				esc_html(
@@ -1671,7 +1671,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// Only set the query var if this is the validated URL post type.
-		$post_id = sanitize_key( $_GET['post'] );
+		$post_id = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 			$wp_term_query->query_vars['object_ids'] = $post_id;
 		}

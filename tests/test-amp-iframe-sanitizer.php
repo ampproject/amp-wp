@@ -30,11 +30,25 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
 				'
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
 						<noscript>
 							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe>
 						</noscript>
 					</amp-iframe>
 				',
+				array(
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+				),
+			),
+
+			'simple_iframe_without_noscript_or_placeholder' => array(
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic"></amp-iframe>',
+				array(
+					'add_noscript_fallback' => false,
+					'add_placeholder'       => false,
+				),
 			),
 
 			'force_https'                               => array(
@@ -269,13 +283,14 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
+	 * @param array  $args     Sanitizer args.
 	 */
-	public function test_converter( $source, $expected = null ) {
+	public function test_converter( $source, $expected = null, $args = array() ) {
 		if ( ! $expected ) {
 			$expected = $source;
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Iframe_Sanitizer( $dom );
+		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );

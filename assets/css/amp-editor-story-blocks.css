@@ -27,8 +27,8 @@
  *
  * Makes editing blocks easier when their on top of another block.
  */
-#amp-story-editor.components-placeholder {
-	background: #f9f9f9;
+#amp-story-editor .components-placeholder {
+	background: #f3f3f3;
 }
 
 /* Completely hide default appenders/inserters */
