@@ -1507,7 +1507,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors   = explode( $between_selectors . ',', $split_stylesheet[ ++$i ] );
 					$declaration = $split_stylesheet[ ++$i ];
 
-					// @todo The following logic could be made much more robust of PHP-CSS-Parser did parsing of selectors. See <https://github.com/sabberworm/PHP-CSS-Parser/pull/138#issuecomment-418193262>.
+					// @todo The following logic could be made much more robust if PHP-CSS-Parser did parsing of selectors. See <https://github.com/sabberworm/PHP-CSS-Parser/pull/138#issuecomment-418193262> and <https://github.com/ampproject/amp-wp/issues/2102>.
 					$selectors_parsed = array();
 					foreach ( $selectors as $selector ) {
 						$selectors_parsed[ $selector ] = array();
