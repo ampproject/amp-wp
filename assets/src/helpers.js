@@ -102,9 +102,14 @@ export const setBlockParent = ( props ) => {
  * @return {Object} Settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
-	if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+
+	if ( ! isChildBlock ) {
 		return settings;
 	}
+
+	const isImageBlock = 'core/image' === name;
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 	const addedAttributes = {
 		anchor: {
@@ -113,7 +118,75 @@ export const addAMPAttributes = ( settings, name ) => {
 			attribute: 'id',
 			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
 		},
+		ampAnimationType: {
+			type: 'string',
+		},
+		ampAnimationDelay: {
+			type: 'number',
+			default: 0,
+		},
+		addedAttributes: {
+			type: 'number',
+			default: 0,
+		},
+		ampAnimationAfter: {
+			type: 'string',
+		},
+		fontSize: {
+			type: 'string',
+		},
+		customFontSize: {
+			type: 'number',
+		},
+		ampFontFamily: {
+			type: 'string',
+		},
+		textColor: {
+			type: 'string',
+		},
+		customTextColor: {
+			type: 'string',
+		},
+		backgroundColor: {
+			type: 'string',
+		},
+		customBackgroundColor: {
+			type: 'string',
+		},
+		opacity: {
+			type: 'number',
+			default: 100,
+		},
 	};
+
+	if ( isMovableBlock ) {
+		addedAttributes.positionTop = {
+			type: 'number',
+			default: 0,
+		};
+
+		addedAttributes.positionLeft = {
+			type: 'number',
+			default: 5,
+		};
+
+		addedAttributes.height = {
+			default: 50,
+			type: 'number',
+		};
+
+		addedAttributes.width = {
+			default: 250,
+			type: 'number',
+		};
+	}
+
+	if ( isImageBlock ) {
+		addedAttributes.ampShowImageCaption = {
+			type: 'boolean',
+			default: false,
+		};
+	}
 
 	// Define selector according to mappings.
 	if ( BLOCK_TAG_MAPPING[ name ] ) {
@@ -138,40 +211,6 @@ export const addAMPAttributes = ( settings, name ) => {
 			source: 'attribute',
 			selector: BLOCK_TAG_MAPPING[ name ],
 			attribute: 'animate-in-after',
-		};
-	} else if ( 'core/list' === name ) {
-		addedAttributes.ampAnimationType = {
-			type: 'string',
-		};
-		addedAttributes.ampAnimationDelay = {
-			type: 'number',
-			default: 0,
-		};
-		addedAttributes.ampAnimationDuration = {
-			type: 'number',
-			default: 0,
-		};
-		addedAttributes.ampAnimationAfter = {
-			type: 'string',
-		};
-	}
-
-	if ( 'core/image' === name ) {
-		addedAttributes.ampShowImageCaption = {
-			type: 'boolean',
-			default: false,
-		};
-	}
-
-	if ( ALLOWED_MOVABLE_BLOCKS.includes( name ) ) {
-		addedAttributes.positionTop = {
-			type: 'number',
-			default: 0,
-		};
-
-		addedAttributes.positionLeft = {
-			type: 'number',
-			default: 5,
 		};
 	}
 
@@ -572,6 +611,7 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 };
 
 export const getClassNameFromBlockAttributes = ( {
+	className,
 	ampFitText,
 	backgroundColor,
 	textColor,
@@ -584,7 +624,7 @@ export const getClassNameFromBlockAttributes = ( {
 
 	const hasOpacity = opacity && opacity < 100;
 
-	return classnames( {
+	return classnames( className, {
 		'amp-text-content': ! ampFitText,
 		'has-text-color': textColor || customTextColor,
 		'has-background': backgroundColor || customBackgroundColor,
@@ -608,34 +648,18 @@ export const getStylesFromBlockAttributes = ( {
 	opacity,
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
-	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
-
-	const hasOpacity = opacity && opacity < 100;
 
 	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
 
 	/*
-     * Calculate fontsize using vw to make it responsive.
+     * Calculate font size using vw to make it responsive.
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
 	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
-	const fontSizeResponsive = ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
+	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
-	let appliedBackgroundColor;
-
-	// If we need to assign opacity.
-	if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
-		const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
-
-		if ( hexColor ) {
-			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
-
-			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
-		}
-	} else if ( ! backgroundClass ) {
-		appliedBackgroundColor = customBackgroundColor;
-	}
+	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 	return {
 		backgroundColor: appliedBackgroundColor,
@@ -649,7 +673,6 @@ export const getStylesFromBlockAttributes = ( {
 
 export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
 	const supports = {
-		className: false,
 		anchor: true,
 		reusable: true,
 	};
@@ -657,35 +680,6 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 	const schema = {
 		align: {
 			type: 'string',
-		},
-		fontSize: {
-			type: 'string',
-		},
-		customFontSize: {
-			type: 'number',
-		},
-		ampFontFamily: {
-			type: 'string',
-		},
-		textColor: {
-			type: 'string',
-		},
-		customTextColor: {
-			type: 'string',
-		},
-		backgroundColor: {
-			type: 'string',
-		},
-		customBackgroundColor: {
-			type: 'string',
-		},
-		height: {
-			default: 50,
-			type: 'number',
-		},
-		width: {
-			default: 250,
-			type: 'number',
 		},
 	};
 
@@ -707,4 +701,26 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		},
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
+};
+
+const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity ) => {
+	const hasOpacity = opacity && opacity < 100;
+	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
+
+	let appliedBackgroundColor;
+
+	// If we need to assign opacity.
+	if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
+		const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+
+		if ( hexColor ) {
+			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
+
+			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+		}
+	} else if ( ! backgroundClass ) {
+		appliedBackgroundColor = customBackgroundColor;
+	}
+
+	return appliedBackgroundColor;
 };

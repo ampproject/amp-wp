@@ -26,7 +26,6 @@ import {
  */
 import {
 	withAmpStorySettings,
-	withAnimationControls,
 	withPageNumber,
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
@@ -365,7 +364,6 @@ registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublish
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
-addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );

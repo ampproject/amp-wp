@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { getMetaBlockSettings } from '../../helpers';
+import './edit.css';
 
 export const name = 'amp/amp-story-post-title';
 

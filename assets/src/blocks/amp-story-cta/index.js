@@ -31,30 +31,6 @@ const schema = {
 		source: 'html',
 		selector: 'a',
 	},
-	backgroundColor: {
-		type: 'string',
-	},
-	textColor: {
-		type: 'string',
-	},
-	customBackgroundColor: {
-		type: 'string',
-	},
-	customTextColor: {
-		type: 'string',
-	},
-	fontSize: {
-		type: 'string',
-	},
-	customFontSize: {
-		type: 'number',
-	},
-	autoFontSize: {
-		type: 'number',
-	},
-	ampFontFamily: {
-		type: 'string',
-	},
 };
 
 export const name = 'amp/amp-story-cta';

@@ -10,20 +10,16 @@ import { compose } from '@wordpress/compose';
 import {
 	AlignmentToolbar,
 	BlockControls,
-	InspectorControls,
-	withColors,
-	withFontSizes,
 } from '@wordpress/block-editor';
 import { Fragment } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
-import { dateI18n, __experimentalGetSettings } from '@wordpress/date';
+import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpress/date';
 
 /**
  * Internal dependencies
  */
-import { ResizableBox, ColorSettings, TextSettings } from './';
-import { maybeEnqueueFontStyle } from '../helpers';
+import { getRgbaFromHex } from '../helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
@@ -35,28 +31,16 @@ const MetaBlockEdit = ( props ) => {
 		setAttributes,
 		className,
 		fontSize,
-		isSelected,
-		setFontSize,
 		backgroundColor,
 		textColor,
-		setBackgroundColor,
-		setTextColor,
-		toggleSelection,
 		tagName,
 	} = props;
 
-	const {
-		align,
-		ampFontFamily,
-		customFontSize,
-		height,
-		width,
-		opacity,
-	} = attributes;
+	const { align, opacity } = attributes;
 
-	const minTextHeight = 20;
-	const minTextWidth = 30;
-	const userFontSize = fontSize.size ? fontSize.size + 'px' : '2rem';
+	const userFontSize = fontSize.size && fontSize.size + 'px';
+
+	const [ r, g, b, a ] = getRgbaFromHex( backgroundColor.color, opacity );
 
 	const ContentTag = tagName;
 
@@ -68,60 +52,24 @@ const MetaBlockEdit = ( props ) => {
 					onChange={ ( value ) => setAttributes( { align: value } ) }
 				/>
 			</BlockControls>
-			<InspectorControls>
-				<TextSettings
-					fontFamily={ ampFontFamily }
-					setFontFamily={ ( value ) => {
-						maybeEnqueueFontStyle( value );
-						setAttributes( { ampFontFamily: value } );
-					} }
-					fontSize={ fontSize }
-					setFontSize={ setFontSize }
-					customFontSize={ customFontSize }
-				/>
-				<ColorSettings
-					backgroundColor={ backgroundColor }
-					setBackgroundColor={ setBackgroundColor }
-					textColor={ textColor }
-					setTextColor={ setTextColor }
-					fontSize={ fontSize }
-					opacity={ opacity }
-					setOpacity={ ( value ) => setAttributes( { opacity: value } ) }
-				/>
-			</InspectorControls>
-			<ResizableBox
-				isSelected={ isSelected }
-				width={ width }
-				height={ height }
-				minHeight={ minTextHeight }
-				minWidth={ minTextWidth }
-				onResizeStop={ ( value ) => {
-					setAttributes( value );
-					toggleSelection( true );
+			<ContentTag
+				style={ {
+					backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,
+					color: textColor.color,
+					fontSize: userFontSize,
+					textAlign: align,
 				} }
-				onResizeStart={ () => {
-					toggleSelection( false );
-				} }
+				className={ classnames( className, {
+					'has-text-color': textColor.color,
+					'has-background': backgroundColor.color,
+					[ backgroundColor.class ]: backgroundColor.class,
+					[ textColor.class ]: textColor.class,
+					[ fontSize.class ]: fontSize.class,
+					'is-empty': ! blockContent,
+				} ) }
 			>
-				<ContentTag
-					style={ {
-						backgroundColor: backgroundColor.color,
-						color: textColor.color,
-						fontSize: userFontSize,
-						textAlign: align,
-					} }
-					className={ classnames( className, {
-						'has-text-color': textColor.color,
-						'has-background': backgroundColor.color,
-						[ backgroundColor.class ]: backgroundColor.class,
-						[ textColor.class ]: textColor.class,
-						[ fontSize.class ]: fontSize.class,
-						'is-empty': ! blockContent,
-					} ) }
-				>
-					{ blockContent || placeholder }
-				</ContentTag>
-			</ResizableBox>
+				{ blockContent || placeholder }
+			</ContentTag>
 		</Fragment>
 	);
 };
@@ -139,9 +87,11 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 			// Todo: Maybe pass callbacks as props instead.
 			switch ( attribute ) {
 				case 'date':
-					// Disable reason: false positive because of the two leading underscores.
-					const dateFormat = __experimentalGetSettings().formats.date; // eslint-disable-line no-restricted-syntax
-					blockContent = dateI18n( dateFormat, attributeValue );
+					const dateSettings = getDateSettings();
+					const dateFormat = dateSettings.formats.date;
+					const date = attributeValue || new Date();
+
+					blockContent = dateI18n( dateFormat, date );
 
 					break;
 				case 'author':
@@ -167,8 +117,6 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 				onChange: ( value ) => editPost( { [ attribute ]: value } ),
 			};
 		} ),
-		withColors( 'backgroundColor', { textColor: 'color' } ),
-		withFontSizes( 'fontSize' ),
 	)( ( props ) => {
 		return (
 			<MetaBlockEdit

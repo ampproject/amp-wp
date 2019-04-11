@@ -17,7 +17,6 @@ import {
 export const name = 'amp/amp-story-text';
 
 const supports = {
-	className: false,
 	anchor: true,
 	reusable: true,
 };
@@ -43,45 +42,12 @@ const schema = {
 	align: {
 		type: 'string',
 	},
-	fontSize: {
-		type: 'string',
-	},
-	customFontSize: {
-		type: 'number',
-	},
 	autoFontSize: {
 		type: 'number',
 	},
 	ampFitText: {
 		type: 'boolean',
 		default: true,
-	},
-	ampFontFamily: {
-		type: 'string',
-	},
-	textColor: {
-		type: 'string',
-	},
-	customTextColor: {
-		type: 'string',
-	},
-	backgroundColor: {
-		type: 'string',
-	},
-	customBackgroundColor: {
-		type: 'string',
-	},
-	opacity: {
-		default: 100,
-		type: 'number',
-	},
-	height: {
-		default: 50,
-		type: 'number',
-	},
-	width: {
-		default: 250,
-		type: 'number',
 	},
 };
 
