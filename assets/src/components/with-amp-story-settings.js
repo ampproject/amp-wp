@@ -16,7 +16,7 @@ import { withParentBlock, StoryBlockMover } from './';
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return withParentBlock( ( props ) => {
-			const { attributes, name, parentBlock } = props;
+			const { attributes, name, parentBlock, isSelected } = props;
 
 			if ( ! parentBlock ||
 				! ALLOWED_CHILD_BLOCKS.includes( name ) ||
@@ -33,12 +33,9 @@ export default createHigherOrderComponent(
 				<Fragment>
 					{ isMovableBLock && (
 						<StoryBlockMover
-							clientIds={ props.clientId }
+							clientId={ props.clientId }
 							blockElementId={ `block-${ props.clientId }` }
-							isFirst={ props.isFirst }
-							isLast={ props.isLast }
-							isFocused={ props.isFocused }
-							isDraggable={ ! props.isPartOfMultiSelection }
+							isDraggable={ ! props.isPartOfMultiSelection && isSelected }
 						/>
 					) }
 					<BlockEdit { ...props } />

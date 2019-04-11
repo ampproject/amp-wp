@@ -17,3 +17,15 @@
 div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-mover {
 	opacity: 1;
 }
+
+.block-editor-block-list__layout .block-editor-block-list__layout .block-editor-block-mover__control {
+	box-shadow: none;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__layout .block-editor-block-mover__control-drag-handle {
+	box-shadow: none !important;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__layout .block-editor-block-mover__control-drag-handle:hover {
+	box-shadow: inset 0 0 0 1px #e2e4e7 !important;
+}

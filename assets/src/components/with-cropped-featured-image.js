@@ -22,16 +22,13 @@ const getMinimumDimensions = () => {
 	const featuredImageDimensions = getMinimumFeaturedImageDimensions();
 
 	//( posterImageDimensions.height / posterImageDimensions.width ) *
-	let width = Math.max( posterImageDimensions.width, featuredImageDimensions.width );
-	let height = Math.max( posterImageDimensions.height, featuredImageDimensions.height );
+	const width = Math.max( posterImageDimensions.width, featuredImageDimensions.width );
+	const height = Math.max( posterImageDimensions.height, featuredImageDimensions.height );
 
 	// @todo Adjust the width or height to make sure the aspect ratio of posterImageDimensions is preserved.
 	if ( width / height ) {
 
 	}
-
-
-
 };
 
 /**

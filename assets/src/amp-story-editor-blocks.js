@@ -18,6 +18,7 @@ import {
 	unregisterBlockType,
 	registerBlockType,
 	registerBlockStyle,
+	unregisterBlockStyle,
 } from '@wordpress/blocks';
 
 /**
@@ -34,6 +35,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	PrePublishPanel,
+	withRotatableBox,
 	withCallToActionValidation,
 } from './components';
 import {
@@ -148,6 +150,13 @@ domReady( () => {
 		name: 'rounded',
 		label: __( 'Rounded', 'amp' ),
 	} );
+
+	registerBlockStyle( 'core/quote', {
+		name: 'white',
+		label: __( 'White', 'amp' ),
+	} );
+
+	unregisterBlockStyle( 'core/quote', 'large' );
 } );
 
 const positionTopLimit = 75;
@@ -373,6 +382,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', add
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addAnimationControls', withAnimationControls );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withRotatableBox', withRotatableBox );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
