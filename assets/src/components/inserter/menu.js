@@ -6,6 +6,7 @@
  * top-level blocks (story page) or child-level blocks (text block, call-to-action, et al).
  * Child-level blocks are inserted on the current page as determined by the getCurrentPage() selector, regardless
  * of block selection.
+ * In addition, this custom inserter does not make use of the ChildBlocks component.
  */
 
 /**
@@ -49,7 +50,6 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import BlockPreview from '../block-preview';
 import BlockTypesList from '../block-types-list';
-import ChildBlocks from './child-blocks';
 import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
 
 const MAX_SUGGESTED_ITEMS = 9;
@@ -256,9 +256,8 @@ export class InserterMenu extends Component {
 	}
 
 	render() {
-		const { instanceId, onSelect, rootClientId } = this.props;
+		const { instanceId, onSelect } = this.props;
 		const {
-			childItems,
 			hoveredItem,
 			itemsPerCategory,
 			openPanels,
@@ -298,13 +297,6 @@ export class InserterMenu extends Component {
 					role="region"
 					aria-label={ __( 'Available block types', 'amp' ) }
 				>
-
-					<ChildBlocks
-						rootClientId={ rootClientId }
-						items={ childItems }
-						onSelect={ onSelect }
-						onHover={ this.onHover }
-					/>
 
 					{ !! suggestedItems.length &&
 						<PanelBody
