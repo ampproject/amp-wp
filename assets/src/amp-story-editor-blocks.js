@@ -10,6 +10,7 @@ import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
+import { registerPlugin } from '@wordpress/plugins';
 import {
 	createBlock,
 	getDefaultBlockName,
@@ -51,11 +52,6 @@ import {
 import { ALLOWED_BLOCKS, ALLOWED_TOP_LEVEL_BLOCKS, ALLOWED_CHILD_BLOCKS, MEDIA_INNER_BLOCKS } from './constants';
 
 import store from './stores/amp-story';
-import { registerPlugin } from '@wordpress/plugins';
-
-// Register plugin.
-// @todo Consider importing automatically, especially in case of more plugins.
-import './plugins/template-menu-item';
 
 const {
 	getSelectedBlockClientId,
@@ -360,6 +356,13 @@ store.subscribe( () => {
 	}
 } );
 
+const plugins = require.context( './plugins', true, /.*\.js$/ );
+
+plugins.keys().forEach( ( modulePath ) => {
+	const { name, render } = plugins( modulePath );
+	registerPlugin( name, { render } );
+} );
+
 registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
@@ -377,10 +380,10 @@ addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone'
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );
 
-const context = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
+const blocks = require.context( './blocks', true, /\/.*-story.*\/index\.js$/ );
 
 // Block types need to be register *after* all the filters have been applied.
-context.keys().forEach( ( modulePath ) => {
-	const { name, settings } = context( modulePath );
+blocks.keys().forEach( ( modulePath ) => {
+	const { name, settings } = blocks( modulePath );
 	registerBlockType( name, settings );
 } );
