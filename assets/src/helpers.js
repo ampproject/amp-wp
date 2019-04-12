@@ -466,15 +466,17 @@ export const renderStoryComponents = () => {
 	}
 
 	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
+		if ( ! document.getElementById( 'amp-story-shortcuts' ) ) {
+			const shortcuts = document.createElement( 'div' );
+			shortcuts.id = 'amp-story-shortcuts';
 
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+			editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
 
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
+			render(
+				<Shortcuts />,
+				shortcuts
+			);
+		}
 
 		const customInserter = document.createElement( 'div' );
 		customInserter.id = 'amp-story-inserter';
