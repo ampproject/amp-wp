@@ -100,13 +100,12 @@
 	height: 543px;
 }
 
-
 /*
  * Make all the inner blocks positioned with absolute.
- * @todo Add exception for CTA block once it's added back.
  */
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
 	position: absolute;
+	z-index: 10;
 }
 
 .editor-block-list__block .editor-block-list__layout {
