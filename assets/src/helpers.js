@@ -668,7 +668,7 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @param {Object}  media      A media object with width and height values.
  * @param {Object}  dimensions An object with minimum required width and height values.
  * @param {boolean} required   Whether the image is required or not.
- * @return {string[]} Validation errors.
+ * @return {string[]|null} Validation errors, or null if there were no errors.
  */
 export const validateFeaturedImage = ( media, dimensions, required ) => {
 	if ( ! media ) {
@@ -697,7 +697,7 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 		);
 	}
 
-	return errors;
+	return 0 === errors.length ? null : errors;
 };
 
 /**
