@@ -134,7 +134,10 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
  * Hackily hide the alignment options from the image block since they are irrelevant for an image block in a story.
  * In the future the underlying alignment buttons should be removed entirely. See <https://github.com/ampproject/amp-wp/issues/2115>.
  */
-.editor-block-list__block[data-type="core/image"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2) {
+.editor-block-list__block[data-type="core/image"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/pullquote"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/embed"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/video"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2) {
 	display: none;
 }
 
