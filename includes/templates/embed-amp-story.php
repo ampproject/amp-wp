@@ -9,8 +9,8 @@
 
 get_header( 'embed' );
 
-if ( have_posts() ) :
-	while ( have_posts() ) :
+if ( have_posts() ) {
+	while ( have_posts() ) {
 		the_post();
 		?>
 		<div class="amp-story-embed">
@@ -24,9 +24,9 @@ if ( have_posts() ) :
 			?>
 		</div>
 		<?php
-	endwhile;
-else :
+	}
+} else {
 	get_template_part( 'embed', '404' );
-endif;
+}
 
 get_footer( 'embed' );

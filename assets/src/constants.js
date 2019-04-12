@@ -39,7 +39,7 @@ export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'core/template', // Reusable blocks.
 ];
 
-export const ALLOWED_CHILD_BLOCKS = [
+export const ALLOWED_MOVABLE_BLOCKS = [
 	'core/code',
 	'core/embed',
 	'core/image',
@@ -51,8 +51,16 @@ export const ALLOWED_CHILD_BLOCKS = [
 	'core/verse',
 	'core/video',
 	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
 	'core/block', // Reusable blocks.
 	'core/template', // Reusable blocks.
+];
+
+export const ALLOWED_CHILD_BLOCKS = [
+	...ALLOWED_MOVABLE_BLOCKS,
+	'amp/amp-story-cta',
 ];
 
 export const ALLOWED_BLOCKS = [

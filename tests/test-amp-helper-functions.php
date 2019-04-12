@@ -122,7 +122,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
 
-		// Now check with theme support added (in paired mode).
+		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
@@ -187,7 +187,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
 
-		// Now check with theme support added (in paired mode).
+		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
@@ -203,7 +203,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_get_permalink() with theme support paired mode.
+	 * Test amp_get_permalink() with theme support transitional mode.
 	 *
 	 * @covers \amp_get_permalink()
 	 */
@@ -344,11 +344,11 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
 		$this->assertFalse( is_amp_endpoint() );
 
-		// Paired theme support.
+		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$_GET['amp'] = '';
 		$this->assertTrue( is_amp_endpoint() );
-		unset( $_GET['amp'] );
+		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
@@ -481,14 +481,14 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		ob_start();
 		amp_add_generator_metadata();
 		$output = ob_get_clean();
-		$this->assertContains( 'mode=classic', $output );
+		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
 		ob_start();
 		amp_add_generator_metadata();
 		$output = ob_get_clean();
-		$this->assertContains( 'mode=paired', $output );
+		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );

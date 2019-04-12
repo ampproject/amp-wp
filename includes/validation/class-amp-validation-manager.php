@@ -243,12 +243,12 @@ class AMP_Validation_Manager {
 	/**
 	 * Add menu items to admin bar for AMP.
 	 *
-	 * When on a non-AMP response (paired mode), then the admin bar item should include:
+	 * When on a non-AMP response (transitional mode), then the admin bar item should include:
 	 * - Icon: LINK SYMBOL when AMP not known to be invalid and sanitization is not forced, or CROSS MARK when AMP is known to be valid.
 	 * - Parent admin item and first submenu item: link to AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
-	 * When on paired AMP response:
+	 * When on transitional AMP response:
 	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors which are being forcibly sanitized.
 	 *         Otherwise, if there are unsanitized validation errors then a redirect to the non-AMP version will be done.
 	 * - Parent admin item and first submenu item: link to non-AMP version.
@@ -303,7 +303,7 @@ class AMP_Validation_Manager {
 		 */
 		if ( ! is_amp_endpoint() ) {
 			if ( isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) && is_numeric( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$error_count = intval( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] );
+				$error_count = (int) $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ]; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			}
 			if ( $error_count < 0 ) {
 				$amp_validated_url_post = AMP_Validated_URL_Post_Type::get_invalid_url_post( $amp_url );
@@ -523,9 +523,9 @@ class AMP_Validation_Manager {
 			&&
 			'post.php' === $pagenow
 			&&
-			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			&&
-			intval( $_POST['post_ID'] ) === (int) $post_id // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			(int) $_POST['post_ID'] === (int) $post_id // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		);
 
 		$should_validate_post = (
@@ -1793,11 +1793,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
-		if ( amp_is_canonical() ) {
-			$url = remove_query_arg( amp_get_slug(), $url );
-		} else {
-			$url = add_query_arg( amp_get_slug(), '', $url );
-		}
 
 		$added_query_vars = array(
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -1848,13 +1843,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			// Ensure the redirect URL is formatted for the AMP.
-			if ( amp_is_canonical() ) {
-				$location_header = remove_query_arg( amp_get_slug(), $location_header );
-			} else {
-				$location_header = add_query_arg( amp_get_slug(), '', $location_header );
-			}
-			$validation_url = add_query_arg( $added_query_vars, $location_header );
+			$validation_url = $location_header;
 		}
 
 		if ( is_wp_error( $r ) ) {

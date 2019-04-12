@@ -45,6 +45,22 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 			),
 
+			'simple_image'                             => array(
+				'<p><img src="http://placehold.it/300x300" width="300" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="300" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="http://placehold.it/300x300" width="300" height="300"></noscript></amp-img></p>',
+				array(
+					'add_noscript_fallback' => true,
+				),
+			),
+
+			'simple_image_without_noscript'            => array(
+				'<p><img src="http://placehold.it/300x300" width="300" height="300" /></p>',
+				'<p><amp-img src="http://placehold.it/300x300" width="300" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"></amp-img></p>',
+				array(
+					'add_noscript_fallback' => false,
+				),
+			),
+
 			'image_without_src'                        => array(
 				'<p><img width="300" height="300" /></p>',
 				'<p></p>',
@@ -232,15 +248,16 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
+	 * @param array  $args     Args.
 	 * @dataProvider get_data
 	 */
-	public function test_converter( $source, $expected = null ) {
+	public function test_converter( $source, $expected = null, $args = array() ) {
 		if ( ! $expected ) {
 			$expected = $source;
 		}
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$img_count = $dom->getElementsByTagName( 'img' )->length;
-		$sanitizer = new AMP_Img_Sanitizer( $dom );
+		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
