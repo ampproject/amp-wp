@@ -19,13 +19,20 @@ const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'le
 	);
 };
 
-export default withSelect( ( select, { block } ) => {
+export default withSelect( ( select, { block, label } ) => {
+	if ( ! block ) {
+		return {
+			content: label,
+			icon: null,
+		};
+	}
+
 	const { getEditedPostAttribute } = select( 'core/editor' );
 	const { getAuthors, getMedia } = select( 'core' );
 
 	const blockType = getBlockType( block.name );
 
-	let label = blockType.title;
+	label = blockType.title;
 	let content;
 
 	switch ( block.name ) {
