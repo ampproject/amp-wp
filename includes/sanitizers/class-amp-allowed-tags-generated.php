@@ -4321,6 +4321,47 @@ class AMP_Allowed_Tags_Generated {
 				),
 			),
 		),
+		'amp-script' => array(
+			array(
+				'attr_spec_list' => array(
+					'media' => array(),
+					'noloading' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+				),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							5,
+							6,
+							2,
+							3,
+							7,
+							1,
+							4,
+						),
+					),
+					'disallowed_ancestor' => array(
+						'amp-script',
+					),
+					'requires_extension' => array(
+						'amp-script',
+					),
+				),
+			),
+		),
 		'amp-selector' => array(
 			array(
 				'attr_spec_list' => array(
@@ -13140,6 +13181,31 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'extension_spec' => array(
 						'name' => 'amp-riddle-quiz',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-script',
 						'version' => array(
 							'0.1',
 							'latest',

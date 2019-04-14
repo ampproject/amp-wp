@@ -1410,6 +1410,40 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-smartlinks' ),
 			),
+
+			'amp-script-1' => array(
+				'<amp-script layout="container" src="https://example.com/hello-world.js"><button id="hello">Insert Hello World!</button></amp-script>',
+				null,
+				array( 'amp-script' ),
+			),
+			'amp-script-2' => array(
+				'
+					<amp-script layout="container" src="https://example.com/examples/amp-script/hello-world.js">
+						<div class="root">
+							<button id="hello">Insert Hello World!</button>
+							<button id="long">Long task</button>
+							<button id="amp-img">Insert amp-img</button>
+							<button id="script">Insert &lt;script&gt;</button>
+							<button id="img">Insert &lt;img&gt;</button>
+						</div>
+					</amp-script>
+					
+					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
+						<div class="root">should be empty</div>
+					</amp-script>
+				',
+				null,
+				array( 'amp-script' ),
+			),
+			'amp-script-3' => array(
+				'
+					<amp-script src="https://example.com/examples/amp-script/todomvc.ssr.js" layout="container">
+						<div><header class="header"><h1>todos</h1><input class="new-todo" placeholder="What needs to be done?" autofocus="true"></header></div>
+					</amp-script>
+				',
+				null,
+				array( 'amp-script' ),
+			),
 		);
 	}
 
