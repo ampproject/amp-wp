@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 846;
+	private static $spec_file_revision = 855;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -9917,6 +9917,7 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'child_tags' => array(
 						'child_tag_name_oneof' => array(
+							'ol',
 							'ul',
 						),
 						'mandatory_num_child_tags' => 1,
@@ -13428,6 +13429,9 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
+						'deprecated_version' => array(
+							'0.1',
+						),
 						'name' => 'amp-story',
 						'version' => array(
 							'0.1',
@@ -14815,6 +14819,7 @@ class AMP_Allowed_Tags_Generated {
 						'form div [submitting][template]',
 						'form div [verify-error][template]',
 					),
+					'mandatory_ancestor' => 'body',
 					'requires_extension' => array(
 						'amp-mustache',
 					),
@@ -15447,6 +15452,42 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_parent' => 'amp-video',
 					'spec_name' => 'amp-video > track[kind=subtitles]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'[label]' => array(),
+					'[src]' => array(),
+					'[srclang]' => array(),
+					'default' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'kind' => array(
+						'value' => array(
+							'captions',
+							'chapters',
+							'descriptions',
+							'metadata',
+						),
+					),
+					'label' => array(),
+					'src' => array(
+						'blacklisted_value_regex' => '__amp_source_origin',
+						'mandatory' => true,
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
+						),
+					),
+					'srclang' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-ima-video',
+					'spec_name' => 'amp-ima-video > track',
 				),
 			),
 			array(
