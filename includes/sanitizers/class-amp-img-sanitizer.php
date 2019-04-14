@@ -49,7 +49,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Placeholder for default args.
 	 *
-	 * @since 1.2
+	 * @since 1.1
 	 *
 	 * @var array
 	 */
