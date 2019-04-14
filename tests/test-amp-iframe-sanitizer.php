@@ -274,7 +274,6 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				null,
 			),
 
-
 			'attributes_removed_from_noscript_iframe'   => array(
 				'<iframe src="https://example.com/embed/132886713" width="500" height="281" onclick="foo()" data-foo="bar"></iframe>',
 				'
