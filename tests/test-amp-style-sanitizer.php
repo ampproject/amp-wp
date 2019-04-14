@@ -607,6 +607,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'article>video{border:solid 1px green}',
 				'article>amp-video{border:solid 1px green}',
 			),
+			'form' => array(
+				sprintf( '<div id="search"><form method="get" action="https://example.com"><label id="s">Search</label><input type="search" name="s" id="s"></form></div>' ),
+				'#search form label{display:block}',
+				'#search form label{display:block}',
+			),
 			'video_with_amp_video' => array(
 				'<amp-video class="video"></amp-video>',
 				'amp-video.video video{border:solid 1px green}',
@@ -630,7 +635,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'type_class_names' => array(
 				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
 				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
-				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(form){color:green}',
 			),
 		);
 	}
