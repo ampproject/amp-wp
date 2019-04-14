@@ -58,6 +58,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Attributes allowed on noscript fallback elements.
+	 *
+	 * This is used to prevent duplicated validation errors.
+	 *
+	 * @var array
+	 */
+	private $noscript_fallback_allowed_attributes = array();
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
@@ -77,6 +86,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
+		$spec = current( AMP_Allowed_Tags_Generated::get_allowed_tag( 'img' ) );
+
+		$this->noscript_fallback_allowed_attributes = array_fill_keys(
+			array_merge(
+				array_keys( $spec['attr_spec_list'] ),
+				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
+			),
+			true
+		);
 
 		/**
 		 * Node list.
@@ -297,9 +315,29 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
 
+
 		// Preserve original node in noscript for no-JS environments.
-		if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+		$can_include_noscript = (
+			! empty( $this->args['add_noscript_fallback'] )
+			&&
+			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
+			&&
+			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
+		);
+		if ( $can_include_noscript ) {
 			$noscript = $this->dom->createElement( 'noscript' );
+
+			// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
+			$disallowed_attributes = array();
+			foreach ( $node->attributes as $attribute ) {
+				if ( ! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
+					$disallowed_attributes[] = $attribute->nodeName;
+				}
+			}
+			foreach ( $disallowed_attributes as $disallowed_attribute ) {
+				$node->removeAttribute( $disallowed_attribute );
+			}
+
 			$noscript->appendChild( $node );
 			$img_node->appendChild( $noscript );
 		}
