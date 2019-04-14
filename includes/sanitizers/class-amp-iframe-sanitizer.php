@@ -50,6 +50,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
+	 * Attributes allowed on noscript fallback elements.
+	 *
+	 * This is used to prevent duplicated validation errors.
+	 *
+	 * @var array
+	 */
+	private $noscript_fallback_allowed_attributes = array();
+
+	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
 	 *
 	 * @return array Mapping.
@@ -73,6 +82,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_nodes ) {
 			return;
 		}
+
+		$this->noscript_fallback_allowed_attributes = array_fill_keys(
+			array_merge(
+				array_keys( current( AMP_Allowed_Tags_Generated::get_allowed_tag( self::$tag ) )['attr_spec_list'] ),
+				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
+			),
+			true
+		);
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
@@ -118,6 +135,17 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$noscript = $this->dom->createElement( 'noscript' );
 				$noscript->appendChild( $node );
 				$new_node->appendChild( $noscript );
+
+				// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
+				$disallowed_attributes = array();
+				foreach ( $node->attributes as $attribute ) {
+					if ( ! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
+						$disallowed_attributes[] = $attribute->nodeName;
+					}
+				}
+				foreach ( $disallowed_attributes as $disallowed_attribute ) {
+					$node->removeAttribute( $disallowed_attribute );
+				}
 			}
 		}
 	}

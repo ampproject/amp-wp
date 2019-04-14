@@ -86,15 +86,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public function sanitize() {
-		$spec = current( AMP_Allowed_Tags_Generated::get_allowed_tag( 'img' ) );
-
-		$this->noscript_fallback_allowed_attributes = array_fill_keys(
-			array_merge(
-				array_keys( $spec['attr_spec_list'] ),
-				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
-			),
-			true
-		);
 
 		/**
 		 * Node list.
@@ -109,6 +100,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_nodes ) {
 			return;
 		}
+
+		$this->noscript_fallback_allowed_attributes = array_fill_keys(
+			array_merge(
+				array_keys( current( AMP_Allowed_Tags_Generated::get_allowed_tag( self::$tag ) )['attr_spec_list'] ),
+				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
+			),
+			true
+		);
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
@@ -325,6 +324,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		);
 		if ( $can_include_noscript ) {
 			$noscript = $this->dom->createElement( 'noscript' );
+			$noscript->appendChild( $node );
+			$img_node->appendChild( $noscript );
 
 			// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
 			$disallowed_attributes = array();
@@ -336,9 +337,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $disallowed_attributes as $disallowed_attribute ) {
 				$node->removeAttribute( $disallowed_attribute );
 			}
-
-			$noscript->appendChild( $node );
-			$img_node->appendChild( $noscript );
 		}
 	}
 
