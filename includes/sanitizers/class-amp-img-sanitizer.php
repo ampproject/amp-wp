@@ -315,7 +315,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
 
-
 		// Preserve original node in noscript for no-JS environments.
 		$can_include_noscript = (
 			! empty( $this->args['add_noscript_fallback'] )

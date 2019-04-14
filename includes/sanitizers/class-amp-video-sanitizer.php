@@ -168,7 +168,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
-			} elseif ( ! empty( $this->args['add_noscript_fallback'] ) ) {
+			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 
 				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
