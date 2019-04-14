@@ -150,7 +150,14 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-ima-video' => array(
-				'<amp-ima-video width="640" height="360" data-tag="https://example.com/foo" layout="responsive" data-src="https://example.com/bar"></amp-ima-video>',
+				'
+					<amp-ima-video width="640" height="360" data-tag="https://example.com/foo" layout="responsive" data-src="https://example.com/bar">
+						<source src="https://example.com/foo.mp4" type="video/mp4">
+						<source src="https://example.com/foo.webm" type="video/webm">
+						<track label="English subtitles" kind="subtitles" srclang="en" src="https://example.com/subtitles.vtt">
+						<script type="application/json">{"locale": "en","numRedirects": 4}</script>
+					</amp-ima-video>
+				',
 				null, // No change.
 				array( 'amp-ima-video' ),
 			),
@@ -712,8 +719,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'remove_node_with_disallowed_ancestor_and_disallowed_child_nodes' => array(
-				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><i>bad</i><ul><li>Hello</li></ul><i>bad</i></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
-				'<amp-sidebar><nav><ul><li>Hello</li></ul></nav></amp-sidebar>',
+				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><i>bad</i><ul><li>Hello</li></ul><ol><li>Hello</li></ol><i>bad</i></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
+				'<amp-sidebar><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
 				array( 'amp-sidebar' ),
 			),
 
