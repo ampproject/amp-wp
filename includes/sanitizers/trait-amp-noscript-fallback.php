@@ -88,14 +88,12 @@ trait AMP_Noscript_Fallback {
 		$new_node->appendChild( $noscript );
 
 		// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
-		$disallowed_attributes = array();
-		foreach ( $old_node->attributes as $attribute ) {
-			if ( ! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
-				$disallowed_attributes[] = $attribute->nodeName;
+		for ( $i = $old_node->attributes->length - 1; $i >= 0; $i-- ) {
+			$attribute = $old_node->attributes->item( $i );
+			if ( isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
+				continue;
 			}
-		}
-		foreach ( $disallowed_attributes as $disallowed_attribute ) {
-			$old_node->removeAttribute( $disallowed_attribute );
+			$old_node->removeAttribute( $attribute->nodeName );
 		}
 	}
 }
