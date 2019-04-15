@@ -54,7 +54,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param array       $args Optional. Sanitizer arguments. See {@see AMP_Base_Sanitizer::__construct()}.
 	 */
 	public function __construct( $dom, $args = array() ) {
-		$this->DEFAULT_ARGS = $this->merge_default_args( $this->DEFAULT_ARGS );
+		$this->DEFAULT_ARGS = $this->merge_default_noscript_args( $this->DEFAULT_ARGS );
 
 		parent::__construct( $dom, $args );
 	}
@@ -94,7 +94,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->initialize_allowed_attributes( self::$tag );
+		$this->initialize_noscript_allowed_attributes( self::$tag );
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );

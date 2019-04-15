@@ -32,7 +32,7 @@ trait AMP_Noscript_Fallback {
 	 * @param array $default_args Original defaults.
 	 * @return array Extended defaults.
 	 */
-	protected function merge_default_args( array $default_args ) {
+	protected function merge_default_noscript_args( array $default_args ) {
 		$default_args['add_noscript_fallback'] = true;
 		return $default_args;
 	}
@@ -44,7 +44,7 @@ trait AMP_Noscript_Fallback {
 	 *
 	 * @param string $tag Tag name to get allowed attributes for.
 	 */
-	protected function initialize_allowed_attributes( $tag ) {
+	protected function initialize_noscript_allowed_attributes( $tag ) {
 		$this->noscript_fallback_allowed_attributes = array_fill_keys(
 			array_merge(
 				array_keys( current( AMP_Allowed_Tags_Generated::get_allowed_tag( $tag ) )['attr_spec_list'] ),
