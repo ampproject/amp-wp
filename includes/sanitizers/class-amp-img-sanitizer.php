@@ -11,6 +11,7 @@
  * Converts <img> tags to <amp-img> or <amp-anim>
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Value used for width attribute when $attributes['width'] is empty.
@@ -47,24 +48,16 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	private static $anim_extension = '.gif';
 
 	/**
-	 * Placeholder for default args.
+	 * Constructor.
 	 *
-	 * @since 1.1
-	 *
-	 * @var array
+	 * @param DOMDocument $dom  DOMDocument $dom Represents the HTML document to sanitize.
+	 * @param array       $args Optional. Sanitizer arguments. See {@see AMP_Base_Sanitizer::__construct()}.
 	 */
-	protected $DEFAULT_ARGS = array(
-		'add_noscript_fallback' => true,
-	);
+	public function __construct( $dom, $args = array() ) {
+		$this->DEFAULT_ARGS = $this->merge_default_args( $this->DEFAULT_ARGS );
 
-	/**
-	 * Attributes allowed on noscript fallback elements.
-	 *
-	 * This is used to prevent duplicated validation errors.
-	 *
-	 * @var array
-	 */
-	private $noscript_fallback_allowed_attributes = array();
+		parent::__construct( $dom, $args );
+	}
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -101,13 +94,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->noscript_fallback_allowed_attributes = array_fill_keys(
-			array_merge(
-				array_keys( current( AMP_Allowed_Tags_Generated::get_allowed_tag( self::$tag ) )['attr_spec_list'] ),
-				array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() )
-			),
-			true
-		);
+		$this->initialize_allowed_attributes( self::$tag );
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
@@ -115,8 +102,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			// Skip element if in AMP-element fallbacks.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
 
@@ -314,29 +301,14 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
 
-		// Preserve original node in noscript for no-JS environments.
 		$can_include_noscript = (
-			! empty( $this->args['add_noscript_fallback'] )
-			&&
 			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
 			&&
 			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
 		);
 		if ( $can_include_noscript ) {
-			$noscript = $this->dom->createElement( 'noscript' );
-			$noscript->appendChild( $node );
-			$img_node->appendChild( $noscript );
-
-			// Remove all non-allowed attributes preemptively to prevent doubled validation errors.
-			$disallowed_attributes = array();
-			foreach ( $node->attributes as $attribute ) {
-				if ( ! isset( $this->noscript_fallback_allowed_attributes[ $attribute->nodeName ] ) ) {
-					$disallowed_attributes[] = $attribute->nodeName;
-				}
-			}
-			foreach ( $disallowed_attributes as $disallowed_attribute ) {
-				$node->removeAttribute( $disallowed_attribute );
-			}
+			// Preserve original node in noscript for no-JS environments.
+			$this->append_old_node_noscript( $img_node, $node, $this->dom, $this->args );
 		}
 	}
 
