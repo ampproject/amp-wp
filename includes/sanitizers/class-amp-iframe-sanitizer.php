@@ -75,7 +75,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$this->initialize_noscript_allowed_attributes( self::$tag );
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
