@@ -11,6 +11,7 @@
  * Converts <img> tags to <amp-img> or <amp-anim>
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Value used for width attribute when $attributes['width'] is empty.
@@ -38,6 +39,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public static $tag = 'img';
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
 
 	/**
 	 * Animation extension.
@@ -81,14 +91,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 			if ( ! $node instanceof DOMElement ) {
 				continue;
 			}
 
-			// Skip element if in AMP-element fallbacks.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
 
@@ -286,10 +300,17 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
 
-		// Preserve original node in noscript for no-JS environments.
-		$noscript = $this->dom->createElement( 'noscript' );
-		$noscript->appendChild( $node );
-		$img_node->appendChild( $noscript );
+		$can_include_noscript = (
+			$this->args['add_noscript_fallback']
+			&&
+			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
+			&&
+			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
+		);
+		if ( $can_include_noscript ) {
+			// Preserve original node in noscript for no-JS environments.
+			$this->append_old_node_noscript( $img_node, $node, $this->dom );
+		}
 	}
 
 	/**

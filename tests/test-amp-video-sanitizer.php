@@ -29,6 +29,17 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			'simple_video' => array(
 				'<video width="300" height="300" src="https://example.com/video.mp4"></video>',
 				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
+				array(
+					'add_noscript_fallback' => true,
+				),
+			),
+
+			'simple_video_without_noscript' => array(
+				'<video width="300" height="300" src="https://example.com/video.mp4"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a></amp-video>',
+				array(
+					'add_noscript_fallback' => false,
+				),
 			),
 
 			'video_without_dimensions' => array(
@@ -57,8 +68,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'video_with_custom_attribute' => array(
-				'<video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video></noscript></amp-video>',
+				'<video width="300" height="300" src="https://example.com/video.mp4" onclick="foo()" data-foo="bar"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 			),
 
 			'video_with_sizes_attribute_is_overridden' => array(
@@ -181,15 +192,16 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 	 *
 	 * @param string $source   Source.
 	 * @param string $expected Expected.
+	 * @param array  $args     Sanitizer args.
 	 */
-	public function test_converter( $source, $expected = null ) {
+	public function test_converter( $source, $expected = null, $args = array() ) {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
 
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
 
-		$sanitizer = new AMP_Video_Sanitizer( $dom );
+		$sanitizer = new AMP_Video_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
