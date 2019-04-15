@@ -1157,7 +1157,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v16'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v17'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
