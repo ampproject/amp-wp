@@ -25,19 +25,6 @@ trait AMP_Noscript_Fallback {
 	private $noscript_fallback_allowed_attributes = array();
 
 	/**
-	 * Extends the default arguments array with additional defaults.
-	 *
-	 * @since 1.1
-	 *
-	 * @param array $default_args Original defaults.
-	 * @return array Extended defaults.
-	 */
-	protected function merge_default_noscript_args( array $default_args ) {
-		$default_args['add_noscript_fallback'] = true;
-		return $default_args;
-	}
-
-	/**
 	 * Initializes the internal allowed attributes array.
 	 *
 	 * @since 1.1
@@ -69,20 +56,13 @@ trait AMP_Noscript_Fallback {
 	/**
 	 * Appends the given old node in a <noscript> element to the new node.
 	 *
-	 * If the 'add_noscript_fallback' argument is set to false, this process is skipped.
-	 *
 	 * @since 1.1
 	 *
 	 * @param \DOMNode     $new_node New node to append a noscript with the old node to.
 	 * @param \DOMNode     $old_node Old node to append in a noscript.
 	 * @param \DOMDocument $dom      DOM document instance.
-	 * @param array        $args     Arguments.
 	 */
-	protected function append_old_node_noscript( \DOMNode $new_node, \DOMNode $old_node, \DOMDocument $dom, array $args ) {
-		if ( empty( $args['add_noscript_fallback'] ) ) {
-			return;
-		}
-
+	protected function append_old_node_noscript( \DOMNode $new_node, \DOMNode $old_node, \DOMDocument $dom ) {
 		$noscript = $dom->createElement( 'noscript' );
 		$noscript->appendChild( $old_node );
 		$new_node->appendChild( $noscript );

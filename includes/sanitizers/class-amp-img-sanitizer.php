@@ -41,23 +41,20 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'img';
 
 	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
+
+	/**
 	 * Animation extension.
 	 *
 	 * @var string
 	 */
 	private static $anim_extension = '.gif';
-
-	/**
-	 * Constructor.
-	 *
-	 * @param DOMDocument $dom  DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args Optional. Sanitizer arguments. See {@see AMP_Base_Sanitizer::__construct()}.
-	 */
-	public function __construct( $dom, $args = array() ) {
-		$this->DEFAULT_ARGS = $this->merge_default_noscript_args( $this->DEFAULT_ARGS );
-
-		parent::__construct( $dom, $args );
-	}
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -302,13 +299,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$node->parentNode->replaceChild( $img_node, $node );
 
 		$can_include_noscript = (
+			$this->args['add_noscript_fallback']
+			&&
 			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
 			&&
 			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
 		);
 		if ( $can_include_noscript ) {
 			// Preserve original node in noscript for no-JS environments.
-			$this->append_old_node_noscript( $img_node, $node, $this->dom, $this->args );
+			$this->append_old_node_noscript( $img_node, $node, $this->dom );
 		}
 	}
 

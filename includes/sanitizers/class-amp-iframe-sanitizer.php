@@ -46,20 +46,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
+		'add_placeholder'       => false,
+		'add_noscript_fallback' => true,
 	);
-
-	/**
-	 * Constructor.
-	 *
-	 * @param DOMDocument $dom  DOMDocument $dom Represents the HTML document to sanitize.
-	 * @param array       $args Optional. Sanitizer arguments. See {@see AMP_Base_Sanitizer::__construct()}.
-	 */
-	public function __construct( $dom, $args = array() ) {
-		$this->DEFAULT_ARGS = $this->merge_default_noscript_args( $this->DEFAULT_ARGS );
-
-		parent::__construct( $dom, $args );
-	}
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -124,11 +113,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$new_node->appendChild( $placeholder_node );
 			}
 
-			$node->setAttribute( 'src', $normalized_attributes['src'] );
 			$node->parentNode->replaceChild( $new_node, $node );
 
-			// Preserve original node in noscript for no-JS environments.
-			$this->append_old_node_noscript( $new_node, $node, $this->dom, $this->args );
+			if ( $this->args['add_noscript_fallback'] ) {
+				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// Preserve original node in noscript for no-JS environments.
+				$this->append_old_node_noscript( $new_node, $node, $this->dom );
+			}
 		}
 	}
 
