@@ -97,6 +97,16 @@
 	height: 100%;
 }
 
+.amp-stories__editor-inserter__results .block-editor-block-preview__content > div > div:first-of-type,
+.amp-stories__editor-inserter__results .block-editor-block-preview__content .rotatable-box-wrap,
+.amp-stories__editor-inserter__results .block-editor-block-preview__content .reusable-block-indicator {
+	display: none;
+}
+
+.amp-stories__editor-inserter__results .block-editor-block-preview .components-resizable-box__container {
+	height: auto !important;
+}
+
 .amp-stories__blank-page-inserter {
 	height: 100%;
 	width: 100%;
