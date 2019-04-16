@@ -379,6 +379,9 @@ class AMP_Options_Manager {
 			.amp-welcome-notice {
 				padding: 38px;
 			}
+			.amp-welcome-notice + .notice {
+				clear: both;
+			}
 			.amp-welcome-icon-holder {
 				width: 200px;
 				height: 200px;
