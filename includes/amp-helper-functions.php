@@ -257,7 +257,7 @@ function is_amp_endpoint() {
 	}
 
 	// Always return false when requesting service worker.
-	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
+	if ( class_exists( 'WP_Service_Workers' ) && ! empty( $wp_query ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && $wp_query->get( WP_Service_Workers::QUERY_VAR ) ) {
 		return false;
 	}
 
