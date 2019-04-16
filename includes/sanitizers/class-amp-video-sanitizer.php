@@ -13,6 +13,7 @@
  * Converts <video> tags to <amp-video>
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Value used for height attribute when $attributes['height'] is empty.
@@ -33,9 +34,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'video';
 
 	/**
-	 * Placeholder for default args.
-	 *
-	 * @since 1.2
+	 * Default args.
 	 *
 	 * @var array
 	 */
@@ -67,6 +66,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			/**
 			 * Node.
@@ -76,7 +79,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
 
@@ -171,10 +174,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 
-				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
-					$noscript = $this->dom->createElement( 'noscript' );
-					$noscript->appendChild( $old_node );
-					$new_node->appendChild( $noscript );
+				if ( $this->args['add_noscript_fallback'] ) {
+					// Preserve original node in noscript for no-JS environments.
+					$this->append_old_node_noscript( $new_node, $old_node, $this->dom );
 				}
 			}
 
