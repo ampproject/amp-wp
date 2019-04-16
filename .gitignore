@@ -1,9 +1,0 @@
-.DS_Store
-/vendor
-/build
-node_modules
-wiki
-amp.zip
-assets/js/*-compiled.js
-built
-/amphtml
