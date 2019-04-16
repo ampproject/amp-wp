@@ -1,12 +1,27 @@
 <?php
+/**
+ * Class AMP_Image_Dimension_Extractor
+ *
+ * @package AMP
+ */
 
+/**
+ * Class with static methods to extract image dimensions.
+ */
 class AMP_Image_Dimension_Extractor {
-	static $callbacks_registered = false;
-	const STATUS_FAILED_LAST_ATTEMPT = 'failed';
+
+	const STATUS_FAILED_LAST_ATTEMPT     = 'failed';
 	const STATUS_IMAGE_EXTRACTION_FAILED = 'failed';
 
 	/**
-	 * Extract dimensions from image URLs.
+	 * Internal flag whether callbacks have been registered.
+	 *
+	 * @var bool
+	 */
+	private static $callbacks_registered = false;
+
+	/**
+	 * Extracts dimensions from image URLs.
 	 *
 	 * @since 0.2
 	 *
@@ -27,13 +42,13 @@ class AMP_Image_Dimension_Extractor {
 		}
 
 		// Normalize URLs and also track a map of normalized-to-original as we'll need it to reformat things when returning the data.
-		$url_map = array();
+		$url_map         = array();
 		$normalized_urls = array();
 		foreach ( $urls as $original_url ) {
 			$normalized_url = self::normalize_url( $original_url );
 			if ( false !== $normalized_url ) {
 				$url_map[ $original_url ] = $normalized_url;
-				$normalized_urls[] = $normalized_url;
+				$normalized_urls[]        = $normalized_url;
 			} else {
 				// This is not a URL we can extract dimensions from, so default to false.
 				$return_dimensions[ $original_url ] = false;
@@ -56,6 +71,14 @@ class AMP_Image_Dimension_Extractor {
 		return $return_dimensions;
 	}
 
+	/**
+	 * Normalizes the given URL.
+	 *
+	 * This method ensures the URL has a scheme and, if relative, is prepended the WordPress site URL.
+	 *
+	 * @param string $url URL to normalize.
+	 * @return string Normalized URL.
+	 */
 	public static function normalize_url( $url ) {
 		if ( empty( $url ) ) {
 			return false;
@@ -65,25 +88,45 @@ class AMP_Image_Dimension_Extractor {
 			return false;
 		}
 
+		$normalized_url = $url;
+
 		if ( 0 === strpos( $url, '//' ) ) {
-			return set_url_scheme( $url, 'http' );
+			$normalized_url = set_url_scheme( $url, 'http' );
+		} else {
+			$parsed = wp_parse_url( $url );
+			if ( ! isset( $parsed['host'] ) ) {
+				$path = '';
+				if ( isset( $parsed['path'] ) ) {
+					$path .= $parsed['path'];
+				}
+				if ( isset( $parsed['query'] ) ) {
+					$path .= '?' . $parsed['query'];
+				}
+				$home      = home_url();
+				$home_path = wp_parse_url( $home, PHP_URL_PATH );
+				if ( ! empty( $home_path ) ) {
+					$home = substr( $home, 0, - strlen( $home_path ) );
+				}
+				$normalized_url = $home . $path;
+			}
 		}
 
-		$parsed = wp_parse_url( $url );
-		if ( ! isset( $parsed['host'] ) ) {
-			$path = '';
-			if ( isset( $parsed['path'] ) ) {
-				$path .= $parsed['path'];
-			}
-			if ( isset( $parsed['query'] ) ) {
-				$path .= '?' . $parsed['query'];
-			}
-			$url = site_url( $path );
-		}
+		/**
+		 * Apply filters on the normalized image URL for dimension extraction.
+		 *
+		 * @since 1.1
+		 *
+		 * @param string $normalized_url Normalized image URL.
+		 * @param string $url            Original image URL.
+		 */
+		$normalized_url = apply_filters( 'amp_normalized_dimension_extractor_image_url', $normalized_url, $url );
 
-		return $url;
+		return $normalized_url;
 	}
 
+	/**
+	 * Registers the necessary callbacks.
+	 */
 	private static function register_callbacks() {
 		self::$callbacks_registered = true;
 
@@ -95,19 +138,27 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Extract dimensions from downloaded images (or transient/cached dimensions from downloaded images)
 	 *
-	 * @param array  $dimensions Image urls mapped to dimensions.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
+	 * @param array $dimensions Image urls mapped to dimensions.
+	 * @param false $mode       Deprecated.
 	 * @return array Dimensions mapped to image urls, or false if they could not be retrieved
 	 */
-	public static function extract_by_downloading_images( $dimensions, $mode = 'concurrent' ) {
+	public static function extract_by_downloading_images( $dimensions, $mode = false ) {
+		if ( $mode ) {
+			_deprecated_argument( __METHOD__, 'AMP 1.1' );
+		}
+
 		$transient_expiration = 30 * DAY_IN_SECONDS;
 
 		$urls_to_fetch = array();
-		$images = array();
+		$images        = array();
 
 		self::determine_which_images_to_fetch( $dimensions, $urls_to_fetch );
-		self::fetch_images( $urls_to_fetch, $images, $mode );
-		self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		try {
+			self::fetch_images( $urls_to_fetch, $images );
+			self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
+		} catch ( \Exception $exception ) {
+			trigger_error( esc_html( $exception->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
+		}
 
 		return $dimensions;
 	}
@@ -128,14 +179,14 @@ class AMP_Image_Dimension_Extractor {
 				continue;
 			}
 
-			$url_hash = md5( $url );
-			$transient_name = sprintf( 'amp_img_%s', $url_hash );
+			$url_hash          = md5( $url );
+			$transient_name    = sprintf( 'amp_img_%s', $url_hash );
 			$cached_dimensions = get_transient( $transient_name );
 
 			// If we're able to retrieve the dimensions from a transient, set them and move on.
 			if ( is_array( $cached_dimensions ) ) {
 				$dimensions[ $url ] = array(
-					'width' => $cached_dimensions[0],
+					'width'  => $cached_dimensions[0],
 					'height' => $cached_dimensions[1],
 				);
 				continue;
@@ -156,9 +207,9 @@ class AMP_Image_Dimension_Extractor {
 			}
 
 			// Include the image as a url to fetch.
-			$urls_to_fetch[ $url ] = array();
-			$urls_to_fetch[ $url ]['url'] = $url;
-			$urls_to_fetch[ $url ]['transient_name'] = $transient_name;
+			$urls_to_fetch[ $url ]                        = array();
+			$urls_to_fetch[ $url ]['url']                 = $url;
+			$urls_to_fetch[ $url ]['transient_name']      = $transient_name;
 			$urls_to_fetch[ $url ]['transient_lock_name'] = $transient_lock_name;
 			set_transient( $transient_lock_name, 1, MINUTE_IN_SECONDS );
 		}
@@ -167,56 +218,26 @@ class AMP_Image_Dimension_Extractor {
 	/**
 	 * Fetch dimensions of remote images
 	 *
-	 * @param array  $urls_to_fetch Image src urls to fetch.
-	 * @param array  $images Array to populate with results of image/dimension inspection.
-	 * @param string $mode Whether image dimensions should be extracted concurrently or synchronously.
-	 */
-	private static function fetch_images( $urls_to_fetch, &$images, $mode ) {
-		// Use FasterImage when for compatible PHP versions
-		if ( 'synchronous' === $mode ||
-			false === function_exists( 'curl_multi_exec' ) ||
-			version_compare( PHP_VERSION, '5.4.0' ) < 0
-		) {
-			self::fetch_images_via_fast_image( $urls_to_fetch, $images );
-		} else {
-			self::fetch_images_via_faster_image( $urls_to_fetch, $images );
-		}
-	}
-
-	/**
-	 * Fetch images via FastImage library
+	 * @throws Exception When cURL handle cannot be added.
 	 *
 	 * @param array $urls_to_fetch Image src urls to fetch.
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
-	private static function fetch_images_via_fast_image( $urls_to_fetch, &$images ) {
+	private static function fetch_images( $urls_to_fetch, &$images ) {
+		$urls   = array_keys( $urls_to_fetch );
+		$client = new \FasterImage\FasterImage();
 
-		$image = new FastImage();
-		$urls  = array_keys( $urls_to_fetch );
+		/**
+		 * Filters the user agent for onbtaining the image dimensions.
+		 *
+		 * @param string $user_agent User agent.
+		 */
+		$client->setUserAgent( apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() ) );
+		$client->setBufferSize( 1024 );
+		$client->setSslVerifyHost( true );
+		$client->setSslVerifyPeer( true );
 
-		foreach ( $urls as $url ) {
-			$result = $image->load( $url );
-			if ( false === $result ) {
-				$images[ $url ]['size'] = self::STATUS_IMAGE_EXTRACTION_FAILED;
-			} else {
-				$size = $image->getSize();
-
-				$images[ $url ]['size'] = $size;
-			}
-		}
-	}
-
-	/**
-	 * Fetch images via FasterImage library
-	 *
-	 * @param array $urls_to_fetch Image src urls to fetch.
-	 * @param array $images Array to populate with results of image/dimension inspection.
-	 */
-	private static function fetch_images_via_faster_image( $urls_to_fetch, &$images ) {
-		$urls       = array_keys( $urls_to_fetch );
-		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client     = new \FasterImage\FasterImage( $user_agent );
-		$images     = $client->batch( $urls );
+		$images = $client->batch( $urls );
 	}
 
 	/**
@@ -236,7 +257,7 @@ class AMP_Image_Dimension_Extractor {
 				set_transient( $url_data['transient_name'], self::STATUS_FAILED_LAST_ATTEMPT, $transient_expiration );
 			} else {
 				$dimensions[ $url_data['url'] ] = array(
-					'width' => $image_data['size'][0],
+					'width'  => $image_data['size'][0],
 					'height' => $image_data['size'][1],
 				);
 				set_transient(
@@ -259,6 +280,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @return string
 	 */
 	public static function get_default_user_agent() {
-		return 'amp-wp, v' . AMP__VERSION . ', ' . get_site_url();
+		return 'amp-wp, v' . AMP__VERSION . ', ' . home_url();
 	}
 }

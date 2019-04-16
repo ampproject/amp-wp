@@ -122,11 +122,11 @@ class AMP_HTTP {
 
 		// Scrub input vars.
 		foreach ( $query_vars as $query_var ) {
-			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore
+			if ( ! isset( $_GET[ $query_var ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				continue;
 			}
-			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore
-			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] );
+			self::$purged_amp_query_vars[ $query_var ] = wp_unslash( $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $_REQUEST[ $query_var ], $_GET[ $query_var ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$scrubbed = true;
 		}
 
@@ -188,10 +188,12 @@ class AMP_HTTP {
 		$hosts[] = 'cdn.ampproject.org';
 
 		// From the publisher’s own origins.
-		$domains = array_unique( array(
-			wp_parse_url( site_url(), PHP_URL_HOST ),
-			wp_parse_url( home_url(), PHP_URL_HOST ),
-		) );
+		$domains = array_unique(
+			array(
+				wp_parse_url( site_url(), PHP_URL_HOST ),
+				wp_parse_url( home_url(), PHP_URL_HOST ),
+			)
+		);
 
 		/*
 		 * From AMP docs:
@@ -201,11 +203,9 @@ class AMP_HTTP {
 		 */
 		foreach ( $domains as $domain ) {
 			if ( function_exists( 'idn_to_utf8' ) ) {
-				if ( version_compare( PHP_VERSION, '5.4', '>=' ) && defined( 'INTL_IDNA_VARIANT_UTS46' ) ) {
-					$domain = idn_to_utf8( $domain, IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46 ); // phpcs:ignore PHPCompatibility.PHP.NewFunctionParameters.idn_to_utf8_variantFound, PHPCompatibility.PHP.NewConstants.intl_idna_variant_uts46Found
-				} else {
-					$domain = idn_to_utf8( $domain );
-				}
+				// The third parameter is set explicitly to prevent issues with newer PHP versions compiled with an old ICU version.
+				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
+				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
 			$subdomain = str_replace( '-', '--', $domain );
 			$subdomain = str_replace( '.', '-', $subdomain );
@@ -302,9 +302,12 @@ class AMP_HTTP {
 		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
 
 		// Add die handler for AMP error display, most likely due to problem with comment.
-		add_filter( 'wp_die_handler', function () {
-			return array( __CLASS__, 'handle_wp_die' );
-		} );
+		add_filter(
+			'wp_die_handler',
+			function () {
+				return array( __CLASS__, 'handle_wp_die' );
+			}
+		);
 	}
 
 	/**
@@ -386,9 +389,11 @@ class AMP_HTTP {
 		}
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
-		wp_send_json( array(
-			'error' => amp_wp_kses_mustache( $error ),
-		) );
+		wp_send_json(
+			array(
+				'error' => amp_wp_kses_mustache( $error ),
+			)
+		);
 	}
 
 	/**
@@ -421,7 +426,7 @@ class AMP_HTTP {
 		if ( '1' === (string) $comment->comment_approved ) {
 			$message = __( 'Your comment has been posted.', 'amp' );
 		} else {
-			$message = __( 'Your comment is awaiting moderation.', 'default' ); // Note core string re-use.
+			$message = __( 'Your comment is awaiting moderation.', 'amp' );
 		}
 
 		/**
@@ -432,9 +437,11 @@ class AMP_HTTP {
 		$message = apply_filters( 'amp_comment_posted_message', $message, $comment );
 
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
-		wp_send_json( array(
-			'message' => amp_wp_kses_mustache( $message ),
-		) );
+		wp_send_json(
+			array(
+				'message' => amp_wp_kses_mustache( $message ),
+			)
+		);
 
 		return null;
 	}

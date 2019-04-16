@@ -11,6 +11,7 @@
  * Converts <iframe> tags to <amp-iframe>
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Value used for height attribute when $attributes['height'] is empty.
@@ -45,7 +46,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
+		'add_placeholder'       => false,
+		'add_noscript_fallback' => true,
 	);
 
 	/**
@@ -73,8 +75,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node           = $nodes->item( $i );
+			$node = $nodes->item( $i );
+
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
+				continue;
+			}
+
 			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
@@ -104,12 +116,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$node->parentNode->replaceChild( $new_node, $node );
+
+			if ( $this->args['add_noscript_fallback'] ) {
+				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// Preserve original node in noscript for no-JS environments.
+				$this->append_old_node_noscript( $new_node, $node, $this->dom );
+			}
 		}
 	}
 
 	/**
 	 * Normalize HTML attributes for <amp-iframe> elements.
-	 *
 	 *
 	 * @param string[] $attributes {
 	 *      Attributes.
@@ -185,10 +203,14 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMElement|false
 	 */
 	private function build_placeholder( $parent_attributes ) {
-		$placeholder_node = AMP_DOM_Utils::create_node( $this->dom, 'span', array(
-			'placeholder' => '',
-			'class'       => 'amp-wp-iframe-placeholder',
-		) );
+		$placeholder_node = AMP_DOM_Utils::create_node(
+			$this->dom,
+			'span',
+			array(
+				'placeholder' => '',
+				'class'       => 'amp-wp-iframe-placeholder',
+			)
+		);
 
 		return $placeholder_node;
 	}

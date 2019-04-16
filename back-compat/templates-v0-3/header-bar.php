@@ -1,4 +1,12 @@
-<?php $site_icon_url = $this->get( 'site_icon_url' ); ?>
+<?php
+/**
+ * Legacy template for the AMP title bar.
+ *
+ * @package AMP
+ */
+
+$site_icon_url = $this->get( 'site_icon_url' );
+?>
 
 <nav class="amp-wp-title-bar">
 	<div>

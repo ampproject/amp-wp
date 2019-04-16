@@ -234,7 +234,7 @@ class AMP_Options_Manager {
 	 */
 	public static function check_supported_post_type_update_errors() {
 
-		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/paired theme support.
+		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/transitional theme support.
 		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {
 			return;
 		}
@@ -379,6 +379,9 @@ class AMP_Options_Manager {
 			.amp-welcome-notice {
 				padding: 38px;
 			}
+			.amp-welcome-notice + .notice {
+				clear: both;
+			}
 			.amp-welcome-icon-holder {
 				width: 200px;
 				height: 200px;
@@ -410,10 +413,12 @@ class AMP_Options_Manager {
 	public static function persistent_object_caching_notice() {
 		if ( ! wp_using_ext_object_cache() && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
-				'<div class="notice notice-warning"><p>%s <a href="%s">%s</a></p></div>',
-				esc_html__( 'The AMP plugin performs at its best when persistent object cache is enabled.', 'amp' ),
-				esc_url( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching' ),
-				esc_html__( 'More details', 'amp' )
+				'<div class="notice notice-warning"><p>%s</p></div>',
+				sprintf(
+					/* translators: %s: Persistent object cache support URL */
+					__( 'The AMP plugin performs at its best when persistent object cache is enabled. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					esc_url( __( 'https://codex.wordpress.org/Class_Reference/WP_Object_Cache#Persistent_Caching', 'amp' ) )
+				)
 			);
 		}
 	}
@@ -433,10 +438,12 @@ class AMP_Options_Manager {
 		}
 
 		printf(
-			'<div class="notice notice-warning is-dismissible"><p>%s <a href="%s">%s</a></p></div>',
-			esc_html__( "The AMP plugin's post-processor cache disabled due to the detection of highly-variable content.", 'amp' ),
-			esc_url( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache' ),
-			esc_html__( 'More details', 'amp' )
+			'<div class="notice notice-warning is-dismissible"><p>%s</p></div>',
+			sprintf(
+				/* translators: %s: post-processor cache support URL */
+				__( 'The AMP plugin&lsquo;s post-processor cache was disabled due to the detection of highly-variable content. <a href="%s">More details</a>', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				esc_url( __( 'https://github.com/ampproject/amp-wp/wiki/Post-Processor-Cache', 'amp' ) )
+			)
 		);
 	}
 
@@ -465,9 +472,9 @@ class AMP_Options_Manager {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
 				sprintf(
-					/* translators: %s is location where conflicting lib was found */
-					esc_html__( "A conflicting version of PHP-CSS-Parser appears to be installed by another plugin/theme (located in '%s'). Because of this CSS processing will be limited, and tree shaking will not be available.", 'amp' ),
-					esc_html( $source_dir )
+					/* translators: %s: path to the conflicting library */
+					__( 'A conflicting version of PHP-CSS-Parser appears to be installed by another plugin or theme (located in %s). Because of this, CSS processing will be limited, and tree shaking will not be available.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+					'<code>' . esc_html( $source_dir ) . '</code>'
 				)
 			);
 		} catch ( ReflectionException $e ) {
@@ -517,7 +524,7 @@ class AMP_Options_Manager {
 			$theme_support['paired'] = 'paired' === $template_mode;
 			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
 		} else {
-			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for classic URL.
+			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for reader mode URL.
 		}
 
 		$url = amp_admin_get_preview_permalink();
@@ -528,12 +535,14 @@ class AMP_Options_Manager {
 			$validation = AMP_Validation_Manager::validate_url( $url );
 
 			if ( is_wp_error( $validation ) ) {
-				$review_messages[] = esc_html( sprintf(
-					/* translators: %1$s is the error message, %2$s is the error code */
-					__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
-					$validation->get_error_message(),
-					$validation->get_error_code()
-				) );
+				$review_messages[] = esc_html(
+					sprintf(
+						/* translators: %1$s is the error message, %2$s is the error code */
+						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
+						$validation->get_error_message(),
+						$validation->get_error_code()
+					)
+				);
 
 				$error_message = $validation->get_error_message();
 				if ( $error_message ) {
@@ -633,7 +642,7 @@ class AMP_Options_Manager {
 				}
 				break;
 			case 'paired':
-				$message = esc_html__( 'Paired mode activated!', 'amp' );
+				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );
 				}
@@ -642,7 +651,7 @@ class AMP_Options_Manager {
 				$message = wp_kses_post(
 					sprintf(
 						/* translators: %s is an AMP URL */
-						__( 'Classic mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Paired mode.', 'amp' ),
+						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Transitional mode.', 'amp' ),
 						esc_url( $url )
 					)
 				);

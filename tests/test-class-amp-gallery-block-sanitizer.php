@@ -58,7 +58,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test sanitizer.
 	 *
 	 * This only tests when theme support is present.
-	 * Like if Native or Paired is selected in AMP Settings > Template Mode,
+	 * Like if Native or Transitional is selected in AMP Settings > Template Mode,
 	 * or if this is added with add_theme_support( 'amp' ).
 	 * If there is no theme support, the sanitizer will have the argument array( 'carousel_required' => true ).
 	 *
@@ -80,11 +80,11 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Get the Classic mode data.
+	 * Get the Reader mode data.
 	 *
 	 * @return array
 	 */
-	public function get_classic_mode_data() {
+	public function get_reader_mode_data() {
 		return array(
 			'no_block_class'                      => array(
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
@@ -104,17 +104,17 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test the sanitizer in Classic mode (without theme support).
+	 * Test the sanitizer in Reader mode (without theme support).
 	 *
 	 * The tested sanitizer will have an argument of array( 'carousel_required' => true ),
 	 * which sometimes causes different output.
 	 *
 	 * @see amp_get_content_sanitizers()
-	 * @dataProvider get_classic_mode_data
+	 * @dataProvider get_reader_mode_data
 	 * @param string $source Source.
 	 * @param string $expected Expected.
 	 */
-	public function test_sanitizer_classic_mode( $source, $expected ) {
+	public function test_sanitizer_reader_mode( $source, $expected ) {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Gallery_Block_Sanitizer(
 			$dom,

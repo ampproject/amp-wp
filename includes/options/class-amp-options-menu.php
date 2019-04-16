@@ -138,9 +138,15 @@ class AMP_Options_Menu {
 	 * @since 1.0
 	 */
 	public function render_theme_support() {
-		$theme_support      = AMP_Options_Manager::get_option( 'theme_support' );
-		$native_description = __( 'Reuses active theme\'s templates to display AMP responses but does not use separate URLs for AMP. This means your site is <b>AMP-first</b> and your canonical URLs are AMP.', 'amp' );
-		$paired_description = __( 'Reuses active theme\'s templates to display AMP responses, but uses separate URLs for AMP. Each canonical URL may have a corresponding AMP URL, if the content is fully AMP valid.', 'amp' );
+		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
+
+		/* translators: %s: URL to the documentation. */
+		$native_description = sprintf( __( 'Integrates AMP as the framework for your site by using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
+		/* translators: %s: URL to the documentation. */
+		$transitional_description = sprintf( __( 'Uses the active theme’s templates to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
+		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
+		/* translators: %s: URL to the ecosystem page. */
+		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -149,21 +155,27 @@ class AMP_Options_Menu {
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
 			<p>
+				<?php echo wp_kses_post( $ecosystem_description ); ?>
+			</p>
+			<p>
 				<?php if ( amp_is_canonical() ) : ?>
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
 					<?php echo wp_kses_post( $native_description ); ?>
 				<?php else : ?>
-					<strong><?php esc_html_e( 'Paired:', 'amp' ); ?></strong>
-					<?php echo wp_kses_post( $paired_description ); ?>
+					<strong><?php esc_html_e( 'Transitional:', 'amp' ); ?></strong>
+					<?php echo wp_kses_post( $transitional_description ); ?>
 				<?php endif; ?>
 			</p>
 		<?php else : ?>
 			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in paired or native mode.', 'amp' ); ?></p>
+						<p><?php esc_html_e( 'Your active theme is known to work well in transitional or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
+				<p>
+					<?php echo wp_kses_post( $ecosystem_description ); ?>
+				</p>
 				<dl>
 					<dt>
 						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
@@ -175,22 +187,22 @@ class AMP_Options_Menu {
 						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_paired" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
-						<label for="theme_support_paired">
-							<strong><?php esc_html_e( 'Paired', 'amp' ); ?></strong>
+						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, 'paired' ); ?>>
+						<label for="theme_support_transitional">
+							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo wp_kses_post( $paired_description ); ?>
+						<?php echo wp_kses_post( $transitional_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
 						<label for="theme_support_disabled">
-							<strong><?php esc_html_e( 'Classic', 'amp' ); ?></strong>
+							<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php esc_html_e( 'Display AMP responses in classic (legacy) post templates in a basic design that does not match your theme\'s templates.', 'amp' ); ?>
+						<?php echo wp_kses_post( $reader_description ); ?>
 
 						<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
 							<div class="notice notice-info inline notice-alt">
@@ -199,7 +211,7 @@ class AMP_Options_Menu {
 									echo wp_kses_post(
 										sprintf(
 											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
-											__( 'View current site compatibility results for native and paired modes: %1$s and %2$s.', 'amp' ),
+											__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
 												esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
@@ -242,13 +254,17 @@ class AMP_Options_Menu {
 		?>
 		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php
-			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => 'non_existent',
-			) );
+			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => 'non_existent',
+				)
+			);
 			remove_filter( 'amp_validation_error_sanitized', array( 'AMP_Validation_Manager', 'filter_tree_shaking_validation_error_as_accepted' ) );
-			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( array(
-				'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
-			) );
+			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
+				array(
+					'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
+				)
+			);
 
 			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
 			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
@@ -304,7 +320,7 @@ class AMP_Options_Menu {
 						</label>
 					</p>
 					<p class="description">
-						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; if you have more, than it is a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
+						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; any more than this will cause a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
 					</p>
 				</div>
 			<?php endif; ?>
@@ -384,7 +400,13 @@ class AMP_Options_Menu {
 		<?php else : ?>
 			<div class="notice notice-warning notice-alt inline">
 				<p>
-					<?php esc_html_e( 'Your theme is using the deprecated available_callback argument for AMP theme support.', 'amp' ); ?>
+					<?php
+					printf(
+						/* translators: %s: available_callback */
+						esc_html__( 'Your theme is using the deprecated %s argument for AMP theme support.', 'amp' ),
+						'available_callback'
+					);
+					?>
 				</p>
 			</div>
 		<?php endif; ?>
@@ -567,7 +589,7 @@ class AMP_Options_Menu {
 	 * @since 0.6
 	 */
 	public function render_screen() {
-		if ( ! empty( $_GET['settings-updated'] ) ) { // WPCS: CSRF ok.
+		if ( ! empty( $_GET['settings-updated'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>

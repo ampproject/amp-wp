@@ -5,6 +5,8 @@
  * @package AMP
  */
 
+// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+
 /**
  * Context.
  *
@@ -32,6 +34,7 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 
 .aligncenter {
 	display: block;
+	text-align: center;
 	margin-left: auto;
 	margin-right: auto;
 }
@@ -42,11 +45,7 @@ $header_color            = $this->get_customizer_setting( 'header_color' );
 	margin: 0 auto;
 }
 
-.amp-wp-unknown-size img {
-	/** Worst case scenario when we can't figure out dimensions for an image. **/
-	/** Force the image into a box of fixed dimensions and use object-fit to scale. **/
-	object-fit: contain;
-}
+<?php echo file_get_contents( AMP__DIR__ . '/assets/css/amp-default.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions ?>
 
 /* Template Styles */
 
@@ -65,7 +64,7 @@ html {
 body {
 	background: <?php echo sanitize_hex_color( $theme_color ); ?>;
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
-	font-family: 'Merriweather', 'Times New Roman', Times, Serif;
+	font-family: Georgia, 'Times New Roman', Times, Serif;
 	font-weight: 300;
 	line-height: 1.75em;
 }
@@ -94,7 +93,7 @@ a:focus {
 blockquote {
 	color: <?php echo sanitize_hex_color( $text_color ); ?>;
 	background: rgba(127,127,127,.125);
-	border-left: 2px solid <?php echo sanitize_hex_color( $link_color ); ?>;
+	border-<?php echo is_rtl() ? 'right' : 'left'; ?>: 2px solid <?php echo sanitize_hex_color( $link_color ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 	margin: 8px 0 24px 0;
 	padding: 16px;
 }
@@ -138,7 +137,20 @@ blockquote p:last-child {
 	text-decoration: none;
 }
 
-/* Site Icon */
+<?php if ( $this->get( 'post_canonical_link_url' ) || is_customize_preview() ) : ?>
+	.amp-wp-header .amp-wp-canonical-link {
+		font-size: 0.8em;
+		text-decoration: underline;
+		position: absolute;
+		<?php
+		$distance = 18;
+		if ( $this->get( 'site_icon_url' ) ) {
+			$distance += 32 + 10; // Width of site icon with margin.
+		}
+		printf( '%s: %dpx;', is_rtl() ? 'left' : 'right', $distance ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		?>
+	}
+<?php endif; ?>
 
 .amp-wp-header .amp-wp-site-icon {
 	/** site icon is 32px **/
@@ -146,7 +158,7 @@ blockquote p:last-child {
 	border: 1px solid <?php echo sanitize_hex_color( $header_color ); ?>;
 	border-radius: 50%;
 	position: absolute;
-	right: 18px;
+	<?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>: 18px;
 	top: 10px;
 }
 
@@ -194,11 +206,11 @@ blockquote p:last-child {
 }
 
 .amp-wp-article-header .amp-wp-meta:last-of-type {
-	text-align: right;
+	text-align: <?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 }
 
 .amp-wp-article-header .amp-wp-meta:first-of-type {
-	text-align: left;
+	text-align: <?php echo is_rtl() ? 'right' : 'left'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 }
 
 .amp-wp-byline amp-img,
@@ -211,11 +223,11 @@ blockquote p:last-child {
 	border: 1px solid <?php echo sanitize_hex_color( $link_color ); ?>;
 	border-radius: 50%;
 	position: relative;
-	margin-right: 6px;
+	margin-<?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>: 6px;
 }
 
 .amp-wp-posted-on {
-	text-align: right;
+	text-align: <?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 }
 
 /* Featured image */
@@ -238,7 +250,7 @@ blockquote p:last-child {
 
 .amp-wp-article-content ul,
 .amp-wp-article-content ol {
-	margin-left: 1em;
+	margin-<?php echo is_rtl() ? 'right' : 'left'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>: 1em;
 }
 
 .amp-wp-article-content .wp-caption {
@@ -281,6 +293,11 @@ blockquote p:last-child {
 }
 
 /* AMP Media */
+
+.alignwide,
+.alignfull {
+	clear: both;
+}
 
 amp-carousel {
 	background: <?php echo sanitize_hex_color( $border_color ); ?>;
@@ -388,5 +405,5 @@ amp-carousel > amp-img > img {
 	font-weight: 600;
 	line-height: 2em;
 	position: absolute;
-	right: 16px;
+	<?php echo is_rtl() ? 'left' : 'right'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>: 16px;
 }

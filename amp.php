@@ -3,9 +3,9 @@
  * Plugin Name: AMP
  * Description: Enable AMP on your WordPress site, the WordPress way.
  * Plugin URI: https://amp-wp.org
- * Author: WordPress.com VIP, XWP, Google, and contributors
+ * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.0.2
+ * Version: 1.1.0
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -21,11 +21,19 @@
 function _amp_print_php_version_admin_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires PHP 5.3+. Please contact your host to update your PHP version.', 'amp' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: %s: required PHP version */
+				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
+				'5.4+'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }
-if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
+if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
 	return;
 }
@@ -38,7 +46,15 @@ if ( version_compare( phpversion(), '5.3.6', '<' ) ) {
 function _amp_print_php_dom_document_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires DOM extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
+					'DOM'
+				);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -55,7 +71,15 @@ if ( ! class_exists( 'DOMDocument' ) ) {
 function _amp_print_php_missing_iconv_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'The AMP plugin requires iconv extension in PHP. Please contact your host to install this extension.', 'amp' ); ?></p>
+		<p>
+			<?php
+				printf(
+					/* translators: %s: PHP extension name */
+					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
+					'iconv'
+				);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -72,7 +96,15 @@ if ( ! function_exists( 'iconv' ) ) {
 function _amp_print_build_needed_notice() {
 	?>
 	<div class="notice notice-error">
-		<p><?php esc_html_e( 'You appear to be running the AMP plugin from source. Please do `composer install && npm install && npm run build` to finish installation.', 'amp' ); ?></p>
+		<p>
+			<?php
+			printf(
+				/* translators: %s: composer install && npm install && npm run build */
+				__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+				'<code>composer install && npm install && npm run build</code>'
+			);
+			?>
+		</p>
 	</div>
 	<?php
 }
@@ -83,7 +115,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.0.2' );
+define( 'AMP__VERSION', '1.1.0' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -215,9 +247,10 @@ function amp_init() {
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
+	AMP_Service_Worker::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
-	if ( defined( 'WP_CLI' ) ) {
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
 
@@ -277,7 +310,7 @@ function amp_force_query_var_value( $query_vars ) {
 }
 
 /**
- * Conditionally add AMP actions or render the 'paired mode' template(s).
+ * Conditionally add AMP actions or render the transitional mode template(s).
  *
  * If the request is for an AMP page and this is in 'canonical mode,' redirect to the non-AMP page.
  * It won't need this plugin's template system, nor the frontend actions like the 'rel' link.
@@ -294,7 +327,7 @@ function amp_maybe_add_actions() {
 		return;
 	}
 
-	// The remaining logic here is for paired mode running in themes that don't support AMP, the template system in AMP<=0.6.
+	// The remaining logic here is for transitional mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
 		return;
@@ -310,13 +343,26 @@ function amp_maybe_add_actions() {
 	$post = get_queried_object();
 	if ( ! post_supports_amp( $post ) ) {
 		if ( $is_amp_endpoint ) {
-			wp_safe_redirect( get_permalink( $post->ID ), 302 ); // Temporary redirect because AMP may be supported in future.
+			/*
+			 * Temporary redirect is used for admin users because reader mode and AMP support can be enabled by user at any time,
+			 * so they will be able to make AMP available for this URL and see the change without wrestling with the redirect cache.
+			 */
+			wp_safe_redirect( get_permalink( $post->ID ), current_user_can( 'manage_options' ) ? 302 : 301 );
 			exit;
 		}
 		return;
 	}
 
 	if ( $is_amp_endpoint ) {
+
+		// Prevent infinite URL space under /amp/ endpoint.
+		global $wp;
+		wp_parse_str( $wp->matched_query, $path_args );
+		if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
+			wp_safe_redirect( amp_get_permalink( $post->ID ), 301 );
+			exit;
+		}
+
 		amp_prepare_render();
 	} else {
 		amp_add_frontend_actions();
@@ -371,13 +417,13 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      add_theme_support( AMP_Theme_Support::SLUG );
  *
  * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
- * If you want to make available in paired mode, where templates are served in AMP or non-AMP documents, do:
+ * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired' => true,
  *      ) );
  *
- * Paired mode is also implied if you define a template_dir:
+ * Transitional mode is also implied if you define a template_dir:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'template_dir' => 'amp',
@@ -418,7 +464,7 @@ function amp_is_canonical() {
 		return empty( $args['paired'] );
 	}
 
-	// If there is a template_dir, then paired mode is implied.
+	// If there is a template_dir, then transitional mode is implied.
 	return empty( $args['template_dir'] );
 }
 
@@ -448,7 +494,6 @@ function amp_add_frontend_actions() {
  * @deprecated This function is not used when 'amp' theme support is added.
  */
 function amp_add_post_template_actions() {
-	require_once AMP__DIR__ . '/includes/amp-post-template-actions.php';
 	require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 	amp_post_template_init_hooks();
 }

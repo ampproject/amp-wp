@@ -34,10 +34,16 @@ class AMP_Customizer_Design_Settings {
 	/**
 	 * Returns whether the AMP design settings are enabled.
 	 *
+	 * @since 1.1 This always return false when AMP theme support is present.
 	 * @since 0.6
+	 *
 	 * @return bool AMP Customizer design settings enabled.
 	 */
 	public static function is_amp_customizer_enabled() {
+
+		if ( current_theme_supports( 'amp' ) ) {
+			return false;
+		}
 
 		/**
 		 * Filter whether to enable the AMP default template design settings.
@@ -79,28 +85,48 @@ class AMP_Customizer_Design_Settings {
 	public static function register_customizer_settings( $wp_customize ) {
 
 		// Header text color setting.
-		$wp_customize->add_setting( 'amp_customizer[header_color]', array(
-			'type'              => 'option',
-			'default'           => self::DEFAULT_HEADER_COLOR,
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage',
-		) );
+		$wp_customize->add_setting(
+			'amp_customizer[header_color]',
+			array(
+				'type'              => 'option',
+				'default'           => self::DEFAULT_HEADER_COLOR,
+				'sanitize_callback' => 'sanitize_hex_color',
+				'transport'         => 'postMessage',
+			)
+		);
 
 		// Header background color.
-		$wp_customize->add_setting( 'amp_customizer[header_background_color]', array(
-			'type'              => 'option',
-			'default'           => self::DEFAULT_HEADER_BACKGROUND_COLOR,
-			'sanitize_callback' => 'sanitize_hex_color',
-			'transport'         => 'postMessage',
-		) );
+		$wp_customize->add_setting(
+			'amp_customizer[header_background_color]',
+			array(
+				'type'              => 'option',
+				'default'           => self::DEFAULT_HEADER_BACKGROUND_COLOR,
+				'sanitize_callback' => 'sanitize_hex_color',
+				'transport'         => 'postMessage',
+			)
+		);
 
 		// Background color scheme.
-		$wp_customize->add_setting( 'amp_customizer[color_scheme]', array(
-			'type'              => 'option',
-			'default'           => self::DEFAULT_COLOR_SCHEME,
-			'sanitize_callback' => array( __CLASS__, 'sanitize_color_scheme' ),
-			'transport'         => 'postMessage',
-		) );
+		$wp_customize->add_setting(
+			'amp_customizer[color_scheme]',
+			array(
+				'type'              => 'option',
+				'default'           => self::DEFAULT_COLOR_SCHEME,
+				'sanitize_callback' => array( __CLASS__, 'sanitize_color_scheme' ),
+				'transport'         => 'postMessage',
+			)
+		);
+
+		// Display exit link.
+		$wp_customize->add_setting(
+			'amp_customizer[display_exit_link]',
+			array(
+				'type'              => 'option',
+				'default'           => false,
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'transport'         => 'postMessage',
+			)
+		);
 	}
 
 	/**
@@ -109,57 +135,89 @@ class AMP_Customizer_Design_Settings {
 	 * @param WP_Customize_Manager $wp_customize Manager.
 	 */
 	public static function register_customizer_ui( $wp_customize ) {
-		$wp_customize->add_section( 'amp_design', array(
-			'title' => __( 'Design', 'amp' ),
-			'panel' => AMP_Template_Customizer::PANEL_ID,
-		) );
+		$wp_customize->add_section(
+			'amp_design',
+			array(
+				'title' => __( 'Design', 'amp' ),
+				'panel' => AMP_Template_Customizer::PANEL_ID,
+			)
+		);
 
 		// Header text color control.
 		$wp_customize->add_control(
-			new WP_Customize_Color_Control( $wp_customize, 'amp_header_color', array(
-				'settings' => 'amp_customizer[header_color]',
-				'label'    => __( 'Header Text Color', 'amp' ),
-				'section'  => 'amp_design',
-				'priority' => 10,
-			) )
+			new WP_Customize_Color_Control(
+				$wp_customize,
+				'amp_header_color',
+				array(
+					'settings' => 'amp_customizer[header_color]',
+					'label'    => __( 'Header Text Color', 'amp' ),
+					'section'  => 'amp_design',
+					'priority' => 10,
+				)
+			)
 		);
 
 		// Header background color control.
 		$wp_customize->add_control(
-			new WP_Customize_Color_Control( $wp_customize, 'amp_header_background_color', array(
-				'settings' => 'amp_customizer[header_background_color]',
-				'label'    => __( 'Header Background & Link Color', 'amp' ),
-				'section'  => 'amp_design',
-				'priority' => 20,
-			) )
+			new WP_Customize_Color_Control(
+				$wp_customize,
+				'amp_header_background_color',
+				array(
+					'settings' => 'amp_customizer[header_background_color]',
+					'label'    => __( 'Header Background & Link Color', 'amp' ),
+					'section'  => 'amp_design',
+					'priority' => 20,
+				)
+			)
 		);
 
 		// Background color scheme.
-		$wp_customize->add_control( 'amp_color_scheme', array(
-			'settings'   => 'amp_customizer[color_scheme]',
-			'label'      => __( 'Color Scheme', 'amp' ),
-			'section'    => 'amp_design',
-			'type'       => 'radio',
-			'priority'   => 30,
-			'choices'    => self::get_color_scheme_names(),
-		) );
+		$wp_customize->add_control(
+			'amp_color_scheme',
+			array(
+				'settings' => 'amp_customizer[color_scheme]',
+				'label'    => __( 'Color Scheme', 'amp' ),
+				'section'  => 'amp_design',
+				'type'     => 'radio',
+				'priority' => 30,
+				'choices'  => self::get_color_scheme_names(),
+			)
+		);
+
+		// Display exit link.
+		$wp_customize->add_control(
+			'amp_display_exit_link',
+			array(
+				'settings' => 'amp_customizer[display_exit_link]',
+				'label'    => __( 'Display link to exit reader mode?', 'amp' ),
+				'section'  => 'amp_design',
+				'type'     => 'checkbox',
+				'priority' => 40,
+			)
+		);
 
 		// Header.
-		$wp_customize->selective_refresh->add_partial( 'amp-wp-header', array(
-			'selector'         => '.amp-wp-header',
-			'settings'         => array( 'blogname' ), // @todo Site Icon.
-			'render_callback'  => array( __CLASS__, 'render_header_bar' ),
-			'fallback_refresh' => false,
-		) );
+		$wp_customize->selective_refresh->add_partial(
+			'amp-wp-header',
+			array(
+				'selector'         => '.amp-wp-header',
+				'settings'         => array( 'blogname', 'amp_customizer[display_exit_link]' ), // @todo Site Icon.
+				'render_callback'  => array( __CLASS__, 'render_header_bar' ),
+				'fallback_refresh' => false,
+			)
+		);
 
 		// Header.
-		$wp_customize->selective_refresh->add_partial( 'amp-wp-footer', array(
-			'selector'            => '.amp-wp-footer',
-			'settings'            => array( 'blogname' ),
-			'render_callback'     => array( __CLASS__, 'render_footer' ),
-			'fallback_refresh'    => false,
-			'container_inclusive' => true,
-		) );
+		$wp_customize->selective_refresh->add_partial(
+			'amp-wp-footer',
+			array(
+				'selector'            => '.amp-wp-footer',
+				'settings'            => array( 'blogname' ),
+				'render_callback'     => array( __CLASS__, 'render_footer' ),
+				'fallback_refresh'    => false,
+				'container_inclusive' => true,
+			)
+		);
 	}
 
 	/**
@@ -190,6 +248,7 @@ class AMP_Customizer_Design_Settings {
 	public static function enqueue_customizer_preview_scripts() {
 		global $wp_customize;
 
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NoExplicitVersion
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
 			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
@@ -197,9 +256,13 @@ class AMP_Customizer_Design_Settings {
 			false,
 			true
 		);
-		wp_localize_script( 'amp-customizer-design-preview', 'amp_customizer_design', array(
-			'color_schemes' => self::get_color_schemes(),
-		) );
+		wp_localize_script(
+			'amp-customizer-design-preview',
+			'amp_customizer_design',
+			array(
+				'color_schemes' => self::get_color_schemes(),
+			)
+		);
 
 		// Prevent a theme's registered blogname partial from causing full page refreshes.
 		$blogname_partial = $wp_customize->selective_refresh->get_partial( 'blogname' );
@@ -217,17 +280,25 @@ class AMP_Customizer_Design_Settings {
 	 * @return array Merged settings.
 	 */
 	public static function append_settings( $settings ) {
-		$settings = wp_parse_args( $settings, array(
-			'header_color' => self::DEFAULT_HEADER_COLOR,
-			'header_background_color' => self::DEFAULT_HEADER_BACKGROUND_COLOR,
-			'color_scheme' => self::DEFAULT_COLOR_SCHEME,
-		) );
+		$settings = wp_parse_args(
+			$settings,
+			array(
+				'header_color'            => self::DEFAULT_HEADER_COLOR,
+				'header_background_color' => self::DEFAULT_HEADER_BACKGROUND_COLOR,
+				'color_scheme'            => self::DEFAULT_COLOR_SCHEME,
+				'display_exit_link'       => false,
+			)
+		);
 
 		$theme_colors = self::get_colors_for_color_scheme( $settings['color_scheme'] );
 
-		return array_merge( $settings, $theme_colors, array(
-			'link_color' => $settings['header_background_color'],
-		) );
+		return array_merge(
+			$settings,
+			$theme_colors,
+			array(
+				'link_color' => $settings['header_background_color'],
+			)
+		);
 	}
 
 	/**
@@ -237,8 +308,8 @@ class AMP_Customizer_Design_Settings {
 	 */
 	protected static function get_color_scheme_names() {
 		return array(
-			'light'   => __( 'Light', 'amp' ),
-			'dark'    => __( 'Dark', 'amp' ),
+			'light' => __( 'Light', 'amp' ),
+			'dark'  => __( 'Dark', 'amp' ),
 		);
 	}
 
@@ -256,7 +327,7 @@ class AMP_Customizer_Design_Settings {
 				'muted_text_color' => '#696969',
 				'border_color'     => '#c2c2c2',
 			),
-			'dark' => array(
+			'dark'  => array(
 				// Convert and invert colors to greyscale for dark theme color; see <http://goo.gl/uVB2cO>.
 				'theme_color'      => '#0a0a0a',
 				'text_color'       => '#dedede',
@@ -289,7 +360,7 @@ class AMP_Customizer_Design_Settings {
 	 * @return string Sanitized name.
 	 */
 	public static function sanitize_color_scheme( $value ) {
-		$schemes = self::get_color_scheme_names();
+		$schemes      = self::get_color_scheme_names();
 		$scheme_slugs = array_keys( $schemes );
 
 		if ( ! in_array( $value, $scheme_slugs, true ) ) {

@@ -250,15 +250,18 @@ class AMP_DOM_Utils {
 		};
 
 		// Match all start tags that contain a binding attribute.
-		$pattern   = join( '', array(
-			'#<',
-			'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
-			'(?P<attrs>\s',                            // Attributes.
-			'(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
-			'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
-			'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
-			')>#s',
-		) );
+		$pattern   = join(
+			'',
+			array(
+				'#<',
+				'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
+				'(?P<attrs>\s',                            // Attributes.
+				'(?:[^>"\'\[\]]+|"[^"]*+"|\'[^\']*+\')*+', // Non-binding attributes tokens.
+				'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
+				'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
+				')>#s',
+			)
+		);
 		$converted = preg_replace_callback(
 			$pattern,
 			$replace_callback,

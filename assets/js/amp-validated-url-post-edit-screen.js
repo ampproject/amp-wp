@@ -120,7 +120,7 @@ const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-u
 			tr.classList.add( 'hidden' );
 		} else if ( null !== numberErrorsDisplaying ) {
 			// Update the number of errors displaying and create a 'Show all' button if it does not exist yet.
-			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%', numberErrorsDisplaying );
+			document.getElementById( component.idNumberErrors ).innerText = component.data.l10n.showing_number_errors.replace( '%1$s', numberErrorsDisplaying );
 			document.getElementById( component.idNumberErrors ).classList.remove( 'hidden' );
 			component.conditionallyCreateShowAllButton();
 			if ( document.getElementById( component.showAllId ) ) {

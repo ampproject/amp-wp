@@ -195,6 +195,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			module.resetWarningNotice();
 
 			noticeMessage = wp.i18n.sprintf(
+				/* translators: %s: number of issues */
 				wp.i18n._n(
 					'There is %s issue from AMP validation which needs review.',
 					'There are %s issues from AMP validation which need review.',
@@ -212,36 +213,29 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
 					noticeMessage += ' ' + wp.i18n.sprintf(
-						/* translators: %s is the count of block errors. */
+						/* translators: %s: number of block errors. */
 						wp.i18n._n(
-							'And %s is directly due to content here.',
-							'And %s are directly due to content here.',
+							'%s issue is directly due to content here.',
+							'%s issues are directly due to content here.',
 							blockErrorCount,
 							'amp'
 						),
 						blockErrorCount
 					);
+				} else if ( validationErrors.length === 1 ) {
+					noticeMessage += ' ' + wp.i18n.__( 'The issue is not directly due to content here.', 'amp' );
 				} else {
-					noticeMessage += ' ' + wp.i18n.sprintf(
-						wp.i18n._n(
-							'But it is not directly due to content here.',
-							'But none are directly due to content here.',
-							validationErrors.length,
-							'amp'
-						),
-						validationErrors.length
-					);
+					noticeMessage += ' ' + wp.i18n.__( 'The issues are not directly due to content here.', 'amp' );
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
 				module.resetBlockNotices();
 
-				noticeMessage += ' ' + wp.i18n._n(
-					'It may not be due to content here.',
-					'Some may be due to content here.',
-					validationErrors.length,
-					'amp'
-				);
+				if ( validationErrors.length === 1 ) {
+					noticeMessage += ' ' + wp.i18n.__( 'The issue may not be due to content here', 'amp' );
+				} else {
+					noticeMessage += ' ' + wp.i18n.__( 'Some issues may be due to content here.', 'amp' );
+				}
 			}
 
 			rejectedErrors = _.filter( ampValidity.results, function( result ) {
@@ -300,8 +294,7 @@ var ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 
 			return (
-				module.lastStates.validationErrors.length !== validationErrors.length
-				||
+				module.lastStates.validationErrors.length !== validationErrors.length ||
 				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
 			);
 		},

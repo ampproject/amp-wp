@@ -180,8 +180,7 @@ class AMP_CLI {
 			} else {
 				WP_CLI::error(
 					sprintf(
-						/* translators: %s is the flag to force validation */
-						__( 'The current template mode is Classic, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.', 'amp' ),
+						'Your templates are currently in Reader mode, which does not allow crawling the site. Please pass the --%s flag in order to force crawling for validation.',
 						self::FLAG_NAME_FORCE_VALIDATION
 					)
 				);
@@ -193,35 +192,32 @@ class AMP_CLI {
 			if ( ! empty( self::$include_conditionals ) ) {
 				WP_CLI::error(
 					sprintf(
-						/* translators: %s is the command line argument to include certain templates */
-						__( 'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.', 'amp' ),
+						'The templates passed via the --%s argument did not match any URLs. You might try passing different templates to it.',
 						self::INCLUDE_ARGUMENT
 					)
 				);
 			} else {
 				WP_CLI::error(
 					sprintf(
-						/* translators: %s is the command line argument to force validation */
-						__( 'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.', 'amp' ),
+						'All of your templates might be unchecked in AMP Settings > Supported Templates. You might pass --%s to this command.',
 						self::FLAG_NAME_FORCE_VALIDATION
 					)
 				);
 			}
 		}
 
-		WP_CLI::log( __( 'Crawling the site for AMP validity.', 'amp' ) );
+		WP_CLI::log( 'Crawling the site for AMP validity.' );
 
 		self::$wp_cli_progress = WP_CLI\Utils\make_progress_bar(
-			/* translators: %d is the number of URLs */
-			sprintf( __( 'Validating %d URLs...', 'amp' ), $number_urls_to_crawl ),
+			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
 		self::crawl_site();
 		self::$wp_cli_progress->finish();
 
-		$key_template_type = __( 'Template or content type', 'amp' );
-		$key_url_count     = __( 'URL Count', 'amp' );
-		$key_validity_rate = __( 'Validity Rate', 'amp' );
+		$key_template_type = 'Template or content type';
+		$key_url_count     = 'URL Count';
+		$key_validity_rate = 'Validity Rate';
 
 		$table_validation_by_type = array();
 		foreach ( self::$validity_by_type as $type_name => $validity ) {
@@ -233,14 +229,13 @@ class AMP_CLI {
 		}
 
 		if ( empty( $table_validation_by_type ) ) {
-			WP_CLI::error( __( 'No validation results were obtained from the URLs.', 'amp' ) );
+			WP_CLI::error( 'No validation results were obtained from the URLs.' );
 			return;
 		}
 
 		WP_CLI::success(
 			sprintf(
-				/* translators: $1%d is the number of URls crawled, $2%d is the number of validation issues, $3%d is the number of unaccepted issues, $4%s is the list of validation by type, $5%s is the link for more details */
-				__( '%3$d crawled URLs have unaccepted issue(s) out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.', 'amp' ),
+				'%3$d crawled URLs have unaccepted issue(s) out of %2$d total with AMP validation issue(s); %1$d URLs were crawled.',
 				self::$number_crawled,
 				self::$total_errors,
 				self::$unaccepted_errors
@@ -259,8 +254,7 @@ class AMP_CLI {
 			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			admin_url( 'edit.php' )
 		);
-		/* translators: %s is the URL to the admin */
-		WP_CLI::line( sprintf( __( 'For more details, please see: %s', 'amp' ), $url_more_details ) );
+		WP_CLI::line( sprintf( 'For more details, please see: %s', $url_more_details ) );
 	}
 
 	/**
@@ -293,8 +287,7 @@ class AMP_CLI {
 		$posts = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
-			/* translators: %d is the number of posts */
-			sprintf( __( 'Deleting %d amp_validated_url posts...', 'amp' ), $count ),
+			sprintf( 'Deleting %d amp_validated_url posts...', $count ),
 			$count
 		);
 		while ( $posts->valid() ) {
@@ -311,8 +304,7 @@ class AMP_CLI {
 		$terms = new WP_CLI\Iterators\Query( $query, 10000 );
 
 		$progress = WP_CLI\Utils\make_progress_bar(
-			/* translators: %d is the number of terms */
-			sprintf( __( 'Deleting %d amp_taxonomy_error terms...', 'amp' ), $count ),
+			sprintf( 'Deleting %d amp_taxonomy_error terms...', $count ),
 			$count
 		);
 		while ( $terms->valid() ) {
@@ -350,11 +342,13 @@ class AMP_CLI {
 
 		// Count all public taxonomy terms.
 		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
-			$term_query = new WP_Term_Query( array(
-				'taxonomy' => $taxonomy,
-				'fields'   => 'ids',
-				'number'   => self::$limit_type_validate_count,
-			) );
+			$term_query = new WP_Term_Query(
+				array(
+					'taxonomy' => $taxonomy,
+					'fields'   => 'ids',
+					'number'   => self::$limit_type_validate_count,
+				)
+			);
 
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
 			$total_count += ! empty( $term_query->terms ) ? count( $term_query->terms ) : 0;
@@ -631,8 +625,7 @@ class AMP_CLI {
 		 * One cause of an error is if the validation request results in a 404 response code.
 		 */
 		if ( is_wp_error( $validity ) ) {
-			/* translators: %1$s is error code, %2$s is error message, and %3$s is the actual URL. */
-			WP_CLI::warning( sprintf( __( 'Validate URL error (%1$s): %2$s URL: %3$s', 'amp' ), $validity->get_error_code(), $validity->get_error_message(), $url ) );
+			WP_CLI::warning( sprintf( 'Validate URL error (%1$s): %2$s URL: %3$s', $validity->get_error_code(), $validity->get_error_message(), $url ) );
 			return;
 		}
 		if ( self::$wp_cli_progress ) {
@@ -645,17 +638,19 @@ class AMP_CLI {
 			$validity['url'],
 			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
 		);
-		$unaccepted_error_count = count( array_filter(
-			$validation_errors,
-			function( $error ) {
-				$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
-				return (
+		$unaccepted_error_count = count(
+			array_filter(
+				$validation_errors,
+				function( $error ) {
+					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
+					return (
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']
 					&&
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS !== $validation_status['term_status']
-				);
-			}
-		) );
+					);
+				}
+			)
+		);
 
 		if ( count( $validation_errors ) > 0 ) {
 			self::$total_errors++;

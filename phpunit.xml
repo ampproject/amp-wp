@@ -1,5 +1,5 @@
 <phpunit
-	bootstrap="dev-lib/phpunit-plugin-bootstrap.php"
+	bootstrap="vendor/xwp/wp-dev-lib/sample-config/phpunit-plugin-bootstrap.php"
 	backupGlobals="false"
 	colors="true"
 	convertErrorsToExceptions="true"
@@ -7,15 +7,12 @@
 	convertWarningsToExceptions="true"
 	>
 	<php>
-		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php" />
+		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
-		<testsuite>
+		<testsuite name="amp-wp">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
-	    <testsuite name="Test Tag and Attribute Sanitizer Private Methods">
-	      <file phpVersion="5.3.6" phpVersionOperator=">=">./tests/amp-tag-and-attribute-sanitizer-private-methods-tests.php</file>
-	    </testsuite>
 	</testsuites>
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="false">

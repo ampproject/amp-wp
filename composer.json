@@ -1,22 +1,35 @@
 {
-    "name": "ampproject/amp-wp",
-    "description": "WordPress plugin for adding AMP support.",
-    "homepage": "https://github.com/ampproject/amp-wp",
-    "type": "wordpress-plugin",
-    "license": "GPL-2.0",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/xwp/PHP-CSS-Parser"
-        }
-    ],
-    "require": {
-        "php": "^5.3.6 || ^7.0",
-        "sabberworm/php-css-parser": "^8"
-    },
-    "require-dev": {
-        "wp-coding-standards/wpcs": "^0.14.0",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.4.4",
-        "wimg/php-compatibility": "^8.1"
+  "name": "ampproject/amp-wp",
+  "type": "wordpress-plugin",
+  "description": "WordPress plugin for adding AMP support.",
+  "homepage": "https://github.com/ampproject/amp-wp",
+  "license": "GPL-2.0-or-later",
+  "require": {
+    "php": "^5.4 || ^7.0",
+    "ext-dom": "*",
+    "ext-iconv": "*",
+    "ext-intl": "*",
+    "ext-libxml": "*",
+    "cweagans/composer-patches": "1.6.5",
+    "fasterimage/fasterimage": "1.4.0",
+    "sabberworm/php-css-parser": "8.3.0"
+  },
+  "require-dev": {
+    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
+    "phpcompatibility/php-compatibility": "9.1.1",
+    "wp-coding-standards/wpcs": "2.1.0",
+    "xwp/wp-dev-lib": "1.1.1"
+  },
+  "config": {
+    "platform": {
+      "php": "5.4"
     }
+  },
+  "extra": {
+    "patches": {
+      "sabberworm/php-css-parser": {
+        "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
+      }
+    }
+  }
 }

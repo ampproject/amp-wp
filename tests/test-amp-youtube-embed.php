@@ -3,22 +3,22 @@
 class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
 		return array(
-			'no_embed' => array(
+			'no_embed'                         => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
 
-			'url_simple' => array(
+			'url_simple'                       => array(
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
 			),
 
-			'url_short' => array(
+			'url_short'                        => array(
 				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
 			),
 
-			'url_with_querystring' => array(
+			'url_with_querystring'             => array(
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0&hl=en&fs=1&w=425&h=349' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
 			),
@@ -29,7 +29,7 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
 			),
 
-			'shortcode_unnamed_attr_as_url' => array(
+			'shortcode_unnamed_attr_as_url'    => array(
 				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
 				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL,
 			),
@@ -53,7 +53,7 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted' => array(
+			'converted'     => array(
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
 				array( 'amp-youtube' => true ),
 			),
