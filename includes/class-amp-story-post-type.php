@@ -66,7 +66,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function register() {
 
-		if ( ! function_exists( 'register_block_type' ) ) {
+		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! function_exists( 'register_block_type' ) ) {
 			return;
 		}
 

@@ -109,6 +109,17 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_settings_field(
+			'amp_stories',
+			__( 'AMP Stories', 'amp' ),
+			array( $this, 'render_amp_stories' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-stories-field',
+			)
+		);
+
 		if ( wp_using_ext_object_cache() ) {
 			add_settings_field(
 				'caching',
@@ -492,6 +503,33 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * AMP Stories section renderer.
+	 *
+	 * @since 1.2
+	 */
+	public function render_amp_stories() {
+		?>
+		<p>
+			<label for="enable_amp_stories">
+				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
+				<?php esc_html_e( 'Enable experimental support for the AMP Story post type.', 'amp' ); ?>
+			</label>
+		</p>
+		<p class="description">
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %s is the AMP Stories landing page */
+					__( 'AMP Stories is a new visual storytelling for the open web. AMP stories immerse your readers in fast-loading full-screen experiences. Easily create visual narratives, with engaging animations and tappable interactions. The AMP story format is free and part of the open web and are available for everyone to try on their websites. They can be shared and embedded across the web without being confined to a closed ecosystem or platform. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
+					esc_url( 'https://amp.dev/about/stories' )
+				)
+			);
+			?>
+		</p>
 		<?php
 	}
 
