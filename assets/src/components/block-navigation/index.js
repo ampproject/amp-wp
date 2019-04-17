@@ -3,7 +3,6 @@
  */
 import { withSelect, withDispatch } from '@wordpress/data';
 import { Button, NavigableMenu } from '@wordpress/components';
-import { getBlockType } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
@@ -27,7 +26,6 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
 			{ blocks.map( ( block ) => {
-				const blockType = getBlockType( block.name );
 				const isSelected = block.clientId === selectedBlockClientId;
 
 				let className = 'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button';
@@ -44,7 +42,6 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 							>
 								<BlockPreviewLabel
 									block={ block }
-									blockType={ blockType }
 									accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
 								/>
 							</Button>

@@ -28,7 +28,7 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 
 			'simple_audio' => array(
 				'<audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio>',
-				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg" data-foo="bar"></audio></noscript></amp-audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
 				array(
 					'add_noscript_fallback' => true,
 				),
@@ -200,6 +200,14 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 						<!--/noscript-->
 					</div>
 				',
+			),
+
+			'audio_with_extra_attributes' => array(
+				'<audio src="https://example.com/audio/file.ogg" onclick="foo()" data-foo="bar"></audio>',
+				'<amp-audio src="https://example.com/audio/file.ogg" data-foo="bar" width="auto"><a href="https://example.com/audio/file.ogg" fallback="">https://example.com/audio/file.ogg</a><noscript><audio src="https://example.com/audio/file.ogg"></audio></noscript></amp-audio>',
+				array(
+					'add_noscript_fallback' => true,
+				),
 			),
 		);
 	}

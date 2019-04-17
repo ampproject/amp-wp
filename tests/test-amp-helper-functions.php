@@ -403,7 +403,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->go_to( home_url( '?feed=rss' ) );
 		$this->assertFalse( is_amp_endpoint() );
 
-		if ( class_exists( 'WP_Service_Workers' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
+		if ( class_exists( 'WP_Service_Workers' ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
 			$this->go_to( home_url( "?p=$post_id" ) );
 			global $wp_query;
 			$wp_query->set( WP_Service_Workers::QUERY_VAR, WP_Service_Workers::SCOPE_FRONT );
