@@ -210,7 +210,7 @@ class AMP_Options_Menu {
 									<?php
 									echo wp_kses_post(
 										sprintf(
-											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
+											/* translators: %1: link to invalid URLs. 2: link to validation errors. */
 											__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
