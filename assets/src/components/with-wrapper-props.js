@@ -58,7 +58,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 			let style = {
 				top: `${ attributes.positionTop }%`,
 				left: `${ attributes.positionLeft }%`,
-				transform: `rotate(${ attributes.rotationAngle }deg)`,
+				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle }deg)`,
 			};
 			if ( props.wrapperProps && props.wrapperProps.style ) {
 				style = {

@@ -1,3 +1,9 @@
+:root {
+	--preview-scale: 0.42;
+	--preview-translateX: -40%;
+	--preview-translateY: -70%;
+}
+
 /*
  * 0. General editor layout styles.
  */
