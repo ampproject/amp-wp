@@ -520,7 +520,7 @@ class AMP_Options_Menu {
 			</div>
 		<?php elseif ( ! current_theme_supports( 'amp' ) ) : ?>
 			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'To use AMP stories, you must currently set the template mode to Native or Transitional.', 'amp' ); ?></p>
+				<p><?php esc_html_e( 'To use AMP stories, you must currently set the template mode to Native or Transitional above and save changes.', 'amp' ); ?></p>
 			</div>
 		<?php endif; ?>
 		<p>
