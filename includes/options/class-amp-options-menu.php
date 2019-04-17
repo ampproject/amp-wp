@@ -516,15 +516,15 @@ class AMP_Options_Menu {
 		<p>
 			<label for="enable_amp_stories">
 				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
-				<?php esc_html_e( 'Enable experimental support for the AMP Story post type.', 'amp' ); ?>
+				<?php esc_html_e( 'Enable experimental support for AMP Stories.', 'amp' ); ?>
 			</label>
 		</p>
 		<p class="description">
 			<?php
 			echo wp_kses_post(
 				sprintf(
-					/* translators: %s is the AMP Stories landing page */
-					__( 'AMP Stories is a new visual storytelling for the open web. AMP stories immerse your readers in fast-loading full-screen experiences. Easily create visual narratives, with engaging animations and tappable interactions. The AMP story format is free and part of the open web and are available for everyone to try on their websites. They can be shared and embedded across the web without being confined to a closed ecosystem or platform. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
+					/* translators: %s: AMP Stories documentation URL. */
+					__( 'AMP Stories is a visual storytelling format for the open web, which immerse your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
 					esc_url( 'https://amp.dev/about/stories' )
 				)
 			);
