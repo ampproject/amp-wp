@@ -537,7 +537,7 @@ class AMP_Options_Manager {
 			if ( is_wp_error( $validation ) ) {
 				$review_messages[] = esc_html(
 					sprintf(
-						/* translators: %1$s is the error message, %2$s is the error code */
+						/* translators: 1: error message. 2: error code. */
 						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
 						$validation->get_error_message(),
 						$validation->get_error_code()
@@ -616,7 +616,7 @@ class AMP_Options_Manager {
 					if ( $new_errors > 0 && $invalid_url_screen_url ) {
 						$message .= ' ' . wp_kses_post(
 							sprintf(
-								/* translators: %1$s is URL to review issues, %2$s is count of new errors */
+								/* translators: 1: URL to review issues. 2: count of new errors. */
 								_n(
 									'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
 									'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',
