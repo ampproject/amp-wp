@@ -81,7 +81,7 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! current_theme_supports( 'amp' ) || ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
+		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 

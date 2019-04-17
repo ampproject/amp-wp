@@ -124,25 +124,34 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		self::read_theme_support();
-		if ( ! current_theme_supports( self::SLUG ) ) {
-			return;
-		}
-
-		// Ensure extra theme support for core themes is in place.
-		AMP_Core_Theme_Sanitizer::extend_theme_support();
 
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+		if ( current_theme_supports( self::SLUG ) ) {
+			// Ensure extra theme support for core themes is in place.
+			AMP_Core_Theme_Sanitizer::extend_theme_support();
 
-		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
-		/*
-		 * Note that wp action is use instead of template_redirect because some themes/plugins output
-		 * the response at this action and then short-circuit with exit. So this is why the the preceding
-		 * action to template_redirect--the wp action--is used instead.
-		 */
-		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+
+			/*
+			 * Note that wp action is use instead of template_redirect because some themes/plugins output
+			 * the response at this action and then short-circuit with exit. So this is why the the preceding
+			 * action to template_redirect--the wp action--is used instead.
+			 */
+			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+		} elseif ( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+			add_action(
+				'wp',
+				function () {
+					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+						self::finish_init();
+					}
+				},
+				PHP_INT_MAX
+			);
+		}
 	}
 
 	/**
