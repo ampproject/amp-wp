@@ -212,7 +212,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test render_block_latest_stories.
 	 *
-	 * @covers \AMP_Editor_Blocks::render_block_latest_stories()
+	 * @covers \AMP_Story_Post_Type::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -247,7 +247,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test get_featured_image_minimum_height.
 	 *
-	 * @covers \AMP_Editor_Blocks::get_featured_image_minimum_height()
+	 * @covers \AMP_Story_Post_Type::get_featured_image_minimum_height()
 	 */
 	public function test_get_featured_image_minimum_height() {
 		$expected_min_height = 300;
