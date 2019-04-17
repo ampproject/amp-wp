@@ -6,7 +6,8 @@
  * @package AMP
  */
 
-_deprecated_file( __FILE__, '1.1', null, esc_html__( 'AMP_Comment_Walker functionality has been moved to AMP_Comments_Sanitizer.', 'amp' ) );
+ /* translators: 1: AMP_Comment_Walker. 2: AMP_Comments_Sanitizer. */
+_deprecated_file( __FILE__, '1.1', null, sprintf( esc_html__( '%1$s functionality has been moved to %2$s.', 'amp' ), 'AMP_Comment_Walker', 'AMP_Comments_Sanitizer' ) );
 
 /**
  * Class AMP_Comment_Walker
