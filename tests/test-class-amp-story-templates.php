@@ -17,6 +17,11 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
+
+		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+			WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+		}
+
 		AMP_Story_Post_Type::register();
 	}
 
