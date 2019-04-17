@@ -2412,8 +2412,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					) . "\n";
 				} else {
 					$comment .= sprintf(
-						/* translators: %1$d is number of included bytes */
-						esc_html__( 'Total included size: %1$s bytes', 'amp' ),
+						/* translators: %s is number of included bytes */
+						esc_html__( 'Total included size: %s bytes', 'amp' ),
 						number_format_i18n( $included_size ),
 						$included_size / $included_original_size * 100,
 						number_format_i18n( $included_original_size )
