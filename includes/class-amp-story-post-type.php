@@ -65,7 +65,6 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-
 		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! function_exists( 'register_block_type' ) ) {
 			return;
 		}
@@ -167,14 +166,13 @@ class AMP_Story_Post_Type {
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
-		// Register the Latest Stories block.
-		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
-
 		// The AJAX handler for when an image is cropped and sent via POST.
 		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
+
+		self::register_block_latest_stories();
 
 		register_block_type(
 			'amp/amp-story-post-author',

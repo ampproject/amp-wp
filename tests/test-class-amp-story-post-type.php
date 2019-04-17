@@ -129,8 +129,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
-		AMP_Story_Post_Type::register();
-
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.
 		 * Also, this adds the permastruct for the AMP story post type, like http://example.com/stories/example-story-name.
@@ -193,8 +191,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
 		}
-
-		AMP_Story_Post_Type::register();
 
 		set_current_screen( 'edit.php' );
 		$block_name           = 'amp/amp-latest-stories';
