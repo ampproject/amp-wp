@@ -9,6 +9,11 @@
  * Test AMP_Story_Post_Type.
  */
 class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
+	public function setUp() {
+		parent::setUp();
+
+		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
+	}
 
 	/**
 	 * Reset the permalink structure to the state before the tests.
@@ -18,9 +23,22 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		global $wp_rewrite;
 
+		AMP_Options_Manager::update_option( 'enable_amp_stories', false );
+
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
 		parent::tearDown();
+	}
+
+	/**
+	 * @covers \AMP_Story_Post_Type::register()
+	 */
+	public function test_requires_opt_in() {
+		AMP_Options_Manager::update_option( 'enable_amp_stories', false );
+
+		AMP_Story_Post_Type::register();
+
+		$this->assertFalse( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 	}
 
 	/**
@@ -82,6 +100,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
+		AMP_Story_Post_Type::register();
+
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
 		AMP_Story_Post_Type::enqueue_embed_styling();
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
@@ -108,6 +128,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
+
+		AMP_Story_Post_Type::register();
 
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.
@@ -172,11 +194,13 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
 		}
 
-		set_current_screen( 'edit.php' );
-		$registered_blocks    = WP_Block_Type_Registry::get_instance()->get_all_registered();
-		$block_name           = 'amp/amp-latest-stories';
-		$latest_stories_block = $registered_blocks[ $block_name ];
+		AMP_Story_Post_Type::register();
 
+		set_current_screen( 'edit.php' );
+		$block_name           = 'amp/amp-latest-stories';
+		$latest_stories_block = WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
+
+		$this->assertNotNull( $latest_stories_block );
 		$this->assertEquals(
 			array(
 				'className'     => array(
