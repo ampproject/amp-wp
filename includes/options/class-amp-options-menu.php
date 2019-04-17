@@ -518,14 +518,10 @@ class AMP_Options_Menu {
 			<div class="notice notice-info notice-alt inline">
 				<p><?php esc_html_e( 'To use AMP stories, you must either have WordPress 5.2 or the latest version of the Gutenberg plugin installed.', 'amp' ); ?></p>
 			</div>
-		<?php elseif ( ! current_theme_supports( 'amp' ) ) : ?>
-			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'To use AMP stories, you must currently set the template mode to Native or Transitional above and save changes.', 'amp' ); ?></p>
-			</div>
 		<?php endif; ?>
 		<p>
 			<label for="enable_amp_stories">
-				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities || ! current_theme_supports( 'amp' ) ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
+				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
 				<?php esc_html_e( 'Enable experimental support for AMP Stories.', 'amp' ); ?>
 			</label>
 		</p>
