@@ -60,12 +60,28 @@ class AMP_Story_Post_Type {
 	const AMP_STORIES_STYLE_HANDLE = 'amp-story-style';
 
 	/**
+	 * Check if the required version of block capabilities available.
+	 *
+	 * @return bool Whether capabilities are available.
+	 */
+	public static function has_required_block_capabilities() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return false;
+		}
+		return (
+			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '>=' )
+			||
+			function_exists( 'gutenberg_pre_init' )
+		);
+	}
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! function_exists( 'register_block_type' ) ) {
+		if ( ! current_theme_supports( 'amp' ) || ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 
