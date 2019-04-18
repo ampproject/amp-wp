@@ -145,6 +145,14 @@
 	max-width: initial;
 }
 
+/* @todo This is a quick fix for cancelling the transforming for image and quote blocks and needs changing later. */
+.amp-stories__editor-inserter__results .block-editor-block-preview .wp-block[data-type="core/quote"] .amp-story-resize-container {
+	min-width: 135% !important;
+}
+.amp-stories__editor-inserter__results .block-editor-block-preview .wp-block[data-type="core/image"] {
+	width: 180%;
+}
+
 .amp-stories__editor-inserter__results .block-editor-block-preview .wp-block {
 	--preview-scale: 0.48;
 	--preview-translateX: -55%;

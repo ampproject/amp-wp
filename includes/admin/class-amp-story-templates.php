@@ -167,10 +167,6 @@ class AMP_Story_Templates {
 				'title' => __( 'Template: Title Page', 'amp' ),
 				'name'  => 'title-page',
 			),
-			array(
-				'title' => __( 'Template: Vertical', 'amp' ),
-				'name'  => 'travel-vertical',
-			),
 		);
 	}
 
