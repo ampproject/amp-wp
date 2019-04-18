@@ -12,6 +12,14 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+			if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+				WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+			}
+		}
+
+		global $wp_styles;
+		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
 	}
 
@@ -58,21 +66,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 					'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
 				)
 			);
-			$card_markup    = ob_get_clean();
-			$featured_image = get_post_thumbnail_id( $story );
+			$card_markup = ob_get_clean();
 			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
-			$this->assertContains(
-				wp_get_attachment_image(
-					$featured_image,
-					AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
-					false,
-					array(
-						'alt'   => get_the_title( $story ),
-						'class' => 'latest-stories__featured-img',
-					)
-				),
-				$card_markup
-			);
+			$this->assertContains( ' class="latest_stories__link"', $card_markup );
 			// Because there's no 'disable_link' argument, this should have an <a> with an href.
 			$this->assertContains( '<a href=', $card_markup );
 		}
@@ -215,6 +211,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
 		}
 
+		AMP_Story_Post_Type::register_block_latest_stories();
+
 		set_current_screen( 'edit.php' );
 		$block_name           = 'amp/amp-latest-stories';
 		$latest_stories_block = WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
@@ -261,6 +259,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
+		AMP_Story_Post_Type::register();
 
 		$attributes = array(
 			'storiesToShow' => 10,
@@ -275,16 +274,12 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = AMP_Story_Post_Type::render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
-		$this->assertContains(
-			sprintf(
-				'height="%s"',
-				$minimum_height
-			),
-			$rendered_block
-		);
+		$this->assertContains( '<div class="slide latest-stories__slide">', $rendered_block );
+		$this->assertContains( '<div class="latest-stories__meta">', $rendered_block );
 
 		// Assert that wp_enqueue_style() was called in the render callback.
-		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'registered' ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'enqueued' ) );
 	}
 
 	/**
