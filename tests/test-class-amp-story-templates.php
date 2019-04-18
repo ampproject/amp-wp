@@ -19,7 +19,9 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 		parent::setUp();
 
 		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
-			WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+			if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+				WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+			}
 		}
 
 		AMP_Story_Post_Type::register();
