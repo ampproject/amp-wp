@@ -1,7 +1,7 @@
 :root {
-	--preview-scale: 0.42;
-	--preview-translateX: -40%;
-	--preview-translateY: -70%;
+	--preview-scale: 1;
+	--preview-translateX: 0%;
+	--preview-translateY: 0%;
 }
 
 /*

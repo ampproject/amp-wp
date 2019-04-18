@@ -37,6 +37,9 @@
 }
 
 .amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page .wp-block {
+	--preview-scale: 0.42;
+	--preview-translateX: -40%;
+	--preview-translateY: -70%;
 	position: absolute;
 	transform: scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)),
 
