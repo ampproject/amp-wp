@@ -516,7 +516,20 @@ class AMP_Options_Menu {
 		?>
 		<?php if ( ! $has_required_block_capabilities ) : ?>
 			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'To use AMP stories, you must either have WordPress 5.2 or the latest version of the Gutenberg plugin installed.', 'amp' ); ?></p>
+				<p>
+					<?php
+					$gutenberg = 'Gutenberg';
+					// Link to Gutenberg plugin installation if eligible.
+					if ( current_user_can( 'install_plugins' ) ) {
+						$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+					}
+					printf(
+						/* translators: %s: Gutenberg plugin name */
+						esc_html__( 'To use AMP stories, you currently must have the latest version of the %s plugin installed.', 'amp' ),
+						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					);
+					?>
+				</p>
 			</div>
 		<?php endif; ?>
 		<p>
@@ -530,7 +543,7 @@ class AMP_Options_Menu {
 			echo wp_kses_post(
 				sprintf(
 					/* translators: %s: AMP Stories documentation URL. */
-					__( 'AMP Stories is a visual storytelling format for the open web, which immerse your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
+					__( 'AMP Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
 					esc_url( 'https://amp.dev/about/stories' )
 				)
 			);

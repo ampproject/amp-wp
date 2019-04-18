@@ -196,8 +196,8 @@ function amp_editor_core_blocks() {
  * @since 1.0
  */
 function amp_admin_pointer() {
-	$admin_pointer = new AMP_Admin_Pointer();
-	$admin_pointer->init();
+	$admin_pointers = new AMP_Admin_Pointers();
+	$admin_pointers->init();
 }
 
 /**
