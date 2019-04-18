@@ -141,6 +141,10 @@
 	max-width: 160px;
 }
 
+.amp-stories__editor-inserter__results .components-resizable-box__container.amp-story-resize-container .amp-story-resize-container {
+	max-width: initial;
+}
+
 .amp-stories__editor-inserter__results .block-editor-block-preview .wp-block {
 	--preview-scale: 0.48;
 	--preview-translateX: -55%;
@@ -148,6 +152,10 @@
 	height: initial !important;
 	position: absolute;
 	transform: scale(0.48) translateX(-55%) translateY(-40%);
+}
+
+.amp-stories__editor-inserter__results .components-disabled .wp-block div {
+	height: initial !important;
 }
 
 @media (min-width: 600px) {
