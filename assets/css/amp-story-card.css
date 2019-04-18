@@ -56,6 +56,9 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	padding: 0.6rem 1rem 1rem 1rem;
 	background-color: #333;
 	z-index: 10;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
 
 .latest-stories__meta .latest-stories__avatar {
