@@ -48,6 +48,7 @@ import {
 import { ALLOWED_BLOCKS } from './constants';
 
 import store from './stores/amp-story';
+import './temporarily-disabled-plugins/template-menu-item';
 
 const {
 	getSelectedBlockClientId,
