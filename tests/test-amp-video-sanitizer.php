@@ -68,8 +68,8 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 			),
 
 			'video_with_custom_attribute' => array(
-				'<video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video>',
-				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar"></video></noscript></amp-video>',
+				'<video width="300" height="300" src="https://example.com/video.mp4" onclick="foo()" data-foo="bar"></video>',
+				'<amp-video width="300" height="300" src="https://example.com/video.mp4" data-foo="bar" layout="responsive"><a href="https://example.com/video.mp4" fallback="">https://example.com/video.mp4</a><noscript><video width="300" height="300" src="https://example.com/video.mp4"></video></noscript></amp-video>',
 			),
 
 			'video_with_sizes_attribute_is_overridden' => array(

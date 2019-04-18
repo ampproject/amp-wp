@@ -88,7 +88,7 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|postcss\.config\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src)/.test( file );
 			} );
 
 			paths.push( 'vendor/autoload.php' );

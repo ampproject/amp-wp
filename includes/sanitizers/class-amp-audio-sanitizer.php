@@ -11,6 +11,7 @@
  * Converts <audio> tags to <amp-audio>
  */
 class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Tag.
@@ -21,9 +22,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	public static $tag = 'audio';
 
 	/**
-	 * Placeholder for default args.
-	 *
-	 * @since 1.2
+	 * Default args.
 	 *
 	 * @var array
 	 */
@@ -54,11 +53,15 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 ) ) {
+			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
 
@@ -148,10 +151,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
 
-				if ( ! empty( $this->args['add_noscript_fallback'] ) ) {
-					$noscript = $this->dom->createElement( 'noscript' );
-					$new_node->appendChild( $noscript );
-					$noscript->appendChild( $old_node );
+				if ( $this->args['add_noscript_fallback'] ) {
+					// Preserve original node in noscript for no-JS environments.
+					$this->append_old_node_noscript( $new_node, $old_node, $this->dom );
 				}
 			}
 
