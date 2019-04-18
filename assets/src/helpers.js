@@ -791,7 +791,7 @@ export const getStylesFromBlockAttributes = ( {
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
-	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+	const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
 	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
@@ -804,6 +804,25 @@ export const getStylesFromBlockAttributes = ( {
 		height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		textAlign: align,
 	};
+};
+
+/**
+ * Get font size from slug.
+ *
+ * @param {string} slug Font slug.
+ * @return {number} Font size in pixels.
+ */
+const getFontSizeFromSlug = ( slug ) => {
+	switch ( slug ) {
+		case 'small':
+			return 19.5;
+		case 'large':
+			return 36.5;
+		case 'huge':
+			return 49.5;
+		default:
+			return 16;
+	}
 };
 
 export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
