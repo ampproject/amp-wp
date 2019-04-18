@@ -1195,7 +1195,7 @@ class AMP_Story_Post_Type {
 		?>
 		<div class="<?php echo esc_attr( $class ); ?>">
 			<?php if ( $is_amp_carousel ) : ?>
-				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="slides" class="latest-stories-carousel">
+				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
 			<?php else : ?>
 				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
 			<?php endif; ?>
