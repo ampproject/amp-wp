@@ -14,7 +14,14 @@ if ( have_posts() ) {
 		the_post();
 		?>
 		<div class="amp-story-embed">
-			<?php AMP_Story_Post_Type::the_single_story_card( get_post() ); ?>
+			<?php
+			AMP_Story_Post_Type::the_single_story_card(
+				array(
+					'post' => get_post(),
+					'size' => AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
+				)
+			);
+			?>
 		</div>
 		<?php
 	}

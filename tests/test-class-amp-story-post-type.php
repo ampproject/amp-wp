@@ -12,6 +12,14 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+			if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+				WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+			}
+		}
+
+		global $wp_styles;
+		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
 	}
 
@@ -47,28 +55,39 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::the_single_story_card()
 	 */
 	public function test_the_single_story_card() {
-		$featured_image_dimensions = array( 100, 200, 400 );
+		$featured_image_dimensions = array( array( 1200, 1300 ), array( 1300, 1400 ), array( 1400, 1500 ) );
 		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
 			ob_start();
-			AMP_Story_Post_Type::the_single_story_card( $story );
-			$card_markup    = ob_get_clean();
-			$featured_image = get_post_thumbnail_id( $story );
-			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
-			$this->assertContains(
-				wp_get_attachment_image(
-					$featured_image,
-					AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
-					false,
-					array(
-						'alt'   => get_the_title( $story ),
-						'class' => 'latest-stories__featured-img',
-					)
-				),
-				$card_markup
+			AMP_Story_Post_Type::the_single_story_card(
+				array(
+					'post' => $story,
+					'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+				)
 			);
+			$card_markup = ob_get_clean();
+			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
+			$this->assertContains( ' class="latest_stories__link"', $card_markup );
+			// Because there's no 'disable_link' argument, this should have an <a> with an href.
+			$this->assertContains( '<a href=', $card_markup );
 		}
+
+		$first_story = reset( $stories );
+		ob_start();
+		AMP_Story_Post_Type::the_single_story_card(
+			array(
+				'post'         => $first_story,
+				'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+				'disable_link' => true,
+			)
+		);
+		$this->assertNotContains( '<a', ob_get_clean() );
+
+		// If the 'post' argument isn't either an int or a WP_Post, this shouldn't output anything.
+		ob_start();
+		AMP_Story_Post_Type::the_single_story_card( array( 'post' => 'foo post' ) );
+		$this->assertEmpty( ob_get_clean() );
 	}
 
 	/**
@@ -158,7 +177,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertEquals( null, AMP_Story_Post_Type::override_story_embed_callback( null, $wrong_block ) );
 
 		// The conditional is now satisfied, so this should return the overriden callback.
-		$story_posts    = $this->create_story_posts_with_featured_images( array( 400 ) );
+		$story_posts    = $this->create_story_posts_with_featured_images( array( 400, 400 ) );
 		$amp_story_post = reset( $story_posts );
 		$correct_url    = get_post_permalink( $amp_story_post );
 		$correct_block  = array(
@@ -191,6 +210,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
 		}
+
+		AMP_Story_Post_Type::register_block_latest_stories();
 
 		set_current_screen( 'edit.php' );
 		$block_name           = 'amp/amp-latest-stories';
@@ -238,6 +259,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
+		AMP_Story_Post_Type::register();
 
 		$attributes = array(
 			'storiesToShow' => 10,
@@ -248,51 +270,57 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		// Create mock AMP story posts to test.
 		$minimum_height = 200;
-		$dimensions     = array( $minimum_height, 300, 500 );
+		$dimensions     = array( array( $minimum_height, 200 ), array( 300, 400 ), array( 500, 600 ) );
 		$this->create_story_posts_with_featured_images( $dimensions );
 		$rendered_block = AMP_Story_Post_Type::render_block_latest_stories( $attributes );
 		$this->assertContains( '<amp-carousel', $rendered_block );
-		$this->assertContains(
-			sprintf(
-				'height="%s"',
-				$minimum_height
-			),
-			$rendered_block
-		);
+		$this->assertContains( '<div class="slide latest-stories__slide">', $rendered_block );
+		$this->assertContains( '<div class="latest-stories__meta">', $rendered_block );
 
 		// Assert that wp_enqueue_style() was called in the render callback.
-		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'registered' ) );
+		$this->assertTrue( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG, 'enqueued' ) );
 	}
 
 	/**
-	 * Test get_featured_image_minimum_height.
+	 * Test remove_title_from_embed.
 	 *
-	 * @covers \AMP_Story_Post_Type::get_featured_image_minimum_height()
+	 * @covers \AMP_Editor_Blocks::remove_title_from_embed()
 	 */
-	public function test_get_featured_image_minimum_height() {
-		$expected_min_height = 300;
-		$dimensions          = array(
-			$expected_min_height,
-			400,
-			500,
-			600,
-		);
-		$stories             = $this->create_story_posts_with_featured_images( $dimensions );
-		$this->assertEquals( $expected_min_height, AMP_Story_Post_Type::get_featured_image_minimum_height( $stories ) );
+	public function test_remove_title_from_embed() {
+		$initial_output = '<iframe src="https://example.com/baz"></iframe>';
+		$wrong_post     = $this->factory()->post->create_and_get();
 
-		// When an empty array() is passed, the minimum height should be 0.
-		$this->assertEquals( 0, AMP_Story_Post_Type::get_featured_image_minimum_height( array() ) );
+		// The post type is not amp_story, so this should return the same $output it's passed.
+		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $initial_output, $wrong_post ) );
+
+		// The post type is correct, but the <blockquote> does not have the expected class, so this should again return the same $output.
+		$correct_post              = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$block_quote_without_class = '<blockquote>Example Title</blockquote>';
+		$output_with_blockquote    = $block_quote_without_class . $initial_output;
+		$this->assertEquals( $output_with_blockquote, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+
+		// All of the conditions are satisfied, so this should remove the <blockquote> and the elements it contains.
+		$correct_post           = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$block_quote            = '<blockquote class="wp-embedded-content">Example Title</blockquote>';
+		$output_with_blockquote = $block_quote . $initial_output;
+		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
 	}
 
 	/**
 	 * Creates amp_story posts with featured images of given heights.
 	 *
-	 * @param array $dimensions An array of strings.
+	 * @param array $featured_images[][] {
+	 *     The featured image dimensions.
+	 *
+	 *     @type int width
+	 *     @type int height
+	 * }
 	 * @return array $posts An array of WP_Post objects of the amp_story post type.
 	 */
-	public function create_story_posts_with_featured_images( $dimensions ) {
+	public function create_story_posts_with_featured_images( $featured_images ) {
 		$stories = array();
-		foreach ( $dimensions as $dimension ) {
+		foreach ( $featured_images as $dimensions ) {
 			$new_story = $this->factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
@@ -311,8 +339,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			wp_update_attachment_metadata(
 				$thumbnail_id,
 				array(
-					'width'  => $dimension,
-					'height' => $dimension,
+					'width'  => $dimensions[0],
+					'height' => $dimensions[1],
 				)
 			);
 		}
