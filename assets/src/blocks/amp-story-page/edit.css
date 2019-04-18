@@ -107,6 +107,11 @@
 	height: 543px;
 }
 
+[data-block] {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 /*
  * Make all the inner blocks positioned with absolute.
  */
