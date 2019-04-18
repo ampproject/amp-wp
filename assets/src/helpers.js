@@ -693,6 +693,7 @@ const emptyTemplateMapping = {
 	},
 	'core/image': {
 		url: null,
+		positionLeft: null,
 	},
 	'amp/amp-story-cta': {
 		text: null,
@@ -721,6 +722,12 @@ const getSkeletonTemplateBlock = ( block ) => {
 			attributes[ key ] = value;
 		}
 	} );
+
+	// Image block's left positioning should be set to 0.
+	if ( 'core/image' === block.name ) {
+		attributes.positionLeft = 0;
+	}
+
 	return attributes;
 };
 
