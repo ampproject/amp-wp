@@ -13,7 +13,7 @@ import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
 import { createBlock } from '@wordpress/blocks';
 import { dispatch, select } from '@wordpress/data';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -784,7 +784,7 @@ export const getStylesFromBlockAttributes = ( {
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
 
-	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+	const { colors } = select( 'core/block-editor' ).getSettings();
 
 	/*
      * Calculate font size using vw to make it responsive.
