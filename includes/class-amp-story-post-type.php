@@ -1036,14 +1036,13 @@ class AMP_Story_Post_Type {
 		?>
 		<<?php echo esc_attr( $wrapper_tag_name ); ?> <?php echo isset( $href ) ? wp_kses_post( $href ) : ''; ?> class="latest_stories__link">
 			<?php
-			echo wp_get_attachment_image(
-				$thumbnail_id,
-				$args['size'],
-				false,
-				array(
-					'alt'   => get_the_title( $post ),
-					'class' => 'latest-stories__featured-img',
-				)
+			list( $src ) = wp_get_attachment_image_src( $thumbnail_id, $args['size'] );
+			printf(
+				'<img src="%s" width="%d" height="%d" alt="%s" class="latest-stories__featured-img" data-amp-layout="fixed">',
+				esc_url( $src ),
+				esc_attr( self::STORY_SMALL_IMAGE_DIMENSION / 2 ),
+				esc_attr( self::STORY_LARGE_IMAGE_DIMENSION / 2 ),
+				esc_attr( get_the_title( $post ) )
 			);
 			?>
 			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
@@ -1188,8 +1187,9 @@ class AMP_Story_Post_Type {
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
-		$size       = self::STORY_CARD_IMAGE_SIZE;
-		$min_height = self::get_story_carousel_height( $story_query->posts, $size );
+		$size        = self::STORY_CARD_IMAGE_SIZE;
+		$meta_height = 76;
+		$min_height  = self::STORY_LARGE_IMAGE_DIMENSION / 2 + $meta_height;
 
 		ob_start();
 		?>

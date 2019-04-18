@@ -21,6 +21,14 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	position: relative;
 }
 
+.latest_stories__link {
+	width: 348px;
+	display: block;
+	position: relative;
+	border-radius: 0.5rem;
+	overflow-x: hidden;
+}
+
 /* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
 .latest_stories__link:after {
 	display: block;
@@ -36,6 +44,10 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 
 .latest-stories__featured-img {
 	border-radius: 0.5rem;
+	object-fit: cover; /* For non-AMP. */
+}
+amp-img.latest-stories__featured-img > img {
+	object-fit: cover;
 }
 
 .latest-stories__title {
@@ -78,18 +90,6 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	color: #d3d3d3;
 }
 
-/* Styling for when an AMP story is embedded in a post, like with the WordPress (embed) block. */
 .amp-story-embed {
-	position: relative;
-	border-radius: 0.5rem;
-	overflow-x: hidden;
-}
 
-/* Override stye rules in Twenty Nineteen that set a wider max-width */
-div.amp-story-embed {
-	max-width: 696px;
-}
-
-.amp-block-latest-stories amp-carousel .latest-stories__meta {
-	width: calc( 100% - 2rem );
 }
