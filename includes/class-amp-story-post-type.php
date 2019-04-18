@@ -116,6 +116,7 @@ class AMP_Story_Post_Type {
 					'not_found'          => __( 'No AMP Stories found.', 'amp' ),
 					'not_found_in_trash' => __( 'No AMP Stories found in Trash.', 'amp' ),
 				),
+				'menu_icon'    => 'dashicons-book',
 				'supports'     => array(
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
