@@ -21,9 +21,7 @@ class AMP_Admin_Pointers {
 	public function init() {
 		add_action(
 			'admin_enqueue_scripts',
-			function( $hook_suffix ) {
-				$this->enqueue_scripts( $hook_suffix );
-			}
+			array( $this, 'enqueue_scripts' )
 		);
 	}
 
@@ -34,7 +32,7 @@ class AMP_Admin_Pointers {
 	 *
 	 * @param string $hook_suffix The current admin screen hook suffix.
 	 */
-	private function enqueue_scripts( $hook_suffix ) {
+	public function enqueue_scripts( $hook_suffix ) {
 		$pointers = $this->get_pointers();
 		if ( empty( $pointers ) ) {
 			return;
