@@ -82,11 +82,9 @@ class AMP_Story_Post_Type {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			return false;
 		}
-		return (
-			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '>=' )
-			||
-			function_exists( 'gutenberg_pre_init' )
-		);
+
+		// TODO: Require only the latest WordPress version itself, not the plugin.
+		return function_exists( 'gutenberg_pre_init' );
 	}
 
 	/**
