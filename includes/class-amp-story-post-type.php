@@ -1250,50 +1250,6 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Gets the height of the Latest Stories carousel, as <amp-carousel> requires a height attribute.
-	 *
-	 * Gets the smallest height of any of the featured images.
-	 * This iterates through all of the posts, to find their featured image.
-	 * Then, this returns the smallest height.
-	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
-	 * this will return 100.
-	 *
-	 * @param array  $posts An array or WP_Post objects.
-	 * @param string $size The size of the image.
-	 * @return int $minimum_dimension The smallest dimension of a featured image.
-	 */
-	public static function get_story_carousel_height( $posts, $size ) {
-		$height_index   = 2;
-		$minimum_height = 0;
-		foreach ( $posts as $post ) {
-			$thumbnail_id = get_post_thumbnail_id( $post->ID );
-			if ( ! $thumbnail_id ) {
-				continue;
-			}
-
-			$image = wp_get_attachment_image_src( $thumbnail_id, $size );
-			if (
-				isset( $image[ $height_index ] )
-				&&
-				(
-					! $minimum_height
-					||
-					$image[ $height_index ] < $minimum_height
-				)
-			) {
-				$minimum_height = $image[ $height_index ];
-			}
-		}
-
-		// If the global $content_width is narrow enough, proportionally reduce the height.
-		if ( ! empty( $GLOBALS['content_width'] ) ) {
-			$minimum_height_per_content_width = intval( $GLOBALS['content_width'] ) * self::STORY_LARGE_IMAGE_DIMENSION / self::STORY_SMALL_IMAGE_DIMENSION;
-			return min( $minimum_height_per_content_width, $minimum_height );
-		}
-		return $minimum_height;
-	}
-
-	/**
 	 * Crops the image and returns the object as JSON.
 	 *
 	 * Forked from Custom_Image_Header::ajax_header_crop().
