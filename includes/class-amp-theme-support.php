@@ -1756,8 +1756,15 @@ class AMP_Theme_Support {
 		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
 		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
 		 * response is returned.
+		 *
+		 * Such 304 Not Modified responses are only enabled when using a stable release. This is not enabled for
+		 * non-stable releases (like 1.2-beta2) because the plugin would be under active development and such caching
+		 * would make it more difficult to see changes applied to the sanitizers. (A browser's cache would have to be
+		 * disabled or the developer would have to always do hard reloads.)
 		 */
 		$has_matching_etag = (
+			false === strpos( AMP__VERSION, '-' )
+			&&
 			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
 			&&
 			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
