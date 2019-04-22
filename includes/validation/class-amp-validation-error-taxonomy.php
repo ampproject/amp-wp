@@ -891,14 +891,14 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-						array( 'common' ),
+						array( 'common', 'amp-validation-tooltips' ),
 						AMP__VERSION
 					);
 
 					wp_enqueue_script(
 						'amp-validation-detail-toggle',
 						amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-						array( 'wp-dom-ready' ),
+						array( 'wp-dom-ready', 'amp-validation-tooltips' ),
 						AMP__VERSION,
 						true
 					);
