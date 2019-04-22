@@ -58,6 +58,13 @@ export const ALLOWED_MOVABLE_BLOCKS = [
 	'core/template', // Reusable blocks.
 ];
 
+export const BLOCKS_WITH_TEXT_SETTINGS = [
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
+];
+
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
