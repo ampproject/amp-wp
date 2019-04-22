@@ -52,7 +52,7 @@
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	width: 100%;
 	max-width: 338px;
-	height: 553px;
+	height: 563px;
 	position: relative;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div .editor-inner-blocks.block-editor-inner-blocks {
-	height: 543px;
+	height: 563px;
 }
 
 [data-block] {
