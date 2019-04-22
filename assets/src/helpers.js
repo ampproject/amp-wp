@@ -333,6 +333,17 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		};
 	}
 
+	if ( attributes.width && attributes.height && 'core/quote' === blockType.name ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...resizeStyle,
+		};
+	}
+
 	return {
 		...newProps,
 		...ampAttributes,
