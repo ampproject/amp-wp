@@ -19,6 +19,7 @@ export const name = 'amp/amp-story-text';
 const supports = {
 	anchor: true,
 	reusable: true,
+	className: false,
 };
 
 const schema = {

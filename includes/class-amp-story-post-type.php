@@ -82,11 +82,9 @@ class AMP_Story_Post_Type {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			return false;
 		}
-		return (
-			version_compare( strtok( get_bloginfo( 'version' ), '-' ), '5.2', '>=' )
-			||
-			function_exists( 'gutenberg_pre_init' )
-		);
+
+		// TODO: Require only the latest WordPress version itself, not the plugin.
+		return function_exists( 'gutenberg_pre_init' );
 	}
 
 	/**
@@ -116,6 +114,7 @@ class AMP_Story_Post_Type {
 					'not_found'          => __( 'No AMP Stories found.', 'amp' ),
 					'not_found_in_trash' => __( 'No AMP Stories found in Trash.', 'amp' ),
 				),
+				'menu_icon'    => 'dashicons-book',
 				'supports'     => array(
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.

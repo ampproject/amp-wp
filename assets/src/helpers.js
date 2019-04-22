@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every } from 'lodash';
+import { each, every } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -11,11 +11,9 @@ import { every } from 'lodash';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x } from '@wordpress/i18n';
+import { createBlock } from '@wordpress/blocks';
 import { dispatch, select } from '@wordpress/data';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
-import {
-	createBlock,
-} from '@wordpress/blocks';
+import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -680,6 +678,73 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 	];
 };
 
+/**
+ * Object of block attributes to set to default when inserting a template.
+ */
+const emptyTemplateMapping = {
+	// @todo This can use just arrays of attribute keys instead of object.
+	'amp/amp-story-text': {
+		content: '',
+	},
+	'amp/amp-story-page': {
+		mediaUrl: null,
+		mediaType: null,
+		focalPoint: {},
+	},
+	'core/image': {
+		url: null,
+		positionLeft: null,
+	},
+	'amp/amp-story-cta': {
+		text: null,
+		link: null,
+	},
+	'core/quote': {
+		citation: null,
+		value: null,
+	},
+};
+
+/**
+ * Gets a skeleton template block from pre-populated block.
+ *
+ * @param {Object} block Original block.
+ * @return {Object} Block.
+ */
+const getSkeletonTemplateBlock = ( block ) => {
+	if ( ! emptyTemplateMapping[ block.name ] ) {
+		return block.attributes;
+	}
+
+	const attributes = {};
+	each( block.attributes, function( value, key ) {
+		if ( undefined === emptyTemplateMapping[ block.name ][ key ] ) {
+			attributes[ key ] = value;
+		}
+	} );
+
+	// Image block's left positioning should be set to 0.
+	if ( 'core/image' === block.name ) {
+		attributes.positionLeft = 0;
+	}
+
+	return attributes;
+};
+
+/**
+ * Creates a skeleton template from pre-populated template.
+ *
+ * @param {Object} template Block.
+ * @return {Object} Skeleton template block.
+ */
+export const createSkeletonTemplate = ( template ) => {
+	const children = [];
+	template.innerBlocks.forEach( function( childBlock ) {
+		children.push( createBlock( childBlock.name, getSkeletonTemplateBlock( childBlock ) ) );
+	} );
+	return createBlock( template.name, getSkeletonTemplateBlock( template ), children );
+};
+
 export const getClassNameFromBlockAttributes = ( {
 	className,
 	ampFitText,
@@ -719,14 +784,14 @@ export const getStylesFromBlockAttributes = ( {
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
 
-	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+	const { colors } = select( 'core/block-editor' ).getSettings();
 
 	/*
      * Calculate font size using vw to make it responsive.
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
-	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+	const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
 	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
@@ -739,6 +804,25 @@ export const getStylesFromBlockAttributes = ( {
 		height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		textAlign: align,
 	};
+};
+
+/**
+ * Get font size from slug.
+ *
+ * @param {string} slug Font slug.
+ * @return {number} Font size in pixels.
+ */
+const getFontSizeFromSlug = ( slug ) => {
+	switch ( slug ) {
+		case 'small':
+			return 19.5;
+		case 'large':
+			return 36.5;
+		case 'huge':
+			return 49.5;
+		default:
+			return 16;
+	}
 };
 
 export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {

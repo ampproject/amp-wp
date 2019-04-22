@@ -199,3 +199,13 @@ function amp_admin_pointer() {
 	$admin_pointers = new AMP_Admin_Pointers();
 	$admin_pointers->init();
 }
+
+/**
+ * Bootstrap the Story Templates needed in editor.
+ *
+ * @since 1.?
+ */
+function amp_story_templates() {
+	$story_templates = new AMP_Story_Templates();
+	$story_templates->init();
+}

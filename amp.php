@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2-alpha
+ * Version: 1.2-alpha1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -115,7 +115,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-alpha' );
+define( 'AMP__VERSION', '1.2-alpha1' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -260,7 +260,7 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_action( 'wp_loaded', 'amp_story_templates' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_admin_pointer' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
