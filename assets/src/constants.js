@@ -60,6 +60,13 @@ export const ALLOWED_CHILD_BLOCKS = [
 	'amp/amp-story-cta',
 ];
 
+export const BLOCKS_WITH_TEXT_SETTINGS = [
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
+];
+
 export const ALLOWED_BLOCKS = [
 	...ALLOWED_TOP_LEVEL_BLOCKS,
 	...ALLOWED_CHILD_BLOCKS,
