@@ -888,6 +888,22 @@ class AMP_Validation_Error_Taxonomy {
 					th.column-status { width:15%; }
 				'
 					);
+
+					wp_register_style(
+						'amp-validation-tooltips',
+						amp_get_asset_url( 'css/amp-validation-tooltips.css' ),
+						array( 'wp-pointer' ),
+						AMP__VERSION
+					);
+
+					wp_register_script(
+						'amp-validation-tooltips',
+						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
+						array( 'jquery', 'wp-pointer' ),
+						AMP__VERSION,
+						true
+					);
+
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
