@@ -83,3 +83,10 @@ amp-story-grid-layer .wp-block-quote {
     font-size: 32px;
     font-family: "Source Sans Pro", sans-serif;
 }
+.wp-block-image.is-resized {
+    width: initial !important;
+}
+.wp-block-image.is-resized amp-img {
+    width: 100% !important;
+    height: auto !important;
+}

@@ -335,8 +335,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	// @todo Handle image responsiveness.
-	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) && 'core/image' !== blockType.name ) {
+	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
 		const resizeStyle = {
 			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
 			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
