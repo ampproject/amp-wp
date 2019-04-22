@@ -51,8 +51,8 @@
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"],
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	width: 100%;
-	max-width: 338px;
-	height: 563px;
+	max-width: 328px;
+	height: 553px;
 	position: relative;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div .editor-inner-blocks.block-editor-inner-blocks {
-	height: 563px;
+	height: 553px;
 }
 
 [data-block] {
