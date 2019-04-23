@@ -20,7 +20,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from './';
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS } from '../constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../constants';
 import { maybeEnqueueFontStyle } from '../helpers';
 
 const { getComputedStyle } = window;
@@ -157,6 +157,7 @@ export default createHigherOrderComponent(
 
 			const isImageBlock = 'core/image' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
+			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
@@ -246,7 +247,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBlock && (
+					{ needsTextSettings && (
 						<InspectorControls>
 							<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 								<FontFamilyPicker
@@ -317,6 +318,25 @@ export default createHigherOrderComponent(
 									step={ 5 }
 								/>
 							</PanelColorSettings>
+							<PanelBody
+								title={ __( 'Animation', 'amp' ) }
+							>
+								<AnimationControls
+									animatedBlocks={ getAnimatedBlocks }
+									animationType={ ampAnimationType }
+									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
+									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+									animationAfter={ animationAfter }
+									onAnimationTypeChange={ onAnimationTypeChange }
+									onAnimationDurationChange={ onAnimationDurationChange }
+									onAnimationDelayChange={ onAnimationDelayChange }
+									onAnimationAfterChange={ onAnimationOrderChange }
+								/>
+							</PanelBody>
+						</InspectorControls>
+					) }
+					{ isMovableBlock && (
+						<InspectorControls>
 							<PanelBody
 								title={ __( 'Animation', 'amp' ) }
 							>

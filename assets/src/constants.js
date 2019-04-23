@@ -30,9 +30,6 @@ import Ubuntu from '../images/font-names/ubuntu.svg';
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
-const storyPageBorderWidth = 10;
-export const STORY_PAGE_WIDTH = STORY_PAGE_INNER_WIDTH + storyPageBorderWidth;
-
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 	'core/block', // Reusable blocks.
@@ -56,6 +53,13 @@ export const ALLOWED_MOVABLE_BLOCKS = [
 	'amp/amp-story-post-title',
 	'core/block', // Reusable blocks.
 	'core/template', // Reusable blocks.
+];
+
+export const BLOCKS_WITH_TEXT_SETTINGS = [
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
 ];
 
 export const ALLOWED_CHILD_BLOCKS = [
