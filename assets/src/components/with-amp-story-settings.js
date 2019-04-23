@@ -176,7 +176,7 @@ export default createHigherOrderComponent(
 
 			// If we have an image with pre-set caption we should remove it.
 			if ( isImageBlock && ! ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
-				props.setAttributes( { caption: '' } );
+				setAttributes( { caption: '' } );
 			}
 
 			const minTextHeight = 20;
