@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import getFeaturedImageNotice from './get-featured-image-notice';
-import { hasMinimumStoryPosterDimensions } from '../helpers';
+import { hasMinimumStoryPosterDimensions } from '../stories-editor/helpers';
 
 export default getFeaturedImageNotice(
 	hasMinimumStoryPosterDimensions,

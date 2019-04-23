@@ -19,7 +19,7 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
 /**
  * Internal dependencies
  */
-import { getRgbaFromHex } from '../helpers';
+import { getRgbaFromHex } from '../stories-editor/helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.

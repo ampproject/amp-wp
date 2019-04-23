@@ -50,7 +50,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import BlockPreview from '../block-preview';
 import BlockTypesList from '../block-types-list';
-import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../constants';
+import { ALLOWED_TOP_LEVEL_BLOCKS } from '../../stories-editor/constants';
 
 const MAX_SUGGESTED_ITEMS = 9;
 

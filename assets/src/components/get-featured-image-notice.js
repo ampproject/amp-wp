@@ -7,7 +7,7 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getFeaturedImageMessage } from '../helpers';
+import { getFeaturedImageMessage } from '../stories-editor/helpers';
 
 /**
  * Conditionally displays a notice above the post's 'Featured Image' component.

@@ -395,6 +395,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
 	$handles = array( 'wp-i18n', 'wp-dom-ready' );
+	// todo: check why the compiled files don't exist.
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
 			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );

@@ -12,7 +12,7 @@ import { compose } from '@wordpress/compose';
  */
 import Indicator from './indicator';
 import { Reorderer } from '../';
-import { STORY_PAGE_INNER_WIDTH } from './../../constants';
+import { STORY_PAGE_INNER_WIDTH } from '../../stories-editor/constants';
 import './edit.css';
 
 const PAGE_MARGIN = 20;

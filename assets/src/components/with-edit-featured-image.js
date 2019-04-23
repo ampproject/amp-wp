@@ -6,7 +6,7 @@ import { dispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { hasMinimumStoryPosterDimensions } from '../helpers';
+import { hasMinimumStoryPosterDimensions } from '../stories-editor/helpers';
 
 /**
  * Gets a wrapped version of a block's edit component that conditionally sets the featured image.
