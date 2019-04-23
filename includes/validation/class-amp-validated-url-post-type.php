@@ -457,7 +457,7 @@ class AMP_Validated_URL_Post_Type {
 		$result = array();
 		if ( $counts['new_rejected'] ) {
 			$result[] = sprintf(
-				/* translators: %1$s is the status, %2$s is the count */
+				/* translators: 1: status. 2: count. */
 				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
 				esc_html__( 'New Rejected', 'amp' ),
 				number_format_i18n( $counts['new_rejected'] )
@@ -465,7 +465,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 		if ( $counts['new_accepted'] ) {
 			$result[] = sprintf(
-				/* translators: %1$s is the status, %2$s is the count */
+				/* translators: 1: status. 2: count. */
 				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
 				esc_html__( 'New Accepted', 'amp' ),
 				number_format_i18n( $counts['new_accepted'] )
@@ -653,9 +653,14 @@ class AMP_Validated_URL_Post_Type {
 		$stored_validation_errors = array();
 
 		// Prevent Kses from corrupting JSON in description.
-		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-		if ( false !== $has_pre_term_description_filter ) {
-			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		$pre_term_description_filters = array(
+			'wp_filter_kses'       => has_filter( 'pre_term_description', 'wp_filter_kses' ),
+			'wp_targeted_link_rel' => has_filter( 'pre_term_description', 'wp_targeted_link_rel' ),
+		);
+		foreach ( $pre_term_description_filters as $callback => $priority ) {
+			if ( false !== $priority ) {
+				remove_filter( 'pre_term_description', $callback, $priority );
+			}
 		}
 
 		$terms = array();
@@ -713,8 +718,10 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		// Finish preventing Kses from corrupting JSON in description.
-		if ( false !== $has_pre_term_description_filter ) {
-			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		foreach ( $pre_term_description_filters as $callback => $priority ) {
+			if ( false !== $priority ) {
+				add_filter( 'pre_term_description', $callback, $priority );
+			}
 		}
 
 		$post_content = wp_json_encode( $stored_validation_errors );

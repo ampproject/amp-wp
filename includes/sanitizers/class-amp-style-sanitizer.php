@@ -2404,7 +2404,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				) . "\n" . implode( "\n", $included_sources ) . "\n";
 				if ( self::has_required_php_css_parser() ) {
 					$comment .= sprintf(
-						/* translators: %1$d is number of included bytes, %2$d is percentage of total CSS actually included after tree shaking, %3$d is total included size */
+						/* translators: 1: number of included bytes. 2: percentage of total CSS actually included after tree shaking. 3: total included size. */
 						esc_html__( 'Total included size: %1$s bytes (%2$d%% of %3$s total after tree shaking)', 'amp' ),
 						number_format_i18n( $included_size ),
 						$included_size / $included_original_size * 100,
@@ -2412,8 +2412,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					) . "\n";
 				} else {
 					$comment .= sprintf(
-						/* translators: %1$d is number of included bytes */
-						esc_html__( 'Total included size: %1$s bytes', 'amp' ),
+						/* translators: %s: number of included bytes. */
+						esc_html__( 'Total included size: %s bytes', 'amp' ),
 						number_format_i18n( $included_size ),
 						$included_size / $included_original_size * 100,
 						number_format_i18n( $included_original_size )

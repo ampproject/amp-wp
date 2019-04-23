@@ -1841,7 +1841,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// If the first element is not of the required type, invalidate the entire element.
-		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ( empty( $child_elements[0] ) || ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) ) {
+		if ( isset( $child_tags['first_child_tag_name_oneof'] ) && ! empty( $child_elements[0] ) && ! in_array( $child_elements[0]->nodeName, $child_tags['first_child_tag_name_oneof'], true ) ) {
 			return false;
 		}
 
