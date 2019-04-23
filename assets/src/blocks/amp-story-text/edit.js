@@ -30,14 +30,23 @@ class TextBlockEdit extends Component {
 		this.onReplace = this.onReplace.bind( this );
 	}
 
-	componentDidUpdate() {
-		const { attributes, setAttributes } = this.props;
+	componentDidUpdate( prevProps ) {
+		const { attributes, isSelected, setAttributes } = this.props;
 		const {
 			height,
 			width,
 			autoFontSize,
 			ampFitText,
 		} = attributes;
+
+		// If not selected, only proceed if height or width has changed.
+		if (
+			! isSelected &&
+			prevProps.attributes.height === height &&
+			prevProps.attributes.width === width
+		) {
+			return;
+		}
 
 		if ( ampFitText && attributes.content.length ) {
 			// Check if the font size is OK, if not, update the font size if not.
