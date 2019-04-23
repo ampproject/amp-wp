@@ -169,9 +169,10 @@ Contributors who want to make a new release, follow these steps:
 7. Run `npm run deploy` to commit the plugin to WordPress.org.
 8. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 9. Publish GitHub release.
-10. Create built release tag: `git fetch --tags && git checkout $(git tag | tail -n1) && ./bin/tag-built.sh` (then add link from release)
-11. Create a new branch off of the release branch (e.g. `update/develop-with-1.0.x`), merge `develop` into it and resolve conflicts (e.g. with version), and then open pull request to merge changes into `develop`.
-12. Merge release tag into `master`.
-13. Publish release blog post, including link to GitHub release.
-14. Close the GitHub milestone and project.
-15. Make announcements.
+10. Create built release tag (from the just-created `build` directory): `git fetch --tags && ./bin/tag-built.sh` (then add link from release)
+11. For new major/minor releases, create a release branch from the tag. Patch versions are made from the release branch.
+12. Bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
+13. Merge release tag into `master`.
+14. Publish release blog post, including link to GitHub release.
+15. Close the GitHub milestone and project.
+16. Make announcements.
