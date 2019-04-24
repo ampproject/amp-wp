@@ -104,6 +104,10 @@
 	overflow: hidden;
 }
 
+#amp-story-editor .amp-story-reorderer .components-draggable__clone {
+	position: fixed;
+}
+
 .amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
 	margin: 0;
 	height: 267px;
