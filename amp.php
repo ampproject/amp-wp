@@ -40,7 +40,6 @@ $_amp_required_extensions = array(
 	'curl',
 	'dom',
 	'iconv',
-	'intl',
 	'libxml',
 );
 $_amp_missing_extensions  = array();

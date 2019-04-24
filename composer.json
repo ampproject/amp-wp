@@ -9,7 +9,6 @@
     "ext-curl": "*",
     "ext-dom": "*",
     "ext-iconv": "*",
-    "ext-intl": "*",
     "ext-libxml": "*",
     "cweagans/composer-patches": "1.6.5",
     "fasterimage/fasterimage": "1.4.0",
