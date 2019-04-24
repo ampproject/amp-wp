@@ -45,6 +45,7 @@ const schema = {
 	},
 	autoFontSize: {
 		type: 'number',
+		default: 45,
 	},
 	ampFitText: {
 		type: 'boolean',
