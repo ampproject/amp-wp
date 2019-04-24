@@ -53,7 +53,6 @@ amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 
 amp-story-grid-layer amp-img > img {
 	object-position: inherit;
-	object-fit: contain;
 }
 
 .is-style-white p,
