@@ -14,102 +14,111 @@
  */
 
 /**
- * Print admin notice regarding having an old version of PHP.
+ * Errors encountered while loading the plugin.
  *
- * @since 0.7
+ * This has to be a global for the same of PHP 5.2.
+ *
+ * @var \WP_Error $_amp_load_errors
  */
-function _amp_print_php_version_admin_notice() {
-	?>
-	<div class="notice notice-error">
-		<p>
-			<?php
-			printf(
-				/* translators: %s: required PHP version */
-				esc_html__( 'The AMP plugin requires PHP %s. Please contact your host to update your PHP version.', 'amp' ),
-				'5.4+'
-			);
-			?>
-		</p>
-	</div>
-	<?php
-}
+global $_amp_load_errors;
+
+$_amp_load_errors = new \WP_Error();
+
 if ( version_compare( phpversion(), '5.4', '<' ) ) {
-	add_action( 'admin_notices', '_amp_print_php_version_admin_notice' );
-	return;
+	$_amp_load_errors->add(
+		'insufficient_php_version',
+		sprintf(
+			/* translators: %s: required PHP version */
+			__( 'The AMP plugin requires PHP %s; please contact your host to update your PHP version.', 'amp' ),
+			'5.4+'
+		)
+	);
 }
 
-/**
- * Print admin notice regarding DOM extension is not installed.
- *
- * @since 1.0
- */
-function _amp_print_php_dom_document_notice() {
-	?>
-	<div class="notice notice-error">
-		<p>
-			<?php
-				printf(
-					/* translators: %s: PHP extension name */
-					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
-					'DOM'
-				);
-			?>
-		</p>
-	</div>
-	<?php
+// See composer.json for this list.
+$_amp_required_extensions = array(
+	'curl',
+	'dom',
+	'iconv',
+	'intl',
+	'libxml',
+);
+$_amp_missing_extensions  = array();
+foreach ( $_amp_required_extensions as $_amp_required_extension ) {
+	if ( ! extension_loaded( $_amp_required_extension ) ) {
+		$_amp_missing_extensions[] = $_amp_required_extension;
+	}
 }
-if ( ! class_exists( 'DOMDocument' ) ) {
-	add_action( 'admin_notices', '_amp_print_php_dom_document_notice' );
-	return;
-}
+if ( count( $_amp_missing_extensions ) > 0 ) {
+	foreach ( $_amp_missing_extensions as &$_amp_missing_extension ) {
+		$_amp_missing_extension = "<code>$_amp_missing_extension</code>"; // Not using array_map() w/ closure due to PHP 5.2 support.
+	}
 
-/**
- * Print admin notice regarding DOM extension is not installed.
- *
- * @since 1.0.1
- */
-function _amp_print_php_missing_iconv_notice() {
-	?>
-	<div class="notice notice-error">
-		<p>
-			<?php
-				printf(
-					/* translators: %s: PHP extension name */
-					esc_html__( 'The AMP plugin requires the %s extension in PHP. Please contact your host to install this extension.', 'amp' ),
-					'iconv'
-				);
-			?>
-		</p>
-	</div>
-	<?php
+	$_amp_load_errors->add(
+		'missing_extension',
+		sprintf(
+			/* translators: %s is list of missing extensions */
+			_n(
+				'The following PHP extension is missing: %s. Please contact your host to finish installation.',
+				'The following PHP extensions are missing: %s. Please contact your host to finish installation.',
+				count( $_amp_missing_extensions ),
+				'amp'
+			),
+			implode( ', ', $_amp_missing_extensions )
+		)
+	);
 }
-if ( ! function_exists( 'iconv' ) ) {
-	add_action( 'admin_notices', '_amp_print_php_missing_iconv_notice' );
-	return;
-}
+unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_extension, $_amp_missing_extension );
 
-/**
- * Print admin notice when composer install has not been performed.
- *
- * @since 1.0
- */
-function _amp_print_build_needed_notice() {
-	?>
-	<div class="notice notice-error">
-		<p>
-			<?php
-			printf(
-				/* translators: %s: composer install && npm install && npm run build */
-				__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-				'<code>composer install && npm install && npm run build</code>'
-			);
-			?>
-		</p>
-	</div>
-	<?php
-}
 if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
-	add_action( 'admin_notices', '_amp_print_build_needed_notice' );
+	$_amp_load_errors->add(
+		'build_required',
+		sprintf(
+			/* translators: %s: composer install && npm install && npm run build */
+			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
+			'<code>composer install && npm install && npm run build</code>'
+		)
+	);
+}
+
+/**
+ * Displays an admin notice about why the plugin is unable to load.
+ *
+ * @since 1.1.2
+ * @global \WP_Error $_amp_load_errors
+ */
+function _amp_show_load_errors_admin_notice() {
+	global $_amp_load_errors;
+	?>
+	<div class="notice notice-error">
+		<p>
+			<strong><?php esc_html_e( 'AMP plugin unable to initialize.', 'amp' ); ?></strong>
+			<ul>
+			<?php foreach ( array_keys( $_amp_load_errors->errors ) as $error_code ) : ?>
+				<?php foreach ( $_amp_load_errors->get_error_messages( $error_code ) as $message ) : ?>
+					<li>
+						<?php echo wp_kses_post( $message ); ?>
+					</li>
+				<?php endforeach; ?>
+			<?php endforeach; ?>
+			</ul>
+		</p>
+	</div>
+	<?php
+}
+
+// Abort if dependencies are not satisfied.
+if ( ! empty( $_amp_load_errors->errors ) ) {
+	add_action( 'admin_notices', '_amp_show_load_errors_admin_notice' );
+	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+		$messages = array( __( 'AMP plugin unable to initialize.', 'amp' ) );
+		foreach ( array_keys( $_amp_load_errors->errors ) as $error_code ) {
+			$messages = array_merge( $messages, $_amp_load_errors->get_error_messages( $error_code ) );
+		}
+		$message = implode( "\n * ", $messages );
+		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
+		WP_CLI::warning( $message );
+	}
 	return;
 }
 
