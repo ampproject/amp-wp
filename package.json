@@ -79,7 +79,7 @@
     "timeago.js": "3.0.2",
     "uuid": "3.3.2",
     "webpack": "4.30.0",
-    "webpack-cli": "3.3.0"
+    "webpack-cli": "3.3.1"
   },
   "scripts": {
     "build": "npm-run-all build:*",
