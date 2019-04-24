@@ -41,7 +41,6 @@ $_amp_required_extensions = array(
 	'date',
 	'dom',
 	'iconv',
-	'intl',
 	'libxml',
 	'spl',
 );
