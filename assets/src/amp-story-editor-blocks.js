@@ -39,6 +39,7 @@ import {
 	addAMPExtraProps,
 	getTotalAnimationDuration,
 	renderStoryComponents,
+	maybeInitializeAnimations,
 	maybeSetInitialPositioning,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
@@ -74,10 +75,6 @@ const {
 
 const {
 	setCurrentPage,
-	addAnimation,
-	changeAnimationType,
-	changeAnimationDuration,
-	changeAnimationDelay,
 } = dispatch( 'amp/story' );
 
 /**
@@ -100,21 +97,7 @@ domReady( () => {
 	const firstPage = allBlocks.find( ( { name } ) => name === 'amp/amp-story-page' );
 	setCurrentPage( firstPage ? firstPage.clientId : undefined );
 
-	// Set initial animation order state for all child blocks.
 	for ( const block of allBlocks ) {
-		const page = getBlockRootClientId( block.clientId );
-
-		if ( page ) {
-			const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
-			const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
-
-			addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
-
-			changeAnimationType( page, block.clientId, ampAnimationType );
-			changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
-			changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
-		}
-
 		// Load all needed fonts.
 		if ( block.attributes.ampFontFamily ) {
 			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
@@ -155,6 +138,8 @@ let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
 subscribe( () => {
+	maybeInitializeAnimations();
+
 	const defaultBlockName = getDefaultBlockName();
 	const selectedBlockClientId = getSelectedBlockClientId();
 
