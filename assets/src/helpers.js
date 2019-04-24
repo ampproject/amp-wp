@@ -32,6 +32,7 @@ import {
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
+	BLOCKS_WITH_TEXT_SETTINGS,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -343,6 +344,18 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes.style = {
 			...ampAttributes.style,
 			...rotationStyle,
+		};
+	}
+
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
+	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...resizeStyle,
 		};
 	}
 
