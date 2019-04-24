@@ -37,7 +37,7 @@ const Reorderer = ( { pages } ) => {
 };
 
 export default withSelect( ( select ) => {
-	const { getBlocksByClientId } = select( 'core/editor' );
+	const { getBlocksByClientId } = select( 'core/block-editor' );
 	const { getBlockOrder } = select( 'amp/story' );
 
 	const pages = getBlocksByClientId( getBlockOrder() );

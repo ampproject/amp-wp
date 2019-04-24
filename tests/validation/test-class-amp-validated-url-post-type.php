@@ -376,6 +376,16 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 				),
 			),
 			array(
+				'code'    => 'rejected',
+				'evil'    => '<script>document.write( \'<a href="#" target="_blank" rel="noopener noreferrer">test</a>\' );</script>', // Test protection against wp_targeted_link_rel JSON corruption.
+				'sources' => array(
+					array(
+						'type' => 'theme',
+						'name' => 'twentyseventeen',
+					),
+				),
+			),
+			array(
 				'code'    => 'new',
 				'sources' => array(
 					array(
@@ -450,6 +460,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		$error_groups = array(
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
+			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS,
 			AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 		);

@@ -979,6 +979,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 
+			'amp-state-src' => array(
+				'<amp-state id="myRemoteState" src="https://data.com/articles.json"></amp-state>',
+				null,
+				array( 'amp-bind' ),
+			),
+
 			// Adapted from <https://www.ampproject.org/docs/reference/components/amp-selector>.
 			'reference-points-amp_selector_and_carousel_with_boolean_attributes' => array(
 				str_replace(
