@@ -345,12 +345,11 @@ class EditPage extends Component {
 
 export default withSelect( ( select, { clientId, attributes } ) => {
 	const { getMedia } = select( 'core' );
-	const { getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+	const { getBlockOrder, getBlocksByClientId, getBlockRootClientId } = select( 'core/block-editor' );
 
 	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
 	const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 	const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
-	const { getBlockRootClientId } = select( 'core/editor' );
 	const { getAnimatedBlocks } = select( 'amp/story' );
 
 	const { mediaId } = attributes;

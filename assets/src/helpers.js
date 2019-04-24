@@ -45,7 +45,7 @@ const {
 	getBlockOrder,
 	getBlock,
 	getClientIdsWithDescendants,
-} = select( 'core/editor' );
+} = select( 'core/block-editor' );
 
 const {
 	addAnimation,
@@ -58,7 +58,7 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
-const { updateBlockAttributes } = dispatch( 'core/editor' );
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {

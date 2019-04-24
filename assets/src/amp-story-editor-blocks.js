@@ -59,7 +59,7 @@ const {
 	getBlockOrder,
 	getBlock,
 	getBlockAttributes,
-} = select( 'core/editor' );
+} = select( 'core/block-editor' );
 
 const {
 	isReordering,
@@ -71,7 +71,7 @@ const {
 const {
 	moveBlockToPosition,
 	updateBlockAttributes,
-} = dispatch( 'core/editor' );
+} = dispatch( 'core/block-editor' );
 
 const {
 	setCurrentPage,

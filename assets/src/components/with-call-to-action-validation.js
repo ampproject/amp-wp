@@ -21,7 +21,7 @@ const enhance = compose(
 	 * @return {Component} Enhanced component with merged state data props.
 	 */
 	withSelect( ( select, props ) => {
-		const { getBlockRootClientId, getBlock, getBlockOrder, getBlocksByClientId } = select( 'core/editor' );
+		const { getBlockRootClientId, getBlock, getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
 
 		if ( 'amp/amp-story-cta' !== props.name ) {
 			return {};
@@ -44,7 +44,7 @@ const enhance = compose(
 		};
 	} ),
 	withDispatch( ( dispatch, { originalBlockClientId } ) => ( {
-		selectFirst: () => dispatch( 'core/editor' ).selectBlock( originalBlockClientId ),
+		selectFirst: () => dispatch( 'core/block-editor' ).selectBlock( originalBlockClientId ),
 	} ) ),
 );
 

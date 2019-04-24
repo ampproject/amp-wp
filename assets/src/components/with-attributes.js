@@ -12,7 +12,7 @@ import { withSelect } from '@wordpress/data';
 export default createHigherOrderComponent(
 	withSelect(
 		( select, props ) => {
-			const { getBlockAttributes } = select( 'core/editor' );
+			const { getBlockAttributes } = select( 'core/block-editor' );
 
 			let attributes;
 
