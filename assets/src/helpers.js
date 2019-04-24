@@ -18,8 +18,7 @@ import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@w
 /**
  * Internal dependencies
  */
-// eslint-disable-next-line no-unused-vars
-import store from './stores/amp-story';
+import './stores/amp-story';
 import {
 	BlockNavigation,
 	EditorCarousel,
