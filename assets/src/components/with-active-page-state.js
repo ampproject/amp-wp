@@ -11,7 +11,7 @@ import { withSelect, dispatch } from '@wordpress/data';
  */
 const withActivePageState = ( BlockListBlock ) => {
 	return withSelect( ( select, { clientId } ) => {
-		const { getBlockRootClientId } = select( 'core/editor' );
+		const { getBlockRootClientId } = select( 'core/block-editor' );
 		const { getCurrentPage } = select( 'amp/story' );
 
 		return {
@@ -37,7 +37,7 @@ const withActivePageState = ( BlockListBlock ) => {
 		};
 
 		const { setCurrentPage } = dispatch( 'amp/story' );
-		const { selectBlock } = dispatch( 'core/editor' );
+		const { selectBlock } = dispatch( 'core/block-editor' );
 
 		if ( ! isActivePage ) {
 			return (

@@ -12,7 +12,7 @@ import { withSelect } from '@wordpress/data';
 export default createHigherOrderComponent(
 	withSelect(
 		( select, props ) => {
-			const { hasSelectedInnerBlock } = select( 'core/editor' );
+			const { hasSelectedInnerBlock } = select( 'core/block-editor' );
 
 			return {
 				hasSelectedInnerBlock: hasSelectedInnerBlock( props.clientId, true ),
