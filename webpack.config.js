@@ -113,7 +113,6 @@ const blockEditor = {
 		{
 			// Make localized data importable.
 			'amp-block-editor-data': 'wpAmpEditor',
-			'amp-stories-fonts': 'ampStoriesFonts',
 		},
 	],
 	entry: {

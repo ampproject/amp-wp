@@ -138,7 +138,7 @@ class AMP_Editor_Blocks {
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
 				'amp-editor-blocks',
-				amp_get_asset_url( 'js/amp-blocks.js' ),
+				amp_get_asset_url( 'js/amp-editor-blocks.js' ),
 				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);

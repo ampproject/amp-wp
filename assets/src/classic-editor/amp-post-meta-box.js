@@ -1,5 +1,3 @@
-/* exported ampPostMetaBox */
-
 /**
  * AMP Post Meta Box.
  *
@@ -7,7 +5,7 @@
  *
  * @since 0.6
  */
-const ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
+window.ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	const component = {

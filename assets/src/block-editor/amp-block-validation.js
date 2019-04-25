@@ -5,9 +5,8 @@
  * If one exists for a block, it display it inline with a Notice component.
  */
 
-/* exported ampBlockValidation */
 /* global wp, _ */
-const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
+window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	const module = {

@@ -1,8 +1,7 @@
 /* global _ */
-/* exported ampEditorBlocks */
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0, 4 ] } ] */
 
-const ampEditorBlocks = ( function() {
+window.ampEditorBlocks = ( function() {
 	const __ = wp.i18n.__;
 	const _x = wp.i18n._x;
 
