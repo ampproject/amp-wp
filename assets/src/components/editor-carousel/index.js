@@ -36,7 +36,7 @@ class EditorCarousel extends Component {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN * 2 }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ ( STORY_PAGE_INNER_WIDTH + PAGE_MARGIN * 2 ) / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN * 2 }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}
 
