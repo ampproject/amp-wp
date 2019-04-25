@@ -12,13 +12,13 @@ set -e
 # These are the containers and values for the development site.
 CLI='cli'
 CONTAINER='wordpress'
-SITE_TITLE='Gutenberg Dev'
+SITE_TITLE='AMP Dev'
 
 # If we're installing/re-installing the test site, change the containers used.
 if [ "$1" == '--e2e_tests' ]; then
 	CLI="${CLI}_e2e_tests"
 	CONTAINER="${CONTAINER}_e2e_tests"
-	SITE_TITLE='Gutenberg Testing'
+	SITE_TITLE='AMP Testing'
 
 	if ! docker ps | grep -q $CONTAINER; then
 		echo -e $(error_message "WordPress e2e tests run in their own Docker container, but that container wasn't found.")
@@ -91,9 +91,9 @@ if [ "$CURRENT_URL" != "http://localhost:$HOST_PORT" ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI option update siteurl "http://localhost:$HOST_PORT" --quiet
 fi
 
-# Activate Gutenberg.
-echo -e $(status_message "Activating Gutenberg...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate gutenberg --quiet
+# Activate AMP plugin.
+echo -e $(status_message "Activating AMP plugin...")
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
 
 if [ "$POPULAR_PLUGINS" == "true" ]; then
 	echo -e $(status_message "Activating popular plugins...")
