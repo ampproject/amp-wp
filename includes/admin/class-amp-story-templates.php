@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.2';
+	const STORY_TEMPLATES_VERSION = '0.2.1';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -115,33 +115,63 @@ class AMP_Story_Templates {
 	public function import_story_templates() {
 		$templates = self::get_story_templates();
 		foreach ( $templates as $template ) {
-			$existing_template = $this->template_exists( $template['name'] );
-			if ( $existing_template > 0 ) {
+			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents, WordPress.XSS.EscapeOutput, WordPress.Security.EscapeOutput
+
+			if ( empty( $post_content ) ) {
 				continue;
 			}
-			$post_content = @file_get_contents( AMP__DIR__ . '/includes/templates/story-templates/' . $template['name'] . '.html' ); // phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged, WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents, WordPress.WP.AlternativeFunctions.file_system_read_file_get_contents, WordPress.XSS.EscapeOutput, WordPress.Security.EscapeOutput
-			if ( ! empty( $post_content ) ) {
 
-				$post_content = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates' ), $post_content );
-
-				$post_id = wp_insert_post(
-					wp_slash(
-						array(
-							'post_title'   => $template['title'],
-							'post_type'    => 'wp_block',
-							'post_status'  => 'publish',
-							'post_content' => $post_content,
-							'post_name'    => $template['name'],
-						)
-					)
-				);
-				if ( ! $post_id ) {
-					continue;
-				}
-				wp_set_object_terms( $post_id, self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY );
-				add_post_meta( $post_id, 'amp_template_unmodified', true );
+			$post_content      = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates' ), $post_content );
+			$existing_template = $this->template_exists( $template['name'] );
+			if ( $existing_template > 0 ) {
+				$this->maybe_update_template( $existing_template, $template, $post_content );
+				continue;
 			}
+
+			$post_id = wp_insert_post(
+				wp_slash(
+					array(
+						'post_title'   => $template['title'],
+						'post_type'    => 'wp_block',
+						'post_status'  => 'publish',
+						'post_content' => $post_content,
+						'post_name'    => $template['name'],
+					)
+				)
+			);
+			if ( ! $post_id ) {
+				continue;
+			}
+			wp_set_object_terms( $post_id, self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY );
+			add_post_meta( $post_id, 'amp_template_unmodified', true );
 		}
+	}
+
+	/**
+	 * Update the template if it hasn't been update by the user.
+	 *
+	 * @param integer $template_id Template ID.
+	 * @param array   $template Template's data.
+	 * @param string  $content Template's content.
+	 */
+	protected function maybe_update_template( $template_id, $template, $content ) {
+
+		// If the template has been modified meanwhile, return.
+		if ( false === (bool) get_post_meta( $template_id, 'amp_template_unmodified', true ) ) {
+			return;
+		}
+
+		remove_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'           => $template_id,
+					'post_content' => $content,
+					'post_title'   => $template['title'],
+				)
+			)
+		);
+		add_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
 	}
 
 	/**
@@ -271,6 +301,7 @@ class AMP_Story_Templates {
 	/**
 	 * Flag template as modified when it's being saved.
 	 *
+	 * @todo Confirm if tracking this is necessary, maybe the templates will be static.
 	 * @param int $post_id Post ID.
 	 */
 	public function flag_template_as_modified( $post_id ) {

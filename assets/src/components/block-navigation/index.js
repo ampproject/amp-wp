@@ -86,7 +86,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 export default compose(
 	withSelect( ( select ) => {
 		const { getCurrentPage, isReordering } = select( 'amp/story' );
-		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/editor' );
+		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
 
 		const blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 
@@ -99,7 +99,7 @@ export default compose(
 	withDispatch( ( dispatch, { onSelect = () => undefined } ) => {
 		return {
 			selectBlock( clientId ) {
-				dispatch( 'core/editor' ).selectBlock( clientId );
+				dispatch( 'core/block-editor' ).selectBlock( clientId );
 				onSelect( clientId );
 			},
 		};

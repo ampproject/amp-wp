@@ -96,7 +96,7 @@ export default compose(
 			getBlockOrder,
 			getBlocksByClientId,
 			getAdjacentBlockClientId,
-		} = select( 'core/editor' );
+		} = select( 'core/block-editor' );
 		const { getCurrentPage, isReordering } = select( 'amp/story' );
 
 		const currentPage = getCurrentPage();
@@ -113,7 +113,7 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { setCurrentPage } = dispatch( 'amp/story' );
-		const { selectBlock } = dispatch( 'core/editor' );
+		const { selectBlock } = dispatch( 'core/block-editor' );
 
 		return {
 			onChangePage: ( pageClientId ) => {

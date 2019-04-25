@@ -30,7 +30,7 @@ class TextBlockEdit extends Component {
 		this.onReplace = this.onReplace.bind( this );
 	}
 
-	componentDidUpdate() {
+	componentDidUpdate( prevProps ) {
 		const { attributes, isSelected, setAttributes } = this.props;
 		const {
 			height,
@@ -39,7 +39,16 @@ class TextBlockEdit extends Component {
 			ampFitText,
 		} = attributes;
 
-		if ( isSelected && ampFitText ) {
+		// If not selected, only proceed if height or width has changed.
+		if (
+			! isSelected &&
+			prevProps.attributes.height === height &&
+			prevProps.attributes.width === width
+		) {
+			return;
+		}
+
+		if ( ampFitText && attributes.content.length ) {
 			// Check if the font size is OK, if not, update the font size if not.
 			const element = document.querySelector( `#block-${ this.props.clientId } .block-editor-rich-text__editable` );
 			if ( element ) {

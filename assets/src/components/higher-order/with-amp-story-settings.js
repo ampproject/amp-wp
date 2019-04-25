@@ -38,7 +38,7 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 } );
 
 const applyWithSelect = withSelect( ( select, props ) => {
-	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/editor' );
+	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
 
 	const currentBlock = getSelectedBlockClientId();

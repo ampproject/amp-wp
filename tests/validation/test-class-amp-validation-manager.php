@@ -862,7 +862,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
-		add_action( $action_function_callback, '_amp_print_php_version_admin_notice' );
+		add_action( $action_function_callback, '_amp_show_load_errors_admin_notice' );
 		add_action( $action_no_argument, array( $this, 'output_div' ) );
 		add_action( $action_one_argument, array( $this, 'output_notice' ) );
 		add_action( $action_two_arguments, array( $this, 'output_message' ), 10, 2 );

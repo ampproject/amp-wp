@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { each, every } from 'lodash';
+import { each, every, isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -18,6 +18,7 @@ import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@w
 /**
  * Internal dependencies
  */
+import './stores/amp-story';
 import {
 	BlockNavigation,
 	EditorCarousel,
@@ -31,6 +32,7 @@ import {
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
+	BLOCKS_WITH_TEXT_SETTINGS,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -42,9 +44,21 @@ const {
 	getBlockRootClientId,
 	getBlockOrder,
 	getBlock,
-} = select( 'core/editor' );
+	getClientIdsWithDescendants,
+} = select( 'core/block-editor' );
 
-const { updateBlockAttributes } = dispatch( 'core/editor' );
+const {
+	addAnimation,
+	changeAnimationType,
+	changeAnimationDuration,
+	changeAnimationDelay,
+} = dispatch( 'amp/story' );
+
+const {
+	getAnimatedBlocks,
+} = select( 'amp/story' );
+
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -330,6 +344,18 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes.style = {
 			...ampAttributes.style,
 			...rotationStyle,
+		};
+	}
+
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
+	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...resizeStyle,
 		};
 	}
 
@@ -979,5 +1005,29 @@ export const maybeSetTagName = ( clientId ) => {
 
 	if ( block.attributes.tagName !== tagName ) {
 		updateBlockAttributes( clientId, { tagName } );
+	}
+};
+
+/**
+ * Initializes the animations if it hasn't been done yet.
+ */
+export const maybeInitializeAnimations = () => {
+	const animations = getAnimatedBlocks();
+	if ( isEqual( {}, animations ) ) {
+		const allBlocks = getBlocksByClientId( getClientIdsWithDescendants() );
+		for ( const block of allBlocks ) {
+			const page = getBlockRootClientId( block.clientId );
+
+			if ( page ) {
+				const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
+				const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+
+				addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+
+				changeAnimationType( page, block.clientId, ampAnimationType );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+			}
+		}
 	}
 };
