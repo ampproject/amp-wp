@@ -262,7 +262,7 @@ addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone'
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
 addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );
 
-const blocks = require.context( './blocks', true, /index\.js$/ );
+const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 // Block types need to be register *after* all the filters have been applied.
 blocks.keys().forEach( ( modulePath ) => {

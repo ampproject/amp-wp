@@ -56,7 +56,7 @@ plugins.keys().forEach( ( modulePath ) => {
 	registerPlugin( name, { icon, render } );
 } );
 
-const blocks = require.context( './blocks', true, /index\.js$/ );
+const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
