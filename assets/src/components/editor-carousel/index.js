@@ -15,7 +15,8 @@ import { Reorderer } from '../';
 import { STORY_PAGE_INNER_WIDTH } from './../../constants';
 import './edit.css';
 
-const PAGE_MARGIN = 20;
+// This is the average of left (20px) and right (30px) margin.
+const PAGE_MARGIN = 25;
 
 class EditorCarousel extends Component {
 	constructor() {
@@ -35,7 +36,7 @@ class EditorCarousel extends Component {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN * 2 }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}
 
