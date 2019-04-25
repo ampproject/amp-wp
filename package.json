@@ -2,6 +2,8 @@
   "name": "amp-wp",
   "private": true,
   "description": "WordPress plugin for adding AMP support.",
+  "author": "WordPress.com VIP, XWP, Google, and contributors",
+  "license": "GPL-2.0-or-later",
   "keywords": [
     "amp",
     "amphtml",
@@ -9,41 +11,12 @@
     "wordpress-plugin"
   ],
   "homepage": "https://github.com/ampproject/amp-wp",
-  "bugs": {
-    "url": "https://github.com/ampproject/amp-wp/issues"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/ampproject/amp-wp.git"
   },
-  "license": "GPL-2.0-or-later",
-  "author": "WordPress.com VIP, XWP, Google, and contributors",
-  "scripts": {
-    "build": "npm-run-all build:*",
-    "build:js": "wp-scripts build",
-    "build:prepare": "grunt clean",
-    "build:run": "grunt build",
-    "build:zip": "grunt create-build-zip",
-    "check-engines": "wp-scripts check-engines",
-    "check-licenses": "wp-scripts check-licenses --production",
-    "deploy": "grunt deploy",
-    "dev": "wp-scripts start",
-    "lint": "npm-run-all --parallel lint:*",
-    "lint:css": "wp-scripts lint-style 'assets/**/*.css'",
-    "lint:css:fix": "wp-scripts lint-style 'assets/**/*.css' -- --fix",
-    "lint:js": "wp-scripts lint-js .",
-    "lint:js:fix": "wp-scripts lint-js . -- --fix",
-    "lint:php": "vendor/bin/phpcs",
-    "lint:pkg-json": "wp-scripts lint-pkg-json . --ignorePath .gitignore",
-    "start": "wp-scripts start",
-    "test": "npm-run-all --parallel test:*",
-    "pretest:e2e": "cross-env SCRIPT_DEBUG=false ./bin/reset-e2e-tests.sh",
-    "test:e2e": "wp-scripts test-e2e --config=tests/e2e/jest.config.js",
-    "test:e2e:watch": "npm run test:e2e --watch",
-    "test:js": "wp-scripts test-unit-js --config=tests/unit/jest.config.js",
-    "test:js:help": "wp-scripts test-unit-js --help",
-    "test:js:watch": "npm run test:js -- --watch",
-    "test:php": "phpunit"
+  "bugs": {
+    "url": "https://github.com/ampproject/amp-wp/issues"
   },
   "dependencies": {
     "classnames": "2.2.6",
@@ -114,6 +87,33 @@
     "uuid": "3.3.2",
     "webpack": "4.30.0",
     "webpack-cli": "3.3.1"
+  },
+  "scripts": {
+    "build": "npm-run-all build:*",
+    "build:js": "wp-scripts build",
+    "build:prepare": "grunt clean",
+    "build:run": "grunt build",
+    "build:zip": "grunt create-build-zip",
+    "check-engines": "wp-scripts check-engines",
+    "check-licenses": "wp-scripts check-licenses --production",
+    "deploy": "grunt deploy",
+    "dev": "wp-scripts start",
+    "lint": "npm-run-all --parallel lint:*",
+    "lint:css": "wp-scripts lint-style 'assets/**/*.css'",
+    "lint:css:fix": "npm run lint:css -- --fix",
+    "lint:js": "wp-scripts lint-js .",
+    "lint:js:fix": "npm run lint:js -- --fix",
+    "lint:php": "vendor/bin/phpcs",
+    "lint:pkg-json": "wp-scripts lint-pkg-json . --ignorePath .gitignore",
+    "start": "wp-scripts start",
+    "test": "npm-run-all --parallel test:*",
+    "pretest:e2e": "cross-env SCRIPT_DEBUG=false ./bin/reset-e2e-tests.sh",
+    "test:e2e": "wp-scripts test-e2e --config=tests/e2e/jest.config.js",
+    "test:e2e:watch": "npm run test:e2e -- --watch",
+    "test:js": "wp-scripts test-unit-js --config=tests/unit/jest.config.js",
+    "test:js:help": "wp-scripts test-unit-js --help",
+    "test:js:watch": "npm run test:js -- --watch",
+    "test:php": "phpunit"
   },
   "npmPackageJsonLintConfig": {
     "extends": "@wordpress/npm-package-json-lint-config",
