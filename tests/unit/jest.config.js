@@ -1,6 +1,6 @@
 module.exports = {
 	rootDir: '../../',
-	preset: '@wordpress/jest-preset-default',
+	...require( '@wordpress/scripts/config/jest-unit.config' ),
 	transform: {
 		'^.+\\.[jt]sx?$': '<rootDir>/node_modules/@wordpress/scripts/config/babel-transform',
 	},
