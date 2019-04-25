@@ -47,6 +47,8 @@ export default ( InitialMediaUpload ) => {
 		}
 
 		/**
+		 * Initialize.
+		 *
 		 * Mainly copied from customize-controls.js, like most of this class.
 		 *
 		 * Overwrites the Media Library frame, this.frame.
@@ -67,6 +69,7 @@ export default ( InitialMediaUpload ) => {
 						multiple: false,
 						date: false,
 						priority: 20,
+						// Note: These suggestions are shown in the media library image browser.
 						suggestedWidth: EXPECTED_WIDTH,
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),
@@ -86,12 +89,14 @@ export default ( InitialMediaUpload ) => {
 		}
 
 		/**
+		 * Calculate image selection options.
+		 *
 		 * Returns a set of options, computed from the attached image data and
 		 * control-specific data, to be fed to the imgAreaSelect plugin in
 		 * wp.media.view.Cropper.
 		 *
-		 * @param {wp.media.model.Attachment} attachment
-		 * @param {wp.media.controller.Cropper} controller
+		 * @param {wp.media.model.Attachment} attachment   - Attachment.
+		 * @param {wp.media.controller.Cropper} controller - Controller.
 		 * @return {Object} Options
 		 */
 		calculateImageSelectOptions( attachment, controller ) {
@@ -137,9 +142,10 @@ export default ( InitialMediaUpload ) => {
 		}
 
 		/**
-		 * After an image is selected in the media modal, switch to the cropper
- 		 * state if the image isn't the right size.
- 		*/
+		 * Handle image selection.
+		 *
+		 * After an image is selected in the media modal, switch to the cropper state if the image isn't the right size.
+		 */
 		onSelectImage() {
 			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
 
@@ -153,10 +159,11 @@ export default ( InitialMediaUpload ) => {
 				wp.ajax.post( 'crop-image', {
 					nonce: attachment.nonces.edit,
 					id: attachment.id,
-					context: 'site-icon',
+					context: 'featured-image',
 					cropDetails: {
 						x1: 0,
 						y1: 0,
+						// @todo Some of these are incorrect since the resulting image is skewed.
 						width: EXPECTED_WIDTH,
 						height: EXPECTED_HEIGHT,
 						dst_width: EXPECTED_WIDTH,
@@ -180,7 +187,7 @@ export default ( InitialMediaUpload ) => {
 		 * there's no way to have the correct image size without distorting it.
 		 * So this can allow preventing the crop option when choosing a featured image.
 		 *
-		 * @param {Object} attachment The attachment object to evaluate.
+		 * @param {Object} attachment - The attachment object to evaluate.
 		 * @return {boolean} Whether to allow cropping.
 		 */
 		doAllowCrop( attachment ) {
@@ -190,24 +197,23 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Return whether the image must be cropped, based on required dimensions.
 		 *
-		 * @param {number}  dstW The expected width.
-		 * @param {number}  dstH The expected height.
-		 * @param {number}  imgW The actual width.
-		 * @param {number}  imgH The actual height.
+		 * @param {number}  dstW - The expected width.
+		 * @param {number}  dstH - The expected height.
+		 * @param {number}  imgW - The actual width.
+		 * @param {number}  imgH - The actual height.
 		 * @return {boolean} Whether the image must be cropped.
 		 */
 		mustBeCropped( dstW, dstH, imgW, imgH ) {
-			if ( ( dstW === imgW && dstH === imgH ) || ( imgW <= dstW )	) {
-				return false;
-			}
-
-			return true;
+			return ! (
+				( dstW === imgW && dstH === imgH ) ||
+				( imgW <= dstW )
+			);
 		}
 
 		/**
 		 * After the image has been cropped, apply the cropped image data to the setting.
 		 *
-		 * @param {Object} croppedImage Cropped attachment data.
+		 * @param {Object} croppedImage - Cropped attachment data.
 		 */
 		onCropped( croppedImage ) {
 			const url = croppedImage.url,
@@ -220,7 +226,7 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * If cropping was skipped, apply the image data directly to the setting.
 		 *
-		 * @param {Object} selection
+		 * @param {Object} selection - Selection.
 		 */
 		onSkippedCrop( selection ) {
 			const url = selection.get( 'url' ),
@@ -230,14 +236,12 @@ export default ( InitialMediaUpload ) => {
 		}
 
 		/**
-		 * Creates a new wp.customize.HeaderTool.ImageModel from provided
-		 * header image data and inserts it into the user-uploaded headers
-		 * collection.
+		 * Set the featured image.
 		 *
-		 * @param {string} url
-		 * @param {number} attachmentId
-		 * @param {number} width
-		 * @param {number} height
+		 * @param {string} url          - Image URL.
+		 * @param {number} attachmentId - Attachment ID.
+		 * @param {number} width        - Image width.
+		 * @param {number} height       - Image height.
 		 */
 		setImageFromURL( url, attachmentId, width, height ) {
 			const data = {};
@@ -259,7 +263,7 @@ export default ( InitialMediaUpload ) => {
 				data.height = height;
 			}
 
-			onSelect( data );
+			onSelect( data ); // @todo Does this do anything?
 			dispatch( 'core/editor' ).editPost( { featured_media: attachmentId } );
 		}
 	};
