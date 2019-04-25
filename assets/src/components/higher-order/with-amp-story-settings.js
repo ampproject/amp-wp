@@ -318,21 +318,6 @@ export default createHigherOrderComponent(
 									step={ 5 }
 								/>
 							</PanelColorSettings>
-							<PanelBody
-								title={ __( 'Animation', 'amp' ) }
-							>
-								<AnimationControls
-									animatedBlocks={ getAnimatedBlocks }
-									animationType={ ampAnimationType }
-									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
-									animationAfter={ animationAfter }
-									onAnimationTypeChange={ onAnimationTypeChange }
-									onAnimationDurationChange={ onAnimationDurationChange }
-									onAnimationDelayChange={ onAnimationDelayChange }
-									onAnimationAfterChange={ onAnimationOrderChange }
-								/>
-							</PanelBody>
 						</InspectorControls>
 					) }
 					{ isMovableBlock && (
