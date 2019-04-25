@@ -12,9 +12,16 @@
 	border-color: #555d66;
 }
 
+.block-editor-block-list__layout .block-editor-block-list__block .block-editor-block-list__block-edit:before {
+	left: -3px;
+	top: -3px;
+	right: -3px;
+	bottom: -3px;
+}
+
 .block-editor-block-list__layout .block-editor-block-list__block[data-type="amp/amp-story-page"] > .block-editor-block-list__block-edit > .block-editor-block-contextual-toolbar > .block-editor-block-toolbar {
-	left: 4px;
-	top: 3px;
+	left: 18px;
+	top: 11px;
 }
 
 /*
@@ -44,7 +51,7 @@
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"],
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	width: 100%;
-	max-width: 338px;
+	max-width: 328px;
 	height: 553px;
 	position: relative;
 }
@@ -96,17 +103,21 @@
 	letter-spacing: 1px;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div {
-	height: 543px;
+.editor-block-list__layout div[data-type="amp/amp-story-page"] .amp-story-page-number + div .editor-inner-blocks.block-editor-inner-blocks {
+	height: 553px;
 }
 
+[data-block] {
+	margin-top: 0;
+	margin-bottom: 0;
+}
 
 /*
  * Make all the inner blocks positioned with absolute.
- * @todo Add exception for CTA block once it's added back.
  */
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
 	position: absolute;
+	z-index: 10;
 }
 
 .editor-block-list__block .editor-block-list__layout {
@@ -129,6 +140,17 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 
 div[data-type="amp/amp-story-page"] .wp-block-image {
 	margin-top: 0;
+}
+
+/*
+ * Hackily hide the alignment options from the image block since they are irrelevant for an image block in a story.
+ * In the future the underlying alignment buttons should be removed entirely. See <https://github.com/ampproject/amp-wp/issues/2115>.
+ */
+.editor-block-list__block[data-type="core/image"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/pullquote"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/embed"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2),
+.editor-block-list__block[data-type="core/video"] > div.editor-block-list__block-edit.block-editor-block-list__block-edit > div.editor-block-contextual-toolbar.block-editor-block-contextual-toolbar > div.editor-block-toolbar.block-editor-block-toolbar > div:nth-child(2) {
+	display: none;
 }
 
 #amp-story-editor .components-draggable__clone {

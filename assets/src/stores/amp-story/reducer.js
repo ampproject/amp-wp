@@ -8,7 +8,7 @@ import { select, combineReducers } from '@wordpress/data';
  */
 import { isValidAnimationPredecessor } from './selectors';
 
-const { getBlock, getBlockOrder } = select( 'core/editor' );
+const { getBlock, getBlockOrder } = select( 'core/block-editor' );
 
 /**
  * Reducer handling animation state changes.

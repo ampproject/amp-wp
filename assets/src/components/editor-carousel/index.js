@@ -12,7 +12,7 @@ import { compose } from '@wordpress/compose';
  */
 import Indicator from './indicator';
 import { Reorderer } from '../';
-import { STORY_PAGE_WIDTH } from './../../constants';
+import { STORY_PAGE_INNER_WIDTH } from './../../constants';
 import './edit.css';
 
 const PAGE_MARGIN = 20;
@@ -35,7 +35,7 @@ class EditorCarousel extends Component {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}
 
@@ -96,7 +96,7 @@ export default compose(
 			getBlockOrder,
 			getBlocksByClientId,
 			getAdjacentBlockClientId,
-		} = select( 'core/editor' );
+		} = select( 'core/block-editor' );
 		const { getCurrentPage, isReordering } = select( 'amp/story' );
 
 		const currentPage = getCurrentPage();
@@ -113,7 +113,7 @@ export default compose(
 	} ),
 	withDispatch( ( dispatch ) => {
 		const { setCurrentPage } = dispatch( 'amp/story' );
-		const { selectBlock } = dispatch( 'core/editor' );
+		const { selectBlock } = dispatch( 'core/block-editor' );
 
 		return {
 			onChangePage: ( pageClientId ) => {

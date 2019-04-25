@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every } from 'lodash';
+import { each, every, isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -11,13 +11,14 @@ import { every } from 'lodash';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
-import { dispatch, select } from '@wordpress/data';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
+import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
+import './stores/amp-story';
 import {
 	BlockNavigation,
 	EditorCarousel,
@@ -31,6 +32,7 @@ import {
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
+	BLOCKS_WITH_TEXT_SETTINGS,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -42,9 +44,21 @@ const {
 	getBlockRootClientId,
 	getBlockOrder,
 	getBlock,
-} = select( 'core/editor' );
+	getClientIdsWithDescendants,
+} = select( 'core/block-editor' );
 
-const { updateBlockAttributes } = dispatch( 'core/editor' );
+const {
+	addAnimation,
+	changeAnimationType,
+	changeAnimationDuration,
+	changeAnimationDelay,
+} = dispatch( 'amp/story' );
+
+const {
+	getAnimatedBlocks,
+} = select( 'amp/story' );
+
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
@@ -155,10 +169,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		},
 		ampAnimationType: {
 			type: 'string',
-		},
-		ampAnimationDelay: {
-			type: 'number',
-			default: 0,
 		},
 		addedAttributes: {
 			type: 'number',
@@ -293,11 +303,11 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
 		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay;
+			ampAttributes[ 'animate-in-delay' ] = parseInt( attributes.ampAnimationDelay ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration;
+			ampAttributes[ 'animate-in-duration' ] = parseInt( attributes.ampAnimationDuration ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationAfter ) {
@@ -330,6 +340,18 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes.style = {
 			...ampAttributes.style,
 			...rotationStyle,
+		};
+	}
+
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
+	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+		};
+		ampAttributes.style = {
+			...ampAttributes.style,
+			...resizeStyle,
 		};
 	}
 
@@ -749,6 +771,73 @@ export const getRgbaFromHex = ( hex, opacity ) => {
 	];
 };
 
+/**
+ * Object of block attributes to set to default when inserting a template.
+ */
+const emptyTemplateMapping = {
+	// @todo This can use just arrays of attribute keys instead of object.
+	'amp/amp-story-text': {
+		content: '',
+	},
+	'amp/amp-story-page': {
+		mediaUrl: null,
+		mediaType: null,
+		focalPoint: {},
+	},
+	'core/image': {
+		url: null,
+		positionLeft: null,
+	},
+	'amp/amp-story-cta': {
+		text: null,
+		link: null,
+	},
+	'core/quote': {
+		citation: null,
+		value: null,
+	},
+};
+
+/**
+ * Gets a skeleton template block from pre-populated block.
+ *
+ * @param {Object} block Original block.
+ * @return {Object} Block.
+ */
+const getSkeletonTemplateBlock = ( block ) => {
+	if ( ! emptyTemplateMapping[ block.name ] ) {
+		return block.attributes;
+	}
+
+	const attributes = {};
+	each( block.attributes, function( value, key ) {
+		if ( undefined === emptyTemplateMapping[ block.name ][ key ] ) {
+			attributes[ key ] = value;
+		}
+	} );
+
+	// Image block's left positioning should be set to 0.
+	if ( 'core/image' === block.name ) {
+		attributes.positionLeft = 0;
+	}
+
+	return attributes;
+};
+
+/**
+ * Creates a skeleton template from pre-populated template.
+ *
+ * @param {Object} template Block.
+ * @return {Object} Skeleton template block.
+ */
+export const createSkeletonTemplate = ( template ) => {
+	const children = [];
+	template.innerBlocks.forEach( function( childBlock ) {
+		children.push( createBlock( childBlock.name, getSkeletonTemplateBlock( childBlock ) ) );
+	} );
+	return createBlock( template.name, getSkeletonTemplateBlock( template ), children );
+};
+
 export const getClassNameFromBlockAttributes = ( {
 	className,
 	ampFitText,
@@ -788,14 +877,14 @@ export const getStylesFromBlockAttributes = ( {
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
 
-	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
+	const { colors } = select( 'core/block-editor' ).getSettings();
 
 	/*
      * Calculate font size using vw to make it responsive.
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
-	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
+	const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
 	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
@@ -808,6 +897,25 @@ export const getStylesFromBlockAttributes = ( {
 		height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		textAlign: align,
 	};
+};
+
+/**
+ * Get font size from slug.
+ *
+ * @param {string} slug Font slug.
+ * @return {number} Font size in pixels.
+ */
+const getFontSizeFromSlug = ( slug ) => {
+	switch ( slug ) {
+		case 'small':
+			return 19.5;
+		case 'large':
+			return 36.5;
+		case 'huge':
+			return 49.5;
+		default:
+			return 16;
+	}
 };
 
 export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
@@ -964,5 +1072,29 @@ export const maybeSetTagName = ( clientId ) => {
 
 	if ( block.attributes.tagName !== tagName ) {
 		updateBlockAttributes( clientId, { tagName } );
+	}
+};
+
+/**
+ * Initializes the animations if it hasn't been done yet.
+ */
+export const maybeInitializeAnimations = () => {
+	const animations = getAnimatedBlocks();
+	if ( isEqual( {}, animations ) ) {
+		const allBlocks = getBlocksByClientId( getClientIdsWithDescendants() );
+		for ( const block of allBlocks ) {
+			const page = getBlockRootClientId( block.clientId );
+
+			if ( page ) {
+				const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
+				const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+
+				addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+
+				changeAnimationType( page, block.clientId, ampAnimationType );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+			}
+		}
 	}
 };

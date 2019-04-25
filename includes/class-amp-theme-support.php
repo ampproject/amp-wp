@@ -124,25 +124,34 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		self::read_theme_support();
-		if ( ! current_theme_supports( self::SLUG ) ) {
-			return;
-		}
-
-		// Ensure extra theme support for core themes is in place.
-		AMP_Core_Theme_Sanitizer::extend_theme_support();
 
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+		if ( current_theme_supports( self::SLUG ) ) {
+			// Ensure extra theme support for core themes is in place.
+			AMP_Core_Theme_Sanitizer::extend_theme_support();
 
-		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
-		/*
-		 * Note that wp action is use instead of template_redirect because some themes/plugins output
-		 * the response at this action and then short-circuit with exit. So this is why the the preceding
-		 * action to template_redirect--the wp action--is used instead.
-		 */
-		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+
+			/*
+			 * Note that wp action is use instead of template_redirect because some themes/plugins output
+			 * the response at this action and then short-circuit with exit. So this is why the the preceding
+			 * action to template_redirect--the wp action--is used instead.
+			 */
+			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+		} elseif ( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+			add_action(
+				'wp',
+				function () {
+					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+						self::finish_init();
+					}
+				},
+				PHP_INT_MAX
+			);
+		}
 	}
 
 	/**
@@ -1756,8 +1765,15 @@ class AMP_Theme_Support {
 		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
 		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
 		 * response is returned.
+		 *
+		 * Such 304 Not Modified responses are only enabled when using a stable release. This is not enabled for
+		 * non-stable releases (like 1.2-beta2) because the plugin would be under active development and such caching
+		 * would make it more difficult to see changes applied to the sanitizers. (A browser's cache would have to be
+		 * disabled or the developer would have to always do hard reloads.)
 		 */
 		$has_matching_etag = (
+			false === strpos( AMP__VERSION, '-' )
+			&&
 			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
 			&&
 			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )

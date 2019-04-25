@@ -32,7 +32,9 @@ class AMP_Options_Manager {
 		'all_templates_supported'  => true,
 		'supported_templates'      => array( 'is_singular' ),
 		'enable_response_caching'  => true,
+		'enable_amp_stories'       => false,
 		'version'                  => AMP__VERSION,
+		'story_templates_version'  => false,
 	);
 
 	/**
@@ -136,6 +138,7 @@ class AMP_Options_Manager {
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 		$options['accept_tree_shaking']      = ! empty( $new_options['accept_tree_shaking'] );
 		$options['disable_admin_bar']        = ! empty( $new_options['disable_admin_bar'] );
+		$options['enable_amp_stories']       = ! empty( $new_options['enable_amp_stories'] );
 
 		// Validate post type support.
 		$options['supported_post_types'] = array();
@@ -379,6 +382,9 @@ class AMP_Options_Manager {
 			.amp-welcome-notice {
 				padding: 38px;
 			}
+			.amp-welcome-notice + .notice {
+				clear: both;
+			}
 			.amp-welcome-icon-holder {
 				width: 200px;
 				height: 200px;
@@ -534,7 +540,7 @@ class AMP_Options_Manager {
 			if ( is_wp_error( $validation ) ) {
 				$review_messages[] = esc_html(
 					sprintf(
-						/* translators: %1$s is the error message, %2$s is the error code */
+						/* translators: 1: error message. 2: error code. */
 						__( 'However, there was an error when checking the AMP validity for your site.', 'amp' ),
 						$validation->get_error_message(),
 						$validation->get_error_code()
@@ -613,7 +619,7 @@ class AMP_Options_Manager {
 					if ( $new_errors > 0 && $invalid_url_screen_url ) {
 						$message .= ' ' . wp_kses_post(
 							sprintf(
-								/* translators: %1$s is URL to review issues, %2$s is count of new errors */
+								/* translators: 1: URL to review issues. 2: count of new errors. */
 								_n(
 									'Please also <a href="%1$s">review %2$s issue</a> which may need to be fixed (for one URL at least).',
 									'Please also <a href="%1$s">review %2$s issues</a> which may need to be fixed (for one URL at least).',

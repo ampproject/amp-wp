@@ -27,7 +27,7 @@ export default ( BlockEdit ) => {
 		}
 
 		const selectedMediaId = ownProps.attributes.mediaId || ownProps.attributes.id;
-		const selectedBlock = select( 'core/editor' ).getSelectedBlock();
+		const selectedBlock = select( 'core/block-editor' ).getSelectedBlock();
 		if ( ! selectedMediaId || ! selectedBlock || ! selectedBlock.attributes ) {
 			return;
 		}

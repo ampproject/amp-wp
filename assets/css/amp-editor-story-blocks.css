@@ -1,3 +1,9 @@
+:root {
+	--preview-scale: 1;
+	--preview-translateX: 0%;
+	--preview-translateY: 0%;
+}
+
 /*
  * 0. General editor layout styles.
  */
@@ -72,6 +78,18 @@
 .amp-stories__editor-inserter__menu .amp-stories__editor-inserter__results .components-disabled .wp-block-quote.is-style-white {
 	background-color: initial;
 }
+
+/*
+ * Fix issue where images wit large max-width/max-height visually break the editor.
+ *
+ * @see https://github.com/ampproject/amp-wp/pull/2119
+ * @see https://github.com/WordPress/gutenberg/issues/7180
+ */
+
+.wp-block-image .components-resizable-box__container + .__resizable_base__ {
+	left: 0 !important;
+}
+
 /*
  * 100. Shame
  */

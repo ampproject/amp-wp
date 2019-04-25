@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5ddc26dd4f143b6df706bceab44b8d89",
+    "content-hash": "bdb4b18c2d8983eadff4218c7ab982d8",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -422,16 +422,16 @@
         },
         {
             "name": "xwp/wp-dev-lib",
-            "version": "1.1.0",
+            "version": "1.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/wp-dev-lib.git",
-                "reference": "69f6564f930390e9a9a413e14daea749f1adaed2"
+                "reference": "4caaf0f554778bb59062c8797755999b5fae400d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/69f6564f930390e9a9a413e14daea749f1adaed2",
-                "reference": "69f6564f930390e9a9a413e14daea749f1adaed2",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/4caaf0f554778bb59062c8797755999b5fae400d",
+                "reference": "4caaf0f554778bb59062c8797755999b5fae400d",
                 "shasum": ""
             },
             "type": "library",
@@ -456,7 +456,7 @@
             "keywords": [
                 "wordpress"
             ],
-            "time": "2019-03-24T06:28:18+00:00"
+            "time": "2019-04-06T06:37:44+00:00"
         }
     ],
     "aliases": [],
@@ -469,7 +469,8 @@
         "ext-dom": "*",
         "ext-iconv": "*",
         "ext-intl": "*",
-        "ext-libxml": "*"
+        "ext-libxml": "*",
+        "ext-curl": "*"
     },
     "platform-dev": [],
     "platform-overrides": {

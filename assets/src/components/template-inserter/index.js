@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton, Button } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { createBlock, cloneBlock } from '@wordpress/blocks';
+import { createBlock } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -15,6 +15,7 @@ import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
 import './edit.css';
+import { createSkeletonTemplate } from '../../helpers';
 
 const storyPageBlockName = 'amp/amp-story-page';
 
@@ -78,8 +79,8 @@ class TemplateInserter extends Component {
 					const onSelect = ( item ) => {
 						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
 						onClose();
-						// Clone block to avoid duplicate ID-s.
-						insertBlock( cloneBlock( block ) );
+
+						insertBlock( createSkeletonTemplate( block ) );
 					};
 
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );

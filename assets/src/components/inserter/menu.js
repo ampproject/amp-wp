@@ -367,12 +367,13 @@ export default compose(
 			getBlockName,
 			getBlockRootClientId,
 			getBlockSelectionEnd,
+			canInsertBlockType,
+			getBlockListSettings,
 		} = select( 'core/block-editor' );
 		const {
 			getChildBlockNames,
 		} = select( 'core/blocks' );
 		const { getCurrentPage } = select( 'amp/story' );
-		const { canInsertBlockType, getBlockListSettings } = select( 'core/editor' );
 
 		let destinationRootClientId = rootClientId;
 		if ( ! destinationRootClientId && ! clientId && ! isAppender ) {
