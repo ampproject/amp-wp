@@ -302,7 +302,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									</amp-img>
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
-									<h1>The End</h1>
+									<h1 animate-in="drop" animate-in-delay="500ms" animate-in-duration="600ms">The End</h1>
+									<div>
+										<h1 animate-in="drop" animate-in-delay="1500ms" animate-in-duration="700ms">Afterward</h1>
+									</div>
 									<button class="baddie">bad</button>
 								</amp-story-grid-layer>
 								<amp-story-cta-layer>

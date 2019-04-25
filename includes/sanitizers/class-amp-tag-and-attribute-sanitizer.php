@@ -1652,21 +1652,26 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		/*
-		 * Handle special case for amp-selector where its reference points do not have to be direct children.
+		 * Handle special case for reference points which do not have to be direct children.
 		 * This is noted as a special case in the AMP validator spec for amp-selector, so that is why it is
 		 * a special case here in this method. It is also implemented in this way for the sake of efficiency
 		 * to prevent having to waste time in process_node() merging attribute lists. For more on amp-selector's
 		 * unique reference point, see:
 		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
 		 */
-		$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' );
-		if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
-			$parent = $attr_node->parentNode;
-			while ( $parent ) {
-				if ( 'amp-selector' === $parent->nodeName ) {
-					return true;
+		$descendant_reference_points = array(
+			'amp-selector'         => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' ),
+			'amp-story-grid-layer' => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-STORY-GRID-LAYER default' ), // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
+		);
+		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec ) {
+			if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
+				$parent = $attr_node->parentNode;
+				while ( $parent ) {
+					if ( $ancestor_name === $parent->nodeName ) {
+						return true;
+					}
+					$parent = $parent->parentNode;
 				}
-				$parent = $parent->parentNode;
 			}
 		}
 
