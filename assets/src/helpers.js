@@ -396,6 +396,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  *
  * @param {Object} element
  * @param {Object} blockType
+ * @param {Object} attributes
  *
  * @return {Object} The element.
  */
