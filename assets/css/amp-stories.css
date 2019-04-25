@@ -1,7 +1,7 @@
 amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
 
 .has-background {
-	padding: 7px !important;
+	padding: 1px 5px !important;
 	display: flex;
 }
 
