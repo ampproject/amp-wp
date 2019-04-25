@@ -336,7 +336,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		};
 	}
 
-	if ( attributes.rotationAngle ) {
+	if ( attributes.rotationAngle && ! attributes.ampAnimationType ) {
 		const rotationAngle = parseInt( attributes.rotationAngle );
 		const rotationStyle = {
 			transform: `rotate(${ rotationAngle }deg)`,
@@ -399,9 +399,26 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  *
  * @return {Object} The element.
  */
-export const wrapBlocksInGridLayer = ( element, blockType ) => {
+export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
+	}
+
+	// If both rotation and animation are present then we'll need to use a separate wrapper for rotation.
+	if ( attributes.rotationAngle && attributes.ampAnimationType ) {
+		const rotationAngle = parseInt( attributes.rotationAngle );
+		const rotationStyle = {
+			style: {
+				transform: `rotate(${ rotationAngle }deg)`,
+			},
+		};
+		return (
+			<amp-story-grid-layer template="vertical">
+				<div { ...rotationStyle }>
+					{ element }
+				</div>
+			</amp-story-grid-layer>
+		);
 	}
 
 	return (
