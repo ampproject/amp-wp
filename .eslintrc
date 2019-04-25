@@ -8,6 +8,8 @@
     }
   },
   "globals": {
+    "browser": true,
+    "page": true,
     "wp": true,
     "Set": true
   }
