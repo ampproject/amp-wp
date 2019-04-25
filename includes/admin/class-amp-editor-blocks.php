@@ -137,14 +137,14 @@ class AMP_Editor_Blocks {
 
 			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 			wp_enqueue_script(
-				'amp-editor-blocks-build',
-				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
+				'amp-editor-blocks',
+				amp_get_asset_url( 'js/amp-blocks.js' ),
 				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 				AMP__VERSION
 			);
 
 			if ( function_exists( 'wp_set_script_translations' ) ) {
-				wp_set_script_translations( 'amp-editor-blocks-build', 'amp' );
+				wp_set_script_translations( 'amp-editor-blocks', 'amp' );
 			}
 		}
 
