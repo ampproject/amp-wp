@@ -37,10 +37,12 @@
     "lint:pkg-json": "wp-scripts lint-pkg-json . --ignorePath .gitignore",
     "start": "wp-scripts start",
     "test": "npm-run-all --parallel test:*",
-    "test:e2e": "wp-scripts test-e2e",
-    "test:js": "wp-scripts test-unit-js",
+    "pretest:e2e": "cross-env SCRIPT_DEBUG=false ./bin/reset-e2e-tests.sh",
+    "test:e2e": "wp-scripts test-e2e --config=tests/e2e/jest.config.js",
+    "test:e2e:watch": "npm run test:e2e --watch",
+    "test:js": "wp-scripts test-unit-js --config=tests/unit/jest.config.js",
     "test:js:help": "wp-scripts test-unit-js --help",
-    "test:js:watch": "wp-scripts test-unit-js --watch",
+    "test:js:watch": "npm run test:js -- --watch",
     "test:php": "phpunit"
   },
   "dependencies": {
@@ -62,6 +64,7 @@
     "@wordpress/data": "4.4.0",
     "@wordpress/date": "3.2.0",
     "@wordpress/dom-ready": "2.2.0",
+    "@wordpress/e2e-test-utils": "^1.1.0",
     "@wordpress/edit-post": "3.3.4",
     "@wordpress/editor": "9.2.4",
     "@wordpress/element": "2.3.0",
