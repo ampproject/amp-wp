@@ -38,10 +38,12 @@ if ( version_compare( phpversion(), '5.4', '<' ) ) {
 // See composer.json for this list.
 $_amp_required_extensions = array(
 	'curl',
+	'date',
 	'dom',
 	'iconv',
 	'intl',
 	'libxml',
+	'spl',
 );
 $_amp_missing_extensions  = array();
 foreach ( $_amp_required_extensions as $_amp_required_extension ) {
