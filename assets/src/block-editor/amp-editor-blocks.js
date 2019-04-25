@@ -935,5 +935,3 @@ window.ampEditorBlocks = ( function() {
 
 	return component;
 }() );
-
-window.ampEditorBlocks = ampEditorBlocks;
