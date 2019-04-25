@@ -18,7 +18,7 @@ import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@w
 /**
  * Internal dependencies
  */
-import './stores/amp-story';
+import './store';
 import {
 	BlockNavigation,
 	EditorCarousel,
