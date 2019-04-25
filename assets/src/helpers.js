@@ -170,10 +170,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		ampAnimationType: {
 			type: 'string',
 		},
-		ampAnimationDelay: {
-			type: 'number',
-			default: 0,
-		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
@@ -307,11 +303,11 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
 
 		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = attributes.ampAnimationDelay;
+			ampAttributes[ 'animate-in-delay' ] = parseInt( attributes.ampAnimationDelay ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = attributes.ampAnimationDuration;
+			ampAttributes[ 'animate-in-duration' ] = parseInt( attributes.ampAnimationDuration ) + 'ms';
 		}
 
 		if ( attributes.ampAnimationAfter ) {
