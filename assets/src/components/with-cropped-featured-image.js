@@ -120,7 +120,8 @@ export default ( InitialMediaUpload ) => {
 				xImg = xInit,
 				yImg = yInit;
 
-			controller.set( 'canSkipCrop', ! control.mustBeCropped( xInit, yInit, realWidth, realHeight ) );
+			// Allow cropping to be skipped because the image is at least the required dimensions, so skipping crop will auto crop.
+			controller.set( 'canSkipCrop', true );
 
 			if ( realWidth / realHeight > ratio ) {
 				yInit = realHeight;
