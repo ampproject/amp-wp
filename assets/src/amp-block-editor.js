@@ -13,7 +13,7 @@ import { registerPlugin } from '@wordpress/plugins';
 /**
  * Internal dependencies
  */
-import { PrePublishPanel, withFeaturedImageNotice } from './components';
+import { PrePublishPanel, withCroppedFeaturedImage, withFeaturedImageNotice } from './components';
 import { getMinimumFeaturedImageDimensions } from './helpers';
 
 /**
@@ -108,6 +108,8 @@ addFilter(
 	'ampEditorBlocks/withFeaturedImageNotice',
 	withFeaturedImageNotice
 );
+
+addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
 
 // On clicking 'Publish,' display a notice if no featured image exists or its width is too small.
 registerPlugin(

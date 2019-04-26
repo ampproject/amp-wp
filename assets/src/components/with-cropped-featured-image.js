@@ -7,12 +7,12 @@ import { now } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { dispatch } from '@wordpress/data';
+import { select, dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { getMinimumStoryPosterDimensions } from '../helpers';
+import { getMinimumStoryPosterDimensions, getMinimumFeaturedImageDimensions } from '../helpers';
 import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 
@@ -27,7 +27,10 @@ import FeaturedImageCropper from './featured-image-cropper';
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload ) => {
-	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = getMinimumStoryPosterDimensions();
+	const minImageDimensions = 'amp_story' === select( 'core/editor' ).getCurrentPostType() ?
+		getMinimumStoryPosterDimensions() :
+		getMinimumFeaturedImageDimensions();
+	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
 
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
