@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { now } from 'lodash';
+import { now, template } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -13,6 +13,155 @@ import { dispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { getMinimumStoryPosterDimensions } from '../helpers';
+
+/**
+ * FeaturedImageSelectionError
+ *
+ * @class
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ */
+const FeaturedImageSelectionError = wp.media.View.extend( {
+	className: 'notice notice-error notice-alt inline',
+	template: ( () => {
+		const errorTemplate = template(
+			'<p>' + __( 'The selected image is too small ({{width}} by {{height}} pixels); it must be at least {{minWidth}} by {{minHeight}} pixels.', 'amp' ) + '</p>',
+			{
+				evaluate: /<#([\s\S]+?)#>/g,
+				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+				escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+			}
+		);
+		return ( data ) => {
+			return errorTemplate( data );
+		};
+	} )(),
+} );
+
+/**
+ * FeaturedImageToolbarSelect
+ *
+ * Prevent selection of an image that does not meet the minimum requirements.
+ *
+ * @class
+ * @augments wp.media.view.Toolbar.Select
+ * @augments wp.media.view.Toolbar
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ * @inheritDoc
+ */
+const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
+
+	/**
+	 * Refresh the view.
+	 */
+	refresh() {
+		wp.media.view.Toolbar.Select.prototype.refresh.call( this );
+
+		const state = this.controller.state();
+		const selection = state.get( 'selection' );
+
+		const attachment = selection.models[ 0 ];
+		const minWidth = state.collection.get( 'library' ).get( 'suggestedWidth' );
+		const minHeight = state.collection.get( 'library' ).get( 'suggestedHeight' );
+
+		if ( ! attachment || ( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight ) ) {
+			this.secondary.unset( 'select-error' );
+		} else {
+			this.secondary.set(
+				'select-error',
+				new FeaturedImageSelectionError( {
+					minWidth,
+					minHeight,
+					width: attachment.get( 'width' ),
+					height: attachment.get( 'height' ),
+				} )
+			);
+
+			if ( this._views ) {
+				for ( const button of Object.values( this._views ) ) {
+					if ( button.model ) {
+						button.model.set( 'disabled', true );
+					}
+				}
+			}
+		}
+	},
+} );
+
+/**
+ * FeaturedImageSelectMediaFrame
+ *
+ * Select a featured image from the media library.
+ *
+ * @class
+ * @augments wp.media.view.MediaFrame.Select
+ * @augments wp.media.view.MediaFrame
+ * @augments wp.media.view.Frame
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ * @mixes wp.media.controller.StateMachine
+ * @inheritDoc
+ */
+const FeaturedImageSelectMediaFrame = wp.media.view.MediaFrame.Select.extend( {
+
+	/**
+	 * Create select toolbar.
+	 *
+	 * The only reason for this method is to override the select toolbar view class.
+	 *
+	 * @param {Object} toolbar
+	 * @param {Object} [options={}]
+	 * @this wp.media.controller.Region
+	 */
+	createSelectToolbar( toolbar, options ) {
+		options = options || this.options.button || {};
+		options.controller = this;
+
+		toolbar.view = new FeaturedImageToolbarSelect( options );
+	},
+} );
+
+/**
+ * A state for cropping a featured image.
+ *
+ * @constructs FeaturedImageCropper
+ * @inheritDoc
+ */
+const FeaturedImageCropper = wp.media.controller.Cropper.extend( {
+	/**
+	 * Creates an object with the image attachment and crop properties.
+	 *
+	 * @param {wp.media.model.Attachment} attachment The attachment to crop.
+	 * @return {jQuery.promise} A jQuery promise that represents the crop image request.
+	 */
+	doCrop( attachment ) {
+		const cropDetails = attachment.get( 'cropDetails' );
+		const imgSelectOptions = this.imgSelect.getOptions();
+
+		// Account for imprecise cropping at minWidth/minHeight by snapping to minimum dimension if within 10 pixels.
+		if ( Math.abs( cropDetails.width - imgSelectOptions.minWidth ) < 10 ) {
+			cropDetails.width = imgSelectOptions.minWidth;
+		}
+		if ( Math.abs( cropDetails.height - imgSelectOptions.minHeight ) < 10 ) {
+			cropDetails.height = imgSelectOptions.minHeight;
+		}
+
+		// Force the resulting image to have the expected dimensions (scale down).
+		cropDetails.dst_width = imgSelectOptions.minWidth;
+		cropDetails.dst_height = imgSelectOptions.minHeight;
+
+		return wp.ajax.post( 'crop-image', {
+			nonce: attachment.get( 'nonces' ).edit,
+			id: attachment.get( 'id' ),
+			context: 'featured-image',
+			cropDetails,
+		} );
+	},
+} );
 
 /**
  * Gets a wrapped version of MediaUpload to crop images for AMP Stories.
@@ -57,7 +206,7 @@ export default ( InitialMediaUpload ) => {
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		init() {
-			this.frame = wp.media( {
+			this.frame = new FeaturedImageSelectMediaFrame( {
 				button: {
 					text: __( 'Select', 'amp' ),
 					close: false,
@@ -73,12 +222,15 @@ export default ( InitialMediaUpload ) => {
 						suggestedWidth: EXPECTED_WIDTH,
 						suggestedHeight: EXPECTED_HEIGHT,
 					} ),
-					new wp.media.controller.Cropper( {
+					new FeaturedImageCropper( {
 						imgSelectOptions: this.calculateImageSelectOptions,
 						control: this,
 					} ),
 				],
 			} );
+
+			// See wp.media() for this.
+			wp.media.frame = this.frame;
 
 			this.frame.on( 'select', this.onSelectImage, this );
 			this.frame.on( 'cropped', this.onCropped, this );
@@ -145,36 +297,13 @@ export default ( InitialMediaUpload ) => {
 		 * Handle image selection.
 		 *
 		 * After an image is selected in the media modal, switch to the cropper state if the image isn't the right size.
+		 * Only an image that is at least the expected width/height can be selected in the first place.
 		 */
 		onSelectImage() {
 			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
-
-			if ( ! this.doAllowCrop( attachment ) ) {
+			if ( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) {
 				this.setImageFromURL( attachment.url, attachment.id, attachment.width, attachment.height );
 				this.frame.close();
-				return;
-			}
-
-			if ( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) {
-				wp.ajax.post( 'crop-image', {
-					nonce: attachment.nonces.edit,
-					id: attachment.id,
-					context: 'featured-image',
-					cropDetails: {
-						x1: 0,
-						y1: 0,
-						// @todo Some of these are incorrect since the resulting image is skewed.
-						width: EXPECTED_WIDTH,
-						height: EXPECTED_HEIGHT,
-						dst_width: EXPECTED_WIDTH,
-						dst_height: EXPECTED_HEIGHT,
-					},
-				} ).done( ( croppedImage ) => {
-					this.setImageFromURL( croppedImage.url, croppedImage.id, croppedImage.width, croppedImage.height );
-					this.frame.close();
-				} ).fail( () => {
-					this.frame.trigger( 'content:error:crop' );
-				} );
 			} else {
 				this.frame.setState( 'cropper' );
 			}
@@ -217,7 +346,7 @@ export default ( InitialMediaUpload ) => {
 		 */
 		onCropped( croppedImage ) {
 			const url = croppedImage.url,
-				attachmentId = croppedImage.attachment_id,
+				attachmentId = croppedImage.id,
 				width = croppedImage.width,
 				height = croppedImage.height;
 			this.setImageFromURL( url, attachmentId, width, height );
