@@ -105,9 +105,14 @@ class TemplateInserter extends Component {
 										/>
 									</div>
 									{ storyTemplates && storyTemplates.map( ( item ) => (
-										<Button
+										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
+											role="button"
+											tabIndex="0"
 											onClick={ () => {
+												onSelect( item );
+											} }
+											onKeyDown={ () => {
 												onSelect( item );
 											} }
 											className="components-button block-editor-block-preview"
@@ -116,7 +121,7 @@ class TemplateInserter extends Component {
 												name="core/block"
 												attributes={ { ref: item.id } }
 											/>
-										</Button>
+										</a>
 									) ) }
 								</div>
 							</div>
