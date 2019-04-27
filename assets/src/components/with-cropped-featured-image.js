@@ -109,8 +109,7 @@ export default ( InitialMediaUpload ) => {
 		 * @return {Object} Options
 		 */
 		calculateImageSelectOptions( attachment, controller ) {
-			const control = controller.get( 'control' ),
-				realWidth = attachment.get( 'width' ),
+			const realWidth = attachment.get( 'width' ),
 				realHeight = attachment.get( 'height' );
 
 			let xInit = parseInt( EXPECTED_WIDTH, 10 ),
