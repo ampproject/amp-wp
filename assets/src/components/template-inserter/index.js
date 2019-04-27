@@ -1,3 +1,9 @@
+
+/**
+ * External dependencies
+ */
+import { includes } from 'lodash';
+
 /**
  * WordPress dependencies
  */
@@ -7,6 +13,7 @@ import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
+import { ENTER, SPACE } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -112,8 +119,10 @@ class TemplateInserter extends Component {
 											onClick={ () => {
 												onSelect( item );
 											} }
-											onKeyDown={ () => {
-												onSelect( item );
+											onKeyDown={ ( event ) => {
+												if ( includes( [ ENTER, SPACE ], event.keyCode ) ) {
+													onSelect( item );
+												}
 											} }
 											className="components-button block-editor-block-preview"
 										>
