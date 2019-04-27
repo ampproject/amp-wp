@@ -25,8 +25,8 @@ const FeaturedImageCropper = wp.media.controller.Cropper.extend( {
 		}
 
 		// Force the resulting image to have the expected dimensions (scale down).
-		cropDetails.dst_width = imgSelectOptions.minWidth;
-		cropDetails.dst_height = imgSelectOptions.minHeight;
+		cropDetails.dst_width = cropDetails.width;
+		cropDetails.dst_height = cropDetails.height;
 
 		return wp.ajax.post( 'crop-image', {
 			nonce: attachment.get( 'nonces' ).edit,

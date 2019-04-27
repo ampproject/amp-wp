@@ -17,7 +17,7 @@ import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 
 /**
- * Gets a wrapped version of MediaUpload to crop images for AMP Stories.
+ * Gets a wrapped version of MediaUpload to crop featured images.
  *
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
