@@ -14,15 +14,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
 
 	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
-
-	/**
 	 * Default values for sandboxing IFrame.
 	 *
 	 * @since 0.2
