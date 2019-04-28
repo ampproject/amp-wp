@@ -20,6 +20,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	protected $block_ampify_methods = array(
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
+		'core/video'      => 'ampify_video_block',
 	);
 
 	/**
@@ -50,7 +51,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
 			$block_content = call_user_func(
 				array( $this, $this->block_ampify_methods[ $block['blockName'] ] ),
-				$block_content
+				$block_content,
+				$block
 			);
 		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
 			/*
@@ -128,4 +130,32 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		return $block_content;
 	}
 
+	/**
+	 * Ampify video block.
+	 *
+	 * Inject the video attachment's dimensions if available. This prevents having to try to look up the attachment
+	 * post by the video URL in `\AMP_Video_Sanitizer::filter_video_dimensions()`.
+	 *
+	 * @see \AMP_Video_Sanitizer::filter_video_dimensions()
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 * @return string Filtered block content.
+	 */
+	public function ampify_video_block( $block_content, $block ) {
+		if ( empty( $block['attrs']['id'] ) || 'attachment' !== get_post_type( $block['attrs']['id'] ) ) {
+			return $block_content;
+		}
+
+		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
+		if ( isset( $meta_data['width'] ) && isset( $meta_data['height'] ) ) {
+			$block_content = preg_replace(
+				'/(?<=<video\s)/',
+				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),
+				$block_content
+			);
+		}
+
+		return $block_content;
+	}
 }
