@@ -8,10 +8,10 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { validateFeaturedImage, getMinimumStoryPosterDimensions } from '../stories-editor/helpers';
+import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../stories-editor/helpers';
 
 /**
- * Higher-order component that is used for filtering the PostFeaturedImage component for AMP stories.
+ * Higher-order component that is used for filtering the PostFeaturedImage component.
  *
  * Used to display notices in case the image does not meet minimum requirements.
  *
@@ -22,7 +22,7 @@ export default createHigherOrderComponent(
 		return ( props ) => {
 			const { media } = props;
 
-			const errors = validateFeaturedImage( media, getMinimumStoryPosterDimensions(), true );
+			const errors = validateFeaturedImage( media, getMinimumFeaturedImageDimensions(), false );
 
 			if ( ! errors ) {
 				return <PostFeaturedImage { ...props } />;
@@ -31,7 +31,7 @@ export default createHigherOrderComponent(
 			return (
 				<Fragment>
 					<Notice
-						status="warning"
+						status="notice"
 						isDismissible={ false }
 					>
 						{ errors.map( ( errorMessage, index ) => {
@@ -47,5 +47,5 @@ export default createHigherOrderComponent(
 			);
 		};
 	},
-	'withStoryFeaturedImageNotice'
+	'withFeaturedImageNotice'
 );

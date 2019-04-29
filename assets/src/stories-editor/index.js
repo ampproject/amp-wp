@@ -27,7 +27,6 @@ import {
 	withWrapperProps,
 	withCroppedFeaturedImage,
 	withActivePageState,
-	withPrePublishNotice,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 } from '../components';
@@ -109,7 +108,7 @@ domReady( () => {
 	renderStoryComponents();
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
+	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
 
 	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
 		registerBlockStyle( roundedBlock, {
@@ -260,8 +259,6 @@ plugins.keys().forEach( ( modulePath ) => {
 		registerPlugin( name, { render } );
 	}
 } );
-
-registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );

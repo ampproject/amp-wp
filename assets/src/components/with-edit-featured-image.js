@@ -6,10 +6,10 @@ import { dispatch, withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { hasMinimumStoryPosterDimensions } from '../stories-editor/helpers';
+import { hasMinimumDimensions, getMinimumFeaturedImageDimensions, getMinimumStoryPosterDimensions } from '../stories-editor/helpers';
 
 /**
- * Gets a wrapped version of a block's edit component that conditionally sets the featured image.
+ * Gets a wrapped version of a block's edit component that conditionally sets the featured image (only for AMP Story posts).
  *
  * On selecting an image, if there is no featured image, set it to the selected image.
  * Only applies to the Image block and the AMP Story Page's 'Background Media' control.
@@ -40,7 +40,7 @@ export default ( BlockEdit ) => {
 
 		// Conditionally set the selected image as the featured image.
 		const media = select( 'core' ).getMedia( selectedMediaId );
-		if ( media && media.media_details && hasMinimumStoryPosterDimensions( media.media_details ) ) {
+		if ( media && media.media_details && hasMinimumDimensions( media.media_details, getMinimumFeaturedImageDimensions() ) && hasMinimumDimensions( media.media_details, getMinimumStoryPosterDimensions() ) ) {
 			dispatch( 'core/editor' ).editPost( { featured_media: selectedMediaId } );
 		}
 	} )( ( props ) => {
