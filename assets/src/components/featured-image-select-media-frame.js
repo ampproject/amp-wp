@@ -6,7 +6,7 @@ import { template } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * FeaturedImageSelectionError
@@ -19,8 +19,17 @@ import { __ } from '@wordpress/i18n';
 const FeaturedImageSelectionError = wp.media.View.extend( {
 	className: 'notice notice-error notice-alt inline',
 	template: ( () => {
+		const message = sprintf(
+			/* translators: 1: image width in pixels. 2: image height in pixels. 3: required minimum width in pixels. 4: required minimum height in pixels. */
+			__( 'The selected image is too small (%1$s by %2$s pixels). It should have a size of at least %3$s by %4$s pixels.', 'amp' ),
+			'{{width}}',
+			'{{height}}',
+			'{{minWidth}}',
+			'{{minHeight}}',
+		);
+
 		const errorTemplate = template(
-			'<p>' + __( 'The selected image is too small ({{width}} by {{height}} pixels); it must be at least {{minWidth}} by {{minHeight}} pixels.', 'amp' ) + '</p>',
+			`<p>${ message }</p>`,
 			{
 				evaluate: /<#([\s\S]+?)#>/g,
 				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
