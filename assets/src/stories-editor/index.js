@@ -68,6 +68,8 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
+const { getEditorMode } = select( 'core/edit-post' );
+
 const {
 	moveBlockToPosition,
 	updateBlockAttributes,
@@ -137,7 +139,9 @@ domReady( () => {
 let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
-subscribe( () => {
+let editorMode = getEditorMode();
+
+subscribe( async () => {
 	maybeInitializeAnimations();
 
 	const defaultBlockName = getDefaultBlockName();
@@ -183,6 +187,18 @@ subscribe( () => {
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
+
+	// Re-add controls when switching back from code to visual editor.
+	const newEditorMode = getEditorMode();
+	if ( 'visual' === newEditorMode && newEditorMode !== editorMode ) {
+		while ( ! document.querySelector( '.editor-block-list__layout' ) ) {
+			await new Promise( ( r ) => setTimeout( r, 200 ) );
+		}
+
+		renderStoryComponents();
+	}
+
+	editorMode = newEditorMode;
 } );
 
 store.subscribe( () => {

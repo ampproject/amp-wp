@@ -447,12 +447,6 @@ export const renderStoryComponents = () => {
 		const blockNavigation = document.createElement( 'div' );
 		blockNavigation.id = 'amp-story-block-navigation';
 
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
-
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
 		/**
 		 * The intended layout is as follows:
 		 *
@@ -464,37 +458,53 @@ export const renderStoryComponents = () => {
 		 * - - Carousel controls
 		 */
 		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-		ampStoryWrapper.appendChild( storyControls );
-		ampStoryWrapper.appendChild( editorBlockList );
-		ampStoryWrapper.appendChild( blockNavigation );
-		ampStoryWrapper.appendChild( editorCarousel );
 
-		render(
-			<StoryControls />,
-			storyControls
-		);
+		if ( ! document.getElementById( 'amp-story-controls' ) ) {
+			const storyControls = document.createElement( 'div' );
+			storyControls.id = 'amp-story-controls';
+
+			ampStoryWrapper.appendChild( storyControls );
+
+			render(
+				<StoryControls />,
+				storyControls
+			);
+		}
+
+		ampStoryWrapper.appendChild( editorBlockList );
+
+		ampStoryWrapper.appendChild( blockNavigation );
 
 		render(
 			<BlockNavigation />,
 			blockNavigation
 		);
 
-		render(
-			<EditorCarousel />,
-			editorCarousel
-		);
+		if ( ! document.getElementById( 'amp-story-editor-carousel' ) ) {
+			const editorCarousel = document.createElement( 'div' );
+			editorCarousel.id = 'amp-story-editor-carousel';
+
+			ampStoryWrapper.appendChild( editorCarousel );
+
+			render(
+				<EditorCarousel />,
+				editorCarousel
+			);
+		}
 	}
 
 	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
+		if ( ! document.getElementById( 'amp-story-shortcuts' ) ) {
+			const shortcuts = document.createElement( 'div' );
+			shortcuts.id = 'amp-story-shortcuts';
 
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+			editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
 
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
+			render(
+				<Shortcuts />,
+				shortcuts
+			);
+		}
 
 		const customInserter = document.createElement( 'div' );
 		customInserter.id = 'amp-story-inserter';
