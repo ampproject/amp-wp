@@ -104,8 +104,8 @@ export default ( InitialMediaUpload ) => {
 		 * control-specific data, to be fed to the imgAreaSelect plugin in
 		 * wp.media.view.Cropper.
 		 *
-		 * @param {wp.media.model.Attachment} attachment   - Attachment.
-		 * @param {wp.media.controller.Cropper} controller - Controller.
+		 * @param {wp.media.model.Attachment} attachment   Attachment.
+		 * @param {wp.media.controller.Cropper} controller Controller.
 		 * @return {Object} Options
 		 */
 		calculateImageSelectOptions( attachment, controller ) {
@@ -173,7 +173,8 @@ export default ( InitialMediaUpload ) => {
 		 * there's no way to have the correct image size without distorting it.
 		 * So this can allow preventing the crop option when choosing a featured image.
 		 *
-		 * @param {Object} attachment - The attachment object to evaluate.
+		 * @param {Object} attachment The attachment object to evaluate.
+		 *
 		 * @return {boolean} Whether to allow cropping.
 		 */
 		doAllowCrop( attachment ) {
@@ -183,10 +184,11 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Return whether the image must be cropped, based on required dimensions.
 		 *
-		 * @param {number}  dstW - The expected width.
-		 * @param {number}  dstH - The expected height.
-		 * @param {number}  imgW - The actual width.
-		 * @param {number}  imgH - The actual height.
+		 * @param {number} dstW The expected width.
+		 * @param {number} dstH The expected height.
+		 * @param {number} imgW The actual width.
+		 * @param {number} imgH The actual height.
+		 *
 		 * @return {boolean} Whether the image must be cropped.
 		 */
 		mustBeCropped( dstW, dstH, imgW, imgH ) {
@@ -199,7 +201,7 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * After the image has been cropped, apply the cropped image data to the setting.
 		 *
-		 * @param {Object} croppedImage - Cropped attachment data.
+		 * @param {Object} croppedImage Cropped attachment data.
 		 */
 		onCropped( croppedImage ) {
 			const url = croppedImage.url,
@@ -212,7 +214,7 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * If cropping was skipped, apply the image data directly to the setting.
 		 *
-		 * @param {Object} selection - Selection.
+		 * @param {Object} selection Selection.
 		 */
 		onSkippedCrop( selection ) {
 			const url = selection.get( 'url' ),
@@ -224,10 +226,10 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Set the featured image.
 		 *
-		 * @param {string} url          - Image URL.
-		 * @param {number} attachmentId - Attachment ID.
-		 * @param {number} width        - Image width.
-		 * @param {number} height       - Image height.
+		 * @param {string} url          Image URL.
+		 * @param {number} attachmentId Attachment ID.
+		 * @param {number} width        Image width.
+		 * @param {number} height       Image height.
 		 */
 		setImageFromURL( url, attachmentId, width, height ) {
 			const data = {};
