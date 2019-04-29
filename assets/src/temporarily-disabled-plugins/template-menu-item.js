@@ -20,7 +20,7 @@ const addTemplate = () => {
 	const {
 		__experimentalReceiveReusableBlocks: receiveReusableBlocks,
 		__experimentalSaveReusableBlock: saveReusableBlock,
-	} = dispatch( 'core/editor' );
+	} = dispatch( 'core/block-editor' );
 
 	// @todo Allow multi-page templates.
 	const parsedBlock = getBlock( getSelectedBlockClientId() );

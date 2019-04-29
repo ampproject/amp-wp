@@ -1,12 +1,19 @@
+
+/**
+ * External dependencies
+ */
+import { includes } from 'lodash';
+
 /**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton, Button } from '@wordpress/components';
+import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { createBlock, cloneBlock } from '@wordpress/blocks';
+import { createBlock } from '@wordpress/blocks';
 import { compose } from '@wordpress/compose';
+import { ENTER, SPACE } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -15,6 +22,7 @@ import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
 import './edit.css';
+import { createSkeletonTemplate } from '../../helpers';
 
 const storyPageBlockName = 'amp/amp-story-page';
 
@@ -78,8 +86,8 @@ class TemplateInserter extends Component {
 					const onSelect = ( item ) => {
 						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
 						onClose();
-						// Clone block to avoid duplicate ID-s.
-						insertBlock( cloneBlock( block ) );
+
+						insertBlock( createSkeletonTemplate( block ) );
 					};
 
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
@@ -104,10 +112,17 @@ class TemplateInserter extends Component {
 										/>
 									</div>
 									{ storyTemplates && storyTemplates.map( ( item ) => (
-										<Button
+										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
+											role="button"
+											tabIndex="0"
 											onClick={ () => {
 												onSelect( item );
+											} }
+											onKeyDown={ ( event ) => {
+												if ( includes( [ ENTER, SPACE ], event.keyCode ) ) {
+													onSelect( item );
+												}
 											} }
 											className="components-button block-editor-block-preview"
 										>
@@ -115,7 +130,7 @@ class TemplateInserter extends Component {
 												name="core/block"
 												attributes={ { ref: item.id } }
 											/>
-										</Button>
+										</a>
 									) ) }
 								</div>
 							</div>

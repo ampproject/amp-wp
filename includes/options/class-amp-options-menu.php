@@ -109,6 +109,17 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_settings_field(
+			'amp_stories',
+			__( 'AMP Stories', 'amp' ),
+			array( $this, 'render_amp_stories' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-stories-field',
+			)
+		);
+
 		if ( wp_using_ext_object_cache() ) {
 			add_settings_field(
 				'caching',
@@ -140,9 +151,13 @@ class AMP_Options_Menu {
 	public function render_theme_support() {
 		$theme_support = AMP_Options_Manager::get_option( 'theme_support' );
 
-		$native_description       = __( 'Integrates AMP as the framework for your site by using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of development work may be required.', 'amp' );
-		$transitional_description = __( 'Uses the active theme’s templates to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of development work may be required.', 'amp' );
+		/* translators: %s: URL to the documentation. */
+		$native_description = sprintf( __( 'Integrates AMP as the framework for your site by using the active’s theme templates and styles to render AMP responses. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
+		/* translators: %s: URL to the documentation. */
+		$transitional_description = sprintf( __( 'Uses the active theme’s templates to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
 		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
+		/* translators: %s: URL to the ecosystem page. */
+		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
@@ -150,6 +165,9 @@ class AMP_Options_Menu {
 			<div class="notice notice-info notice-alt inline">
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
+			<p>
+				<?php echo wp_kses_post( $ecosystem_description ); ?>
+			</p>
 			<p>
 				<?php if ( amp_is_canonical() ) : ?>
 					<strong><?php esc_html_e( 'Native:', 'amp' ); ?></strong>
@@ -166,6 +184,9 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in transitional or native mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
+				<p>
+					<?php echo wp_kses_post( $ecosystem_description ); ?>
+				</p>
 				<dl>
 					<dt>
 						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, 'native' ); ?>>
@@ -200,7 +221,7 @@ class AMP_Options_Menu {
 									<?php
 									echo wp_kses_post(
 										sprintf(
-											/* translators: %1$s is link to invalid URLs and %2$s is link to validation errors */
+											/* translators: %1: link to invalid URLs. 2: link to validation errors. */
 											__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
 											sprintf(
 												'<a href="%s">%s</a>',
@@ -482,6 +503,52 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * AMP Stories section renderer.
+	 *
+	 * @since 1.2
+	 */
+	public function render_amp_stories() {
+		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
+		?>
+		<?php if ( ! $has_required_block_capabilities ) : ?>
+			<div class="notice notice-info notice-alt inline">
+				<p>
+					<?php
+					$gutenberg = 'Gutenberg';
+					// Link to Gutenberg plugin installation if eligible.
+					if ( current_user_can( 'install_plugins' ) ) {
+						$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+					}
+					printf(
+						/* translators: %s: Gutenberg plugin name */
+						esc_html__( 'To use AMP stories, you currently must have the latest version of the %s plugin installed.', 'amp' ),
+						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+		<p>
+			<label for="enable_amp_stories">
+				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
+				<?php esc_html_e( 'Enable experimental support for AMP Stories.', 'amp' ); ?>
+			</label>
+		</p>
+		<p class="description">
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %s: AMP Stories documentation URL. */
+					__( 'AMP Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s">AMP Stories</a>.', 'amp' ),
+					esc_url( 'https://amp.dev/about/stories' )
+				)
+			);
+			?>
+		</p>
 		<?php
 	}
 

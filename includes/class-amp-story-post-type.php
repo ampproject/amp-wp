@@ -39,6 +39,20 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
+	 * The large dimension of the AMP Story poster images.
+	 *
+	 * @var int
+	 */
+	const STORY_LARGE_IMAGE_DIMENSION = 928;
+
+	/**
+	 * The small dimension of the AMP Story poster images.
+	 *
+	 * @var int
+	 */
+	const STORY_SMALL_IMAGE_DIMENSION = 696;
+
+	/**
 	 * The slug of the story card CSS file.
 	 *
 	 * @var string
@@ -60,13 +74,26 @@ class AMP_Story_Post_Type {
 	const AMP_STORIES_STYLE_HANDLE = 'amp-story-style';
 
 	/**
+	 * Check if the required version of block capabilities available.
+	 *
+	 * @return bool Whether capabilities are available.
+	 */
+	public static function has_required_block_capabilities() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			return false;
+		}
+
+		// TODO: Require only the latest WordPress version itself, not the plugin.
+		return function_exists( 'gutenberg_pre_init' );
+	}
+
+	/**
 	 * Registers the post type to store URLs with validation errors.
 	 *
 	 * @return void
 	 */
 	public static function register() {
-
-		if ( ! function_exists( 'register_block_type' ) ) {
+		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 
@@ -87,6 +114,7 @@ class AMP_Story_Post_Type {
 					'not_found'          => __( 'No AMP Stories found.', 'amp' ),
 					'not_found_in_trash' => __( 'No AMP Stories found in Trash.', 'amp' ),
 				),
+				'menu_icon'    => 'dashicons-book',
 				'supports'     => array(
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
@@ -137,13 +165,13 @@ class AMP_Story_Post_Type {
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( self::STORY_CARD_IMAGE_SIZE, 696, 928, true );
+		add_image_size( self::STORY_CARD_IMAGE_SIZE, self::STORY_SMALL_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
 
 		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, 928, 928, true );
+		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, 928, 696, true );
+		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
@@ -164,17 +192,19 @@ class AMP_Story_Post_Type {
 		// Enqueue the styling for the /embed endpoint.
 		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
 
+		// In the block editor, remove the title from above the AMP Stories embed.
+		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
+
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
-
-		// Register the Latest Stories block.
-		add_action( 'wp_loaded', array( __CLASS__, 'register_block_latest_stories' ), 11 );
 
 		// The AJAX handler for when an image is cropped and sent via POST.
 		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
+
+		self::register_block_latest_stories();
 
 		register_block_type(
 			'amp/amp-story-post-author',
@@ -460,8 +490,8 @@ class AMP_Story_Post_Type {
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return array(
 				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
-				928,
-				696,
+				self::STORY_LARGE_IMAGE_DIMENSION,
+				self::STORY_SMALL_IMAGE_DIMENSION,
 			);
 		}
 
@@ -950,19 +980,42 @@ class AMP_Story_Post_Type {
 
 	/**
 	 * Outputs a card of a single AMP story.
-	 * Used for a slide in the Latest Stories block.
 	 *
-	 * @param WP_Post $post The AMP story post.
-	 * @return void
+	 * Used for a slide in the Latest Stories block.
+	 * The 'disable_link' parameter can prevent a link from appearing in the block editor.
+	 * So on clicking the story card, it does not redirect to the story's URL.
+	 *
+	 * @param array $args {
+	 *     The arguments to create a single story card.
+	 *
+	 *     @type WP_Post|int post The post object or ID in which to search for the featured image.
+	 *     @type string      size The size of the image.
+	 *     @type bool        disable_link Whether to disable the link in the card container.
+	 * }
 	 */
-	public static function the_single_story_card( $post ) {
+	public static function the_single_story_card( $args ) {
+		$args = wp_parse_args(
+			$args,
+			array(
+				'post'         => null,
+				'size'         => 'full',
+				'disable_link' => false,
+			)
+		);
+
+		$post = get_post( $args['post'] );
+		if ( ! $post ) {
+			return;
+		}
+
 		$thumbnail_id = get_post_thumbnail_id( $post );
-		if ( ! $thumbnail_id ) {
+		if ( ! $thumbnail_id || ! is_object( $post ) ) {
 			return;
 		}
 
 		$author_id           = $post->post_author;
 		$author_display_name = get_the_author_meta( 'display_name', $author_id );
+		$wrapper_tag_name    = $args['disable_link'] ? 'div' : 'a';
 		$avatar              = get_avatar(
 			$author_id,
 			24,
@@ -972,18 +1025,23 @@ class AMP_Story_Post_Type {
 				'class' => 'latest-stories__avatar',
 			)
 		);
+		if ( ! $args['disable_link'] ) {
+			$href = sprintf(
+				'href="%s"',
+				esc_url( get_permalink( $post ) )
+			);
+		}
 
 		?>
-		<a class="latest_stories__link" href="<?php echo esc_url( get_permalink( $post ) ); ?>">
+		<<?php echo esc_attr( $wrapper_tag_name ); ?> <?php echo isset( $href ) ? wp_kses_post( $href ) : ''; ?> class="latest_stories__link">
 			<?php
-			echo wp_get_attachment_image(
-				$thumbnail_id,
-				self::STORY_CARD_IMAGE_SIZE,
-				false,
-				array(
-					'alt'   => get_the_title( $post ),
-					'class' => 'latest-stories__featured-img',
-				)
+			$url = wp_get_attachment_image_url( $thumbnail_id, $args['size'] );
+			printf(
+				'<img src="%s" width="%d" height="%d" alt="%s" class="latest-stories__featured-img" data-amp-layout="fixed">',
+				esc_url( $url ),
+				esc_attr( self::STORY_SMALL_IMAGE_DIMENSION / 2 ),
+				esc_attr( self::STORY_LARGE_IMAGE_DIMENSION / 2 ),
+				esc_attr( get_the_title( $post ) )
 			);
 			?>
 			<span class="latest-stories__title"><?php echo esc_html( get_the_title( $post ) ); ?></span>
@@ -995,12 +1053,12 @@ class AMP_Story_Post_Type {
 						/* translators: 1: the post author. 2: the amount of time ago. */
 						esc_html__( '%1$s &#8226; %2$s ago', 'amp' ),
 						esc_html( $author_display_name ),
-						esc_html( human_time_diff( get_post_time( 'U', false, $post->ID ), current_time( 'timestamp' ) ) )
+						esc_html( human_time_diff( get_post_time( 'U', false, $post ), current_time( 'timestamp' ) ) )
 					);
 					?>
 				</span>
 			</div>
-		</a>
+		</<?php echo esc_attr( $wrapper_tag_name ); ?>>
 		<?php
 	}
 
@@ -1055,7 +1113,14 @@ class AMP_Story_Post_Type {
 		ob_start();
 		?>
 		<div class="amp-story-embed">
-			<?php self::the_single_story_card( $post ); ?>
+			<?php
+			self::the_single_story_card(
+				array(
+					'post' => $post,
+					'size' => self::STORY_CARD_IMAGE_SIZE,
+				)
+			);
+			?>
 		</div>
 		<?php
 		return ob_get_clean();
@@ -1106,11 +1171,6 @@ class AMP_Story_Post_Type {
 	 * @return string $markup The rendered block markup.
 	 */
 	public static function render_block_latest_stories( $attributes ) {
-		/*
-		 * There should only be an <amp-carousel> on the front-end,
-		 * so the editor component passes useCarousel=false to <ServerSideRender>.
-		 * This detects whether this render_callback is called in the editor context.
-		 */
 		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
 		$args            = array(
 			'post_type'        => self::POST_TYPE_SLUG,
@@ -1122,11 +1182,13 @@ class AMP_Story_Post_Type {
 			'meta_key'         => '_thumbnail_id',
 		);
 		$story_query     = new WP_Query( $args );
-		$min_height      = self::get_featured_image_minimum_height( $story_query->posts );
 		$class           = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
+		$size        = self::STORY_CARD_IMAGE_SIZE;
+		$meta_height = 76;
+		$min_height  = self::STORY_LARGE_IMAGE_DIMENSION / 2 + $meta_height;
 
 		ob_start();
 		?>
@@ -1138,7 +1200,15 @@ class AMP_Story_Post_Type {
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
-						<?php self::the_single_story_card( $post ); ?>
+						<?php
+						self::the_single_story_card(
+							array(
+								'post'         => $post,
+								'size'         => $size,
+								'disable_link' => ! $is_amp_carousel,
+							)
+						);
+						?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
 					<?php
 				endforeach;
@@ -1179,44 +1249,6 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Gets the smallest height of any of the featured images.
-	 *
-	 * This iterates through all of the posts, to find their featured image.
-	 * Then, this returns the smallest height.
-	 * For example, if $posts has 3 posts, with featured image heights of 100, 200 and 300,
-	 * this will return 100.
-	 *
-	 * @param array $posts An array or WP_Post objects.
-	 * @return int $minimum_dimension The smallest dimension of a featured image.
-	 */
-	public static function get_featured_image_minimum_height( $posts ) {
-		$index = 2;
-
-		$minimum_height = 0;
-		foreach ( $posts as $post ) {
-			$thumbnail_id = get_post_thumbnail_id( $post->ID );
-			if ( ! $thumbnail_id ) {
-				continue;
-			}
-
-			$image = wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE );
-			if (
-				isset( $image[ $index ] )
-				&&
-				(
-					! $minimum_height
-					||
-					$image[ $index ] < $minimum_height
-				)
-			) {
-				$minimum_height = $image[ $index ];
-			}
-		}
-
-		return $minimum_height;
-	}
-
-	/**
 	 * Crops the image and returns the object as JSON.
 	 *
 	 * Forked from Custom_Image_Header::ajax_header_crop().
@@ -1231,8 +1263,8 @@ class AMP_Story_Post_Type {
 		$crop_details = $_POST['cropDetails'];
 
 		$dimensions = array(
-			'dst_width'  => 696,
-			'dst_height' => 928,
+			'dst_width'  => self::STORY_SMALL_IMAGE_DIMENSION,
+			'dst_height' => self::STORY_LARGE_IMAGE_DIMENSION,
 		);
 
 		$attachment_id = absint( $_POST['id'] );
@@ -1320,5 +1352,20 @@ class AMP_Story_Post_Type {
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		return $attachment_id;
+	}
+
+	/**
+	 * For amp_story embeds, removes the title from above the <iframe>.
+	 *
+	 * @param string  $output The output to filter.
+	 * @param WP_Post $post The post for the embed.
+	 * @return string $output The filtered output.
+	 */
+	public static function remove_title_from_embed( $output, $post ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $output;
+		}
+
+		return preg_replace( '/<blockquote class="wp-embedded-content">.*?<\/blockquote>/', '', $output );
 	}
 }

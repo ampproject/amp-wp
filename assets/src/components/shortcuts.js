@@ -37,7 +37,7 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings } = select( 'core/editor' );
+	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
 
 	return {
 		canInsertBlockType: ( name ) => {
@@ -50,8 +50,8 @@ const applyWithSelect = withSelect( ( select ) => {
 
 const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { getBlockOrder } = select( 'core/editor' );
-	const { insertBlock } = dispatch( 'core/editor' );
+	const { getBlockOrder } = select( 'core/block-editor' );
+	const { insertBlock } = dispatch( 'core/block-editor' );
 
 	return {
 		insertBlock: ( name ) => {

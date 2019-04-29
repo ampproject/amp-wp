@@ -16,7 +16,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	const {
 		getBlockOrder,
 		getBlockRootClientId,
-	} = select( 'core/editor' );
+	} = select( 'core/block-editor' );
 	const {	isReordering } = select( 'amp/story' );
 
 	if ( '' !== getBlockRootClientId( props.clientId ) ) {

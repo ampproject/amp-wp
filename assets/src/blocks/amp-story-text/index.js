@@ -19,6 +19,7 @@ export const name = 'amp/amp-story-text';
 const supports = {
 	anchor: true,
 	reusable: true,
+	className: false,
 };
 
 const schema = {
@@ -44,6 +45,7 @@ const schema = {
 	},
 	autoFontSize: {
 		type: 'number',
+		default: 45,
 	},
 	ampFitText: {
 		type: 'boolean',

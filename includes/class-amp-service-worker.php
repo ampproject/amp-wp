@@ -83,7 +83,8 @@ class AMP_Service_Worker {
 	 */
 	public static function add_cdn_script_caching( $service_workers ) {
 		if ( ! ( $service_workers instanceof WP_Service_Worker_Scripts ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Please update to PWA v0.2. Expected argument to be WP_Service_Worker_Cache_Registry.', 'amp' ), '1.1' );
+			/* translators: %s: WP_Service_Worker_Cache_Registry. */
+			_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Please update to PWA v0.2. Expected argument to be %s.', 'amp' ), 'WP_Service_Worker_Cache_Registry' ), '1.1' );
 			return;
 		}
 
