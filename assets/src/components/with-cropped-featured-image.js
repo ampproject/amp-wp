@@ -27,6 +27,7 @@ import FeaturedImageCropper from './featured-image-cropper';
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload ) => {
+	// @todo: Pass dimensions as argument instead.
 	const minImageDimensions = 'amp_story' === select( 'core/editor' ).getCurrentPostType() ?
 		getMinimumStoryPosterDimensions() :
 		getMinimumFeaturedImageDimensions();
