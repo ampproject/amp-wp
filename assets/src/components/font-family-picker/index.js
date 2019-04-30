@@ -23,10 +23,6 @@ function FontFamilyPicker( {
 	onChange,
 	value = '',
 } ) {
-	if ( ! ampStoriesFonts ) {
-		return null;
-	}
-
 	const defaultOption = {
 		value: '',
 		label: __( 'None', 'amp' ),
