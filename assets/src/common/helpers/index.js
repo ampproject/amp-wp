@@ -106,7 +106,7 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
 
 	if ( hex.length === 3 ) {
 		// If this is a 3 digit color, e.g. #f00, make it 6 digits by duplicating each one.
-		hex = `#${ hex.charAt( 0 ) }${ hex.charAt( 0 ) }${ hex.charAt( 1 ) }${ hex.charAt( 1 ) }${ hex.charAt( 2 ) }${ hex.charAt( 2 ) }`;
+		hex = `${ hex.charAt( 0 ) }${ hex.charAt( 0 ) }${ hex.charAt( 1 ) }${ hex.charAt( 1 ) }${ hex.charAt( 2 ) }${ hex.charAt( 2 ) }`;
 	}
 
 	const r = parseInt( hex.substring( 0, 2 ), 16 );
