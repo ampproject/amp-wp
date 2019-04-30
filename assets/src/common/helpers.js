@@ -51,9 +51,12 @@ export const getMinimumFeaturedImageDimensions = () => {
 /**
  * Validates the an image based on requirements.
  *
- * @param {Object}  media      A media object with width and height values.
- * @param {Object}  dimensions An object with minimum required width and height values.
- * @param {boolean} required   Whether the image is required or not.
+ * @param {Object}  media               A media object.
+ * @param {string}  media.mime_type     The media item's mime type.
+ * @param {Object}  media.media_details A media details object with width and height values.
+ * @param {Object}  dimensions          An object with minimum required width and height values.
+ * @param {boolean} required            Whether the image is required or not.
+ *
  * @return {string[]|null} Validation errors, or null if there were no errors.
  */
 export const validateFeaturedImage = ( media, dimensions, required ) => {
@@ -121,6 +124,18 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
 	];
 };
 
+/**
+ * Returns a CSS background-color property based on passed color and available colors.
+ *
+ * Either backgroundColor or customBackgroundColor should be passed, not both.
+ *
+ * @param {Object[]} colors                Array of color objects as set by the theme or by the editor defaults.
+ * @param {?string}  backgroundColor       A string containing the color slug.
+ * @param {string}   customBackgroundColor A string containing the custom color value.
+ * @param {?number}  opacity               Opacity.
+ *
+ * @return {string} Background color string.
+ */
 export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity ) => {
 	const hasOpacity = opacity && opacity < 100;
 	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
