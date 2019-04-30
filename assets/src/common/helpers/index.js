@@ -12,10 +12,12 @@ import { getColorClassName, getColorObjectByAttributeValues } from '@wordpress/b
  * For AMP Stories, the featured image will be used for the poster-portrait-src.
  * For this, it should have a width of at least 696px and a height of at least 928px.
  *
- * @param {Object} media        A media object with width and height values.
- * @param {Object} media.width  Media width in pixels.
- * @param {Object} media.height Media height in pixels.
- * @param {Object} dimensions   An object with minimum required width and height values.
+ * @param {Object} media             A media object with width and height values.
+ * @param {number} media.width       Media width in pixels.
+ * @param {number} media.height      Media height in pixels.
+ * @param {Object} dimensions        An object with minimum required width and height values.
+ * @param {number} dimensions.width  Required media width in pixels.
+ * @param {number} dimensions.height Required media height in pixels.
  *
  * @return {boolean} Whether the media has the minimum dimensions.
  */

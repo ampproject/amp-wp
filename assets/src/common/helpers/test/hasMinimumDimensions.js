@@ -6,8 +6,8 @@ import { hasMinimumDimensions } from '../';
 describe( 'hasMinimumDimensions', () => {
 	it( 'should reject invalid media object', () => {
 		expect( hasMinimumDimensions( undefined, {} ) ).toBe( false );
-		expect( hasMinimumDimensions( { width: 100 }, {} ) ).toBe( false );
-		expect( hasMinimumDimensions( { height: 100 }, {} ) ).toBe( false );
+		expect( hasMinimumDimensions( { width: 100, height: undefined }, {} ) ).toBe( false );
+		expect( hasMinimumDimensions( { width: undefined, height: 100 }, {} ) ).toBe( false );
 	} );
 
 	it( 'should reject image if width is too small', () => {
