@@ -10,7 +10,7 @@ import { registerBlockType } from '@wordpress/blocks';
  */
 // @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
 import withCroppedFeaturedImage from '../components/with-cropped-featured-image';
-import withFeaturedImageNotice from '../components/with-featured-image-notice';
+import withFeaturedImageNotice from '../components/higher-order/with-featured-image-notice';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 
 // Display a notice in the Featured Image panel if none exists or its width is too small.
