@@ -43,9 +43,5 @@ export default ( BlockEdit ) => {
 		if ( media && media.media_details && hasMinimumStoryPosterDimensions( media.media_details ) ) {
 			dispatch( 'core/editor' ).editPost( { featured_media: selectedMediaId } );
 		}
-	} )( ( props ) => {
-		return (
-			<BlockEdit { ...props } />
-		);
-	} );
+	} )( BlockEdit );
 };
