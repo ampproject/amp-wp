@@ -432,7 +432,12 @@ export const wrapBlocksInGridLayer = ( element, blockType ) => {
  * Given a list of animated blocks, calculates the total duration
  * of all animations based on the durations and the delays.
  *
- * @param {Array} animatedBlocks List of animated blocks.
+ * @param {Object[]} animatedBlocks               List of animated blocks.
+ * @param {string} animatedBlocks[].id            The block's client ID.
+ * @param {string} animatedBlocks[].parent        The block's parent client ID.
+ * @param {string} animatedBlocks[].animationType The block's animation type.
+ * @param {string} animatedBlocks[].duration      The block's animation duration.
+ * @param {string} animatedBlocks[].delay         The block's animation delay.
  *
  * @return {number} Total animation duration time.
  */
@@ -562,14 +567,14 @@ const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' )
  * @param {?string} attributes.fontSize       Font size slug.
  * @param {?number} attributes.customFontSize Custom font size in pixels.
  * @param {?number} attributes.positionTop    The block's top offset.
- * @param {string}  attributes.type           Text type. Can be one of 'auto', 'p', 'h1', or 'h2'.
- * @param {string}  attributes.content        Block content.
+ * @param {?string} attributes.type           Text type. Can be one of 'auto', 'p', 'h1', or 'h2'.
+ * @param {?string} attributes.content        Block content.
  * @param {boolean} canUseH1                  Whether an H1 tag is allowed. Prevents having multiple h1 tags on a page.
  *
  * @return {string} HTML tag name. Either p, h1, or h2.
  */
-export const getTagName = ( attributes, canUseH1 ) => {
-	const { fontSize, customFontSize, positionTop, type, content } = attributes;
+export const getTagName = ( attributes, canUseH1 = true ) => {
+	const { fontSize, customFontSize, positionTop, type, content = '' } = attributes;
 
 	if ( type && 'auto' !== type ) {
 		return type;
