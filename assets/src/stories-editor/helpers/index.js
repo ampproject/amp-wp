@@ -663,18 +663,13 @@ export const getMinimumStoryPosterDimensions = () => {
 	const posterImageWidth = 696;
 	const posterImageHeight = 928;
 
-	const { width: featuredImageWidth, height: featuredImageHeight } = getMinimumFeaturedImageDimensions();
+	const expectedAspectRatio = posterImageWidth / posterImageHeight;
 
-	const expectedAspectRatio = featuredImageWidth / featuredImageHeight;
+	const { width: featuredImageWidth } = getMinimumFeaturedImageDimensions();
 
 	const width = Math.max( posterImageWidth, featuredImageWidth );
-	const height = Math.max( posterImageHeight, featuredImageHeight );
 
-	if ( ( ( width / height ) - expectedAspectRatio ) < Number.EPSILON ) {
-		return { width, height };
-	}
-
-	// Adjust the height to make sure the aspect ratio of posterImageDimensions is preserved.
+	// Adjust the height to make sure the aspect ratio of the poster image is preserved.
 	return {
 		width,
 		height: ( 1 / expectedAspectRatio ) * width,
