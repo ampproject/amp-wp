@@ -12,7 +12,8 @@ import { select, dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getMinimumStoryPosterDimensions, getMinimumFeaturedImageDimensions } from '../stories-editor/helpers';
+import { getMinimumStoryPosterDimensions } from '../stories-editor/helpers';
+import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 

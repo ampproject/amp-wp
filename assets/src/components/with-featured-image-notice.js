@@ -8,7 +8,7 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../stories-editor/helpers';
+import { validateFeaturedImage, getMinimumFeaturedImageDimensions } from '../common/helpers';
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component.

@@ -8,28 +8,14 @@ import { registerBlockType } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { PrePublishPanel, withCroppedFeaturedImage, withFeaturedImageNotice } from '../components';
-import { getMinimumFeaturedImageDimensions } from '../stories-editor/helpers';
+// @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
+import withCroppedFeaturedImage from '../components/with-cropped-featured-image';
+import withFeaturedImageNotice from '../components/with-featured-image-notice';
 
 // Display a notice in the Featured Image panel if none exists or its width is too small.
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
-
-// On clicking 'Publish,' display a notice if no featured image exists or its width is too small.
-registerPlugin(
-	'amp-post-featured-image-pre-publish',
-	{
-		render: () => {
-			return (
-				<PrePublishPanel
-					dimensions={ getMinimumFeaturedImageDimensions() }
-					required={ false }
-				/>
-			);
-		},
-	}
-);
 
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 

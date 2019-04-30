@@ -17,7 +17,8 @@ import {
 /**
  * Internal dependencies
  */
-import { calculateFontSize, getRgbaFromHex } from '../../helpers';
+import { calculateFontSize } from '../../helpers';
+import { getRgbaFromHex } from '../../../common/helpers';
 import './edit.css';
 
 const maxLimitFontSize = 54;

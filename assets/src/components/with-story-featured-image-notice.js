@@ -8,7 +8,8 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { validateFeaturedImage, getMinimumStoryPosterDimensions } from '../stories-editor/helpers';
+import { getMinimumStoryPosterDimensions } from '../stories-editor/helpers';
+import { validateFeaturedImage } from '../common/helpers';
 
 /**
  * Higher-order component that is used for filtering the PostFeaturedImage component for AMP stories.
