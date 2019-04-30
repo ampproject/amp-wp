@@ -63,7 +63,7 @@ describe( 'reducers', () => {
 				item,
 			} );
 
-			originalState = animations( undefined, {
+			originalState = animations( originalState, {
 				type: 'ADD_ANIMATION',
 				page,
 				item: item2,
