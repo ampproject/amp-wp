@@ -24,9 +24,9 @@
     "timeago.js": "3.0.2"
   },
   "devDependencies": {
-    "@babel/cli": "7.4.3",
-    "@babel/core": "7.4.3",
-    "@babel/plugin-proposal-object-rest-spread": "7.4.3",
+    "@babel/cli": "7.4.4",
+    "@babel/core": "7.4.4",
+    "@babel/plugin-proposal-object-rest-spread": "7.4.4",
     "@babel/plugin-transform-react-jsx": "7.3.0",
     "@wordpress/babel-preset-default": "4.1.0",
     "@wordpress/block-editor": "2.0.1",
@@ -56,7 +56,7 @@
     "babel-loader": "8.0.5",
     "babel-plugin-inline-react-svg": "1.1.0",
     "browserslist": "4.5.5",
-    "core-js": "2.6.5",
+    "core-js": "3.0.1",
     "cross-env": "5.2.0",
     "css-loader": "2.1.1",
     "cssnano": "4.1.10",
