@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getRgbaFromHex } from '../helpers';
+import { getRgbaFromHex } from '../';
 
 describe( 'getRgbaFromHex', () => {
 	it( 'should reject invalid hex values', () => {

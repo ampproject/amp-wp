@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { hasMinimumDimensions } from '../helpers';
+import { hasMinimumDimensions } from '../';
 
 describe( 'hasMinimumDimensions', () => {
 	it( 'should reject invalid media object', () => {

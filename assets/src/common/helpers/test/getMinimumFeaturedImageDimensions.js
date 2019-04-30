@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getMinimumFeaturedImageDimensions } from '../helpers';
+import { getMinimumFeaturedImageDimensions } from '../';
 
 describe( 'getMinimumFeaturedImageDimensions', () => {
 	it( 'should return size with correct aspect ration', () => {
