@@ -11,11 +11,12 @@ import { registerBlockType } from '@wordpress/blocks';
 // @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
 import withCroppedFeaturedImage from '../components/with-cropped-featured-image';
 import withFeaturedImageNotice from '../components/with-featured-image-notice';
+import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 
 // Display a notice in the Featured Image panel if none exists or its width is too small.
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 
-addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
+addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 
 const plugins = require.context( './plugins', true, /.*\.js$/ );
 

@@ -43,12 +43,12 @@ import {
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
+	getMinimumStoryPosterDimensions,
 } from './helpers';
 
 import { ALLOWED_BLOCKS } from './constants';
 
 import store from './store';
-import './plugins/template-menu-item';
 
 const {
 	getSelectedBlockClientId,
@@ -268,7 +268,7 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', with
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
-addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

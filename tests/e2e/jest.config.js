@@ -8,10 +8,6 @@ module.exports = {
 		'<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-test-framework.js',
 		'expect-puppeteer',
 	],
-	transformIgnorePatterns: [
-		'node_modules',
-		'<rootDir>/node_modules/@wordpress/scripts/config/puppeteer.config.js',
-	],
 	testPathIgnorePatterns: [
 		'/\.git/',
 		'/node_modules/',
