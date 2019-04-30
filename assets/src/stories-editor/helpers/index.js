@@ -26,7 +26,7 @@ import {
 	Shortcuts,
 	withMetaBlockEdit,
 	Inserter,
-} from '../components';
+} from '../../components';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,
@@ -36,9 +36,9 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
-} from './constants';
+} from '../constants';
+import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 import ampStoriesFonts from 'amp-stories-fonts';
-import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../common/helpers';
 
 const {
 	getBlocksByClientId,
@@ -61,6 +61,13 @@ const {
 
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
+/**
+ * Adds a <link> element to the <head> for a given font in case there is none yet.
+ *
+ * Allows dynamically enqueuing font styles when needed.
+ *
+ * @param {string} name Font name.
+ */
 export const maybeEnqueueFontStyle = ( name ) => {
 	if ( ! name || 'undefined' === typeof ampStoriesFonts ) {
 		return;
@@ -94,11 +101,12 @@ export const maybeEnqueueFontStyle = ( name ) => {
 };
 
 /**
- * Filter layer properties to define the parent block.
+ * Filter block properties to define the parent block.
  *
- * @param {Object} props Block properties.
+ * @param {Object} props      Block properties.
  * @param {string} props.name Block name.
- * @return {Object} Properties.
+ *
+ * @return {Object} Updated properties.
  */
 export const setBlockParent = ( props ) => {
 	const { name } = props;
@@ -122,6 +130,13 @@ export const setBlockParent = ( props ) => {
 	return props;
 };
 
+/**
+ * Returns the minimum height for a given block.
+ *
+ * @param {string} name Block name.
+ *
+ * @return {number} Block height in pixels.
+ */
 const getDefaultMinimumBlockHeight = ( name ) => {
 	switch ( name ) {
 		case 'core/quote':
@@ -145,10 +160,11 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 };
 
 /**
- * Add AMP attributes to every allowed AMP Story block.
+ * Adds AMP attributes to every allowed AMP Story block.
  *
  * @param {Object} settings Settings.
- * @param {string} name Block name.
+ * @param {string} name     Block name.
+ *
  * @return {Object} Settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
@@ -283,9 +299,11 @@ export const addAMPAttributes = ( settings, name ) => {
 /**
  * Add extra attributes to save to DB.
  *
- * @param {Object} props Properties.
- * @param {Object} blockType Block type.
- * @param {Object} attributes Attributes.
+ * @param {Object} props           Properties.
+ * @param {Object} blockType       Block type object.
+ * @param {string} blockType.name  Block type name.
+ * @param {Object} attributes      Attributes.
+ *
  * @return {Object} Props.
  */
 export const addAMPExtraProps = ( props, blockType, attributes ) => {
@@ -365,11 +383,12 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 const blockContentDiv = document.createElement( 'div' );
 
 /**
- * Filter block attributes to make sure that the className is taken even though it's wrapper in grid layer.
+ * Filters block attributes to make sure that the className is taken even though it's wrapped in a grid layer.
  *
  * @param {Object} blockAttributes Block attributes.
- * @param {Object} blockType Block type.
- * @param {string} innerHTML Inner HTML from saved content.
+ * @param {Object} blockType       Block type object. Unused.
+ * @param {string} innerHTML       Inner HTML from saved content.
+ *
  * @return {Object} Block attributes.
  */
 export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) => {
@@ -391,10 +410,11 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer.
  *
- * @param {Object} element
- * @param {Object} blockType
+ * @param {Object} element       Block element.
+ * @param {Object} blockType     Block type object.
+ * @param {string} blockType.name Block type name.
  *
- * @return {Object} The element.
+ * @return {Object} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
@@ -538,13 +558,18 @@ const wordCountType = _x( 'words', 'Word count type. Do not translate!', 'amp' )
  *
  * Font size takes precedence over text length as it's a stronger signal for semantic meaning.
  *
- * @param {Object}  attributes Block attributes.
- * @param {boolean} canUseH1   Whether an H1 tag is allowed.
+ * @param {Object}  attributes                Block attributes.
+ * @param {?string} attributes.fontSize       Font size slug.
+ * @param {?number} attributes.customFontSize Custom font size in pixels.
+ * @param {?number} attributes.positionTop    The block's top offset.
+ * @param {string}  attributes.type           Text type. Can be one of 'auto', 'p', 'h1', or 'h2'.
+ * @param {string}  attributes.content        Block content.
+ * @param {boolean} canUseH1                  Whether an H1 tag is allowed. Prevents having multiple h1 tags on a page.
  *
  * @return {string} HTML tag name. Either p, h1, or h2.
  */
 export const getTagName = ( attributes, canUseH1 ) => {
-	const { fontSize, customFontSize, positionTop, type } = attributes;
+	const { fontSize, customFontSize, positionTop, type, content } = attributes;
 
 	if ( type && 'auto' !== type ) {
 		return type;
@@ -563,7 +588,7 @@ export const getTagName = ( attributes, canUseH1 ) => {
 		return 'h2';
 	}
 
-	const textLength = count( attributes.content, wordCountType, {} );
+	const textLength = count( content, wordCountType, {} );
 
 	if ( H1_TEXT_LENGTH >= textLength ) {
 		return canUseH1 ? 'h1' : 'h2';
@@ -623,7 +648,7 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 };
 
 /**
- * Get minimum dimensions for a story poster.
+ * Returns the minimum dimensions for a story poster image.
  *
  * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
  *
@@ -654,8 +679,9 @@ export const getMinimumStoryPosterDimensions = () => {
 /**
  * Adds either background color or gradient to style depending on the settings.
  *
- * @param {Object} overlayStyle Original style.
- * @param {Array} backgroundColors Array of color settings.
+ * @param {Object} overlayStyle     Original style.
+ * @param {Array}  backgroundColors Array of color settings.
+ *
  * @return {Object} Adjusted style.
  */
 export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) => {
@@ -707,8 +733,11 @@ const emptyTemplateMapping = {
 /**
  * Gets a skeleton template block from pre-populated block.
  *
- * @param {Object} block Original block.
- * @return {Object} Block.
+ * @param {Object}   block            Original block.
+ * @param {Object}   block.name       Block name.
+ * @param {Object[]} block.attributes Block attributes.
+ *
+ * @return {Object} Block object.
  */
 const getSkeletonTemplateBlock = ( block ) => {
 	if ( ! emptyTemplateMapping[ block.name ] ) {
@@ -733,7 +762,11 @@ const getSkeletonTemplateBlock = ( block ) => {
 /**
  * Creates a skeleton template from pre-populated template.
  *
- * @param {Object} template Block.
+ * @param {Object}   template             Block object.
+ * @param {Object}   template.name        Block name.
+ * @param {Object[]} template.innerBlocks List of inner blocks.
+ * @param {Object[]} template.attributes  Block attributes.
+ *
  * @return {Object} Skeleton template block.
  */
 export const createSkeletonTemplate = ( template ) => {
@@ -744,6 +777,19 @@ export const createSkeletonTemplate = ( template ) => {
 	return createBlock( template.name, getSkeletonTemplateBlock( template ), children );
 };
 
+/**
+ * Determines a block's HTML class name based on its attributes.
+ *
+ * @param {string[]} className             List of pre-existing class names for the block.
+ * @param {boolean}  ampFitText            Whether amp-fit-text should be used or not.
+ * @param {?string}  backgroundColor       A string containing the background color slug.
+ * @param {?string}  textColor             A string containing the color slug.
+ * @param {string}   customBackgroundColor A string containing the custom background color value.
+ * @param {string}   customTextColor       A string containing the custom color value.
+ * @param {?number}  opacity               Opacity.
+ *
+ * @return {string} The block's HTML class name.
+ */
 export const getClassNameFromBlockAttributes = ( {
 	className,
 	ampFitText,
@@ -767,6 +813,24 @@ export const getClassNameFromBlockAttributes = ( {
 	} );
 };
 
+/**
+ * Determines a block's inline style based on its attributes.
+ *
+ * @param {string}  align                 Block alignment.
+ * @param {?string} fontSize              Font size slug.
+ * @param {?number} customFontSize        Custom font size in pixels.
+ * @param {boolean} ampFitText            Whether amp-fit-text should be used or not.
+ * @param {number}  autoFontSize          The automatically determined font sized. Used when ampFitText is true.
+ * @param {?string} backgroundColor       A string containing the background color slug.
+ * @param {?string} textColor             A string containing the color slug.
+ * @param {string}  customBackgroundColor A string containing the custom background color value.
+ * @param {string}  customTextColor       A string containing the custom color value.
+ * @param {number}  width                 The block's width in pixels.
+ * @param {number}  height                The block's height in pixels.
+ * @param {?number} opacity               Opacity.
+ *
+ * @return {Object} Block inline style.
+ */
 export const getStylesFromBlockAttributes = ( {
 	align,
 	fontSize,
@@ -808,7 +872,8 @@ export const getStylesFromBlockAttributes = ( {
 /**
  * Get font size from slug.
  *
- * @param {string} slug Font slug.
+ * @param {string} slug A string containing the font slug.
+ *
  * @return {number} Font size in pixels.
  */
 const getFontSizeFromSlug = ( slug ) => {
@@ -824,6 +889,16 @@ const getFontSizeFromSlug = ( slug ) => {
 	}
 };
 
+/**
+ * Returns the settings object for the AMP story meta blocks (post title, author, date).
+ *
+ * @param {string}  attribute   The post attribute this meta block reads from.
+ * @param {?string} placeholder Optional. Placeholder text in case the attribute is empty.
+ * @param {string}  tagName     Optional. The HTML tag name to use for the content. Default '<p>'.
+ * @param {boolean} isEditable  Optional. Whether the meta block is editable by the user or not. Default false.
+ *
+ * @return {Object} The meta block's settings object.
+ */
 export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', isEditable = false } ) => {
 	const supports = {
 		anchor: true,
