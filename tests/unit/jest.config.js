@@ -10,5 +10,7 @@ module.exports = {
 	testPathIgnorePatterns: [
 		'/\.git/',
 		'/node_modules/',
+		'/build/',
+		'.*/e2e/.*',
 	],
 };
