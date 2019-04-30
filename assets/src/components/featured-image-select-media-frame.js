@@ -8,6 +8,8 @@ import { template } from 'lodash';
  */
 import { __, sprintf } from '@wordpress/i18n';
 
+const { wp } = window;
+
 /**
  * FeaturedImageSelectionError
  *
@@ -16,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-const FeaturedImageSelectionError = wp.media.View.extend( {
+const FeaturedImageSelectionError = wp.media.view.extend( {
 	className: 'notice notice-error notice-alt inline',
 	template: ( () => {
 		const message = sprintf(

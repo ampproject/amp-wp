@@ -15,6 +15,8 @@ import { dispatch } from '@wordpress/data';
 import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 
+const { wp } = window;
+
 /**
  * Gets a wrapped version of MediaUpload to crop featured images.
  *
