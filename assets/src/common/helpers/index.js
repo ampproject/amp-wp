@@ -136,12 +136,12 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
  *
  * @param {Object[]} colors                Array of color objects as set by the theme or by the editor defaults.
  * @param {?string}  backgroundColor       A string containing the color slug.
- * @param {string}   customBackgroundColor A string containing the custom color value.
+ * @param {?string}  customBackgroundColor A string containing the custom color value.
  * @param {?number}  opacity               Opacity.
  *
- * @return {string} Background color string.
+ * @return {?string} Background color string or undefined if no color has been set.
  */
-export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity ) => {
+export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity = undefined ) => {
 	const hasOpacity = opacity && opacity < 100;
 	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
 
