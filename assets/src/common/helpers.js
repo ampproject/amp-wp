@@ -87,20 +87,32 @@ export const validateFeaturedImage = ( media, dimensions, required ) => {
 };
 
 /**
- * Converts hex to rgba.
+ * Converts a hexadecimal color to its RGBA form.
  *
- * @param {string} hex Hex value.
+ * @param {string} hex     Hex value.
  * @param {number} opacity Opacity.
+ *
  * @return {Object} Rgba value.
  */
-export const getRgbaFromHex = ( hex, opacity ) => {
+export const getRgbaFromHex = ( hex, opacity = 100 ) => {
 	if ( ! hex ) {
 		return [];
 	}
+
 	hex = hex.replace( '#', '' );
+
+	if ( hex.length === 3 ) {
+		// If this is a 3 digit color, e.g. #f00, make it 6 digits by duplicating each one.
+		hex = `#${ hex.charAt( 0 ) }${ hex.charAt( 0 ) }${ hex.charAt( 1 ) }${ hex.charAt( 1 ) }${ hex.charAt( 2 ) }${ hex.charAt( 2 ) }`;
+	}
+
 	const r = parseInt( hex.substring( 0, 2 ), 16 );
 	const g = parseInt( hex.substring( 2, 4 ), 16 );
 	const b = parseInt( hex.substring( 4, 6 ), 16 );
+
+	// Opacity needs to be in the range of 0-100.
+	opacity = Math.min( 100, Math.max( 0, opacity ) );
+
 	return [
 		r,
 		g,
