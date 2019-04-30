@@ -18,7 +18,7 @@ import { getColorClassName, RichText } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import './store';
+import '../store';
 import {
 	BlockNavigation,
 	EditorCarousel,
