@@ -62,7 +62,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	public function test_enqueue_block_editor_assets() {
 		set_current_screen( 'admin.php' );
 		$slug               = 'amp-editor-blocks';
-		$expected_file_name = 'amp-blocks.js';
+		$expected_file_name = 'amp-editor-blocks.js';
 		$this->instance->enqueue_block_editor_assets();
 		$scripts = wp_scripts();
 		$script  = $scripts->registered[ $slug ];
