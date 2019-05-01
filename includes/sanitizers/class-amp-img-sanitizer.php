@@ -111,8 +111,28 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
+				$layout = $node->getAttribute( 'data-amp-layout' );
+			} elseif ( $node->hasAttribute( 'layout' ) ) {
+				$layout = $node->getAttribute( 'layout' );
+			} else {
+				$layout = 'intrinsic';
+			}
+
+			$has_width  = is_numeric( $node->getAttribute( 'width' ) );
+			$has_height = is_numeric( $node->getAttribute( 'height' ) );
+
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+			$missing_dimensions = (
+				( ! $has_height && 'fixed-height' === $layout )
+				||
+				(
+					( ! $has_width || ! $has_height )
+					&&
+					in_array( $layout, array( 'fixed', 'responsive', 'intrinsic' ), true )
+				)
+			);
+			if ( $missing_dimensions ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -299,6 +319,33 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
 		$node->parentNode->replaceChild( $img_node, $node );
+
+		/*
+		 * Prevent inline style on an image from rendering the amp-img invisible or conflicting with the required display.
+		 * This could eventually be expanded to fixup inline styles for elements other than images, but the reality
+		 * is that this is not going to completely solve the problem for images as well, since it will not handle the
+		 * case where an image gets a display:inline style via a style rule.
+		 * See <https://github.com/ampproject/amp-wp/issues/1803>.
+		 */
+		if ( $img_node->hasAttribute( 'style' ) ) {
+			$layout = $img_node->getAttribute( 'layout' );
+			if ( in_array( $layout, array( 'fixed-height', 'responsive', 'fill', 'flex-item' ), true ) ) {
+				$required_display = 'block';
+			} elseif ( 'nodisplay' === $layout ) {
+				$required_display = 'none';
+			} else {
+				// This is also the default for any AMP element (.i-amphtml-element).
+				$required_display = 'inline-block';
+			}
+			$img_node->setAttribute(
+				'style',
+				preg_replace(
+					'/\bdisplay\s*:\s*[a-z\-]+\b/',
+					"display:$required_display",
+					$img_node->getAttribute( 'style' )
+				)
+			);
+		}
 
 		$can_include_noscript = (
 			$this->args['add_noscript_fallback']

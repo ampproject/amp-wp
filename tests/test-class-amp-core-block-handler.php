@@ -15,20 +15,25 @@
 class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 
 	/**
-	 * Test register_embed().
-	 *
-	 * @covers AMP_Core_Block_Handler::register_embed()
-	 * @covers AMP_Core_Block_Handler::unregister_embed()
+	 * Set up.
 	 */
-	public function test_register_and_unregister_embed() {
-
+	public function setUp() {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestIncomplete( 'Files needed for testing missing.' );
 		}
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Missing required render_block filter.' );
 		}
+		parent::setUp();
+	}
 
+	/**
+	 * Test register_embed().
+	 *
+	 * @covers AMP_Core_Block_Handler::register_embed()
+	 * @covers AMP_Core_Block_Handler::unregister_embed()
+	 */
+	public function test_register_and_unregister_embed() {
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 
@@ -66,10 +71,6 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::filter_rendered_block()
 	 */
 	public function test_placeholder_blocks() {
-		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
-			$this->markTestSkipped( 'Missing required render_block filter.' );
-		}
-
 		$handler = new AMP_Core_Block_Handler();
 		$handler->unregister_embed(); // Make sure we are on the initial clean state.
 		$handler->register_embed();
@@ -83,5 +84,33 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$image_populated_block   = "<!-- wp:image -->\n<figure class=\"wp-block-image\"><img src=\"https://wordpressdev.lndo.site/content/uploads/2019/02/1200px-American_bison_k5680-1-1024x668.jpg\" alt=\"\"/></figure>\n<!-- /wp:image -->";
 		$this->assertEmpty( apply_filters( 'the_content', $image_placeholder_block ) );
 		$this->assertNotEmpty( apply_filters( 'the_content', $image_populated_block ) );
+	}
+
+	/**
+	 * Test that video width/height attributes are added.
+	 *
+	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
+	 */
+	public function test_ampify_video_block() {
+		$attachment_id = $this->factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
+
+		$post_id = $this->factory()->post->create(
+			array(
+				'post_title'   => 'Video',
+				'post_content' => sprintf(
+					"<!-- wp:video {\"id\":%d} -->\n<figure class=\"wp-block-video\"><video controls src=\"%s\"></video></figure>\n<!-- /wp:video -->",
+					$attachment_id,
+					wp_get_attachment_url( $attachment_id )
+				),
+			)
+		);
+
+		$handler = new AMP_Core_Block_Handler();
+		$handler->unregister_embed(); // Make sure we are on the initial clean state.
+		$handler->register_embed();
+
+		$content = apply_filters( 'the_content', get_post( $post_id )->post_content );
+
+		$this->assertContains( '<video width="560" height="320" ', $content );
 	}
 }
