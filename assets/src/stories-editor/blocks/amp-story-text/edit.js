@@ -13,12 +13,13 @@ import {
 	BlockControls,
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
+import { select } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { calculateFontSize } from '../../helpers';
-import { getRgbaFromHex } from '../../../common/helpers';
+import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
 
 const maxLimitFontSize = 54;
@@ -82,6 +83,7 @@ class TextBlockEdit extends Component {
 			className,
 			fontSize,
 			backgroundColor,
+			customBackgroundColor,
 			textColor,
 		} = this.props;
 
@@ -104,7 +106,8 @@ class TextBlockEdit extends Component {
 			}
 		}
 
-		const [ r, g, b, a ] = getRgbaFromHex( backgroundColor.color, opacity );
+		const { colors } = select( 'core/block-editor' ).getSettings();
+		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 		return (
 			<Fragment>
@@ -122,7 +125,7 @@ class TextBlockEdit extends Component {
 					onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
 					onReplace={ this.onReplace }
 					style={ {
-						backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,
+						backgroundColor: appliedBackgroundColor,
 						color: textColor.color,
 						fontSize: ampFitText ? autoFontSize : userFontSize,
 						fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',

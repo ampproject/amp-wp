@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`amp/amp-story-post-author block edit matches snapshot 1`] = `
+<div
+  class="wp-block-amp-amp-story-post-author"
+>
+  Anonymous
+</div>
+`;

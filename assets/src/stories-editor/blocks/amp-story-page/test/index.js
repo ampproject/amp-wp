@@ -8,6 +8,6 @@ describe( 'amp/amp-story-page', () => {
 	test( 'block edit matches snapshot', () => {
 		const wrapper = blockEditRender( name, settings );
 
-		expect( wrapper ).toMatchSnapshot();
+		expect( wrapper.render() ).toMatchSnapshot();
 	} );
 } );
