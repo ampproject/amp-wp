@@ -327,23 +327,37 @@ class AMP_Validation_Manager {
 		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
 		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
 
+		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
 			$icon = '&#x2705;'; // WHITE HEAVY CHECK MARK. This will get overridden in AMP_Validation_Manager::finalize_validation() if there are unaccepted errors.
+			$href = $validate_url;
 		} elseif ( $error_count > 0 ) {
 			$icon = '&#x274C;'; // CROSS MARK.
+			$href = $validate_url;
 		} else {
 			$icon = '&#x1F517;'; // LINK SYMBOL.
+			$href = $amp_url;
 		}
+		$parent = array(
+			'id'    => 'amp',
+			'title' => sprintf(
+				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
+				$icon,
+				esc_html__( 'AMP', 'amp' )
+			),
+			'href'  => esc_url( $href ),
+		);
 
+		// Construct admin bar item for validation.
 		$validate_item = array(
 			'parent' => 'amp',
 			'id'     => 'amp-validity',
 			'href'   => esc_url( $validate_url ),
 		);
 		if ( $error_count <= 0 ) {
-			$validate_item['item'] = esc_html__( 'Re-validate', 'amp' );
+			$validate_item['title'] = esc_html__( 'Re-validate', 'amp' );
 		} else {
-			$validate_item['item'] = esc_html(
+			$validate_item['title'] = esc_html(
 				sprintf(
 					/* translators: %s is count of validation errors */
 					_n(
@@ -357,71 +371,37 @@ class AMP_Validation_Manager {
 			);
 		}
 
-		$parent = array(
-			'id' => 'amp',
+		// Construct admin bar item to link to AMP version or non-AMP version.
+		$link_item = array(
+			'parent' => 'amp',
+			'id'     => 'amp-view',
+			'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
+			'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
 		);
 
-		$first_item_is_validate = (
+		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
+		$is_single_version_available = (
 			amp_is_canonical()
 			||
 			( ! is_amp_endpoint() && $error_count > 0 )
 		);
-		if ( $first_item_is_validate ) {
-			$title          = __( 'Validate AMP', 'amp' );
-			$parent['href'] = esc_url( $validate_url );
-		} elseif ( is_amp_endpoint() ) {
-			$title          = __( 'AMP', 'amp' ); // @todo This link will actually be to the non-AMP version!
-			$parent['href'] = esc_url( $non_amp_url );
+
+		// Add top-level menu item. Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
+		$wp_admin_bar->add_node( $parent );
+
+		/*
+		 * Add submenu items based on whether viewing AMP or not, and whether or not AMP is available.
+		 * When
+		 */
+		if ( $is_single_version_available ) {
+			$wp_admin_bar->add_node( $validate_item );
+		} elseif ( ! is_amp_endpoint() ) {
+			$wp_admin_bar->add_node( $link_item );
+			$wp_admin_bar->add_node( $validate_item );
 		} else {
-			$title          = __( 'AMP', 'amp' );
-			$parent['href'] = esc_url( $amp_url );
+			$wp_admin_bar->add_node( $validate_item );
+			$wp_admin_bar->add_node( $link_item );
 		}
-		$parent['title'] = sprintf(
-			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-			$icon,
-			esc_html( $title )
-		);
-
-		// Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
-		$wp_admin_bar->add_menu( $parent );
-
-		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
-		if ( ! $first_item_is_validate ) {
-			$wp_admin_bar->add_menu(
-				array(
-					'parent' => 'amp',
-					'id'     => 'amp-view',
-					'title'  => esc_html( is_amp_endpoint() ? __( 'View non-AMP version', 'amp' ) : __( 'View AMP version', 'amp' ) ),
-					'href'   => esc_url( is_amp_endpoint() ? $non_amp_url : $amp_url ),
-				)
-			);
-		}
-
-		// Validate admin bar item.
-		if ( $error_count <= 0 ) {
-			$title = esc_html__( 'Re-validate', 'amp' );
-		} else {
-			$title = esc_html(
-				sprintf(
-					/* translators: %s is count of validation errors */
-					_n(
-						'Re-validate (%s validation error)',
-						'Re-validate (%s validation errors)',
-						$error_count,
-						'amp'
-					),
-					number_format_i18n( $error_count )
-				)
-			);
-		}
-		$wp_admin_bar->add_menu(
-			array(
-				'parent' => 'amp',
-				'id'     => 'amp-validity',
-				'title'  => esc_html( $title ),
-				'href'   => esc_url( $validate_url ),
-			)
-		);
 
 		// Scrub the query var from the URL.
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
