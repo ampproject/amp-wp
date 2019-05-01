@@ -1067,3 +1067,60 @@ function amp_wp_kses_mustache( $markup ) {
 	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
 	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
 }
+
+/**
+ * Add "View AMP" admin bar item for Transitional/Reader mode.
+ *
+ * Note that in Transitional mode, the admin bar item will be further amended by `AMP_Validation_Manager::add_admin_bar_menu_items()`.
+ *
+ * @see \AMP_Validation_Manager::add_admin_bar_menu_items()
+ *
+ * @param WP_Admin_Bar $wp_admin_bar Admin bar.
+ */
+function amp_add_admin_bar_view_link( $wp_admin_bar ) {
+	if ( is_admin() || amp_is_canonical() ) {
+		return;
+	}
+
+	if ( current_theme_supports( 'amp' ) ) {
+		$available = AMP_Theme_Support::get_template_availability()['supported'];
+	} elseif ( is_singular() ) {
+		$post      = get_queried_object();
+		$available = ( $post instanceof WP_Post ) && post_supports_amp( $post );
+	} else {
+		$available = false;
+	}
+	if ( ! $available ) {
+		// @todo Add note that AMP is not available?
+		return;
+	}
+
+	// Show nothing if there are rejected validation errors for this URL.
+	if ( ! is_amp_endpoint() && count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), array( 'ignore_accepted' => true ) ) ) > 0 ) {
+		return;
+	}
+
+	if ( is_amp_endpoint() ) {
+		$href = amp_remove_endpoint( amp_get_current_url() );
+	} else {
+		if ( is_singular() ) {
+			$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
+		} else {
+			$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
+		}
+	}
+
+	$icon = '&#x1F517;'; // LINK SYMBOL.
+
+	$parent = array(
+		'id'    => 'amp',
+		'title' => sprintf(
+			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
+			$icon,
+			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
+		),
+		'href'  => esc_url( $href ),
+	);
+
+	$wp_admin_bar->add_menu( $parent );
+}

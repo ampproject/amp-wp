@@ -190,7 +190,7 @@ class AMP_Validation_Manager {
 			}
 		);
 
-		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 100 );
+		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
 
 		// Add filter to auto-accept tree shaking validation error.
 		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
@@ -259,6 +259,7 @@ class AMP_Validation_Manager {
 	 * - Parent admin and first submenu item: link to validate the URL.
 	 *
 	 * @see AMP_Validation_Manager::finalize_validation() Where the emoji is updated.
+	 * @see amp_add_admin_bar_view_link() Where an admin bar item may have been added already for Reader/Transitional modes.
 	 *
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar.
 	 */
@@ -357,12 +358,7 @@ class AMP_Validation_Manager {
 		}
 
 		$parent = array(
-			'id'    => 'amp',
-			'title' => sprintf(
-				'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
-				$icon,
-				esc_html( is_amp_endpoint() ? __( 'AMP', 'amp' ) : __( 'View AMP', 'amp' ) )
-			),
+			'id' => 'amp',
 		);
 
 		$first_item_is_validate = (
@@ -374,10 +370,10 @@ class AMP_Validation_Manager {
 			$title          = __( 'Validate AMP', 'amp' );
 			$parent['href'] = esc_url( $validate_url );
 		} elseif ( is_amp_endpoint() ) {
-			$title          = __( 'AMP', 'amp' );
+			$title          = __( 'AMP', 'amp' ); // @todo This link will actually be to the non-AMP version!
 			$parent['href'] = esc_url( $non_amp_url );
 		} else {
-			$title          = __( 'View AMP', 'amp' );
+			$title          = __( 'AMP', 'amp' );
 			$parent['href'] = esc_url( $amp_url );
 		}
 		$parent['title'] = sprintf(
@@ -386,6 +382,7 @@ class AMP_Validation_Manager {
 			esc_html( $title )
 		);
 
+		// Note that this will correctly merge/amend any existing AMP nav menu item added in amp_add_admin_bar_view_link().
 		$wp_admin_bar->add_menu( $parent );
 
 		// Add admin bar item to switch between AMP and non-AMP if parent node is also an AMP link.
