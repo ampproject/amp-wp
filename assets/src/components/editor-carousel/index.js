@@ -31,11 +31,13 @@ class EditorCarousel extends Component {
 			return;
 		}
 
+		const { currentIndex } = this.props;
+
 		if ( this.props.isReordering ) {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( this.props.currentIndex ) * PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ STORY_PAGE_INNER_WIDTH / 2 }px - ${ ( currentIndex ) * PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}
 
