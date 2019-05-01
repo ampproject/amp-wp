@@ -1071,7 +1071,8 @@ function amp_wp_kses_mustache( $markup ) {
 /**
  * Add "View AMP" admin bar item for Transitional/Reader mode.
  *
- * Note that in Transitional mode, the admin bar item will be further amended by `AMP_Validation_Manager::add_admin_bar_menu_items()`.
+ * Note that when theme support is present (in Native/Transitional modes), the admin bar item will be further amended by
+ * the `AMP_Validation_Manager::add_admin_bar_menu_items()` method.
  *
  * @see \AMP_Validation_Manager::add_admin_bar_menu_items()
  *
