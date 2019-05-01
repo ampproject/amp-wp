@@ -272,6 +272,7 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_admin_pointer' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
 	// Redirect the old url of amp page to the updated url.
 	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
