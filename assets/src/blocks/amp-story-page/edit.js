@@ -2,6 +2,7 @@
  * External dependencies
  */
 import uuid from 'uuid/v4';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -276,7 +277,13 @@ class EditPage extends Component {
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
 												<Button
-													className={ 'editor-amp-story-page-background ' + ( ! poster ? 'editor-post-featured-image__toggle' : 'editor-post-featured-image__preview' ) }
+													className={ classnames(
+														'editor-amp-story-page-background',
+														{
+															'editor-post-featured-image__toggle': ! poster,
+															'editor-post-featured-image__preview': poster,
+														}
+													) }
 													onClick={ open }
 													aria-label={ ! poster ? null : __( 'Edit or update the poster image', 'amp' ) }
 												>
