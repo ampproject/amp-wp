@@ -5,8 +5,21 @@
  * If one exists for a block, it display it inline with a Notice component.
  */
 
-/* global wp, _ */
-window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
+/**
+ * External dependencies
+ */
+import { extend, each, map, filter, isEqual, isUndefined } from 'lodash';
+
+/**
+ * WordPress dependencies
+ */
+import { __, _n, sprintf, setLocaleData } from '@wordpress/i18n';
+import { addFilter } from '@wordpress/hooks';
+import { subscribe, registerStore, select, dispatch } from '@wordpress/data';
+import { Notice } from '@wordpress/components';
+import { createElement, Fragment } from '@wordpress/element';
+
+const ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 	'use strict';
 
 	const module = {
@@ -49,12 +62,12 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @param {Object} data - Module data.
 		 * @return {void}
 		 */
-		boot: function boot( data ) {
+		boot( data ) {
 			module.data = data;
 
-			wp.i18n.setLocaleData( module.data.i18n, 'amp' );
+			setLocaleData( module.data.i18n, 'amp' );
 
-			wp.hooks.addFilter(
+			addFilter(
 				'editor.BlockEdit',
 				'amp/add-notice',
 				module.conditionallyAddNotice,
@@ -63,7 +76,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			module.store = module.registerStore();
 
-			wp.data.subscribe( module.handleValidationErrorsStateChange );
+			subscribe( module.handleValidationErrorsStateChange );
 		},
 
 		/**
@@ -71,8 +84,8 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 *
 		 * @return {Object} Store.
 		 */
-		registerStore: function registerStore() {
-			return wp.data.registerStore( module.storeName, {
+		registerStore() {
+			return registerStore( module.storeName, {
 				reducer( _state, action ) {
 					const state = _state || {
 						blockValidationErrorsByClientId: {},
@@ -80,7 +93,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 					switch ( action.type ) {
 						case 'UPDATE_BLOCKS_VALIDATION_ERRORS':
-							return _.extend( {}, state, {
+							return extend( {}, state, {
 								blockValidationErrorsByClientId: action.blockValidationErrorsByClientId,
 							} );
 						default:
@@ -108,8 +121,8 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 *
 		 * @return {boolean} Returns true when the AMP toggle is on; else, false is returned.
 		 */
-		isAMPEnabled: function isAMPEnabled() {
-			const meta = wp.data.select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+		isAMPEnabled() {
+			const meta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
 			if ( meta && meta.amp_status && module.data.possibleStati.includes( meta.amp_status ) ) {
 				return 'enabled' === meta.amp_status;
 			}
@@ -124,17 +137,14 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		waitToHandleStateChange: function waitToHandleStateChange() {
 			// @todo Gutenberg currently is not persisting isDirty state if changes are made during save request. Block order mismatch.
 			// We can only align block validation errors with blocks in editor when in saved state, since only here will the blocks be aligned with the validation errors.
-			if ( wp.data.select( 'core/editor' ).isEditedPostDirty() || ( ! wp.data.select( 'core/editor' ).isEditedPostDirty() && wp.data.select( 'core/editor' ).isEditedPostNew() ) ) {
+			if ( select( 'core/editor' ).isEditedPostDirty() || ( ! select( 'core/editor' ).isEditedPostDirty() && select( 'core/editor' ).isEditedPostNew() ) ) {
 				return true;
 			}
 
 			// Wait for the current post to be set up.
-			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
-			if ( ! currentPost.hasOwnProperty( 'id' ) ) {
-				return true;
-			}
+			const currentPost = select( 'core/editor' ).getCurrentPost();
 
-			return false;
+			return ! currentPost.hasOwnProperty( 'id' );
 		},
 
 		/**
@@ -161,12 +171,12 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				return;
 			}
 
-			const currentPost = wp.data.select( 'core/editor' ).getCurrentPost();
+			const currentPost = select( 'core/editor' ).getCurrentPost();
 			const ampValidity = currentPost[ module.data.ampValidityRestField ] || {};
 
 			// Show all validation errors which have not been explicitly acknowledged as accepted.
-			const validationErrors = _.map(
-				_.filter( ampValidity.results, function( result ) {
+			const validationErrors = map(
+				filter( ampValidity.results, function( result ) {
 					// @todo Show VALIDATION_ERROR_ACK_REJECTED_STATUS differently since moderated?
 					return (
 						0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
@@ -193,9 +203,9 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			// Remove any existing notice.
 			module.resetWarningNotice();
 
-			noticeMessage = wp.i18n.sprintf(
+			noticeMessage = sprintf(
 				/* translators: %s: number of issues */
-				wp.i18n._n(
+				_n(
 					'There is %s issue from AMP validation which needs review.',
 					'There are %s issues from AMP validation which need review.',
 					validationErrors.length,
@@ -207,13 +217,13 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			try {
 				blockValidationErrors = module.getBlocksValidationErrors();
 				module.lastStates.blockValidationErrors = blockValidationErrors.byClientId;
-				wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
+				dispatch( module.storeName ).updateBlocksValidationErrors( blockValidationErrors.byClientId );
 
 				blockErrorCount = validationErrors.length - blockValidationErrors.other.length;
 				if ( blockErrorCount > 0 ) {
-					noticeMessage += ' ' + wp.i18n.sprintf(
+					noticeMessage += ' ' + sprintf(
 						/* translators: %s: number of block errors. */
-						wp.i18n._n(
+						_n(
 							'%s issue is directly due to content here.',
 							'%s issues are directly due to content here.',
 							blockErrorCount,
@@ -222,22 +232,22 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						blockErrorCount
 					);
 				} else if ( validationErrors.length === 1 ) {
-					noticeMessage += ' ' + wp.i18n.__( 'The issue is not directly due to content here.', 'amp' );
+					noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
 				} else {
-					noticeMessage += ' ' + wp.i18n.__( 'The issues are not directly due to content here.', 'amp' );
+					noticeMessage += ' ' + __( 'The issues are not directly due to content here.', 'amp' );
 				}
 			} catch ( e ) {
 				// Clear out block validation errors in case the block sand errors cannot be aligned.
 				module.resetBlockNotices();
 
 				if ( validationErrors.length === 1 ) {
-					noticeMessage += ' ' + wp.i18n.__( 'The issue may not be due to content here', 'amp' );
+					noticeMessage += ' ' + __( 'The issue may not be due to content here', 'amp' );
 				} else {
-					noticeMessage += ' ' + wp.i18n.__( 'Some issues may be due to content here.', 'amp' );
+					noticeMessage += ' ' + __( 'Some issues may be due to content here.', 'amp' );
 				}
 			}
 
-			const rejectedErrors = _.filter( ampValidity.results, function( result ) {
+			const rejectedErrors = filter( ampValidity.results, function( result ) {
 				return (
 					0 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS */ === result.status ||
 					2 /* \AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_REJECTED_STATUS */ === result.status // eslint-disable-line no-magic-numbers
@@ -248,9 +258,9 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
 			if ( module.data.isSanitizationAutoAccepted ) {
 				if ( 0 === rejectedErrors.length ) {
-					noticeMessage += wp.i18n.__( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+					noticeMessage += __( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
 				} else {
-					noticeMessage += wp.i18n._n(
+					noticeMessage += _n(
 						'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
 						'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
 						validationErrors.length,
@@ -258,7 +268,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					);
 				}
 			} else {
-				noticeMessage += wp.i18n.__( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+				noticeMessage += __( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
 			}
 
 			const noticeOptions = {
@@ -267,7 +277,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			if ( ampValidity.review_link ) {
 				noticeOptions.actions = [
 					{
-						label: wp.i18n.__( 'Review issues', 'amp' ),
+						label: __( 'Review issues', 'amp' ),
 						url: ampValidity.review_link,
 					},
 				];
@@ -275,7 +285,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			// Display notice if there were validation errors.
 			if ( validationErrors.length > 0 ) {
-				wp.data.dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
+				dispatch( 'core/notices' ).createNotice( 'warning', noticeMessage, noticeOptions );
 			}
 
 			module.validationWarningNoticeId = noticeOptions.id;
@@ -294,7 +304,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 			return (
 				module.lastStates.validationErrors.length !== validationErrors.length ||
-				( validationErrors && ! _.isEqual( module.lastStates.validationErrors, validationErrors ) )
+				( validationErrors && ! isEqual( module.lastStates.validationErrors, validationErrors ) )
 			);
 		},
 
@@ -306,8 +316,8 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {boolean} Whether out of sync.
 		 */
 		areBlocksOutOfSync: function areBlocksOutOfSync() {
-			const blockOrder = wp.data.select( 'core/editor' ).getBlockOrder();
-			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! _.isEqual( module.lastStates.blockOrder, blockOrder ) ) {
+			const blockOrder = select( 'core/editor' ).getBlockOrder();
+			if ( module.lastStates.blockOrder.length !== blockOrder.length || ! isEqual( module.lastStates.blockOrder, blockOrder ) ) {
 				module.lastStates.blockOrder = blockOrder;
 				return true;
 			}
@@ -322,7 +332,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		resetWarningNotice: function resetWarningNotice() {
 			if ( module.validationWarningNoticeId ) {
-				wp.data.dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
+				dispatch( 'core/notices' ).removeNotice( module.validationWarningNoticeId );
 				module.validationWarningNoticeId = null;
 			}
 		},
@@ -333,7 +343,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 * @return {void}
 		 */
 		resetBlockNotices: function resetBlockNotices() {
-			wp.data.dispatch( module.storeName ).updateBlocksValidationErrors( {} );
+			dispatch( module.storeName ).updateBlocksValidationErrors( {} );
 		},
 
 		/**
@@ -344,7 +354,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		getFlattenedBlockOrder: function getFlattenedBlockOrder( blocks ) {
 			const blockOrder = [];
-			_.each( blocks, function( block ) {
+			each( blocks, function( block ) {
 				blockOrder.push( block.clientId );
 				if ( block.innerBlocks.length > 0 ) {
 					Array.prototype.push.apply( blockOrder, module.getFlattenedBlockOrder( block.innerBlocks ) );
@@ -360,10 +370,10 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 		 */
 		getBlocksValidationErrors: function getBlocksValidationErrors() {
 			const acceptedStatus = 3; // eslint-disable-line no-magic-numbers
-			const editorSelect = wp.data.select( 'core/editor' );
+			const editorSelect = select( 'core/editor' );
 			const currentPost = editorSelect.getCurrentPost();
-			const validationErrors = _.map(
-				_.filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
+			const validationErrors = map(
+				filter( currentPost[ module.data.ampValidityRestField ].results, function( result ) {
 					return result.term_status !== acceptedStatus; // If not accepted by the user.
 				} ),
 				function( result ) {
@@ -374,11 +384,11 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			const otherValidationErrors = [];
 			const blockValidationErrorsByClientId = {};
 
-			_.each( blockOrder, function( clientId ) {
+			each( blockOrder, function( clientId ) {
 				blockValidationErrorsByClientId[ clientId ] = [];
 			} );
 
-			_.each( validationErrors, function( validationError ) {
+			each( validationErrors, function( validationError ) {
 				let i, source, clientId, block, matched;
 				if ( ! validationError.sources ) {
 					otherValidationErrors.push( validationError );
@@ -391,13 +401,13 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 					source = validationError.sources[ i ];
 
 					// Skip sources that are not for blocks.
-					if ( ! source.block_name || _.isUndefined( source.block_content_index ) || currentPost.id !== source.post_id ) {
+					if ( ! source.block_name || isUndefined( source.block_content_index ) || currentPost.id !== source.post_id ) {
 						continue;
 					}
 
 					// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
 					clientId = blockOrder[ source.block_content_index ];
-					if ( _.isUndefined( clientId ) ) {
+					if ( isUndefined( clientId ) ) {
 						throw new Error( 'undefined_block_index' );
 					}
 
@@ -445,18 +455,18 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 			}
 			if ( 'invalid_element' === validationError.code && validationError.node_name ) {
 				return [
-					wp.i18n.__( 'Invalid element: ' ),
-					wp.element.createElement( 'code', { key: 'name' }, validationError.node_name ),
+					__( 'Invalid element: ', 'amp' ),
+					createElement( 'code', { key: 'name' }, validationError.node_name ),
 				];
 			} else if ( 'invalid_attribute' === validationError.code && validationError.node_name ) {
 				return [
-					wp.i18n.__( 'Invalid attribute: ' ),
-					wp.element.createElement( 'code', { key: 'name' }, validationError.parent_name ? wp.i18n.sprintf( '%s[%s]', validationError.parent_name, validationError.node_name ) : validationError.node_name ),
+					__( 'Invalid attribute: ', 'amp' ),
+					createElement( 'code', { key: 'name' }, validationError.parent_name ? sprintf( '%s[%s]', validationError.parent_name, validationError.node_name ) : validationError.node_name ),
 				];
 			}
 			return [
-				wp.i18n.__( 'Error code: ', 'amp' ),
-				wp.element.createElement( 'code', { key: 'name' }, validationError.code || wp.i18n.__( 'unknown' ) ),
+				__( 'Error code: ', 'amp' ),
+				createElement( 'code', { key: 'name' }, validationError.code || __( 'unknown', 'amp' ) ),
 			];
 		},
 
@@ -471,7 +481,7 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				let validationErrors;
 
 				function AmpNoticeBlockEdit( props ) {
-					const edit = wp.element.createElement(
+					const edit = createElement(
 						BlockEdit,
 						props
 					);
@@ -480,9 +490,9 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 						return edit;
 					}
 
-					const details = wp.element.createElement( 'details', { className: 'amp-block-validation-errors' }, [
-						wp.element.createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, wp.i18n.sprintf(
-							wp.i18n._n(
+					const details = createElement( 'details', { className: 'amp-block-validation-errors' }, [
+						createElement( 'summary', { key: 'summary', className: 'amp-block-validation-errors__summary' }, sprintf(
+							_n(
 								'There is %s issue from AMP validation.',
 								'There are %s issues from AMP validation.',
 								props.ampBlockValidationErrors.length,
@@ -490,19 +500,19 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 							),
 							props.ampBlockValidationErrors.length
 						) ),
-						wp.element.createElement(
+						createElement(
 							'ul',
 							{ key: 'list', className: 'amp-block-validation-errors__list' },
-							_.map( props.ampBlockValidationErrors, function( error, key ) {
-								return wp.element.createElement( 'li', { key }, module.getValidationErrorMessage( error ) );
+							map( props.ampBlockValidationErrors, function( error, key ) {
+								return createElement( 'li', { key }, module.getValidationErrorMessage( error ) );
 							} )
 						),
 					] );
 
-					return wp.element.createElement(
-						wp.element.Fragment, {},
-						wp.element.createElement(
-							wp.components.Notice,
+					return createElement(
+						Fragment, {},
+						createElement(
+							Notice,
 							{
 								status: 'warning',
 								isDismissible: false,
@@ -514,11 +524,11 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 				}
 
 				if ( ! module.lastStates.blockValidationErrors[ ownProps.clientId ] ) {
-					validationErrors = wp.data.select( module.storeName ).getBlockValidationErrors( ownProps.clientId );
+					validationErrors = select( module.storeName ).getBlockValidationErrors( ownProps.clientId );
 					module.lastStates.blockValidationErrors[ ownProps.clientId ] = validationErrors;
 				}
 
-				const mergedProps = _.extend( {}, ownProps, {
+				const mergedProps = extend( {}, ownProps, {
 					ampBlockValidationErrors: module.lastStates.blockValidationErrors[ ownProps.clientId ],
 				} );
 
@@ -529,3 +539,5 @@ window.ampBlockValidation = ( function() { // eslint-disable-line no-unused-vars
 
 	return module;
 }() );
+
+window.ampBlockValidation = ampBlockValidation;
