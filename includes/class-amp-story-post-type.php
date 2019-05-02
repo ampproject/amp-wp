@@ -439,7 +439,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function filter_block_editor_settings( $editor_settings, $post ) {
 		if ( self::POST_TYPE_SLUG === $post->post_type ) {
-			unset( $editor_settings['colors'] );
+			unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
 		}
 
 		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
