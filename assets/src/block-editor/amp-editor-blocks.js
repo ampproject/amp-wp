@@ -1,10 +1,19 @@
-/* global _ */
-/* eslint no-magic-numbers: [ "error", { "ignore": [ 1, -1, 0, 4 ] } ] */
+/**
+ * External dependencies
+ */
+import { extend, each } from 'lodash';
 
-window.ampEditorBlocks = ( function() {
-	const __ = wp.i18n.__;
-	const _x = wp.i18n._x;
+/**
+ * WordPress dependencies
+ */
+import { __, _x } from '@wordpress/i18n';
+import { addFilter } from '@wordpress/hooks';
+import { getBlockType, unregisterBlockType } from '@wordpress/blocks';
+import { SelectControl, PanelBody, TextControl, ToggleControl, FontSizePicker, Notice } from '@wordpress/components';
+import { createElement, RawHTML, cloneElement } from '@wordpress/element';
+import { InspectorControls } from '@wordpress/editor';
 
+const ampEditorBlocks = ( function() {
 	const component = {
 
 		/**
@@ -105,13 +114,13 @@ window.ampEditorBlocks = ( function() {
 	 */
 	component.boot = function boot( data ) {
 		if ( data ) {
-			_.extend( component.data, data );
+			extend( component.data, data );
 		}
 
-		wp.hooks.addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
-		wp.hooks.addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
-		wp.hooks.addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
-		wp.hooks.addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
+		addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', component.addAMPAttributes );
+		addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', component.filterBlocksSave );
+		addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', component.filterBlocksEdit );
+		addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', component.addAMPExtraProps );
 		component.maybeUnregisterBlocks();
 	};
 
@@ -140,7 +149,7 @@ window.ampEditorBlocks = ( function() {
 			},
 		];
 
-		_.each( component.data.ampLayoutOptions, function( option ) {
+		each( component.data.ampLayoutOptions, function( option ) {
 			if ( component.isLayoutAvailable( blockName, option ) ) {
 				layoutOptions.push( {
 					value: option.value,
@@ -186,7 +195,7 @@ window.ampEditorBlocks = ( function() {
 			ampAttributes[ 'data-amp-carousel' ] = attributes.ampCarousel;
 		}
 
-		return _.extend( ampAttributes, props );
+		return extend( ampAttributes, props );
 	};
 
 	/**
@@ -270,8 +279,6 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Function} Edit function.
 	 */
 	component.filterBlocksEdit = function filterBlocksEdit( BlockEdit ) {
-		const el = wp.element.createElement;
-
 		return function( props ) {
 			const attributes = props.attributes;
 			const name = props.name;
@@ -294,7 +301,7 @@ window.ampEditorBlocks = ( function() {
 				if ( '' === inspectorControls ) {
 					// Return original.
 					return [
-						el( BlockEdit, _.extend( {
+						createElement( BlockEdit, extend( {
 							key: 'original',
 						}, props ) ),
 					];
@@ -317,7 +324,7 @@ window.ampEditorBlocks = ( function() {
 			}
 
 			return [
-				el( BlockEdit, _.extend( {
+				createElement( BlockEdit, extend( {
 					key: 'original',
 				}, props ) ),
 				inspectorControls,
@@ -362,14 +369,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpInspectorControls = function setUpInspectorControls( props ) {
-		const isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
+		const { isSelected } = props;
 
 		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
+			createElement( InspectorControls, { key: 'inspector' },
+				createElement( PanelBody, { title: component.data.ampPanelLabel },
 					component.getAmpLayoutControl( props ),
 					component.getAmpNoloadingToggle( props )
 				)
@@ -384,10 +388,7 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Element.
 	 */
 	component.getAmpLayoutControl = function getAmpLayoutControl( props ) {
-		const ampLayout = props.attributes.ampLayout;
-		const el = wp.element.createElement;
-		const SelectControl = wp.components.SelectControl;
-		const name = props.name;
+		const { name, attributes: { ampLayout } } = props;
 
 		let label = __( 'AMP Layout', 'amp' );
 
@@ -395,7 +396,7 @@ window.ampEditorBlocks = ( function() {
 			label = __( 'AMP Layout (modifies width/height)', 'amp' );
 		}
 
-		return el( SelectControl, {
+		return createElement( SelectControl, {
 			label,
 			value: ampLayout,
 			options: component.getLayoutOptions( name ),
@@ -415,12 +416,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Element.
 	 */
 	component.getAmpNoloadingToggle = function getAmpNoloadingToggle( props ) {
-		const ampNoLoading = props.attributes.ampNoLoading,
-			el = wp.element.createElement,
-			ToggleControl = wp.components.ToggleControl,
-			label = __( 'AMP Noloading', 'amp' );
+		const { attributes: { ampNoLoading } } = props;
 
-		return el( ToggleControl, {
+		const label = __( 'AMP Noloading', 'amp' );
+
+		return createElement( ToggleControl, {
 			label,
 			checked: ampNoLoading,
 			onChange() {
@@ -438,18 +438,9 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
 	 */
 	component.setUpTextBlocksInspectorControls = function setUpInspectorControls( props ) {
-		const ampFitText = props.attributes.ampFitText;
-		const isSelected = props.isSelected;
-		const el = wp.element.createElement;
-		const InspectorControls = wp.editor.InspectorControls;
-		const TextControl = wp.components.TextControl;
-		const FontSizePicker = wp.components.FontSizePicker;
-		const ToggleControl = wp.components.ToggleControl;
-		const PanelBody = wp.components.PanelBody;
-
-		let minFont = props.attributes.minFont,
-			maxFont = props.attributes.maxFont,
-			height = props.attributes.height;
+		const { isSelected, attributes } = props;
+		const { ampFitText } = attributes;
+		let { minFont, maxFont, height } = attributes;
 
 		const FONT_SIZES = [
 			{
@@ -483,7 +474,7 @@ window.ampEditorBlocks = ( function() {
 		const inspectorPanelBodyArgs = [
 			PanelBody,
 			{ title: component.data.ampSettingsLabel, className: ampFitText ? 'is-amp-fit-text' : '' },
-			el( ToggleControl, {
+			createElement( ToggleControl, {
 				label,
 				checked: ampFitText,
 				onChange() {
@@ -497,7 +488,7 @@ window.ampEditorBlocks = ( function() {
 			height = parseInt( height, 10 );
 			minFont = parseInt( minFont, 10 );
 			inspectorPanelBodyArgs.push.apply( inspectorPanelBodyArgs, [
-				el( TextControl, {
+				createElement( TextControl, {
 					label: __( 'Height', 'amp' ),
 					value: height,
 					min: 1,
@@ -505,16 +496,16 @@ window.ampEditorBlocks = ( function() {
 						props.setAttributes( { height: nextHeight } );
 					},
 				} ),
-				maxFont > height && el(
-					wp.components.Notice,
+				maxFont > height && createElement(
+					Notice,
 					{
 						status: 'error',
 						isDismissible: false,
 					},
 					__( 'The height must be greater than the max font size.', 'amp' )
 				),
-				el( PanelBody, { title: __( 'Minimum font size', 'amp' ) },
-					el( FontSizePicker, {
+				createElement( PanelBody, { title: __( 'Minimum font size', 'amp' ) },
+					createElement( FontSizePicker, {
 						fallbackFontSize: 14,
 						value: minFont,
 						fontSizes: FONT_SIZES,
@@ -528,16 +519,16 @@ window.ampEditorBlocks = ( function() {
 						},
 					} )
 				),
-				minFont > maxFont && el(
-					wp.components.Notice,
+				minFont > maxFont && createElement(
+					Notice,
 					{
 						status: 'error',
 						isDismissible: false,
 					},
 					__( 'The min font size must less than the max font size.', 'amp' )
 				),
-				el( PanelBody, { title: __( 'Maximum font size', 'amp' ) },
-					el( FontSizePicker, {
+				createElement( PanelBody, { title: __( 'Maximum font size', 'amp' ) },
+					createElement( FontSizePicker, {
 						value: maxFont,
 						fallbackFontSize: 48,
 						fontSizes: FONT_SIZES,
@@ -556,8 +547,8 @@ window.ampEditorBlocks = ( function() {
 		}
 
 		return (
-			el( InspectorControls, { key: 'inspector' },
-				el.apply( null, inspectorPanelBodyArgs )
+			createElement( InspectorControls, { key: 'inspector' },
+				createElement.apply( null, inspectorPanelBodyArgs )
 			)
 		);
 	};
@@ -570,15 +561,12 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Inspector controls.
 	 */
 	component.setUpShortcodeInspectorControls = function setUpShortcodeInspectorControls( props ) {
-		const isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
+		const { isSelected } = props;
 
 		if ( component.isGalleryShortcode( props.attributes ) ) {
 			return isSelected && (
-				el( InspectorControls, { key: 'inspector' },
-					el( PanelBody, { title: component.data.ampPanelLabel },
+				createElement( InspectorControls, { key: 'inspector' },
+					createElement( PanelBody, { title: component.data.ampPanelLabel },
 						component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
 						component.getAmpLightboxToggle( props )
 					)
@@ -596,12 +584,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Element.
 	 */
 	component.getAmpLightboxToggle = function getAmpLightboxToggle( props ) {
-		const ampLightbox = props.attributes.ampLightbox,
-			el = wp.element.createElement,
-			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Add lightbox effect', 'amp' );
+		const { attributes: { ampLightbox } } = props;
 
-		return el( ToggleControl, {
+		const label = __( 'Add lightbox effect', 'amp' );
+
+		return createElement( ToggleControl, {
 			label,
 			checked: ampLightbox,
 			onChange( nextValue ) {
@@ -627,12 +614,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Element.
 	 */
 	component.getAmpCarouselToggle = function getAmpCarouselToggle( props ) {
-		const ampCarousel = props.attributes.ampCarousel,
-			el = wp.element.createElement,
-			ToggleControl = wp.components.ToggleControl,
-			label = __( 'Display as carousel', 'amp' );
+		const { attributes: { ampCarousel } } = props;
 
-		return el( ToggleControl, {
+		const label = __( 'Display as carousel', 'amp' );
+
+		return createElement( ToggleControl, {
 			label,
 			checked: ampCarousel,
 			onChange() {
@@ -648,14 +634,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Inspector Controls.
 	 */
 	component.setUpImageInpsectorControls = function setUpImageInpsectorControls( props ) {
-		const isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
+		const { isSelected } = props;
 
 		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
+			createElement( InspectorControls, { key: 'inspector' },
+				createElement( PanelBody, { title: component.data.ampPanelLabel },
 					component.getAmpLayoutControl( props ),
 					component.getAmpNoloadingToggle( props ),
 					component.getAmpLightboxToggle( props )
@@ -672,14 +655,11 @@ window.ampEditorBlocks = ( function() {
 	 * @return {Object} Inspector controls.
 	 */
 	component.setUpGalleryInpsectorControls = function setUpGalleryInpsectorControls( props ) {
-		const isSelected = props.isSelected,
-			el = wp.element.createElement,
-			InspectorControls = wp.editor.InspectorControls,
-			PanelBody = wp.components.PanelBody;
+		const { isSelected } = props;
 
 		return isSelected && (
-			el( InspectorControls, { key: 'inspector' },
-				el( PanelBody, { title: component.data.ampPanelLabel },
+			createElement( InspectorControls, { key: 'inspector' },
+				createElement( PanelBody, { title: component.data.ampPanelLabel },
 					component.data.hasThemeSupport && component.getAmpCarouselToggle( props ),
 					component.getAmpLightboxToggle( props )
 				)
@@ -690,9 +670,11 @@ window.ampEditorBlocks = ( function() {
 	/**
 	 * Filters blocks' save function.
 	 *
-	 * @param {Object} element Element.
-	 * @param {string} blockType Block type.
-	 * @param {Object} attributes Attributes.
+	 * @param {Object} element        Element.
+	 * @param {string} blockType      Block type.
+	 * @param {string} blockType.name Block type name.
+	 * @param {Object} attributes     Attributes.
+	 *
 	 * @return {Object} Output element.
 	 */
 	component.filterBlocksSave = function filterBlocksSave( element, blockType, attributes ) {
@@ -718,8 +700,8 @@ window.ampEditorBlocks = ( function() {
 				// If lightbox is not set, we can return here.
 				if ( ! attributes.ampLightbox ) {
 					if ( attributes.text !== text ) {
-						return wp.element.createElement(
-							wp.element.RawHTML,
+						return createElement(
+							RawHTML,
 							{},
 							text
 						);
@@ -740,8 +722,8 @@ window.ampEditorBlocks = ( function() {
 			}
 
 			if ( attributes.text !== text ) {
-				return wp.element.createElement(
-					wp.element.RawHTML,
+				return createElement(
+					RawHTML,
 					{},
 					text
 				);
@@ -749,7 +731,7 @@ window.ampEditorBlocks = ( function() {
 		} else if ( 'core/paragraph' === blockType.name && ! attributes.ampFitText ) {
 			content = component.getAmpFitTextContent( attributes.content );
 			if ( content !== attributes.content ) {
-				return wp.element.cloneElement(
+				return cloneElement(
 					element,
 					{
 						key: 'new',
@@ -775,12 +757,12 @@ window.ampEditorBlocks = ( function() {
 			 */
 			if ( 'core/paragraph' === blockType.name ) {
 				let ampFitTextContent = '<amp-fit-text';
-				_.each( fitTextProps, function( value, att ) {
+				each( fitTextProps, function( value, att ) {
 					ampFitTextContent += ' ' + att + '="' + value + '"';
 				} );
 				ampFitTextContent += '>' + component.getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
 
-				return wp.element.cloneElement(
+				return cloneElement(
 					element,
 					{
 						key: 'new',
@@ -790,7 +772,7 @@ window.ampEditorBlocks = ( function() {
 			}
 
 			fitTextProps.children = element;
-			return wp.element.createElement( 'amp-fit-text', fitTextProps );
+			return createElement( 'amp-fit-text', fitTextProps );
 		}
 		return element;
 	};
@@ -927,11 +909,13 @@ window.ampEditorBlocks = ( function() {
 
 		ampDependentBlocks.forEach( function( block ) {
 			const blockName = 'amp/' + block;
-			if ( wp.blocks.getBlockType( blockName ) ) {
-				wp.blocks.unregisterBlockType( blockName );
+			if ( getBlockType( blockName ) ) {
+				unregisterBlockType( blockName );
 			}
 		} );
 	};
 
 	return component;
 }() );
+
+window.ampEditorBlocks = ampEditorBlocks;
