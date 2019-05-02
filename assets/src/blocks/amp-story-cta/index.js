@@ -31,6 +31,10 @@ const schema = {
 		source: 'html',
 		selector: 'a',
 	},
+	align: {
+		type: 'string',
+		default: 'center',
+	},
 };
 
 export const name = 'amp/amp-story-cta';
