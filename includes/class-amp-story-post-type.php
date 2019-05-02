@@ -1196,7 +1196,7 @@ class AMP_Story_Post_Type {
 			<?php if ( $is_amp_carousel ) : ?>
 				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
 			<?php else : ?>
-				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+				<ul class="latest-stories-carousel">
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
