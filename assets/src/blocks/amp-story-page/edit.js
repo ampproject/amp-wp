@@ -20,8 +20,10 @@ import {
 	Button,
 	BaseControl,
 	FocalPointPicker,
+	Notice,
 	SelectControl,
 	RangeControl,
+	ResponsiveWrapper,
 } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 
@@ -261,27 +263,55 @@ class EditPage extends Component {
 										label={ __( 'Poster Image (required)', 'amp' ) }
 										help={ __( 'The recommended dimensions for a poster image are: 720p (720w x 1280h)', 'amp' ) }
 									>
+										{
+											! poster &&
+											<Notice status="error" isDismissible={ false } >
+												{ __( 'A poster image must be supplied.', 'amp' ) }
+											</Notice>
+										}
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
 											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
 											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
+											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
 												<Button
-													isDefault
+													className={ 'editor-amp-story-page-background ' + ( ! poster ? 'editor-post-featured-image__toggle' : 'editor-post-featured-image__preview' ) }
 													onClick={ open }
-													className="editor-amp-story-page-background"
+													aria-label={ ! poster ? null : __( 'Edit or update the poster image', 'amp' ) }
 												>
-													{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
+													{ !! poster &&
+													<ResponsiveWrapper
+														naturalWidth={ 960 }
+														naturalHeight={ 1280 }
+													>
+														<img src={ poster } alt="" />
+													</ResponsiveWrapper>
+													}
+													{ ! poster &&
+														__( 'Set poster image', 'amp' )
+													}
 												</Button>
 											) }
 										/>
-										{ poster &&
-										<Button
-											onClick={ () => setAttributes( { poster: undefined } ) }
-											isLink
-											isDestructive>
-											{ __( 'Remove Poster Image', 'amp' ) }
-										</Button>
+
+										{ !! poster &&
+											<Fragment>
+												<MediaUpload
+													title={ __( 'Select Poster Image', 'amp' ) }
+													onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
+													allowedTypes={ ALLOWED_MEDIA_TYPES }
+													modalClass="editor-amp-story-background-video-poster__media-modal"
+													render={ ( { open } ) => (
+														<Button onClick={ open } className="editor-amp-story-page-background" isDefault isLarge>
+															{ __( 'Replace Poster Image', 'amp' ) }
+														</Button>
+													) }
+												/>
+												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
+													{ __( 'Remove poster image', 'amp' ) }
+												</Button>
+											</Fragment>
 										}
 									</BaseControl>
 								</MediaUploadCheck>
