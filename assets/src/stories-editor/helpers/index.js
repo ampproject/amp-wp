@@ -612,11 +612,12 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  *
  * @see https://github.com/ampproject/amphtml/blob/e7a1b3ff97645ec0ec482192205134bd0735943c/extensions/amp-fit-text/0.1/amp-fit-text.js
  *
- * @param {Object} measurer HTML element.
+ * @param {Object} measurer       HTML element.
  * @param {number} expectedHeight Maximum height.
- * @param {number} expectedWidth Maximum width.
- * @param {number} maxFontSize Maximum font size.
- * @param {number} minFontSize Minimum font size.
+ * @param {number} expectedWidth  Maximum width.
+ * @param {number} maxFontSize    Maximum font size.
+ * @param {number} minFontSize    Minimum font size.
+ *
  * @return {number} Calculated font size.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
