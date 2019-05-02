@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`withBlockName provides the the wrapped component with block name as props 1`] = `
-<ContextConsumer>
-  <Component />
-</ContextConsumer>
-`;
