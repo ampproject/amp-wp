@@ -61,22 +61,21 @@ const {
 } = select( 'core/block-editor' );
 
 const {
+	moveBlockToPosition,
+	updateBlockAttributes,
+} = dispatch( 'core/block-editor' );
+
+const { getEditorMode, isFeatureActive } = select( 'core/edit-post' );
+const { toggleFeature } = dispatch( 'core/edit-post' );
+
+const {
 	isReordering,
 	getBlockOrder: getCustomBlockOrder,
 	getCurrentPage,
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
-const { getEditorMode } = select( 'core/edit-post' );
-
-const {
-	moveBlockToPosition,
-	updateBlockAttributes,
-} = dispatch( 'core/block-editor' );
-
-const {
-	setCurrentPage,
-} = dispatch( 'amp/story' );
+const {	setCurrentPage } = dispatch( 'amp/story' );
 
 /**
  * Initialize editor integration.
@@ -103,6 +102,11 @@ domReady( () => {
 		if ( block.attributes.ampFontFamily ) {
 			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
 		}
+	}
+
+	// Enforce fixed toolbar.
+	if ( ! isFeatureActive( 'fixedToolbar' ) ) {
+		toggleFeature( 'fixedToolbar' );
 	}
 
 	renderStoryComponents();
