@@ -32,7 +32,6 @@ import {
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
-	BLOCKS_WITH_TEXT_SETTINGS,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -319,42 +318,6 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
 	}
 
-	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
-		const style = props.style ? props.style : {};
-		const positionStyle = {
-			position: 'absolute',
-			top: `${ attributes.positionTop }%`,
-			left: `${ attributes.positionLeft }%`,
-		};
-		ampAttributes.style = {
-			...style,
-			...positionStyle,
-		};
-	}
-
-	if ( attributes.rotationAngle && ! attributes.ampAnimationType ) {
-		const rotationAngle = parseInt( attributes.rotationAngle );
-		const rotationStyle = {
-			transform: `rotate(${ rotationAngle }deg)`,
-		};
-		ampAttributes.style = {
-			...ampAttributes.style,
-			...rotationStyle,
-		};
-	}
-
-	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
-		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
-		};
-		ampAttributes.style = {
-			...ampAttributes.style,
-			...resizeStyle,
-		};
-	}
-
 	return {
 		...newProps,
 		...ampAttributes,
@@ -388,7 +351,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 };
 
 /**
- * Wraps all movable blocks in a grid layer.
+ * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
  * @param {Object} element
  * @param {Object} blockType
@@ -401,26 +364,49 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	// If both rotation and animation are present then we'll need to use a separate wrapper for rotation.
-	if ( attributes.rotationAngle && attributes.ampAnimationType ) {
+	const style = {
+		style: {},
+	};
+	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
+		const positionStyle = {
+			position: 'absolute',
+			top: `${ attributes.positionTop }%`,
+			left: `${ attributes.positionLeft }%`,
+		};
+		style.style = {
+			...style.style,
+			...positionStyle,
+		};
+	}
+
+	if ( attributes.rotationAngle ) {
 		const rotationAngle = parseInt( attributes.rotationAngle );
 		const rotationStyle = {
-			style: {
-				transform: `rotate(${ rotationAngle }deg)`,
-			},
+			transform: `rotate(${ rotationAngle }deg)`,
 		};
-		return (
-			<amp-story-grid-layer template="vertical">
-				<div { ...rotationStyle }>
-					{ element }
-				</div>
-			</amp-story-grid-layer>
-		);
+		style.style = {
+			...style.style,
+			...rotationStyle,
+		};
+	}
+
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
+	if ( attributes.width && attributes.height ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+		};
+		style.style = {
+			...style.style,
+			...resizeStyle,
+		};
 	}
 
 	return (
 		<amp-story-grid-layer template="vertical">
-			{ element }
+			<div className="amp-story-block-wrapper" { ...style }>
+				{ element }
+			</div>
 		</amp-story-grid-layer>
 	);
 };
@@ -899,8 +885,6 @@ export const getStylesFromBlockAttributes = ( {
 	textColor,
 	customBackgroundColor,
 	customTextColor,
-	width,
-	height,
 	opacity,
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
@@ -921,8 +905,6 @@ export const getStylesFromBlockAttributes = ( {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
 		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
-		width: `${ getPercentageFromPixels( 'x', width ) }%`,
-		height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		textAlign: align,
 	};
 };

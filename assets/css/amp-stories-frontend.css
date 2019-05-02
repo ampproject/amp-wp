@@ -96,3 +96,8 @@ amp-story-grid-layer .wp-block-quote {
     font-size: 13px;
     text-align: center;
 }
+
+.amp-story-block-wrapper > :first-child {
+    width: 100%;
+    height: 100%;
+}
