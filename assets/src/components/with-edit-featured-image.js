@@ -53,9 +53,5 @@ export default ( BlockEdit ) => {
 		) {
 			editPost( { featured_media: selectedMediaId } );
 		}
-	} )( ( props ) => {
-		return (
-			<BlockEdit { ...props } />
-		);
-	} );
+	} )( BlockEdit );
 };
