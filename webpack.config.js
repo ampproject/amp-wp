@@ -3,6 +3,7 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
 
@@ -19,11 +20,14 @@ const sharedConfig = {
 	},
 	optimization: {
 		usedExports: true,
-		minimizer: [ new TerserPlugin( {
-			parallel: true,
-			sourceMap: false,
-			cache: true,
-		} ) ],
+		minimizer: [
+			new TerserPlugin( {
+				parallel: true,
+				sourceMap: false,
+				cache: true,
+			} ),
+			new OptimizeCSSAssetsPlugin( { } ),
+		],
 	},
 };
 
