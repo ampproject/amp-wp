@@ -326,9 +326,9 @@ class EditPage extends Component {
 				</InspectorControls>
 				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
+					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video">
+							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster }>
 								<source src={ mediaUrl } type={ media.mime_type } />
 							</video>
 						</div>
