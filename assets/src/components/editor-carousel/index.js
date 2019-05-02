@@ -15,8 +15,8 @@ import { Reorderer } from '../';
 import { STORY_PAGE_INNER_WIDTH } from './../../constants';
 import './edit.css';
 
-// This is the sum of left (20px) and right (30px) margin.
-const TOTAL_PAGE_MARGIN = 50;
+// This is the sum of left (20px) and right (30px) margin and border of 2x3px.
+const TOTAL_PAGE_MARGIN = 56;
 
 class EditorCarousel extends Component {
 	constructor() {
