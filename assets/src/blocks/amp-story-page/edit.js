@@ -266,7 +266,7 @@ class EditPage extends Component {
 										{
 											! poster &&
 											<Notice status="error" isDismissible={ false } >
-												{ __( 'A poster image must be supplied.', 'amp' ) }
+												{ __( 'A poster image must be set.', 'amp' ) }
 											</Notice>
 										}
 										<MediaUpload
