@@ -161,7 +161,7 @@ class EditPage extends Component {
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
-			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : '50% 50%',
+			backgroundPosition: `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
 			backgroundRepeat: 'no-repeat',
 			backgroundSize: 'cover',
 		};
