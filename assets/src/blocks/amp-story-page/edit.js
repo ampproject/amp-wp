@@ -148,7 +148,7 @@ class EditPage extends Component {
 			mediaId,
 			mediaType,
 			mediaUrl,
-			focalPoint,
+			focalPoint = { x: .5, y: .5 },
 			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
