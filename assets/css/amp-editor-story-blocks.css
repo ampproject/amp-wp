@@ -90,6 +90,13 @@
 	left: 0 !important;
 }
 
+/**
+ * Hide option to toggle fixed toolbar.
+ */
+.edit-post-more-menu__content .components-menu-group .components-button:first-of-type {
+	display: none;
+}
+
 /*
  * 100. Shame
  */
