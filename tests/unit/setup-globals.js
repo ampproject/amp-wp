@@ -7,8 +7,10 @@ global.wp = {
 				extend: jest.fn(),
 			},
 		},
-		view: {
+		View: {
 			extend: jest.fn(),
+		},
+		view: {
 			Toolbar: {
 				Select: {
 					extend: jest.fn(),

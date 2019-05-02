@@ -18,7 +18,7 @@ const { wp } = window;
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-const FeaturedImageSelectionError = wp.media.view.extend( {
+const FeaturedImageSelectionError = wp.media.View.extend( {
 	className: 'notice notice-error notice-alt inline',
 	template: ( () => {
 		const message = sprintf(
