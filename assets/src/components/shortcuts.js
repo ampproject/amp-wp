@@ -42,7 +42,8 @@ const applyWithSelect = withSelect( ( select ) => {
 	return {
 		canInsertBlockType: ( name ) => {
 			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			return canInsertBlockType( name, getCurrentPage() ) && getBlockListSettings( getCurrentPage() ).allowedBlocks.includes( name );
+			const blockSettings = getBlockListSettings( getCurrentPage() );
+			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
 		},
 	};
 } );

@@ -16,15 +16,6 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	use AMP_Noscript_Fallback;
 
 	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
-
-	/**
 	 * Tag.
 	 *
 	 * @var string HTML <video> tag to identify and replace with AMP version.
@@ -187,6 +178,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Filter video dimensions, try to get width and height from original file if missing.
+	 *
+	 * The video block will automatically have the width/height supplied for attachments.
+	 *
+	 * @see \AMP_Core_Block_Handler::ampify_video_block()
 	 *
 	 * @param array  $new_attributes Attributes.
 	 * @param string $src            Video URL.

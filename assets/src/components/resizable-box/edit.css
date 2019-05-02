@@ -15,6 +15,10 @@
 	margin: 0 auto;
 }
 
+.amp-story-resize-container .amp-story-editor__rotate-container {
+	height: 100%;
+}
+
 .wp-block .components-resizable-box__handle,
 .wp-block.is-typing .components-resizable-box__handle{
 	display: block;

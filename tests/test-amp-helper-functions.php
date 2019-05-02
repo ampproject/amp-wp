@@ -973,6 +973,60 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_add_admin_bar_view_link()
+	 *
+	 * @covers \amp_add_admin_bar_view_link()
+	 * @global \WP_Query $wp_query
+	 */
+	public function test_amp_add_admin_bar_item() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		$post_id = $this->factory()->post->create();
+		$this->go_to( get_permalink( $post_id ) );
+		global $wp_query; // Must be here after the go_to() call.
+
+		// Check that canonical adds no link.
+		add_theme_support( 'amp' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp' ) );
+
+		// Check that paired mode does add link.
+		add_theme_support( 'amp', array( 'paired' => true ) );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+
+		// Confirm that link is added to non-AMP version.
+		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_endpoint() );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
+		unset( $wp_query->query_vars[ amp_get_slug() ] );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Confirm post opt-out works.
+		add_filter( 'amp_skip_post', '__return_true' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp' ) );
+		remove_filter( 'amp_skip_post', '__return_true' );
+
+		// Confirm Reader mode works.
+		remove_theme_support( 'amp' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+	}
+
+	/**
 	 * Get a mock publisher logo URL, to test that the filter works as expected.
 	 *
 	 * @param string $site_icon The publisher logo in the schema.org data.
