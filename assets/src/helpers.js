@@ -164,7 +164,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
+			selector: 'amp-story-grid-layer .amp-story-block-wrapper > *, amp-story-cta-layer',
 		},
 		ampAnimationType: {
 			type: 'string',
@@ -341,9 +341,10 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 		// Lets check the first child of the amp-story-grid-layer for the className.
 		if (
 			blockContentDiv.children[ 0 ].children.length &&
-			blockContentDiv.children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
+			blockContentDiv.children[ 0 ].children[ 0 ].children.length &&
+			blockContentDiv.children[ 0 ].children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
 		) {
-			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].className;
+			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].children[ 0 ].className;
 		}
 	}
 
