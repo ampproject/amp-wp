@@ -525,7 +525,7 @@ class AMP_Options_Menu {
 					}
 					printf(
 						/* translators: %s: Gutenberg plugin name */
-						esc_html__( 'To use AMP stories, you currently must have the latest version of the %s plugin installed.', 'amp' ),
+						esc_html__( 'To use AMP stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
 						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					);
 					?>

@@ -27,7 +27,6 @@ import {
 	withWrapperProps,
 	withCroppedFeaturedImage,
 	withActivePageState,
-	withPrePublishNotice,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 } from './components';
@@ -68,6 +67,8 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
+const { getEditorMode } = select( 'core/edit-post' );
+
 const {
 	moveBlockToPosition,
 	updateBlockAttributes,
@@ -107,7 +108,7 @@ domReady( () => {
 	renderStoryComponents();
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.querySelector( '.editor-writing-flow__click-redirect' ).remove();
+	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
 
 	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
 		registerBlockStyle( roundedBlock, {
@@ -137,7 +138,9 @@ domReady( () => {
 let blockOrder = getBlockOrder();
 let allBlocksWithChildren = getClientIdsWithDescendants();
 
-subscribe( () => {
+let editorMode = getEditorMode();
+
+subscribe( async () => {
 	maybeInitializeAnimations();
 
 	const defaultBlockName = getDefaultBlockName();
@@ -183,6 +186,18 @@ subscribe( () => {
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
+
+	// Re-add controls when switching back from code to visual editor.
+	const newEditorMode = getEditorMode();
+	if ( 'visual' === newEditorMode && newEditorMode !== editorMode ) {
+		while ( ! document.querySelector( '.editor-block-list__layout' ) ) {
+			await new Promise( ( r ) => setTimeout( r, 200 ) );
+		}
+
+		renderStoryComponents();
+	}
+
+	editorMode = newEditorMode;
 } );
 
 store.subscribe( () => {
@@ -241,8 +256,6 @@ plugins.keys().forEach( ( modulePath ) => {
 	const { name, render } = plugins( modulePath );
 	registerPlugin( name, { render } );
 } );
-
-registerPlugin( 'amp-story-featured-image-pre-publish', { render: withPrePublishNotice } );
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );

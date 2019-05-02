@@ -64,6 +64,7 @@ const ampEditorBlocks = ( function() {
 					value: 'intrinsic',
 					label: __( 'Intrinsic', 'amp' ),
 					notAvailable: [
+						'core/video',
 						'core-embed/youtube',
 						'core-embed/facebook',
 						'core-embed/instagram',

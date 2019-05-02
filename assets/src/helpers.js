@@ -10,9 +10,9 @@ import { each, every, isEqual } from 'lodash';
  */
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
-import { __, _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
+import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { dispatch, select } from '@wordpress/data';
 import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@wordpress/block-editor';
 
 /**
@@ -447,12 +447,6 @@ export const renderStoryComponents = () => {
 		const blockNavigation = document.createElement( 'div' );
 		blockNavigation.id = 'amp-story-block-navigation';
 
-		const editorCarousel = document.createElement( 'div' );
-		editorCarousel.id = 'amp-story-editor-carousel';
-
-		const storyControls = document.createElement( 'div' );
-		storyControls.id = 'amp-story-controls';
-
 		/**
 		 * The intended layout is as follows:
 		 *
@@ -464,37 +458,53 @@ export const renderStoryComponents = () => {
 		 * - - Carousel controls
 		 */
 		editorBlockList.parentNode.replaceChild( ampStoryWrapper, editorBlockList );
-		ampStoryWrapper.appendChild( storyControls );
-		ampStoryWrapper.appendChild( editorBlockList );
-		ampStoryWrapper.appendChild( blockNavigation );
-		ampStoryWrapper.appendChild( editorCarousel );
 
-		render(
-			<StoryControls />,
-			storyControls
-		);
+		if ( ! document.getElementById( 'amp-story-controls' ) ) {
+			const storyControls = document.createElement( 'div' );
+			storyControls.id = 'amp-story-controls';
+
+			ampStoryWrapper.appendChild( storyControls );
+
+			render(
+				<StoryControls />,
+				storyControls
+			);
+		}
+
+		ampStoryWrapper.appendChild( editorBlockList );
+
+		ampStoryWrapper.appendChild( blockNavigation );
 
 		render(
 			<BlockNavigation />,
 			blockNavigation
 		);
 
-		render(
-			<EditorCarousel />,
-			editorCarousel
-		);
+		if ( ! document.getElementById( 'amp-story-editor-carousel' ) ) {
+			const editorCarousel = document.createElement( 'div' );
+			editorCarousel.id = 'amp-story-editor-carousel';
+
+			ampStoryWrapper.appendChild( editorCarousel );
+
+			render(
+				<EditorCarousel />,
+				editorCarousel
+			);
+		}
 	}
 
 	if ( editorBlockNavigation ) {
-		const shortcuts = document.createElement( 'div' );
-		shortcuts.id = 'amp-story-shortcuts';
+		if ( ! document.getElementById( 'amp-story-shortcuts' ) ) {
+			const shortcuts = document.createElement( 'div' );
+			shortcuts.id = 'amp-story-shortcuts';
 
-		editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
+			editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
 
-		render(
-			<Shortcuts />,
-			shortcuts
-		);
+			render(
+				<Shortcuts />,
+				shortcuts
+			);
+		}
 
 		const customInserter = document.createElement( 'div' );
 		customInserter.id = 'amp-story-inserter';
@@ -612,43 +622,114 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 };
 
 /**
- * Gets the message for an invalid featured image, if it is invalid.
+ * Get minimum dimensions for a featured image.
  *
- * @param {Function} validateImageSize A function to validate whether the size is correct.
- * @param {string} invalidSizeMessage A message to display in a Notice if the size is wrong.
- * @return {string|null} A message about the invalid featured image, or null if it's valid.
+ * @link https://developers.google.com/search/docs/data-types/article#article_types
+ *
+ * "Images should be at least 1200 pixels wide.
+ * For best results, provide multiple high-resolution images (minimum of 800,000 pixels when multiplying width and height)
+ * with the following aspect ratios: 16x9, 4x3, and 1x1."
+ *
+ * Given this requirement, this function ensures the right aspect ratio.
+ * The 16/9 aspect ratio is chosen because it has the smallest height for the given width.
+ *
+ * @return {Object} Minimum dimensions including width and height.
  */
-export const getFeaturedImageMessage = ( validateImageSize, invalidSizeMessage ) => {
-	const currentPost = select( 'core/editor' ).getCurrentPost();
-	const editedFeaturedMedia = select( 'core/editor' ).getEditedPostAttribute( 'featured_media' );
-	const featuredMedia = currentPost.featured_media || editedFeaturedMedia;
+export const getMinimumFeaturedImageDimensions = () => {
+	const width = 1200;
 
-	if ( ! featuredMedia ) {
-		return __( 'Selecting a featured image is required.', 'amp' );
-	}
+	const height = width * ( 9 / 16 );
 
-	const media = select( 'core' ).getMedia( featuredMedia );
-	if ( ! media || ! media.media_details || ! validateImageSize( media.media_details ) ) {
-		return invalidSizeMessage;
-	}
+	return { width, height };
 };
 
 /**
- * Gets whether the AMP story's featured image has the right minimum dimensions.
+ * Get minimum dimensions for a story poster.
  *
- * The featured image will be used for the poster-portrait-src.
- * It should have a width of at least 696px and a height of at least 928px.
+ * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
  *
- * @param {Object} media A media object with width and height values.
+ * @return {Object} Minimum dimensions including width and height.
+ */
+export const getMinimumStoryPosterDimensions = () => {
+	const posterImageWidth = 696;
+	const posterImageHeight = 928;
+
+	const { width: featuredImageWidth, height: featuredImageHeight } = getMinimumFeaturedImageDimensions();
+
+	const expectedAspectRatio = featuredImageWidth / featuredImageHeight;
+
+	const width = Math.max( posterImageWidth, featuredImageWidth );
+	const height = Math.max( posterImageHeight, featuredImageHeight );
+
+	if ( ( ( width / height ) - expectedAspectRatio ) < Number.EPSILON ) {
+		return { width, height };
+	}
+
+	// Adjust the height to make sure the aspect ratio of posterImageDimensions is preserved.
+	return {
+		width,
+		height: ( 1 / expectedAspectRatio ) * width,
+	};
+};
+
+/**
+ * Determines whether whether the image has the minimum required dimensions.
+ *
+ * The image should have a width of at least 1200 pixels to satisfy the requirements of Google Search for Schema.org metadata.
+ *
+ * For AMP Stories, the featured image will be used for the poster-portrait-src.
+ * For this, it should have a width of at least 696px and a height of at least 928px.
+ *
+ * @param {Object} media      A media object with width and height values.
+ * @param {Object} dimensions An object with minimum required width and height values.
  * @return {boolean} Whether the media has the minimum dimensions.
  */
-export const hasMinimumStoryPosterDimensions = ( media ) => {
-	const minWidth = 696;
-	const minHeight = 928;
-	return (
-		( media.width && media.height )	&&
-		( media.width >= minWidth && media.height >= minHeight )
-	);
+export const hasMinimumDimensions = ( media, dimensions ) => {
+	if ( ! media || ! media.width || ! media.height ) {
+		return false;
+	}
+
+	const { width, height } = dimensions;
+
+	return ( media.width >= width && media.height >= height );
+};
+
+/**
+ * Validates the story featured image based on requirements.
+ *
+ * @param {Object}  media      A media object with width and height values.
+ * @param {Object}  dimensions An object with minimum required width and height values.
+ * @param {boolean} required   Whether the image is required or not.
+ * @return {string[]|null} Validation errors, or null if there were no errors.
+ */
+export const validateFeaturedImage = ( media, dimensions, required ) => {
+	if ( ! media ) {
+		if ( required ) {
+			return [ __( 'Selecting a featured image is required.', 'amp' ) ];
+		}
+
+		return [ __( 'Selecting a featured image is recommended for an optimal user experience.', 'amp' ) ];
+	}
+
+	const errors = [];
+
+	if ( ! [ 'image/png', 'image/gif', 'image/jpeg' ].includes( media.mime_type ) ) {
+		errors.push(
+			/* translators: 1: .jpg, 2: .png. 3: .gif */
+			sprintf( __( 'The featured image must be in %1$s, %2$s, or %3$s format.', 'amp' ), '.jpg', '.png', '.gif' )
+		);
+	}
+
+	if ( ! hasMinimumDimensions( media.media_details, dimensions ) ) {
+		const { width, height } = dimensions;
+
+		errors.push(
+			/* translators: 1: minimum width, 2: minimum height. */
+			sprintf( __( 'The featured image should have a size of at least %1$s by %2$s pixels.', 'amp' ), Math.ceil( width ), Math.ceil( height ) )
+		);
+	}
+
+	return 0 === errors.length ? null : errors;
 };
 
 /**
