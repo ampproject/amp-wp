@@ -3,6 +3,11 @@
  */
 import { detailToggleBtnAriaLabel, sourcesToggleBtnAriaLabel } from 'amp-validation-i18n';
 
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
+
 const OPEN_CLASS = 'is-open';
 
 /**
@@ -74,7 +79,7 @@ function addTermListTableRowClasses() {
 	} );
 }
 
-wp.domReady( () => {
+domReady( () => {
 	addToggleButtons( 'th.column-details.manage-column', detailToggleBtnAriaLabel )
 		.forEach( ( btn ) => {
 			addToggleAllListener( {
