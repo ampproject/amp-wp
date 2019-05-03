@@ -1077,8 +1077,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 		const media = select( 'core' ).getMedia( attributes.id );
 		// If the width and height haven't been set for the media, we should get it from the original image.
 		if ( media && media.media_details ) {
-			const height = media.media_details.height;
-			const width = media.media_details.width;
+			const { height, width } = media.media_details;
 			let ratio = 1;
 			// If the image exceeds the page limits, adjust the width and height accordingly.
 			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
