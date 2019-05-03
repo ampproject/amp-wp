@@ -139,13 +139,19 @@ const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
 } );
 
 const applyWithDispatch = withDispatch( ( dispatch, { block: { clientId } }, { select } ) => {
-	const { getBlockRootClientId } = select( 'core/block-editor' );
+	const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
 	const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 
 	const rootClientId = getBlockRootClientId( clientId );
+	const blockOrder = getBlockOrder( rootClientId );
 
 	return {
-		moveBlockToPosition: ( block, index ) => moveBlockToPosition( block, rootClientId, rootClientId, index ),
+		moveBlockToPosition: ( block, index ) => {
+			// Since the BlockNavigation list is reversed, inserting at index 0 actually means inserting at the end, and vice-versa.
+			const reversedIndex = blockOrder.length - 1 - index;
+
+			moveBlockToPosition( block, rootClientId, rootClientId, reversedIndex );
+		},
 	};
 } );
 
