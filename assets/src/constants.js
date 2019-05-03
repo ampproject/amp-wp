@@ -51,6 +51,7 @@ export const ALLOWED_MOVABLE_BLOCKS = [
 	'amp/amp-story-post-author',
 	'amp/amp-story-post-date',
 	'amp/amp-story-post-title',
+	'core/html',
 	'core/block', // Reusable blocks.
 	'core/template', // Reusable blocks.
 ];
