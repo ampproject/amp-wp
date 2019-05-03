@@ -153,13 +153,13 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	display: none;
 }
 
-#amp-story-editor .components-draggable__clone {
-	position: absolute;
-}
-
 /* Hide inserter within inactive pages */
 .amp-page-inactive[data-type="amp/amp-story-page"] .block-list-appender {
 	display: none;
+}
+
+.block-editor-block-list__block-edit .components-draggable__clone {
+	position: absolute;
 }
 
 /* Pullquote block adjustments */
