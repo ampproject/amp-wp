@@ -213,9 +213,12 @@
 	border-bottom: 3px solid #0071a1;
 }
 
-.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-close-to-top,
-.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-appender.is-close-to-top,
-.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-appender.is-close-to-bottom {
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
+	background: none;
+	border: none;
+}
+
+.block-editor-block-navigation__list li:first-child .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
 	background: none;
 	border-top: 3px solid #0071a1;
 	border-bottom: none;
