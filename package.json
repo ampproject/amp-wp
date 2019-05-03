@@ -21,7 +21,7 @@
     "cross-env": "5.2.0",
     "eslint": "5.16.0",
     "eslint-config-wordpress": "2.0.0",
-    "eslint-plugin-react": "7.12.4",
+    "eslint-plugin-react": "7.13.0",
     "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
