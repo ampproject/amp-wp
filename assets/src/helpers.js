@@ -158,6 +158,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	const isImageBlock = 'core/image' === name;
+	const isVideoBlock = 'core/video' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 	const addedAttributes = {
@@ -236,6 +237,17 @@ export const addAMPAttributes = ( settings, name ) => {
 	if ( isImageBlock ) {
 		addedAttributes.ampShowImageCaption = {
 			type: 'boolean',
+			default: false,
+		};
+	}
+
+	if ( isVideoBlock ) {
+		addedAttributes.autoplay = {
+			...addedAttributes.autoplay,
+			default: true,
+		};
+		addedAttributes.controls = {
+			...addedAttributes.controls,
 			default: false,
 		};
 	}
