@@ -159,7 +159,7 @@ class EditPage extends Component {
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
-			backgroundPosition: `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
+			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
 			backgroundRepeat: 'no-repeat',
 			backgroundSize: 'cover',
 		};
@@ -249,7 +249,7 @@ class EditPage extends Component {
 								{ !! mediaId &&
 								<MediaUploadCheck>
 									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove video', 'amp' ) : __( 'Remove image', 'amp' ) }
+										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>
 								}
@@ -258,8 +258,14 @@ class EditPage extends Component {
 								<MediaUploadCheck>
 									<BaseControl
 										id="editor-amp-story-page-poster"
-										label={ __( 'Poster Image (required)', 'amp' ) }
-										help={ __( 'The recommended dimensions for a poster image are: 720p (720w x 1280h)', 'amp' ) }
+										label={ __( 'Poster Image', 'amp' ) }
+										help={ sprintf(
+											/* translators: 1: 720p. 2: 720w. 3: 1280h */
+											__( 'The recommended dimensions for a poster image are: %1$s (%2$s x %3$s)', 'amp' ),
+											'720p',
+											'720w',
+											'1080h',
+										) }
 									>
 										{
 											! poster &&
@@ -282,40 +288,28 @@ class EditPage extends Component {
 														}
 													) }
 													onClick={ open }
-													aria-label={ ! poster ? null : __( 'Edit or update the poster image', 'amp' ) }
+													aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
 												>
-													{ !! poster &&
-													<ResponsiveWrapper
-														naturalWidth={ 960 }
-														naturalHeight={ 1280 }
-													>
-														<img src={ poster } alt="" />
-													</ResponsiveWrapper>
-													}
+													{ poster && (
+														<ResponsiveWrapper
+															naturalWidth={ 960 }
+															naturalHeight={ 1280 }
+														>
+															<img src={ poster } alt="" />
+														</ResponsiveWrapper>
+													) }
 													{ ! poster &&
-														__( 'Set poster image', 'amp' )
+														__( 'Set Poster Image', 'amp' )
 													}
 												</Button>
 											) }
 										/>
-
-										{ !! poster &&
-											<Fragment>
-												<MediaUpload
-													title={ __( 'Select Poster Image', 'amp' ) }
-													onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
-													allowedTypes={ ALLOWED_MEDIA_TYPES }
-													modalClass="editor-amp-story-background-video-poster__media-modal"
-													render={ ( { open } ) => (
-														<Button onClick={ open } className="editor-amp-story-page-background" isDefault isLarge>
-															{ __( 'Replace Poster Image', 'amp' ) }
-														</Button>
-													) }
-												/>
+										{
+											poster && (
 												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
-													{ __( 'Remove poster image', 'amp' ) }
+													{ __( 'Remove Poster Image', 'amp' ) }
 												</Button>
-											</Fragment>
+											)
 										}
 									</BaseControl>
 								</MediaUploadCheck>
@@ -368,7 +362,7 @@ class EditPage extends Component {
 						</div>
 					) }
 					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle }></div>
+						<div style={ overlayStyle } />
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
