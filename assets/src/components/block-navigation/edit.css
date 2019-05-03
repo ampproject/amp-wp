@@ -199,6 +199,10 @@
 	position: relative;
 }
 
+.block-editor-block-navigation__list .block-editor-block-navigation__item-is-dragging {
+	cursor: grab;
+}
+
 .block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone {
 	border: none;
 	border-radius: 0;

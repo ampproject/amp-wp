@@ -92,7 +92,12 @@ class BlockNavigationItem extends Component {
 		};
 
 		return (
-			<div className="editor-block-navigation__item block-editor-block-navigation__item">
+			<div className={ classnames(
+				'editor-block-navigation__item block-editor-block-navigation__item',
+				{
+					'block-editor-block-navigation__item-is-dragging': this.state.isDragging,
+				}
+			) } >
 				<Draggable
 					elementId={ blockElementId }
 					transferData={ transferData }
