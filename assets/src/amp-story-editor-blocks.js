@@ -40,6 +40,7 @@ import {
 	renderStoryComponents,
 	maybeInitializeAnimations,
 	maybeSetInitialPositioning,
+	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
@@ -187,6 +188,7 @@ subscribe( async () => {
 		maybeSetInitialPositioning( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
+		maybeSetInitialSize( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
