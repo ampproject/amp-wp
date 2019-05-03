@@ -2,6 +2,7 @@
  * External dependencies
  */
 import uuid from 'uuid/v4';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -20,8 +21,10 @@ import {
 	Button,
 	BaseControl,
 	FocalPointPicker,
+	Notice,
 	SelectControl,
 	RangeControl,
+	ResponsiveWrapper,
 } from '@wordpress/components';
 import { withSelect } from '@wordpress/data';
 
@@ -85,11 +88,8 @@ class EditPage extends Component {
 			mediaUrl: media.url,
 			mediaId: media.id,
 			mediaType,
+			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image ? media.image.src : undefined,
 		} );
-
-		if ( IMAGE_BACKGROUND_TYPE === mediaType ) {
-			this.props.setAttributes( { poster: undefined } );
-		}
 	}
 
 	removeBackgroundColor( index ) {
@@ -159,7 +159,7 @@ class EditPage extends Component {
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
-			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'cover',
+			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
 			backgroundRepeat: 'no-repeat',
 			backgroundSize: 'cover',
 		};
@@ -249,7 +249,7 @@ class EditPage extends Component {
 								{ !! mediaId &&
 								<MediaUploadCheck>
 									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove video', 'amp' ) : __( 'Remove image', 'amp' ) }
+										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>
 								}
@@ -258,30 +258,58 @@ class EditPage extends Component {
 								<MediaUploadCheck>
 									<BaseControl
 										id="editor-amp-story-page-poster"
-										label={ __( 'Poster Image (required)', 'amp' ) }
-										help={ __( 'The recommended dimensions for a poster image are: 720p (720w x 1280h)', 'amp' ) }
+										label={ __( 'Poster Image', 'amp' ) }
+										help={ sprintf(
+											/* translators: 1: 720p. 2: 720w. 3: 1280h */
+											__( 'The recommended dimensions for a poster image are: %1$s (%2$s x %3$s)', 'amp' ),
+											'720p',
+											'720w',
+											'1080h',
+										) }
 									>
+										{
+											! poster &&
+											<Notice status="error" isDismissible={ false } >
+												{ __( 'A poster image must be set.', 'amp' ) }
+											</Notice>
+										}
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
 											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
 											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
+											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
 												<Button
-													isDefault
+													className={ classnames(
+														'editor-amp-story-page-background',
+														{
+															'editor-post-featured-image__toggle': ! poster,
+															'editor-post-featured-image__preview': poster,
+														}
+													) }
 													onClick={ open }
-													className="editor-amp-story-page-background"
+													aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
 												>
-													{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
+													{ poster && (
+														<ResponsiveWrapper
+															naturalWidth={ 960 }
+															naturalHeight={ 1280 }
+														>
+															<img src={ poster } alt="" />
+														</ResponsiveWrapper>
+													) }
+													{ ! poster &&
+														__( 'Set Poster Image', 'amp' )
+													}
 												</Button>
 											) }
 										/>
-										{ poster &&
-										<Button
-											onClick={ () => setAttributes( { poster: undefined } ) }
-											isLink
-											isDestructive>
-											{ __( 'Remove Poster Image', 'amp' ) }
-										</Button>
+										{
+											poster && (
+												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
+													{ __( 'Remove Poster Image', 'amp' ) }
+												</Button>
+											)
 										}
 									</BaseControl>
 								</MediaUploadCheck>
@@ -326,15 +354,15 @@ class EditPage extends Component {
 				</InspectorControls>
 				<div key="contents" style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && ! poster && (
+					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video">
+							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster }>
 								<source src={ mediaUrl } type={ media.mime_type } />
 							</video>
 						</div>
 					) }
 					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle }></div>
+						<div style={ overlayStyle } />
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
