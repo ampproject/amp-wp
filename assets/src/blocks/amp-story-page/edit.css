@@ -158,6 +158,10 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	display: none;
 }
 
+.block-editor-block-list__block-edit .components-draggable__clone {
+	position: absolute;
+}
+
 /* Pullquote block adjustments */
 .wp-block[data-type="core/pullquote"][data-align="wide"],
 .wp-block[data-type="core/pullquote"][data-align="full"] {
