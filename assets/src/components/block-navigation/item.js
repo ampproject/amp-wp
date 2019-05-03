@@ -10,12 +10,13 @@ import { compose } from '@wordpress/compose';
 import { Button, Draggable, DropZone } from '@wordpress/components';
 import { Fragment, Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { BlockPreviewLabel } from '../';
-import { __ } from '@wordpress/i18n';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 /**
  * Parses drag & drop events to ensure the event contains valid transfer data.
@@ -55,15 +56,16 @@ class BlockNavigationItem extends Component {
 	}
 
 	getInsertIndex( position ) {
-		const { index } = this.props;
+		const { block: { clientId }, getBlockIndex } = this.props;
 
-		if ( index !== undefined ) {
+		if ( clientId !== undefined ) {
+			const index = getBlockIndex( clientId );
 			return position.y === 'top' ? index : index + 1;
 		}
 	}
 
 	onDrop( event, position ) {
-		const { block: { clientId }, moveBlockToPosition, index } = this.props;
+		const { block: { clientId }, moveBlockToPosition, getBlockIndex } = this.props;
 		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 
 		const isBlockDropType = ( dropType ) => dropType === 'block';
@@ -73,18 +75,19 @@ class BlockNavigationItem extends Component {
 			return;
 		}
 
+		const dstIndex = getBlockIndex( clientId );
 		const positionIndex = this.getInsertIndex( position );
-		const insertIndex = srcIndex < index ? positionIndex - 1 : positionIndex;
+		const insertIndex = srcIndex < dstIndex ? positionIndex - 1 : positionIndex;
 		moveBlockToPosition( srcClientId, insertIndex );
 	}
 
 	render() {
-		const { block, index, isSelected, onClick } = this.props;
+		const { block, getBlockIndex, isSelected, onClick } = this.props;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
 		const transferData = {
 			type: 'block',
-			srcIndex: index,
+			srcIndex: getBlockIndex( clientId ),
 			srcClientId: clientId,
 		};
 
@@ -131,10 +134,17 @@ class BlockNavigationItem extends Component {
 }
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
-	const { getBlockIndex, getBlockRootClientId } = select( 'core/block-editor' );
+	const { getBlockOrder, getBlockRootClientId, getBlocksByClientId } = select( 'core/block-editor' );
+
+	const blockOrder = getBlockOrder( getBlockRootClientId( clientId ) );
+
+	// Need to reverse the list and exclude CTA blocks just like BlockNavigation does.
+	const blocks = getBlocksByClientId( blockOrder ).filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).map( ( { clientId: id } ) => id ).reverse();
 
 	return {
-		index: getBlockIndex( clientId, getBlockRootClientId( clientId ) ),
+		getBlockIndex: ( blockClientId ) => {
+			return blocks.indexOf( blockClientId );
+		},
 	};
 } );
 
