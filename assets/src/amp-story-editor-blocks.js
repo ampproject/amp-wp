@@ -29,6 +29,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withVideoPosterImageNotice,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -270,6 +271,7 @@ addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNot
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', withCroppedFeaturedImage );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
