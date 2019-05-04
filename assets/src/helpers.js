@@ -242,12 +242,23 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	if ( isVideoBlock ) {
+		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
-			...addedAttributes.autoplay,
+			...settings.attributes.autoplay,
+			default: true,
+		};
+		addedAttributes.playsInline = {
+			...settings.attributes.playsInline,
+			default: false,
+		};
+
+		// Optional defaults.
+		addedAttributes.loop = {
+			...settings.attributes.loop,
 			default: true,
 		};
 		addedAttributes.controls = {
-			...addedAttributes.controls,
+			...settings.attributes.controls,
 			default: false,
 		};
 	}
