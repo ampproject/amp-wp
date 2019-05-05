@@ -195,6 +195,9 @@ class AMP_Story_Post_Type {
 		// In the block editor, remove the title from above the AMP Stories embed.
 		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
 
+		// Change some attributes for the AMP story embed.
+		add_filter( 'embed_html', array( __CLASS__, 'change_embed_iframe_attributes' ), 10, 2 );
+
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
@@ -1367,5 +1370,49 @@ class AMP_Story_Post_Type {
 		}
 
 		return preg_replace( '/<blockquote class="wp-embedded-content">.*?<\/blockquote>/', '', $output );
+	}
+
+	/**
+	 * Changes attributes of the AMP Story embed <iframe>.
+	 *
+	 * The embed typically appears in the editor in an <iframe>, and without an <iframe> on the front-end.
+	 * The height of the <iframe> isn't enough to display the full story, so this increases it.
+	 * Also, this removes attributes that AMP does not allow for the <amp-iframe>, like marginwidth.
+	 *
+	 * @param string  $output The embed output.
+	 * @param WP_Post $post The post for the embed.
+	 * @return string The filtered embed output.
+	 */
+	public static function change_embed_iframe_attributes( $output, $post ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $output;
+		}
+
+		preg_match( '/<iframe sandbox="allow-scripts" [^>]*>/', $output, $matches );
+		if ( ! $matches ) {
+			return $output;
+		}
+
+		$original_iframe = $matches[0];
+		$new_iframe      = preg_replace(
+			'/(?<=\sheight=")\w+(?=")/',
+			strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 ),
+			$original_iframe
+		);
+
+		// Remove attributes that AMP doesn't allow for the <amp-iframe>.
+		if ( is_amp_endpoint() ) {
+			$new_iframe = preg_replace(
+				array(
+					'/\ssecurity="[\w]+"/',
+					'/\smarginwidth="[\w]+"/',
+					'/\smarginheight="[\w]+"/',
+				),
+				'',
+				$new_iframe
+			);
+		}
+
+		return str_replace( $original_iframe, $new_iframe, $output );
 	}
 }
