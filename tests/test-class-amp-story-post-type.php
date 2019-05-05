@@ -314,6 +314,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Editor_Blocks::change_embed_iframe_attributes()
 	 */
 	public function test_change_embed_iframe_attributes() {
+		remove_theme_support( 'amp' );
 		$original_embed_markup = '<iframe sandbox="allow-scripts" width="600" height="343" security="restricted" marginwidth="10" marginheight="10">';
 		$non_amp_story         = $this->factory()->post->create_and_get();
 
