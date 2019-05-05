@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { validateFeaturedImage } from '../helpers';
+import { validateFeaturedImage } from '../common/helpers';
 
 /**
  * Conditionally adds a notice to the pre-publish panel for the featured image.

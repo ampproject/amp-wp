@@ -19,7 +19,7 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
 /**
  * Internal dependencies
  */
-import { getRgbaFromHex } from '../helpers';
+import { getBackgroundColorWithOpacity } from '../common/helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
@@ -31,16 +31,18 @@ const MetaBlockEdit = ( props ) => {
 		setAttributes,
 		className,
 		fontSize,
+		colors,
 		backgroundColor,
+		customBackgroundColor,
 		textColor,
 		tagName,
 	} = props;
 
 	const { align, opacity } = attributes;
 
-	const userFontSize = fontSize.size && fontSize.size + 'px';
+	const userFontSize = fontSize && fontSize.size && fontSize.size + 'px';
 
-	const [ r, g, b, a ] = getRgbaFromHex( backgroundColor.color, opacity );
+	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 	const ContentTag = tagName;
 
@@ -54,7 +56,7 @@ const MetaBlockEdit = ( props ) => {
 			</BlockControls>
 			<ContentTag
 				style={ {
-					backgroundColor: ( backgroundColor.color && 100 !== opacity ) ? `rgba( ${ r }, ${ g }, ${ b }, ${ a })` : backgroundColor.color,
+					backgroundColor: appliedBackgroundColor,
 					color: textColor.color,
 					fontSize: userFontSize,
 					textAlign: align,
@@ -79,6 +81,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 		withSelect( ( select ) => {
 			const { getEditedPostAttribute } = select( 'core/editor' );
 			const { getAuthors } = select( 'core' );
+			const { getSettings } = select( 'core/block-editor' );
 
 			const attributeValue = getEditedPostAttribute( attribute );
 
@@ -104,9 +107,12 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 					blockContent = attributeValue;
 			}
 
+			const { colors } = getSettings();
+
 			return {
 				blockContent,
 				placeholder,
+				colors,
 			};
 		} ),
 		// @todo: Implement isEditable handling to make this usable.
