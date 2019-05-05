@@ -101,17 +101,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-hooks',
 				'wp-i18n',
 				'wp-components',
+				'amp-editor-blocks',
 			),
 			$block_script->deps
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
-		$this->assertInternalType( 'array', $block_script->extra['before'] );
-
-		$matches = preg_grep( '/wpAmpEditor/', $block_script->extra['before'] );
-		$this->assertCount( 1, $matches );
-		$this->assertContains( AMP_Post_Meta_Box::ENABLED_STATUS, array_shift( $matches ) );
 	}
 
 	/**

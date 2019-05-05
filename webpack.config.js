@@ -13,6 +13,13 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 const sharedConfig = {
+	externals: [
+		...defaultConfig.externals,
+		{
+			// Make localized data importable.
+			'amp-stories-fonts': 'ampStoriesFonts',
+		},
+	],
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',
@@ -34,13 +41,6 @@ const sharedConfig = {
 const ampStories = {
 	...defaultConfig,
 	...sharedConfig,
-	externals: [
-		...defaultConfig.externals,
-		{
-			// Make localized data importable.
-			'amp-stories-fonts': 'ampStoriesFonts',
-		},
-	],
 	entry: {
 		'amp-stories': './assets/src/stories-editor/index.js',
 	},
@@ -96,7 +96,7 @@ const ampValidation = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: [
-		...defaultConfig.externals,
+		...sharedConfig.externals,
 		{
 			// Make localized data importable.
 			'amp-validation-i18n': 'ampValidationI18n',
@@ -114,16 +114,16 @@ const blockEditor = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: [
-		...defaultConfig.externals,
+		...sharedConfig.externals,
 		{
 			// Make localized data importable.
-			'amp-block-editor-data': 'wpAmpEditor',
+			'amp-block-editor-data': 'ampBlockEditor',
 		},
 	],
 	entry: {
 		'amp-block-editor': './assets/src/block-editor/index.js',
 		'amp-editor-blocks': './assets/src/block-editor/amp-editor-blocks.js',
-		'amp-block-validation': './assets/src/block-editor/amp-block-validation.js',
+		'amp-block-validation': './assets/src/block-validation/index.js',
 	},
 	module: {
 		...defaultConfig.module,
