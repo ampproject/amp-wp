@@ -87,9 +87,6 @@ amp-story-grid-layer .wp-block-quote {
     width: 100% !important;
     height: auto !important;
 }
-.wp-block-image.is-resized amp-img > img {
-	object-fit: contain;
-}
 
 .wp-block-image figcaption {
     color: #555d66;
