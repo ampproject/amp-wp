@@ -933,6 +933,26 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 };
 
 /**
+ * Removes a pre-set caption from image block.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeRemoveImageCaption = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	// If we have an image with pre-set caption we should remove the caption.
+	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+		updateBlockAttributes( clientId, { caption: '' } );
+	}
+};
+
+/**
  * Set initial positioning if the selected block is an unmodified block.
  *
  * @param {string} clientId Block ID.

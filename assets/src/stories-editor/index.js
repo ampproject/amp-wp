@@ -39,6 +39,7 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	maybeInitializeAnimations,
+	maybeRemoveImageCaption,
 	maybeSetInitialPositioning,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
@@ -185,6 +186,7 @@ subscribe( async () => {
 
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
+		maybeRemoveImageCaption( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
 	}
