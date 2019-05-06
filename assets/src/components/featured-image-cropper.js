@@ -1,4 +1,6 @@
 
+const { wp } = window;
+
 /**
  * A state for cropping a featured image.
  *

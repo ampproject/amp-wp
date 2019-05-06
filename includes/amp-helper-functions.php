@@ -397,7 +397,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handles = array( 'wp-i18n', 'wp-dom-ready' );
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );
+			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ) );
 		}
 	}
 

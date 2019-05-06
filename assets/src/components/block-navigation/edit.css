@@ -190,3 +190,40 @@
 		width: 60px;
 	}
 }
+
+/**
+ * Drag & Drop support
+ */
+
+.block-editor-block-navigation__list .block-editor-block-navigation__item {
+	position: relative;
+}
+
+.block-editor-block-navigation__list .block-editor-block-navigation__item-is-dragging {
+	cursor: grab;
+}
+
+.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone {
+	border: none;
+	border-radius: 0;
+}
+
+.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-dragging-over-element .components-drop-zone__content {
+	display: none;
+}
+
+.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-close-to-bottom {
+	background: none;
+	border-bottom: 3px solid #0071a1;
+}
+
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
+	background: none;
+	border: none;
+}
+
+.block-editor-block-navigation__list li:first-child .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
+	background: none;
+	border-top: 3px solid #0071a1;
+	border-bottom: none;
+}
