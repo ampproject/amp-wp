@@ -124,7 +124,6 @@ export const settings = {
 					/*
 					 * When there is nothing that matches the content selector (.amp-text-content), the pasted content
 					 * lacks lacks the amp-fit-text wrapper and thus ampFitText is false.
-					 * @todo This is still not working.
 					 */
 					if ( ! blockAttributes.content ) {
 						blockAttributes.content = node.textContent;
