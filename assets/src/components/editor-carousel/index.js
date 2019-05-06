@@ -12,7 +12,7 @@ import { compose } from '@wordpress/compose';
  */
 import Indicator from './indicator';
 import { Reorderer } from '../';
-import { STORY_PAGE_INNER_WIDTH } from './../../constants';
+import { STORY_PAGE_INNER_WIDTH } from '../../stories-editor/constants';
 import './edit.css';
 
 // This is the sum of left (20px) and right (30px) margin.
@@ -33,11 +33,13 @@ class EditorCarousel extends Component {
 			return;
 		}
 
+		const { currentIndex } = this.props;
+
 		if ( this.props.isReordering ) {
 			wrapper.style.display = 'none';
 		} else {
 			wrapper.style.display = '';
-			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( this.props.currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ this.props.currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
+			wrapper.style.transform = `translateX(calc(50% - ${ PAGE_BORDER }px - ${ ( STORY_PAGE_INNER_WIDTH + TOTAL_PAGE_MARGIN ) / 2 }px - ${ ( currentIndex ) * TOTAL_PAGE_MARGIN }px - ${ currentIndex * STORY_PAGE_INNER_WIDTH }px))`;
 		}
 	}
 

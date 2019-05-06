@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../stories-editor/constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
 const wrapperWithSelect = compose(
