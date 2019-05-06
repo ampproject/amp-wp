@@ -7,14 +7,15 @@ import { now } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { select, dispatch } from '@wordpress/data';
+import { dispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { getMinimumStoryPosterDimensions, getMinimumFeaturedImageDimensions } from '../helpers';
 import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
+
+const { wp } = window;
 
 /**
  * Gets a wrapped version of MediaUpload to crop featured images.
@@ -24,13 +25,10 @@ import FeaturedImageCropper from './featured-image-cropper';
  * Mostly copied from customize-controls.js.
  *
  * @param {Function} InitialMediaUpload The MediaUpload component, passed from the filter.
+ * @param {Object}   minImageDimensions Minimum required image dimensions.
  * @return {Function} The wrapped component.
  */
-export default ( InitialMediaUpload ) => {
-	// @todo: Pass dimensions as argument instead.
-	const minImageDimensions = 'amp_story' === select( 'core/editor' ).getCurrentPostType() ?
-		getMinimumStoryPosterDimensions() :
-		getMinimumFeaturedImageDimensions();
+export default ( InitialMediaUpload, minImageDimensions ) => {
 	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
 
 	/**

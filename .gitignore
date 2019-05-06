@@ -7,7 +7,8 @@ amp.zip
 assets/css/*-compiled.css
 assets/css/*-compiled-rtl.css
 assets/css/*.map
-assets/js/*-compiled.js
+assets/js/*.js
+!assets/js/amp-service-worker-runtime-precaching.js
 assets/js/*.map
 built
 /amphtml

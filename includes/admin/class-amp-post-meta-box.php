@@ -27,7 +27,7 @@ class AMP_Post_Meta_Box {
 	 * @since 1.0
 	 * @var string
 	 */
-	const BLOCK_ASSET_HANDLE = 'amp-block-editor-compiled';
+	const BLOCK_ASSET_HANDLE = 'amp-block-editor';
 
 	/**
 	 * The enabled status post meta value.

@@ -9,13 +9,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './edit.css';
-
-/**
- * Internal dependencies
- */
 import BlockNavigationItem from './item';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../stories-editor/constants';
+import './edit.css';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (

@@ -15,7 +15,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getPercentageFromPixels } from './../helpers';
+import { getPercentageFromPixels } from '../stories-editor/helpers';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
