@@ -1029,6 +1029,40 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 };
 
 /**
+ * Sets width and height to image if it hasn't been set via resizing yet.
+ * Takes the values from the original image.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetInitialSize = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	if ( ! attributes.width && ! attributes.height && 0 < attributes.id ) {
+		const media = select( 'core' ).getMedia( attributes.id );
+		// If the width and height haven't been set for the media, we should get it from the original image.
+		if ( media && media.media_details ) {
+			const { height, width } = media.media_details;
+			let ratio = 1;
+			// If the image exceeds the page limits, adjust the width and height accordingly.
+			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
+				ratio = Math.max( width / STORY_PAGE_INNER_WIDTH, height / STORY_PAGE_INNER_HEIGHT );
+			}
+
+			updateBlockAttributes( clientId, {
+				width: Math.round( width / ratio ),
+				height: Math.round( height / ratio ),
+			} );
+		}
+	}
+};
+
+/**
  * Determines the HTML tag name that should be used for text blocks.
  *
  * This is based on the block's attributes, as well as the surrounding context.

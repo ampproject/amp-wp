@@ -41,6 +41,7 @@ import {
 	maybeInitializeAnimations,
 	maybeRemoveImageCaption,
 	maybeSetInitialPositioning,
+	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
@@ -189,6 +190,7 @@ subscribe( async () => {
 		maybeRemoveImageCaption( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
+		maybeSetInitialSize( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
