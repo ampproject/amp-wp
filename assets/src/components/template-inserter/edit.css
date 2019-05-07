@@ -1,7 +1,7 @@
 #amp-story-controls .editor-inserter__amp-inserter {
 	height: 48px;
 	width: 48px;
-	background-color: #0085BA;
+	background-color: theme(primary);
 	border-radius: 50%;
 	margin-right: 10px;
 }
