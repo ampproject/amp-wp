@@ -634,6 +634,9 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 			minFontSize = mid;
 		}
 	}
+	// Let's restore the correct font size, too.
+	measurer.style.fontSize = minFontSize + 'px';
+
 	return minFontSize;
 };
 
