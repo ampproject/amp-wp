@@ -13,6 +13,7 @@ p {
 
 amp-story-grid-layer {
     padding: 0;
+    align-content: unset;
 }
 
 .wp-block-pullquote {
@@ -83,12 +84,13 @@ amp-story-grid-layer .wp-block-quote {
     font-size: 32px;
     font-family: "Source Sans Pro", sans-serif;
 }
-.wp-block-image.is-resized amp-img {
+
+.wp-block-image amp-img {
     width: 100% !important;
-    height: auto !important;
+    height: 100% !important;
 }
-.wp-block-image.is-resized amp-img > img {
-	object-fit: contain;
+.wp-block-image amp-img > img {
+	object-fit: cover;
 }
 
 .wp-block-image figcaption {
