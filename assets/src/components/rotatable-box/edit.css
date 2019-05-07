@@ -45,7 +45,7 @@
 	position: absolute;
 	bottom: -40px;
 	margin-left: 50%;
-	border-left: 1px solid theme(outlines);
+	border-left: 1px solid theme( outlines );
 }
 
 .block-editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
@@ -64,7 +64,7 @@
 }
 
 .rotatable-box-wrap .rotatable-box-wrap__handle::before {
-	background: theme(primary);
+	background: theme( primary );
 	border: 2px solid #fff;
 	border-radius: 50%;
 	content: "";
