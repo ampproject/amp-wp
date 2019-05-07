@@ -933,6 +933,26 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 };
 
 /**
+ * Removes a pre-set caption from image block.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeRemoveImageCaption = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	// If we have an image with pre-set caption we should remove the caption.
+	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+		updateBlockAttributes( clientId, { caption: '' } );
+	}
+};
+
+/**
  * Set initial positioning if the selected block is an unmodified block.
  *
  * @param {string} clientId Block ID.
@@ -1005,6 +1025,40 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 
 	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
 		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
+	}
+};
+
+/**
+ * Sets width and height to image if it hasn't been set via resizing yet.
+ * Takes the values from the original image.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetInitialSize = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	if ( ! attributes.width && ! attributes.height && 0 < attributes.id ) {
+		const media = select( 'core' ).getMedia( attributes.id );
+		// If the width and height haven't been set for the media, we should get it from the original image.
+		if ( media && media.media_details ) {
+			const { height, width } = media.media_details;
+			let ratio = 1;
+			// If the image exceeds the page limits, adjust the width and height accordingly.
+			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
+				ratio = Math.max( width / STORY_PAGE_INNER_WIDTH, height / STORY_PAGE_INNER_HEIGHT );
+			}
+
+			updateBlockAttributes( clientId, {
+				width: Math.round( width / ratio ),
+				height: Math.round( height / ratio ),
+			} );
+		}
 	}
 };
 

@@ -39,7 +39,9 @@ import {
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	maybeInitializeAnimations,
+	maybeRemoveImageCaption,
 	maybeSetInitialPositioning,
+	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
@@ -185,8 +187,10 @@ subscribe( async () => {
 
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
+		maybeRemoveImageCaption( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
+		maybeSetInitialSize( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();

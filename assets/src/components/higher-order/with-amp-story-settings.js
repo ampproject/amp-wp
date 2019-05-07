@@ -174,11 +174,6 @@ export default createHigherOrderComponent(
 				rotationAngle,
 			} = attributes;
 
-			// If we have an image with pre-set caption we should remove it.
-			if ( isImageBlock && ! ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
-				setAttributes( { caption: '' } );
-			}
-
 			const minTextHeight = 20;
 			const minTextWidth = 30;
 
