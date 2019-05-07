@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { RichText } from '@wordpress/block-editor';
 import { RawHTML } from '@wordpress/element';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -108,5 +109,31 @@ export const settings = {
 				<amp-fit-text layout="flex-item" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
 			</ContentTag>
 		);
+	},
+
+	transforms: {
+		from: [
+			{
+				type: 'raw',
+				priority: 20,
+				selector: 'p,h1,h2',
+				transform: ( node ) => {
+					const innerHTML = node.outerHTML;
+					const blockAttributes = getBlockAttributes( name, innerHTML );
+
+					/*
+					 * When there is nothing that matches the content selector (.amp-text-content), the pasted content
+					 * lacks lacks the amp-fit-text wrapper and thus ampFitText is false.
+					 */
+					if ( ! blockAttributes.content ) {
+						blockAttributes.content = node.textContent;
+						blockAttributes.tagName = node.nodeName;
+						blockAttributes.ampFitText = false;
+					}
+
+					return createBlock( name, blockAttributes );
+				},
+			},
+		],
 	},
 };
