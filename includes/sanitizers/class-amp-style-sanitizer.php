@@ -1157,7 +1157,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = array() ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v17'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v18'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -1512,8 +1512,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					foreach ( $selectors as $selector ) {
 						$selectors_parsed[ $selector ] = array();
 
-						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text`.
-						$reduced_selector = preg_replace( '/::?[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
+						// Remove :not() and pseudo selectors to eliminate false negatives, such as with `body:not(.title-tagline-hidden) .site-branding-text` (but not after escape character).
+						$reduced_selector = preg_replace( '/(?<!\\\\)::?[a-zA-Z0-9_-]+(\(.+?\))?/', '', $selector );
 
 						// Ignore any selector terms that occur under a dynamic selector.
 						if ( $dynamic_selector_pattern ) {
@@ -1535,9 +1535,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 						// Extract class names.
 						$reduced_selector = preg_replace_callback(
-							'/\.([a-zA-Z0-9_-]+)/',
+							'/\.((?:[a-zA-Z0-9_-]+|\\\\.)+)/', // The `\\\\.` will allow any char via escaping, like the colon in `.lg\:w-full`.
 							function( $matches ) use ( $selector, &$selectors_parsed ) {
-								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = $matches[1];
+								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = stripslashes( $matches[1] );
 								return '';
 							},
 							$reduced_selector
