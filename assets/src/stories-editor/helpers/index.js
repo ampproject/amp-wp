@@ -374,9 +374,14 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {Object} element    Block element.
- * @param {Object} blockType  Block type object.
- * @param {Object} attributes Block type name.
+ * @param {Object} element                  Block element.
+ * @param {Object} blockType                Block type object.
+ * @param {Object} attributes               Block attributes.
+ * @param {number} attributes.positionTop   Top offset in pixel.
+ * @param {number} attributes.positionLeft  Left offset in pixel.
+ * @param {number} attributes.rotationAngle Rotation angle in degrees.
+ * @param {number} attributes.width         Block width in pixel.
+ * @param {number} attributes.height        Block height in pixel.
  *
  * @return {Object} The wrapped element.
  */
@@ -385,14 +390,17 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
+	const { positionTop, positionLeft, rotationAngle, width, height } = attributes;
+
 	const style = {
 		style: {},
 	};
-	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
+
+	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
 		const positionStyle = {
 			position: 'absolute',
-			top: `${ attributes.positionTop }%`,
-			left: `${ attributes.positionLeft }%`,
+			top: `${ positionTop }%`,
+			left: `${ positionLeft }%`,
 		};
 		style.style = {
 			...style.style,
@@ -400,10 +408,9 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
-	if ( attributes.rotationAngle ) {
-		const rotationAngle = parseInt( attributes.rotationAngle );
+	if ( rotationAngle ) {
 		const rotationStyle = {
-			transform: `rotate(${ rotationAngle }deg)`,
+			transform: `rotate(${ parseInt( rotationAngle ) }deg)`,
 		};
 		style.style = {
 			...style.style,
@@ -412,10 +419,10 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( attributes.width && attributes.height ) {
+	if ( width && height ) {
 		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 		style.style = {
 			...style.style,
