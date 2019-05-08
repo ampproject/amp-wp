@@ -73,12 +73,11 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { select } ) => {
+const applyWithDispatch = withDispatch( ( dispatch, {}, { select } ) => {
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
 	} = select( 'core/block-editor' );
-	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -102,13 +101,6 @@ const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { selec
 		},
 		onAnimationDelayChange( value ) {
 			changeAnimationDelay( page, item, value );
-		},
-		startBlockRotation: () => toggleSelection( false ),
-		stopBlockRotation: () => {
-			toggleSelection( true );
-
-			clearSelectedBlock();
-			document.activeElement.blur();
 		},
 	};
 } );
@@ -145,8 +137,6 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
-				startBlockRotation,
-				stopBlockRotation,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -193,15 +183,10 @@ export default createHigherOrderComponent(
 							initialAngle={ rotationAngle }
 							className="amp-story-editor__rotate-container"
 							angle={ isSelected ? 0 : rotationAngle }
-							onRotateStart={ () => {
-								startBlockRotation();
-							} }
 							onRotateStop={ ( event, angle ) => {
 								setAttributes( {
 									rotationAngle: angle,
 								} );
-
-								stopBlockRotation();
 							} }
 						>
 							<BlockEdit { ...props } />
@@ -227,15 +212,10 @@ export default createHigherOrderComponent(
 								initialAngle={ rotationAngle }
 								className="amp-story-editor__rotate-container"
 								angle={ isSelected ? 0 : rotationAngle }
-								onRotateStart={ () => {
-									startBlockRotation();
-								} }
 								onRotateStop={ ( event, angle ) => {
 									setAttributes( {
 										rotationAngle: angle,
 									} );
-
-									stopBlockRotation();
 								} }
 							>
 								<BlockEdit { ...props } />

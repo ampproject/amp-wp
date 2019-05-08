@@ -53,8 +53,6 @@ class BlockDropZone extends Component {
 			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
 			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
 		} );
-		// Make sure the block stays selected. // @todo This is not working.
-		selectBlock( srcClientId );
 	}
 
 	render() {
