@@ -27,7 +27,7 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { updateBlockAttributes, srcClientId } = this.props;
+		const { updateBlockAttributes, srcClientId, selectBlock } = this.props;
 
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
@@ -53,6 +53,8 @@ class BlockDropZone extends Component {
 			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
 			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
 		} );
+		// Make sure the block stays selected. // @todo This is not working.
+		selectBlock( srcClientId );
 	}
 
 	render() {
@@ -65,11 +67,12 @@ class BlockDropZone extends Component {
 	}
 }
 export default withDispatch( ( dispatch ) => {
-	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+	const { updateBlockAttributes, selectBlock } = dispatch( 'core/block-editor' );
 
 	return {
 		updateBlockAttributes( ...args ) {
 			updateBlockAttributes( ...args );
 		},
+		selectBlock,
 	};
 } )( BlockDropZone );
