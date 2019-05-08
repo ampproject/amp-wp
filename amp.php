@@ -241,6 +241,7 @@ add_action( 'after_setup_theme', 'amp_after_setup_theme', 5 );
  * @since 0.1
  */
 function amp_init() {
+	AMP_HTTP::$server_timing = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || current_user_can( 'manage_options' );
 
 	/**
 	 * Triggers on init when AMP plugin is active.

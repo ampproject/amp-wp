@@ -21,6 +21,13 @@ class AMP_HTTP {
 	public static $headers_sent = array();
 
 	/**
+	 * Whether Server-Timing headers are sent.
+	 *
+	 * @var bool
+	 */
+	public static $server_timing = true;
+
+	/**
 	 * AMP-specific query vars that were purged.
 	 *
 	 * @since 0.7
@@ -83,7 +90,7 @@ class AMP_HTTP {
 	 * @return bool Return value of send_header call. If WP_DEBUG is not enabled or admin user (who can manage_options) is not logged-in, this will always return false.
 	 */
 	public static function send_server_timing( $name, $duration = null, $description = null ) {
-		if ( ! WP_DEBUG && ! current_user_can( 'manage_options' ) ) {
+		if ( ! self::$server_timing ) {
 			return false;
 		}
 		$value = $name;
