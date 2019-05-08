@@ -27,7 +27,7 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { updateBlockAttributes, srcClientId, selectBlock } = this.props;
+		const { updateBlockAttributes, srcClientId } = this.props;
 
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
@@ -65,12 +65,11 @@ class BlockDropZone extends Component {
 	}
 }
 export default withDispatch( ( dispatch ) => {
-	const { updateBlockAttributes, selectBlock } = dispatch( 'core/block-editor' );
+	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 	return {
 		updateBlockAttributes( ...args ) {
 			updateBlockAttributes( ...args );
 		},
-		selectBlock,
 	};
 } )( BlockDropZone );
