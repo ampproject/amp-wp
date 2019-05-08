@@ -13,6 +13,11 @@ import { noop } from 'lodash';
 import { Component } from '@wordpress/element';
 import { withSafeTimeout } from '@wordpress/compose';
 
+/**
+ * Internal dependencies
+ */
+import { getPixelsFromPercentage } from '../../stories-editor/helpers';
+
 const cloneWrapperClass = 'components-draggable__clone';
 
 const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
@@ -73,12 +78,9 @@ class Draggable extends Component {
 
 	/**
 	 *  - Clones the current element and spawns clone over original element.
-	 *  - Sets transfer data.
 	 *  - Adds dragover listener.
 	 *
-	 * @param {Object} event		 The non-custom DragEvent.
-	 * @param {string} elementId	 The HTML id of the element to be dragged.
-	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
+	 * @param {Object} event Custom DragEvent.
 	 */
 	onDragStart( event ) {
 		const { elementId, transferData, onDragStart = noop } = this.props;
@@ -94,24 +96,23 @@ class Draggable extends Component {
 		// Prepare element clone and append to element wrapper.
 		const elementRect = element.getBoundingClientRect();
 		const elementWrapper = element.parentNode;
-		const elementTopOffset = parseInt( elementRect.top, 10 );
-		const elementLeftOffset = parseInt( elementRect.left, 10 );
 
-		const pageWrapperRect = parentPage.getBoundingClientRect();
-
-		const clone = element.cloneNode( true );
-		clone.id = `clone-${ elementId }`;
-		clone.style.top = 0;
-		clone.style.left = 0;
 		this.cloneWrapper = document.createElement( 'div' );
 		this.cloneWrapper.classList.add( cloneWrapperClass );
 		this.cloneWrapper.style.width = `${ elementRect.width }px`;
 
+		const clone = element.cloneNode( true );
+		this.cloneWrapper.style.transform = clone.style.transform;
+
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ elementTopOffset - parseInt( pageWrapperRect.top, 10 ) }px`;
+		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
 		// Add 5px adjustment for having the block mover right next to the clone.
-		// @todo This will need some additional adjusting once we add padding to the Page in the editor.
-		this.cloneWrapper.style.left = `${ elementLeftOffset - parseInt( pageWrapperRect.left, 10 ) - 5 }px`;
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+
+		clone.id = `clone-${ elementId }`;
+		clone.style.top = 0;
+		clone.style.left = 0;
+		clone.style.transform = 'none';
 
 		// Hack: Remove iFrames as it's causing the embeds drag clone to freeze
 		[ ...clone.querySelectorAll( 'iframe' ) ].forEach( ( child ) => child.parentNode.removeChild( child ) );

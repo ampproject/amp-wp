@@ -668,6 +668,22 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 };
 
 /**
+ * Get pixel value from percentage, based on the full width / height of the page.
+ *
+ * @param {string} axis X or Y axis.
+ * @param {number} percentageValue Value in pixels.
+ * @return {number} Value in percentage.
+ */
+export const getPixelsFromPercentage = ( axis, percentageValue ) => {
+	if ( 'x' === axis ) {
+		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_WIDTH );
+	} else if ( 'y' === axis ) {
+		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_HEIGHT );
+	}
+	return 0;
+};
+
+/**
  * Returns the minimum dimensions for a story poster image.
  *
  * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
