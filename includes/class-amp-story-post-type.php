@@ -985,7 +985,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * Forces the block editor to be used for stories.
 	 *
-	 * @param array $editors    Associative array of the editors and whether they are enabled for the post type.
+	 * @param array  $editors   Associative array of the editors and whether they are enabled for the post type.
 	 * @param string $post_type The post type.
 	 *
 	 * @return array Filtered list of enabled editors.
