@@ -42,6 +42,7 @@ class BlockDropZone extends Component {
 		}
 
 		// We have to remove the rotation for getting accurate position.
+		clone.parentNode.style.visibility = 'hidden';
 		clone.parentNode.style.transform = 'none';
 		const clonePosition = clone.getBoundingClientRect();
 		const wrapperPosition = wrapperEl.getBoundingClientRect();

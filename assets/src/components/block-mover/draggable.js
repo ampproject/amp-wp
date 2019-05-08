@@ -94,12 +94,13 @@ class Draggable extends Component {
 		event.dataTransfer.setData( 'text', JSON.stringify( transferData ) );
 
 		// Prepare element clone and append to element wrapper.
-		const elementRect = element.getBoundingClientRect();
 		const elementWrapper = element.parentNode;
 
 		this.cloneWrapper = document.createElement( 'div' );
 		this.cloneWrapper.classList.add( cloneWrapperClass );
-		this.cloneWrapper.style.width = `${ elementRect.width }px`;
+
+		this.cloneWrapper.style.width = `${ element.clientWidth }px`;
+		this.cloneWrapper.style.height = `${ element.clientHeight }px`;
 
 		const clone = element.cloneNode( true );
 		this.cloneWrapper.style.transform = clone.style.transform;
