@@ -42,7 +42,8 @@ class Draggable extends Component {
 
 	/**
 	 * Removes the element clone, resets cursor, and removes drag listener.
-	 * @param  {Object} event     The non-custom DragEvent.
+	 *
+	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd( event ) {
 		const { onDragEnd = noop } = this.props;
@@ -54,9 +55,10 @@ class Draggable extends Component {
 		this.props.setTimeout( onDragEnd );
 	}
 
-	/*
+	/**
 	 * Updates positioning of element clone based on mouse movement during dragging.
-	 * @param  {Object} event     The non-custom DragEvent.
+	 *
+	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
 		this.cloneWrapper.style.top =
@@ -81,6 +83,8 @@ class Draggable extends Component {
 	 *  - Adds dragover listener.
 	 *
 	 * @param {Object} event Custom DragEvent.
+	 * @param {string} elementId	The HTML id of the element to be dragged.
+	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
 		const { elementId, transferData, onDragStart = noop } = this.props;
