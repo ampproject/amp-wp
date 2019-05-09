@@ -5,7 +5,12 @@ import { getBlockType, createBlock } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
+import { compose, ifCondition } from '@wordpress/compose';
+
+/**
+ * Internal dependencies
+ */
+import { withIsReordering } from '../';
 
 const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 	const blocks = [
@@ -66,6 +71,10 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 } );
 
 export default compose(
+	withIsReordering,
+	ifCondition(
+		( { isReordering } ) => ! isReordering
+	),
 	applyWithSelect,
 	applyWithDispatch,
 )( Shortcuts );

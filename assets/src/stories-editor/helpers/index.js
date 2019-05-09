@@ -11,7 +11,7 @@ import { each, every, isEqual } from 'lodash';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { _x } from '@wordpress/i18n';
-import { select, dispatch, withSelect } from '@wordpress/data';
+import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 import { getColorClassName, RichText } from '@wordpress/block-editor';
 
@@ -519,20 +519,6 @@ export const renderStoryComponents = () => {
 		}
 	}
 
-	/**
-	 * Gets a component that conditionally displays, depending on whether the pages are reordering.
-	 *
-	 * @param {Function} component The component to conditionally display.
-	 * @return {Function|null} The passed omponent, or null.
-	 */
-	const getConditionalDisplay = ( component ) => {
-		return withSelect( ( ownSelect ) => {
-			return { isReordering: ownSelect( 'amp/story' ).isReordering() };
-		} )( ( { isReordering } ) => {
-			return isReordering ? null : component;
-		} );
-	};
-
 	if ( editorBlockNavigation ) {
 		if ( ! document.getElementById( 'amp-story-shortcuts' ) ) {
 			const shortcuts = document.createElement( 'div' );
@@ -540,9 +526,8 @@ export const renderStoryComponents = () => {
 
 			editorBlockNavigation.parentNode.parentNode.insertBefore( shortcuts, editorBlockNavigation.parentNode.nextSibling );
 
-			const ConditionallyDisplayedShortcuts = getConditionalDisplay( <Shortcuts /> );
 			render(
-				<ConditionallyDisplayedShortcuts />,
+				<Shortcuts />,
 				shortcuts
 			);
 		}
@@ -553,9 +538,8 @@ export const renderStoryComponents = () => {
 		const inserterWrapper = editorBlockNavigation.parentNode.parentNode.querySelector( '.block-editor-inserter' ).parentNode;
 		inserterWrapper.parentNode.replaceChild( customInserter, inserterWrapper );
 
-		const ConditionallyDisplayedInserter = getConditionalDisplay( <Inserter position="bottom right" /> );
 		render(
-			<ConditionallyDisplayedInserter />,
+			<Inserter position="bottom right" />,
 			customInserter
 		);
 	}

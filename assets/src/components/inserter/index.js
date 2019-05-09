@@ -2,7 +2,7 @@
  * This is an almost 1:1 copy of the Inserter component in @wordpress/block-editor.
  *
  * It has been included here in a slightly modified way, namely without the hasItems
- * limitation.
+ * limitation and with an additional restriction to hide the inserter while reordering is in progress.
  */
 
 /**
@@ -11,10 +11,12 @@
 import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
+import { compose, ifCondition } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
+import { withIsReordering } from '../';
 import InserterMenu from './menu';
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
@@ -105,4 +107,9 @@ class Inserter extends Component {
 	}
 }
 
-export default Inserter;
+export default compose(
+	withIsReordering,
+	ifCondition(
+		( { isReordering } ) => ! isReordering
+	),
+)( Inserter );
