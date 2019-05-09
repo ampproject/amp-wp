@@ -11,16 +11,13 @@ import classnames from 'classnames';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
-import { withSelect, withDispatch } from '@wordpress/data';
-import { withInstanceId, compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { upArrow, downArrow, dragHandle } from './icons';
+import { dragHandle } from './icons';
 import { IconDragHandle } from './drag-handle';
 import IgnoreNestedEvents from './ignore-nested-events';
 import './edit.css';
@@ -48,7 +45,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientId, blockElementId, instanceId } = this.props;
+		const { isDraggable, onDragStart, onDragEnd, clientId, blockElementId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
@@ -58,16 +55,6 @@ export class BlockMover extends Component {
 		return (
 			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] }>
 				<div className={ classnames( 'amp-story-editor-block-mover editor-block-mover block-editor-block-mover', { 'is-visible': isFocused } ) }>
-					<IconButton
-						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isLast ? null : bringForward }
-						icon={ upArrow }
-						label={ __( 'Bring Forward', 'amp' ) }
-						aria-describedby={ `editor-block-mover__up-description-${ instanceId }` }
-						aria-disabled={ isLast }
-						onFocus={ this.onFocus }
-						onBlur={ this.onBlur }
-					/>
 					<IconDragHandle
 						className="editor-block-mover__control block-editor-block-mover__control"
 						icon={ dragHandle }
@@ -77,44 +64,15 @@ export class BlockMover extends Component {
 						onDragStart={ onDragStart }
 						onDragEnd={ onDragEnd }
 					/>
-					<IconButton
-						className="editor-block-mover__control block-editor-block-mover__control"
-						onClick={ isFirst ? null : sendBackward }
-						icon={ downArrow }
-						label={ __( 'Send Backward', 'amp' ) }
-						aria-describedby={ `editor-block-mover__down-description-${ instanceId }` }
-						aria-disabled={ isFirst }
-						onFocus={ this.onFocus }
-						onBlur={ this.onBlur }
-					/>
 				</div>
 			</IgnoreNestedEvents>
 		);
 	}
 }
 
-export default compose(
-	withSelect( ( select, { clientId } ) => {
-		const { getBlockOrder, getBlockIndex, getTemplateLock, getBlockRootClientId } = select( 'core/block-editor' );
-		const rootClientId = getBlockRootClientId( clientId );
-		const blockClientIds = getBlockOrder( rootClientId );
-		const blockIndex = getBlockIndex( clientId, rootClientId );
-
-		return {
-			isFirst: 0 === blockIndex,
-			isLast: blockIndex === blockClientIds.length - 1,
-			isLocked: getTemplateLock( rootClientId ) === 'all',
-			rootClientId,
-		};
-	} ),
-	withDispatch( ( dispatch, { clientId, rootClientId } ) => {
-		const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
-
-		return {
-			onDragEnd: clearSelectedBlock,
-			bringForward: () => moveBlocksDown( clientId, rootClientId ),
-			sendBackward: () => moveBlocksUp( clientId, rootClientId ),
-		};
-	} ),
-	withInstanceId,
-)( BlockMover );
+export default withDispatch( ( dispatch ) => {
+	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
+	return {
+		onDragEnd: clearSelectedBlock,
+	};
+} )( BlockMover );

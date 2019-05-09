@@ -13,7 +13,14 @@ import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { Fragment } from '@wordpress/element';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
-import { PanelBody, RangeControl, SelectControl, ToggleControl, withFallbackStyles } from '@wordpress/components';
+import {
+	IconButton,
+	PanelBody,
+	RangeControl,
+	SelectControl,
+	ToggleControl,
+	withFallbackStyles,
+} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -38,7 +45,7 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 } );
 
 const applyWithSelect = withSelect( ( select, props ) => {
-	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
+	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlockOrder, getBlockIndex } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
 
 	const currentBlock = getSelectedBlockClientId();
@@ -46,9 +53,16 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 	const animatedBlocks = getAnimatedBlocks()[ page ] || [];
 	const animationOrderEntry = animatedBlocks.find( ( { id } ) => id === props.clientId );
+	const parentBlockId = getBlockRootClientId( props.clientId );
+
+	const blockClientIds = getBlockOrder( parentBlockId );
+	const blockIndex = getBlockIndex( props.clientId, parentBlockId );
 
 	return {
-		parentBlock: getBlock( getBlockRootClientId( props.clientId ) ),
+		isFirst: 0 === blockIndex,
+		isLast: blockIndex === blockClientIds.length - 1,
+		parentBlock: getBlock( parentBlockId ),
+		rootClientId: parentBlockId,
 		// Use parent's clientId instead of anchor attribute.
 		// The attribute will be updated via subscribers.
 		animationAfter: animationOrderEntry ? animationOrderEntry.parent : undefined,
@@ -73,12 +87,12 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { select } ) => {
+const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, toggleSelection }, { select } ) => {
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
 	} = select( 'core/block-editor' );
-	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
+	const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -110,6 +124,8 @@ const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { selec
 			clearSelectedBlock();
 			document.activeElement.blur();
 		},
+		bringForward: () => moveBlocksDown( clientId, rootClientId ),
+		sendBackward: () => moveBlocksUp( clientId, rootClientId ),
 	};
 } );
 
@@ -129,6 +145,8 @@ export default createHigherOrderComponent(
 				name,
 				attributes,
 				isSelected,
+				isLast,
+				isFirst,
 				toggleSelection,
 				fontSize,
 				setFontSize,
@@ -147,6 +165,8 @@ export default createHigherOrderComponent(
 				animationAfter,
 				startBlockRotation,
 				stopBlockRotation,
+				bringForward,
+				sendBackward,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -241,6 +261,28 @@ export default createHigherOrderComponent(
 								<BlockEdit { ...props } />
 							</RotatableBox>
 						</ResizableBox>
+					) }
+					{ ! ( isLast && isFirst ) && (
+						<InspectorControls>
+							<PanelBody
+								title={ __( 'Block position', 'amp' ) }
+							>
+								{ ! isLast && (
+									<IconButton
+										className="amp-story-controls-bring-forward"
+										onClick={ bringForward }
+										icon="arrow-up-alt"
+									/>
+								) }
+								{ ! isFirst && (
+									<IconButton
+										className="amp-story-controls-send-backwards"
+										onClick={ sendBackward }
+										icon="arrow-down-alt"
+									/>
+								) }
+							</PanelBody>
+						</InspectorControls>
 					) }
 					{ needsTextSettings && (
 						<InspectorControls>

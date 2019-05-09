@@ -3,11 +3,10 @@
 	width: 30px;
 	height: 100%;
 	max-height: 112px;
-	top: -15px;
 	z-index: 80;
 	padding-right: 2px;
 	left: -45px;
-	margin-top: -8px;
+	margin-top: 0 !important;
 	opacity: 0;
 	animation: none;
 	transition: opacity .3s;
