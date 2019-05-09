@@ -222,6 +222,9 @@ class AMP_Story_Post_Type {
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
 
+		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'use_block_editor_for_story_post_type' ), PHP_INT_MAX, 2 );
+		add_filter( 'classic_editor_enabled_editors_for_post_type', array( __CLASS__, 'filter_enabled_editors_for_story_post_type' ), PHP_INT_MAX, 2 );
+
 		self::register_block_latest_stories();
 
 		register_block_type(
@@ -975,6 +978,42 @@ class AMP_Story_Post_Type {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Filters whether a post is able to be edited in the block editor.
+	 *
+	 * Forces the block editor to be used for stories.
+	 *
+	 * @param bool   $use_block_editor Whether the post type can be edited or not.
+	 * @param string $post_type        The current post type.
+	 *
+	 * @return bool Whether to use the block editor for the given post type.
+	 */
+	public static function use_block_editor_for_story_post_type( $use_block_editor, $post_type ) {
+		if ( self::POST_TYPE_SLUG === $post_type ) {
+			return true;
+		}
+
+		return $use_block_editor;
+	}
+
+	/**
+	 * Filters the editors that are enabled for the given post type.
+	 *
+	 * Forces the block editor to be used for stories.
+	 *
+	 * @param array  $editors   Associative array of the editors and whether they are enabled for the post type.
+	 * @param string $post_type The post type.
+	 *
+	 * @return array Filtered list of enabled editors.
+	 */
+	public static function filter_enabled_editors_for_story_post_type( $editors, $post_type ) {
+		if ( self::POST_TYPE_SLUG === $post_type ) {
+			$editors['classic_editor'] = false;
+		}
+
+		return $editors;
 	}
 
 	/**

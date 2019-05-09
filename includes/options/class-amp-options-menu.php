@@ -543,7 +543,7 @@ class AMP_Options_Menu {
 			echo wp_kses_post(
 				sprintf(
 					/* translators: %s: Stories documentation URL. */
-					__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s">Stories</a>.', 'amp' ),
+					__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">Stories</a>.', 'amp' ),
 					esc_url( 'https://amp.dev/about/stories' )
 				)
 			);
