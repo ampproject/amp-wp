@@ -144,16 +144,15 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
  * @return {?string} Background color string or undefined if no color has been set.
  */
 export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity = undefined ) => {
-	const hasOpacity = opacity && opacity < 100;
 	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
-
 	let appliedBackgroundColor;
 
-	// If we need to assign opacity.
-	if ( hasOpacity && ( backgroundColor || customBackgroundColor ) ) {
-		const hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+	if ( backgroundColor || customBackgroundColor ) {
+		let hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
+		// If background color's hex value is not found by class.
+		hexColor = ( ! hexColor || ! hexColor.color ) && backgroundColor.color ? backgroundColor : hexColor;
 
-		if ( hexColor ) {
+		if ( hexColor && hexColor.color ) {
 			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
 
 			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;

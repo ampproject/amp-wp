@@ -125,7 +125,7 @@ class TextBlockEdit extends Component {
 					onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
 					// The 2 following lines are necessary for pasting to work.
 					onReplace={ this.onReplace }
-					onSplit={ () => {} }
+					unstableOnSplit={ () => {} }
 					style={ {
 						backgroundColor: appliedBackgroundColor,
 						color: textColor.color,
