@@ -654,8 +654,9 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 /**
  * Get percentage of a distance compared to the full width / height of the page.
  *
- * @param {string} axis X or Y axis.
+ * @param {string} axis       X or Y axis.
  * @param {number} pixelValue Value in pixels.
+ *
  * @return {number} Value in percentage.
  */
 export const getPercentageFromPixels = ( axis, pixelValue ) => {
@@ -670,8 +671,9 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 /**
  * Get pixel value from percentage, based on the full width / height of the page.
  *
- * @param {string} axis X or Y axis.
- * @param {number} percentageValue Value in pixels.
+ * @param {string} axis            X or Y axis.
+ * @param {number} percentageValue Value in percent.
+ *
  * @return {number} Value in percentage.
  */
 export const getPixelsFromPercentage = ( axis, percentageValue ) => {
@@ -856,8 +858,6 @@ export const getClassNameFromBlockAttributes = ( {
  * @param {?string} textColor             A string containing the color slug.
  * @param {string}  customBackgroundColor A string containing the custom background color value.
  * @param {string}  customTextColor       A string containing the custom color value.
- * @param {number}  width                 The block's width in pixels.
- * @param {number}  height                The block's height in pixels.
  * @param {?number} opacity               Opacity.
  *
  * @return {Object} Block inline style.
