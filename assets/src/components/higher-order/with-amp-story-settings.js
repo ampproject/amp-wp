@@ -29,6 +29,8 @@ import { __ } from '@wordpress/i18n';
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
 import { maybeEnqueueFontStyle } from '../../stories-editor/helpers';
+import bringForwardIcon from '../../../images/bring-forward.svg';
+import sendBackIcon from '../../../images/send-backwards.svg';
 
 const { getComputedStyle } = window;
 
@@ -271,14 +273,14 @@ export default createHigherOrderComponent(
 									<IconButton
 										className="amp-story-controls-bring-forward"
 										onClick={ bringForward }
-										icon="arrow-up-alt"
+										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
 									/>
 								) }
 								{ ! isFirst && (
 									<IconButton
 										className="amp-story-controls-send-backwards"
 										onClick={ sendBackward }
-										icon="arrow-down-alt"
+										icon={ sendBackIcon( { width: 24, height: 24 } ) }
 									/>
 								) }
 							</PanelBody>
