@@ -93,7 +93,7 @@ class TemplateInserter extends Component {
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
-						<div key="template-list" className="amp-stories__editor-inserter__menu">
+						<div className="amp-stories__editor-inserter__menu">
 							<div
 								className="amp-stories__editor-inserter__results"
 								tabIndex="0"
