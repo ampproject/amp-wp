@@ -61,6 +61,7 @@
 }
 
 .wp-block.amp-page-active .wp-block:hover .rotatable-box-wrap,
-.wp-block.amp-page-active .wp-block .rotatable-box-wrap:hover {
+.wp-block.amp-page-active .wp-block .rotatable-box-wrap:hover,
+.wp-block.amp-page-active .wp-block.is-rotating .rotatable-box-wrap {
 	opacity: 1;
 }
