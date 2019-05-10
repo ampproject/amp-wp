@@ -92,7 +92,7 @@ export const settings =	{
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'Brid.tv partner ID (required)', 'amp' ) }

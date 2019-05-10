@@ -7,6 +7,7 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { Warning } from '@wordpress/editor';
 import { createHigherOrderComponent, compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
+import { Fragment } from '@wordpress/element';
 
 const enhance = compose(
 	/**
@@ -75,20 +76,19 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 			);
 		}
 
-		return [
-			<div key="invalid-preview" style={ { minHeight: '60px' } }>
-				<BlockEdit key="block-edit" { ...props } />
-			</div>,
-			<Warning
-				key="multiple-use-warning"
-				actions={ actions }
-			>
-				<strong>{ blockType.title }: </strong>
-				{ originalBlockClientId ?
-					__( 'This block can only be used once per page.', 'amp' ) :
-					__( 'This block can not be used on the first page.', 'amp' )
-				}
-			</Warning>,
-		];
+		return (
+			<Fragment>
+				<div style={ { minHeight: '60px' } }>
+					<BlockEdit key="block-edit" { ...props } />
+				</div>
+				<Warning actions={ actions }>
+					<strong>{ blockType.title }: </strong>
+					{ originalBlockClientId ?
+						__( 'This block can only be used once per page.', 'amp' ) :
+						__( 'This block can not be used on the first page.', 'amp' )
+					}
+				</Warning>
+			</Fragment>
+		);
 	} );
 }, 'withCallToActionValidation' );

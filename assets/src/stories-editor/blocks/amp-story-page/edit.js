@@ -198,7 +198,7 @@ class EditPage extends Component {
 
 		return (
 			<Fragment>
-				<InspectorControls key="controls">
+				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
 						initialOpen={ false }
@@ -352,7 +352,7 @@ class EditPage extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style }>
+				<div style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">

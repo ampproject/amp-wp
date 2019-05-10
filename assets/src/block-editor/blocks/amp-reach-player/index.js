@@ -70,7 +70,7 @@ export const settings = {
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'Reach settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'The Reach player embed id (required)', 'amp' ) }

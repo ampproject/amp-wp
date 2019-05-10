@@ -32,7 +32,6 @@ export default function AnimationControls( {
 	return (
 		<Fragment>
 			<SelectControl
-				key="animation"
 				label={ __( 'Animation Type', 'amp' ) }
 				value={ animationType }
 				options={ AMP_ANIMATION_TYPE_OPTIONS }
@@ -47,7 +46,6 @@ export default function AnimationControls( {
 			{ animationType && (
 				<Fragment>
 					<RangeControl
-						key="duration"
 						label={ __( 'Duration (ms)', 'amp' ) }
 						value={ animationDuration }
 						onChange={ onAnimationDurationChange }
@@ -57,7 +55,6 @@ export default function AnimationControls( {
 						initialPosition={ DEFAULT_ANIMATION_DURATION }
 					/>
 					<RangeControl
-						key="delay"
 						label={ __( 'Delay (ms)', 'amp' ) }
 						value={ animationDelay || 0 }
 						onChange={ onAnimationDelayChange }
@@ -65,7 +62,6 @@ export default function AnimationControls( {
 						max="5000"
 					/>
 					<AnimationOrderPicker
-						key="order"
 						value={ animationAfter }
 						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }

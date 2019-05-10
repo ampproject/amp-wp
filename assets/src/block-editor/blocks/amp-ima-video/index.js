@@ -84,7 +84,7 @@ export const settings = {
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }

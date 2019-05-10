@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+import { Fragment } from '@wordpress/element';
 import {
 	TextControl,
 	SelectControl,
@@ -39,49 +40,48 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 	const showHeightNotice = ! height && ( 'fixed' === ampLayout || 'fixed-height' === ampLayout );
 	const showWidthNotice = ! width && 'fixed' === ampLayout;
 
-	return [
-		<SelectControl
-			key="ampLayout"
-			label={ __( 'Layout', 'amp' ) }
-			value={ ampLayout }
-			options={ ampLayoutOptions }
-			onChange={ ( value ) => ( setAttributes( { ampLayout: value } ) ) }
-		/>,
-		showWidthNotice && (
-			<Notice key="showWidthNotice" status="error" isDismissible={ false }>
-				{
-					sprintf(
-						/* translators: %s is the layout name */
-						__( 'Width is required for %s layout', 'amp' ),
-						ampLayout
-					)
-				}
-			</Notice>
-		),
-		<TextControl
-			key="width"
-			type="number"
-			label={ __( 'Width (px)', 'amp' ) }
-			value={ width !== undefined ? width : '' }
-			onChange={ ( value ) => ( setAttributes( { width: value } ) ) }
-		/>,
-		showHeightNotice && (
-			<Notice key="showHeightNotice" status="error" isDismissible={ false }>
-				{
-					sprintf(
-						/* translators: %s is the layout name */
-						__( 'Height is required for %s layout', 'amp' ),
-						ampLayout
-					)
-				}
-			</Notice>
-		),
-		<TextControl
-			key="height"
-			type="number"
-			label={ __( 'Height (px)', 'amp' ) }
-			value={ height }
-			onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
-		/>,
-	];
+	return (
+		<Fragment>
+			<SelectControl
+				label={ __( 'Layout', 'amp' ) }
+				value={ ampLayout }
+				options={ ampLayoutOptions }
+				onChange={ ( value ) => ( setAttributes( { ampLayout: value } ) ) }
+			/>
+			{ showWidthNotice && (
+				<Notice status="error" isDismissible={ false }>
+					{
+						sprintf(
+							/* translators: %s is the layout name */
+							__( 'Width is required for %s layout', 'amp' ),
+							ampLayout
+						)
+					}
+				</Notice>
+			) }
+			<TextControl
+				type="number"
+				label={ __( 'Width (px)', 'amp' ) }
+				value={ width !== undefined ? width : '' }
+				onChange={ ( value ) => ( setAttributes( { width: value } ) ) }
+			/>
+			{ showHeightNotice && (
+				<Notice status="error" isDismissible={ false }>
+					{
+						sprintf(
+							/* translators: %s is the layout name */
+							__( 'Height is required for %s layout', 'amp' ),
+							ampLayout
+						)
+					}
+				</Notice>
+			) }
+			<TextControl
+				type="number"
+				label={ __( 'Height (px)', 'amp' ) }
+				value={ height }
+				onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
+			/>
+		</Fragment>
+	);
 }

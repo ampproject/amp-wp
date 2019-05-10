@@ -28,7 +28,6 @@ export const settings = {
 
 		return (
 			<PlainText
-				key="formula"
 				value={ dataFormula }
 				placeholder={ __( 'Insert formula', 'amp' ) }
 				onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
