@@ -73,7 +73,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch, {}, { select } ) => {
+const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { select } ) => {
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
@@ -101,6 +101,10 @@ const applyWithDispatch = withDispatch( ( dispatch, {}, { select } ) => {
 		},
 		onAnimationDelayChange( value ) {
 			changeAnimationDelay( page, item, value );
+		},
+		startBlockRotation: () => toggleSelection( false ),
+		stopBlockRotation: () => {
+			toggleSelection( true );
 		},
 	};
 } );
@@ -137,6 +141,8 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
+				startBlockRotation,
+				stopBlockRotation,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -183,10 +189,14 @@ export default createHigherOrderComponent(
 							initialAngle={ rotationAngle }
 							className="amp-story-editor__rotate-container"
 							angle={ isSelected ? 0 : rotationAngle }
+							onRotateStart={ () => {
+								startBlockRotation();
+							} }
 							onRotateStop={ ( event, angle ) => {
 								setAttributes( {
 									rotationAngle: angle,
 								} );
+								stopBlockRotation();
 							} }
 						>
 							<BlockEdit { ...props } />
@@ -212,10 +222,15 @@ export default createHigherOrderComponent(
 								initialAngle={ rotationAngle }
 								className="amp-story-editor__rotate-container"
 								angle={ isSelected ? 0 : rotationAngle }
+								onRotateStart={ () => {
+									startBlockRotation();
+								} }
 								onRotateStop={ ( event, angle ) => {
 									setAttributes( {
 										rotationAngle: angle,
 									} );
+
+									stopBlockRotation();
 								} }
 							>
 								<BlockEdit { ...props } />

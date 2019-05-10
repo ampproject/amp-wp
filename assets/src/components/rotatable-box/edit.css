@@ -65,3 +65,7 @@
 .wp-block.amp-page-active .wp-block.is-rotating .rotatable-box-wrap {
 	opacity: 1;
 }
+.wp-block.amp-page-active .wp-block.is-rotating:hover .components-resizable-box__handle,
+.wp-block.amp-page-active .wp-block.is-rotating .components-resizable-box__handle:hover {
+	opacity: 0;
+}
