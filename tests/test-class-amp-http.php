@@ -14,6 +14,14 @@
 class Test_AMP_HTTP extends WP_UnitTestCase {
 
 	/**
+	 * Set up before class.
+	 */
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+		AMP_HTTP::$server_timing = true;
+	}
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 *
 	 * @global WP_Scripts $wp_scripts

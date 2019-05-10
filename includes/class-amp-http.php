@@ -23,9 +23,17 @@ class AMP_HTTP {
 	/**
 	 * Whether Server-Timing headers are sent.
 	 *
+	 * By default this is false to prevent breaking some web servers with an unexpected number of response headers. To
+	 * enable in `WP_DEBUG` mode, consider the following plugin code:
+	 *
+	 *     add_action( 'amp_init', function () {
+	 *         AMP_HTTP::$server_timing = ( ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || current_user_can( 'manage_options' ) );
+	 *     } );
+	 *
+	 * @link https://gist.github.com/westonruter/053f8f47c21df51f1a081fc41b47f547
 	 * @var bool
 	 */
-	public static $server_timing = true;
+	public static $server_timing = false;
 
 	/**
 	 * AMP-specific query vars that were purged.
