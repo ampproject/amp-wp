@@ -2,7 +2,7 @@
 
 exports[`amp/amp-story-page block edit matches snapshot 1`] = `
 <div
-  style="background-position:cover;background-repeat:no-repeat;background-size:cover"
+  style="background-repeat:no-repeat;background-size:cover"
 >
   <div
     class="editor-inner-blocks block-editor-inner-blocks"
