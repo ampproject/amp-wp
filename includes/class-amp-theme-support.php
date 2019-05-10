@@ -1694,34 +1694,51 @@ class AMP_Theme_Support {
 			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
 		}
 
+		/**
+		 * Filters whether response (post-processor) caching is enabled.
+		 *
+		 * When enabled and when an external object cache is present, the output of the post-processor phase is stored in
+		 * in the object cache. When another request is made that generates the same HTML output, the previously-cached
+		 * post-processor output will then be served immediately and bypass needlessly re-running the sanitizers.
+		 * This does not apply when:
+		 *
+		 * - AMP validation is being performed.
+		 * - The response is in the Customizer preview.
+		 * - Response caching is disabled due to a high-rate of cache misses.
+		 *
+		 * @param bool $enable_response_caching Whether response caching is enabled.
+		 */
+		$enable_response_caching = apply_filters( 'amp_response_caching_enabled', ! ( defined( 'WP_DEBUG' ) && WP_DEBUG ) || ! empty( $args['enable_response_caching'] ) );
+		$enable_response_caching = (
+			$enable_response_caching
+			&&
+			! AMP_Validation_Manager::should_validate_response()
+			&&
+			! is_customize_preview()
+		);
+
+		// When response caching is enabled, determine if it should be turned off for cache misses.
+		$caches_for_url = null;
+		if ( $enable_response_caching ) {
+			list( $disable_response_caching, $caches_for_url ) = self::check_for_cache_misses();
+			$enable_response_caching                           = ! $disable_response_caching;
+		}
+
 		$args = array_merge(
 			array(
-				'content_max_width'       => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
-				'use_document_element'    => true,
-				'allow_dirty_styles'      => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
-				'allow_dirty_scripts'     => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
-				'enable_response_caching' => (
-					! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
-					&&
-					! AMP_Validation_Manager::should_validate_response()
-					&&
-					! is_customize_preview()
-				),
-				'user_can_validate'       => AMP_Validation_Manager::has_cap(),
-				'stream_fragment'         => $stream_fragment,
+				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
+				'use_document_element' => true,
+				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
+				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
+				'stream_fragment'      => $stream_fragment,
 			),
-			$args
+			$args,
+			compact( 'enable_response_caching' )
 		);
 
 		$current_url = amp_get_current_url();
 		$non_amp_url = amp_remove_endpoint( $current_url );
-
-		// When response caching is enabled, determine if it should be turned off for cache misses.
-		$caches_for_url = null;
-		if ( true === $args['enable_response_caching'] ) {
-			list( $disable_response_caching, $caches_for_url ) = self::check_for_cache_misses();
-			$args['enable_response_caching']                   = ! $disable_response_caching;
-		}
 
 		/*
 		 * Set response cache hash, the data values dictates whether a new hash key should be generated or not.
