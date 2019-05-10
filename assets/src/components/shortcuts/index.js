@@ -7,11 +7,6 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
 
-/**
- * Internal dependencies
- */
-import { withIsReordering } from '../';
-
 const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 	const blocks = [
 		'amp/amp-story-text',
@@ -43,8 +38,10 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
 	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
+	const { isReordering } = select( 'amp/story' );
 
 	return {
+		isReordering: isReordering(),
 		canInsertBlockType: ( name ) => {
 			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
 			const blockSettings = getBlockListSettings( getCurrentPage() );
@@ -71,10 +68,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 } );
 
 export default compose(
-	withIsReordering,
-	ifCondition(
-		( { isReordering } ) => ! isReordering
-	),
 	applyWithSelect,
 	applyWithDispatch,
+	ifCondition( ( { isReordering } ) => ! isReordering ),
 )( Shortcuts );

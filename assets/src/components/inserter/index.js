@@ -12,11 +12,11 @@ import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { compose, ifCondition } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { withIsReordering } from '../';
 import InserterMenu from './menu';
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
@@ -107,8 +107,16 @@ class Inserter extends Component {
 	}
 }
 
+const applyWithSelect = withSelect( ( select ) => {
+	const { isReordering } = select( 'amp/story' );
+
+	return {
+		isReordering: isReordering(),
+	};
+} );
+
 export default compose(
-	withIsReordering,
+	applyWithSelect,
 	ifCondition(
 		( { isReordering } ) => ! isReordering
 	),
