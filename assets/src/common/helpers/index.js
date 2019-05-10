@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { getColorObjectByAttributeValues } from '@wordpress/block-editor';
+import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -137,26 +137,26 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
  * Either backgroundColor or customBackgroundColor should be passed, not both.
  *
  * @param {Object[]} colors                Array of color objects as set by the theme or by the editor defaults.
- * @param {Object}   backgroundColor       A string containing the color slug.
+ * @param {?Object}  backgroundColor       Color object.
+ * @param {?string}  backgroundColor.name  Color name.
+ * @param {?string}  backgroundColor.slug  Color slug.
+ * @param {?string}  backgroundColor.color Color value.
  * @param {?string}  customBackgroundColor A string containing the custom color value.
  * @param {?number}  opacity               Opacity.
  *
- * @return {?string} Background color string or undefined if no color has been set.
+ * @return {?string} Background color string or undefined if no color has been set / found.
  */
 export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity = undefined ) => {
-	let appliedBackgroundColor;
+	// Order: 1. Existing colors as set by the theme. 2. Custom color objects. 3. Custom background color.
+	const colorObject = backgroundColor ?
+		( getColorObjectByColorValue( colors, backgroundColor.color ) || getColorObjectByAttributeValues( colors, backgroundColor.slug, backgroundColor.color || customBackgroundColor ) ) :
+		{ color: customBackgroundColor };
 
-	if ( ( backgroundColor && backgroundColor.color ) || customBackgroundColor ) {
-		let hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
-		// If background color's hex value is not found by class.
-		hexColor = ( ! hexColor || ! hexColor.color ) && backgroundColor.color ? backgroundColor : hexColor;
+	if ( colorObject && colorObject.color ) {
+		const [ r, g, b, a ] = getRgbaFromHex( colorObject.color, opacity );
 
-		if ( hexColor && hexColor.color ) {
-			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
-
-			appliedBackgroundColor = `rgba(${ r }, ${ g }, ${ b }, ${ a })`;
-		}
+		return `rgba(${ r }, ${ g }, ${ b }, ${ a })`;
 	}
 
-	return appliedBackgroundColor;
+	return undefined;
 };
