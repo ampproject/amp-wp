@@ -78,7 +78,6 @@ const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { selec
 		getSelectedBlockClientId,
 		getBlockRootClientId,
 	} = select( 'core/block-editor' );
-	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -106,9 +105,6 @@ const applyWithDispatch = withDispatch( ( dispatch, { toggleSelection }, { selec
 		startBlockRotation: () => toggleSelection( false ),
 		stopBlockRotation: () => {
 			toggleSelection( true );
-
-			clearSelectedBlock();
-			document.activeElement.blur();
 		},
 	};
 } );
@@ -183,7 +179,7 @@ export default createHigherOrderComponent(
 						<StoryBlockMover
 							clientId={ props.clientId }
 							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection && isSelected }
+							isDraggable={ ! props.isPartOfMultiSelection }
 						/>
 					) }
 					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
@@ -200,7 +196,6 @@ export default createHigherOrderComponent(
 								setAttributes( {
 									rotationAngle: angle,
 								} );
-
 								stopBlockRotation();
 							} }
 						>
