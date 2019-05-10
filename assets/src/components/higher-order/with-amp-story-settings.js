@@ -253,7 +253,7 @@ export default createHigherOrderComponent(
 										onChange={ setFontSize }
 									/>
 								) }
-								{ isTextBlock && (
+								{ needsTextSettings && (
 									<ToggleControl
 										label={ __( 'Automatically fit text to container', 'amp' ) }
 										checked={ ampFitText }

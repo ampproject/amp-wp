@@ -35,6 +35,7 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_TEXT_SETTINGS,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 import ampStoriesFonts from 'amp-stories-fonts';
@@ -175,6 +176,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	const addedAttributes = {
 		anchor: {
@@ -219,6 +221,17 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 100,
 		},
 	};
+
+	if ( needsTextSettings ) {
+		addedAttributes.autoFontSize = {
+			type: 'number',
+			default: 45,
+		};
+		addedAttributes.ampFitText = {
+			type: 'boolean',
+			default: true,
+		};
+	}
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
