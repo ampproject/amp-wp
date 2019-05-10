@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { getColorClassName, getColorObjectByAttributeValues } from '@wordpress/block-editor';
+import { getColorObjectByAttributeValues } from '@wordpress/block-editor';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -137,17 +137,16 @@ export const getRgbaFromHex = ( hex, opacity = 100 ) => {
  * Either backgroundColor or customBackgroundColor should be passed, not both.
  *
  * @param {Object[]} colors                Array of color objects as set by the theme or by the editor defaults.
- * @param {?string}  backgroundColor       A string containing the color slug.
+ * @param {Object}   backgroundColor       A string containing the color slug.
  * @param {?string}  customBackgroundColor A string containing the custom color value.
  * @param {?number}  opacity               Opacity.
  *
  * @return {?string} Background color string or undefined if no color has been set.
  */
 export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBackgroundColor, opacity = undefined ) => {
-	const backgroundClass = getColorClassName( 'background-color', backgroundColor );
 	let appliedBackgroundColor;
 
-	if ( backgroundColor || customBackgroundColor ) {
+	if ( ( backgroundColor && backgroundColor.color ) || customBackgroundColor ) {
 		let hexColor = getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor );
 		// If background color's hex value is not found by class.
 		hexColor = ( ! hexColor || ! hexColor.color ) && backgroundColor.color ? backgroundColor : hexColor;
@@ -155,10 +154,8 @@ export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBa
 		if ( hexColor && hexColor.color ) {
 			const [ r, g, b, a ] = getRgbaFromHex( hexColor.color, opacity );
 
-			appliedBackgroundColor = `rgba( ${ r }, ${ g }, ${ b }, ${ a })`;
+			appliedBackgroundColor = `rgba(${ r }, ${ g }, ${ b }, ${ a })`;
 		}
-	} else if ( ! backgroundClass ) {
-		appliedBackgroundColor = customBackgroundColor;
 	}
 
 	return appliedBackgroundColor;
