@@ -393,13 +393,16 @@ def GetTagSpec(tag_spec, attr_lists):
 	tag_dict = GetTagRules(tag_spec)
 	if tag_dict is None:
 		return None
-	attr_dict = GetAttrs(tag_spec.attrs)
+	attr_dict = {}
 
-	# Now add attributes from any attribute lists to this tag.
+	# First add attributes from any attribute lists to this tag.
 	for (tag_field_desc, tag_field_val) in tag_spec.ListFields():
 		if 'attr_lists' == tag_field_desc.name:
 			for attr_list in tag_field_val:
 				attr_dict.update(attr_lists[UnicodeEscape(attr_list)])
+
+	# Then merge the spec-specific attributes on top to override any list definitions.
+	attr_dict.update(GetAttrs(tag_spec.attrs))
 
 	logging.info('... done')
 	tag_spec_dict = {'tag_spec':tag_dict, 'attr_spec_list':attr_dict}
