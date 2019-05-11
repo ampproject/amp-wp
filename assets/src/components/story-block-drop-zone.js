@@ -15,7 +15,7 @@ import { withDispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getPercentageFromPixels } from './../helpers';
+import { getPercentageFromPixels } from '../stories-editor/helpers';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
@@ -41,9 +41,10 @@ class BlockDropZone extends Component {
 			return;
 		}
 
-		// Get the current position of the clone.
+		// We have to remove the rotation for getting accurate position.
+		clone.parentNode.style.visibility = 'hidden';
+		clone.parentNode.style.transform = 'none';
 		const clonePosition = clone.getBoundingClientRect();
-
 		const wrapperPosition = wrapperEl.getBoundingClientRect();
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.

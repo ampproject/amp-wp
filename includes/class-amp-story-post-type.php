@@ -101,18 +101,36 @@ class AMP_Story_Post_Type {
 			self::POST_TYPE_SLUG,
 			array(
 				'labels'       => array(
-					'name'               => _x( 'AMP Stories', 'post type general name', 'amp' ),
-					'singular_name'      => _x( 'AMP Story', 'post type singular name', 'amp' ),
-					'menu_name'          => _x( 'AMP Stories', 'admin menu', 'amp' ),
-					'name_admin_bar'     => _x( 'AMP Story', 'add new on admin bar', 'amp' ),
-					'add_new'            => _x( 'Add New', 'amp_story', 'amp' ),
-					'add_new_item'       => __( 'Add New AMP Story', 'amp' ),
-					'new_item'           => __( 'New AMP Story', 'amp' ),
-					'edit_item'          => __( 'Edit AMP Story', 'amp' ),
-					'view_item'          => __( 'View AMP Story', 'amp' ),
-					'all_items'          => __( 'All AMP Stories', 'amp' ),
-					'not_found'          => __( 'No AMP Stories found.', 'amp' ),
-					'not_found_in_trash' => __( 'No AMP Stories found in Trash.', 'amp' ),
+					'name'                     => _x( 'Stories', 'post type general name', 'amp' ),
+					'singular_name'            => _x( 'Story', 'post type singular name', 'amp' ),
+					'add_new'                  => _x( 'New', 'story', 'amp' ),
+					'add_new_item'             => __( 'Add New Story', 'amp' ),
+					'edit_item'                => __( 'Edit Story', 'amp' ),
+					'new_item'                 => __( 'New Story', 'amp' ),
+					'view_item'                => __( 'View Story', 'amp' ),
+					'view_items'               => __( 'View Stories', 'amp' ),
+					'search_items'             => __( 'Search Stories', 'amp' ),
+					'not_found'                => __( 'No stories found.', 'amp' ),
+					'not_found_in_trash'       => __( 'No stories found in Trash.', 'amp' ),
+					'all_items'                => __( 'All Stories', 'amp' ),
+					'archives'                 => __( 'Story Archives', 'amp' ),
+					'attributes'               => __( 'Story Attributes', 'amp' ),
+					'insert_into_item'         => __( 'Insert into story', 'amp' ),
+					'uploaded_to_this_item'    => __( 'Uploaded to this story', 'amp' ),
+					'featured_image'           => __( 'Featured Image', 'amp' ),
+					'set_featured_image'       => __( 'Set featured image', 'amp' ),
+					'remove_featured_image'    => __( 'Remove featured image', 'amp' ),
+					'use_featured_image'       => __( 'Use as featured image', 'amp' ),
+					'filter_items_list'        => __( 'Filter stories list', 'amp' ),
+					'items_list_navigation'    => __( 'Stories list navigation', 'amp' ),
+					'items_list'               => __( 'Stories list', 'amp' ),
+					'item_published'           => __( 'Story published.', 'amp' ),
+					'item_published_privately' => __( 'SStory published privately.', 'amp' ),
+					'item_reverted_to_draft'   => __( 'Story reverted to draft.', 'amp' ),
+					'item_scheduled'           => __( 'Story scheduled', 'amp' ),
+					'item_updated'             => __( 'Story updated.', 'amp' ),
+					'menu_name'                => _x( 'Stories', 'admin menu', 'amp' ),
+					'name_admin_bar'           => _x( 'Story', 'add new on admin bar', 'amp' ),
 				),
 				'menu_icon'    => 'dashicons-book',
 				'supports'     => array(
@@ -203,6 +221,9 @@ class AMP_Story_Post_Type {
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
+
+		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'use_block_editor_for_story_post_type' ), PHP_INT_MAX, 2 );
+		add_filter( 'classic_editor_enabled_editors_for_post_type', array( __CLASS__, 'filter_enabled_editors_for_story_post_type' ), PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
 
@@ -550,7 +571,7 @@ class AMP_Story_Post_Type {
 
 		wp_enqueue_script(
 			'amp-story-editor',
-			amp_get_asset_url( 'js/amp-stories-compiled.js' ),
+			amp_get_asset_url( 'js/amp-stories.js' ),
 			array( 'wp-dom-ready', 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
 			AMP__VERSION,
 			false
@@ -957,6 +978,42 @@ class AMP_Story_Post_Type {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Filters whether a post is able to be edited in the block editor.
+	 *
+	 * Forces the block editor to be used for stories.
+	 *
+	 * @param bool   $use_block_editor Whether the post type can be edited or not.
+	 * @param string $post_type        The current post type.
+	 *
+	 * @return bool Whether to use the block editor for the given post type.
+	 */
+	public static function use_block_editor_for_story_post_type( $use_block_editor, $post_type ) {
+		if ( self::POST_TYPE_SLUG === $post_type ) {
+			return true;
+		}
+
+		return $use_block_editor;
+	}
+
+	/**
+	 * Filters the editors that are enabled for the given post type.
+	 *
+	 * Forces the block editor to be used for stories.
+	 *
+	 * @param array  $editors   Associative array of the editors and whether they are enabled for the post type.
+	 * @param string $post_type The post type.
+	 *
+	 * @return array Filtered list of enabled editors.
+	 */
+	public static function filter_enabled_editors_for_story_post_type( $editors, $post_type ) {
+		if ( self::POST_TYPE_SLUG === $post_type ) {
+			$editors['classic_editor'] = false;
+		}
+
+		return $editors;
 	}
 
 	/**

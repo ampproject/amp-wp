@@ -13,9 +13,8 @@
 }
 
 .amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page {
-	max-width: 169px;
-	height: 277px;
-	margin: 0 10px;
+	max-width: 165px;
+	height: 270px;
 }
 
 .amp-story-reorderer .block-editor-block-preview .block-editor-block-preview__content .components-disabled {
@@ -34,15 +33,15 @@
 .amp-story-reorderer .components-disabled div:first-of-type {
 	padding: 0;
 	width: 100%;
+	height: 100%;
 }
 
 .amp-story-reorderer .amp-story-reorderer-item .amp-story-reorderer-item-page .wp-block {
-	--preview-scale: 0.42;
+	--preview-scale: 0.47;
 	--preview-translateX: -40%;
 	--preview-translateY: -70%;
 	position: absolute;
 	transform: scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)),
-
 }
 
 .amp-story-reorderer .block-editor-block-list__layout > .block-editor-block-list__block > .block-editor-block-list__block-edit {
@@ -99,7 +98,7 @@
 	border-radius: 5px;
 	background: #fff;
 	width: 100%;
-	height: 277px;
+	height: 100%;
 	cursor: grab;
 	overflow: hidden;
 }
@@ -110,11 +109,7 @@
 
 .amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper {
 	margin: 0;
-	height: 267px;
-}
-
-.amp-story-reorderer .amp-story-page-preview .editor-styles-wrapper > div {
-	height: 267px;
+	height: 260px;
 }
 
 .amp-story-reorderer .amp-story-page-preview .editor-block-list__layout {

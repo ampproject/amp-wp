@@ -2,20 +2,16 @@
  * WordPress dependencies
  */
 import { withSelect, withDispatch } from '@wordpress/data';
-import { Button, NavigableMenu } from '@wordpress/components';
+import { DropZoneProvider, NavigableMenu } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { BlockPreviewLabel } from '../';
+import BlockNavigationItem from './item';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../stories-editor/constants';
 import './edit.css';
-
-/**
- * Internal dependencies
- */
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
@@ -24,32 +20,23 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
-			{ blocks.map( ( block ) => {
-				const isSelected = block.clientId === selectedBlockClientId;
+		<DropZoneProvider>
+			<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+				{ blocks.map( ( block ) => {
+					const isSelected = block.clientId === selectedBlockClientId;
 
-				let className = 'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button';
-				if ( isSelected ) {
-					className += ' is-selected';
-				}
-
-				return (
-					<li key={ block.clientId }>
-						<div className="editor-block-navigation__item block-editor-block-navigation__item">
-							<Button
-								className={ className }
+					return (
+						<li key={ block.clientId }>
+							<BlockNavigationItem
+								block={ block }
+								isSelected={ isSelected }
 								onClick={ () => selectBlock( block.clientId ) }
-							>
-								<BlockPreviewLabel
-									block={ block }
-									accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
-								/>
-							</Button>
-						</div>
-					</li>
-				);
-			} ) }
-		</ul>
+							/>
+						</li>
+					);
+				} ) }
+			</ul>
+		</DropZoneProvider>
 		/* eslint-enable jsx-a11y/no-redundant-roles */
 	);
 }

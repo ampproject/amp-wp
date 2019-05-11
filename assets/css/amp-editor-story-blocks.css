@@ -90,6 +90,20 @@
 	left: 0 !important;
 }
 
+/**
+ * Hide option to toggle fixed toolbar.
+ */
+.edit-post-more-menu__content .components-menu-group:first-of-type .components-button:first-of-type {
+	display: none;
+}
+
+/**
+ * Hide Block Manager option
+ */
+.edit-post-more-menu__content .components-menu-group:nth-last-of-type(2) div[role="menu"] > .components-button:first-child {
+	display: none;
+}
+
 /*
  * 100. Shame
  */

@@ -8,6 +8,8 @@ import { template } from 'lodash';
  */
 import { __, sprintf } from '@wordpress/i18n';
 
+const { wp } = window;
+
 /**
  * FeaturedImageSelectionError
  *
