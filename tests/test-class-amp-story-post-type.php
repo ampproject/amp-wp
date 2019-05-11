@@ -331,16 +331,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'<iframe sandbox="allow-scripts" width="600" height="468" security="restricted" marginwidth="10" marginheight="10">',
 			AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $amp_story )
 		);
-
-		// Simulate this being an AMP endpoint, and avoid a _doing_it_wrong() warning for is_amp_endpoint().
-		add_theme_support( 'amp' );
-		do_action( 'wp' );
-
-		// This is an AMP endpoint, so it should also remove other illegal attributes.
-		$this->assertEquals(
-			'<iframe sandbox="allow-scripts" width="600" height="468">',
-			AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $amp_story )
-		);
 	}
 
 	/**

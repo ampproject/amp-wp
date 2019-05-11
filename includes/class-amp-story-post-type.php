@@ -1388,31 +1388,12 @@ class AMP_Story_Post_Type {
 			return $output;
 		}
 
-		preg_match( '/<iframe sandbox="allow-scripts" [^>]*>/', $output, $matches );
-		if ( ! $matches ) {
-			return $output;
-		}
-
-		$original_iframe = $matches[0];
-		$new_iframe      = preg_replace(
-			'/(?<=\sheight=")\w+(?=")/',
-			strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 ),
-			$original_iframe
+		// Add 4px more height, as the <iframe> needs that to display the full image.
+		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		return preg_replace(
+			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
+			sprintf( '${1}%s${3}', $new_height ),
+			$output
 		);
-
-		// Remove attributes that AMP doesn't allow for the <amp-iframe>.
-		if ( is_amp_endpoint() ) {
-			$new_iframe = preg_replace(
-				array(
-					'/\ssecurity="[\w]+"/',
-					'/\smarginwidth="[\w]+"/',
-					'/\smarginheight="[\w]+"/',
-				),
-				'',
-				$new_iframe
-			);
-		}
-
-		return str_replace( $original_iframe, $new_iframe, $output );
 	}
 }
