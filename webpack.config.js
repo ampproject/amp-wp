@@ -3,42 +3,50 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
+const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
+const TerserPlugin = require( 'terser-webpack-plugin' );
 
 /**
  * WordPress dependencies
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
-function recursiveIssuer( m ) {
-	if ( m.issuer ) {
-		return recursiveIssuer( m.issuer );
-	} else if ( m.name ) {
-		return m.name;
-	}
-	return false;
-}
+const sharedConfig = {
+	output: {
+		path: path.resolve( process.cwd(), 'assets', 'js' ),
+		filename: '[name].js',
+		chunkFilename: '[name].js',
+	},
+	optimization: {
+		usedExports: true,
+		minimizer: [
+			new TerserPlugin( {
+				parallel: true,
+				sourceMap: false,
+				cache: true,
+			} ),
+			new OptimizeCSSAssetsPlugin( { } ),
+		],
+	},
+};
 
-const config = {
+const ampStories = {
 	...defaultConfig,
+	...sharedConfig,
 	externals: [
 		...defaultConfig.externals,
 		{
 			// Make localized data importable.
-			'amp-validation-i18n': 'ampValidationI18n',
 			'amp-stories-fonts': 'ampStoriesFonts',
 		},
 	],
 	entry: {
-		'amp-blocks': './assets/src/amp-blocks.js',
-		'amp-block-editor': './assets/src/amp-block-editor.js',
-		'amp-validation-detail-toggle': './assets/src/amp-validation-detail-toggle.js',
-		'amp-validation-single-error-url-details': './assets/src/amp-validation-single-error-url-details.js',
-		'amp-stories': './assets/src/amp-story-editor-blocks.js',
+		'amp-stories': './assets/src/stories-editor/index.js',
 	},
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
-		filename: '[name]-compiled.js',
+		filename: '[name].js',
 		library: 'AMP',
 		libraryTarget: 'this',
 	},
@@ -70,35 +78,12 @@ const config = {
 		} ),
 	],
 	optimization: {
+		...sharedConfig.optimization,
 		splitChunks: {
 			cacheGroups: {
-				blocks: {
-					name: 'amp-blocks',
-					test: ( m, c, entry = 'amp-blocks' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
-					chunks: 'all',
-					enforce: true,
-				},
-				blocksEditorToggle: {
-					name: 'amp-blocks-editor-toggle',
-					test: ( m, c, entry = 'amp-blocks-editor-toggle' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
-					chunks: 'all',
-					enforce: true,
-				},
-				validationDetailToggle: {
-					name: 'amp-validation-detail-toggle',
-					test: ( m, c, entry = 'amp-validation-detail-toggle' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
-					chunks: 'all',
-					enforce: true,
-				},
-				validationSingleDetails: {
-					name: 'amp-validation-single-error-url-details',
-					test: ( m, c, entry = 'amp-validation-single-error-url-details' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
-					chunks: 'all',
-					enforce: true,
-				},
 				stories: {
 					name: 'amp-stories',
-					test: ( m, c, entry = 'amp-stories' ) => m.constructor.name === 'CssModule' && recursiveIssuer( m ) === entry,
+					test: /\.css$/,
 					chunks: 'all',
 					enforce: true,
 				},
@@ -107,4 +92,83 @@ const config = {
 	},
 };
 
-module.exports = config;
+const ampValidation = {
+	...defaultConfig,
+	...sharedConfig,
+	externals: [
+		...defaultConfig.externals,
+		{
+			// Make localized data importable.
+			'amp-validation-i18n': 'ampValidationI18n',
+		},
+	],
+	entry: {
+		'amp-validated-url-post-edit-screen': './assets/src/amp-validation/amp-validated-url-post-edit-screen.js',
+		'amp-validated-urls-index': './assets/src/amp-validation/amp-validated-urls-index.js',
+		'amp-validation-detail-toggle': './assets/src/amp-validation/amp-validation-detail-toggle.js',
+		'amp-validation-single-error-url-details': './assets/src/amp-validation/amp-validation-single-error-url-details.js',
+	},
+};
+
+const blockEditor = {
+	...defaultConfig,
+	...sharedConfig,
+	externals: [
+		...defaultConfig.externals,
+		{
+			// Make localized data importable.
+			'amp-block-editor-data': 'wpAmpEditor',
+		},
+	],
+	entry: {
+		'amp-block-editor': './assets/src/block-editor/index.js',
+		'amp-editor-blocks': './assets/src/block-editor/amp-editor-blocks.js',
+		'amp-block-validation': './assets/src/block-editor/amp-block-validation.js',
+	},
+	module: {
+		...defaultConfig.module,
+		rules: [
+			...defaultConfig.module.rules,
+			{
+				test: /\.css$/,
+				use: 'null-loader',
+			},
+		],
+	},
+};
+
+const classicEditor = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'amp-post-meta-box': './assets/src/classic-editor/amp-post-meta-box.js',
+	},
+};
+
+const admin = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'amp-admin-pointer': './assets/src/admin/amp-admin-pointer.js',
+		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
+	},
+};
+
+const wpPolyfills = {
+	...defaultConfig,
+	...sharedConfig,
+	externals: {},
+	entry: {
+		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
+		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
+	},
+};
+
+module.exports = [
+	ampStories,
+	ampValidation,
+	blockEditor,
+	classicEditor,
+	admin,
+	wpPolyfills,
+];

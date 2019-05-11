@@ -97,7 +97,6 @@ class RotatableBox extends Component {
 		e.preventDefault();
 
 		this.elementRef.classList.add( 'is-rotating' );
-		this.elementRef.style.transform = `rotate(${ this.props.angle }deg)`;
 
 		this.setState(
 			{

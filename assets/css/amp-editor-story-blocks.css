@@ -94,6 +94,8 @@
  * Hide option to toggle fixed toolbar.
  */
 .edit-post-more-menu__content .components-menu-group:first-of-type .components-button:first-of-type {
+	display: none;
+}
 
 /**
  * Hide Block Manager option

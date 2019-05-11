@@ -9,13 +9,9 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import './edit.css';
-
-/**
- * Internal dependencies
- */
 import BlockNavigationItem from './item';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../stories-editor/constants';
+import './edit.css';
 
 function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	return (
@@ -25,7 +21,7 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<DropZoneProvider>
-			<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+			<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
 				{ blocks.map( ( block ) => {
 					const isSelected = block.clientId === selectedBlockClientId;
 

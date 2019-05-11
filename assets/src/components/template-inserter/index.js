@@ -22,7 +22,7 @@ import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
 import './edit.css';
-import { createSkeletonTemplate } from '../../helpers';
+import { createSkeletonTemplate } from '../../stories-editor/helpers';
 
 const storyPageBlockName = 'amp/amp-story-page';
 
@@ -93,7 +93,7 @@ class TemplateInserter extends Component {
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
-						<div key="template-list" className="amp-stories__editor-inserter__menu">
+						<div className="amp-stories__editor-inserter__menu">
 							<div
 								className="amp-stories__editor-inserter__results"
 								tabIndex="0"

@@ -48,7 +48,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, onDragEnd, clientId, blockElementId, instanceId } = this.props;
+		const { bringForward, sendBackward, isFirst, isLast, isDraggable, onDragStart, clientId, blockElementId, instanceId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
@@ -75,7 +75,6 @@ export class BlockMover extends Component {
 						blockElementId={ blockElementId }
 						isVisible={ isDraggable }
 						onDragStart={ onDragStart }
-						onDragEnd={ onDragEnd }
 					/>
 					<IconButton
 						className="editor-block-mover__control block-editor-block-mover__control"
@@ -108,10 +107,9 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch, { clientId, rootClientId } ) => {
-		const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
+		const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
 
 		return {
-			onDragEnd: clearSelectedBlock,
 			bringForward: () => moveBlocksDown( clientId, rootClientId ),
 			sendBackward: () => moveBlocksUp( clientId, rootClientId ),
 		};
