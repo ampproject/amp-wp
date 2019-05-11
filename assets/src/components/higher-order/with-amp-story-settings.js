@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { get } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import {
@@ -40,12 +45,23 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 const applyWithSelect = withSelect( ( select, props ) => {
 	const { getSelectedBlockClientId, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
+	const { getMedia } = select( 'core' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
 
 	const animatedBlocks = getAnimatedBlocks()[ page ] || [];
 	const animationOrderEntry = animatedBlocks.find( ( { id } ) => id === props.clientId );
+
+	const isVideoBlock = 'core/video' === props.name;
+	let videoFeaturedImage;
+
+	// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
+	if ( isVideoBlock && props.attributes.id && ! props.attributes.poster ) {
+		const media = getMedia( props.attributes.id );
+		const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
+		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
+	}
 
 	return {
 		parentBlock: getBlock( getBlockRootClientId( props.clientId ) ),
@@ -70,6 +86,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 					};
 				} );
 		},
+		videoFeaturedImage,
 	};
 } );
 
@@ -141,6 +158,7 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
+				videoFeaturedImage,
 				startBlockRotation,
 				stopBlockRotation,
 			} = props;
@@ -152,6 +170,7 @@ export default createHigherOrderComponent(
 			}
 
 			const isImageBlock = 'core/image' === name;
+			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
@@ -169,6 +188,11 @@ export default createHigherOrderComponent(
 				ampAnimationDelay,
 				rotationAngle,
 			} = attributes;
+
+			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
+			if ( isVideoBlock && videoFeaturedImage ) {
+				setAttributes( { poster: videoFeaturedImage.source_url } );
+			}
 
 			const minTextHeight = 20;
 			const minTextWidth = 30;
