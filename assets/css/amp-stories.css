@@ -1,4 +1,6 @@
-amp-story-grid-layer[template="fill"] .wp-block-image { margin: 0; }
+amp-story-grid-layer[template="fill"] .wp-block-image {
+	margin: 0;
+}
 
 .has-background {
 	padding: 7px !important;
@@ -58,7 +60,7 @@ amp-story-grid-layer amp-img > img {
 .is-style-white p,
 .is-style-white.wp-block-quote cite,
 .is-style-white .wp-block-quote__citation {
-	color: #ffffff;
+	color: #fff;
 }
 
 .wp-block-quote {
