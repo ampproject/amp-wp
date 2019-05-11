@@ -32,4 +32,4 @@ export { default as withCroppedFeaturedImage } from './with-cropped-featured-ima
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';
 export { default as withCallToActionValidation } from './higher-order/with-call-to-action-validation';
-export { default as withVideoPosterImageNotice } from './with-video-poster-image-notice';
+export { default as withVideoPosterImageNotice } from './higher-order/with-video-poster-image-notice';
