@@ -90,7 +90,7 @@ amp-story-grid-layer .wp-block-quote {
 	height: 100% !important;
 }
 
-.wp-block-image amp-img > img {
+.wp-block-image:not(.is-resized) amp-img > img {
 	object-fit: cover;
 }
 
