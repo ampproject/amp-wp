@@ -1373,11 +1373,10 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Changes attributes of the AMP Story embed <iframe>.
+	 * Changes the height of the AMP Story embed <iframe>.
 	 *
-	 * The embed typically appears in the editor in an <iframe>, and without an <iframe> on the front-end.
+	 * In the block editor, this embed typically appears in an <iframe>, though on the front-end it's not in an <iframe>.
 	 * The height of the <iframe> isn't enough to display the full story, so this increases it.
-	 * Also, this removes attributes that AMP does not allow for the <amp-iframe>, like marginwidth.
 	 *
 	 * @param string  $output The embed output.
 	 * @param WP_Post $post The post for the embed.
