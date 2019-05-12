@@ -96,7 +96,7 @@ export const settings = {
 
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'AMP Timeago Settings' ) }>
 						<DateTimePicker
 							locale="en"
@@ -115,7 +115,7 @@ export const settings = {
 						/>
 					</PanelBody>
 				</InspectorControls>
-				<BlockControls key="controls">
+				<BlockControls>
 					<BlockAlignmentToolbar
 						value={ align }
 						onChange={ ( nextAlign ) => {
@@ -124,7 +124,7 @@ export const settings = {
 						controls={ [ 'left', 'center', 'right' ] }
 					/>
 				</BlockControls>
-				<time key="timeago" dateTime={ attributes.dateTime }>{ timeAgo }</time>
+				<time dateTime={ attributes.dateTime }>{ timeAgo }</time>
 			</Fragment>
 		);
 	},

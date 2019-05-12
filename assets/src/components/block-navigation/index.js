@@ -21,7 +21,7 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<DropZoneProvider>
-			<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+			<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
 				{ blocks.map( ( block ) => {
 					const isSelected = block.clientId === selectedBlockClientId;
 

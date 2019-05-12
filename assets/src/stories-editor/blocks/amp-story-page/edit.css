@@ -168,6 +168,7 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	width: 100%;
 	max-width: 100%;
 }
+
 .block-editor-inner-blocks .wp-block[data-type="core/pullquote"] .block-editor-block-list__block-edit {
 	display: block;
 }

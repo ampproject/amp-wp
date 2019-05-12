@@ -32,7 +32,6 @@ import {
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
 	BLOCK_TAG_MAPPING,
-	BLOCKS_WITH_TEXT_SETTINGS,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -175,6 +174,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	const isImageBlock = 'core/image' === name;
+	const isVideoBlock = 'core/video' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 	const addedAttributes = {
@@ -182,7 +182,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: 'amp-story-grid-layer > *, amp-story-cta-layer',
+			selector: 'amp-story-grid-layer .amp-story-block-wrapper > *, amp-story-cta-layer',
 		},
 		ampAnimationType: {
 			type: 'string',
@@ -253,6 +253,28 @@ export const addAMPAttributes = ( settings, name ) => {
 	if ( isImageBlock ) {
 		addedAttributes.ampShowImageCaption = {
 			type: 'boolean',
+			default: false,
+		};
+	}
+
+	if ( isVideoBlock ) {
+		// Required defaults for AMP validity.
+		addedAttributes.autoplay = {
+			...settings.attributes.autoplay,
+			default: true,
+		};
+		addedAttributes.playsInline = {
+			...settings.attributes.playsInline,
+			default: false,
+		};
+
+		// Optional defaults.
+		addedAttributes.loop = {
+			...settings.attributes.loop,
+			default: true,
+		};
+		addedAttributes.controls = {
+			...settings.attributes.controls,
 			default: false,
 		};
 	}
@@ -338,42 +360,6 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		ampAttributes[ 'data-font-family' ] = attributes.ampFontFamily;
 	}
 
-	if ( 'undefined' !== typeof attributes.positionTop && 'undefined' !== typeof attributes.positionLeft ) {
-		const style = props.style ? props.style : {};
-		const positionStyle = {
-			position: 'absolute',
-			top: `${ attributes.positionTop }%`,
-			left: `${ attributes.positionLeft }%`,
-		};
-		ampAttributes.style = {
-			...style,
-			...positionStyle,
-		};
-	}
-
-	if ( attributes.rotationAngle ) {
-		const rotationAngle = parseInt( attributes.rotationAngle );
-		const rotationStyle = {
-			transform: `rotate(${ rotationAngle }deg)`,
-		};
-		ampAttributes.style = {
-			...ampAttributes.style,
-			...rotationStyle,
-		};
-	}
-
-	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( attributes.width && attributes.height && ! BLOCKS_WITH_TEXT_SETTINGS.includes( blockType.name ) ) {
-		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', attributes.width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', attributes.height ) }%`,
-		};
-		ampAttributes.style = {
-			...ampAttributes.style,
-			...resizeStyle,
-		};
-	}
-
 	return {
 		...newProps,
 		...ampAttributes,
@@ -398,9 +384,10 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 		// Lets check the first child of the amp-story-grid-layer for the className.
 		if (
 			blockContentDiv.children[ 0 ].children.length &&
-			blockContentDiv.children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
+			blockContentDiv.children[ 0 ].children[ 0 ].children.length &&
+			blockContentDiv.children[ 0 ].children[ 0 ].children[ 0 ].className.includes( 'is-style-' )
 		) {
-			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].className;
+			blockAttributes.className = blockContentDiv.children[ 0 ].children[ 0 ].children[ 0 ].className;
 		}
 	}
 
@@ -408,22 +395,69 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 };
 
 /**
- * Wraps all movable blocks in a grid layer.
+ * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {Object} element       Block element.
- * @param {Object} blockType     Block type object.
- * @param {string} blockType.name Block type name.
+ * @param {Object} element                  Block element.
+ * @param {Object} blockType                Block type object.
+ * @param {Object} attributes               Block attributes.
+ * @param {number} attributes.positionTop   Top offset in pixel.
+ * @param {number} attributes.positionLeft  Left offset in pixel.
+ * @param {number} attributes.rotationAngle Rotation angle in degrees.
+ * @param {number} attributes.width         Block width in pixel.
+ * @param {number} attributes.height        Block height in pixel.
  *
  * @return {Object} The wrapped element.
  */
-export const wrapBlocksInGridLayer = ( element, blockType ) => {
+export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
 	}
 
+	const { positionTop, positionLeft, rotationAngle, width, height } = attributes;
+
+	const style = {
+		style: {},
+	};
+
+	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
+		const positionStyle = {
+			position: 'absolute',
+			top: `${ positionTop }%`,
+			left: `${ positionLeft }%`,
+		};
+		style.style = {
+			...style.style,
+			...positionStyle,
+		};
+	}
+
+	if ( rotationAngle ) {
+		const rotationStyle = {
+			transform: `rotate(${ parseInt( rotationAngle ) }deg)`,
+		};
+		style.style = {
+			...style.style,
+			...rotationStyle,
+		};
+	}
+
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
+	if ( width && height ) {
+		const resizeStyle = {
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
+		};
+		style.style = {
+			...style.style,
+			...resizeStyle,
+		};
+	}
+
 	return (
 		<amp-story-grid-layer template="vertical">
-			{ element }
+			<div className="amp-story-block-wrapper" { ...style }>
+				{ element }
+			</div>
 		</amp-story-grid-layer>
 	);
 };
@@ -634,14 +668,18 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 			minFontSize = mid;
 		}
 	}
+	// Let's restore the correct font size, too.
+	measurer.style.fontSize = minFontSize + 'px';
+
 	return minFontSize;
 };
 
 /**
  * Get percentage of a distance compared to the full width / height of the page.
  *
- * @param {string} axis X or Y axis.
+ * @param {string} axis       X or Y axis.
  * @param {number} pixelValue Value in pixels.
+ *
  * @return {number} Value in percentage.
  */
 export const getPercentageFromPixels = ( axis, pixelValue ) => {
@@ -649,6 +687,23 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
 		return Math.round( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 );
 	} else if ( 'y' === axis ) {
 		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
+	}
+	return 0;
+};
+
+/**
+ * Get pixel value from percentage, based on the full width / height of the page.
+ *
+ * @param {string} axis            X or Y axis.
+ * @param {number} percentageValue Value in percent.
+ *
+ * @return {number} Value in percentage.
+ */
+export const getPixelsFromPercentage = ( axis, percentageValue ) => {
+	if ( 'x' === axis ) {
+		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_WIDTH );
+	} else if ( 'y' === axis ) {
+		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_HEIGHT );
 	}
 	return 0;
 };
@@ -826,8 +881,6 @@ export const getClassNameFromBlockAttributes = ( {
  * @param {?string} textColor             A string containing the color slug.
  * @param {string}  customBackgroundColor A string containing the custom background color value.
  * @param {string}  customTextColor       A string containing the custom color value.
- * @param {number}  width                 The block's width in pixels.
- * @param {number}  height                The block's height in pixels.
  * @param {?number} opacity               Opacity.
  *
  * @return {Object} Block inline style.
@@ -842,8 +895,6 @@ export const getStylesFromBlockAttributes = ( {
 	textColor,
 	customBackgroundColor,
 	customTextColor,
-	width,
-	height,
 	opacity,
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
@@ -864,8 +915,6 @@ export const getStylesFromBlockAttributes = ( {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
 		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
-		width: `${ getPercentageFromPixels( 'x', width ) }%`,
-		height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		textAlign: align,
 	};
 };
@@ -930,6 +979,26 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		},
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
+};
+
+/**
+ * Removes a pre-set caption from image block.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeRemoveImageCaption = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	// If we have an image with pre-set caption we should remove the caption.
+	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+		updateBlockAttributes( clientId, { caption: '' } );
+	}
 };
 
 /**
@@ -1005,6 +1074,40 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 
 	if ( block.attributes.autoAdvanceAfterMedia !== autoAdvanceAfterMedia ) {
 		updateBlockAttributes( clientId, { autoAdvanceAfterMedia } );
+	}
+};
+
+/**
+ * Sets width and height to image if it hasn't been set via resizing yet.
+ * Takes the values from the original image.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeSetInitialSize = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block || 'core/image' !== block.name ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	if ( ! attributes.width && ! attributes.height && 0 < attributes.id ) {
+		const media = select( 'core' ).getMedia( attributes.id );
+		// If the width and height haven't been set for the media, we should get it from the original image.
+		if ( media && media.media_details ) {
+			const { height, width } = media.media_details;
+			let ratio = 1;
+			// If the image exceeds the page limits, adjust the width and height accordingly.
+			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
+				ratio = Math.max( width / STORY_PAGE_INNER_WIDTH, height / STORY_PAGE_INNER_HEIGHT );
+			}
+
+			updateBlockAttributes( clientId, {
+				width: Math.round( width / ratio ),
+				height: Math.round( height / ratio ),
+			} );
+		}
 	}
 };
 

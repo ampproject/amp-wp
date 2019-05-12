@@ -90,7 +90,7 @@ export const settings = {
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'Player ID (required)', 'amp' ) }
