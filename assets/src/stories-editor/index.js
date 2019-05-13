@@ -55,7 +55,6 @@ import store from './store';
 
 const {
 	getSelectedBlock,
-	getSelectedBlockClientId,
 	getBlocksByClientId,
 	getClientIdsWithDescendants,
 	getBlockRootClientId,
