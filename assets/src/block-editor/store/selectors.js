@@ -18,7 +18,7 @@ export function getBlockValidationErrors( state, clientId ) {
  * @return {boolean} Whether the current theme has AMP support.
  */
 export function hasThemeSupport( state ) {
-	return state.hasThemeSupport;
+	return Boolean( state.hasThemeSupport );
 }
 
 /**
@@ -29,7 +29,7 @@ export function hasThemeSupport( state ) {
  * @return {boolean} Whether the current site uses native AMP.
  */
 export function isNativeAMP( state ) {
-	return state.isNativeAMP;
+	return Boolean( state.isNativeAMP );
 }
 
 export function getDefaultStatus( state ) {

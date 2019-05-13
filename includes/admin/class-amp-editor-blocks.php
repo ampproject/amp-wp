@@ -143,15 +143,6 @@ class AMP_Editor_Blocks {
 			true
 		);
 
-		wp_localize_script(
-			'amp-editor-blocks',
-			'ampBlockEditor',
-			array(
-				'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
-				'isNativeAMP'     => amp_is_canonical(),
-			)
-		);
-
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
