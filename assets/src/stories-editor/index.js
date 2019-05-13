@@ -168,9 +168,9 @@ subscribe( async () => {
 	}
 
 	if ( selectedBlock !== newSelectedBlock ) {
-		const toolbar = document.querySelector( '.edit-post-header-toolbar__block-toolbar' );
-		if ( toolbar ) {
-			toolbar.setAttribute( 'data-block-name', newSelectedBlock ? newSelectedBlock.name : '' );
+		const editPostLayout = document.querySelector( '.edit-post-layout' );
+		if ( editPostLayout ) {
+			editPostLayout.setAttribute( 'data-block-name', newSelectedBlock ? newSelectedBlock.name : '' );
 		}
 	}
 

@@ -146,10 +146,10 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
  * Hackily hide the alignment options from the image block since they are irrelevant for an image block in a story.
  * In the future the underlying alignment buttons should be removed entirely. See <https://github.com/ampproject/amp-wp/issues/2115>.
  */
-.edit-post-header-toolbar__block-toolbar[data-block-name="core/image"] .block-editor-block-toolbar > .components-toolbar,
-.edit-post-header-toolbar__block-toolbar[data-block-name="core/pullquote"] .block-editor-block-toolbar > .components-toolbar,
-.edit-post-header-toolbar__block-toolbar[data-block-name="core/embed"] .block-editor-block-toolbar > .components-toolbar,
-.edit-post-header-toolbar__block-toolbar[data-block-name="core/video"] .block-editor-block-toolbar > .components-toolbar {
+.edit-post-layout[data-block-name="core/image"] .edit-post-header-toolbar__block-toolbar  .block-editor-block-toolbar > .components-toolbar,
+.edit-post-layout[data-block-name="core/pullquote"] .edit-post-header-toolbar__block-toolbar  .block-editor-block-toolbar > .components-toolbar,
+.edit-post-layout[data-block-name="core/embed"] .edit-post-header-toolbar__block-toolbar  .block-editor-block-toolbar > .components-toolbar,
+.edit-post-layout[data-block-name="core/video"] .edit-post-header-toolbar__block-toolbar  .block-editor-block-toolbar > .components-toolbar {
 	display: none;
 }
 
