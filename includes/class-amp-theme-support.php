@@ -1167,9 +1167,9 @@ class AMP_Theme_Support {
 			str_replace(
 				'%s',
 				sprintf( '" + %s.replyToName + "', $state_id ),
-				wp_json_encode( $args['title_reply_to'] )
+				wp_json_encode( $args['title_reply_to'], JSON_UNESCAPED_UNICODE )
 			),
-			wp_json_encode( $args['title_reply'] )
+			wp_json_encode( $args['title_reply'], JSON_UNESCAPED_UNICODE )
 		);
 
 		$args['title_reply_before'] .= sprintf(
@@ -1252,7 +1252,7 @@ class AMP_Theme_Support {
 			esc_url( remove_query_arg( 'replytocom' ) . '#' . $respond_id ),
 			isset( $_GET['replytocom'] ) ? '' : ' hidden', // phpcs:ignore
 			esc_attr( sprintf( '%s.values.comment_parent == "0"', self::get_comment_form_state_id( get_the_ID() ) ) ),
-			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state ) ) ),
+			esc_attr( sprintf( 'tap:AMP.setState( %s )', wp_json_encode( $tap_state, JSON_UNESCAPED_UNICODE ) ) ),
 			esc_html( $text )
 		);
 	}
