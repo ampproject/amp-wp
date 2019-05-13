@@ -1161,3 +1161,41 @@ export const maybeInitializeAnimations = () => {
 		}
 	}
 };
+
+/**
+ * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
+ *
+ * @param {Object} event MouseEvent.
+ * @param {number} angle Rotation angle.
+ * @param {number} lastSeenX Starting X coordinate.
+ * @param {number} lastSeenY Starint Y coordinate.
+ * @param {string} direction Direction of resizing.
+ * @return {Object} Width and height values.
+ */
+export const getDelta = ( event, angle, lastSeenX, lastSeenY, direction ) => {
+	let deltaH = 'bottom' === direction ? Math.sqrt( Math.pow( event.clientX - lastSeenX, 2 ) + Math.pow( event.clientY - lastSeenY, 2 ) ) : 0;
+	let deltaW = 'right' === direction ? Math.sqrt( Math.pow( event.clientX - lastSeenX, 2 ) + Math.pow( event.clientY - lastSeenY, 2 ) ) : 0;
+
+	if ( 'bottom' === direction ) {
+		// If delta Y has changed to minus then we substract.
+		// If we are "upside down" and delta is in plus then we substract.
+		if (
+			( Math.abs( angle ) <= 90 && 0 > event.clientY - lastSeenY ) ||
+			( Math.abs( angle ) > 90 && 0 < event.clientY - lastSeenY )
+		) {
+			deltaH = -deltaH;
+		}
+	} else if ( 'right' === direction ) {
+		if (
+			( Math.abs( angle ) <= 90 && 0 > event.clientX - lastSeenX ) ||
+			( Math.abs( angle ) > 90 && 0 < event.clientX - lastSeenX )
+		) {
+			deltaW = -deltaW;
+		}
+	}
+
+	return {
+		deltaW,
+		deltaH,
+	};
+};

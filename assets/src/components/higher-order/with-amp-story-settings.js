@@ -231,6 +231,7 @@ export default createHigherOrderComponent(
 							isSelected={ isSelected }
 							width={ width }
 							height={ height }
+							angle={ rotationAngle }
 							minHeight={ minTextHeight }
 							minWidth={ minTextWidth }
 							onResizeStop={ ( value ) => {
@@ -245,7 +246,7 @@ export default createHigherOrderComponent(
 								blockElementId={ `block-${ clientId }` }
 								initialAngle={ rotationAngle }
 								className="amp-story-editor__rotate-container"
-								angle={ isSelected ? 0 : rotationAngle }
+								angle={ rotationAngle }
 								onRotateStart={ () => {
 									startBlockRotation();
 								} }
