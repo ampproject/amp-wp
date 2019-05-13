@@ -914,7 +914,7 @@ export const getStylesFromBlockAttributes = ( {
 	return {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
-		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
+		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
 		textAlign: align,
 	};
 };
