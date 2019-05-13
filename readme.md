@@ -7,7 +7,7 @@ Enable AMP on your WordPress site, the WordPress way.
 **Contributors:** [automattic](https://profiles.wordpress.org/automattic), [xwp](https://profiles.wordpress.org/xwp), [google](https://profiles.wordpress.org/google), [westonruter](https://profiles.wordpress.org/westonruter), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [batmoo](https://profiles.wordpress.org/batmoo), [stubgo](https://profiles.wordpress.org/stubgo), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry), [joshuawold](https://profiles.wordpress.org/joshuawold), [postphotos](https://profiles.wordpress.org/postphotos)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.9  
-**Tested up to:** 5.1  
+**Tested up to:** 5.2  
 **Stable tag:** 1.1.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
