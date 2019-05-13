@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 855;
+	private static $spec_file_revision = 859;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -740,13 +740,7 @@ class AMP_Allowed_Tags_Generated {
 		'amp-addthis' => array(
 			array(
 				'attr_spec_list' => array(
-					'data-class-name' => array(
-						'mandatory' => false,
-					),
 					'data-product-code' => array(),
-					'data-pub-id' => array(
-						'mandatory' => true,
-					),
 					'data-share-media' => array(
 						'value_url' => array(
 							'allow_empty' => true,
@@ -824,6 +818,8 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'object-fit' => array(),
+					'object-position' => array(),
 					'src' => array(
 						'alternative_names' => array(
 							'srcset',
@@ -3221,6 +3217,8 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'object-fit' => array(),
+					'object-position' => array(),
 					'placeholder' => array(),
 					'src' => array(
 						'alternative_names' => array(
@@ -3497,6 +3495,28 @@ class AMP_Allowed_Tags_Generated {
 					'requires_extension' => array(
 						'amp-lightbox',
 					),
+				),
+			),
+		),
+		'amp-link-rewriter' => array(
+			array(
+				'attr_spec_list' => array(),
+				'tag_spec' => array(
+					'amp_layout' => array(
+						'supported_layouts' => array(
+							1,
+						),
+					),
+					'child_tags' => array(
+						'first_child_tag_name_oneof' => array(
+							'script',
+						),
+						'mandatory_num_child_tags' => 1,
+					),
+					'requires_extension' => array(
+						'amp-link-rewriter',
+					),
+					'unique' => true,
 				),
 			),
 		),
@@ -5241,6 +5261,8 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'object-fit' => array(),
+					'object-position' => array(),
 					'placeholder' => array(),
 					'poster' => array(),
 					'preload' => array(
@@ -5348,6 +5370,8 @@ class AMP_Allowed_Tags_Generated {
 							'',
 						),
 					),
+					'object-fit' => array(),
+					'object-position' => array(),
 					'placeholder' => array(),
 					'poster' => array(
 						'mandatory' => true,
@@ -11878,6 +11902,7 @@ class AMP_Allowed_Tags_Generated {
 						'requires_usage' => 2,
 						'version' => array(
 							'0.1',
+							'1.0',
 							'latest',
 						),
 					),
@@ -12635,6 +12660,56 @@ class AMP_Allowed_Tags_Generated {
 							'latest',
 						),
 					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'async' => array(
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'nonce' => array(),
+					'type' => array(
+						'value_casei' => array(
+							'text/javascript',
+						),
+					),
+				),
+				'tag_spec' => array(
+					'extension_spec' => array(
+						'name' => 'amp-link-rewriter',
+						'version' => array(
+							'0.1',
+							'latest',
+						),
+					),
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'nonce' => array(),
+					'type' => array(
+						'dispatch_key' => 3,
+						'mandatory' => true,
+						'value_casei' => array(
+							'application/json',
+						),
+					),
+				),
+				'cdata' => array(
+					'blacklisted_cdata_regex' => array(
+						'error_message' => 'html comments',
+						'regex' => '<!--',
+					),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-link-rewriter',
+					'requires_extension' => array(
+						'amp-link-rewriter',
+					),
+					'spec_name' => 'amp-link-rewriter extension .json script',
 				),
 			),
 			array(
