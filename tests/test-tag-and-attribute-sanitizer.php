@@ -1450,6 +1450,18 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-script' ),
 			),
+
+			'amp_img_with_object_fit_position' => array(
+				'<amp-img src="http://placehold.it/400x500" width="300" height="300" object-fit="none" object-position="right top" layout="intrinsic"></amp-img>',
+				null,
+				array(),
+			),
+
+			'amp_link_rewriter' => array(
+				'<amp-link-rewriter layout="nodisplay"><script type="application/json">{}</script></amp-link-rewriter>',
+				null,
+				array( 'amp-link-rewriter' ),
+			),
 		);
 	}
 
