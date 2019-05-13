@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-jwplayer';
 
@@ -101,14 +101,10 @@ export const settings = {
 							value={ dataPlaylistId }
 							onChange={ ( value ) => ( setAttributes( { dataPlaylistId: value } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'JW Player', 'amp' ), url )
-				}
+				{ url && <MediaPlaceholder name={ __( 'JW Player', 'amp' ) } url={ url } /> }
 				{
 					! url && (
 						<Placeholder label={ __( 'JW Player', 'amp' ) }>

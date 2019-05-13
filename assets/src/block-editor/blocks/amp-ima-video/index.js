@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-ima-video';
 
@@ -106,14 +106,10 @@ export const settings = {
 							checked={ dataDelayAdRequest }
 							onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					dataSet && getMediaPlaceholder( __( 'IMA Video', 'amp' ), dataSrc )
-				}
+				{ dataSet && <MediaPlaceholder name={ __( 'IMA Video', 'amp' ) } url={ dataSrc } /> }
 				{
 					! dataSet && (
 						<Placeholder label={ __( 'IMA Video', 'amp' ) }>

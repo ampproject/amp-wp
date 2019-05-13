@@ -17,6 +17,8 @@ export { default as PreviewPicker } from './preview-picker';
 export { default as Inserter } from './inserter';
 export { default as ResizableBox } from './resizable-box';
 export { default as ValidationErrorMessage } from './validation-error-message';
+export { default as MediaPlaceholder } from './media-placeholder';
+export { default as LayoutControls } from './layout-controls';
 export { default as withMetaBlockEdit } from './with-meta-block-edit';
 export { default as withAmpStorySettings } from './higher-order/with-amp-story-settings';
 export { default as withAttributes } from './higher-order/with-attributes';
