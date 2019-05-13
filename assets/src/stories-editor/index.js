@@ -54,6 +54,7 @@ import { ALLOWED_BLOCKS } from './constants';
 import store from './store';
 
 const {
+	getSelectedBlock,
 	getSelectedBlockClientId,
 	getBlocksByClientId,
 	getClientIdsWithDescendants,
@@ -147,24 +148,33 @@ let allBlocksWithChildren = getClientIdsWithDescendants();
 
 let editorMode = getEditorMode();
 
+let selectedBlock;
+
 subscribe( async () => {
 	maybeInitializeAnimations();
 
 	const defaultBlockName = getDefaultBlockName();
-	const selectedBlockClientId = getSelectedBlockClientId();
+	const newSelectedBlock = getSelectedBlock();
 
 	// Switch default block depending on context
-	if ( selectedBlockClientId ) {
-		const selectedBlock = getBlock( selectedBlockClientId );
-
-		if ( 'amp/amp-story-page' === selectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
+	if ( newSelectedBlock ) {
+		if ( 'amp/amp-story-page' === newSelectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-page' );
-		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
+		} else if ( 'amp/amp-story-page' !== newSelectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-text' );
 		}
-	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
+	} else if ( 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
+
+	if ( selectedBlock !== newSelectedBlock ) {
+		const toolbar = document.querySelector( '.edit-post-header-toolbar__block-toolbar' );
+		if ( toolbar ) {
+			toolbar.setAttribute( 'data-block-name', newSelectedBlock ? newSelectedBlock.name : '' );
+		}
+	}
+
+	selectedBlock = newSelectedBlock;
 
 	const newBlockOrder = getBlockOrder();
 	const newlyAddedPages = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
