@@ -2,6 +2,10 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	margin: 0;
 }
 
+/**
+ * See https://github.com/ampproject/amp-wp/issues/2219.
+ */
+.wp-block-amp-story-text .block-editor-rich-text__editable,
 .has-background {
 	padding: 7px !important;
 	display: flex;
