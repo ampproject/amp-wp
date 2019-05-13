@@ -1334,7 +1334,7 @@ class AMP_Theme_Support {
 		if ( ! $schema_org_meta_script ) {
 			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'type', 'application/ld+json' );
-			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata() ) ) );
+			$script->appendChild( $dom->createTextNode( wp_json_encode( amp_get_schemaorg_metadata(), JSON_UNESCAPED_UNICODE ) ) );
 			$head->appendChild( $script );
 		}
 
