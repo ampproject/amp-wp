@@ -33,6 +33,9 @@ export const STORY_PAGE_INNER_HEIGHT = 553;
 export const MIN_BLOCK_WIDTH = 30;
 export const MIN_BLOCK_HEIGHT = 20;
 
+export const MIN_FONT_SIZE = 8;
+export const MAX_FONT_SIZE = 54;
+
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 	'core/block', // Reusable blocks.

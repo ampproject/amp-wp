@@ -20,10 +20,8 @@ import { select } from '@wordpress/data';
  */
 import { calculateFontSize } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
+import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../constants';
 import './edit.css';
-
-const maxLimitFontSize = 54;
-const minLimitFontSize = 14;
 
 class TextBlockEdit extends Component {
 	constructor() {
@@ -54,7 +52,7 @@ class TextBlockEdit extends Component {
 			// Check if the font size is OK, if not, update the font size if not.
 			const element = document.querySelector( `#block-${ this.props.clientId } .block-editor-rich-text__editable` );
 			if ( element ) {
-				const fitFontSize = calculateFontSize( element, height, width, maxLimitFontSize, minLimitFontSize );
+				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 				if ( autoFontSize !== fitFontSize ) {
 					setAttributes( { autoFontSize: fitFontSize } );
 				}
