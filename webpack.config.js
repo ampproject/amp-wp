@@ -15,10 +15,6 @@ const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 const sharedConfig = {
 	externals: [
 		...defaultConfig.externals,
-		{
-			// Make localized data importable.
-			'amp-stories-fonts': 'ampStoriesFonts',
-		},
 	],
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
@@ -26,12 +22,17 @@ const sharedConfig = {
 		chunkFilename: '[name].js',
 	},
 	optimization: {
-		usedExports: true,
 		minimizer: [
 			new TerserPlugin( {
 				parallel: true,
 				sourceMap: false,
 				cache: true,
+				terserOptions: {
+					output: {
+						comments: /translators:/i,
+					},
+				},
+				extractComments: false,
 			} ),
 			new OptimizeCSSAssetsPlugin( { } ),
 		],

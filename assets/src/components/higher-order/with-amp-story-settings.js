@@ -28,7 +28,7 @@ import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, Rot
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
 import { maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 
-const { getComputedStyle } = window;
+const { getComputedStyle, ampStoriesFonts } = window;
 
 const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 	const { textColor, backgroundColor, fontSize, customFontSize } = ownProps;
@@ -265,6 +265,7 @@ export default createHigherOrderComponent(
 						<InspectorControls>
 							<PanelBody title={ __( 'Text Settings', 'amp' ) }>
 								<FontFamilyPicker
+									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
 									onChange={ ( value ) => {
 										maybeEnqueueFontStyle( value );

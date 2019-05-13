@@ -37,7 +37,8 @@ import {
 	MEDIA_INNER_BLOCKS,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import ampStoriesFonts from 'amp-stories-fonts';
+
+const { ampStoriesFonts } = window;
 
 const {
 	getBlocksByClientId,
