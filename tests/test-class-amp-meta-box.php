@@ -101,7 +101,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-hooks',
 				'wp-i18n',
 				'wp-components',
-				'amp-editor-blocks',
 			),
 			$block_script->deps
 		);
