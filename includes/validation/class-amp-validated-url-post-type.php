@@ -221,6 +221,7 @@ class AMP_Validated_URL_Post_Type {
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
 		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
+		add_filter( 'admin_title', array( __CLASS__, 'filter_admin_title' ) );
 
 		// Hide irrelevant "published" label in the AMP Validated URLs post list.
 		add_filter(
@@ -305,14 +306,9 @@ class AMP_Validated_URL_Post_Type {
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
 			amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
-			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
+			array( 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
-		);
-		wp_localize_script(
-			'amp-validation-detail-toggle',
-			'ampValidationI18n',
-			array( 'btnAriaLabel' => esc_attr__( 'Toggle all', 'amp' ) )
 		);
 	}
 
@@ -1619,50 +1615,41 @@ class AMP_Validated_URL_Post_Type {
 
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
-		wp_enqueue_script( self::EDIT_POST_SCRIPT_HANDLE, amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ), array(), AMP__VERSION, true );
-	}
+		wp_enqueue_script(
+			self::EDIT_POST_SCRIPT_HANDLE,
+			amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ),
+			array( 'wp-dom-ready', 'wp-i18n' ),
+			AMP__VERSION,
+			true
+		);
 
-	/**
-	 * Enqueues scripts for the edit post screen.
-	 *
-	 * This is called in render_single_url_list_table() instead of enqueue_edit_post_screen_scripts(),
-	 * as it depends on data from the WP_Terms_List_Table in that method.
-	 * So this has to run after the 'admin_enqueue_scripts' hook.
-	 */
-	public static function add_edit_post_inline_script() {
 		$current_screen = get_current_screen();
-		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
-			return;
+		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
+			$post = get_post();
+			$data = array(
+				'page_heading' => self::get_single_url_page_heading(),
+				'amp_enabled'  => self::is_amp_enabled_on_post( $post ),
+			);
+
+			wp_localize_script(
+				self::EDIT_POST_SCRIPT_HANDLE,
+				'ampValidation',
+				$data
+			);
 		}
 
-		$post = get_post();
-		$data = array(
-			'l10n' => array(
-				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
-				'page_heading'    => self::get_single_url_page_heading(),
-				'show_all'        => __( 'Show all', 'amp' ),
-				'amp_enabled'     => self::is_amp_enabled_on_post( $post ),
-			),
-		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::EDIT_POST_SCRIPT_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
 
-		// Only the second number is interpolated by PHP, as the JS file will dynamically replace %1$s with the errors being displayed.
-		$data['l10n']['showing_number_errors'] = sprintf(
-			/* translators: 1: number of errors being displayed. 2: total number of errors found. */
-			_n(
-				'Showing %1$s of %2$s validation error',
-				'Showing %1$s of %2$s validation errors',
-				self::$total_errors_for_url,
-				'amp'
-			),
-			'%1$s',
-			number_format_i18n( self::$total_errors_for_url )
-		);
-
-		wp_add_inline_script(
-			self::EDIT_POST_SCRIPT_HANDLE,
-			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
-			'after'
-		);
+			wp_add_inline_script(
+				self::EDIT_POST_SCRIPT_HANDLE,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 
 	/**
@@ -1874,7 +1861,6 @@ class AMP_Validated_URL_Post_Type {
 
 		// The inline script depends on data from the list table.
 		self::$total_errors_for_url = $wp_list_table->get_pagination_arg( 'total_items' );
-		self::add_edit_post_inline_script();
 
 		?>
 		<form class="search-form wp-clearfix" method="get">
@@ -2090,6 +2076,24 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Filters the document title on the single URL page at /wp-admin/post.php.
+	 *
+	 * @param string $title Document title.
+	 *
+	 * @return string Filtered document title.
+	 */
+	public static function filter_admin_title( $title ) {
+		$page_title = self::get_single_url_page_heading();
+
+		if ( $page_title ) {
+			/* translators: Admin screen title. %s: Admin screen name */
+			return sprintf( __( '%s &#8212; WordPress' ), $page_title );
+		}
+
+		return $title;
+	}
+
+	/**
 	 * Gets the heading for the single URL page at /wp-admin/post.php.
 	 * This will be in the format of 'Errors for: <page title>'.
 	 *
@@ -2112,9 +2116,9 @@ class AMP_Validated_URL_Post_Type {
 		$post           = get_post();
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
 		$name           = __( 'Single URL', 'amp' ); // Default.
-		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
+		if ( isset( $queried_object['type'], $queried_object['id'] ) ) {
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-				$name = html_entity_decode( get_the_title( $queried_object['id'], ENT_QUOTES ) );
+				$name = html_entity_decode( get_the_title( $queried_object['id'] ), ENT_QUOTES );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
 				$name = get_term( $queried_object['id'] )->name;
 			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {

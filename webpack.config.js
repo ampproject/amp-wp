@@ -96,13 +96,6 @@ const ampStories = {
 const ampValidation = {
 	...defaultConfig,
 	...sharedConfig,
-	externals: [
-		...sharedConfig.externals,
-		{
-			// Make localized data importable.
-			'amp-validation-i18n': 'ampValidationI18n',
-		},
-	],
 	entry: {
 		'amp-validated-url-post-edit-screen': './assets/src/amp-validation/amp-validated-url-post-edit-screen.js',
 		'amp-validated-urls-index': './assets/src/amp-validation/amp-validated-urls-index.js',
