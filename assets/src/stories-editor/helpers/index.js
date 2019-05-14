@@ -876,7 +876,6 @@ export const getClassNameFromBlockAttributes = ( {
  * @param {?string} fontSize              Font size slug.
  * @param {?number} customFontSize        Custom font size in pixels.
  * @param {boolean} ampFitText            Whether amp-fit-text should be used or not.
- * @param {number}  autoFontSize          The automatically determined font sized. Used when ampFitText is true.
  * @param {?string} backgroundColor       A string containing the background color slug.
  * @param {?string} textColor             A string containing the color slug.
  * @param {string}  customBackgroundColor A string containing the custom background color value.
@@ -890,7 +889,6 @@ export const getStylesFromBlockAttributes = ( {
 	fontSize,
 	customFontSize,
 	ampFitText,
-	autoFontSize,
 	backgroundColor,
 	textColor,
 	customBackgroundColor,
