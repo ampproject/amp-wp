@@ -1076,36 +1076,72 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 };
 
 /**
- * Sets width and height to image if it hasn't been set via resizing yet.
- * Takes the values from the original image.
+ * Sets width and height for blocks if they haven't been modified yet.
  *
  * @param {string} clientId Block ID.
  */
 export const maybeSetInitialSize = ( clientId ) => {
 	const block = getBlock( clientId );
 
-	if ( ! block || 'core/image' !== block.name ) {
+	if ( ! block ) {
 		return;
 	}
 
-	const { attributes } = block;
+	const { name, attributes } = block;
+	const { width, height } = attributes;
 
-	if ( ! attributes.width && ! attributes.height && 0 < attributes.id ) {
-		const media = select( 'core' ).getMedia( attributes.id );
-		// If the width and height haven't been set for the media, we should get it from the original image.
-		if ( media && media.media_details ) {
-			const { height, width } = media.media_details;
-			let ratio = 1;
-			// If the image exceeds the page limits, adjust the width and height accordingly.
-			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
-				ratio = Math.max( width / STORY_PAGE_INNER_WIDTH, height / STORY_PAGE_INNER_HEIGHT );
+	switch ( name ) {
+		/**
+		 * Sets width and height to image if it hasn't been set via resizing yet.
+		 *
+		 * Takes the values from the original image.
+		 */
+		case 'core/image':
+			if ( ! width && ! height && attributes.id > 0 ) {
+				const media = select( 'core' ).getMedia( attributes.id );
+				// If the width and height haven't been set for the media, we should get it from the original image.
+				if ( media && media.media_details ) {
+					const { height: imageHeight, width: imageWidth } = media.media_details;
+
+					let ratio = 1;
+					// If the image exceeds the page limits, adjust the width and height accordingly.
+					if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
+						ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
+					}
+
+					updateBlockAttributes( clientId, {
+						width: Math.round( width / ratio ),
+						height: Math.round( height / ratio ),
+					} );
+				}
 			}
 
-			updateBlockAttributes( clientId, {
-				width: Math.round( width / ratio ),
-				height: Math.round( height / ratio ),
-			} );
-		}
+			break;
+
+		case 'amp/amp-story-text':
+			if ( height === getDefaultMinimumBlockHeight( name ) ) {
+				// Check if the font size is OK, if not, update the font size if not.
+				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+				if ( element && element.offsetHeight !== height ) {
+					updateBlockAttributes( clientId, {
+						height: element.offsetHeight,
+					} );
+				}
+			}
+
+			break;
+		case 'amp/amp-story-post-title':
+			if ( height === getDefaultMinimumBlockHeight( name ) ) {
+				// Check if the font size is OK, if not, update the font size if not.
+				const element = document.querySelector( `#block-${ clientId } .wp-block-amp-amp-story-post-title` );
+				if ( element && element.scrollHeight !== height ) {
+					updateBlockAttributes( clientId, {
+						height: element.scrollHeight,
+					} );
+				}
+			}
+
+			break;
 	}
 };
 
