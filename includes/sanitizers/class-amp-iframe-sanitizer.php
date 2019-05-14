@@ -39,6 +39,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	protected $DEFAULT_ARGS = array(
 		'add_placeholder'       => false,
 		'add_noscript_fallback' => true,
+		'add_overflow'          => true,
 	);
 
 	/**
@@ -101,6 +102,21 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-iframe', $normalized_attributes );
 
+			if ( $this->is_wordpress_embed( $node ) ) {
+				/**
+				 * Needed for resizable iframes
+				 *
+				 * @see https://github.com/ampproject/amphtml/blob/master/extensions/amp-iframe/amp-iframe.md
+				 */
+				if ( $node->previousSibling && 'blockquote' === $node->previousSibling->nodeName ) {
+					$blockquote = $node->parentNode->removeChild( $node->previousSibling );
+					$blockquote->setAttribute( 'overflow', '' );
+					$new_node->appendChild( $blockquote );
+				}
+
+				$new_node->removeAttribute( 'style' );
+			}
+
 			if ( true === $this->args['add_placeholder'] ) {
 				$placeholder_node = $this->build_placeholder( $normalized_attributes );
 				$new_node->appendChild( $placeholder_node );
@@ -115,6 +131,19 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				$this->append_old_node_noscript( $new_node, $node, $this->dom );
 			}
 		}
+	}
+
+	/**
+	 * Checks whether the node belongs to a WordPress oEmbed.
+	 *
+	 * @param DOMElement $node The DOMNode to check against.
+	 *
+	 * @return bool Whether node is for WordPress oEmbed.
+	 */
+	private function is_wordpress_embed( $node ) {
+		$class_attr = $node->getAttribute( 'class' );
+
+		return null !== $class_attr && false !== strpos( $class_attr, 'wp-embedded-content' );
 	}
 
 	/**
@@ -164,6 +193,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					}
 					break;
 
+				// Remove invalid attributes.
+				case 'security':
+				case 'marginwidth':
+				case 'marginheight':
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
@@ -172,6 +207,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! isset( $out['sandbox'] ) ) {
 			$out['sandbox'] = self::SANDBOX_DEFAULTS;
+		}
+
+		if ( ! isset( $out['resizable'] ) ) {
+			$out['resizable'] = '';
 		}
 
 		return $out;

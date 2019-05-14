@@ -210,15 +210,6 @@ class AMP_Story_Post_Type {
 		// Enqueue the styling for the /embed endpoint.
 		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
 
-		// In the block editor, remove the title from above the AMP Stories embed.
-		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
-
-		// Change some attributes for the AMP story embed.
-		add_filter( 'embed_html', array( __CLASS__, 'change_embed_iframe_attributes' ), 10, 2 );
-
-		// Override the render_callback for AMP story embeds.
-		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
-
 		// The AJAX handler for when an image is cropped and sent via POST.
 		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
 
@@ -1130,61 +1121,6 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Overrides the render_callback of an AMP story post embed, when using the WordPress (embed) block.
-	 *
-	 * WordPress post embeds are usually wrapped in an <iframe>,
-	 * which can cause validation and display issues in AMP.
-	 * This overrides the embed callback in that case, replacing the <iframe> with the simple AMP story card.
-	 *
-	 * @param string $pre_render The pre-rendered markup, default null.
-	 * @param array  $block The block to render.
-	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
-	 */
-	public static function override_story_embed_callback( $pre_render, $block ) {
-		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || ! in_array( $block['blockName'], array( 'core-embed/wordpress', 'core/embed' ), true ) ) {
-			return $pre_render;
-		}
-
-		// Taken from url_to_postid(), ensures that the URL is from this site.
-		$url           = $block['attrs']['url'];
-		$url_host      = wp_parse_url( $url, PHP_URL_HOST );
-		$home_url_host = wp_parse_url( home_url(), PHP_URL_HOST );
-
-		// Exit if the URL isn't from this site.
-		if ( $url_host !== $home_url_host ) {
-			return $pre_render;
-		}
-
-		$embed_url_path = wp_parse_url( $url, PHP_URL_PATH );
-		$base_url_path  = wp_parse_url( trailingslashit( home_url( self::REWRITE_SLUG ) ), PHP_URL_PATH );
-		if ( 0 !== strpos( $embed_url_path, $base_url_path ) ) {
-			return $pre_render;
-		}
-		$path = substr( $embed_url_path, strlen( $base_url_path ) );
-		$post = get_post( get_page_by_path( $path, OBJECT, self::POST_TYPE_SLUG ) );
-
-		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
-			return $pre_render;
-		}
-
-		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
-		ob_start();
-		?>
-		<div class="amp-story-embed">
-			<?php
-			self::the_single_story_card(
-				array(
-					'post' => $post,
-					'size' => self::STORY_CARD_IMAGE_SIZE,
-				)
-			);
-			?>
-		</div>
-		<?php
-		return ob_get_clean();
-	}
-
-	/**
 	 * Registers the dynamic block Latest Stories.
 	 * Much of this is taken from the Core block Latest Posts.
 	 *
@@ -1410,44 +1346,5 @@ class AMP_Story_Post_Type {
 		wp_update_attachment_metadata( $attachment_id, $metadata );
 
 		return $attachment_id;
-	}
-
-	/**
-	 * For amp_story embeds, removes the title from above the <iframe>.
-	 *
-	 * @param string  $output The output to filter.
-	 * @param WP_Post $post The post for the embed.
-	 * @return string $output The filtered output.
-	 */
-	public static function remove_title_from_embed( $output, $post ) {
-		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
-			return $output;
-		}
-
-		return preg_replace( '/<blockquote class="wp-embedded-content">.*?<\/blockquote>/', '', $output );
-	}
-
-	/**
-	 * Changes the height of the AMP Story embed <iframe>.
-	 *
-	 * In the block editor, this embed typically appears in an <iframe>, though on the front-end it's not in an <iframe>.
-	 * The height of the <iframe> isn't enough to display the full story, so this increases it.
-	 *
-	 * @param string  $output The embed output.
-	 * @param WP_Post $post The post for the embed.
-	 * @return string The filtered embed output.
-	 */
-	public static function change_embed_iframe_attributes( $output, $post ) {
-		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
-			return $output;
-		}
-
-		// Add 4px more height, as the <iframe> needs that to display the full image.
-		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
-		return preg_replace(
-			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
-			sprintf( '${1}%s${3}', $new_height ),
-			$output
-		);
 	}
 }

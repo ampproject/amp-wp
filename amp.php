@@ -348,6 +348,7 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_story_templates' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_admin_pointer' );
+	add_action( 'wp_loaded', 'amp_wordpress_embed_templates' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 
