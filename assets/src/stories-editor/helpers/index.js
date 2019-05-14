@@ -684,9 +684,9 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
  */
 export const getPercentageFromPixels = ( axis, pixelValue ) => {
 	if ( 'x' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) );
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 );
 	} else if ( 'y' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 ).toFixed( 2 ) );
+		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
 	}
 	return 0;
 };
