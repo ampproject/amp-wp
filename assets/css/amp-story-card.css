@@ -29,6 +29,11 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	overflow-x: hidden;
 }
 
+.amp-story-embed .latest_stories__link:hover {
+	box-shadow: none;
+	-webkit-box-shadow: none;
+}
+
 /* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
 .latest_stories__link:after {
 	display: block;
