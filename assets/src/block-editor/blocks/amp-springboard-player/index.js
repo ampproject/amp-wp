@@ -96,7 +96,7 @@ export const settings = {
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'SprintBoard site ID (required)', 'amp' ) }

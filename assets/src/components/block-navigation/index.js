@@ -21,7 +21,7 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<DropZoneProvider>
-			<ul key="navigation-list" className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+			<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
 				{ blocks.map( ( block ) => {
 					const isSelected = block.clientId === selectedBlockClientId;
 
@@ -51,9 +51,9 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 	return (
 		<NavigableMenu
 			role="presentation"
-			className="editor-block-navigation__container block-editor-block-navigation__container"
+			className="block-editor-block-navigation__container"
 		>
-			<p className="editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }
@@ -62,7 +62,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 				/>
 			) }
 			{ ! hasBlocks && (
-				<p className="editor-block-navigation__paragraph">
+				<p className="block-editor-block-navigation__paragraph">
 					{ __( 'No blocks created yet.', 'amp' ) }
 				</p>
 			) }

@@ -12,7 +12,6 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -45,7 +44,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { isDraggable, onDragStart, onDragEnd, clientId, blockElementId } = this.props;
+		const { isDraggable, onDragStart, clientId, blockElementId, instanceId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`
@@ -62,7 +61,6 @@ export class BlockMover extends Component {
 						blockElementId={ blockElementId }
 						isVisible={ isDraggable }
 						onDragStart={ onDragStart }
-						onDragEnd={ onDragEnd }
 					/>
 				</div>
 			</IgnoreNestedEvents>
@@ -70,9 +68,4 @@ export class BlockMover extends Component {
 	}
 }
 
-export default withDispatch( ( dispatch ) => {
-	const { clearSelectedBlock } = dispatch( 'core/block-editor' );
-	return {
-		onDragEnd: clearSelectedBlock,
-	};
-} )( BlockMover );
+export default BlockMover;

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { get } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import {
@@ -49,6 +54,7 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 const applyWithSelect = withSelect( ( select, props ) => {
 	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlockOrder, getBlockIndex } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
+	const { getMedia } = select( 'core' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
@@ -59,6 +65,16 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 	const blockClientIds = getBlockOrder( parentBlockId );
 	const blockIndex = getBlockIndex( props.clientId, parentBlockId );
+
+	const isVideoBlock = 'core/video' === props.name;
+	let videoFeaturedImage;
+
+	// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
+	if ( isVideoBlock && props.attributes.id && ! props.attributes.poster ) {
+		const media = getMedia( props.attributes.id );
+		const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
+		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
+	}
 
 	return {
 		isFirst: 0 === blockIndex,
@@ -86,6 +102,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 					};
 				} );
 		},
+		videoFeaturedImage,
 	};
 } );
 
@@ -94,7 +111,7 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 		getSelectedBlockClientId,
 		getBlockRootClientId,
 	} = select( 'core/block-editor' );
-	const { moveBlocksDown, moveBlocksUp, clearSelectedBlock } = dispatch( 'core/block-editor' );
+	const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -122,9 +139,6 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 		startBlockRotation: () => toggleSelection( false ),
 		stopBlockRotation: () => {
 			toggleSelection( true );
-
-			clearSelectedBlock();
-			document.activeElement.blur();
 		},
 		bringForward: () => moveBlocksDown( clientId, rootClientId ),
 		sendBackward: () => moveBlocksUp( clientId, rootClientId ),
@@ -165,6 +179,7 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
+				videoFeaturedImage,
 				startBlockRotation,
 				stopBlockRotation,
 				bringForward,
@@ -178,6 +193,7 @@ export default createHigherOrderComponent(
 			}
 
 			const isImageBlock = 'core/image' === name;
+			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
@@ -196,6 +212,11 @@ export default createHigherOrderComponent(
 				rotationAngle,
 			} = attributes;
 
+			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
+			if ( isVideoBlock && videoFeaturedImage ) {
+				setAttributes( { poster: videoFeaturedImage.source_url } );
+			}
+
 			const minTextHeight = 20;
 			const minTextWidth = 30;
 
@@ -205,7 +226,7 @@ export default createHigherOrderComponent(
 						<StoryBlockMover
 							clientId={ props.clientId }
 							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection && isSelected }
+							isDraggable={ ! props.isPartOfMultiSelection }
 						/>
 					) }
 					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
@@ -222,7 +243,6 @@ export default createHigherOrderComponent(
 								setAttributes( {
 									rotationAngle: angle,
 								} );
-
 								stopBlockRotation();
 							} }
 						>
@@ -384,7 +404,6 @@ export default createHigherOrderComponent(
 								title={ __( 'Story Settings', 'amp' ) }
 							>
 								<ToggleControl
-									key="position"
 									label={ __( 'Show or hide the caption', 'amp' ) }
 									checked={ ampShowImageCaption }
 									onChange={

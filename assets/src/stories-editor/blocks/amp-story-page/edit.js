@@ -88,7 +88,7 @@ class EditPage extends Component {
 			mediaUrl: media.url,
 			mediaId: media.id,
 			mediaType,
-			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image ? media.image.src : undefined,
+			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
 	}
 
@@ -159,7 +159,7 @@ class EditPage extends Component {
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
-			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType && `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%`,
+			backgroundPosition: IMAGE_BACKGROUND_TYPE === mediaType ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : undefined,
 			backgroundRepeat: 'no-repeat',
 			backgroundSize: 'cover',
 		};
@@ -198,7 +198,7 @@ class EditPage extends Component {
 
 		return (
 			<Fragment>
-				<InspectorControls key="controls">
+				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
 						initialOpen={ false }
@@ -352,7 +352,7 @@ class EditPage extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<div key="contents" style={ style }>
+				<div style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">

@@ -2,7 +2,7 @@
  * This is an almost 1:1 copy of the Inserter component in @wordpress/block-editor.
  *
  * It has been included here in a slightly modified way, namely without the hasItems
- * limitation.
+ * limitation and with an additional restriction to hide the inserter while reordering is in progress.
  */
 
 /**
@@ -11,6 +11,8 @@
 import { __ } from '@wordpress/i18n';
 import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
+import { compose, ifCondition } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -105,4 +107,17 @@ class Inserter extends Component {
 	}
 }
 
-export default Inserter;
+const applyWithSelect = withSelect( ( select ) => {
+	const { isReordering } = select( 'amp/story' );
+
+	return {
+		isReordering: isReordering(),
+	};
+} );
+
+export default compose(
+	applyWithSelect,
+	ifCondition(
+		( { isReordering } ) => ! isReordering
+	),
+)( Inserter );

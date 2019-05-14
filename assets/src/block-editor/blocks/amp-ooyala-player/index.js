@@ -87,7 +87,7 @@ export const settings = {
 		}
 		return (
 			<Fragment>
-				<InspectorControls key="inspector">
+				<InspectorControls>
 					<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
 						<TextControl
 							label={ __( 'Video embed code (required)', 'amp' ) }
