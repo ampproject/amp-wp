@@ -35,6 +35,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
+		unset( $GLOBALS['current_screen'] );
 		parent::tearDown();
 	}
 
@@ -305,6 +306,31 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$block_quote            = '<blockquote class="wp-embedded-content">Example Title</blockquote>';
 		$output_with_blockquote = $block_quote . $initial_output;
 		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
+	}
+
+	/**
+	 * Test change_embed_iframe_attributes.
+	 *
+	 * @covers \AMP_Editor_Blocks::change_embed_iframe_attributes()
+	 */
+	public function test_change_embed_iframe_attributes() {
+		remove_theme_support( 'amp' );
+		$original_embed_markup = '<iframe sandbox="allow-scripts" width="600" height="343" security="restricted" marginwidth="10" marginheight="10">';
+		$non_amp_story         = $this->factory()->post->create_and_get();
+
+		// This isn't an AMP story embed, so it shouldn't change the markup.
+		$this->assertEquals( $original_embed_markup, AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $non_amp_story ) );
+
+		// This is an AMP story embed, but the markup doesn't have an <iframe>, so it shouldn't be changed.
+		$amp_story                   = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$embed_markup_without_iframe = '<div class="wp-embed"><img src="https://example.com/baz.jpeg></div>';
+		$this->assertEquals( $embed_markup_without_iframe, AMP_Story_Post_Type::change_embed_iframe_attributes( $embed_markup_without_iframe, $amp_story ) );
+
+		// This is an AMP story embed, so it should change the height.
+		$this->assertEquals(
+			'<iframe sandbox="allow-scripts" width="600" height="468" security="restricted" marginwidth="10" marginheight="10">',
+			AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $amp_story )
+		);
 	}
 
 	/**

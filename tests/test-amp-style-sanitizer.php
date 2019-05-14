@@ -206,6 +206,14 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul{color:red}',
 				),
 			),
+
+			'selector_with_escaped_char_class_name'      => array(
+				'<style>.lg\:w-full { width: 100%; }</style><div class="bg-black w-16 lg:w-full hover:bg-blue"></div>',
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue"></div>',
+				array(
+					'.lg\:w-full{width:100%}',
+				),
+			),
 		);
 	}
 
@@ -734,6 +742,19 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'[loop]'     => true,
 					'[controls]' => true,
+				),
+			),
+			'escaped_char_class_name' => array(
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@"></div>',
+				array(
+					'.lg'               => false,
+					'.hover'            => false,
+					'.hover\:bg-blue'   => true,
+					'.lg\:w-full'       => true,
+					'.lg\:w-full:hover' => true,
+					'.lg\:w-medium'     => false,
+					'.\@\@\@'           => true,
+					'.\@\@\@\@'         => false,
 				),
 			),
 		);
