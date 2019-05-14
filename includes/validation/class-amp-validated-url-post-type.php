@@ -260,14 +260,9 @@ class AMP_Validated_URL_Post_Type {
 			wp_enqueue_script(
 				'amp-validated-urls-index',
 				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				array(),
+				array( 'wp-dom-ready' ),
 				AMP__VERSION,
 				true
-			);
-			wp_add_inline_script(
-				'amp-validated-urls-index',
-				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlsIndex.boot(); } );' ),
-				'after'
 			);
 		}
 

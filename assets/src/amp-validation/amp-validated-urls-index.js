@@ -1,34 +1,14 @@
-const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
-	const component = {
-		classes: {},
-	};
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
 
-	/**
-	 * The class for the new status
-	 *
-	 * @type {string}
-	 */
-	component.classes.new = 'new';
+const CLASS_NAME = 'new';
 
-	/**
-	 * Boot.
-	 */
-	component.boot = function boot() {
-		component.highlightRowsWithNewStatus();
-	};
-
-	/**
-	 * Highlight rows with new status.
-	 */
-	component.highlightRowsWithNewStatus = function highlightRowsWithNewStatus() {
-		document.querySelectorAll( 'tr[id^="post-"]' ).forEach( function( row ) {
-			if ( row.querySelector( 'span.status-text.' + component.classes.new ) ) {
-				row.classList.add( 'new' );
-			}
-		} );
-	};
-
-	return component;
-}() );
-
-window.ampValidatedUrlsIndex = ampValidatedUrlsIndex;
+domReady( () => {
+	document.querySelectorAll( 'tr[id^="post-"]' ).forEach( function( row ) {
+		if ( row.querySelector( 'span.status-text.' + CLASS_NAME ) ) {
+			row.classList.add( CLASS_NAME );
+		}
+	} );
+} );
