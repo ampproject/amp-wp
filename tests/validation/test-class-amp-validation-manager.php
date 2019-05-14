@@ -726,7 +726,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			'latest_posts' => array(
 				'<!-- wp:latest-posts {"postsToShow":1,"categories":""} /-->',
 				sprintf(
-					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}--><ul class="wp-block-latest-posts"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}-->',
+					'<!--amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_content_index":0,"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}--><ul class="wp-block-latest-posts wp-block-latest-posts__list"><li><a href="{{url}}">{{title}}</a></li></ul><!--/amp-source-stack {"block_name":"core\/latest-posts","post_id":{{post_id}},"block_attrs":{"postsToShow":1,"categories":""},"type":"%1$s","name":"%2$s","function":"%3$s"}-->',
 					$is_gutenberg ? 'plugin' : 'core',
 					$is_gutenberg ? 'gutenberg' : 'wp-includes',
 					$latest_posts_block->render_callback
@@ -788,6 +788,14 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 			$expected
 		);
+
+		// Temporary patch to support running unit tests in Gutenberg<5.7.0.
+		$rendered_block = str_replace(
+			'class="wp-block-latest-posts"',
+			'class="wp-block-latest-posts wp-block-latest-posts__list"',
+			$rendered_block
+		);
+
 		$this->assertEquals(
 			preg_replace( '/(?<=>)\s+(?=<)/', '', str_replace( '%d', $post->ID, $expected ) ),
 			preg_replace( '/(?<=>)\s+(?=<)/', '', $rendered_block )
