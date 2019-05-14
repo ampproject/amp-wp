@@ -37,24 +37,68 @@ if ( version_compare( phpversion(), '5.4', '<' ) ) {
 
 // See composer.json for this list.
 $_amp_required_extensions = array(
-	'curl',
-	'date',
-	'dom',
-	'iconv',
-	'libxml',
-	'spl',
+	// Required by FasterImage.
+	'curl'   => array(
+		'functions' => array(
+			'curl_error',
+			'curl_init',
+			'curl_multi_add_handle',
+			'curl_multi_exec',
+			'curl_multi_init',
+			'curl_setopt',
+		),
+	),
+	'dom'    => array(
+		'classes' => array(
+			'DOMAttr',
+			'DOMComment',
+			'DOMDocument',
+			'DOMElement',
+			'DOMNode',
+			'DOMNodeList',
+			'DOMXPath',
+		),
+	),
+	// Required by PHP-CSS-Parser.
+	'iconv'  => array(
+		'functions' => array( 'iconv' ),
+	),
+	'libxml' => array(
+		'functions' => array( 'libxml_use_internal_errors' ),
+	),
+	'spl'    => array(
+		'functions' => array( 'spl_autoload_register' ),
+	),
 );
-$_amp_missing_extensions  = array();
-foreach ( $_amp_required_extensions as $_amp_required_extension ) {
+$_amp_missing_extensions = array();
+$_amp_missing_classes    = array();
+$_amp_missing_functions  = array();
+foreach ( $_amp_required_extensions as $_amp_required_extension => $_amp_required_constructs ) {
 	if ( ! extension_loaded( $_amp_required_extension ) ) {
-		$_amp_missing_extensions[] = $_amp_required_extension;
+		$_amp_missing_extensions[] = "<code>$_amp_required_extension</code>";
+	} else {
+		foreach ( $_amp_required_constructs as $_amp_construct_type => $_amp_constructs ) {
+			switch ( $_amp_construct_type ) {
+				case 'functions':
+					foreach ( $_amp_constructs as $_amp_construct ) {
+						if ( ! function_exists( $_amp_construct ) ) {
+							$_amp_missing_functions[] = "<code>$_amp_construct</code>";
+						}
+					}
+					break;
+				case 'classes':
+					foreach ( $_amp_constructs as $_amp_construct ) {
+						if ( ! class_exists( $_amp_construct ) ) {
+							$_amp_missing_classes[] = "<code>$_amp_construct</code>";
+						}
+					}
+					break;
+			}
+		}
+		unset( $_amp_construct_type, $_amp_constructs );
 	}
 }
 if ( count( $_amp_missing_extensions ) > 0 ) {
-	foreach ( $_amp_missing_extensions as &$_amp_missing_extension ) {
-		$_amp_missing_extension = "<code>$_amp_missing_extension</code>"; // Not using array_map() w/ closure due to PHP 5.2 support.
-	}
-
 	$_amp_load_errors->add(
 		'missing_extension',
 		sprintf(
@@ -69,7 +113,38 @@ if ( count( $_amp_missing_extensions ) > 0 ) {
 		)
 	);
 }
-unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_extension, $_amp_missing_extension );
+if ( count( $_amp_missing_classes ) > 0 ) {
+	$_amp_load_errors->add(
+		'missing_class',
+		sprintf(
+			/* translators: %s is list of missing extensions */
+			_n(
+				'The following PHP class is missing: %s. Please contact your host to finish installation.',
+				'The following PHP classes are missing: %s. Please contact your host to finish installation.',
+				count( $_amp_missing_classes ),
+				'amp'
+			),
+			implode( ', ', $_amp_missing_classes )
+		)
+	);
+}
+if ( count( $_amp_missing_functions ) > 0 ) {
+	$_amp_load_errors->add(
+		'missing_class',
+		sprintf(
+			/* translators: %s is list of missing extensions */
+			_n(
+				'The following PHP function is missing: %s. Please contact your host to finish installation.',
+				'The following PHP functions are missing: %s. Please contact your host to finish installation.',
+				count( $_amp_missing_functions ),
+				'amp'
+			),
+			implode( ', ', $_amp_missing_functions )
+		)
+	);
+}
+
+unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
 if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
 	$_amp_load_errors->add(
