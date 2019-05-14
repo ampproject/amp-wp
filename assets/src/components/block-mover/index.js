@@ -44,7 +44,7 @@ export class BlockMover extends Component {
 	}
 
 	render() {
-		const { isDraggable, onDragStart, clientId, blockElementId, instanceId } = this.props;
+		const { isDraggable, onDragStart, clientId, blockElementId } = this.props;
 		const { isFocused } = this.state;
 
 		// We emulate a disabled state because forcefully applying the `disabled`

@@ -110,8 +110,9 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 	const {
 		getSelectedBlockClientId,
 		getBlockRootClientId,
+		getBlockOrder,
 	} = select( 'core/block-editor' );
-	const { moveBlocksDown, moveBlocksUp } = dispatch( 'core/block-editor' );
+	const { moveBlocksDown, moveBlocksUp, moveBlockToPosition } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -142,6 +143,14 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 		},
 		bringForward: () => moveBlocksDown( clientId, rootClientId ),
 		sendBackward: () => moveBlocksUp( clientId, rootClientId ),
+		moveFront: () => {
+			const blockOrder = getBlockOrder( rootClientId );
+			const topIndex = blockOrder.length - 1;
+			moveBlockToPosition( clientId, rootClientId, rootClientId, topIndex );
+		},
+		moveBack: () => {
+			moveBlockToPosition( clientId, rootClientId, rootClientId, 0 );
+		},
 	};
 } );
 
@@ -184,6 +193,8 @@ export default createHigherOrderComponent(
 				stopBlockRotation,
 				bringForward,
 				sendBackward,
+				moveFront,
+				moveBack,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -296,11 +307,25 @@ export default createHigherOrderComponent(
 										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
 									/>
 								) }
+								{ ! isLast && (
+									<IconButton
+										className="amp-story-controls-bring-forward"
+										onClick={ moveFront }
+										icon="arrow-up"
+									/>
+								) }
 								{ ! isFirst && (
 									<IconButton
 										className="amp-story-controls-send-backwards"
 										onClick={ sendBackward }
 										icon={ sendBackIcon( { width: 24, height: 24 } ) }
+									/>
+								) }
+								{ ! isFirst && (
+									<IconButton
+										className="amp-story-controls-send-backwards"
+										onClick={ moveBack }
+										icon="arrow-down"
 									/>
 								) }
 							</PanelBody>
