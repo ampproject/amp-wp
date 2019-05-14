@@ -88,7 +88,7 @@ class EditPage extends Component {
 			mediaUrl: media.url,
 			mediaId: media.id,
 			mediaType,
-			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image ? media.image.src : undefined,
+			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
 	}
 
