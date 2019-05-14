@@ -1,5 +1,3 @@
-/* exported ampValidatedUrlPostEditScreen */
-
 const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-unused-vars
 	const component = {
 		data: {
@@ -409,3 +407,5 @@ const ampValidatedUrlPostEditScreen = ( function() { // eslint-disable-line no-u
 
 	return component;
 }() );
+
+window.ampValidatedUrlPostEditScreen = ampValidatedUrlPostEditScreen;

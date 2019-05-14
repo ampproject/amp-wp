@@ -1,5 +1,3 @@
-/* exported ampValidatedUrlsIndex */
-
 const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
 	const component = {
 		classes: {},
@@ -32,3 +30,5 @@ const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-va
 
 	return component;
 }() );
+
+window.ampValidatedUrlsIndex = ampValidatedUrlsIndex;
