@@ -200,7 +200,7 @@ class AMP_Post_Meta_Box {
 		wp_enqueue_script(
 			self::BLOCK_ASSET_HANDLE,
 			amp_get_asset_url( 'js/' . self::BLOCK_ASSET_HANDLE . '.js' ),
-			array( 'wp-hooks', 'wp-i18n', 'wp-components', 'amp-editor-blocks' ),
+			array( 'wp-hooks', 'wp-i18n', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
