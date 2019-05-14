@@ -1199,3 +1199,22 @@ export const getDelta = ( event, angle, lastSeenX, lastSeenY, direction ) => {
 		deltaH,
 	};
 };
+
+/**
+ * Get block's left and top position based on width, height, and radian.
+ *
+ * @param {number} width Width.
+ * @param {number} height Height.
+ * @param {number} radian Radian.
+ * @return {{top: number, left: number}} Top and left positioning.
+ */
+export const getBlockPositioning = ( width, height, radian ) => {
+	const x = -width / 2;
+	const y = height / 2;
+	const rotatedX = ( y * Math.sin( radian ) ) + ( x * Math.cos( radian ) );
+	const rotatedY = ( y * Math.cos( radian ) ) - ( x * Math.sin( radian ) );
+	return {
+		left: rotatedX - x,
+		top: rotatedY - y,
+	};
+};
