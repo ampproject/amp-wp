@@ -74,3 +74,11 @@ amp-story-grid-layer amp-img > img {
 .is-style-white.wp-block-quote {
 	background-image: url("../images/quote-white.svg");
 }
+
+/**
+ * See https://github.com/ampproject/amp-wp/issues/2283
+ */
+.edit-post-layout[data-block-name="core/video"] .edit-post-settings-sidebar__panel-block .block-editor-block-inspector__card + div > .components-panel__body:first-child .components-toggle-control:nth-child(2),
+.edit-post-layout[data-block-name="core/video"] .edit-post-settings-sidebar__panel-block .block-editor-block-inspector__card + div > .components-panel__body:first-child .components-toggle-control:nth-child(6) {
+	display: none;
+}

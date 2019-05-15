@@ -13,7 +13,7 @@ import { count } from '@wordpress/wordcount';
 import { _x } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { getColorClassName, getColorObjectByAttributeValues, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -897,14 +897,14 @@ export const getStylesFromBlockAttributes = ( {
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
 
-	const { colors } = select( 'core/block-editor' ).getSettings();
+	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
 
 	/*
      * Calculate font size using vw to make it responsive.
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
-	const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
+	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
 	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor ), customBackgroundColor, opacity );
@@ -915,26 +915,6 @@ export const getStylesFromBlockAttributes = ( {
 		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
 		textAlign: align,
 	};
-};
-
-/**
- * Get font size from slug.
- *
- * @param {string} slug A string containing the font slug.
- *
- * @return {number} Font size in pixels.
- */
-const getFontSizeFromSlug = ( slug ) => {
-	switch ( slug ) {
-		case 'small':
-			return 19.5;
-		case 'large':
-			return 36.5;
-		case 'huge':
-			return 49.5;
-		default:
-			return 16;
-	}
 };
 
 /**
