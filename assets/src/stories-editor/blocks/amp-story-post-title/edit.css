@@ -1,5 +1,4 @@
-.wp-block-amp-amp-story-post-title {
+.block-editor-block-list__block-edit .wp-block-amp-amp-story-post-title {
 	margin: 0;
-	height: 100%;
-	display: inline; /* needed for amp-fit-text */
+	padding: 7px !important;
 }

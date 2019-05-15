@@ -1131,9 +1131,9 @@ export const maybeSetInitialSize = ( clientId ) => {
 			if ( height === getDefaultMinimumBlockHeight( name ) ) {
 				// Check if the font size is OK, if not, update the font size if not.
 				const element = document.querySelector( `#block-${ clientId } .wp-block-amp-amp-story-post-title` );
-				if ( element && element.scrollHeight !== height ) {
+				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
-						height: element.scrollHeight,
+						height: element.offsetHeight,
 					} );
 				}
 			}
