@@ -207,26 +207,7 @@ export default createHigherOrderComponent(
 						/>
 					) }
 					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
-					{ isImageBlock && (
-						<RotatableBox
-							blockElementId={ `block-${ clientId }` }
-							initialAngle={ rotationAngle }
-							className="amp-story-editor__rotate-container"
-							angle={ isSelected ? 0 : rotationAngle }
-							onRotateStart={ () => {
-								startBlockRotation();
-							} }
-							onRotateStop={ ( event, angle ) => {
-								setAttributes( {
-									rotationAngle: angle,
-								} );
-								stopBlockRotation();
-							} }
-						>
-							<BlockEdit { ...props } />
-						</RotatableBox>
-					) }
-					{ isMovableBlock && ! isImageBlock && (
+					{ isMovableBlock && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
