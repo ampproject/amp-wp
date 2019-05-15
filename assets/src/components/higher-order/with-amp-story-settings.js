@@ -411,22 +411,20 @@ export default createHigherOrderComponent(
 										setAttributes( { ampFontFamily: value } );
 									} }
 								/>
+								<ToggleControl
+									label={ __( 'Automatically fit text to container', 'amp' ) }
+									checked={ ampFitText }
+									onChange={ () => {
+										setAttributes( { ampFitText: ! ampFitText } );
+										if ( ! ampFitText ) {
+											setFontSize( attributes.autoFontSize );
+										}
+									} }
+								/>
 								{ ! ampFitText && (
 									<FontSizePicker
 										value={ fontSize.size }
 										onChange={ setFontSize }
-									/>
-								) }
-								{ needsTextSettings && (
-									<ToggleControl
-										label={ __( 'Automatically fit text to container', 'amp' ) }
-										checked={ ampFitText }
-										onChange={ () => {
-											setAttributes( { ampFitText: ! ampFitText } );
-											if ( ! ampFitText ) {
-												setFontSize( attributes.autoFontSize );
-											}
-										} }
 									/>
 								) }
 								{ isTextBlock && (
