@@ -213,6 +213,9 @@ class AMP_Story_Post_Type {
 		// In the block editor, remove the title from above the AMP Stories embed.
 		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
 
+		// Change some attributes for the AMP story embed.
+		add_filter( 'embed_html', array( __CLASS__, 'change_embed_iframe_attributes' ), 10, 2 );
+
 		// Override the render_callback for AMP story embeds.
 		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
 
@@ -460,7 +463,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function filter_block_editor_settings( $editor_settings, $post ) {
 		if ( self::POST_TYPE_SLUG === $post->post_type ) {
-			unset( $editor_settings['colors'] );
+			unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
 		}
 
 		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
@@ -1251,7 +1254,7 @@ class AMP_Story_Post_Type {
 			<?php if ( $is_amp_carousel ) : ?>
 				<amp-carousel layout="fixed-height" height="<?php echo esc_attr( $min_height ); ?>" type="carousel" class="latest-stories-carousel">
 			<?php else : ?>
-				<ul class="latest-stories-carousel" style="height:<?php echo esc_attr( $min_height ); ?>px;">
+				<ul class="latest-stories-carousel">
 			<?php endif; ?>
 				<?php foreach ( $story_query->posts as $post ) : ?>
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
@@ -1422,5 +1425,29 @@ class AMP_Story_Post_Type {
 		}
 
 		return preg_replace( '/<blockquote class="wp-embedded-content">.*?<\/blockquote>/', '', $output );
+	}
+
+	/**
+	 * Changes the height of the AMP Story embed <iframe>.
+	 *
+	 * In the block editor, this embed typically appears in an <iframe>, though on the front-end it's not in an <iframe>.
+	 * The height of the <iframe> isn't enough to display the full story, so this increases it.
+	 *
+	 * @param string  $output The embed output.
+	 * @param WP_Post $post The post for the embed.
+	 * @return string The filtered embed output.
+	 */
+	public static function change_embed_iframe_attributes( $output, $post ) {
+		if ( self::POST_TYPE_SLUG !== get_post_type( $post ) ) {
+			return $output;
+		}
+
+		// Add 4px more height, as the <iframe> needs that to display the full image.
+		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		return preg_replace(
+			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
+			sprintf( '${1}%s${3}', $new_height ),
+			$output
+		);
 	}
 }
