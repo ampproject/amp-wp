@@ -308,7 +308,7 @@ export default createHigherOrderComponent(
 						<InspectorControls>
 							<PanelBody
 								className="amp-story-order-controls"
-								title={ __( 'Block position', 'amp' ) }
+								title={ __( 'Block Position', 'amp' ) }
 							>
 								<div className="amp-story-order-controls-wrap">
 									<IconButton
