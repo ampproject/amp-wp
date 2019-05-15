@@ -2,7 +2,7 @@
 /**
  * External dependencies
  */
-import { possibleStati, defaultStatus, errorMessages } from 'amp-block-editor-data';
+import { errorMessages } from 'amp-block-editor-data';
 
 /**
  * WordPress dependencies
@@ -15,6 +15,11 @@ import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { compose, withInstanceId } from '@wordpress/compose';
 
 /**
+ * Internal dependencies
+ */
+import { isAMPEnabled } from '../helpers';
+
+/**
  * Adds an 'Enable AMP' toggle to the block editor 'Status & Visibility' section.
  *
  * If there are error(s) that block AMP from being enabled or disabled,
@@ -23,7 +28,7 @@ import { compose, withInstanceId } from '@wordpress/compose';
  *
  * @return {Object} AMPToggle component.
  */
-function AMPToggle( { enabledStatus, onAmpChange } ) {
+function AMPToggle( { isEnabled, onChange } ) {
 	return (
 		<Fragment>
 			<PluginPostStatusInfo>
@@ -32,8 +37,8 @@ function AMPToggle( { enabledStatus, onAmpChange } ) {
 					! errorMessages.length &&
 					(
 						<FormToggle
-							checked={ 'enabled' === enabledStatus }
-							onChange={ () => onAmpChange( enabledStatus ) }
+							checked={ isEnabled }
+							onChange={ () => onChange( ! isEnabled ) }
 							id="amp-enabled"
 						/>
 					)
@@ -63,31 +68,18 @@ export const name = 'amp';
 export const icon = 'hidden';
 
 export const render = compose(
-	withSelect( ( select ) => {
-		/**
-		 * Gets the AMP enabled status.
-		 *
-		 * Uses select from the enclosing function to get the meta value.
-		 * If it doesn't exist, it uses the default value.
-		 * This applies especially for a new post, where there probably won't be a meta value yet.
-		 *
-		 * @return {string} Enabled status, either 'enabled' or 'disabled'.
-		 */
-		const getEnabledStatus = () => {
-			const meta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
-			if ( meta && meta.amp_status && possibleStati.includes( meta.amp_status ) ) {
-				return meta.amp_status;
-			}
-			return defaultStatus;
+	withSelect( () => {
+		return {
+			isEnabled: isAMPEnabled(),
 		};
-
-		return { enabledStatus: getEnabledStatus() };
 	} ),
-	withDispatch( ( dispatch ) => ( {
-		onAmpChange: ( enabledStatus ) => {
-			const newStatus = 'enabled' === enabledStatus ? 'disabled' : 'enabled';
-			dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
-		},
-	} ) ),
+	withDispatch( ( dispatch ) => {
+		return {
+			onChange: ( isEnabled ) => {
+				const newStatus = isEnabled ? 'enabled' : 'disabled';
+				dispatch( 'core/editor' ).editPost( { meta: { amp_status: newStatus } } );
+			},
+		};
+	} ),
 	withInstanceId,
 )( AMPToggle );

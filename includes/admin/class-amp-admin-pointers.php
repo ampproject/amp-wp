@@ -78,8 +78,8 @@ class AMP_Admin_Pointers {
 				array(
 					'selector'        => '#toplevel_page_amp-options',
 					'heading'         => __( 'AMP', 'amp' ),
-					'subheading'      => __( 'AMP Stories', 'amp' ),
-					'description'     => __( 'You can now enable AMP Stories, a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences.', 'amp' ),
+					'subheading'      => __( 'Stories', 'amp' ),
+					'description'     => __( 'You can now enable Stories, a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences.', 'amp' ),
 					'position'        => array(
 						'align' => 'middle',
 					),

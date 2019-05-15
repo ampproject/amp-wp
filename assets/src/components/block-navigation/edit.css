@@ -1,14 +1,5 @@
 #amp-story-block-navigation {
 	display: none;
-}
-
-@media (min-width: 961px) {
-	#amp-story-block-navigation {
-		display: block;
-	}
-}
-
-#amp-story-block-navigation {
 	position: absolute;
 	left: 50px;
 	top: 218px;
@@ -17,6 +8,12 @@
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
+}
+
+@media (min-width: 961px) {
+	#amp-story-block-navigation {
+		display: block;
+	}
 }
 
 #amp-story-block-navigation .editor-inserter {

@@ -21,9 +21,11 @@
 	padding: 2px;
 	transform: translateX(-90%);
 }
+
 .amp-stories__template-inserter__popover::before {
 	border: 8px solid #e2e4e7;
 }
+
 .amp-stories__template-inserter__popover::after {
 	border: 8px solid #fff;
 }
@@ -63,6 +65,7 @@
 .amp-stories__template-inserter__popover.components-popover.is-top .components-popover__content {
 	bottom: initial;
 }
+
 .amp-stories__template-inserter__popover.components-popover:not(.is-without-arrow):not(.is-mobile).is-top {
 	margin-top: 55px;
 }

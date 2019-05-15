@@ -29,6 +29,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withVideoPosterImageNotice,
 } from '../components';
 import {
 	maybeEnqueueFontStyle,
@@ -53,7 +54,7 @@ import { ALLOWED_BLOCKS } from './constants';
 import store from './store';
 
 const {
-	getSelectedBlockClientId,
+	getSelectedBlock,
 	getBlocksByClientId,
 	getClientIdsWithDescendants,
 	getBlockRootClientId,
@@ -146,24 +147,33 @@ let allBlocksWithChildren = getClientIdsWithDescendants();
 
 let editorMode = getEditorMode();
 
+let selectedBlock;
+
 subscribe( async () => {
 	maybeInitializeAnimations();
 
 	const defaultBlockName = getDefaultBlockName();
-	const selectedBlockClientId = getSelectedBlockClientId();
+	const newSelectedBlock = getSelectedBlock();
 
 	// Switch default block depending on context
-	if ( selectedBlockClientId ) {
-		const selectedBlock = getBlock( selectedBlockClientId );
-
-		if ( 'amp/amp-story-page' === selectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
+	if ( newSelectedBlock ) {
+		if ( 'amp/amp-story-page' === newSelectedBlock.name && 'amp/amp-story-page' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-page' );
-		} else if ( 'amp/amp-story-page' !== selectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
+		} else if ( 'amp/amp-story-page' !== newSelectedBlock.name && 'amp/amp-story-text' !== defaultBlockName ) {
 			setDefaultBlockName( 'amp/amp-story-text' );
 		}
-	} else if ( ! selectedBlockClientId && 'amp/amp-story-page' !== defaultBlockName ) {
+	} else if ( 'amp/amp-story-page' !== defaultBlockName ) {
 		setDefaultBlockName( 'amp/amp-story-page' );
 	}
+
+	if ( selectedBlock !== newSelectedBlock ) {
+		const editPostLayout = document.querySelector( '.edit-post-layout' );
+		if ( editPostLayout ) {
+			editPostLayout.setAttribute( 'data-block-name', newSelectedBlock ? newSelectedBlock.name : '' );
+		}
+	}
+
+	selectedBlock = newSelectedBlock;
 
 	const newBlockOrder = getBlockOrder();
 	const newlyAddedPages = newBlockOrder.find( ( block ) => ! blockOrder.includes( block ) );
@@ -277,6 +287,7 @@ addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNot
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

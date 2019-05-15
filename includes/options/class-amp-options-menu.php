@@ -111,7 +111,7 @@ class AMP_Options_Menu {
 
 		add_settings_field(
 			'amp_stories',
-			__( 'AMP Stories', 'amp' ),
+			__( 'Stories', 'amp' ),
 			array( $this, 'render_amp_stories' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
@@ -525,7 +525,7 @@ class AMP_Options_Menu {
 					}
 					printf(
 						/* translators: %s: Gutenberg plugin name */
-						esc_html__( 'To use AMP stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
+						esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
 						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					);
 					?>
@@ -535,15 +535,15 @@ class AMP_Options_Menu {
 		<p>
 			<label for="enable_amp_stories">
 				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
-				<?php esc_html_e( 'Enable experimental support for AMP Stories.', 'amp' ); ?>
+				<?php esc_html_e( 'Enable experimental support for Stories.', 'amp' ); ?>
 			</label>
 		</p>
 		<p class="description">
 			<?php
 			echo wp_kses_post(
 				sprintf(
-					/* translators: %s: AMP Stories documentation URL. */
-					__( 'AMP Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
+					/* translators: %s: Stories documentation URL. */
+					__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">Stories</a>.', 'amp' ),
 					esc_url( 'https://amp.dev/about/stories' )
 				)
 			);

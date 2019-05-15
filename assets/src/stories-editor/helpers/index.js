@@ -10,10 +10,10 @@ import { each, every, isEqual } from 'lodash';
  */
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
-import { _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { getColorClassName, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -38,7 +38,8 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import ampStoriesFonts from 'amp-stories-fonts';
+
+const { ampStoriesFonts } = window;
 
 const {
 	getBlocksByClientId,
@@ -178,6 +179,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	const isImageBlock = 'core/image' === name;
+	const isVideoBlock = 'core/video' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
@@ -268,6 +270,28 @@ export const addAMPAttributes = ( settings, name ) => {
 	if ( isImageBlock ) {
 		addedAttributes.ampShowImageCaption = {
 			type: 'boolean',
+			default: false,
+		};
+	}
+
+	if ( isVideoBlock ) {
+		// Required defaults for AMP validity.
+		addedAttributes.autoplay = {
+			...settings.attributes.autoplay,
+			default: true,
+		};
+		addedAttributes.playsInline = {
+			...settings.attributes.playsInline,
+			default: false,
+		};
+
+		// Optional defaults.
+		addedAttributes.loop = {
+			...settings.attributes.loop,
+			default: true,
+		};
+		addedAttributes.controls = {
+			...settings.attributes.controls,
 			default: false,
 		};
 	}
@@ -892,17 +916,17 @@ export const getStylesFromBlockAttributes = ( {
 } ) => {
 	const textClass = getColorClassName( 'color', textColor );
 
-	const { colors } = select( 'core/block-editor' ).getSettings();
+	const { colors, fontSizes } = select( 'core/block-editor' ).getSettings();
 
 	/*
      * Calculate font size using vw to make it responsive.
      *
      * Get the font size in px based on the slug with fallback to customFontSize.
      */
-	const userFontSize = fontSize ? getFontSizeFromSlug( fontSize ) : customFontSize;
+	const userFontSize = fontSize ? getFontSize( fontSizes, fontSize, customFontSize ).size : customFontSize;
 	const fontSizeResponsive = userFontSize && ( ( userFontSize / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) + 'vw';
 
-	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
+	const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, getColorObjectByAttributeValues( colors, backgroundColor, customBackgroundColor ), customBackgroundColor, opacity );
 
 	return {
 		backgroundColor: appliedBackgroundColor,
@@ -910,26 +934,6 @@ export const getStylesFromBlockAttributes = ( {
 		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
 		textAlign: align,
 	};
-};
-
-/**
- * Get font size from slug.
- *
- * @param {string} slug A string containing the font slug.
- *
- * @return {number} Font size in pixels.
- */
-const getFontSizeFromSlug = ( slug ) => {
-	switch ( slug ) {
-		case 'small':
-			return 19.5;
-		case 'large':
-			return 36.5;
-		case 'huge':
-			return 49.5;
-		default:
-			return 16;
-	}
 };
 
 /**
@@ -1152,5 +1156,60 @@ export const maybeInitializeAnimations = () => {
 				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 			}
 		}
+	}
+};
+
+/**
+ * Return a label for the block order controls depending on block position.
+ *
+ * @param {string}  type            Block type - in the case of a single block, should
+ *                                  define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
+ * @param {number}  currentPosition The block's current position.
+ * @param {number}  newPosition     The block's new position.
+ * @param {boolean} isFirst         This is the first block.
+ * @param {boolean} isLast          This is the last block.
+ * @param {number}  dir             Direction of movement (> 0 is considered to be going
+ *                                  down, < 0 is up).
+ *
+ * @return {string} Label for the block movement controls.
+ */
+export const getBlockOrderDescription = ( type, currentPosition, newPosition, isFirst, isLast, dir ) => {
+	if ( isFirst && isLast ) {
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is the only block, and cannot be moved', 'amp' ), type );
+	}
+
+	if ( dir > 0 && ! isLast ) {
+		// moving down
+		return sprintf(
+			// translators: 1: Type of block (i.e. Text, Image etc), 2: Position of selected block, 3: New position
+			__( 'Move %1$s block from position %2$d down to position %3$d', 'amp' ),
+			type,
+			currentPosition,
+			newPosition
+		);
+	}
+
+	if ( dir > 0 && isLast ) {
+		// moving down, and is the last item
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is at the end of the content and can’t be moved down', 'amp' ), type );
+	}
+
+	if ( dir < 0 && ! isFirst ) {
+		// moving up
+		return sprintf(
+			// translators: 1: Type of block (i.e. Text, Image etc), 2: Position of selected block, 3: New position
+			__( 'Move %1$s block from position %2$d up to position %3$d', 'amp' ),
+			type,
+			currentPosition,
+			newPosition
+		);
+	}
+
+	if ( dir < 0 && isFirst ) {
+		// moving up, and is the first item
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
 };
