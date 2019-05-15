@@ -94,33 +94,6 @@ export default ( props ) => {
 					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 				}
 
-				/*if ( 0 && angle ) {
-					switch ( direction ) {
-						case 'bottom':
-							// const shiftX = ( ( event.clientX - lastSeenX ) / 2 ) * Math.sin( angle );
-							// const shiftY = ( ( event.clientY - lastSeenY ) / 2 ) * Math.cos( angle );
-							// In case of moving from bottom: Y with plus and X with minus.
-							// Shift Y is cos( angle ) * ( deltaH / 2 ); Shift X is sin( angle ) * (deltaH / 2 ).
-
-							const shiftX = getPercentageFromPixels( 'x', ( event.clientX - lastSeenX ) / 2 );
-							// const shiftY = getPercentageFromPixels( 'y',( event.clientY - lastSeenY ) / 2 );
-
-							// blockElement.style.top = parseInt( blockElementTop, 10 ) + shiftY + '%';
-							 blockElement.style.left = parseInt( blockElementLeft, 10 ) + shiftX + '%';
-
-							break;
-						case 'right':
-							// In case of moving from right, x with plus and Y with minus.
-							// Shift Y is sin( angle ) * (deltaWidth / 2); Shift X is cos( angle ) * (deltaW / 2 ).
-							// const shiftX = getPercentageFromPixels( 'x', ( deltaW / 2 ) * Math.cos( angle ) );
-							const shiftY = getPercentageFromPixels( 'y', ( deltaH / 2 ) * Math.sin( angle ) );
-
-							// @todo This is not correct calculation.
-							blockElement.style.top = parseInt( blockElementTop, 10 ) + shiftY + '%';
-							// blockElement.style.left = parseInt( blockElementLeft, 10 ) + shiftX + '%';
-							break;
-					}
-				}*/
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
 			} }
