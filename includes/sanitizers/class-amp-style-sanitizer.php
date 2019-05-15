@@ -404,13 +404,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Get stylesheets.
+	 * Get stylesheets for amp-custom.
 	 *
 	 * @since 0.7
-	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 * @returns array Values are the CSS stylesheets.
 	 */
 	public function get_stylesheets() {
-		return $this->stylesheets;
+		return wp_list_pluck(
+			array_filter(
+				$this->pending_stylesheets,
+				function( $pending_stylesheet ) {
+					return $pending_stylesheet['included'] && 'custom' === $pending_stylesheet['group'];
+				}
+			),
+			'stylesheet'
+		);
 	}
 
 	/**
@@ -769,6 +777,103 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Get the priority of the stylesheet associated with the given element.
+	 *
+	 * As with hooks, lower priorities mean they should be included first.
+	 * The higher the priority value, the more likely it will be that the
+	 * stylesheet will be among those excluded due to 'excessive_css' when
+	 * concatenated CSS reaches 50KB.
+	 *
+	 * @todo This will eventually need to be abstracted to not be CMS-specific, allowing for the prioritization scheme to be defined by configuration.
+	 *
+	 * @param DOMNode|DOMElement|DOMAttr $node Node.
+	 * @return int Priority.
+	 */
+	private function get_stylesheet_priority( DOMNode $node ) {
+		$print_priority_base = 100;
+		$admin_bar_priority  = 200;
+
+		$remove_url_scheme = function( $url ) {
+			return preg_replace( '/^https?:/', '', $url );
+		};
+
+		if ( $node instanceof DOMElement && 'link' === $node->nodeName ) {
+			$element_id      = (string) $node->getAttribute( 'id' );
+			$schemeless_href = $remove_url_scheme( $node->getAttribute( 'href' ) );
+			$is_plugin_asset = (
+				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WP_PLUGIN_DIR ) ) ) )
+				||
+				0 === strpos( $schemeless_href, $remove_url_scheme( trailingslashit( plugins_url( WPMU_PLUGIN_URL ) ) ) )
+			);
+			$style_handle    = null;
+			if ( preg_match( '/^(.+)-css$/', $element_id, $matches ) ) {
+				$style_handle = $matches[1];
+			}
+
+			$core_frontend_handles = array(
+				'wp-block-library',
+				'wp-block-library-theme',
+			);
+			$non_amp_handles       = array(
+				'mediaelement',
+				'wp-mediaelement',
+				'thickbox',
+			);
+
+			if ( in_array( $style_handle, $non_amp_handles, true ) ) {
+				// Styles are for non-AMP JS only so not be used in AMP at all.
+				$priority = 1000;
+			} elseif ( 'admin-bar' === $style_handle ) {
+				// Admin bar has lowest priority. If it gets excluded, then the entire admin bar should be removed.
+				$priority = $admin_bar_priority;
+			} elseif ( 'dashicons' === $style_handle ) {
+				// Dashicons could be used by the theme, but low priority compared to other styles.
+				$priority = 90;
+			} elseif ( false !== strpos( $schemeless_href, $remove_url_scheme( trailingslashit( get_template_directory_uri() ) ) ) ) {
+				// Highest priority are parent theme styles.
+				$priority = 1;
+			} elseif ( false !== strpos( $schemeless_href, $remove_url_scheme( trailingslashit( get_stylesheet_directory_uri() ) ) ) ) {
+				// Penultimate highest priority are child theme styles.
+				$priority = 10;
+			} elseif ( in_array( $style_handle, $core_frontend_handles, true ) ) {
+				// Styles from wp-includes which are enqueued for themes are next highest priority.
+				$priority = 20;
+			} elseif ( $is_plugin_asset ) {
+				// Styles from plugins are next-highest priority.
+				$priority = 30;
+			} elseif ( 0 === strpos( $schemeless_href, $remove_url_scheme( includes_url() ) ) ) {
+				// Other styles from wp-includes come next.
+				$priority = 40;
+			} else {
+				// Everything else, perhaps wp-admin styles or stylesheets from remote servers.
+				$priority = 50;
+			}
+
+			if ( 'print' === $node->getAttribute( 'media' ) ) {
+				$priority += $print_priority_base;
+			}
+		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
+			$element_id = (string) $node->getAttribute( 'id' );
+			if ( 'wp-custom-css' === $element_id ) {
+				// Additional CSS from Customizer.
+				$priority = 60;
+			} else {
+				// Other style elements, including from Recent Comments widget.
+				$priority = 70;
+			}
+
+			if ( 'print' === $node->getAttribute( 'media' ) ) {
+				$priority += $print_priority_base;
+			}
+		} else {
+			// Style attribute.
+			$priority = 70;
+		}
+
+		return $priority;
+	}
+
+	/**
 	 * Eliminate relative segments (../ and ./) from a path.
 	 *
 	 * @param string $path Path with relative segments. This is not a URL, so no host and no query string.
@@ -987,9 +1092,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->pending_stylesheets[] = array_merge(
 			array(
-				'keyframes' => $is_keyframes,
-				'node'      => $element,
-				'sources'   => $this->current_sources,
+				'group'    => $is_keyframes ? 'keyframes' : 'custom',
+				'node'     => $element,
+				'sources'  => $this->current_sources,
+				'priority' => $this->get_stylesheet_priority( $element ),
 			),
 			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
@@ -1103,9 +1209,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->pending_stylesheets[] = array_merge(
 			array(
-				'keyframes' => false,
-				'node'      => $element,
-				'sources'   => $this->current_sources, // Needed because node is removed below.
+				'group'    => 'custom',
+				'node'     => $element,
+				'sources'  => $this->current_sources, // Needed because node is removed below.
+				'priority' => $this->get_stylesheet_priority( $element ),
 			),
 			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
@@ -1172,6 +1279,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *    @type array $stylesheet         Stylesheet parts, where arrays are tuples for declaration blocks.
 	 *    @type array $validation_results Validation results, array containing arrays with error and sanitized keys.
 	 *    @type array $imported_font_urls Imported font stylesheet URLs.
+	 *    @type int   $priority           The priority of the stylesheet.
 	 * }
 	 */
 	private function process_stylesheet( $stylesheet, $options = array() ) {
@@ -2255,9 +2363,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( $processed['stylesheet'] ) {
 			$this->pending_stylesheets[] = array(
+				'group'      => 'custom',
 				'stylesheet' => $processed['stylesheet'],
 				'node'       => $element,
 				'sources'    => $this->current_sources,
+				'priority'   => $this->get_stylesheet_priority( $style_attribute ),
 			);
 
 			if ( $element->hasAttribute( 'class' ) ) {
@@ -2280,22 +2390,22 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @see https://www.ampproject.org/docs/fundamentals/spec#keyframes-stylesheet
 	 */
 	private function finalize_styles() {
-		$stylesheet_sets = array(
+		$stylesheet_groups = array(
 			'custom'    => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'pending_stylesheets' => array(),
-				'final_stylesheets'   => array(),
 				'remove_unused_rules' => $this->args['remove_unused_rules'],
+				'included_count'      => 0,
 			),
 			'keyframes' => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
 				'total_size'          => 0,
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'pending_stylesheets' => array(),
-				'final_stylesheets'   => array(),
 				'remove_unused_rules' => 'never', // Not relevant.
+				'included_count'      => 0,
 			),
 		);
 
@@ -2307,16 +2417,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$imports = array();
 
-		// Divide pending stylesheet between custom and keyframes, and calculate size of each.
-		while ( ! empty( $this->pending_stylesheets ) ) {
-			$pending_stylesheet = array_shift( $this->pending_stylesheets );
-
-			$set_name = ! empty( $pending_stylesheet['keyframes'] ) ? 'keyframes' : 'custom';
-			$size     = 0;
+		// Divide pending stylesheet between custom and keyframes, and calculate size of each (before tree shaking).
+		foreach ( $this->pending_stylesheets as $pending_stylesheet ) {
+			$size = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $i => $part ) {
 				if ( is_string( $part ) ) {
 					$size += strlen( $part );
-					if ( '@import' === substr( $part, 0, 7 ) ) {
+					if ( '@import' === substr( $part, 0, 7 ) ) { // @todo Only when fetch failed, right?
 						$imports[] = $part;
 						unset( $pending_stylesheet['stylesheet'][ $i ] );
 					}
@@ -2325,9 +2432,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$size += strlen( $part[1] ); // Declaration block.
 				}
 			}
-			$stylesheet_sets[ $set_name ]['total_size']           += $size;
-			$stylesheet_sets[ $set_name ]['imports']               = $imports;
-			$stylesheet_sets[ $set_name ]['pending_stylesheets'][] = $pending_stylesheet;
+			$stylesheet_groups[ $pending_stylesheet['group'] ]['total_size'] += $size; // Used in finalize_stylesheet_group() to determine if tree shaking is needed.
+			$stylesheet_groups[ $pending_stylesheet['group'] ]['imports']     = $imports; // @todo Shouldn't this be merging with previous??
 
 			if ( ! empty( $pending_stylesheet['imported_font_urls'] ) ) {
 				$imported_font_urls = array_merge( $imported_font_urls, $pending_stylesheet['imported_font_urls'] );
@@ -2335,19 +2441,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Process the pending stylesheets.
-		foreach ( array_keys( $stylesheet_sets ) as $set_name ) {
-			$stylesheet_sets[ $set_name ] = $this->finalize_stylesheet_set( $stylesheet_sets[ $set_name ] );
+		foreach ( array_keys( $stylesheet_groups ) as $group ) {
+			$stylesheet_groups[ $group ]['included_count'] = $this->finalize_stylesheet_group( $group, $stylesheet_groups[ $group ] );
 		}
-
-		$this->stylesheets = $stylesheet_sets['custom']['final_stylesheets'];
 
 		// If we're not working with the document element (e.g. for legacy post templates) then there is nothing left to do.
 		if ( empty( $this->args['use_document_element'] ) ) {
-			return;
+			return; // @todo This would no longer be true with <https://github.com/ampproject/amp-wp/issues/2202>.
 		}
 
 		// Add style[amp-custom] to document.
-		if ( ! empty( $stylesheet_sets['custom']['final_stylesheets'] ) ) {
+		if ( $stylesheet_groups['custom']['included_count'] > 0 ) {
 
 			// Ensure style[amp-custom] is present in the document.
 			if ( ! $this->amp_custom_style_element ) {
@@ -2356,9 +2460,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->head->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css  = implode( '', $stylesheet_sets['custom']['imports'] ); // For native dirty AMP.
-			$css .= implode( '', $stylesheet_sets['custom']['final_stylesheets'] );
-			$css .= $stylesheet_sets['custom']['source_map_comment'];
+			$css  = implode( '', $stylesheet_groups['custom']['imports'] ); // For native dirty AMP.
+			$css .= implode( '', $this->get_stylesheets() );
+			$css .= $stylesheet_groups['custom']['source_map_comment'];
 
 			/*
 			 * Let the style[amp-custom] be populated with the concatenated CSS.
@@ -2376,8 +2480,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_size          = 0;
 			$excluded_original_size = 0;
 			$included_sources       = array();
-			foreach ( $stylesheet_sets['custom']['pending_stylesheets'] as $i => $pending_stylesheet ) {
-				if ( ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
+			foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
+				if ( 'custom' !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
 				$message = sprintf( '% 6d B', $pending_stylesheet['size'] );
@@ -2398,7 +2502,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 
-				if ( ! empty( $pending_stylesheet['included'] ) ) {
+				if ( $pending_stylesheet['included'] ) {
 					$included_sources[]      = $message;
 					$included_size          += $pending_stylesheet['size'];
 					$included_original_size += $pending_stylesheet['original_size'];
@@ -2506,7 +2610,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Add style[amp-keyframes] to document.
-		if ( ! empty( $stylesheet_sets['keyframes']['final_stylesheets'] ) ) {
+		if ( $stylesheet_groups['keyframes']['included_count'] > 0 ) {
 			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
 			if ( ! $body ) {
 				$this->should_sanitize_validation_error(
@@ -2516,8 +2620,19 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 			} else {
-				$css  = implode( '', $stylesheet_sets['keyframes']['final_stylesheets'] );
-				$css .= $stylesheet_sets['keyframes']['source_map_comment'];
+				$css  = implode(
+					'',
+					wp_list_pluck(
+						array_filter(
+							$this->pending_stylesheets,
+							function( $pending_stylesheet ) {
+								return $pending_stylesheet['included'] && 'keyframes' === $pending_stylesheet['group'];
+							}
+						),
+						'stylesheet'
+					)
+				);
+				$css .= $stylesheet_groups['keyframes']['source_map_comment'];
 
 				$style_element = $this->dom->createElement( 'style' );
 				$style_element->setAttribute( 'amp-keyframes', '' );
@@ -2631,21 +2746,23 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Finalize a stylesheet set (amp-custom or amp-keyframes).
+	 * Finalize a stylesheet group (amp-custom or amp-keyframes).
 	 *
-	 * @since 1.0
+	 * @since 1.2
 	 *
-	 * @param array $stylesheet_set Stylesheet set.
-	 * @return array Finalized stylesheet set.
+	 * @param string $group        Group name (either 'custom' or 'keyframes').
+	 * @param array  $group_config Group config.
+	 * @return int Number of included stylesheets in group.
 	 */
-	private function finalize_stylesheet_set( $stylesheet_set ) {
-		$max_bytes         = $stylesheet_set['cdata_spec']['max_bytes'] - strlen( $stylesheet_set['source_map_comment'] );
-		$is_too_much_css   = $stylesheet_set['total_size'] > $max_bytes;
+	private function finalize_stylesheet_group( $group, $group_config ) {
+		$included_count    = 0;
+		$max_bytes         = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
+		$is_too_much_css   = $group_config['total_size'] > $max_bytes;
 		$should_tree_shake = (
-			'always' === $stylesheet_set['remove_unused_rules'] || (
+			'always' === $group_config['remove_unused_rules'] || (
 				$is_too_much_css
 				&&
-				'sometimes' === $stylesheet_set['remove_unused_rules']
+				'sometimes' === $group_config['remove_unused_rules']
 			)
 		);
 
@@ -2658,11 +2775,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			);
 		}
 
-		$stylesheet_set['processed_nodes'] = array();
+		$previously_seen_stylesheet_index = array();
+		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
+			if ( $group !== $pending_stylesheet['group'] ) {
+				continue;
+			}
 
-		$final_size = 0;
-		$dom        = $this->dom;
-		foreach ( $stylesheet_set['pending_stylesheets'] as &$pending_stylesheet ) {
 			$stylesheet_parts = array();
 			$original_size    = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $stylesheet_part ) {
@@ -2692,8 +2810,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 									0 === count(
 										array_filter(
 											$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-											function( $id ) use ( $dom ) {
-												return ! $dom->getElementById( $id );
+											function( $id ) {
+												return ! $this->dom->getElementById( $id );
 											}
 										)
 									)
@@ -2772,44 +2890,62 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 			}
+
+			$pending_stylesheet['stylesheet']    = implode( '', $stylesheet_parts );
 			$pending_stylesheet['original_size'] = $original_size;
+			$pending_stylesheet['included']      = null; // To be determined below.
+			$pending_stylesheet['size']          = strlen( $pending_stylesheet['stylesheet'] ); // @todo Should this use mb_strlen()?
+			$pending_stylesheet['hash']          = md5( $pending_stylesheet['stylesheet'] );
 
-			$stylesheet = implode( '', $stylesheet_parts );
+			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
+			if ( isset( $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ) ) {
+				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['included']  = false;
+				$this->pending_stylesheets[ $previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] ]['duplicate'] = true;
+			}
+			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
 			unset( $stylesheet_parts );
-			$sheet_size                 = strlen( $stylesheet );
-			$pending_stylesheet['size'] = $sheet_size;
+		}
 
-			// Skip considering stylesheet if an identical one has already been processed.
-			$hash = md5( $stylesheet );
-			if ( isset( $stylesheet_set['final_stylesheets'][ $hash ] ) ) {
-				$pending_stylesheet['included']  = true;
-				$pending_stylesheet['duplicate'] = true;
+		// Determine which stylesheets are included based on their priorities.
+		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );
+		usort(
+			$pending_stylesheet_indices,
+			function( $a, $b ) use ( $group_config ) {
+				return $this->pending_stylesheets[ $a ]['priority'] - $this->pending_stylesheets[ $b ]['priority'];
+			}
+		);
+		$current_concatenated_size = 0;
+		foreach ( $pending_stylesheet_indices as $i ) {
+			if ( $group !== $this->pending_stylesheets[ $i ]['group'] ) {
 				continue;
 			}
-			$pending_stylesheet['duplicate'] = false;
+
+			// Skip duplicates.
+			if ( false === $this->pending_stylesheets[ $i ]['included'] ) {
+				continue;
+			}
 
 			// Report validation error if size is now too big.
-			if ( $final_size + $sheet_size > $max_bytes ) {
+			if ( $current_concatenated_size + $this->pending_stylesheets[ $i ]['size'] > $max_bytes ) {
 				$validation_error = array(
 					'code' => 'excessive_css',
 					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
 				);
-				if ( isset( $pending_stylesheet['sources'] ) ) {
-					$validation_error['sources'] = $pending_stylesheet['sources'];
+				if ( isset( $this->pending_stylesheets[ $i ]['sources'] ) ) {
+					$validation_error['sources'] = $this->pending_stylesheets[ $i ]['sources'];
 				}
 
-				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $pending_stylesheet, array( 'node' ) ) ) ) {
-					$pending_stylesheet['included'] = false;
+				if ( $this->should_sanitize_validation_error( $validation_error, wp_array_slice_assoc( $this->pending_stylesheets[ $i ], array( 'node' ) ) ) ) {
+					$this->pending_stylesheets[ $i ]['included'] = false;
 					continue; // Skip to the next stylesheet.
 				}
 			}
 
-			$final_size += $sheet_size;
+			$this->pending_stylesheets[ $i ]['included'] = true;
+			$included_count++;
 
-			$pending_stylesheet['included']               = true;
-			$stylesheet_set['final_stylesheets'][ $hash ] = $stylesheet;
+			$current_concatenated_size += $this->pending_stylesheets[ $i ]['size'];
 		}
-
-		return $stylesheet_set;
+		return $included_count;
 	}
 }

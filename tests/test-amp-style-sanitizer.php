@@ -1362,10 +1362,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
 		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
 		$this->assertContains( '15 B: style.body', $comment->nodeValue );
-		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '17 B: style.foo3', $comment->nodeValue, 'Expected the foo3 to persist because it has preceding identical stylesheets for foo1 and foo2.' );
 		$this->assertContains( '17 B: style.bard', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
-		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo1', $comment->nodeValue );
 		$this->assertContains( 'Total included size: 49 bytes (100% of 49 total after tree shaking', $comment->nodeValue );
 
 		// Test that it contains the comment with duplicate styles removed with tree shaking.
@@ -1382,10 +1382,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
 		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
 		$this->assertContains( '15 B: style.body', $comment->nodeValue );
-		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
 		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
-		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'style.foo3', $comment->nodeValue );
 		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
 
 		// Test that it contains the comment with duplicate styles removed with excessive CSS.
@@ -1402,10 +1402,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
 		$this->assertContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
 		$this->assertContains( '15 B: style.body', $comment->nodeValue );
-		$this->assertContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
 		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
 		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
-		$this->assertNotContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'style.foo3', $comment->nodeValue );
 		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
 		$this->assertContains( '50024 B: style.excessive', $comment->nodeValue );
 		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
