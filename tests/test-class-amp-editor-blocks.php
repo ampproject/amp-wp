@@ -68,8 +68,8 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$script  = $scripts->registered[ $slug ];
 
 		$this->assertEquals( $slug, $script->handle );
-		$this->assertEquals(
-			array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+		$this->assertEqualSets(
+			array( 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 			$script->deps
 		);
 		$this->assertContains( $expected_file_name, $script->src );

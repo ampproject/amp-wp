@@ -914,18 +914,9 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_script(
 						'amp-validation-detail-toggle',
 						amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
-						array( 'wp-dom-ready', 'amp-validation-tooltips' ),
+						array( 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ),
 						AMP__VERSION,
 						true
-					);
-
-					wp_localize_script(
-						'amp-validation-detail-toggle',
-						'ampValidationI18n',
-						array(
-							'detailToggleBtnAriaLabel'  => esc_attr__( 'Toggle all details', 'amp' ),
-							'sourcesToggleBtnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
-						)
 					);
 				}
 

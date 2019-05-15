@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-springboard-player';
 
@@ -133,14 +133,10 @@ export const settings = {
 							value={ dataItems }
 							onChange={ ( value ) => ( setAttributes( { dataItems: value } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'Springboard Player', 'amp' ), url )
-				}
+				{ url && <MediaPlaceholder name={ __( 'Springboard Player', 'amp' ) } url={ url } /> }
 				{
 					! url && (
 						<Placeholder label={ __( 'Springboard Player', 'amp' ) }>

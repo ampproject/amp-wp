@@ -1188,58 +1188,6 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_edit_post_inline_script()
-	 *
-	 * @covers \AMP_Validated_URL_Post_Type::add_edit_post_inline_script()
-	 */
-	public function test_add_edit_post_inline_script() {
-		global $pagenow, $post;
-
-		$pagenow                = 'post.php';
-		$amp_validated_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
-		$test_post              = $this->factory()->post->create_and_get();
-
-		$post         = $amp_validated_url_post;
-		$_GET['post'] = $amp_validated_url_post->ID;
-		set_current_screen( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
-		AMP_Validated_URL_Post_Type::enqueue_edit_post_screen_scripts();
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains( 'document.addEventListener(', $inline_script );
-		$this->assertContains( 'You have unsaved changes. Are you sure you want to leave?', $inline_script );
-
-		// Now that the total errors are set, they should appear in the inline script.
-		$total_errors                                      = 22;
-		AMP_Validated_URL_Post_Type::$total_errors_for_url = $total_errors;
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains( 'showing_number_errors', $inline_script );
-		$this->assertContains( strval( $total_errors ), $inline_script );
-
-		// The 'page_heading' value should be present in the inline script.
-		$_GET['action'] = 'edit';
-		update_post_meta(
-			$amp_validated_url_post->ID,
-			'_amp_queried_object',
-			array(
-				'type' => 'post',
-				'id'   => $test_post->ID,
-			)
-		);
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains(
-			sprintf( 'Errors for: %s', $test_post->post_title ),
-			$inline_script
-		);
-		$this->assertContains( 'Show all', $inline_script );
-	}
-
-	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::add_meta_boxes()

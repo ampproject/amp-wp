@@ -13,7 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-reach-player';
 
@@ -77,14 +77,10 @@ export const settings = {
 							value={ dataEmbedId }
 							onChange={ ( value ) => ( setAttributes( { dataEmbedId: value } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'Reach Player', 'amp' ), url )
-				}
+				{ url && <MediaPlaceholder name={ __( 'Reach Player', 'amp' ) } url={ url } /> }
 				{
 					! url && (
 						<Placeholder label={ __( 'Reach Player', 'amp' ) }>

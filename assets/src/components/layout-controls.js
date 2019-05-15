@@ -1,41 +1,22 @@
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
 import { Fragment } from '@wordpress/element';
-import {
-	TextControl,
-	SelectControl,
-	Notice,
-	Placeholder,
-} from '@wordpress/components';
-
-/**
- * Display media placeholder.
- *
- * @param {string} name Block's name.
- * @param {string|boolean} url URL.
- * @return {XML} Placeholder.
- */
-export function getMediaPlaceholder( name, url ) {
-	return (
-		<Placeholder label={ name }>
-			<p className="components-placeholder__error">{ url }</p>
-			<p className="components-placeholder__error">{ __( 'Previews for this are unavailable in the editor, sorry!', 'amp' ) }</p>
-		</Placeholder>
-	);
-}
+import { Notice, SelectControl, TextControl } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 
 /**
  * Layout controls for AMP blocks' attributes: layout, width, height.
  *
- * @param {Object} props Props.
- * @param {Array} ampLayoutOptions Layout options.
- * @return {[XML,*,XML,*,XML]} Controls.
+ * @param {Object} props                      Props.
+ * @param {Object} props.attributes           Block attributes.
+ * @param {string} props.attributes.ampLayout AMP layout option.
+ * @param {Array}  props.ampLayoutOptions     Layout options.
+ *
+ * @return {Component} Controls.
  */
-export function getLayoutControls( props, ampLayoutOptions ) {
-	// @todo Move getting ampLayoutOptions to utils as well.
-	const { attributes, setAttributes } = props;
+export default ( props ) => {
+	const { attributes, setAttributes, ampLayoutOptions } = props;
 	const { ampLayout, height, width } = attributes;
 	const showHeightNotice = ! height && ( 'fixed' === ampLayout || 'fixed-height' === ampLayout );
 	const showWidthNotice = ! width && 'fixed' === ampLayout;
@@ -84,4 +65,4 @@ export function getLayoutControls( props, ampLayoutOptions ) {
 			/>
 		</Fragment>
 	);
-}
+};

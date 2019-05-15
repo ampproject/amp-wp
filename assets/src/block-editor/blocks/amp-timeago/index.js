@@ -19,18 +19,18 @@ import { Fragment } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { getLayoutControls } from '../../utils.js';
+import { LayoutControls } from '../../../components';
 
 export const name = 'amp/amp-timeago';
 
 export const settings = {
-	title: __( 'AMP Timeago' ),
+	title: __( 'AMP Timeago', 'amp' ),
 	category: 'common',
 	icon: 'backup',
 	keywords: [
-		__( 'Time difference' ),
-		__( 'Time ago' ),
-		__( 'Date' ),
+		__( 'Time difference', 'amp' ),
+		__( 'Time ago', 'amp' ),
+		__( 'Date', 'amp' ),
 	],
 
 	attributes: {
@@ -97,19 +97,17 @@ export const settings = {
 		return (
 			<Fragment>
 				<InspectorControls>
-					<PanelBody title={ __( 'AMP Timeago Settings' ) }>
+					<PanelBody title={ __( 'AMP Timeago Settings', 'amp' ) }>
 						<DateTimePicker
 							locale="en"
 							currentDate={ attributes.dateTime || moment() }
 							onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 						<TextControl
 							type="number"
 							className="blocks-amp-timeout__cutoff"
-							label={ __( 'Cutoff (seconds)' ) }
+							label={ __( 'Cutoff (seconds)', 'amp' ) }
 							value={ cutoff !== undefined ? cutoff : '' }
 							onChange={ ( value ) => ( setAttributes( { cutoff: value } ) ) }
 						/>
