@@ -44,14 +44,6 @@ const schema = {
 	align: {
 		type: 'string',
 	},
-	autoFontSize: {
-		type: 'number',
-		default: 45,
-	},
-	ampFitText: {
-		type: 'boolean',
-		default: true,
-	},
 };
 
 export const settings = {

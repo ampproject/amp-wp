@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-o2-player';
 
@@ -117,14 +117,10 @@ export const settings = {
 							checked={ autoPlay }
 							onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'O2 Player', 'amp' ), url )
-				}
+				{ url && <MediaPlaceholder name={ __( 'O2 Player', 'amp' ) } url={ url } /> }
 				{
 					! url && (
 						<Placeholder label={ __( 'O2 Player', 'amp' ) }>

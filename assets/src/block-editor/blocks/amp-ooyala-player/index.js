@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-ooyala-player';
 
@@ -113,21 +113,15 @@ export const settings = {
 							] }
 							onChange={ ( value ) => ( setAttributes( { dataPlayerVersion: value } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'Ooyala Player', 'amp' ), url )
-				}
-				{
-					! url && (
-						<Placeholder label={ __( 'Ooyala Player', 'amp' ) }>
-							<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
-						</Placeholder>
-					)
-				}
+				{ url && <MediaPlaceholder name={ __( 'Ooyala Player', 'amp' ) } url={ url } /> }
+				{ ! url && (
+					<Placeholder label={ __( 'Ooyala Player', 'amp' ) }>
+						<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
+					</Placeholder>
+				) }
 			</Fragment>
 		);
 	},

@@ -14,7 +14,7 @@ import {
 /**
  * Internal dependencies
  */
-import { getLayoutControls, getMediaPlaceholder } from '../../utils.js';
+import { LayoutControls, MediaPlaceholder } from '../../../components';
 
 export const name = 'amp/amp-brid-player';
 
@@ -124,14 +124,10 @@ export const settings =	{
 							checked={ autoPlay }
 							onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
 						/>
-						{
-							getLayoutControls( props, ampLayoutOptions )
-						}
+						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					</PanelBody>
 				</InspectorControls>
-				{
-					url && getMediaPlaceholder( __( 'Brid Player', 'amp' ), url )
-				}
+				{ url && <MediaPlaceholder name={ __( 'Brid Player', 'amp' ) } url={ url } /> }
 				{
 					! url && (
 						<Placeholder label={ __( 'Brid Player', 'amp' ) }>

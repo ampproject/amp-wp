@@ -10,7 +10,7 @@ import { each, every, isEqual } from 'lodash';
  */
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
-import { _x } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
@@ -35,9 +35,11 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_TEXT_SETTINGS,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import ampStoriesFonts from 'amp-stories-fonts';
+
+const { ampStoriesFonts } = window;
 
 const {
 	getBlocksByClientId,
@@ -153,6 +155,9 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 		case 'amp/amp-story-post-date':
 			return 30;
 
+		case 'amp/amp-story-post-title':
+			return 100;
+
 		default:
 			return 50;
 	}
@@ -176,6 +181,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	const addedAttributes = {
 		anchor: {
@@ -220,6 +226,17 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 100,
 		},
 	};
+
+	if ( needsTextSettings ) {
+		addedAttributes.autoFontSize = {
+			type: 'number',
+			default: 45,
+		};
+		addedAttributes.ampFitText = {
+			type: 'boolean',
+			default: true,
+		};
+	}
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
@@ -1173,5 +1190,60 @@ export const maybeInitializeAnimations = () => {
 				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 			}
 		}
+	}
+};
+
+/**
+ * Return a label for the block order controls depending on block position.
+ *
+ * @param {string}  type            Block type - in the case of a single block, should
+ *                                  define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
+ * @param {number}  currentPosition The block's current position.
+ * @param {number}  newPosition     The block's new position.
+ * @param {boolean} isFirst         This is the first block.
+ * @param {boolean} isLast          This is the last block.
+ * @param {number}  dir             Direction of movement (> 0 is considered to be going
+ *                                  down, < 0 is up).
+ *
+ * @return {string} Label for the block movement controls.
+ */
+export const getBlockOrderDescription = ( type, currentPosition, newPosition, isFirst, isLast, dir ) => {
+	if ( isFirst && isLast ) {
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is the only block, and cannot be moved', 'amp' ), type );
+	}
+
+	if ( dir > 0 && ! isLast ) {
+		// moving down
+		return sprintf(
+			// translators: 1: Type of block (i.e. Text, Image etc), 2: Position of selected block, 3: New position
+			__( 'Move %1$s block from position %2$d down to position %3$d', 'amp' ),
+			type,
+			currentPosition,
+			newPosition
+		);
+	}
+
+	if ( dir > 0 && isLast ) {
+		// moving down, and is the last item
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is at the end of the content and can’t be moved down', 'amp' ), type );
+	}
+
+	if ( dir < 0 && ! isFirst ) {
+		// moving up
+		return sprintf(
+			// translators: 1: Type of block (i.e. Text, Image etc), 2: Position of selected block, 3: New position
+			__( 'Move %1$s block from position %2$d up to position %3$d', 'amp' ),
+			type,
+			currentPosition,
+			newPosition
+		);
+	}
+
+	if ( dir < 0 && isFirst ) {
+		// moving up, and is the first item
+		// translators: %s: Type of block (i.e. Text, Image etc)
+		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
 };
