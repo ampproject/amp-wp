@@ -393,9 +393,10 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		}
 
 		return (
-			<BlockEdit { ...props } >
+			<Fragment>
+				<BlockEdit { ...props } />
 				{ inspectorControls }
-			</BlockEdit>
+			</Fragment>
 		);
 	};
 };
