@@ -82,9 +82,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
+		register_post_type(
+			'secret',
+			array( 'public' => false )
+		);
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			array(
-				'post_type' => 'draft',
+				'post_type' => 'secret',
 			)
 		);
 		$this->instance->enqueue_block_assets();
