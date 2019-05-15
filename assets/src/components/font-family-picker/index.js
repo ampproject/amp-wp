@@ -10,16 +10,12 @@ import { AMP_STORY_FONT_IMAGES } from '../../stories-editor/constants';
 import { PreviewPicker } from '../';
 
 /**
- * External dependencies
- */
-import ampStoriesFonts from 'amp-stories-fonts';
-
-/**
  * Font Family Picker component.
  *
  * @return {?Object} The rendered component or null if there are no options.
  */
 function FontFamilyPicker( {
+	fonts,
 	onChange,
 	value = '',
 } ) {
@@ -28,7 +24,7 @@ function FontFamilyPicker( {
 		label: __( 'None', 'amp' ),
 	};
 
-	const options = ampStoriesFonts.map( ( font ) => ( {
+	const options = fonts.map( ( font ) => ( {
 		value: font.name,
 		label: font.name,
 	} ) );

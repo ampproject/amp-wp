@@ -1948,7 +1948,7 @@ class AMP_Validation_Manager {
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array(),
+			array( 'wp-i18n' ),
 			AMP__VERSION,
 			true
 		);
@@ -1957,18 +1957,28 @@ class AMP_Validation_Manager {
 		$enabled_status    = $status_and_errors['status'];
 
 		$data = array(
-			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
-			'possibleStati'              => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
+			'possibleStatuses'           => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
 			'defaultStatus'              => $enabled_status,
+		);
+
+		wp_localize_script(
+			$slug,
+			'ampBlockValidation',
+			$data
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $slug, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-		}
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
 
-		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', wp_json_encode( $data ) ) );
+			wp_add_inline_script(
+				$slug,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 }

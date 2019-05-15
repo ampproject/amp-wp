@@ -581,13 +581,11 @@ class AMP_Story_Post_Type {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			$translations = wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
+			wp_set_script_translations( 'amp-editor-story-blocks-build', 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp-editor-story-blocks-build' ) : gutenberg_get_jed_locale_data( 'amp-editor-story-blocks-build' );
 			$translations = wp_json_encode( $locale_data );
-		}
 
-		if ( ! empty( $translations ) ) {
 			wp_add_inline_script(
 				'amp-story-editor',
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',

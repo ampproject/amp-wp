@@ -18,14 +18,30 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public $instance;
 
 	/**
-	 * Setup.
+	 * Set up.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
 		parent::setUp();
+		global $wp_scripts, $wp_styles;
+		$wp_scripts     = null;
+		$wp_styles      = null;
 		$this->instance = new AMP_Post_Meta_Box();
 	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+		parent::tearDown();
+	}
+
 
 	/**
 	 * Test init.
@@ -82,9 +98,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
+		register_post_type(
+			'secret',
+			array( 'public' => false )
+		);
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			array(
-				'post_type' => 'draft',
+				'post_type' => 'secret',
 			)
 		);
 		$this->instance->enqueue_block_assets();
@@ -107,11 +127,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
-		$this->assertInternalType( 'array', $block_script->extra['before'] );
-
-		$matches = preg_grep( '/wpAmpEditor/', $block_script->extra['before'] );
-		$this->assertCount( 1, $matches );
-		$this->assertContains( AMP_Post_Meta_Box::ENABLED_STATUS, array_shift( $matches ) );
 	}
 
 	/**

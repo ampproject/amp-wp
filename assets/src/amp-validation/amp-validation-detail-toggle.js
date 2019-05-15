@@ -1,12 +1,8 @@
 /**
- * External dependencies
- */
-import { detailToggleBtnAriaLabel, sourcesToggleBtnAriaLabel } from 'amp-validation-i18n';
-
-/**
  * WordPress dependencies
  */
 import domReady from '@wordpress/dom-ready';
+import { __ } from '@wordpress/i18n';
 
 const OPEN_CLASS = 'is-open';
 
@@ -80,7 +76,7 @@ function addTermListTableRowClasses() {
 }
 
 domReady( () => {
-	addToggleButtons( 'th.column-details.manage-column', detailToggleBtnAriaLabel )
+	addToggleButtons( 'th.column-details.manage-column', __( 'Toggle all details', 'amp' ) )
 		.forEach( ( btn ) => {
 			addToggleAllListener( {
 				btn,
@@ -89,7 +85,7 @@ domReady( () => {
 			} );
 		} );
 
-	addToggleButtons( 'th.manage-column.column-sources_with_invalid_output', sourcesToggleBtnAriaLabel )
+	addToggleButtons( 'th.manage-column.column-sources_with_invalid_output', __( 'Toggle all sources', 'amp' ) )
 		.forEach( ( btn ) => {
 			addToggleAllListener( {
 				btn,

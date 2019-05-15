@@ -1,34 +1,14 @@
-/* exported ampValidatedUrlsIndex */
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
 
-const ampValidatedUrlsIndex = ( function() { // eslint-disable-line no-unused-vars
-	const component = {
-		classes: {},
-	};
+const CLASS_NAME = 'new';
 
-	/**
-	 * The class for the new status
-	 *
-	 * @type {string}
-	 */
-	component.classes.new = 'new';
-
-	/**
-	 * Boot.
-	 */
-	component.boot = function boot() {
-		component.highlightRowsWithNewStatus();
-	};
-
-	/**
-	 * Highlight rows with new status.
-	 */
-	component.highlightRowsWithNewStatus = function highlightRowsWithNewStatus() {
-		document.querySelectorAll( 'tr[id^="post-"]' ).forEach( function( row ) {
-			if ( row.querySelector( 'span.status-text.' + component.classes.new ) ) {
-				row.classList.add( 'new' );
-			}
-		} );
-	};
-
-	return component;
-}() );
+domReady( () => {
+	document.querySelectorAll( 'tr[id^="post-"]' ).forEach( function( row ) {
+		if ( row.querySelector( 'span.status-text.' + CLASS_NAME ) ) {
+			row.classList.add( CLASS_NAME );
+		}
+	} );
+} );
