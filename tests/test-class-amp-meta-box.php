@@ -18,14 +18,30 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public $instance;
 
 	/**
-	 * Setup.
+	 * Set up.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
 		parent::setUp();
+		global $wp_scripts, $wp_styles;
+		$wp_scripts     = null;
+		$wp_styles      = null;
 		$this->instance = new AMP_Post_Meta_Box();
 	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+		parent::tearDown();
+	}
+
 
 	/**
 	 * Test init.
