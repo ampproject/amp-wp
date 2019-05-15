@@ -1,0 +1,11 @@
+<svg width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
+    <g id='Back' fill='none' fillRule='evenodd'>
+        <g id='Group-2' transform='translate(6 5)' fill='#000'>
+            <g id='Group'>
+                <path d='M11.2,4 L12,4 C12.5522847,4 13,4.44771525 13,5 L13,12 C13,12.5522847 12.5522847,13 12,13 L5,13 C4.44771525,13 4,12.5522847 4,12 L4,11.2 C4,11.0895431 4.08954305,11 4.2,11 L10,11 C10.5522847,11 11,10.5522847 11,10 L11,4.2 C11,4.08954305 11.0895431,4 11.2,4 Z'
+                      id='Path' />
+                <rect id='Rectangle' opacity='0.3' width='9' height='9' rx='1' />
+            </g>
+        </g>
+    </g>
+</svg>

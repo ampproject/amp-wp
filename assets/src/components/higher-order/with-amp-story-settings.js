@@ -35,7 +35,9 @@ import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, Rot
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
 import { maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
-import sendBackIcon from '../../../images/send-backwards.svg';
+import sendBackwardIcon from '../../../images/send-backwards.svg';
+import bringFrontIcon from '../../../images/bring-front.svg';
+import sendBackIcon from '../../../images/send-back.svg';
 
 const { getComputedStyle } = window;
 
@@ -298,6 +300,7 @@ export default createHigherOrderComponent(
 					{ ! ( isLast && isFirst ) && (
 						<InspectorControls>
 							<PanelBody
+								className="amp-story-order-controls"
 								title={ __( 'Block position', 'amp' ) }
 							>
 								{ ! isLast && (
@@ -305,28 +308,28 @@ export default createHigherOrderComponent(
 										className="amp-story-controls-bring-forward"
 										onClick={ bringForward }
 										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
-									/>
+									>{ __( 'Forward', 'amp' ) }</IconButton>
 								) }
 								{ ! isLast && (
 									<IconButton
-										className="amp-story-controls-bring-forward"
+										className="amp-story-controls-bring-front"
 										onClick={ moveFront }
-										icon="arrow-up"
-									/>
+										icon={ bringFrontIcon( { width: 24, height: 24 } ) }
+									>{ __( 'Front', 'amp' ) }</IconButton>
 								) }
 								{ ! isFirst && (
 									<IconButton
 										className="amp-story-controls-send-backwards"
 										onClick={ sendBackward }
-										icon={ sendBackIcon( { width: 24, height: 24 } ) }
-									/>
+										icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
+									>{ __( 'Backward', 'amp' ) }</IconButton>
 								) }
 								{ ! isFirst && (
 									<IconButton
-										className="amp-story-controls-send-backwards"
+										className="amp-story-controls-send-back"
 										onClick={ moveBack }
-										icon="arrow-down"
-									/>
+										icon={ sendBackIcon( { width: 24, height: 24 } ) }
+									>{ __( 'Back', 'amp' ) }</IconButton>
 								) }
 							</PanelBody>
 						</InspectorControls>
