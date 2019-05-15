@@ -132,13 +132,12 @@ class AMP_Editor_Blocks {
 				array(),
 				AMP__VERSION
 			);
-
 		}
 
 		wp_enqueue_script(
 			'amp-editor-blocks',
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-block-editor' ),
+			array( 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 			AMP__VERSION,
 			true
 		);
