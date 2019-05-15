@@ -33,7 +33,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
-import { maybeEnqueueFontStyle } from '../../stories-editor/helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
 import sendBackwardIcon from '../../../images/send-backwards.svg';
 import bringFrontIcon from '../../../images/bring-front.svg';
@@ -78,7 +78,11 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
 	}
 
+	const reversedIndex = blockClientIds.length - 1 - blockIndex;
+
 	return {
+		currentBlockPosition: reversedIndex + 1,
+		numberOfBlocks: blockClientIds.length,
 		isFirst: 0 === blockIndex,
 		isLast: blockIndex === blockClientIds.length - 1,
 		parentBlock: getBlock( parentBlockId ),
@@ -174,6 +178,8 @@ export default createHigherOrderComponent(
 				isSelected,
 				isLast,
 				isFirst,
+				currentBlockPosition,
+				numberOfBlocks,
 				toggleSelection,
 				fontSize,
 				setFontSize,
@@ -205,6 +211,7 @@ export default createHigherOrderComponent(
 				return <BlockEdit { ...props } />;
 			}
 
+			const blockType = getBlockType( name );
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
@@ -303,38 +310,96 @@ export default createHigherOrderComponent(
 								className="amp-story-order-controls"
 								title={ __( 'Block position', 'amp' ) }
 							>
-								<IconButton
-									className="amp-story-controls-bring-forward"
-									onClick={ bringForward }
-									icon={ bringForwardIcon( { width: 24, height: 24 } ) }
-									label={ __( 'Send Forward', 'amp' ) }
-									aria-describedby={ `editor-block-mover__forward-description-${ clientId }` }
-									aria-disabled={ isLast }
-								>{ __( 'Forward', 'amp' ) }</IconButton>
-								<IconButton
-									className="amp-story-controls-bring-front"
-									onClick={ moveFront }
-									icon={ bringFrontIcon( { width: 24, height: 24 } ) }
-									label={ __( 'Send Front', 'amp' ) }
-									aria-describedby={ `editor-block-mover__front-description-${ clientId }` }
-									aria-disabled={ isLast }
-								>{ __( 'Front', 'amp' ) }</IconButton>
-								<IconButton
-									className="amp-story-controls-send-backwards"
-									onClick={ sendBackward }
-									icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
-									label={ __( 'Send Backward', 'amp' ) }
-									aria-describedby={ `editor-block-mover__backward-description-${ clientId }` }
-									aria-disabled={ isFirst }
-								>{ __( 'Backward', 'amp' ) }</IconButton>
-								<IconButton
-									className="amp-story-controls-send-back"
-									onClick={ moveBack }
-									icon={ sendBackIcon( { width: 24, height: 24 } ) }
-									label={ __( 'Send Back', 'amp' ) }
-									aria-describedby={ `editor-block-mover__backward-description-${ clientId }` }
-									aria-disabled={ isFirst }
-								>{ __( 'Back', 'amp' ) }</IconButton>
+								<div className="amp-story-order-controls-wrap">
+									<IconButton
+										className="amp-story-controls-bring-front"
+										onClick={ moveFront }
+										icon={ bringFrontIcon( { width: 24, height: 24 } ) }
+										label={ __( 'Send to front', 'amp' ) }
+										aria-describedby={ `amp-story-controls-bring-front-description-${ clientId }` }
+										aria-disabled={ isLast }
+									>
+										{ __( 'Front', 'amp' ) }
+									</IconButton>
+									<IconButton
+										className="amp-story-controls-bring-forward"
+										onClick={ bringForward }
+										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
+										label={ __( 'Send Forward', 'amp' ) }
+										aria-describedby={ `amp-story-controls-bring-forward-description-${ clientId }` }
+										aria-disabled={ isLast }
+									>
+										{ __( 'Forward', 'amp' ) }
+									</IconButton>
+									<IconButton
+										className="amp-story-controls-send-backwards"
+										onClick={ sendBackward }
+										icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
+										label={ __( 'Send Backward', 'amp' ) }
+										aria-describedby={ `amp-story-controls-send-backward-description-${ clientId }` }
+										aria-disabled={ isFirst }
+									>
+										{ __( 'Backward', 'amp' ) }
+									</IconButton>
+									<IconButton
+										className="amp-story-controls-send-back"
+										onClick={ moveBack }
+										icon={ sendBackIcon( { width: 24, height: 24 } ) }
+										label={ __( 'Send to back', 'amp' ) }
+										aria-describedby={ `amp-story-controls-send-back-description-${ clientId }` }
+										aria-disabled={ isFirst }
+									>
+										{ __( 'Back', 'amp' ) }
+									</IconButton>
+								</div>
+								<span className="amp-story-controls-description" id={ `amp-story-controls-bring-front-description-${ clientId }` }>
+									{
+										getBlockOrderDescription(
+											blockType && blockType.title,
+											currentBlockPosition,
+											1,
+											isFirst,
+											isLast,
+											-1,
+										)
+									}
+								</span>
+								<span className="amp-story-controls-description" id={ `amp-story-controls-bring-forward-description-${ clientId }` }>
+									{
+										getBlockOrderDescription(
+											blockType && blockType.title,
+											currentBlockPosition,
+											currentBlockPosition - 1,
+											isFirst,
+											isLast,
+											-1,
+										)
+									}
+								</span>
+								<span className="amp-story-controls-description" id={ `amp-story-controls-send-backward-description-${ clientId }` }>
+									{
+										getBlockOrderDescription(
+											blockType && blockType.title,
+											currentBlockPosition,
+											currentBlockPosition + 1,
+											isFirst,
+											isLast,
+											1,
+										)
+									}
+								</span>
+								<span className="amp-story-controls-description" id={ `amp-story-controls-send-back-description-${ clientId }` }>
+									{
+										getBlockOrderDescription(
+											blockType && blockType.title,
+											currentBlockPosition,
+											numberOfBlocks,
+											isFirst,
+											isLast,
+											1,
+										)
+									}
+								</span>
 							</PanelBody>
 						</InspectorControls>
 					) }

@@ -29,14 +29,25 @@ div[data-type="amp/amp-story-page"] .wp-block:hover .amp-story-editor-block-move
 	box-shadow: inset 0 0 0 1px #e2e4e7 !important;
 }
 
-.amp-story-order-controls .components-icon-button {
-	padding: 0;
-	width: 23%;
-	display: inline-block;
-	text-align: center;
-	font-size: 8px;
+/* still picked up by assistive technologies thanks to aria-describedby */
+.amp-story-order-controls .amp-story-controls-description {
+	display: none;
 }
-.amp-story-order-controls .components-icon-button svg {
+
+.amp-story-order-controls-wrap {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.amp-story-order-controls-wrap .components-icon-button {
+	display: block;
+	align-self: start;
+	text-align: center;
+	color: inherit;
+}
+
+.amp-story-order-controls-wrap .components-icon-button svg {
 	display: block;
 	margin: 0 auto;
 }
