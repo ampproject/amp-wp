@@ -303,34 +303,38 @@ export default createHigherOrderComponent(
 								className="amp-story-order-controls"
 								title={ __( 'Block position', 'amp' ) }
 							>
-								{ ! isLast && (
-									<IconButton
-										className="amp-story-controls-bring-forward"
-										onClick={ bringForward }
-										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
-									>{ __( 'Forward', 'amp' ) }</IconButton>
-								) }
-								{ ! isLast && (
-									<IconButton
-										className="amp-story-controls-bring-front"
-										onClick={ moveFront }
-										icon={ bringFrontIcon( { width: 24, height: 24 } ) }
-									>{ __( 'Front', 'amp' ) }</IconButton>
-								) }
-								{ ! isFirst && (
-									<IconButton
-										className="amp-story-controls-send-backwards"
-										onClick={ sendBackward }
-										icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
-									>{ __( 'Backward', 'amp' ) }</IconButton>
-								) }
-								{ ! isFirst && (
-									<IconButton
-										className="amp-story-controls-send-back"
-										onClick={ moveBack }
-										icon={ sendBackIcon( { width: 24, height: 24 } ) }
-									>{ __( 'Back', 'amp' ) }</IconButton>
-								) }
+								<IconButton
+									className="amp-story-controls-bring-forward"
+									onClick={ bringForward }
+									icon={ bringForwardIcon( { width: 24, height: 24 } ) }
+									label={ __( 'Send Forward', 'amp' ) }
+									aria-describedby={ `editor-block-mover__forward-description-${ clientId }` }
+									aria-disabled={ isLast }
+								>{ __( 'Forward', 'amp' ) }</IconButton>
+								<IconButton
+									className="amp-story-controls-bring-front"
+									onClick={ moveFront }
+									icon={ bringFrontIcon( { width: 24, height: 24 } ) }
+									label={ __( 'Send Front', 'amp' ) }
+									aria-describedby={ `editor-block-mover__front-description-${ clientId }` }
+									aria-disabled={ isLast }
+								>{ __( 'Front', 'amp' ) }</IconButton>
+								<IconButton
+									className="amp-story-controls-send-backwards"
+									onClick={ sendBackward }
+									icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
+									label={ __( 'Send Backward', 'amp' ) }
+									aria-describedby={ `editor-block-mover__backward-description-${ clientId }` }
+									aria-disabled={ isFirst }
+								>{ __( 'Backward', 'amp' ) }</IconButton>
+								<IconButton
+									className="amp-story-controls-send-back"
+									onClick={ moveBack }
+									icon={ sendBackIcon( { width: 24, height: 24 } ) }
+									label={ __( 'Send Back', 'amp' ) }
+									aria-describedby={ `editor-block-mover__backward-description-${ clientId }` }
+									aria-disabled={ isFirst }
+								>{ __( 'Back', 'amp' ) }</IconButton>
 							</PanelBody>
 						</InspectorControls>
 					) }
