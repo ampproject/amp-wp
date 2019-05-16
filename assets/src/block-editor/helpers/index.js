@@ -112,7 +112,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isTextBlock = TEXT_BLOCKS.includes( name );
 
 	// Fit-text for text blocks.
-	if ( ! isTextBlock ) {
+	if ( isTextBlock ) {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
 		}
