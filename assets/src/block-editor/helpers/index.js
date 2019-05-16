@@ -79,11 +79,12 @@ const ampLayoutOptions = [
 ];
 
 /**
- * Add AMP attributes (in this test case just ampLayout) to every core block.
+ * Add AMP attributes to every core block.
  *
- * @param {Object} settings Settings.
- * @param {string} name Block name.
- * @return {Object} Settings.
+ * @param {Object} settings Block settings.
+ * @param {string} name     Block name.
+ *
+ * @return {Object} Modified block settings.
  */
 export const addAMPAttributes = ( settings, name ) => {
 	// AMP Carousel settings.
@@ -112,7 +113,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isTextBlock = TEXT_BLOCKS.includes( name );
 
 	// Fit-text for text blocks.
-	if ( ! isTextBlock ) {
+	if ( isTextBlock ) {
 		if ( ! settings.attributes ) {
 			settings.attributes = {};
 		}
@@ -157,7 +158,7 @@ export const addAMPAttributes = ( settings, name ) => {
 /**
  * Filters blocks' save function.
  *
- * @param {Object} element        Element.
+ * @param {Object} element        Element to be saved.
  * @param {string} blockType      Block type.
  * @param {string} blockType.name Block type name.
  * @param {Object} attributes     Attributes.
@@ -262,9 +263,10 @@ export const filterBlocksSave = ( element, blockType, attributes ) => {
 };
 
 /**
- * Get inner content of AMP Fit Text tag.
+ * Returns the inner content of an AMP Fit Text tag.
  *
  * @param {string} content Original content.
+ *
  * @return {string} Modified content.
  */
 export const getAmpFitTextContent = ( content ) => {
@@ -283,10 +285,11 @@ export const getAmpFitTextContent = ( content ) => {
 /**
  * Get layout options depending on the block.
  *
- * @param {string} blockName Block name.
- * @return {[*]} Options.
+ * @param {string} block Block name.
+ *
+ * @return {Object[]} Options.
  */
-export const getLayoutOptions = ( blockName ) => {
+export const getLayoutOptions = ( block ) => {
 	const layoutOptions = [
 		{
 			value: '',
@@ -295,7 +298,7 @@ export const getLayoutOptions = ( blockName ) => {
 	];
 
 	for ( const option of ampLayoutOptions ) {
-		const isLayoutAvailable = ! option.notAvailable.includes( blockName );
+		const isLayoutAvailable = ! option.notAvailable.includes( block );
 
 		if ( isLayoutAvailable ) {
 			layoutOptions.push( {
@@ -311,9 +314,11 @@ export const getLayoutOptions = ( blockName ) => {
 /**
  * Add extra data-amp-layout attribute to save to DB.
  *
- * @param {Object} props Properties.
- * @param {Object} blockType Block type.
- * @param {Object} attributes Attributes.
+ * @param {Object} props          Properties.
+ * @param {Object} blockType      Block type.
+ * @param {Object} blockType.name Block type name.
+ * @param {Object} attributes     Attributes.
+ *
  * @return {Object} Props.
  */
 export const addAMPExtraProps = ( props, blockType, attributes ) => {
@@ -351,7 +356,8 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 /**
  * Filters blocks edit function of all blocks.
  *
- * @param {Function} BlockEdit Edit function.
+ * @param {Function} BlockEdit function.
+ *
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
@@ -435,7 +441,8 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
  * Default setup for inspector controls.
  *
  * @param {Object} props Props.
- * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
+ *
+ * @return {Component} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
 	const { isSelected } = props;
@@ -458,7 +465,8 @@ export const setUpInspectorControls = ( props ) => {
  * Get AMP Layout select control.
  *
  * @param {Object} props Props.
- * @return {Object} Element.
+ *
+ * @return {Component} Element.
  */
 const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
@@ -488,7 +496,8 @@ const AmpLayoutControl = ( props ) => {
  * Get AMP Noloading toggle control.
  *
  * @param {Object} props Props.
- * @return {Object} Element.
+ *
+ * @return {Component} Element.
  */
 const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
@@ -510,7 +519,8 @@ const AmpNoloadingToggle = ( props ) => {
  * @todo Consider wrapping the render function to delete the original font size in text settings when ampFitText.
  *
  * @param {Object} props Props.
- * @return {Object|Element|*|{$$typeof, type, key, ref, props, _owner}} Inspector Controls.
+ *
+ * @return {Component} Inspector Controls.
  */
 const setUpTextBlocksInspectorControls = ( props ) => {
 	const { isSelected, attributes, setAttributes } = props;
@@ -634,7 +644,8 @@ const setUpTextBlocksInspectorControls = ( props ) => {
  * Adds ampCarousel attribute in case of gallery shortcode.
  *
  * @param {Object} props Props.
- * @return {Object} Inspector controls.
+ *
+ * @return {Component} Inspector controls.
  */
 const setUpShortcodeInspectorControls = ( props ) => {
 	const { isSelected } = props;
@@ -659,7 +670,8 @@ const setUpShortcodeInspectorControls = ( props ) => {
  * Get AMP Lightbox toggle control.
  *
  * @param {Object} props Props.
- * @return {Object} Element.
+ *
+ * @return {Component} Element.
  */
 const AmpLightboxToggle = ( props ) => {
 	const { attributes: { ampLightbox, linkTo, ampLayout }, setAttributes } = props;
@@ -688,7 +700,11 @@ const AmpLightboxToggle = ( props ) => {
 /**
  * Get AMP Carousel toggle control.
  *
- * @param {Object} props Props.
+ * @param {Object}   props                        Props.
+ * @param {Object}   props.attributes             Block attributes.
+ * @param {Object}   props.attributes.ampCarousel AMP Carousel toggle value.
+ * @param {Function} props.setAttributes          Callback to update attributes.
+ *
  * @return {Object} Element.
  */
 const AmpCarouselToggle = ( props ) => {
@@ -706,7 +722,9 @@ const AmpCarouselToggle = ( props ) => {
 /**
  * Set up inspector controls for Image block.
  *
- * @param {Object} props Props.
+ * @param {Object}  props            Props.
+ * @param {boolean} props.isSelected Whether the current block has been selected or not.
+ *
  * @return {Object} Inspector Controls.
  */
 const setUpImageInspectorControls = ( props ) => {
@@ -731,7 +749,9 @@ const setUpImageInspectorControls = ( props ) => {
  * Set up inspector controls for Gallery block.
  * Adds ampCarousel attribute for displaying the output as amp-carousel.
  *
- * @param {Object} props Props.
+ * @param {Object}  props            Props.
+ * @param {boolean} props.isSelected Whether the current block has been selected or not.
+ *
  * @return {Object} Inspector controls.
  */
 const setUpGalleryInspectorControls = ( props ) => {
@@ -754,9 +774,10 @@ const setUpGalleryInspectorControls = ( props ) => {
 };
 
 /**
- * Removes amp-carousel=false from attributes.
+ * Removes amp-carousel=false from shortcode attributes.
  *
  * @param {string} shortcode Shortcode text.
+ *
  * @return {string} Modified shortcode.
  */
 export const removeAmpCarouselFromShortcodeAtts = ( shortcode ) => {
@@ -764,9 +785,10 @@ export const removeAmpCarouselFromShortcodeAtts = ( shortcode ) => {
 };
 
 /**
- * Removes amp-lightbox=true from attributes.
+ * Removes amp-lightbox=true from shortcode attributes.
  *
  * @param {string} shortcode Shortcode text.
+ *
  * @return {string} Modified shortcode.
  */
 export const removeAmpLightboxFromShortcodeAtts = ( shortcode ) => {
@@ -774,38 +796,59 @@ export const removeAmpLightboxFromShortcodeAtts = ( shortcode ) => {
 };
 
 /**
- * Check if shortcode includes amp-carousel attribute.
+ * Determines whether a shortcode includes the amp-carousel attribute.
  *
  * @param {string} text Shortcode.
- * @return {boolean} If has amp-carousel.
+ *
+ * @return {boolean} Whether the shortcode includes the attribute.
  */
 export const hasGalleryShortcodeCarouselAttribute = ( text ) => {
 	return -1 !== text.indexOf( 'amp-carousel=false' );
 };
 
 /**
- * Check if shortcode includes amp-lightbox attribute.
+ * Determines whether a shortcode includes the amp-lightbox attribute.
  *
  * @param {string} text Shortcode.
- * @return {boolean} If has amp-lightbox.
+ *
+ * @return {boolean} Whether the shortcode includes the attribute.
  */
 export const hasGalleryShortcodeLightboxAttribute = ( text ) => {
 	return -1 !== text.indexOf( 'amp-lightbox=true' );
 };
 
 /**
- * Check if shortcode is gallery shortcode.
+ * Determines whether the current shortcode is a gallery shortcode.
  *
- * @param {Object} attributes Attributes.
- * @return {boolean} If is gallery shortcode.
+ * @param {Object} attributes Shortcode attributes.
+ *
+ * @return {boolean} Whether it is a gallery shortcode.
  */
 export const isGalleryShortcode = ( attributes ) => {
 	return attributes.text && -1 !== attributes.text.indexOf( 'gallery' );
 };
 
+/**
+ * Determines whether AMP is enabled for the current post or not.
+ *
+ * For regular posts, this is based on the AMP toggle control and also
+ * the default status based on the template mode.
+ *
+ * For AMP stories, this always returns true.
+ *
+ * @return {boolean} Whether AMP is enabled.
+ */
 export const isAMPEnabled = () => {
 	const { getDefaultStatus, getPossibleStatuses } = select( 'amp/block-editor' );
-	const meta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+	const { getEditedPostAttribute } = select( 'core/editor' );
+
+	const type = getEditedPostAttribute( 'type' );
+
+	if ( 'amp_story' === type ) {
+		return true;
+	}
+
+	const meta = getEditedPostAttribute( 'meta' );
 
 	if ( meta && meta.amp_status && getPossibleStatuses().includes( meta.amp_status ) ) {
 		return 'enabled' === meta.amp_status;

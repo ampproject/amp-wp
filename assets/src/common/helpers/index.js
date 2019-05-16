@@ -59,8 +59,8 @@ export const getMinimumFeaturedImageDimensions = () => {
  * @param {Object}  media                      A media object.
  * @param {string}  media.mime_type            The media item's mime type.
  * @param {Object}  media.media_details        A media details object with width and height values.
- * @param {Object}  media.media_details.width  Media width in pixels.
- * @param {Object}  media.media_details.height Media height in pixels.
+ * @param {number}  media.media_details.width  Media width in pixels.
+ * @param {number}  media.media_details.height Media height in pixels.
  * @param {Object}  dimensions                 An object with minimum required width and height values.
  * @param {boolean} required                   Whether the image is required or not.
  *
