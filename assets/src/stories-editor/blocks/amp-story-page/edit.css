@@ -130,7 +130,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__lay
 	--page-width: 328px;
 	width: calc(var(--dropzone-padding) + var(--page-width));
 	margin: 0;
-	left: calc(var(--dropzone-padding) / -2 );
+	left: calc(var(--dropzone-padding) / -2);
 	top: -50px;
 	border: none;
 	background: transparent;

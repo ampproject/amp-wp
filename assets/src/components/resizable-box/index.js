@@ -13,7 +13,7 @@ import { ResizableBox } from '@wordpress/components';
  */
 import './edit.css';
 import {
-	getDelta,
+	getResizedWidthAndHeight,
 	getPercentageFromPixels,
 	getPixelsFromPercentage,
 	getBlockPositioning,
@@ -47,7 +47,7 @@ export default ( props ) => {
 				left: false,
 			} }
 			onResizeStop={ ( event, direction ) => {
-				const { deltaW, deltaH } = getDelta( event, angle, lastSeenX, lastSeenY, direction );
+				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 				onResizeStop( {
 					width: parseInt( width + deltaW, 10 ),
 					height: parseInt( height + deltaH, 10 ),
@@ -64,7 +64,7 @@ export default ( props ) => {
 				onResizeStart();
 			} }
 			onResize={ ( event, direction, element ) => {
-				const { deltaW, deltaH } = getDelta( event, angle, lastSeenX, lastSeenY, direction );
+				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
 				const appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 				const appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;

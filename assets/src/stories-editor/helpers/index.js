@@ -1144,6 +1144,15 @@ export const maybeInitializeAnimations = () => {
 };
 
 /**
+ * Get the distance between two points based on pythagorean.
+ *
+ * @param {number} deltaX Difference between X coordinates.
+ * @param {number} deltaY Difference between Y coordinates.
+ * @return {number} Difference between the two points.
+ */
+const getDelta = ( deltaX, deltaY ) => Math.sqrt( deltaX * deltaX + deltaY * deltaY );
+
+/**
  * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
  *
  * @param {Object} event MouseEvent.
@@ -1153,9 +1162,9 @@ export const maybeInitializeAnimations = () => {
  * @param {string} direction Direction of resizing.
  * @return {Object} Width and height values.
  */
-export const getDelta = ( event, angle, lastSeenX, lastSeenY, direction ) => {
-	let deltaH = 'bottom' === direction ? Math.sqrt( Math.pow( event.clientX - lastSeenX, 2 ) + Math.pow( event.clientY - lastSeenY, 2 ) ) : 0;
-	let deltaW = 'right' === direction ? Math.sqrt( Math.pow( event.clientX - lastSeenX, 2 ) + Math.pow( event.clientY - lastSeenY, 2 ) ) : 0;
+export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
+	let deltaH = 'bottom' === direction ? getDelta( event.clientX - lastSeenX, event.clientY - lastSeenY ) : 0;
+	let deltaW = 'right' === direction ? getDelta( event.clientX - lastSeenX, event.clientY - lastSeenY ) : 0;
 
 	if ( 'bottom' === direction ) {
 		// If delta Y has changed to minus then we substract.
