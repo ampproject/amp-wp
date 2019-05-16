@@ -21,6 +21,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Theme_Support';
 
 	/**
+	 * Set up before class.
+	 */
+	public static function setUpBeforeClass() {
+		parent::setUpBeforeClass();
+		AMP_HTTP::$server_timing = true;
+	}
+
+	/**
 	 * Set up.
 	 */
 	public function setUp() {
