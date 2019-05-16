@@ -6,8 +6,7 @@
 	margin-right: 10px;
 }
 
-#amp-story-controls .editor-inserter__amp-inserter span:first-of-type,
-.amp-story-controls-reorder span:first-of-type {
+#amp-story-controls .editor-inserter__amp-inserter span:first-of-type {
 	display: none;
 }
 
