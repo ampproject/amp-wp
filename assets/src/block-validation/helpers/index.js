@@ -46,24 +46,35 @@ export const maybeResetValidationErrors = () => {
  * Update blocks' validation errors in the store.
  */
 export const updateValidationErrors = () => {
-	const { getClientIdsWithDescendants, getBlock } = select( 'core/block-editor' );
+	const { getBlockCount, getClientIdsWithDescendants, getBlock } = select( 'core/block-editor' );
 	const { getCurrentPost } = select( 'core/editor' );
 	const { resetValidationErrors, addValidationError, updateReviewLink } = dispatch( 'amp/block-validation' );
 
-	const blockOrder = getClientIdsWithDescendants();
-
-	if ( blockOrder.length === 0 ) {
+	if ( 0 === getBlockCount() ) {
 		return;
 	}
 
 	const currentPost = getCurrentPost();
 
+	/**
+	 * @param {Object}   ampValidity             AMP validation result object.
+	 * @param {Object[]} ampValidity.results     AMP validation results.
+	 * @param {string}   ampValidity.review_link URL for reviewing validation error details.
+	 */
 	const ampValidity = currentPost[ AMP_VALIDITY_REST_FIELD_NAME ] || {};
 
 	if ( ! ampValidity.results || ! ampValidity.review_link ) {
 		return;
 	}
 
+	/**
+	 * @param {Object}  result             Validation error result.
+	 * @param {Object}  result.error       Error object.
+	 * @param {boolean} result.forced      Whether sanitization was forced.
+	 * @param {boolean} result.sanitized   Whether the error has been sanitized or not.
+	 * @param {number}  result.status      Validation error status.
+	 * @param {number}  result.term_status Error status.
+	 */
 	const validationErrors = ampValidity.results.filter( ( result ) => {
 		return result.term_status !== VALIDATION_ERROR_ACK_ACCEPTED_STATUS; // If not accepted by the user.
 	} ).map( ( { error } ) => error );
@@ -83,7 +94,8 @@ export const updateValidationErrors = () => {
 
 	updateReviewLink( ampValidity.review_link );
 
-	validationErrorLoop:
+	const blockOrder = getClientIdsWithDescendants();
+
 	for ( const validationError of validationErrors ) {
 		if ( ! validationError.sources ) {
 			addValidationError( validationError );
@@ -91,6 +103,14 @@ export const updateValidationErrors = () => {
 			break;
 		}
 
+		let clientId;
+
+		/**
+		 * @param {Object} source                     Error source information.
+		 * @param {string} source.block_name          Name of the block associated with the error.
+		 * @param {number} source.block_content_index The block's index in the list of blocks.
+		 * @param {number} source.post_id             ID of the post associated with the error.
+		 */
 		for ( const source of validationError.sources ) {
 			// Skip sources that are not for blocks.
 			if ( ! source.block_name || undefined === source.block_content_index || currentPost.id !== source.post_id ) {
@@ -98,14 +118,14 @@ export const updateValidationErrors = () => {
 			}
 
 			// Look up the block ID by index, assuming the blocks of content in the editor are the same as blocks rendered on frontend.
-			const clientId = blockOrder[ source.block_content_index ];
+			const newClientId = blockOrder[ source.block_content_index ];
 
-			if ( ! clientId ) {
+			if ( ! newClientId ) {
 				continue;
 			}
 
 			// Sanity check that block exists for clientId.
-			const block = getBlock( clientId );
+			const block = getBlock( newClientId );
 			if ( ! block ) {
 				continue;
 			}
@@ -115,13 +135,10 @@ export const updateValidationErrors = () => {
 				continue;
 			}
 
-			addValidationError( validationError, clientId );
-
-			// Stop looking for sources, since we aren't looking for parent blocks.
-			continue validationErrorLoop;
+			clientId = newClientId;
 		}
 
-		addValidationError( validationError );
+		addValidationError( validationError, clientId );
 	}
 
 	maybeDisplayNotice();
