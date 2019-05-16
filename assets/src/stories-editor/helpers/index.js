@@ -758,6 +758,27 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
 };
 
 /**
+ * Resets a block's attributes except for a few ones relevant for the layout.
+ *
+ * @param {Object} block Block object.
+ * @param {Object} block.attributes Block attributes.
+ *
+ * @return {Object} Filtered block attributes.
+ */
+const resetBlockAttributes = ( block ) => {
+	const attributes = {};
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'ampFitText', 'tagName' ];
+
+	for ( const key in block.attributes ) {
+		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
+			attributes[ key ] = block.attributes[ key ];
+		}
+	}
+
+	return attributes;
+};
+
+/**
  * Creates a skeleton template from pre-populated template.
  *
  * Basically resets all block attributes back to their defaults.
@@ -772,10 +793,10 @@ export const createSkeletonTemplate = ( template ) => {
 	const innerBlocks = [];
 
 	for ( const innerBlock of template.innerBlocks ) {
-		innerBlocks.push( createBlock( innerBlock.name, {} ) );
+		innerBlocks.push( createBlock( innerBlock.name, resetBlockAttributes( innerBlock ) ) );
 	}
 
-	return createBlock( template.name, {}, innerBlocks );
+	return createBlock( template.name, resetBlockAttributes( template ), innerBlocks );
 };
 
 /**
