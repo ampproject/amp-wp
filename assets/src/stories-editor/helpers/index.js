@@ -1153,6 +1153,14 @@ export const maybeInitializeAnimations = () => {
 const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
 
 /**
+ * Converts degrees to radian.
+ *
+ * @param {number} angle Angle.
+ * @return {number} Radian.
+ */
+export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
+
+/**
  * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
  *
  * @param {Object} event MouseEvent.
@@ -1163,26 +1171,16 @@ const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.p
  * @return {Object} Width and height values.
  */
 export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
-	let deltaH = 'bottom' === direction ? getDelta( event.clientX - lastSeenX, event.clientY - lastSeenY ) : 0;
-	let deltaW = 'right' === direction ? getDelta( event.clientX - lastSeenX, event.clientY - lastSeenY ) : 0;
+	const deltaY = event.clientY - lastSeenY;
+	const deltaX = event.clientX - lastSeenX;
+	const deltaL = getDelta( deltaX, deltaY );
 
-	if ( 'bottom' === direction ) {
-		// If delta Y has changed to minus then we substract.
-		// If we are "upside down" and delta is in plus then we substract.
-		if (
-			( Math.abs( angle ) <= 90 && 0 > event.clientY - lastSeenY ) ||
-			( Math.abs( angle ) > 90 && 0 < event.clientY - lastSeenY )
-		) {
-			deltaH = -deltaH;
-		}
-	} else if ( 'right' === direction ) {
-		if (
-			( Math.abs( angle ) <= 90 && 0 > event.clientX - lastSeenX ) ||
-			( Math.abs( angle ) > 90 && 0 < event.clientX - lastSeenX )
-		) {
-			deltaW = -deltaW;
-		}
-	}
+	// Get the angle between the two points.
+	const alpha = Math.atan2( deltaY, deltaX );
+	// Get the difference with rotation angle.
+	const beta = alpha - getRadianFromDeg( angle );
+	const deltaW = 'right' === direction ? deltaL * Math.cos( beta ) : 0;
+	const deltaH = 'bottom' === direction ? deltaL * Math.sin( beta ) : 0;
 
 	return {
 		deltaW,
