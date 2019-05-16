@@ -1127,10 +1127,15 @@ export const maybeSetInitialSize = ( clientId ) => {
 			}
 
 			break;
+
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
 		case 'amp/amp-story-post-title':
 			if ( height === getDefaultMinimumBlockHeight( name ) ) {
+				const slug = name.replace( '/', '-' );
+
 				// Check if the font size is OK, if not, update the font size if not.
-				const element = document.querySelector( `#block-${ clientId } .wp-block-amp-amp-story-post-title` );
+				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
 						height: element.offsetHeight,
