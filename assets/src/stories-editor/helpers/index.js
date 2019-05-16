@@ -669,7 +669,10 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  * @return {number} Calculated font size.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	measurer.classList.toggle( 'is-measuring-fontsize' );
+
 	maxFontSize++;
+
 	// Binomial search for the best font size.
 	while ( maxFontSize - minFontSize > 1 ) {
 		const mid = Math.floor( ( minFontSize + maxFontSize ) / 2 );
@@ -682,8 +685,11 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 			minFontSize = mid;
 		}
 	}
+
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
+
+	measurer.classList.toggle( 'is-measuring-fontsize' );
 
 	return minFontSize;
 };
