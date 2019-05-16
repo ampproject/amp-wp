@@ -156,7 +156,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 100;
 
 		default:
-			return 50;
+			return 60;
 	}
 };
 
