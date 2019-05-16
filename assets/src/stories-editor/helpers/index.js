@@ -227,7 +227,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	if ( needsTextSettings ) {
 		addedAttributes.autoFontSize = {
 			type: 'number',
-			default: 45,
+			default: 36,
 		};
 		addedAttributes.ampFitText = {
 			type: 'boolean',
@@ -1120,7 +1120,6 @@ export const maybeSetInitialSize = ( clientId ) => {
 
 		case 'amp/amp-story-text':
 			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				// Check if the font size is OK, if not, update the font size if not.
 				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
 				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
@@ -1137,7 +1136,6 @@ export const maybeSetInitialSize = ( clientId ) => {
 			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
 				const slug = name.replace( '/', '-' );
 
-				// Check if the font size is OK, if not, update the font size if not.
 				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
