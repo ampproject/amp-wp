@@ -85,6 +85,14 @@ export default ( props ) => {
 						left: getPixelsFromPercentage( 'x', parseInt( blockElementLeft, 10 ) ),
 						top: getPixelsFromPercentage( 'y', parseInt( blockElementTop, 10 ) ),
 					};
+
+					// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
+					// @todo Remove this temporary fix.
+					if ( appliedHeight < 60 ) {
+						diff.left = diff.left / ( 60 / appliedHeight );
+						diff.right = diff.right / ( 60 / appliedHeight );
+					}
+
 					const updatedPos = {
 						left: originalPos.left - diff.left,
 						top: originalPos.top + diff.top,

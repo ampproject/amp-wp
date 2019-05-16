@@ -237,8 +237,8 @@ export default createHigherOrderComponent(
 				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 
-			const minTextHeight = 20;
-			const minTextWidth = 30;
+			const minTextHeight = 30;
+			const minTextWidth = 40;
 
 			return (
 				<Fragment>
