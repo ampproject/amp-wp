@@ -20,6 +20,7 @@
 
 .wp-block-image.is-resized .components-resizable-box__container img {
 	height: 100%;
+	object-fit: cover;
 }
 
 .amp-story-resize-container .components-resizable-box__handle-bottom::before {
