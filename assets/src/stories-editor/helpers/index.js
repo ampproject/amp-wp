@@ -1085,7 +1085,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 	}
 
 	const { name, attributes } = block;
-	const { width, height } = attributes;
+	const { width, height, ampFitText } = attributes;
 
 	switch ( name ) {
 		/**
@@ -1116,7 +1116,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 			break;
 
 		case 'amp/amp-story-text':
-			if ( height === getDefaultMinimumBlockHeight( name ) ) {
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
 				// Check if the font size is OK, if not, update the font size if not.
 				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
 				if ( element && element.offsetHeight !== height ) {
@@ -1131,7 +1131,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
 		case 'amp/amp-story-post-title':
-			if ( height === getDefaultMinimumBlockHeight( name ) ) {
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
 				const slug = name.replace( '/', '-' );
 
 				// Check if the font size is OK, if not, update the font size if not.
