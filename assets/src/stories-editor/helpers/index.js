@@ -1150,7 +1150,7 @@ export const maybeInitializeAnimations = () => {
  * @param {number} deltaY Difference between Y coordinates.
  * @return {number} Difference between the two points.
  */
-const getDelta = ( deltaX, deltaY ) => Math.sqrt( deltaX * deltaX + deltaY * deltaY );
+const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
 
 /**
  * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.

@@ -70,7 +70,7 @@ export default ( props ) => {
 				const appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
 
 				if ( angle ) {
-					//Convert angle from degrees to radians
+					// Convert angle from degrees to radians
 					const radianAngle = angle * Math.PI / 180;
 
 					// Compare position between the initial and after resizing.
