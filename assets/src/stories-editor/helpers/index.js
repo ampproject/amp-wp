@@ -1137,7 +1137,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 				const slug = name.replace( '/', '-' );
 
 				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-				if ( element && element.offsetHeight !== height ) {
+				if ( element && element.offsetHeight > height ) {
 					updateBlockAttributes( clientId, {
 						height: element.offsetHeight,
 					} );
