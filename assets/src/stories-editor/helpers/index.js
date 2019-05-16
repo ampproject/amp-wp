@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { each, every, isEqual } from 'lodash';
+import { every, isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -761,77 +761,24 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
 };
 
 /**
- * Object of block attributes to set to default when inserting a template.
- */
-const emptyTemplateMapping = {
-	// @todo This can use just arrays of attribute keys instead of object.
-	'amp/amp-story-text': {
-		content: '',
-	},
-	'amp/amp-story-page': {
-		mediaUrl: null,
-		mediaType: null,
-		focalPoint: {},
-	},
-	'core/image': {
-		url: null,
-		positionLeft: null,
-	},
-	'amp/amp-story-cta': {
-		text: null,
-		link: null,
-	},
-	'core/quote': {
-		citation: null,
-		value: null,
-	},
-};
-
-/**
- * Gets a skeleton template block from pre-populated block.
- *
- * @param {Object}   block            Original block.
- * @param {Object}   block.name       Block name.
- * @param {Object[]} block.attributes Block attributes.
- *
- * @return {Object} Block object.
- */
-const getSkeletonTemplateBlock = ( block ) => {
-	if ( ! emptyTemplateMapping[ block.name ] ) {
-		return block.attributes;
-	}
-
-	const attributes = {};
-	each( block.attributes, function( value, key ) {
-		if ( undefined === emptyTemplateMapping[ block.name ][ key ] ) {
-			attributes[ key ] = value;
-		}
-	} );
-
-	// Image block's left positioning should be set to 0.
-	if ( 'core/image' === block.name ) {
-		attributes.positionLeft = 0;
-	}
-
-	return attributes;
-};
-
-/**
  * Creates a skeleton template from pre-populated template.
  *
- * @param {Object}   template             Block object.
- * @param {Object}   template.name        Block name.
+ * Basically resets all block attributes back to their defaults.
+ *
+ * @param {Object}   template             Template block object.
+ * @param {string}   template.name        Block name.
  * @param {Object[]} template.innerBlocks List of inner blocks.
- * @param {Object[]} template.attributes  Block attributes.
  *
  * @return {Object} Skeleton template block.
  */
 export const createSkeletonTemplate = ( template ) => {
-	const children = [];
-	template.innerBlocks.forEach( function( childBlock ) {
-		children.push( createBlock( childBlock.name, getSkeletonTemplateBlock( childBlock ) ) );
-	} );
-	return createBlock( template.name, getSkeletonTemplateBlock( template ), children );
+	const innerBlocks = [];
+
+	for ( const innerBlock of template.innerBlocks ) {
+		innerBlocks.push( createBlock( innerBlock.name, {} ) );
+	}
+
+	return createBlock( template.name, {}, innerBlocks );
 };
 
 /**
