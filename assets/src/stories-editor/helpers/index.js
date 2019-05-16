@@ -145,9 +145,6 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 		case 'core/embed':
 			return 200;
 
-		case 'core/image':
-			return 215;
-
 		case 'core/pullquote':
 			return 215;
 
