@@ -805,7 +805,15 @@ export const isGalleryShortcode = ( attributes ) => {
 
 export const isAMPEnabled = () => {
 	const { getDefaultStatus, getPossibleStatuses } = select( 'amp/block-editor' );
-	const meta = select( 'core/editor' ).getEditedPostAttribute( 'meta' );
+	const { getEditedPostAttribute } = select( 'core/editor' );
+
+	const type = getEditedPostAttribute( 'type' );
+
+	if ( 'amp_story' === type ) {
+		return true;
+	}
+
+	const meta = getEditedPostAttribute( 'meta' );
 
 	if ( meta && meta.amp_status && getPossibleStatuses().includes( meta.amp_status ) ) {
 		return 'enabled' === meta.amp_status;
