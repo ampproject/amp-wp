@@ -57,7 +57,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_editor_assets().
 	 *
-	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets().
+	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets()
 	 */
 	public function test_enqueue_block_editor_assets() {
 		set_current_screen( 'admin.php' );

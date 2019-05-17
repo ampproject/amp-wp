@@ -30,6 +30,12 @@ import Ubuntu from '../../images/font-names/ubuntu.svg';
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
+export const MIN_BLOCK_WIDTH = 40;
+export const MIN_BLOCK_HEIGHT = 30;
+
+export const MIN_FONT_SIZE = 8;
+export const MAX_FONT_SIZE = 54;
+
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
 	'core/block', // Reusable blocks.

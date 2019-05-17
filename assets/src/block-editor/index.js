@@ -15,6 +15,8 @@ import withFeaturedImageNotice from '../components/higher-order/with-featured-im
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
+const { ampLatestStoriesBlockData } = window;
+
 // Display a notice in the Featured Image panel if none exists or its width is too small.
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
@@ -47,6 +49,11 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
+
+	// Prevent registering latest-stories block if not enabled.
+	if ( 'amp/amp-latest-stories' === name && typeof ampLatestStoriesBlockData === 'undefined' ) {
+		return;
+	}
 
 	const blockRequiresAmp = AMP_DEPENDENT_BLOCKS.includes( name );
 

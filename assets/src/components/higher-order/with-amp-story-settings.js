@@ -32,7 +32,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
+import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS, MIN_BLOCK_WIDTH, MIN_BLOCK_HEIGHT } from '../../stories-editor/constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
 import sendBackwardIcon from '../../../images/send-backwards.svg';
@@ -237,9 +237,6 @@ export default createHigherOrderComponent(
 				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 
-			const minTextHeight = 20;
-			const minTextWidth = 30;
-
 			return (
 				<Fragment>
 					{ isMovableBlock && (
@@ -274,8 +271,8 @@ export default createHigherOrderComponent(
 							isSelected={ isSelected }
 							width={ width }
 							height={ height }
-							minHeight={ minTextHeight }
-							minWidth={ minTextWidth }
+							minHeight={ MIN_BLOCK_HEIGHT }
+							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
 								setAttributes( value );
 								toggleSelection( true );
@@ -414,17 +411,20 @@ export default createHigherOrderComponent(
 										setAttributes( { ampFontFamily: value } );
 									} }
 								/>
+								<ToggleControl
+									label={ __( 'Automatically fit text to container', 'amp' ) }
+									checked={ ampFitText }
+									onChange={ () => {
+										setAttributes( { ampFitText: ! ampFitText } );
+										if ( ! ampFitText ) {
+											setFontSize( attributes.autoFontSize );
+										}
+									} }
+								/>
 								{ ! ampFitText && (
 									<FontSizePicker
 										value={ fontSize.size }
 										onChange={ setFontSize }
-									/>
-								) }
-								{ isTextBlock && (
-									<ToggleControl
-										label={ __( 'Automatically fit text to container', 'amp' ) }
-										checked={ ampFitText }
-										onChange={ () => ( setAttributes( { ampFitText: ! ampFitText } ) ) }
 									/>
 								) }
 								{ isTextBlock && (

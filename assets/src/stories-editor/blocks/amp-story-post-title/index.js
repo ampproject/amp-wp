@@ -23,7 +23,7 @@ export const settings = {
 	...getMetaBlockSettings( {
 		tagName: 'h1',
 		attribute: 'title',
-		placeholder: __( '(Enter title above)', 'amp' ),
+		placeholder: __( 'Add story title…', 'amp' ),
 		isEditable: true,
 	} ),
 };

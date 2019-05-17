@@ -25,15 +25,27 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
 
+const { ampLatestStoriesBlockData } = window;
+
 const blockName = 'amp/amp-latest-stories';
 
 class LatestStoriesEdit extends Component {
-	componentWillMount() {
-		this.isStillMounted = true;
-	}
+	/**
+	 * If the stylesheet isn't present, this adds it to the <head>.
+	 *
+	 * This block uses <ServerSideRender>, so sometimes the stylesheet isn't present.
+	 * This checks if it is, and conditionally adds it.
+	 */
+	componentDidMount() {
+		const stylesheetQuery = document.querySelector( `link[href="${ ampLatestStoriesBlockData.storyCardStyleURL }"]` );
 
-	componentWillUnmount() {
-		this.isStillMounted = false;
+		if ( ! stylesheetQuery ) {
+			const stylesheet = document.createElement( 'link' );
+			stylesheet.setAttribute( 'rel', 'stylesheet' );
+			stylesheet.setAttribute( 'type', 'text/css' );
+			stylesheet.setAttribute( 'href', ampLatestStoriesBlockData.storyCardStyleURL );
+			document.head.appendChild( stylesheet );
+		}
 	}
 
 	render() {
