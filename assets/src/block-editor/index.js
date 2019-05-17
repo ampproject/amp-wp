@@ -1,5 +1,3 @@
-/* global ampLatestStoriesBlockData */
-
 /**
  * WordPress dependencies
  */
@@ -16,6 +14,8 @@ import withCroppedFeaturedImage from '../components/with-cropped-featured-image'
 import withFeaturedImageNotice from '../components/higher-order/with-featured-image-notice';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
+
+const { ampLatestStoriesBlockData } = window;
 
 // Display a notice in the Featured Image panel if none exists or its width is too small.
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );

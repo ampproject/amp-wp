@@ -1,4 +1,3 @@
-/* global ampLatestStoriesBlockData */
 /**
  * AMP Latest Stories edit component, mainly forked from the Gutenberg 'Latest Posts' class LatestPostsEdit.
  */
@@ -26,6 +25,8 @@ import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
 
+const { ampLatestStoriesBlockData } = window;
+
 const blockName = 'amp/amp-latest-stories';
 
 class LatestStoriesEdit extends Component {
@@ -35,14 +36,9 @@ class LatestStoriesEdit extends Component {
 	 * This block uses <ServerSideRender>, so sometimes the stylesheet isn't present.
 	 * This checks if it is, and conditionally adds it.
 	 */
-	componentWillMount() {
-		this.isStillMounted = true;
-
-		if ( 'undefined' === typeof ampLatestStoriesBlockData ) {
-			return;
-		}
-
+	componentDidMount() {
 		const stylesheetQuery = document.querySelector( `link[href="${ ampLatestStoriesBlockData.storyCardStyleURL }"]` );
+
 		if ( ! stylesheetQuery ) {
 			const stylesheet = document.createElement( 'link' );
 			stylesheet.setAttribute( 'rel', 'stylesheet' );
@@ -50,10 +46,6 @@ class LatestStoriesEdit extends Component {
 			stylesheet.setAttribute( 'href', ampLatestStoriesBlockData.storyCardStyleURL );
 			document.head.appendChild( stylesheet );
 		}
-	}
-
-	componentWillUnmount() {
-		this.isStillMounted = false;
 	}
 
 	render() {
