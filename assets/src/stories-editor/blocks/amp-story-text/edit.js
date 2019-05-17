@@ -18,9 +18,8 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { calculateFontSize } from '../../helpers';
+import { maybeUpdateFontSize } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
-import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../constants';
 import './edit.css';
 
 class TextBlockEdit extends Component {
@@ -31,12 +30,10 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { clientId, attributes, isSelected, setAttributes } = this.props;
+		const { attributes, isSelected } = this.props;
 		const {
 			height,
 			width,
-			autoFontSize,
-			ampFitText,
 		} = attributes;
 
 		// If not selected, only proceed if height or width has changed.
@@ -48,16 +45,7 @@ class TextBlockEdit extends Component {
 			return;
 		}
 
-		if ( ampFitText && attributes.content.length ) {
-			// Check if the font size is OK, if not, update the font size.
-			const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
-			if ( element ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
-					setAttributes( { autoFontSize: fitFontSize } );
-				}
-			}
-		}
+		maybeUpdateFontSize( this.props );
 	}
 
 	onReplace( blocks ) {

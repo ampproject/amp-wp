@@ -36,6 +36,8 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MAX_FONT_SIZE,
+	MIN_FONT_SIZE,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 
@@ -1044,6 +1046,69 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 };
 
 /**
+ * Returns a block's inner element containing the actual text node with its content.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+const getBlockInnerTextElement = ( block ) => {
+	const { name, clientId } = block;
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+
+		case 'amp/amp-story-post-title':
+			const slug = name.replace( '/', '-' );
+			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
+	}
+
+	return null;
+};
+
+/**
+ * Updates a block's font size in case it uses amp-fit-text and the content has changed.
+ *
+ * @param {Object} block Block object.
+ */
+export const maybeUpdateFontSize = ( block ) => {
+	const { name, clientId, attributes } = block;
+	const { width, height, ampFitText, content, autoFontSize } = attributes;
+
+	if ( ! ampFitText ) {
+		return;
+	}
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			const element = getBlockInnerTextElement( block );
+
+			if ( element && ampFitText && content.length ) {
+				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+
+				if ( autoFontSize !== fitFontSize ) {
+					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement && ampFitText ) {
+				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+				if ( autoFontSize !== fitFontSize ) {
+					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
+				}
+			}
+
+			break;
+	}
+};
+
+/**
  * Sets width and height for blocks if they haven't been modified yet.
  *
  * @param {string} clientId Block ID.
@@ -1066,7 +1131,9 @@ export const maybeSetInitialSize = ( clientId ) => {
 		 */
 		case 'core/image':
 			if ( ! width && ! height && attributes.id > 0 ) {
-				const media = select( 'core' ).getMedia( attributes.id );
+				const { getMedia } = select( 'core' );
+
+				const media = getMedia( attributes.id );
 				// If the width and height haven't been set for the media, we should get it from the original image.
 				if ( media && media.media_details ) {
 					const { height: imageHeight, width: imageWidth } = media.media_details;
@@ -1089,6 +1156,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 		case 'amp/amp-story-text':
 			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
 				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+
 				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
 						height: element.offsetHeight,
@@ -1101,13 +1169,13 @@ export const maybeSetInitialSize = ( clientId ) => {
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
 		case 'amp/amp-story-post-title':
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				const slug = name.replace( '/', '-' );
+			const slug = name.replace( '/', '-' );
+			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 
-				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-				if ( element && element.offsetHeight > height ) {
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
+				if ( metaBlockElement && metaBlockElement.offsetHeight > height ) {
 					updateBlockAttributes( clientId, {
-						height: element.offsetHeight,
+						height: metaBlockElement.offsetHeight,
 					} );
 				}
 			}

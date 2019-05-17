@@ -20,19 +20,16 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
  * Internal dependencies
  */
 import { getBackgroundColorWithOpacity } from '../common/helpers';
-import { calculateFontSize } from '../stories-editor/helpers';
-import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../stories-editor/constants';
+import { maybeUpdateFontSize } from '../stories-editor/helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
 	componentDidUpdate( prevProps ) {
-		const { clientId, blockContent, attributes, isSelected, setAttributes } = this.props;
+		const { attributes, isSelected } = this.props;
 		const {
 			height,
 			width,
-			autoFontSize,
-			ampFitText,
 		} = attributes;
 
 		// If not selected, only proceed if height or width has changed.
@@ -44,17 +41,7 @@ class MetaBlockEdit extends Component {
 			return;
 		}
 
-		if ( ampFitText && blockContent.length ) {
-			// Check if the font size is OK, if not, update the font size.
-			const element = document.querySelector( `#block-${ clientId } .is-amp-fit-text` );
-
-			if ( element ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
-					setAttributes( { autoFontSize: fitFontSize } );
-				}
-			}
-		}
+		maybeUpdateFontSize( this.props );
 	}
 
 	render() {
