@@ -90,7 +90,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_assets.
 	 *
-	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
+	 * @covers AMP_Post_Meta_Box::enqueue_block_assets()
+	 * @covers AMP_Story_Post_Type::register_story_card_styling()
+	 * @covers AMP_Story_Post_Type::export_latest_stories_block_editor_data()
 	 */
 	public function test_enqueue_block_assets() {
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -127,6 +129,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
+
+		// Test Stories integration.
+		AMP_Story_Post_Type::register_story_card_styling( wp_styles() );
+		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
+		$this->assertContains( 'ampLatestStoriesBlockData', implode( '', wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
 	}
 
 	/**
