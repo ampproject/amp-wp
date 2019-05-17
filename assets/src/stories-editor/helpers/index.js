@@ -767,7 +767,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'ampFitText', 'tagName' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
