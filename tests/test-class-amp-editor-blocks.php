@@ -57,9 +57,7 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_editor_assets().
 	 *
-	 * @covers \AMP_Story_Post_Type::register_story_card_styling()
 	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets()
-	 * @covers \AMP_Story_Post_Type::export_latest_stories_block_editor_data()
 	 */
 	public function test_enqueue_block_editor_assets() {
 		set_current_screen( 'admin.php' );
@@ -77,9 +75,5 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$this->assertContains( $expected_file_name, $script->src );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, $scripts->queue, true ) );
-
-		AMP_Story_Post_Type::register_story_card_styling( wp_styles() );
-		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
-		$this->assertContains( 'ampLatestStoriesBlockData', implode( '', $script->extra['before'] ) );
 	}
 }
