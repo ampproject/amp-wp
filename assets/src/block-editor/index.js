@@ -1,3 +1,5 @@
+/* global ampLatestStoriesBlockData */
+
 /**
  * WordPress dependencies
  */
@@ -47,6 +49,11 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
+
+	// Prevent registering latest-stories block if not enabled.
+	if ( 'amp/amp-latest-stories' === name && typeof ampLatestStoriesBlockData === 'undefined' ) {
+		return;
+	}
 
 	const blockRequiresAmp = AMP_DEPENDENT_BLOCKS.includes( name );
 
