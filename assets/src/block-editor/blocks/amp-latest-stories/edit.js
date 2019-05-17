@@ -29,6 +29,12 @@ import { withSelect } from '@wordpress/data';
 const blockName = 'amp/amp-latest-stories';
 
 class LatestStoriesEdit extends Component {
+	/**
+	 * If the stylesheet isn't present, this adds it to the <head>.
+	 *
+	 * This block uses <ServerSideRender>, so sometimes the stylesheet isn't present.
+	 * This checks if it is, and conditionally adds it.
+	 */
 	componentWillMount() {
 		this.isStillMounted = true;
 
