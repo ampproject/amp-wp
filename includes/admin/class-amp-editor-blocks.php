@@ -154,6 +154,12 @@ class AMP_Editor_Blocks {
 				'after'
 			);
 		}
+
+		wp_localize_script(
+			'amp-editor-blocks',
+			'ampEditorBlocks',
+			array( 'latestStoriesCssUrl' => amp_get_asset_url( 'css/amp-story-card.css' ) )
+		);
 	}
 
 	/**

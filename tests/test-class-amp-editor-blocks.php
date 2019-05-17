@@ -75,5 +75,9 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 		$this->assertContains( $expected_file_name, $script->src );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertTrue( in_array( $slug, $scripts->queue, true ) );
+
+		$data = $script->extra['data'];
+		$this->assertContains( 'var ampEditorBlocks', $data );
+		$this->assertContains( 'amp-story-card.css', $data );
 	}
 }

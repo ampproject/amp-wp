@@ -1,3 +1,4 @@
+/* global ampEditorBlocks */
 /**
  * AMP Latest Stories edit component, mainly forked from the Gutenberg 'Latest Posts' class LatestPostsEdit.
  */
@@ -30,6 +31,19 @@ const blockName = 'amp/amp-latest-stories';
 class LatestStoriesEdit extends Component {
 	componentWillMount() {
 		this.isStillMounted = true;
+
+		if ( 'undefined' === typeof ampEditorBlocks ) {
+			return;
+		}
+
+		const stylesheetQuery = document.querySelector( `link[href="${ ampEditorBlocks.latestStoriesCssUrl }"]` );
+		if ( ! stylesheetQuery ) {
+			const stylesheet = document.createElement( 'link' );
+			stylesheet.setAttribute( 'rel', 'stylesheet' );
+			stylesheet.setAttribute( 'type', 'text/css' );
+			stylesheet.setAttribute( 'href', ampEditorBlocks.latestStoriesCssUrl );
+			document.head.appendChild( stylesheet );
+		}
 	}
 
 	componentWillUnmount() {
