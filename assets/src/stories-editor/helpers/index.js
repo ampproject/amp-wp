@@ -35,6 +35,7 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_TEXT_SETTINGS,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 
@@ -151,8 +152,11 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 		case 'amp/amp-story-post-date':
 			return 30;
 
+		case 'amp/amp-story-post-title':
+			return 100;
+
 		default:
-			return 50;
+			return 60;
 	}
 };
 
@@ -174,6 +178,7 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	const addedAttributes = {
 		anchor: {
@@ -218,6 +223,17 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 100,
 		},
 	};
+
+	if ( needsTextSettings ) {
+		addedAttributes.autoFontSize = {
+			type: 'number',
+			default: 36,
+		};
+		addedAttributes.ampFitText = {
+			type: 'boolean',
+			default: true,
+		};
+	}
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
@@ -653,7 +669,10 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  * @return {number} Calculated font size.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	measurer.classList.toggle( 'is-measuring-fontsize' );
+
 	maxFontSize++;
+
 	// Binomial search for the best font size.
 	while ( maxFontSize - minFontSize > 1 ) {
 		const mid = Math.floor( ( minFontSize + maxFontSize ) / 2 );
@@ -666,8 +685,11 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 			minFontSize = mid;
 		}
 	}
+
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
+
+	measurer.classList.toggle( 'is-measuring-fontsize' );
 
 	return minFontSize;
 };
@@ -842,7 +864,6 @@ export const getClassNameFromBlockAttributes = ( {
  * @param {?string} fontSize              Font size slug.
  * @param {?number} customFontSize        Custom font size in pixels.
  * @param {boolean} ampFitText            Whether amp-fit-text should be used or not.
- * @param {number}  autoFontSize          The automatically determined font sized. Used when ampFitText is true.
  * @param {?string} backgroundColor       A string containing the background color slug.
  * @param {?string} textColor             A string containing the color slug.
  * @param {string}  customBackgroundColor A string containing the custom background color value.
@@ -856,7 +877,6 @@ export const getStylesFromBlockAttributes = ( {
 	fontSize,
 	customFontSize,
 	ampFitText,
-	autoFontSize,
 	backgroundColor,
 	textColor,
 	customBackgroundColor,
@@ -880,7 +900,7 @@ export const getStylesFromBlockAttributes = ( {
 	return {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
-		fontSize: ampFitText ? autoFontSize : fontSizeResponsive,
+		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
 		textAlign: align,
 	};
 };
@@ -1024,36 +1044,75 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 };
 
 /**
- * Sets width and height to image if it hasn't been set via resizing yet.
- * Takes the values from the original image.
+ * Sets width and height for blocks if they haven't been modified yet.
  *
  * @param {string} clientId Block ID.
  */
 export const maybeSetInitialSize = ( clientId ) => {
 	const block = getBlock( clientId );
 
-	if ( ! block || 'core/image' !== block.name ) {
+	if ( ! block ) {
 		return;
 	}
 
-	const { attributes } = block;
+	const { name, attributes } = block;
+	const { width, height, ampFitText } = attributes;
 
-	if ( ! attributes.width && ! attributes.height && 0 < attributes.id ) {
-		const media = select( 'core' ).getMedia( attributes.id );
-		// If the width and height haven't been set for the media, we should get it from the original image.
-		if ( media && media.media_details ) {
-			const { height, width } = media.media_details;
-			let ratio = 1;
-			// If the image exceeds the page limits, adjust the width and height accordingly.
-			if ( STORY_PAGE_INNER_WIDTH < width || STORY_PAGE_INNER_HEIGHT < height ) {
-				ratio = Math.max( width / STORY_PAGE_INNER_WIDTH, height / STORY_PAGE_INNER_HEIGHT );
+	switch ( name ) {
+		/**
+		 * Sets width and height to image if it hasn't been set via resizing yet.
+		 *
+		 * Takes the values from the original image.
+		 */
+		case 'core/image':
+			if ( ! width && ! height && attributes.id > 0 ) {
+				const media = select( 'core' ).getMedia( attributes.id );
+				// If the width and height haven't been set for the media, we should get it from the original image.
+				if ( media && media.media_details ) {
+					const { height: imageHeight, width: imageWidth } = media.media_details;
+
+					let ratio = 1;
+					// If the image exceeds the page limits, adjust the width and height accordingly.
+					if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
+						ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
+					}
+
+					updateBlockAttributes( clientId, {
+						width: Math.round( width / ratio ),
+						height: Math.round( height / ratio ),
+					} );
+				}
 			}
 
-			updateBlockAttributes( clientId, {
-				width: Math.round( width / ratio ),
-				height: Math.round( height / ratio ),
-			} );
-		}
+			break;
+
+		case 'amp/amp-story-text':
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
+				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+				if ( element && element.offsetHeight !== height ) {
+					updateBlockAttributes( clientId, {
+						height: element.offsetHeight,
+					} );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+		case 'amp/amp-story-post-title':
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
+				const slug = name.replace( '/', '-' );
+
+				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
+				if ( element && element.offsetHeight > height ) {
+					updateBlockAttributes( clientId, {
+						height: element.offsetHeight,
+					} );
+				}
+			}
+
+			break;
 	}
 };
 
