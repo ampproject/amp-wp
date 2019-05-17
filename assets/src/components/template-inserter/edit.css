@@ -6,10 +6,6 @@
 	margin-right: 10px;
 }
 
-#amp-story-controls .editor-inserter__amp-inserter span:first-of-type {
-	display: none;
-}
-
 #amp-story-controls .editor-inserter__amp-inserter svg {
 	margin: 0 auto;
 }
