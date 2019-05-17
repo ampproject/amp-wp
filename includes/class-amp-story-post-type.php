@@ -174,6 +174,8 @@ class AMP_Story_Post_Type {
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'export_latest_stories_block_editor_data' ), 100 );
+
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_stories_styles' ) );
 
 		// Remove unnecessary settings.
@@ -561,6 +563,33 @@ class AMP_Story_Post_Type {
 			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
 			array(),
 			AMP__VERSION
+		);
+	}
+
+	/**
+	 * Export data used for Latest Stories block.
+	 */
+	public static function export_latest_stories_block_editor_data() {
+		$url = add_query_arg(
+			'ver',
+			wp_styles()->registered[ self::STORY_CARD_CSS_SLUG ]->ver,
+			wp_styles()->registered[ self::STORY_CARD_CSS_SLUG ]->src
+		);
+
+		/** This filter is documented in wp-includes/class.wp-styles.php */
+		$url = apply_filters( 'style_loader_src', $url, self::STORY_CARD_CSS_SLUG );
+
+		wp_add_inline_script(
+			AMP_Editor_Blocks::SCRIPT_HANDLE,
+			sprintf(
+				'var ampLatestStoriesBlockData = %s;',
+				wp_json_encode(
+					array(
+						'storyCardStyleURL' => $url,
+					)
+				)
+			),
+			'before'
 		);
 	}
 
