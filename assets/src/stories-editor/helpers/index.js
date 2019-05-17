@@ -419,8 +419,8 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @param {number} attributes.positionTop   Top offset in pixel.
  * @param {number} attributes.positionLeft  Left offset in pixel.
  * @param {number} attributes.rotationAngle Rotation angle in degrees.
- * @param {number} attributes.width         Block width in pixel.
- * @param {number} attributes.height        Block height in pixel.
+ * @param {number} attributes.width         Block width in pixels.
+ * @param {number} attributes.height        Block height in pixels.
  *
  * @return {Object} The wrapped element.
  */
@@ -1070,7 +1070,14 @@ const getBlockInnerTextElement = ( block ) => {
 /**
  * Updates a block's font size in case it uses amp-fit-text and the content has changed.
  *
- * @param {Object} block Block object.
+ * @param {Object}  block                         Block object.
+ * @param {string}  block.clientId                Block client ID.
+ * @param {Object}  block.attributes              Block attributes.
+ * @param {number}  block.attributes.width        Block width in pixels.
+ * @param {number}  block.attributes.height       Block height in pixels.
+ * @param {string}  block.attributes.content      Block inner content.
+ * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
+ * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
  */
 export const maybeUpdateFontSize = ( block ) => {
 	const { name, clientId, attributes } = block;
