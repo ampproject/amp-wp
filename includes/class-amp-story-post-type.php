@@ -570,12 +570,6 @@ class AMP_Story_Post_Type {
 	 * Export data used for Latest Stories block.
 	 */
 	public static function export_latest_stories_block_editor_data() {
-
-		// Not relevant on the amp_story post type, since Latest Stories is not registered there.
-		if ( self::POST_TYPE_SLUG === get_current_screen()->post_type ) {
-			return;
-		}
-
 		$url = add_query_arg(
 			'ver',
 			wp_styles()->registered[ self::STORY_CARD_CSS_SLUG ]->ver,
@@ -586,7 +580,7 @@ class AMP_Story_Post_Type {
 		$url = apply_filters( 'style_loader_src', $url, self::STORY_CARD_CSS_SLUG );
 
 		wp_add_inline_script(
-			AMP_Editor_Blocks::SCRIPT_HANDLE,
+			AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE,
 			sprintf(
 				'var ampLatestStoriesBlockData = %s;',
 				wp_json_encode(
