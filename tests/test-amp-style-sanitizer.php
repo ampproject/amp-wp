@@ -757,6 +757,30 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.\@\@\@\@'         => false,
 				),
 			),
+			'toggle_class' => array(
+				implode(
+					'',
+					array(
+						'<div id=\"foo\"></div>',
+						'<button on="tap:foo . toggleClass ( class = \'expanded\' )">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=\'clicked\')">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=&quot;tapped&quot;)">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=pressed);tap:foo.toggleClass(class = im-pressed)">Yes</button>',
+						'<button on="tap:foo.toggleClass(class = \'touch:ed\' )">Yes</button>',
+						'<button on="tap:AMP.setState({toggleClass:\'stateful\'})">No</button>',
+					)
+				),
+				array(
+					'.expanded'   => true,
+					'.clicked'    => true,
+					'.tapped'     => true,
+					'.pressed'    => true,
+					'.im-pressed' => true,
+					'.touch\:ed'  => true,
+					'.exploded'   => false,
+					'.stateful'   => false,
+				),
+			),
 		);
 	}
 

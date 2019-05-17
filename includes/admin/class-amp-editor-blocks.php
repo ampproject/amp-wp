@@ -125,6 +125,8 @@ class AMP_Editor_Blocks {
 	 * Has to be loaded before registering the blocks in registerCoreBlocks.
 	 */
 	public function enqueue_block_editor_assets() {
+		$script_handle = 'amp-editor-blocks';
+
 		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			wp_enqueue_style(
 				'amp-editor-blocks-style',
@@ -135,7 +137,7 @@ class AMP_Editor_Blocks {
 		}
 
 		wp_enqueue_script(
-			'amp-editor-blocks',
+			$script_handle,
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
 			array( 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
 			AMP__VERSION,
@@ -143,13 +145,13 @@ class AMP_Editor_Blocks {
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
+			wp_set_script_translations( $script_handle, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
 			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
 			$translations = wp_json_encode( $locale_data );
 
 			wp_add_inline_script(
-				'amp-editor-blocks',
+				$script_handle,
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);

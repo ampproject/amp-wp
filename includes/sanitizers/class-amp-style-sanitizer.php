@@ -450,6 +450,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			array_unique( array_filter( preg_split( '/\s+/', trim( $classes ) ) ) )
 		);
 
+		// Find all instances of the toggleClass() action to prevent the class name from being tree-shaken.
+		foreach ( $this->xpath->query( '//*/@on[ contains( ., "toggleClass" ) ]' ) as $on_attribute ) {
+			if ( preg_match_all( '/\.\s*toggleClass\s*\(\s*class\s*=\s*(([\'"])([^\1]*?)\2|[a-zA-Z0-9_\-]+)/', $on_attribute->nodeValue, $matches ) ) {
+				$class_names = array_merge(
+					$class_names,
+					array_map(
+						function ( $match ) {
+							return trim( $match, '"\'' );
+						},
+						$matches[1]
+					)
+				);
+			}
+		}
+
 		$this->used_class_names = array_fill_keys( $class_names, true );
 		return $this->used_class_names;
 	}
