@@ -854,7 +854,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
 			$element_id = (string) $node->getAttribute( 'id' );
-			if ( 'wp-custom-css' === $element_id ) {
+			if ( 'admin-bar-inline-css' === $element_id ) {
+				$priority = $admin_bar_priority;
+			} elseif ( 'wp-custom-css' === $element_id ) {
 				// Additional CSS from Customizer.
 				$priority = 60;
 			} else {

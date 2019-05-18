@@ -1299,6 +1299,24 @@ class AMP_Theme_Support {
 			41
 		);
 
+		// Override default admin bar bump to add element ID and remove obsolete IE hacks.
+		if ( has_action( 'wp_head', '_admin_bar_bump_cb' ) ) {
+			remove_action( 'wp_head', '_admin_bar_bump_cb' );
+			add_action(
+				'wp_head',
+				function () {
+					?>
+					<style id="admin-bar-bump-css" type="text/css" media="screen">
+						html { margin-top: 32px !important; }
+						@media screen and ( max-width: 782px ) {
+							html { margin-top: 46px !important; }
+						}
+					</style>
+					<?php
+				}
+			);
+		}
+
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(
 			'body_class',
