@@ -2668,7 +2668,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! $included ) {
 			$admin_bar->parentNode->replaceChild(
-				$this->dom->createComment( ' ' . __( 'Admin bar removed to preserve AMP validity due to excessive CSS.', 'amp' ) . ' ' ),
+				$this->dom->createComment( ' ' . __( 'Admin bar (#wpadminbar) was removed to preserve AMP validity due to excessive CSS.', 'amp' ) . ' ' ),
 				$admin_bar
 			);
 		}
@@ -2986,21 +2986,44 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		// If the main admin bar was excluded, make sure the other admin bar CSS is also excluded.
-		$should_exclude_admin_bar_inline_css = (
-			isset( $indices_by_stylesheet_element_id['admin-bar-css'] )
-			&&
-			false === $this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-css'] ]['included']
-			&&
-			isset( $indices_by_stylesheet_element_id['admin-bar-inline-css'] )
-			&&
-			true === $this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-inline-css'] ]['included']
-		);
-		if ( $should_exclude_admin_bar_inline_css ) {
-			$this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-inline-css'] ]['included'] = false;
-			$included_count--;
-		}
+		$included_count -= $this->exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id );
 
 		return $included_count;
+	}
+
+	/**
+	 * If the admin-bar CSS was excluded, make sure the admin-bar inline CSS is also excluded, and vice-versa.
+	 *
+	 * @param int[] $indices_by_stylesheet_element_id Lookup of stylesheet indices by stylesheet element ID.
+	 * @return int Number of excluded styles.
+	 */
+	private function exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id ) {
+		$excluded_count = 0;
+
+		$admin_bar_style_element_ids         = array( 'admin-bar-css', 'admin-bar-inline-css' );
+		$should_exclude_admin_bar_inline_css = false;
+		foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
+			if ( ! isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ) ) {
+				continue;
+			}
+			if ( false === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] ) {
+				$should_exclude_admin_bar_inline_css = true;
+				break;
+			}
+		}
+		if ( $should_exclude_admin_bar_inline_css ) {
+			foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
+				$needs_exclusion = (
+					isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] )
+					&&
+					true === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included']
+				);
+				if ( $needs_exclusion ) {
+					$this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] = false;
+					$excluded_count++;
+				}
+			}
+		}
+		return $excluded_count;
 	}
 }
