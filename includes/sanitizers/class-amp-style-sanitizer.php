@@ -121,16 +121,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	);
 
 	/**
-	 * Stylesheets.
-	 *
-	 * Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets,
-	 *
-	 * @since 0.7
-	 * @var string[]
-	 */
-	private $stylesheets = array();
-
-	/**
 	 * List of stylesheet parts prior to selector/rule removal (tree shaking).
 	 *
 	 * Keys are MD5 hashes of stylesheets.
