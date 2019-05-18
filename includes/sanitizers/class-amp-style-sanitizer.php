@@ -2642,6 +2642,46 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$body->appendChild( $style_element );
 			}
 		}
+
+		$this->remove_admin_bar_if_css_excluded();
+	}
+
+	/**
+	 * Remove admin bar if its CSS was excluded.
+	 *
+	 * @since 1.2
+	 */
+	private function remove_admin_bar_if_css_excluded() {
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+
+		$admin_bar = $this->dom->getElementById( 'wpadminbar' );
+		if ( ! $admin_bar ) {
+			return;
+		}
+
+		$included = true;
+		foreach ( $this->pending_stylesheets as &$pending_stylesheet ) {
+			$is_admin_bar_css = (
+				'custom' === $pending_stylesheet['group']
+				&&
+				$pending_stylesheet['node'] instanceof DOMElement
+				&&
+				'admin-bar-css' === $pending_stylesheet['node']->getAttribute( 'id' )
+			);
+			if ( $is_admin_bar_css ) {
+				$included = $pending_stylesheet['included'];
+				break;
+			}
+		}
+
+		if ( ! $included ) {
+			$admin_bar->parentNode->replaceChild(
+				$this->dom->createComment( ' ' . __( 'Admin bar removed to preserve AMP validity due to excessive CSS.', 'amp' ) . ' ' ),
+				$admin_bar
+			);
+		}
 	}
 
 	/**
@@ -2778,9 +2818,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$previously_seen_stylesheet_index = array();
+		$indices_by_stylesheet_element_id = array();
 		foreach ( $this->pending_stylesheets as $pending_stylesheet_index => &$pending_stylesheet ) {
 			if ( $group !== $pending_stylesheet['group'] ) {
 				continue;
+			}
+
+			// Keep track of the element IDs for the stylesheets.
+			if ( $pending_stylesheet['node'] instanceof DOMElement && $pending_stylesheet['node']->hasAttribute( 'id' ) ) {
+				$indices_by_stylesheet_element_id[ $pending_stylesheet['node']->getAttribute( 'id' ) ] = $pending_stylesheet_index;
 			}
 
 			$stylesheet_parts = array();
@@ -2943,11 +2989,28 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
-			$this->pending_stylesheets[ $i ]['included'] = true;
-			$included_count++;
-
-			$current_concatenated_size += $this->pending_stylesheets[ $i ]['size'];
+			if ( ! isset( $this->pending_stylesheets[ $i ]['included'] ) ) {
+				$this->pending_stylesheets[ $i ]['included'] = true;
+				$included_count++;
+				$current_concatenated_size += $this->pending_stylesheets[ $i ]['size'];
+			}
 		}
+
+		// If the main admin bar was excluded, make sure the other admin bar CSS is also excluded.
+		$should_exclude_admin_bar_inline_css = (
+			isset( $indices_by_stylesheet_element_id['admin-bar-css'] )
+			&&
+			false === $this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-css'] ]['included']
+			&&
+			isset( $indices_by_stylesheet_element_id['admin-bar-inline-css'] )
+			&&
+			true === $this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-inline-css'] ]['included']
+		);
+		if ( $should_exclude_admin_bar_inline_css ) {
+			$this->pending_stylesheets[ $indices_by_stylesheet_element_id['admin-bar-inline-css'] ]['included'] = false;
+			$included_count--;
+		}
+
 		return $included_count;
 	}
 }

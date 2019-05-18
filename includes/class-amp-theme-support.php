@@ -1299,22 +1299,20 @@ class AMP_Theme_Support {
 			41
 		);
 
-		// Override default admin bar bump to add element ID and remove obsolete IE hacks.
-		if ( has_action( 'wp_head', '_admin_bar_bump_cb' ) ) {
-			remove_action( 'wp_head', '_admin_bar_bump_cb' );
-			add_action(
-				'wp_head',
-				function () {
-					?>
-					<style id="admin-bar-bump-css" type="text/css" media="screen">
-						html { margin-top: 32px !important; }
-						@media screen and ( max-width: 782px ) {
-							html { margin-top: 46px !important; }
-						}
-					</style>
-					<?php
-				}
-			);
+		// Convert admin bar bump callback into an inline style for admin-bar. See \WP_Admin_Bar::initialize().
+		if ( current_theme_supports( 'admin-bar' ) ) {
+			$admin_bar_args  = get_theme_support( 'admin-bar' );
+			$header_callback = $admin_bar_args[0]['callback'];
+		} else {
+			$header_callback = '_admin_bar_bump_cb';
+		}
+		remove_action( 'wp_head', $header_callback );
+		if ( '__return_false' !== $header_callback ) {
+			ob_start();
+			call_user_func( $header_callback );
+			$style = ob_get_clean();
+			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			wp_add_inline_style( 'admin-bar', $data );
 		}
 
 		// Emulate customize support script in PHP, to assume Customizer.
