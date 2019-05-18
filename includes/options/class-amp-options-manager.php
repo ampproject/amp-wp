@@ -28,7 +28,6 @@ class AMP_Options_Manager {
 		'analytics'                => array(),
 		'auto_accept_sanitization' => true,
 		'accept_tree_shaking'      => true,
-		'disable_admin_bar'        => false,
 		'all_templates_supported'  => true,
 		'supported_templates'      => array( 'is_singular' ),
 		'enable_response_caching'  => true,
@@ -137,7 +136,6 @@ class AMP_Options_Manager {
 
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 		$options['accept_tree_shaking']      = ! empty( $new_options['accept_tree_shaking'] );
-		$options['disable_admin_bar']        = ! empty( $new_options['disable_admin_bar'] );
 		$options['enable_amp_stories']       = ! empty( $new_options['enable_amp_stories'] );
 
 		// Validate post type support.
