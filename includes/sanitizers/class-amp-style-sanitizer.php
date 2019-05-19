@@ -2489,7 +2489,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$message .= '.' . $pending_stylesheet['node']->getAttribute( 'class' );
 				}
 				foreach ( $pending_stylesheet['node']->attributes as $attribute ) {
-					if ( 'id' !== $attribute->nodeName || 'class' !== $attribute->nodeName ) {
+					if ( 'id' !== $attribute->nodeName && 'class' !== $attribute->nodeName ) {
 						$message .= sprintf( '[%s=%s]', $attribute->nodeName, $attribute->nodeValue );
 					}
 				}
