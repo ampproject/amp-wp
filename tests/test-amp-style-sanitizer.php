@@ -13,6 +13,26 @@
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		global $wp_styles, $wp_scripts;
+		$wp_styles  = null;
+		$wp_scripts = null;
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_styles, $wp_scripts;
+		$wp_styles  = null;
+		$wp_scripts = null;
+	}
+
+	/**
 	 * Get data for tests.
 	 *
 	 * @return array
@@ -2148,5 +2168,119 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertInstanceOf( 'DOMElement', $link->parentNode );
 		$this->assertEquals( 'head', $link->parentNode->nodeName );
+	}
+
+	/**
+	 * Get prioritization test data.
+	 *
+	 * @return array
+	 */
+	public function get_prioritization_data() {
+		add_filter(
+			'theme_root',
+			function () {
+				return ABSPATH . 'wp-content/themes';
+			}
+		);
+		add_filter(
+			'theme_root_uri',
+			function () {
+				return site_url( 'wp-content/themes' );
+			}
+		);
+
+		$render_template = function () {
+			ob_start();
+			?>
+			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
+			<?php
+			return ob_get_clean();
+		};
+
+		return array(
+			'admin_bar_included' => array(
+				function () use ( $render_template ) {
+					show_admin_bar( true );
+					_wp_admin_bar_init();
+					switch_theme( 'twentyten' );
+					require_once get_template_directory() . '/functions.php';
+					add_action(
+						'wp_head',
+						function() {
+							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 10000 ) ) );
+						},
+						-1000
+					);
+					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
+					AMP_Theme_Support::add_hooks();
+					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
+					wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+					return $render_template();
+				},
+				function( $original_dom, $original_source, $amphtml_dom, $amphtml_source ) {
+					/**
+					 * Vars.
+					 *
+					 * @var DOMDocument $original_dom
+					 * @var string      $original_source
+					 * @var DOMDocument $amphtml_dom
+					 * @var string      $amphtml_source
+					 */
+					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
+					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
+					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
+
+					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
+					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
+					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
+					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
+				},
+			),
+			// @todo Add other scenarios in the future.
+		);
+	}
+
+	/**
+	 * Test stylesheet prioritization.
+	 *
+	 * @dataProvider get_prioritization_data
+	 * @covers \AMP_Style_Sanitizer::finalize_stylesheet_group()
+	 * @covers \AMP_Style_Sanitizer::get_stylesheet_priority()
+	 *
+	 * @param callable $html_generator Generator of HTML.
+	 * @param callable $assert         Function which runs assertions.
+	 */
+	public function test_prioritized_stylesheets( $html_generator, $assert ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
+		add_theme_support( 'amp' );
+		$this->go_to( home_url() );
+		$html = $html_generator();
+
+		$original_dom = AMP_DOM_Utils::get_dom( $html );
+		$amphtml_dom  = clone $original_dom;
+
+		$error_codes = array();
+		$args        = array(
+			'use_document_element'      => true,
+			'remove_unused_rules'       => 'never',
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		);
+
+		$sanitizer = new AMP_Style_Sanitizer( $amphtml_dom, $args );
+		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
+		$whitelist_sanitizer->sanitize();
+
+		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
 	}
 }
