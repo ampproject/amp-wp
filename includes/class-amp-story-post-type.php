@@ -174,6 +174,8 @@ class AMP_Story_Post_Type {
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'export_latest_stories_block_editor_data' ), 100 );
+
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_stories_styles' ) );
 
 		// Remove unnecessary settings.
