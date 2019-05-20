@@ -181,7 +181,6 @@ export default createHigherOrderComponent(
 				isFirst,
 				currentBlockPosition,
 				numberOfBlocks,
-				toggleSelection,
 				fontSize,
 				setFontSize,
 				setAttributes,
