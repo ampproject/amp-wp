@@ -118,7 +118,7 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 		getBlockRootClientId,
 		getBlockOrder,
 	} = select( 'core/block-editor' );
-	const { moveBlocksDown, moveBlocksUp, moveBlockToPosition } = dispatch( 'core/block-editor' );
+	const { moveBlocksDown, moveBlocksUp, moveBlockToPosition, selectBlock } = dispatch( 'core/block-editor' );
 
 	const item = getSelectedBlockClientId();
 	const page = getBlockRootClientId( item );
@@ -143,9 +143,10 @@ const applyWithDispatch = withDispatch( ( dispatch, { clientId, rootClientId, to
 		onAnimationDelayChange( value ) {
 			changeAnimationDelay( page, item, value );
 		},
-		startBlockRotation: () => toggleSelection( false ),
-		stopBlockRotation: () => {
+		startBlockActions: () => toggleSelection( false ),
+		stopBlockActions: () => {
 			toggleSelection( true );
+			selectBlock( clientId );
 		},
 		bringForward: () => moveBlocksDown( clientId, rootClientId ),
 		sendBackward: () => moveBlocksUp( clientId, rootClientId ),
@@ -197,8 +198,8 @@ export default createHigherOrderComponent(
 				getAnimatedBlocks,
 				animationAfter,
 				videoFeaturedImage,
-				startBlockRotation,
-				stopBlockRotation,
+				startBlockActions,
+				stopBlockActions,
 				bringForward,
 				sendBackward,
 				moveFront,
@@ -254,13 +255,13 @@ export default createHigherOrderComponent(
 							className="amp-story-editor__rotate-container"
 							angle={ isSelected ? 0 : rotationAngle }
 							onRotateStart={ () => {
-								startBlockRotation();
+								startBlockActions();
 							} }
 							onRotateStop={ ( event, angle ) => {
 								setAttributes( {
 									rotationAngle: angle,
 								} );
-								stopBlockRotation();
+								stopBlockActions();
 							} }
 						>
 							<BlockEdit { ...props } />
@@ -275,10 +276,10 @@ export default createHigherOrderComponent(
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
 								setAttributes( value );
-								toggleSelection( true );
+								stopBlockActions();
 							} }
 							onResizeStart={ () => {
-								toggleSelection( false );
+								startBlockActions();
 							} }
 						>
 							<RotatableBox
@@ -287,14 +288,14 @@ export default createHigherOrderComponent(
 								className="amp-story-editor__rotate-container"
 								angle={ isSelected ? 0 : rotationAngle }
 								onRotateStart={ () => {
-									startBlockRotation();
+									startBlockActions();
 								} }
 								onRotateStop={ ( event, angle ) => {
 									setAttributes( {
 										rotationAngle: angle,
 									} );
 
-									stopBlockRotation();
+									stopBlockActions();
 								} }
 							>
 								<BlockEdit { ...props } />
