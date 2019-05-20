@@ -841,9 +841,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_add_hooks() {
 		AMP_Theme_Support::add_hooks();
 		$this->assertFalse( has_action( 'wp_head', 'wp_post_preview_js' ) );
+		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
 		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
-		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+		$this->assertEquals( 10, has_action( 'wp_print_styles', array( 'AMP_Theme_Support', 'print_emoji_styles' ) ) );
+		$this->assertEquals( 10, has_filter( 'the_title', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'the_excerpt', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'the_content', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'comment_text', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'widget_text', 'wp_staticize_emoji' ) );
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
