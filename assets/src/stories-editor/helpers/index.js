@@ -1078,8 +1078,8 @@ export const maybeSetInitialSize = ( clientId ) => {
 					}
 
 					updateBlockAttributes( clientId, {
-						width: Math.round( width / ratio ),
-						height: Math.round( height / ratio ),
+						width: Math.round( imageWidth / ratio ),
+						height: Math.round( imageHeight / ratio ),
 					} );
 				}
 			}
