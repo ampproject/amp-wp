@@ -570,6 +570,10 @@ class AMP_Story_Post_Type {
 	 * Export data used for Latest Stories block.
 	 */
 	public static function export_latest_stories_block_editor_data() {
+		if ( self::POST_TYPE_SLUG === get_current_screen()->post_type ) {
+			return;
+		}
+
 		$url = add_query_arg(
 			'ver',
 			wp_styles()->registered[ self::STORY_CARD_CSS_SLUG ]->ver,
