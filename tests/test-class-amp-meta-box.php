@@ -39,6 +39,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		global $wp_scripts, $wp_styles;
 		$wp_scripts = null;
 		$wp_styles  = null;
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 		parent::tearDown();
 	}
 
