@@ -150,7 +150,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
-			return 30;
+			return 50;
 
 		case 'amp/amp-story-post-title':
 			return 100;
