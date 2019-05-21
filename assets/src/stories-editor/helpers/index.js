@@ -1,3 +1,5 @@
+/* global _ */
+
 /**
  * External dependencies
  */
@@ -329,6 +331,42 @@ export const addAMPAttributes = ( settings, name ) => {
 			...settings.supports,
 			anchor: false,
 		},
+	};
+};
+
+/**
+ * Filters blocks' transformations.
+ *
+ * @param {Object} settings Settings.
+ * @param {string} name     Block name.
+ *
+ * @return {Object} Settings.
+ */
+export const filterBlockTransforms = ( settings, name ) => {
+	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+
+	if ( ! isChildBlock ) {
+		return settings;
+	}
+
+	if ( 'core/list' !== name ) {
+		return settings;
+	}
+
+	const transforms = {
+		to: settings.transforms.to,
+		from: [],
+	};
+
+	_.each( settings.transforms.from, function( transform ) {
+		if ( 'prefix' !== transform.type ) {
+			transforms.from.push( transform );
+			return true;
+		}
+	} );
+	return {
+		...settings,
+		transforms,
 	};
 };
 
