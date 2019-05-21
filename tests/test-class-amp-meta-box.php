@@ -146,8 +146,18 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
 
-		// Test Stories integration.
+		/*
+		 * Test Stories integration.
+		 * The current screen is the AMP Story editor, so the data for the Latest Stories block should not be present, as it's not needed there.
+		 */
+		register_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		set_current_screen( AMP_Story_Post_Type::POST_TYPE_SLUG );
 		AMP_Story_Post_Type::register_story_card_styling( wp_styles() );
+		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
+		$this->assertFalse( isset( wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
+
+		// The current screen is the editor for a normal post, so the data for the Latest Stories block should be present.
+		set_current_screen( 'post.php' );
 		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
 		$this->assertContains( 'ampLatestStoriesBlockData', implode( '', wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
 	}
