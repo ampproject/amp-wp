@@ -15,8 +15,8 @@ import { PreviewPicker } from '../';
  * @return {?Object} The rendered component or null if there are no options.
  */
 function FontFamilyPicker( {
-	fonts,
-	onChange,
+	fonts = [],
+	onChange = () => {},
 	value = '',
 } ) {
 	const defaultOption = {
@@ -40,6 +40,7 @@ function FontFamilyPicker( {
 			defaultOption={ defaultOption }
 			onChange={ ( { value: selectedValue } ) => onChange( '' === selectedValue ? undefined : selectedValue ) }
 			label={ __( 'Font Family', 'amp' ) }
+			id="amp-stories-font-family-picker"
 			ariaLabel={ ( currentOption ) => {
 				return sprintf(
 					/* translators: %s: font name */

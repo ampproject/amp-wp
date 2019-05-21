@@ -1945,10 +1945,15 @@ class AMP_Validation_Manager {
 	public static function enqueue_block_validation() {
 		$slug = 'amp-block-validation';
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'wp-i18n' ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);

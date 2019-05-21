@@ -23,8 +23,10 @@ cache:
     - $HOME/phpunit-bin
     - $HOME/deployment-targets
 
+env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 install:
-  - nvm install 8.11.4 && nvm use 8.11.4
+  - nvm install
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - source "$DEV_LIB_PATH/travis.install.sh"
@@ -40,13 +42,13 @@ jobs:
   include:
     - stage: test
       php: "7.3"
-      env: WP_VERSION=5.0
+      env: WP_VERSION=latest
     - php: "5.4"
       env: WP_VERSION=4.9    DEV_LIB_SKIP=phpcs
     - php: "5.5"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+      env: WP_VERSION=5.0    DEV_LIB_SKIP=phpcs
     - php: "5.6"
-      env: WP_VERSION=4.9    DEV_LIB_SKIP=phpcs
+      env: WP_VERSION=5.1    DEV_LIB_SKIP=phpcs
     - php: "5.6"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
     - php: "7.0"

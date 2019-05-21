@@ -118,11 +118,27 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
 
 		$block_script = wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ];
-		$this->assertEquals(
+		$this->assertEqualSets(
 			array(
+				'lodash',
+				'moment',
+				'react',
+				'wp-block-editor',
+				'wp-blocks',
+				'wp-components',
+				'wp-compose',
+				'wp-data',
+				'wp-date',
+				'wp-edit-post',
+				'wp-editor',
+				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
-				'wp-components',
+				'wp-keycodes',
+				'wp-plugins',
+				'wp-polyfill',
+				'wp-url',
+				'wp-wordcount',
 			),
 			$block_script->deps
 		);

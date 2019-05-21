@@ -1,4 +1,15 @@
 /**
+ * Returns general validation erroxrs.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {Array} Validation errors.
+ */
+export function getValidationErrors( state ) {
+	return state.errors;
+}
+
+/**
  * Returns the block validation errors for a given clientId.
  *
  * @param {Object} state    Editor state.
@@ -8,17 +19,6 @@
  */
 export function getBlockValidationErrors( state, clientId ) {
 	return state.errors.filter( ( error ) => error.clientId === clientId );
-}
-
-/**
- * Returns general validation erroxrs.
- *
- * @param {Object} state Editor state.
- *
- * @return {Array} Validation errors.
- */
-export function getValidationErrors( state ) {
-	return state.errors;
 }
 
 /**

@@ -258,10 +258,15 @@ class AMP_Validated_URL_Post_Type {
 		$screen = get_current_screen();
 
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
+			$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validated-urls-index.deps.json';
+			$script_dependencies = file_exists( $script_deps_path )
+				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				: array();
+
 			wp_enqueue_script(
 				'amp-validated-urls-index',
 				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				array( 'wp-dom-ready' ),
+				$script_dependencies,
 				AMP__VERSION,
 				true
 			);
@@ -288,10 +293,15 @@ class AMP_Validated_URL_Post_Type {
 			AMP__VERSION
 		);
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_register_script(
 			'amp-validation-tooltips',
 			amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-			array( 'jquery', 'wp-pointer' ),
+			array_merge( $script_dependencies, array( 'wp-pointer' ) ),
 			AMP__VERSION,
 			true
 		);
@@ -1615,10 +1625,16 @@ class AMP_Validated_URL_Post_Type {
 
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
+
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			self::EDIT_POST_SCRIPT_HANDLE,
 			amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ),
-			array( 'wp-dom-ready', 'wp-i18n' ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);
