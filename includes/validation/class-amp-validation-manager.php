@@ -159,7 +159,7 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
 			return;
 		}
 
@@ -1770,11 +1770,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
-		if ( amp_is_canonical() ) {
-			$url = remove_query_arg( amp_get_slug(), $url );
-		} else {
-			$url = add_query_arg( amp_get_slug(), '', $url );
-		}
 
 		$added_query_vars = array(
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -1825,13 +1820,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			// Ensure the redirect URL is formatted for the AMP.
-			if ( amp_is_canonical() ) {
-				$location_header = remove_query_arg( amp_get_slug(), $location_header );
-			} else {
-				$location_header = add_query_arg( amp_get_slug(), '', $location_header );
-			}
-			$validation_url = add_query_arg( $added_query_vars, $location_header );
+			$validation_url = $location_header;
 		}
 
 		if ( is_wp_error( $r ) ) {
@@ -1956,25 +1945,45 @@ class AMP_Validation_Manager {
 	public static function enqueue_block_validation() {
 		$slug = 'amp-block-validation';
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);
 
+		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
+		$enabled_status    = $status_and_errors['status'];
+
 		$data = array(
-			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
 			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'possibleStatuses'           => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
+			'defaultStatus'              => $enabled_status,
+		);
+
+		wp_localize_script(
+			$slug,
+			'ampBlockValidation',
+			$data
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $slug, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-		}
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
 
-		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', wp_json_encode( $data ) ) );
+			wp_add_inline_script(
+				$slug,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 }

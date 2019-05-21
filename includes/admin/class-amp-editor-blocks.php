@@ -125,56 +125,39 @@ class AMP_Editor_Blocks {
 	 * Has to be loaded before registering the blocks in registerCoreBlocks.
 	 */
 	public function enqueue_block_editor_assets() {
+		$script_handle = 'amp-editor-blocks';
 
-		// Enqueue script and style for AMP-specific blocks.
-		if ( amp_is_canonical() ) {
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
 			wp_enqueue_style(
 				'amp-editor-blocks-style',
 				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
 				array(),
 				AMP__VERSION
 			);
-
-			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
-			wp_enqueue_script(
-				'amp-editor-blocks-build',
-				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-				AMP__VERSION
-			);
-
-			if ( function_exists( 'wp_set_script_translations' ) ) {
-				wp_set_script_translations( 'amp-editor-blocks-build', 'amp' );
-			}
 		}
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-editor-blocks.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
-			'amp-editor-blocks',
+			$script_handle,
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);
 
-		wp_add_inline_script(
-			'amp-editor-blocks',
-			sprintf(
-				'ampEditorBlocks.boot( %s );',
-				wp_json_encode(
-					array(
-						'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
-					)
-				)
-			)
-		);
-
 		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
+			wp_set_script_translations( $script_handle, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
+
 			wp_add_inline_script(
-				'wp-i18n',
-				'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "amp" );',
+				$script_handle,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'after'
 			);
 		}

@@ -18,14 +18,31 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	public $instance;
 
 	/**
-	 * Setup.
+	 * Set up.
 	 *
 	 * @inheritdoc
 	 */
 	public function setUp() {
 		parent::setUp();
+		global $wp_scripts, $wp_styles;
+		$wp_scripts     = null;
+		$wp_styles      = null;
 		$this->instance = new AMP_Post_Meta_Box();
 	}
+
+	/**
+	 * Tear down.
+	 *
+	 * @inheritdoc
+	 */
+	public function tearDown() {
+		global $wp_scripts, $wp_styles;
+		$wp_scripts = null;
+		$wp_styles  = null;
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		parent::tearDown();
+	}
+
 
 	/**
 	 * Test init.
@@ -74,7 +91,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_block_assets.
 	 *
-	 * @see AMP_Post_Meta_Box::enqueue_block_assets()
+	 * @covers AMP_Post_Meta_Box::enqueue_block_assets()
+	 * @covers AMP_Story_Post_Type::register_story_card_styling()
+	 * @covers AMP_Story_Post_Type::export_latest_stories_block_editor_data()
 	 */
 	public function test_enqueue_block_assets() {
 		if ( ! function_exists( 'register_block_type' ) ) {
@@ -82,9 +101,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
+		register_post_type(
+			'secret',
+			array( 'public' => false )
+		);
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
 			array(
-				'post_type' => 'draft',
+				'post_type' => 'secret',
 			)
 		);
 		$this->instance->enqueue_block_assets();
@@ -96,22 +119,48 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
 
 		$block_script = wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ];
-		$this->assertEquals(
+		$this->assertEqualSets(
 			array(
+				'lodash',
+				'moment',
+				'react',
+				'wp-block-editor',
+				'wp-blocks',
+				'wp-components',
+				'wp-compose',
+				'wp-data',
+				'wp-date',
+				'wp-edit-post',
+				'wp-editor',
+				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
-				'wp-components',
+				'wp-keycodes',
+				'wp-plugins',
+				'wp-polyfill',
+				'wp-url',
+				'wp-wordcount',
 			),
 			$block_script->deps
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
 		$this->assertEquals( amp_get_asset_url( 'js/' . AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE . '.js' ), $block_script->src );
 		$this->assertEquals( AMP__VERSION, $block_script->ver );
-		$this->assertInternalType( 'array', $block_script->extra['before'] );
 
-		$matches = preg_grep( '/wpAmpEditor/', $block_script->extra['before'] );
-		$this->assertCount( 1, $matches );
-		$this->assertContains( AMP_Post_Meta_Box::ENABLED_STATUS, array_shift( $matches ) );
+		/*
+		 * Test Stories integration.
+		 * The current screen is the AMP Story editor, so the data for the Latest Stories block should not be present, as it's not needed there.
+		 */
+		register_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		set_current_screen( AMP_Story_Post_Type::POST_TYPE_SLUG );
+		AMP_Story_Post_Type::register_story_card_styling( wp_styles() );
+		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
+		$this->assertFalse( isset( wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
+
+		// The current screen is the editor for a normal post, so the data for the Latest Stories block should be present.
+		set_current_screen( 'post.php' );
+		AMP_Story_Post_Type::export_latest_stories_block_editor_data();
+		$this->assertContains( 'ampLatestStoriesBlockData', implode( '', wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ]->extra['before'] ) );
 	}
 
 	/**

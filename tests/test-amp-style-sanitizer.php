@@ -2124,4 +2124,29 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$expected = "body{color:red}body{color:green}body{color:blue}\n\n/*# sourceURL=amp-custom.css */";
 		$this->assertEquals( $expected, $style->nodeValue );
 	}
+
+	/**
+	 * Test that a font stylesheet is moved to the head.
+	 *
+	 * @covers \AMP_Style_Sanitizer::sanitize()
+	 */
+	public function test_body_font_stylesheet_moved_to_head() {
+		$html = '<!DOCTYPE html><html amp><head><meta charset="utf-8"></head><body><link rel="stylesheet" id="the-font" href="https://fonts.googleapis.com/css?family=Merriweather%3A400%2C700" type="text/css" media="all"></body></html>'; // phpcs:ignore
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$link = $dom->getElementById( 'the-font' );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'body', $link->parentNode->nodeName );
+
+		$sanitizer_args = array( 'use_document_element' => true );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $sanitizer_args );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $sanitizer_args );
+		$sanitizer->sanitize();
+
+		$this->assertInstanceOf( 'DOMElement', $link->parentNode );
+		$this->assertEquals( 'head', $link->parentNode->nodeName );
+	}
 }

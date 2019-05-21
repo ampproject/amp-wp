@@ -743,6 +743,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->process_style_element( $element );
 			} elseif ( 'link' === $node_name ) {
 				$this->process_link_element( $element );
+
+				// If the element is still in the document, it is a font stylesheet; make sure it gets moved to the head as required.
+				if ( $element->parentNode && 'head' !== $element->parentNode->nodeName ) {
+					$this->head->appendChild( $element->parentNode->removeChild( $element ) );
+				}
 			}
 		}
 
@@ -1048,7 +1053,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$css_file_path = $this->get_validated_url_file_path( $href, array( 'css', 'less', 'scss', 'sass' ) );
 		if ( ! is_wp_error( $css_file_path ) ) {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 		} else {
 			// Fall back to doing an HTTP request for the stylesheet is not accessible directly from the filesystem.
 			$contents = $this->fetch_external_stylesheet( $normalized_url );
@@ -1313,7 +1318,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$results[] = compact( 'error', 'sanitized' );
 			return $results;
 		} else {
-			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore -- It's a local filesystem path not a remote request.
+			$stylesheet = file_get_contents( $css_file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- It's a local filesystem path not a remote request.
 		}
 
 		if ( $media_query ) {

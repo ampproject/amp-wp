@@ -109,6 +109,17 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_settings_field(
+			'amp_stories',
+			__( 'Stories', 'amp' ),
+			array( $this, 'render_amp_stories' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-stories-field',
+			)
+		);
+
 		if ( wp_using_ext_object_cache() ) {
 			add_settings_field(
 				'caching',
@@ -492,6 +503,52 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
+		<?php
+	}
+
+	/**
+	 * AMP Stories section renderer.
+	 *
+	 * @since 1.2
+	 */
+	public function render_amp_stories() {
+		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
+		?>
+		<?php if ( ! $has_required_block_capabilities ) : ?>
+			<div class="notice notice-info notice-alt inline">
+				<p>
+					<?php
+					$gutenberg = 'Gutenberg';
+					// Link to Gutenberg plugin installation if eligible.
+					if ( current_user_can( 'install_plugins' ) ) {
+						$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+					}
+					printf(
+						/* translators: %s: Gutenberg plugin name */
+						esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
+						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					);
+					?>
+				</p>
+			</div>
+		<?php endif; ?>
+		<p>
+			<label for="enable_amp_stories">
+				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
+				<?php esc_html_e( 'Enable experimental support for Stories.', 'amp' ); ?>
+			</label>
+		</p>
+		<p class="description">
+			<?php
+			echo wp_kses_post(
+				sprintf(
+					/* translators: %s: Stories documentation URL. */
+					__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">Stories</a>.', 'amp' ),
+					esc_url( 'https://amp.dev/about/stories' )
+				)
+			);
+			?>
+		</p>
 		<?php
 	}
 

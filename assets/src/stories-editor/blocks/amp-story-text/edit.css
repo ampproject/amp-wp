@@ -1,0 +1,69 @@
+.wp-block[data-type="amp/amp-story-text"] p {
+	margin: 0;
+}
+
+/**
+ * See https://github.com/ampproject/amp-wp/issues/2219.
+ */
+.wp-block-amp-story-text .block-editor-rich-text__editable {
+	padding: 7px !important;
+	width: 100%;
+}
+
+.amp-story-text__resize-container .components-resizable-box__handle-right {
+	right: -26px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+
+.amp-story-text__resize-container .components-resizable-box__handle-right::before {
+	margin: 0;
+}
+
+.amp-story-text__resize-container .components-resizable-box__handle-bottom {
+	bottom: -26px;
+	width: 50px;
+	left: calc(50% - 25px);
+}
+
+.amp-story-text__resize-container .components-resizable-box__handle-bottom::before {
+	margin: 0 auto;
+}
+
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
+	width: initial;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
+.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle{
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
+	opacity: 100;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit {
+	display: inline-block;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text {
+	line-height: 1.15;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text,
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text * {
+	height: 100%;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring-fontsize {
+	height: initial !important;
+}

@@ -23,12 +23,14 @@ cache:
     - $HOME/phpunit-bin
     - $HOME/deployment-targets
 
+env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 install:
-  - nvm install 8.11.4 && nvm use 8.11.4
+  - nvm install
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - source "$DEV_LIB_PATH/travis.install.sh"
-  - npx grunt shell:webpack_production
+  - npm run build:js
 
 script:
   - source "$DEV_LIB_PATH/travis.script.sh"
