@@ -15,8 +15,8 @@ import { PreviewPicker } from '../';
  * @return {?Object} The rendered component or null if there are no options.
  */
 function FontFamilyPicker( {
-	fonts,
-	onChange,
+	fonts = [],
+	onChange = () => {},
 	value = '',
 } ) {
 	const defaultOption = {

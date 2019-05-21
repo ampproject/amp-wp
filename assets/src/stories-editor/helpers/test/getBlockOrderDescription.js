@@ -40,6 +40,7 @@ describe( 'block order controls', () => {
 				2,
 				1,
 				false,
+				false,
 				dirUp,
 			) ).toBe( `Move ${ type } block from position 2 up to position 1` );
 		} );
