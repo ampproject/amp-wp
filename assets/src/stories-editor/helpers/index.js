@@ -1057,7 +1057,7 @@ const getBlockInnerTextElement = ( block ) => {
 
 	switch ( name ) {
 		case 'amp/amp-story-text':
-			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
 
 		case 'amp/amp-story-post-title':
 			const slug = name.replace( '/', '-' );
