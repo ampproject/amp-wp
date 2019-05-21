@@ -1952,8 +1952,8 @@ class AMP_Validation_Manager {
 
 		wp_enqueue_script(
 			$slug,
+			amp_get_asset_url( "js/{$slug}.js" ),
 			$script_dependencies,
-			array( 'wp-i18n' ),
 			AMP__VERSION,
 			true
 		);
