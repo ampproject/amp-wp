@@ -137,7 +137,6 @@ const admin = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-admin-pointer': './assets/src/admin/amp-admin-pointer.js',
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 	},
 };
