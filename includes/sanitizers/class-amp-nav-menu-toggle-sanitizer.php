@@ -98,9 +98,11 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$script_el->setAttribute( 'type', 'application/json' );
 		$script_el->appendChild( $this->dom->createTextNode( wp_json_encode( $expanded ) ) );
 		$state_el->appendChild( $script_el );
-		$nav_el->parentNode->insertBefore( $state_el, $nav_el );
 		if ( 'body' === $nav_el->nodeName ) {
 			$nav_el->insertBefore( $state_el, $nav_el->firstChild );
+		} elseif ( $nav_el === $this->dom->documentElement ) {
+			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+			$body->insertBefore( $state_el, $body->firstChild );
 		} else {
 			$nav_el->parentNode->insertBefore( $state_el, $nav_el );
 		}
