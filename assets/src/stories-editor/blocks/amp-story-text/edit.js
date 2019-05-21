@@ -29,6 +29,10 @@ class TextBlockEdit extends Component {
 		this.onReplace = this.onReplace.bind( this );
 	}
 
+	componentDidMount() {
+		maybeUpdateFontSize( this.props );
+	}
+
 	componentDidUpdate( prevProps ) {
 		const { attributes, isSelected } = this.props;
 		const {
@@ -115,7 +119,7 @@ class TextBlockEdit extends Component {
 					style={ {
 						backgroundColor: appliedBackgroundColor,
 						color: textColor.color,
-						fontSize: ampFitText ? autoFontSize : userFontSize,
+						fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 						fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 						textAlign: align,
 					} }
