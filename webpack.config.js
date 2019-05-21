@@ -13,9 +13,6 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 const sharedConfig = {
-	externals: [
-		...defaultConfig.externals,
-	],
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',
@@ -107,13 +104,10 @@ const ampValidation = {
 const blockEditor = {
 	...defaultConfig,
 	...sharedConfig,
-	externals: [
-		...sharedConfig.externals,
-		{
-			// Make localized data importable.
-			'amp-block-editor-data': 'ampBlockEditor',
-		},
-	],
+	externals: {
+		// Make localized data importable.
+		'amp-block-editor-data': 'ampBlockEditor',
+	},
 	entry: {
 		'amp-block-editor': './assets/src/block-editor/index.js',
 		'amp-editor-blocks': './assets/src/block-editor/amp-editor-blocks.js',
