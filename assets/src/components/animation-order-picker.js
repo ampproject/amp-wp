@@ -30,6 +30,7 @@ function AnimationOrderPicker( {
 			defaultOption={ defaultOption }
 			onChange={ ( { value: selectedValue, block } ) => onChange( selectedValue === '' ? undefined : block.clientId ) }
 			label={ __( 'Begin after', 'amp' ) }
+			id="amp-stories-animation-order-picker"
 			ariaLabel={ ( { value: currentValue, blockType } ) => ! currentValue ? __( 'Begin immediately', 'amp' ) : sprintf( __( 'Begin after: %s', 'amp' ), blockType.title ) }
 			renderToggle={ ( currentOption ) => (
 				<BlockPreviewLabel

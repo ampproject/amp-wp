@@ -896,10 +896,15 @@ class AMP_Validation_Error_Taxonomy {
 						AMP__VERSION
 					);
 
+					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
+					$script_dependencies = file_exists( $script_deps_path )
+						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						: array();
+
 					wp_register_script(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-						array( 'jquery', 'wp-pointer' ),
+						array_merge( $script_dependencies, array( 'wp-pointer' ) ),
 						AMP__VERSION,
 						true
 					);
@@ -928,10 +933,15 @@ class AMP_Validation_Error_Taxonomy {
 						AMP__VERSION
 					);
 
+					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
+					$script_dependencies = file_exists( $script_deps_path )
+						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						: array();
+
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',
 						amp_get_asset_url( 'js/amp-validation-single-error-url-details.js' ),
-						array( 'wp-dom-ready' ),
+						$script_dependencies,
 						AMP__VERSION,
 						true
 					);
