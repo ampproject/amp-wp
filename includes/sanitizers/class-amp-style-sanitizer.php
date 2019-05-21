@@ -2646,7 +2646,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$admin_bar = $this->dom->getElementById( 'wpadminbar' );
+		$admin_bar_id = 'wpadminbar';
+		$admin_bar    = $this->dom->getElementById( $admin_bar_id );
 		if ( ! $admin_bar ) {
 			return;
 		}
@@ -2667,8 +2668,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		if ( ! $included ) {
+			$comment_text = sprintf(
+				/* translators: %s: CSS selector for admin bar element  */
+				__( 'Admin bar (%s) was removed to preserve AMP validity due to excessive CSS.', 'amp' ),
+				'#' . $admin_bar_id
+			);
 			$admin_bar->parentNode->replaceChild(
-				$this->dom->createComment( ' ' . __( 'Admin bar (#wpadminbar) was removed to preserve AMP validity due to excessive CSS.', 'amp' ) . ' ' ),
+				$this->dom->createComment( ' ' . $comment_text . ' ' ),
 				$admin_bar
 			);
 		}
@@ -2932,7 +2938,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$pending_stylesheet['stylesheet']    = implode( '', $stylesheet_parts );
 			$pending_stylesheet['original_size'] = $original_size;
 			$pending_stylesheet['included']      = null; // To be determined below.
-			$pending_stylesheet['size']          = strlen( $pending_stylesheet['stylesheet'] ); // @todo Should this use mb_strlen()?
+			$pending_stylesheet['size']          = strlen( $pending_stylesheet['stylesheet'] );
 			$pending_stylesheet['hash']          = md5( $pending_stylesheet['stylesheet'] );
 
 			// If this stylesheet is a duplicate of something that came before, mark the previous as not included automatically.
