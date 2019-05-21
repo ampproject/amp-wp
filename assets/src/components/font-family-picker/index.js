@@ -40,6 +40,7 @@ function FontFamilyPicker( {
 			defaultOption={ defaultOption }
 			onChange={ ( { value: selectedValue } ) => onChange( '' === selectedValue ? undefined : selectedValue ) }
 			label={ __( 'Font Family', 'amp' ) }
+			id="amp-stories-font-family-picker"
 			ariaLabel={ ( currentOption ) => {
 				return sprintf(
 					/* translators: %s: font name */

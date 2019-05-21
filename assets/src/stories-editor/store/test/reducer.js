@@ -96,7 +96,7 @@ describe( 'reducers', () => {
 			expect( state ).toBeUndefined();
 		} );
 
-		it.skip( 'should change page if it exists', () => {
+		it.skip( 'should change page if it exists', () => { // eslint-disable-line jest/no-disabled-tests
 			select( 'core/block-editor' ).getBlock = jest.fn().mockReturnValue( true );
 
 			const page = 'foo';
@@ -111,7 +111,7 @@ describe( 'reducers', () => {
 			select( 'core/block-editor' ).getBlock.mockRestore();
 		} );
 
-		it.skip( 'should not change state for invalid block', () => {
+		it.skip( 'should not change state for invalid block', () => { // eslint-disable-line jest/no-disabled-tests
 			select( 'core/block-editor' ).getBlock = jest.fn().mockReturnValue( true );
 
 			const page = 'foo';
@@ -147,7 +147,7 @@ describe( 'reducers', () => {
 			} );
 		} );
 
-		it.skip( 'should stop reordering', () => {
+		it.skip( 'should stop reordering', () => { // eslint-disable-line jest/no-disabled-tests
 			const state = blocks( undefined, {
 				type: 'STOP_REORDERING',
 			} );
@@ -167,7 +167,7 @@ describe( 'reducers', () => {
 				select( 'core/block-editor' ).getBlockOrder.mockRestore();
 			} );
 
-			it.skip( 'should change block order', () => {
+			it.skip( 'should change block order', () => { // eslint-disable-line jest/no-disabled-tests
 				const originalState = blocks( undefined, {
 					type: 'START_REORDERING',
 				} );
@@ -199,7 +199,7 @@ describe( 'reducers', () => {
 				select( 'core/block-editor' ).getBlockOrder.mockRestore();
 			} );
 
-			it.skip( 'should reset block order', () => {
+			it.skip( 'should reset block order', () => { // eslint-disable-line jest/no-disabled-tests
 				let originalState = blocks( undefined, {
 					type: 'START_REORDERING',
 				} );
