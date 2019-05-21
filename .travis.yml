@@ -23,6 +23,8 @@ cache:
     - $HOME/phpunit-bin
     - $HOME/deployment-targets
 
+env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
 install:
   - nvm install 8.11.4 && nvm use 8.11.4
   - composer install
