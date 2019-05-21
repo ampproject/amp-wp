@@ -11,7 +11,7 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*-compiled.js', 'assets/js/*.deps.json' ],
+				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.deps.json' ],
 			},
 			build: {
 				src: [ 'build' ],
