@@ -91,7 +91,7 @@ amp-story-grid-layer amp-img > img {
 /* Block Warnings */
 
 .is-selected .block-editor-block-list__block .block-editor-warning {
-	border-left-color: inherit;
+	border-color: inherit;
 }
 
 .block-editor-block-list__block .block-editor-warning {
