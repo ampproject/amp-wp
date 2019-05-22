@@ -335,6 +335,37 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
+ * Filters blocks' transformations.
+ * Removes prefixed list transformations to prevent automatic transformation.
+ *
+ * @param {Object} settings Settings.
+ * @param {string} name     Block name.
+ *
+ * @return {Object} Settings.
+ */
+export const filterBlockTransforms = ( settings, name ) => {
+	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+
+	if ( ! isChildBlock ) {
+		return settings;
+	}
+
+	if ( 'core/list' !== name || ! settings.transforms ) {
+		return settings;
+	}
+
+	const transforms = {
+		...settings.transforms,
+		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
+	};
+
+	return {
+		...settings,
+		transforms,
+	};
+};
+
+/**
  * Add extra attributes to save to DB.
  *
  * @param {Object} props           Properties.
