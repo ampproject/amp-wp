@@ -63,7 +63,7 @@ class TextBlockEdit extends Component {
 	onReplace( blocks ) {
 		const { attributes, onReplace, name } = this.props;
 		onReplace( blocks.map( ( block, index ) => (
-			index === 0 && block.name === name ?
+			index === 0 && block && block.name === name ?
 				{ ...block,
 					attributes: {
 						...attributes,
