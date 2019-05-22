@@ -87,3 +87,13 @@ amp-story-grid-layer amp-img > img {
 .edit-post-layout[data-block-name="core/video"] .edit-post-settings-sidebar__panel-block .block-editor-block-inspector__card + div > .components-panel__body:first-child .components-toggle-control:nth-child(6) {
 	display: none;
 }
+
+/* Block Warnings */
+
+.is-selected .block-editor-block-list__block .block-editor-warning {
+	border-color: inherit;
+}
+
+.block-editor-block-list__block .block-editor-warning {
+	margin: 0;
+}
