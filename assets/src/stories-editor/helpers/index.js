@@ -1,5 +1,3 @@
-/* global _ */
-
 /**
  * External dependencies
  */
@@ -336,6 +334,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 /**
  * Filters blocks' transformations.
+ * Removes prefixed list transformations to prevent automatic transformation.
  *
  * @param {Object} settings Settings.
  * @param {string} name     Block name.
@@ -349,7 +348,7 @@ export const filterBlockTransforms = ( settings, name ) => {
 		return settings;
 	}
 
-	if ( 'core/list' !== name ) {
+	if ( 'core/list' !== name || ! settings.transforms ) {
 		return settings;
 	}
 
@@ -358,7 +357,7 @@ export const filterBlockTransforms = ( settings, name ) => {
 		from: [],
 	};
 
-	_.each( settings.transforms.from, function( transform ) {
+	settings.transforms.from.forEach( function( transform ) {
 		if ( 'prefix' !== transform.type ) {
 			transforms.from.push( transform );
 			return true;
