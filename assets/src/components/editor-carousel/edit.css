@@ -1,5 +1,7 @@
 #amp-story-editor-carousel {
 	display: none;
+	position: relative;
+	z-index: -1;
 }
 
 @media (min-width: 961px) {
