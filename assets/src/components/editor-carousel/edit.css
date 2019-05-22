@@ -9,7 +9,7 @@
 }
 
 #amp-story-editor {
-	overflow: hidden;
+	position: relative;
 }
 
 #amp-story-editor > .editor-block-list__layout {
