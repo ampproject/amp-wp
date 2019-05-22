@@ -36,6 +36,8 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MAX_FONT_SIZE,
+	MIN_FONT_SIZE,
 } from '../constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 
@@ -333,6 +335,37 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
+ * Filters blocks' transformations.
+ * Removes prefixed list transformations to prevent automatic transformation.
+ *
+ * @param {Object} settings Settings.
+ * @param {string} name     Block name.
+ *
+ * @return {Object} Settings.
+ */
+export const filterBlockTransforms = ( settings, name ) => {
+	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+
+	if ( ! isChildBlock ) {
+		return settings;
+	}
+
+	if ( 'core/list' !== name || ! settings.transforms ) {
+		return settings;
+	}
+
+	const transforms = {
+		...settings.transforms,
+		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
+	};
+
+	return {
+		...settings,
+		transforms,
+	};
+};
+
+/**
  * Add extra attributes to save to DB.
  *
  * @param {Object} props           Properties.
@@ -417,8 +450,8 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @param {number} attributes.positionTop   Top offset in pixel.
  * @param {number} attributes.positionLeft  Left offset in pixel.
  * @param {number} attributes.rotationAngle Rotation angle in degrees.
- * @param {number} attributes.width         Block width in pixel.
- * @param {number} attributes.height        Block height in pixel.
+ * @param {number} attributes.width         Block width in pixels.
+ * @param {number} attributes.height        Block height in pixels.
  *
  * @return {Object} The wrapped element.
  */
@@ -789,7 +822,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
@@ -1058,6 +1091,76 @@ export const maybeUpdateAutoAdvanceAfterMedia = ( clientId ) => {
 };
 
 /**
+ * Returns a block's inner element containing the actual text node with its content.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+const getBlockInnerTextElement = ( block ) => {
+	const { name, clientId } = block;
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
+
+		case 'amp/amp-story-post-title':
+			const slug = name.replace( '/', '-' );
+			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
+	}
+
+	return null;
+};
+
+/**
+ * Updates a block's font size in case it uses amp-fit-text and the content has changed.
+ *
+ * @param {Object}  block                         Block object.
+ * @param {string}  block.clientId                Block client ID.
+ * @param {Object}  block.attributes              Block attributes.
+ * @param {number}  block.attributes.width        Block width in pixels.
+ * @param {number}  block.attributes.height       Block height in pixels.
+ * @param {string}  block.attributes.content      Block inner content.
+ * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
+ * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
+ */
+export const maybeUpdateFontSize = ( block ) => {
+	const { name, clientId, attributes } = block;
+	const { width, height, ampFitText, content, autoFontSize } = attributes;
+
+	if ( ! ampFitText ) {
+		return;
+	}
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			const element = getBlockInnerTextElement( block );
+
+			if ( element && ampFitText && content.length ) {
+				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+
+				if ( autoFontSize !== fitFontSize ) {
+					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement && ampFitText ) {
+				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+				if ( autoFontSize !== fitFontSize ) {
+					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
+				}
+			}
+
+			break;
+	}
+};
+
+/**
  * Sets width and height for blocks if they haven't been modified yet.
  *
  * @param {string} clientId Block ID.
@@ -1080,7 +1183,9 @@ export const maybeSetInitialSize = ( clientId ) => {
 		 */
 		case 'core/image':
 			if ( ! width && ! height && attributes.id > 0 ) {
-				const media = select( 'core' ).getMedia( attributes.id );
+				const { getMedia } = select( 'core' );
+
+				const media = getMedia( attributes.id );
 				// If the width and height haven't been set for the media, we should get it from the original image.
 				if ( media && media.media_details ) {
 					const { height: imageHeight, width: imageWidth } = media.media_details;
@@ -1103,6 +1208,7 @@ export const maybeSetInitialSize = ( clientId ) => {
 		case 'amp/amp-story-text':
 			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
 				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
+
 				if ( element && element.offsetHeight !== height ) {
 					updateBlockAttributes( clientId, {
 						height: element.offsetHeight,
@@ -1115,13 +1221,13 @@ export const maybeSetInitialSize = ( clientId ) => {
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
 		case 'amp/amp-story-post-title':
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				const slug = name.replace( '/', '-' );
+			const slug = name.replace( '/', '-' );
+			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 
-				const element = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-				if ( element && element.offsetHeight > height ) {
+			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
+				if ( metaBlockElement && metaBlockElement.offsetHeight > height ) {
 					updateBlockAttributes( clientId, {
-						height: element.offsetHeight,
+						height: metaBlockElement.offsetHeight,
 					} );
 				}
 			}

@@ -27,7 +27,7 @@ class EditorCarousel extends Component {
 	}
 
 	translateWrapper() {
-		const wrapper = document.querySelector( '.editor-writing-flow .editor-block-list__layout' );
+		const wrapper = document.querySelector( '#amp-story-controls + .block-editor-block-list__layout' );
 
 		if ( ! wrapper ) {
 			return;
