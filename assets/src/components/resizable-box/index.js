@@ -75,7 +75,7 @@ export default ( props ) => {
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
-				if ( imageWrapper && 'core/image' === blockName ) {
+				if ( 'core/image' === blockName ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
 				onResizeStart();
@@ -121,7 +121,7 @@ export default ( props ) => {
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
 				// If it's image, let's change the width and height of the image, too.
-				if ( 'core/image' === blockName ) {
+				if ( imageWrapper && 'core/image' === blockName ) {
 					imageWrapper.style.width = appliedWidth + 'px';
 					imageWrapper.style.height = appliedHeight + 'px';
 				}
