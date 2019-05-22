@@ -174,6 +174,8 @@ class AMP_Story_Post_Type {
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
 
+		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'export_latest_stories_block_editor_data' ), 100 );
+
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_stories_styles' ) );
 
 		// Remove unnecessary settings.
@@ -568,6 +570,10 @@ class AMP_Story_Post_Type {
 	 * Export data used for Latest Stories block.
 	 */
 	public static function export_latest_stories_block_editor_data() {
+		if ( self::POST_TYPE_SLUG === get_current_screen()->post_type ) {
+			return;
+		}
+
 		$url = add_query_arg(
 			'ver',
 			wp_styles()->registered[ self::STORY_CARD_CSS_SLUG ]->ver,
@@ -599,10 +605,15 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-stories.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			'amp-story-editor',
 			amp_get_asset_url( 'js/amp-stories.js' ),
-			array( 'wp-dom-ready', 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components', 'amp-editor-blocks' ),
+			array_merge( $script_dependencies, array( 'amp-editor-blocks' ) ),
 			AMP__VERSION,
 			false
 		);

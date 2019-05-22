@@ -11,7 +11,7 @@ module.exports = function( grunt ) {
 		// Clean up the build.
 		clean: {
 			compiled: {
-				src: [ 'assets/js/*-compiled.js' ],
+				src: [ 'assets/js/*.js', '!assets/js/amp-service-worker-runtime-precaching.js', 'assets/js/*.deps.json' ],
 			},
 			build: {
 				src: [ 'build' ],
@@ -88,11 +88,12 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|postcss\.config\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|postcss\.config\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src|docker-compose\.yml|babel\.config\.js)/.test( file );
 			} );
 
 			paths.push( 'vendor/autoload.php' );
 			paths.push( 'assets/js/*.js' );
+			paths.push( 'assets/js/*.deps.json' );
 			paths.push( 'assets/css/*.css' );
 			paths.push( 'vendor/composer/**' );
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );

@@ -19,6 +19,7 @@ function PreviewPicker( {
 	defaultOption,
 	onChange,
 	label,
+	id,
 	renderToggle,
 	renderOption,
 	ariaLabel,
@@ -26,7 +27,7 @@ function PreviewPicker( {
 	const currentOption = options.find( ( option ) => value && option.value === value ) || defaultOption;
 
 	return (
-		<BaseControl label={ label }>
+		<BaseControl label={ label } id={ id }>
 			<div className="components-preview-picker__buttons">
 				<Dropdown
 					className="components-preview-picker__dropdown"

@@ -2,7 +2,12 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	margin: 0;
 }
 
-.has-background {
+.amp-story-block-wrapper > h1,
+.amp-story-block-wrapper > h2,
+.amp-story-block-wrapper > p,
+.wp-block-amp-amp-story-post-author,
+.wp-block-amp-amp-story-post-title,
+.wp-block-amp-amp-story-post-date {
 	padding: 7px !important;
 	display: flex;
 }

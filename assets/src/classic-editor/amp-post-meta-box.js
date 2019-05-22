@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import jQuery from 'jquery';
+
+/**
  * AMP Post Meta Box.
  *
  * @todo Rename this to be just the ampEditPostScreen?
@@ -172,4 +177,4 @@ window.ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
 	};
 
 	return component;
-}( window.jQuery ) );
+}( jQuery ) );

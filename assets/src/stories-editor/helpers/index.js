@@ -150,7 +150,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
-			return 30;
+			return 50;
 
 		case 'amp/amp-story-post-title':
 			return 100;
@@ -704,9 +704,9 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
  */
 export const getPercentageFromPixels = ( axis, pixelValue ) => {
 	if ( 'x' === axis ) {
-		return Math.round( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 );
+		return Number( ( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) );
 	} else if ( 'y' === axis ) {
-		return Math.round( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 );
+		return Number( ( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 ).toFixed( 2 ) );
 	}
 	return 0;
 };
@@ -931,16 +931,30 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		supports,
 		attributes: schema,
 		save: ( { attributes } ) => {
+			const { ampFitText } = attributes;
+
 			const className = getClassNameFromBlockAttributes( attributes );
 			const styles = getStylesFromBlockAttributes( attributes );
 
+			if ( ! ampFitText ) {
+				return (
+					<RichText.Content
+						tagName={ tagName }
+						style={ styles }
+						className={ className }
+						value="{content}" // Placeholder to be replaced server-side.
+					/>
+				);
+			}
+
+			const ContentTag = tagName;
+
 			return (
-				<RichText.Content
-					tagName={ tagName }
+				<ContentTag
 					style={ styles }
-					className={ className }
-					value="{content}" // Placeholder to be replaced server-side.
-				/>
+					className={ className }>
+					<amp-fit-text layout="flex-item" className="amp-text-content">{ '{content}' }</amp-fit-text>
+				</ContentTag>
 			);
 		},
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
@@ -1078,8 +1092,8 @@ export const maybeSetInitialSize = ( clientId ) => {
 					}
 
 					updateBlockAttributes( clientId, {
-						width: Math.round( width / ratio ),
-						height: Math.round( height / ratio ),
+						width: Math.round( imageWidth / ratio ),
+						height: Math.round( imageHeight / ratio ),
 					} );
 				}
 			}
@@ -1165,6 +1179,70 @@ export const maybeInitializeAnimations = () => {
 			}
 		}
 	}
+};
+
+/**
+ * Get the distance between two points based on pythagorean.
+ *
+ * @param {number} deltaX Difference between X coordinates.
+ * @param {number} deltaY Difference between Y coordinates.
+ * @return {number} Difference between the two points.
+ */
+const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
+
+/**
+ * Converts degrees to radian.
+ *
+ * @param {number} angle Angle.
+ * @return {number} Radian.
+ */
+export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
+
+/**
+ * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
+ *
+ * @param {Object} event MouseEvent.
+ * @param {number} angle Rotation angle.
+ * @param {number} lastSeenX Starting X coordinate.
+ * @param {number} lastSeenY Starint Y coordinate.
+ * @param {string} direction Direction of resizing.
+ * @return {Object} Width and height values.
+ */
+export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
+	const deltaY = event.clientY - lastSeenY;
+	const deltaX = event.clientX - lastSeenX;
+	const deltaL = getDelta( deltaX, deltaY );
+
+	// Get the angle between the two points.
+	const alpha = Math.atan2( deltaY, deltaX );
+	// Get the difference with rotation angle.
+	const beta = alpha - getRadianFromDeg( angle );
+	const deltaW = 'right' === direction ? deltaL * Math.cos( beta ) : 0;
+	const deltaH = 'bottom' === direction ? deltaL * Math.sin( beta ) : 0;
+
+	return {
+		deltaW,
+		deltaH,
+	};
+};
+
+/**
+ * Get block's left and top position based on width, height, and radian.
+ *
+ * @param {number} width Width.
+ * @param {number} height Height.
+ * @param {number} radian Radian.
+ * @return {{top: number, left: number}} Top and left positioning.
+ */
+export const getBlockPositioning = ( width, height, radian ) => {
+	const x = -width / 2;
+	const y = height / 2;
+	const rotatedX = ( y * Math.sin( radian ) ) + ( x * Math.cos( radian ) );
+	const rotatedY = ( y * Math.cos( radian ) ) - ( x * Math.sin( radian ) );
+	return {
+		left: rotatedX - x,
+		top: rotatedY - y,
+	};
 };
 
 /**
