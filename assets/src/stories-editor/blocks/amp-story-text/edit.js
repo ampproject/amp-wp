@@ -62,8 +62,13 @@ class TextBlockEdit extends Component {
 
 	onReplace( blocks ) {
 		const { attributes, onReplace, name } = this.props;
+		// Make sure that 'undefined' values aren't passed into onReplace.
+		blocks = blocks.filter( ( block ) => 'undefined' !== typeof block );
+		if ( ! blocks.length ) {
+			return;
+		}
 		onReplace( blocks.map( ( block, index ) => (
-			index === 0 && block && block.name === name ?
+			index === 0 && block.name === name ?
 				{ ...block,
 					attributes: {
 						...attributes,
