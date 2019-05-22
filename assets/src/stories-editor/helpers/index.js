@@ -152,7 +152,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
-			return 30;
+			return 50;
 
 		case 'amp/amp-story-post-title':
 			return 100;
@@ -969,16 +969,30 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		supports,
 		attributes: schema,
 		save: ( { attributes } ) => {
+			const { ampFitText } = attributes;
+
 			const className = getClassNameFromBlockAttributes( attributes );
 			const styles = getStylesFromBlockAttributes( attributes );
 
+			if ( ! ampFitText ) {
+				return (
+					<RichText.Content
+						tagName={ tagName }
+						style={ styles }
+						className={ className }
+						value="{content}" // Placeholder to be replaced server-side.
+					/>
+				);
+			}
+
+			const ContentTag = tagName;
+
 			return (
-				<RichText.Content
-					tagName={ tagName }
+				<ContentTag
 					style={ styles }
-					className={ className }
-					value="{content}" // Placeholder to be replaced server-side.
-				/>
+					className={ className }>
+					<amp-fit-text layout="flex-item" className="amp-text-content">{ '{content}' }</amp-fit-text>
+				</ContentTag>
 			);
 		},
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),

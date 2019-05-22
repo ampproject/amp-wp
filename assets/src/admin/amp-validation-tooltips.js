@@ -1,4 +1,12 @@
-/* global jQuery */
+/**
+ * External dependencies
+ */
+import jQuery from 'jquery';
+
+/**
+ * WordPress dependencies
+ */
+import domReady from '@wordpress/dom-ready';
 
 // WIP Pointer function
 function sourcesPointer() {
@@ -14,5 +22,4 @@ function sourcesPointer() {
 	} );
 }
 
-// Run at DOM ready.
-jQuery( sourcesPointer );
+domReady( sourcesPointer );

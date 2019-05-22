@@ -136,10 +136,15 @@ class AMP_Editor_Blocks {
 			);
 		}
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-editor-blocks.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			$script_handle,
 			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'wp-editor', 'wp-edit-post', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);

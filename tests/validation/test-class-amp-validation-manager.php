@@ -1403,7 +1403,17 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::enqueue_block_validation();
 
 		$script                = wp_scripts()->registered[ $slug ];
-		$expected_dependencies = array( 'wp-i18n' );
+		$expected_dependencies = array(
+			'lodash',
+			'wp-block-editor',
+			'wp-components',
+			'wp-compose',
+			'wp-data',
+			'wp-element',
+			'wp-hooks',
+			'wp-i18n',
+			'wp-polyfill',
+		);
 
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
 		$this->assertEqualSets( $expected_dependencies, $script->deps );

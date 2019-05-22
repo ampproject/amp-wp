@@ -150,11 +150,16 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION
 		);
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
 			self::ASSETS_HANDLE,
-			amp_get_asset_url( 'js/amp-post-meta-box.js' ),
-			array( 'jquery' ),
+			amp_get_asset_url( 'js/' . self::ASSETS_HANDLE . '.js' ),
+			$script_dependencies,
 			AMP__VERSION,
 			false
 		);
@@ -197,10 +202,15 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
 		wp_enqueue_script(
 			self::BLOCK_ASSET_HANDLE,
 			amp_get_asset_url( 'js/' . self::BLOCK_ASSET_HANDLE . '.js' ),
-			array( 'wp-hooks', 'wp-i18n', 'wp-components' ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);

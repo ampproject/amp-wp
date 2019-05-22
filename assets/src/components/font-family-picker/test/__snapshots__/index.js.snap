@@ -7,11 +7,12 @@ exports[`FontFamilyPicker should render a default button if no font is selected 
   <div
     class="components-base-control__field"
   >
-    <span
+    <label
       class="components-base-control__label"
+      for="amp-stories-font-family-picker"
     >
       Font Family
-    </span>
+    </label>
     <div
       class="components-preview-picker__buttons"
     >
@@ -39,11 +40,12 @@ exports[`FontFamilyPicker should render the selected font name 1`] = `
   <div
     class="components-base-control__field"
   >
-    <span
+    <label
       class="components-base-control__label"
+      for="amp-stories-font-family-picker"
     >
       Font Family
-    </span>
+    </label>
     <div
       class="components-preview-picker__buttons"
     >
@@ -71,11 +73,12 @@ exports[`FontFamilyPicker should render the selected font svg preview 1`] = `
   <div
     class="components-base-control__field"
   >
-    <span
+    <label
       class="components-base-control__label"
+      for="amp-stories-font-family-picker"
     >
       Font Family
-    </span>
+    </label>
     <div
       class="components-preview-picker__buttons"
     >
