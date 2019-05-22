@@ -25,6 +25,10 @@ import { maybeUpdateFontSize } from '../stories-editor/helpers';
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
+	componentDidMount() {
+		maybeUpdateFontSize( this.props );
+	}
+
 	componentDidUpdate( prevProps ) {
 		const { attributes, isSelected } = this.props;
 		const {
@@ -84,7 +88,7 @@ class MetaBlockEdit extends Component {
 					style={ {
 						backgroundColor: appliedBackgroundColor,
 						color: textColor.color,
-						fontSize: ampFitText ? autoFontSize : userFontSize,
+						fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 						textAlign: align,
 					} }
 					className={ classnames( className, {
