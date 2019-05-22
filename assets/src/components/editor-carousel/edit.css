@@ -8,10 +8,6 @@
 	}
 }
 
-#amp-story-editor {
-	overflow: hidden;
-}
-
 #amp-story-editor > .editor-block-list__layout {
 	padding-left: 0;
 	padding-right: 0;
