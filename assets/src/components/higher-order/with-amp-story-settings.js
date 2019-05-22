@@ -237,6 +237,8 @@ export default createHigherOrderComponent(
 				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 
+			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
+
 			return (
 				<Fragment>
 					{ isMovableBlock && (
@@ -246,8 +248,8 @@ export default createHigherOrderComponent(
 							isDraggable={ ! props.isPartOfMultiSelection }
 						/>
 					) }
-					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && (
+					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
+					{ isMovableBlock && ! isEmptyImageBlock && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
