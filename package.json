@@ -48,7 +48,7 @@
     "@wordpress/keycodes": "2.3.0",
     "@wordpress/plugins": "2.3.0",
     "@wordpress/postcss-themes": "2.1.0",
-    "@wordpress/scripts": "3.2.0",
+    "@wordpress/scripts": "3.2.1",
     "@wordpress/url": "2.6.0",
     "@wordpress/wordcount": "2.3.0",
     "autoprefixer": "9.5.1",
