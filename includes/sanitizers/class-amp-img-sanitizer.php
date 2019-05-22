@@ -111,6 +111,13 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Short-circuit emoji images from needing to make requests out to https://s.w.org/.
+			if ( 'wp-smiley' === $node->getAttribute( 'class' ) ) {
+				$node->setAttribute( 'width', '72' );
+				$node->setAttribute( 'height', '72' );
+				$node->setAttribute( 'noloading', '' );
+			}
+
 			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
 				$layout = $node->getAttribute( 'data-amp-layout' );
 			} elseif ( $node->hasAttribute( 'layout' ) ) {
