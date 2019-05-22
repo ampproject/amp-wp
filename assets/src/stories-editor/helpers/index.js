@@ -353,16 +353,10 @@ export const filterBlockTransforms = ( settings, name ) => {
 	}
 
 	const transforms = {
-		to: settings.transforms.to,
-		from: [],
+		...settings.transforms,
+		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
 	};
 
-	settings.transforms.from.forEach( function( transform ) {
-		if ( 'prefix' !== transform.type ) {
-			transforms.from.push( transform );
-			return true;
-		}
-	} );
 	return {
 		...settings,
 		transforms,
