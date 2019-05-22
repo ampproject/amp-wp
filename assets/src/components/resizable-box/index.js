@@ -75,7 +75,7 @@ export default ( props ) => {
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
-				if ( 'core/image' === blockName ) {
+				if ( imageWrapper && 'core/image' === blockName ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
 				onResizeStart();
