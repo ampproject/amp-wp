@@ -24,10 +24,23 @@ let lastSeenX = 0,
 	lastSeenY = 0,
 	blockElement = null,
 	blockElementTop,
-	blockElementLeft;
+	blockElementLeft,
+	imageWrapper;
 
 export default ( props ) => {
-	const { isSelected, angle, width, height, minWidth, minHeight, onResizeStart, onResizeStop, children, ...otherProps } = props;
+	const {
+		isSelected,
+		angle,
+		blockName,
+		width,
+		height,
+		minWidth,
+		minHeight,
+		onResizeStart,
+		onResizeStop,
+		children,
+		...otherProps
+	} = props;
 
 	return (
 		<ResizableBox
@@ -62,6 +75,9 @@ export default ( props ) => {
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
+				if ( 'core/image' === blockName ) {
+					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
+				}
 				onResizeStart();
 			} }
 			onResize={ ( event, direction, element ) => {
@@ -104,6 +120,11 @@ export default ( props ) => {
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+				// If it's image, let's change the width and height of the image, too.
+				if ( 'core/image' === blockName ) {
+					imageWrapper.style.width = appliedWidth + 'px';
+					imageWrapper.style.height = appliedHeight + 'px';
+				}
 			} }
 		>
 			{ children }

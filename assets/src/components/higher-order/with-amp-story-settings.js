@@ -259,6 +259,7 @@ export default createHigherOrderComponent(
 								setAttributes( value );
 								stopBlockActions();
 							} }
+							blockName={ name }
 							onResizeStart={ () => {
 								startBlockActions();
 							} }
