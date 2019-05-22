@@ -85,9 +85,9 @@ class TemplateInserter extends Component {
 
 					const onSelect = ( item ) => {
 						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
+						const skeletonBlock = createSkeletonTemplate( block );
+						insertBlock( skeletonBlock );
 						onClose();
-
-						insertBlock( createSkeletonTemplate( block ) );
 					};
 
 					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );

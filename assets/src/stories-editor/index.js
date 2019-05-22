@@ -35,6 +35,7 @@ import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
 	filterBlockAttributes,
+	filterBlockTransforms,
 	addAMPAttributes,
 	addAMPExtraProps,
 	getTotalAnimationDuration,
@@ -280,6 +281,7 @@ plugins.keys().forEach( ( modulePath ) => {
 
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransforms', filterBlockTransforms );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );

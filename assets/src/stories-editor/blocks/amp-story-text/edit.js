@@ -18,9 +18,8 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { calculateFontSize } from '../../helpers';
+import { maybeUpdateFontSize } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
-import { MIN_FONT_SIZE, MAX_FONT_SIZE } from '../../constants';
 import './edit.css';
 
 class TextBlockEdit extends Component {
@@ -30,13 +29,15 @@ class TextBlockEdit extends Component {
 		this.onReplace = this.onReplace.bind( this );
 	}
 
+	componentDidMount() {
+		maybeUpdateFontSize( this.props );
+	}
+
 	componentDidUpdate( prevProps ) {
-		const { clientId, attributes, isSelected, setAttributes } = this.props;
+		const { attributes, isSelected } = this.props;
 		const {
 			height,
 			width,
-			autoFontSize,
-			ampFitText,
 		} = attributes;
 
 		// If not selected, only proceed if height or width has changed.
@@ -48,16 +49,7 @@ class TextBlockEdit extends Component {
 			return;
 		}
 
-		if ( ampFitText && attributes.content.length ) {
-			// Check if the font size is OK, if not, update the font size.
-			const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
-			if ( element ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
-					setAttributes( { autoFontSize: fitFontSize } );
-				}
-			}
-		}
+		maybeUpdateFontSize( this.props );
 	}
 
 	onReplace( blocks ) {
@@ -127,7 +119,7 @@ class TextBlockEdit extends Component {
 					style={ {
 						backgroundColor: appliedBackgroundColor,
 						color: textColor.color,
-						fontSize: ampFitText ? autoFontSize : userFontSize,
+						fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 						fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 						textAlign: align,
 					} }
