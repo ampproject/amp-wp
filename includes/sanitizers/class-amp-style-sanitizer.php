@@ -1444,14 +1444,17 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$parsed_stylesheet['validation_results']
 		);
 
-		/**
-		 * CSS Doc.
-		 *
-		 * @var Document $css_document
-		 */
-		$css_document = $parsed_stylesheet['css_document'];
-
 		if ( ! empty( $parsed_stylesheet['css_document'] ) && method_exists( $css_list, 'replace' ) ) {
+			/**
+			 * CSS Doc.
+			 *
+			 * @var Document $css_document
+			 */
+			$css_document = $parsed_stylesheet['css_document'];
+
+			// Work around bug in \Sabberworm\CSS\CSSList\CSSList::replace() when array keys are not 0-based.
+			$css_list->setContents( array_values( $css_list->getContents() ) );
+
 			$css_list->replace( $item, $css_document->getContents() );
 		} else {
 			$css_list->remove( $item );
