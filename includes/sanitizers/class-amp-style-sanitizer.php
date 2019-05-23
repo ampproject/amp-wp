@@ -2403,6 +2403,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'pending_stylesheets' => array(),
 				'remove_unused_rules' => $this->args['remove_unused_rules'],
 				'included_count'      => 0,
+				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
 			),
 			'keyframes' => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
@@ -2411,26 +2412,21 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'pending_stylesheets' => array(),
 				'remove_unused_rules' => 'never', // Not relevant.
 				'included_count'      => 0,
+				'import_front_matter' => '',
 			),
 		);
 
 		$imported_font_urls = array();
 
-		/*
-		 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
-		 * @import rules. These must be moved to the beginning to be honored.
-		 */
-		$imports = array();
-
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each (before tree shaking).
-		foreach ( $this->pending_stylesheets as $pending_stylesheet ) {
+		foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
 			$size = 0;
-			foreach ( $pending_stylesheet['stylesheet'] as $i => $part ) {
+			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
 				if ( is_string( $part ) ) {
 					$size += strlen( $part );
-					if ( '@import' === substr( $part, 0, 7 ) ) { // @todo Only when fetch failed, right?
-						$imports[] = $part;
-						unset( $pending_stylesheet['stylesheet'][ $i ] );
+					if ( '@import' === substr( $part, 0, 7 ) ) {
+						$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
+						unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
 					}
 				} elseif ( is_array( $part ) ) {
 					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
@@ -2438,7 +2434,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 			$stylesheet_groups[ $pending_stylesheet['group'] ]['total_size'] += $size; // Used in finalize_stylesheet_group() to determine if tree shaking is needed.
-			$stylesheet_groups[ $pending_stylesheet['group'] ]['imports']     = $imports; // @todo Shouldn't this be merging with previous??
 
 			if ( ! empty( $pending_stylesheet['imported_font_urls'] ) ) {
 				$imported_font_urls = array_merge( $imported_font_urls, $pending_stylesheet['imported_font_urls'] );
@@ -2465,7 +2460,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->head->appendChild( $this->amp_custom_style_element );
 			}
 
-			$css  = implode( '', $stylesheet_groups['custom']['imports'] ); // For native dirty AMP.
+			/*
+			 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
+			 * @import rules. These must be moved to the beginning to be honored.
+			 */
+			$css = $stylesheet_groups['custom']['import_front_matter'];
+
 			$css .= implode( '', $this->get_stylesheets() );
 			$css .= $stylesheet_groups['custom']['source_map_comment'];
 
@@ -2485,7 +2485,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$excluded_size          = 0;
 			$excluded_original_size = 0;
 			$included_sources       = array();
-			foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
+			foreach ( $this->pending_stylesheets as $j => $pending_stylesheet ) {
 				if ( 'custom' !== $pending_stylesheet['group'] || ! ( $pending_stylesheet['node'] instanceof DOMElement ) || ! empty( $pending_stylesheet['duplicate'] ) ) {
 					continue;
 				}
@@ -2625,7 +2625,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					)
 				);
 			} else {
-				$css  = implode(
+				$css = $stylesheet_groups['keyframes']['import_front_matter'];
+
+				$css .= implode(
 					'',
 					wp_list_pluck(
 						array_filter(
