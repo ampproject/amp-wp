@@ -125,3 +125,7 @@
 div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
 	display: none;
 }
+
+.wp-block .is-amp-fit-text {
+	overflow-wrap: normal;
+}

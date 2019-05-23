@@ -106,7 +106,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'analytics'                => array(),
 				'auto_accept_sanitization' => true,
 				'accept_tree_shaking'      => true,
-				'disable_admin_bar'        => false,
 				'all_templates_supported'  => true,
 				'supported_templates'      => array( 'is_singular' ),
 				'enable_response_caching'  => true,

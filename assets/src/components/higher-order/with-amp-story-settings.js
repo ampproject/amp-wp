@@ -237,6 +237,8 @@ export default createHigherOrderComponent(
 				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 
+			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
+
 			return (
 				<Fragment>
 					<StoryBlockMover
@@ -245,8 +247,9 @@ export default createHigherOrderComponent(
 						isDraggable={ ! props.isPartOfMultiSelection }
 						isMovable={ isMovableBlock }
 					>
-						{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
-						{ isMovableBlock && (
+
+						{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
+						{ isMovableBlock && ! isEmptyImageBlock && (
 							<ResizableBox
 								isSelected={ isSelected }
 								width={ width }
@@ -258,6 +261,7 @@ export default createHigherOrderComponent(
 									setAttributes( value );
 									stopBlockActions();
 								} }
+								blockName={ name }
 								onResizeStart={ () => {
 									startBlockActions();
 								} }
