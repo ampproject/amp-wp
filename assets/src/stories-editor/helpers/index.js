@@ -1224,10 +1224,12 @@ export const maybeSetInitialSize = ( clientId ) => {
 			const slug = name.replace( '/', '-' );
 			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				if ( metaBlockElement && metaBlockElement.offsetHeight > height ) {
+			if ( metaBlockElement && ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) ) {
+				const metaBlockElementHeight = ampFitText ? metaBlockElement.offsetHeight : metaBlockElement.scrollHeight;
+
+				if ( metaBlockElementHeight > height ) {
 					updateBlockAttributes( clientId, {
-						height: metaBlockElement.offsetHeight,
+						height: metaBlockElementHeight,
 					} );
 				}
 			}
