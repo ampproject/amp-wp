@@ -2969,7 +2969,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );
 		usort(
 			$pending_stylesheet_indices,
-			function( $a, $b ) use ( $group_config ) {
+			function( $a, $b ) {
 				return $this->pending_stylesheets[ $a ]['priority'] - $this->pending_stylesheets[ $b ]['priority'];
 			}
 		);
