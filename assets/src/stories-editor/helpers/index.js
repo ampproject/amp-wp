@@ -36,9 +36,11 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+} from '../constants';
+import {
 	MAX_FONT_SIZE,
 	MIN_FONT_SIZE,
-} from '../constants';
+} from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 
 const { ampStoriesFonts } = window;
