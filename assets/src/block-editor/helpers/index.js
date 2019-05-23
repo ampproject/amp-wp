@@ -133,7 +133,8 @@ export const addAMPAttributes = ( settings, name ) => {
 			attribute: 'max-font-size',
 		};
 		settings.attributes.height = {
-			default: 'core/image' === name ? 200 : 50,
+			// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
+			default: 'core/image' === name ? 200 : Math.ceil( MAX_FONT_SIZE / 10 ) * 10,
 			source: 'attribute',
 			selector: 'amp-fit-text',
 			attribute: 'height',
@@ -580,7 +581,7 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 						label={ __( 'Height', 'amp' ) }
 						value={ height }
 						min={ 1 }
-						onCHange={ ( nextHeight ) => {
+						onChange={ ( nextHeight ) => {
 							setAttributes( { height: nextHeight } );
 						} }
 					/>
