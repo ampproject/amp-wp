@@ -133,7 +133,8 @@ export const addAMPAttributes = ( settings, name ) => {
 			attribute: 'max-font-size',
 		};
 		settings.attributes.height = {
-			default: 'core/image' === name ? 200 : 50,
+			// Needs to be higher than the maximum font size, which defaults to MAX_FONT_SIZE
+			default: 'core/image' === name ? 200 : 80,
 			source: 'attribute',
 			selector: 'amp-fit-text',
 			attribute: 'height',
