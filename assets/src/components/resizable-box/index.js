@@ -24,10 +24,28 @@ let lastSeenX = 0,
 	lastSeenY = 0,
 	blockElement = null,
 	blockElementTop,
-	blockElementLeft;
+	blockElementLeft,
+	imageWrapper;
 
 export default ( props ) => {
-	const { isSelected, angle, width, height, minWidth, minHeight, onResizeStart, onResizeStop, children, ...otherProps } = props;
+	const {
+		isSelected,
+		angle,
+		blockName,
+		minWidth,
+		minHeight,
+		onResizeStart,
+		onResizeStop,
+		children,
+		...otherProps
+	} = props;
+
+	let {
+		width,
+		height,
+	} = props;
+
+	const isImage = 'core/image' === blockName;
 
 	return (
 		<ResizableBox
@@ -62,11 +80,19 @@ export default ( props ) => {
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
+				if ( isImage ) {
+					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
+				}
 				onResizeStart();
 			} }
 			onResize={ ( event, direction, element ) => {
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
+				// Handle case where media is inserted from URL.
+				if ( isImage && ! width && ! height ) {
+					width = blockElement.clientWidth;
+					height = blockElement.clientHeight;
+				}
 				const appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 				const appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
 
@@ -104,6 +130,11 @@ export default ( props ) => {
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+				// If it's image, let's change the width and height of the image, too.
+				if ( imageWrapper && isImage ) {
+					imageWrapper.style.width = appliedWidth + 'px';
+					imageWrapper.style.height = appliedHeight + 'px';
+				}
 			} }
 		>
 			{ children }
