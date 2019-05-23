@@ -40,7 +40,7 @@ const ampStories = {
 	...defaultConfig,
 	...sharedConfig,
 	entry: {
-		'amp-stories': './assets/src/stories-editor/index.js',
+		'amp-stories-editor': './assets/src/stories-editor/index.js',
 	},
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
@@ -80,7 +80,7 @@ const ampStories = {
 		splitChunks: {
 			cacheGroups: {
 				stories: {
-					name: 'amp-stories',
+					name: 'amp-stories-editor',
 					test: /\.css$/,
 					chunks: 'all',
 					enforce: true,
@@ -110,7 +110,6 @@ const blockEditor = {
 	},
 	entry: {
 		'amp-block-editor': './assets/src/block-editor/index.js',
-		'amp-editor-blocks': './assets/src/block-editor/amp-editor-blocks.js',
 		'amp-block-validation': './assets/src/block-validation/index.js',
 	},
 	module: {

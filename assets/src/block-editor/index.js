@@ -9,17 +9,27 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-// @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
-import withCroppedFeaturedImage from '../components/with-cropped-featured-image';
-import withFeaturedImageNotice from '../components/higher-order/with-featured-image-notice';
+import { withCroppedFeaturedImage, withFeaturedImageNotice } from '../components';
+import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
 const { ampLatestStoriesBlockData } = window;
 
-// Display a notice in the Featured Image panel if none exists or its width is too small.
+addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
+addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
+addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
+
+const plugins = require.context( './plugins', true, /.*\.js$/ );
+
+plugins.keys().forEach( ( modulePath ) => {
+	const { name, render, icon } = plugins( modulePath );
+
+	registerPlugin( name, { icon, render } );
+} );
 
 /*
  * If there's no theme support, unregister blocks that are only meant for AMP.
@@ -36,14 +46,6 @@ const AMP_DEPENDENT_BLOCKS = [
 	'amp/amp-springboard-player',
 	'amp/amp-timeago',
 ];
-
-const plugins = require.context( './plugins', true, /.*\.js$/ );
-
-plugins.keys().forEach( ( modulePath ) => {
-	const { name, render, icon } = plugins( modulePath );
-
-	registerPlugin( name, { icon, render } );
-} );
 
 const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 

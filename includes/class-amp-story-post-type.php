@@ -67,11 +67,25 @@ class AMP_Story_Post_Type {
 	const REWRITE_SLUG = 'stories';
 
 	/**
+	 * AMP Stories script handle.
+	 *
+	 * @var string
+	 */
+	const AMP_STORIES_SCRIPT_HANDLE = 'amp-stories-editor';
+
+	/**
 	 * AMP Stories style handle.
 	 *
 	 * @var string
 	 */
-	const AMP_STORIES_STYLE_HANDLE = 'amp-story-style';
+	const AMP_STORIES_STYLE_HANDLE = 'amp-stories';
+
+	/**
+	 * AMP Stories editor style handle.
+	 *
+	 * @var string
+	 */
+	const AMP_STORIES_EDITOR_STYLE_HANDLE = 'amp-stories-editor';
 
 	/**
 	 * Check if the required version of block capabilities available.
@@ -413,20 +427,20 @@ class AMP_Story_Post_Type {
 		}
 
 		wp_enqueue_style(
-			'amp-stories-editor',
-			amp_get_asset_url( 'css/amp-stories-compiled.css' ),
+			self::AMP_STORIES_STYLE_HANDLE,
+			amp_get_asset_url( 'css/amp-stories.css' ),
 			array( 'wp-edit-blocks' ),
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( 'amp-stories-editor', 'rtl', true );
-
 		wp_enqueue_style(
-			'amp-stories-editor-blocks',
-			amp_get_asset_url( 'css/amp-editor-story-blocks.css' ),
-			array( 'wp-edit-blocks', 'amp-stories-editor' ),
+			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
+			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
+			array( 'wp-edit-blocks', 'amp-stories' ),
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', true );
 
 		self::enqueue_general_styles();
 	}
@@ -605,15 +619,15 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-stories.deps.json';
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 			: array();
 
 		wp_enqueue_script(
-			'amp-story-editor',
-			amp_get_asset_url( 'js/amp-stories.js' ),
-			array_merge( $script_dependencies, array( 'amp-editor-blocks' ) ),
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			amp_get_asset_url( 'js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.js' ),
+			$script_dependencies,
 			AMP__VERSION,
 			false
 		);
@@ -625,14 +639,14 @@ class AMP_Story_Post_Type {
 			$translations = wp_json_encode( $locale_data );
 
 			wp_add_inline_script(
-				'amp-story-editor',
+				self::AMP_STORIES_SCRIPT_HANDLE,
 				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
 				'before'
 			);
 		}
 
 		wp_localize_script(
-			'amp-story-editor',
+			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
 			self::get_fonts()
 		);

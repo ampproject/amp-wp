@@ -202,6 +202,13 @@ class AMP_Post_Meta_Box {
 			return;
 		}
 
+		wp_enqueue_style(
+			self::BLOCK_ASSET_HANDLE,
+			amp_get_asset_url( 'css/' . self::BLOCK_ASSET_HANDLE . '.css' ),
+			array(),
+			AMP__VERSION
+		);
+
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
