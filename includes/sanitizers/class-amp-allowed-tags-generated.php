@@ -5328,6 +5328,7 @@ class AMP_Allowed_Tags_Generated {
 					'artwork' => array(),
 					'attribution' => array(),
 					'autoplay' => array(
+						'mandatory' => true,
 						'value' => array(
 							'',
 						),

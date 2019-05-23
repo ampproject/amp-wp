@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2-alpha
+ * Version: 1.2-beta1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -146,7 +146,7 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor.js' ) ) {
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
@@ -200,7 +200,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-alpha' );
+define( 'AMP__VERSION', '1.2-beta1' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -332,6 +332,8 @@ function amp_init() {
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
+	AMP_Post_Type_Support::add_post_type_support();
+	AMP_Story_Post_Type::register();
 	AMP_Service_Worker::init();
 	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
 
@@ -343,7 +345,7 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
 	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+	add_action( 'wp_loaded', 'amp_story_templates' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_admin_pointer' );
 	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
@@ -412,6 +414,10 @@ function amp_maybe_add_actions() {
 	// The remaining logic here is for transitional mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
+		return;
+	}
+
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return;
 	}
 

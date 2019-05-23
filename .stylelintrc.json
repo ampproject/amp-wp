@@ -1,0 +1,7 @@
+{
+  "extends": "stylelint-config-wordpress",
+  "rules": {
+    "selector-type-no-unknown": [ true, { "ignore": ["custom-elements"] } ],
+    "number-leading-zero": null
+  }
+}

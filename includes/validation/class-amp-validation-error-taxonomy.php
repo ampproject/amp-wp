@@ -888,6 +888,27 @@ class AMP_Validation_Error_Taxonomy {
 					th.column-status { width:15%; }
 				'
 					);
+
+					wp_register_style(
+						'amp-validation-tooltips',
+						amp_get_asset_url( 'css/amp-validation-tooltips.css' ),
+						array( 'wp-pointer' ),
+						AMP__VERSION
+					);
+
+					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
+					$script_dependencies = file_exists( $script_deps_path )
+						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						: array();
+
+					wp_register_script(
+						'amp-validation-tooltips',
+						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
+						array_merge( $script_dependencies, array( 'wp-pointer' ) ),
+						AMP__VERSION,
+						true
+					);
+
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
@@ -897,19 +918,10 @@ class AMP_Validation_Error_Taxonomy {
 
 					wp_enqueue_script(
 						'amp-validation-detail-toggle',
-						amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-						array( 'wp-dom-ready', 'amp-validation-tooltips' ),
+						amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
+						array( 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ),
 						AMP__VERSION,
 						true
-					);
-
-					wp_localize_script(
-						'amp-validation-detail-toggle',
-						'ampValidationI18n',
-						array(
-							'detailToggleBtnAriaLabel'  => esc_attr__( 'Toggle all details', 'amp' ),
-							'sourcesToggleBtnAriaLabel' => esc_attr__( 'Toggle all sources', 'amp' ),
-						)
 					);
 				}
 
@@ -921,10 +933,15 @@ class AMP_Validation_Error_Taxonomy {
 						AMP__VERSION
 					);
 
+					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
+					$script_dependencies = file_exists( $script_deps_path )
+						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						: array();
+
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',
-						amp_get_asset_url( 'js/amp-validation-single-error-url-details-compiled.js' ),
-						array( 'wp-dom-ready' ),
+						amp_get_asset_url( 'js/amp-validation-single-error-url-details.js' ),
+						$script_dependencies,
 						AMP__VERSION,
 						true
 					);

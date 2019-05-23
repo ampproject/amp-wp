@@ -41,7 +41,6 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
-			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
 			/*
@@ -118,66 +117,6 @@ class AMP_Editor_Blocks {
 		}
 
 		return $tags;
-	}
-
-	/**
-	 * Enqueue filters for extending core blocks attributes.
-	 * Has to be loaded before registering the blocks in registerCoreBlocks.
-	 */
-	public function enqueue_block_editor_assets() {
-
-		// Enqueue script and style for AMP-specific blocks.
-		if ( amp_is_canonical() ) {
-			wp_enqueue_style(
-				'amp-editor-blocks-style',
-				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
-				array(),
-				AMP__VERSION
-			);
-
-			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
-			wp_enqueue_script(
-				'amp-editor-blocks-build',
-				amp_get_asset_url( 'js/amp-blocks-compiled.js' ),
-				array( 'wp-editor', 'wp-blocks', 'lodash', 'wp-i18n', 'wp-element', 'wp-components' ),
-				AMP__VERSION
-			);
-
-			if ( function_exists( 'wp_set_script_translations' ) ) {
-				wp_set_script_translations( 'amp-editor-blocks-build', 'amp' );
-			}
-		}
-
-		wp_enqueue_script(
-			'amp-editor-blocks',
-			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			array( 'underscore', 'wp-hooks', 'wp-i18n', 'wp-components' ),
-			AMP__VERSION,
-			true
-		);
-
-		wp_add_inline_script(
-			'amp-editor-blocks',
-			sprintf(
-				'ampEditorBlocks.boot( %s );',
-				wp_json_encode(
-					array(
-						'hasThemeSupport' => current_theme_supports( AMP_Theme_Support::SLUG ),
-					)
-				)
-			)
-		);
-
-		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( 'amp-editor-blocks', 'amp' );
-		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$locale_data = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-			wp_add_inline_script(
-				'wp-i18n',
-				'wp.i18n.setLocaleData( ' . wp_json_encode( $locale_data ) . ', "amp" );',
-				'after'
-			);
-		}
 	}
 
 	/**

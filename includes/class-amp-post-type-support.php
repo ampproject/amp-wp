@@ -36,12 +36,17 @@ class AMP_Post_Type_Support {
 	 * @return string[] Post types eligible for AMP.
 	 */
 	public static function get_eligible_post_types() {
-		return array_values(
-			get_post_types(
-				array(
-					'public' => true,
-				),
-				'names'
+		return array_diff(
+			array_values(
+				get_post_types(
+					array(
+						'public' => true,
+					),
+					'names'
+				)
+			),
+			array(
+				AMP_Story_Post_Type::POST_TYPE_SLUG,
 			)
 		);
 	}
