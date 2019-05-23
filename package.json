@@ -62,7 +62,7 @@
     "cssnano": "4.1.10",
     "enzyme": "3.9.0",
     "eslint": "5.16.0",
-    "eslint-plugin-jest": "22.5.1",
+    "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-react": "7.13.0",
     "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
