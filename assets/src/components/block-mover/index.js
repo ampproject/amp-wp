@@ -16,10 +16,6 @@ import IgnoreNestedEvents from './ignore-nested-events';
 import './edit.css';
 
 export class BlockMover extends Component {
-	constructor() {
-		super( ...arguments );
-	}
-
 	render() {
 		const { children, isDraggable, isMovable, onDragStart, clientId, blockElementId } = this.props;
 
