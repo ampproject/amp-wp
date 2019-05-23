@@ -37,7 +37,6 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 	public function test_init() {
 		$this->instance->init();
 		if ( function_exists( 'register_block_type' ) ) {
-			$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_editor_assets' ) ) );
 			$this->assertEquals( 10, has_filter( 'wp_kses_allowed_html', array( $this->instance, 'whitelist_block_atts_in_wp_kses_allowed_html' ) ) );
 
 			// Because amp_is_canonical() is false, these should not be hooked.
@@ -52,28 +51,5 @@ class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
 			$this->assertEquals( 10, has_action( 'wp_print_footer_scripts', array( $this->instance, 'print_dirty_amp_scripts' ) ) );
 			remove_theme_support( 'amp' );
 		}
-	}
-
-	/**
-	 * Test enqueue_block_editor_assets().
-	 *
-	 * @covers \AMP_Editor_Blocks::enqueue_block_editor_assets()
-	 */
-	public function test_enqueue_block_editor_assets() {
-		set_current_screen( 'admin.php' );
-		$slug               = 'amp-editor-blocks';
-		$expected_file_name = 'amp-editor-blocks.js';
-		$this->instance->enqueue_block_editor_assets();
-		$scripts = wp_scripts();
-		$script  = $scripts->registered[ $slug ];
-
-		$this->assertEquals( $slug, $script->handle );
-		$this->assertEqualSets(
-			array( 'wp-block-editor', 'wp-components', 'wp-data', 'wp-element', 'wp-hooks', 'wp-i18n', 'wp-polyfill' ),
-			$script->deps
-		);
-		$this->assertContains( $expected_file_name, $script->src );
-		$this->assertEquals( AMP__VERSION, $script->ver );
-		$this->assertTrue( in_array( $slug, $scripts->queue, true ) );
 	}
 }
