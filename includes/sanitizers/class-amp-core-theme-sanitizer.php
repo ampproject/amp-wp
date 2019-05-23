@@ -1127,14 +1127,20 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function add_twentyfourteen_masthead_styles() {
 		add_action(
-			'wp_print_styles',
+			'wp_enqueue_scripts',
 			function() {
+				ob_start();
 				?>
 				<style>
 					/* Styles for featured content */
 					.slider #featured-content .post-thumbnail {
 						padding-top: 0; /* Override responsive hack which is handled by AMP layout. */
 						overflow: visible;
+					}
+					.featured-content .post-thumbnail amp-img {
+						position: static;
+						left: auto;
+						top: auto;
 					}
 					.slider #featured-content .hentry {
 						display: block;
@@ -1207,7 +1213,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							font-size: 32px;
 							line-height: 46px;
 						}
+						.featured-content .post-thumbnail amp-img > img {
+							object-fit: cover;
+							object-position: top;
+						}
 
+						@media screen and (max-width: 672px) {
+							.slider-control-paging {
+								float: none;
+								margin: 0;
+							}
+							.featured-content .post-thumbnail amp-img {
+								height: 55.49132947vw;
+							}
+							.slider-control-paging li {
+								display: inline-block;
+								float: none;
+							}
+						}
 						@media screen and (min-width: 673px) {
 							body.slider amp-carousel > .amp-carousel-button {
 								width: 48px;
@@ -1225,7 +1248,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					<?php endif; ?>
 				</style>
 				<?php
-			}
+				$css = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+
+				wp_add_inline_style( 'twentyfourteen-style', $css );
+			},
+			11
 		);
 	}
 
@@ -1262,33 +1289,55 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$featured_content->appendChild( $amp_state );
 
 		// Create the carousel slider.
-		$amp_carousel_id = 'twentyFourteenSlider';
-		$amp_carousel    = AMP_DOM_Utils::create_node(
+		$amp_carousel_desktop_id = 'twentyFourteenSliderDesktop';
+		$amp_carousel_mobile_id  = 'twentyFourteenSliderMobile';
+		$amp_carousel_attributes = array(
+			'layout'              => 'responsive',
+			'on'                  => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
+			'width'               => '100',
+			'type'                => 'slides',
+			'loop'                => '',
+			'data-amp-bind-slide' => $selected_slide_state_id,
+		);
+		$amp_carousel_desktop    = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'amp-carousel',
-			array(
-				'id'                  => $amp_carousel_id,
-				'layout'              => 'responsive',
-				'on'                  => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
-				'width'               => '100',
-				'height'              => '55.49132947', // Value comes from <https://github.com/WordPress/wordpress-develop/blob/fc2a8f0e11316d066a686995b8578d82cd5546cf/src/wp-content/themes/twentyfourteen/style.css#L3024>.
-				'type'                => 'slides',
-				'loop'                => '',
-				'data-amp-bind-slide' => $selected_slide_state_id,
+			array_merge(
+				$amp_carousel_attributes,
+				array(
+					'id'     => $amp_carousel_desktop_id,
+					'media'  => '(min-width: 672px)',
+					'height' => '55.49132947', // Value comes from <https://github.com/WordPress/wordpress-develop/blob/fc2a8f0e11316d066a686995b8578d82cd5546cf/src/wp-content/themes/twentyfourteen/style.css#L3024>.
+				)
 			)
 		);
+		$amp_carousel_mobile     = AMP_DOM_Utils::create_node(
+			$this->dom,
+			'amp-carousel',
+			array_merge(
+				$amp_carousel_attributes,
+				array(
+					'id'     => $amp_carousel_mobile_id,
+					'media'  => '(max-width: 672px)',
+					'height' => '73',
+				)
+			)
+		);
+
 		while ( $featured_content_inner->firstChild ) {
 			$node = $featured_content_inner->removeChild( $featured_content_inner->firstChild );
-			$amp_carousel->appendChild( $node );
+			$amp_carousel_desktop->appendChild( $node );
+			$amp_carousel_mobile->appendChild( $node->cloneNode( true ) );
 		}
-		$featured_content_inner->appendChild( $amp_carousel );
+		$featured_content_inner->appendChild( $amp_carousel_desktop );
+		$featured_content_inner->appendChild( $amp_carousel_mobile );
 
 		// Create the selector.
 		$amp_selector = $this->dom->createElement( 'amp-selector' );
 		$amp_selector->setAttribute( 'layout', 'container' );
 		$slider_control_nav = $this->dom->createElement( 'ol' );
 		$slider_control_nav->setAttribute( 'class', 'slider-control-nav slider-control-paging' );
-		$count = $amp_carousel->getElementsByTagName( 'article' )->length;
+		$count = $amp_carousel_desktop->getElementsByTagName( 'article' )->length;
 		for ( $i = 0; $i < $count; $i++ ) {
 			$li = $this->dom->createElement( 'li' );
 			$a  = $this->dom->createElement( 'a' );
