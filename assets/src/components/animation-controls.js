@@ -1,6 +1,7 @@
 /**
  * WordPress dependencies
  */
+import { withSelect } from '@wordpress/data';
 import { RangeControl, SelectControl } from '@wordpress/components';
 import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
@@ -16,7 +17,7 @@ import { AnimationOrderPicker } from './';
  *
  * @return {Component} Controls.
  */
-export default function AnimationControls( {
+const AnimationControls = ( {
 	animatedBlocks,
 	onAnimationTypeChange,
 	onAnimationDurationChange,
@@ -26,15 +27,23 @@ export default function AnimationControls( {
 	animationDuration,
 	animationDelay,
 	animationAfter,
-} ) {
+	selectedBlock,
+} ) => {
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+
+	const isImageBlock = 'core/image' === selectedBlock;
+
+	// pan- animations are only really meant for images.
+	const animationTypeOptions = AMP_ANIMATION_TYPE_OPTIONS.filter( ( { value } ) => {
+		return ! ( value.startsWith( 'pan-' ) && ! isImageBlock );
+	} );
 
 	return (
 		<Fragment>
 			<SelectControl
 				label={ __( 'Animation Type', 'amp' ) }
 				value={ animationType }
-				options={ AMP_ANIMATION_TYPE_OPTIONS }
+				options={ animationTypeOptions }
 				onChange={ ( value ) => {
 					onAnimationTypeChange( value );
 
@@ -70,5 +79,14 @@ export default function AnimationControls( {
 			) }
 		</Fragment>
 	);
-}
+};
 
+export default withSelect( ( select ) => {
+	const { getSelectedBlock } = select( 'core/block-editor' );
+
+	const selectedBlock = getSelectedBlock();
+
+	return {
+		selectedBlock: selectedBlock ? selectedBlock.name : null,
+	};
+} )( AnimationControls );
