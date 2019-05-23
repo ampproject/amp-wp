@@ -1921,75 +1921,166 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_import_test_data() {
 		return array(
-			'local_admin_css_file' => array(
-				admin_url( 'css/colors/../login.css' ),
-				'<style>@import "%s"; div::after{content:"After login"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+			'local_css_files' => array(
+				array(
+					admin_url( 'css/colors/../login.css' ),
+					includes_url( 'css/buttons.css' ),
+				),
+				'<style>div::after{content:"After login"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				0, // Zero HTTP requests.
 				null, // No preempting of request, as no external requests.
-				function ( WP_UnitTestCase $test, $stylesheets ) {
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_order = array(
+						preg_quote( 'input[type="checkbox"]:disabled', '/' ),
+						preg_quote( '.wp-core-ui .button', '/' ),
+						preg_quote( 'div::after{content:"After login"}', '/' ),
+					);
 					$test->assertRegExp(
-						'/.*' . preg_quote( 'input[type="checkbox"]:disabled', '/' ) . '.*' . preg_quote( 'div::after{content:"After login"}', '/' ) . '/s',
-						$stylesheets[0]
+						'/.*' . implode( '.*', $expected_order ) . '/s',
+						$stylesheet
 					);
 				},
 			),
 
+			'local_css_with_import_failure_rejecting' => array(
+				array(
+					admin_url( 'css/local-does-not-exist.css' ),
+					'https://bogus.example.com/remote-does-not-exist.css',
+					admin_url( 'css/colors/../login.css' ),
+					'https://bogus.example.com/remote-also-does-not-exist.css',
+				),
+				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				function ( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
+						return new WP_Error( 'does_not_exist' );
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_order = array(
+						'local-does-not-exist.css',
+						'remote-does-not-exist.css',
+						'remote-also-does-not-exist.css',
+						'remote-finally-does-not-exist.css',
+						'.form-table td', // From imported forms.css.
+						'body.locale-he-il', // From imported l10n.css.
+						'.login .message', // From login.css.
+						'div::after{content:"End"}',
+					);
+
+					$previous = -1;
+					foreach ( $expected_order as $i => $expected ) {
+						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$position = strpos( $stylesheet, $expected );
+						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
+						$previous = $position;
+					}
+				},
+				array(
+					'auto_reject' => true,
+				),
+			),
+
+			'local_css_with_import_failure_accepting' => array(
+				array(
+					admin_url( 'css/local-does-not-exist.css' ),
+					'https://bogus.example.com/remote-does-not-exist.css',
+					admin_url( 'css/colors/../login.css' ),
+					'https://bogus.example.com/remote-also-does-not-exist.css',
+				),
+				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				function ( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
+						return new WP_Error( 'does_not_exist' );
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_absent = array(
+						'local-does-not-exist.css',
+						'remote-does-not-exist.css',
+						'remote-also-does-not-exist.css',
+						'remote-finally-does-not-exist.css',
+					);
+					foreach ( $expected_absent as $expected ) {
+						$test->assertNotContains( $expected, $stylesheet, "Expected to not see $expected." );
+					}
+
+					$expected_order = array(
+						'.form-table td', // From imported forms.css.
+						'body.locale-he-il', // From imported l10n.css.
+						'.login .message', // From login.css.
+						'div::after{content:"End"}',
+					);
+
+					$previous = -1;
+					foreach ( $expected_order as $i => $expected ) {
+						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$position = strpos( $stylesheet, $expected );
+						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
+						$previous = $position;
+					}
+				},
+				array(
+					'auto_reject' => false,
+				),
+			),
+
 			'dynamic_stylesheet_with_relative_import' => array(
 				includes_url( '/dynamic/import-buttons.php' ),
-				'<style>@import url("%s"); div::after{content:"After import-buttons"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				'<style>div::after{content:"After import-buttons"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				function( $requested_url, $stylesheet_url ) {
-					if ( wp_parse_url( $stylesheet_url, PHP_URL_PATH ) === wp_parse_url( $requested_url, PHP_URL_PATH ) ) {
+				function( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return '@import url( "../css/./foo/../buttons.css" );body{color:#123456}';
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheets ) {
-					$this->assertCount( 1, $stylesheets );
+				function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons"}', '/' ) . '/s',
-						$stylesheets[0]
+						$stylesheet
 					);
 				},
 			),
 
 			'dynamic_stylesheet_with_absolute_import' => array(
 				includes_url( '/dynamic/import-buttons.php' ),
-				'<style>@import "%s";  div::after{content:"After import-buttons2"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				'<style>div::after{content:"After import-buttons2"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				function( $requested_url, $stylesheet_url ) {
-					if ( wp_parse_url( $stylesheet_url, PHP_URL_PATH ) === wp_parse_url( $requested_url, PHP_URL_PATH ) ) {
+				function( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', includes_url( '/css/buttons.css' ) );
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheets ) {
-					$this->assertCount( 1, $stylesheets );
+				function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
-						$stylesheets[0]
+						$stylesheet
 					);
 				},
 			),
 
 			'dynamic_stylesheet_with_nested_dynamic_stylesheet' => array(
 				includes_url( '/dynamic/import-buttons.php' ),
-				'<style>@import "%s";  div::after{content:"After import-buttons2"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				'<style>div::after{content:"After import-buttons2"}</style>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				2,
-				function( $requested_url, $stylesheet_url ) {
+				function( $requested_url ) {
 					$self_call_url = includes_url( '/dynamic/nested.php' );
-					if ( wp_parse_url( $stylesheet_url, PHP_URL_PATH ) === wp_parse_url( $requested_url, PHP_URL_PATH ) ) {
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', $self_call_url );
 					} elseif ( wp_parse_url( $self_call_url, PHP_URL_PATH ) === wp_parse_url( $requested_url, PHP_URL_PATH ) ) {
 						return 'div::before{ content:"HELLO NESTED"; }';
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheets ) {
-					$this->assertCount( 1, $stylesheets );
+				function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( 'div::before{content:"HELLO NESTED"}', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
-						$stylesheets[0]
+						$stylesheet
 					);
 				},
 			),
@@ -2002,31 +2093,46 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_import_test_data
 	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
 	 *
-	 * @param string   $stylesheet_url              Stylesheet URL.
-	 * @param string   $markup_format               HTML markup for the stylesheet URL.
-	 * @param int      $expected_http_request_count Expected number of HTTP requests.
-	 * @param callable $mock_response               Function that returns the mocked CSS data.
-	 * @param callable $assert                      Function that runs the assertions.
+	 * @param array|string $stylesheet_urls             Stylesheet URLs.
+	 * @param string       $style_element               HTML markup for the stylesheet URL.
+	 * @param int          $expected_http_request_count Expected number of HTTP requests.
+	 * @param callable     $mock_response               Function that returns the mocked CSS data.
+	 * @param callable     $assert                      Function that runs the assertions.
+	 * @param array        $options                     Additional options.
 	 */
-	public function test_css_import( $stylesheet_url, $markup_format, $expected_http_request_count, $mock_response, $assert ) {
+	public function test_css_import( $stylesheet_urls, $style_element, $expected_http_request_count, $mock_response, $assert, $options = array() ) {
+		$stylesheet_urls = (array) $stylesheet_urls;
+
 		$markup  = '<html><head>';
-		$markup .= sprintf( $markup_format, $stylesheet_url );
+		$imports = implode(
+			'',
+			array_map(
+				function ( $stylesheet_url ) {
+					return sprintf( '@import url("%s");', $stylesheet_url );
+				},
+				$stylesheet_urls
+			)
+		);
+		$markup .= preg_replace( ':(?<=<style>):', $imports, $style_element );
 		$markup .= '</head><body>hello</body></html>';
 
 		$http_request_count = 0;
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_url, &$http_request_count ) {
+			function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
 				$http_request_count++;
 				unset( $request );
 				if ( $mock_response ) {
-					$body = call_user_func( $mock_response, $url, $stylesheet_url );
+					$body = call_user_func( $mock_response, $url, $stylesheet_urls );
 					if ( null !== $body ) {
 						$preempt = array(
-							'response' => array( 'code' => 200 ),
+							'response' => array(
+								'code'    => is_wp_error( $body ) ? 404 : 200,
+								'message' => is_wp_error( $body ) ? 'Not Found' : 'OK',
+							),
 							'headers'  => array( 'content-type' => 'text/css' ),
-							'body'     => $body,
+							'body'     => is_wp_error( $body ) ? '' : $body,
 						);
 					}
 				}
@@ -2036,18 +2142,25 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$dom       = AMP_DOM_Utils::get_dom( $markup );
+		$dom = AMP_DOM_Utils::get_dom( $markup );
+
+		if ( ! empty( $options['auto_reject'] ) ) {
+			add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		}
+
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'use_document_element' => true,
-				'remove_unused_rules'  => 'never',
+				'use_document_element'      => true,
+				'remove_unused_rules'       => 'never',
+				'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
 			)
 		);
 		$sanitizer->sanitize();
-		$stylesheets = array_values( $sanitizer->get_stylesheets() );
 
-		call_user_func( $assert, $this, $stylesheets, $dom );
+		$stylesheet = $dom->getElementsByTagName( 'style' )->item( 0 )->textContent;
+
+		call_user_func( $assert, $this, $stylesheet, $dom );
 		$this->assertEquals( $expected_http_request_count, $http_request_count );
 	}
 
