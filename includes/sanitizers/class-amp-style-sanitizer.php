@@ -1227,12 +1227,20 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$cache_key = md5( $url );
 		$contents  = get_transient( $cache_key );
 		if ( false === $contents ) {
-			$r = wp_remote_get( $url );
-			if ( 200 !== wp_remote_retrieve_response_code( $r ) ) {
-				$contents = new WP_Error(
-					wp_remote_retrieve_response_code( $r ),
-					wp_remote_retrieve_response_message( $r )
-				);
+			$r    = wp_remote_get( $url );
+			$code = wp_remote_retrieve_response_code( $r );
+			if ( $code < 200 || $code >= 300 ) {
+				$message = wp_remote_retrieve_response_message( $r );
+				if ( ! $code ) {
+					$code = 'http_error';
+				} else {
+					$code = "http_{$code}";
+				}
+				if ( ! $message ) {
+					/* translators: %s: the fetched URL */
+					$message = sprintf( __( 'Failed to fetch: %s', 'amp' ), $url );
+				}
+				$contents = new WP_Error( $code, $message );
 			} elseif ( ! preg_match( '#^text/css#', wp_remote_retrieve_header( $r, 'content-type' ) ) ) {
 				$contents = new WP_Error(
 					'no_css_content_type',
@@ -1395,6 +1403,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					'code'    => $contents->get_error_code(),
 					'message' => $contents->get_error_message(),
 					'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+					'url'     => $import_stylesheet_url,
 				);
 				$sanitized = $this->should_sanitize_validation_error( $error );
 				if ( $sanitized ) {
@@ -1410,6 +1419,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				'code'    => $css_file_path->get_error_code(),
 				'message' => $css_file_path->get_error_message(),
 				'type'    => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
+				'url'     => $import_stylesheet_url,
 			);
 			$sanitized = $this->should_sanitize_validation_error( $error );
 			if ( $sanitized ) {
