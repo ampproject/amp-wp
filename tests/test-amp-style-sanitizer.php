@@ -2305,7 +2305,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$render_template = function () {
 			ob_start();
 			?>
-			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
+			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body <?php body_class(); ?>><?php wp_footer(); ?></body></html>
 			<?php
 			return ob_get_clean();
 		};
@@ -2313,6 +2313,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'admin_bar_included' => array(
 				function () use ( $render_template ) {
+					$this->go_to( home_url() );
 					show_admin_bar( true );
 					_wp_admin_bar_init();
 					switch_theme( 'twentyten' );
@@ -2342,6 +2343,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					 */
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
+					$this->assertContains( 'admin-bar', $original_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
 					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
 					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
@@ -2350,6 +2352,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
+					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
 					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			),
