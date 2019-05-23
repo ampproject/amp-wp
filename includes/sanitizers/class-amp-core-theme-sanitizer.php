@@ -1133,7 +1133,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				<style>
 					/* Styles for featured content */
 					.slider #featured-content .post-thumbnail {
-						padding-top: 0;
+						padding-top: 0; /* Override responsive hack which is handled by AMP layout. */
+						overflow: visible;
 					}
 					.slider #featured-content .hentry {
 						display: block;
