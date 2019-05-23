@@ -4,11 +4,6 @@
  **/
 
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';

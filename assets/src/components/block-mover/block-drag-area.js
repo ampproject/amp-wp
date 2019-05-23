@@ -1,15 +1,9 @@
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * Internal dependencies
  */
 import BlockDraggable from './block-draggable';
 
 export const BlockDragArea = ( { children, className, onDragStart, onDragEnd, blockElementId, clientId } ) => {
-
 	return (
 		<BlockDraggable
 			clientId={ clientId }
