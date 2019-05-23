@@ -41,7 +41,6 @@ class AMP_Editor_Blocks {
 	 */
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
-			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
 			/*
@@ -118,49 +117,6 @@ class AMP_Editor_Blocks {
 		}
 
 		return $tags;
-	}
-
-	/**
-	 * Enqueue filters for extending core blocks attributes.
-	 * Has to be loaded before registering the blocks in registerCoreBlocks.
-	 */
-	public function enqueue_block_editor_assets() {
-		$script_handle = 'amp-editor-blocks';
-
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
-			wp_enqueue_style(
-				'amp-editor-blocks-style',
-				amp_get_asset_url( 'css/amp-editor-blocks.css' ),
-				array(),
-				AMP__VERSION
-			);
-		}
-
-		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-editor-blocks.deps.json';
-		$script_dependencies = file_exists( $script_deps_path )
-			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: array();
-
-		wp_enqueue_script(
-			$script_handle,
-			amp_get_asset_url( 'js/amp-editor-blocks.js' ),
-			$script_dependencies,
-			AMP__VERSION,
-			true
-		);
-
-		if ( function_exists( 'wp_set_script_translations' ) ) {
-			wp_set_script_translations( $script_handle, 'amp' );
-		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-			$translations = wp_json_encode( $locale_data );
-
-			wp_add_inline_script(
-				$script_handle,
-				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
-				'after'
-			);
-		}
 	}
 
 	/**
