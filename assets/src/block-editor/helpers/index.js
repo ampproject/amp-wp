@@ -580,7 +580,7 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 						label={ __( 'Height', 'amp' ) }
 						value={ height }
 						min={ 1 }
-						onCHange={ ( nextHeight ) => {
+						onChange={ ( nextHeight ) => {
 							setAttributes( { height: nextHeight } );
 						} }
 					/>
