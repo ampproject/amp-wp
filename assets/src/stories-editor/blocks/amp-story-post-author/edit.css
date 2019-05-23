@@ -14,4 +14,6 @@
 
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text.is-measuring-fontsize {
 	height: initial !important;
+	width: initial !important;
+	position: absolute !important;
 }
