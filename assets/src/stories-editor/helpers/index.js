@@ -1107,6 +1107,8 @@ const getBlockInnerTextElement = ( block ) => {
 			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
 
 		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
 			const slug = name.replace( '/', '-' );
 			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 	}
@@ -1149,6 +1151,8 @@ export const maybeUpdateFontSize = ( block ) => {
 			break;
 
 		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
 			if ( metaBlockElement && ampFitText ) {
