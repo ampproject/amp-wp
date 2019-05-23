@@ -1,6 +1,7 @@
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author {
 	margin: 0;
 	padding: 7px !important;
+	height: 100%;
 }
 
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text {
@@ -9,9 +10,10 @@
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: center;
-	height: 100%;
 }
 
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text.is-measuring-fontsize {
 	height: initial !important;
+	width: initial !important;
+	position: absolute !important;
 }

@@ -931,22 +931,13 @@ class AMP_Theme_Support {
 			PHP_INT_MAX
 		);
 
+		add_action( 'admin_bar_init', array( __CLASS__, 'init_admin_bar' ) );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ), 0 ); // Enqueue before theme's styles.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
-
-		/*
-		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
-		 * combine to surpass the 50K limit imposed for the amp-custom style.
-		 */
-		if ( AMP_Options_Manager::get_option( 'disable_admin_bar' ) ) {
-			add_filter( 'show_admin_bar', '__return_false', 100 );
-		} else {
-			add_action( 'admin_bar_init', array( __CLASS__, 'init_admin_bar' ) );
-		}
 
 		/*
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
@@ -1298,6 +1289,22 @@ class AMP_Theme_Support {
 			},
 			41
 		);
+
+		// Convert admin bar bump callback into an inline style for admin-bar. See \WP_Admin_Bar::initialize().
+		if ( current_theme_supports( 'admin-bar' ) ) {
+			$admin_bar_args  = get_theme_support( 'admin-bar' );
+			$header_callback = $admin_bar_args[0]['callback'];
+		} else {
+			$header_callback = '_admin_bar_bump_cb';
+		}
+		remove_action( 'wp_head', $header_callback );
+		if ( '__return_false' !== $header_callback ) {
+			ob_start();
+			call_user_func( $header_callback );
+			$style = ob_get_clean();
+			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			wp_add_inline_style( 'admin-bar', $data );
+		}
 
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(

@@ -8,6 +8,10 @@
 	}
 }
 
+#amp-story-editor {
+	position: relative;
+}
+
 #amp-story-editor > .editor-block-list__layout {
 	padding-left: 0;
 	padding-right: 0;
@@ -15,8 +19,6 @@
 	align-items: center;
 	transform: none;
 	transition: transform 300ms ease-in-out;
-	position: relative;
-	z-index: 5;
 }
 
 #amp-story-editor > .editor-block-list__layout .block-list-appender {
@@ -27,11 +29,6 @@
 	display: flex;
 	justify-content: space-between;
 	margin-top: 3em;
-}
-
-.amp-story-editor-carousel-navigation > button {
-	position: relative;
-	z-index: 10;
 }
 
 .editor-styles-wrapper ul.amp-story-editor-carousel-item-list {

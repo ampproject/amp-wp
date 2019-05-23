@@ -36,9 +36,11 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+} from '../constants';
+import {
 	MAX_FONT_SIZE,
 	MIN_FONT_SIZE,
-} from '../constants';
+} from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
 
 const { ampStoriesFonts } = window;
@@ -1105,6 +1107,8 @@ const getBlockInnerTextElement = ( block ) => {
 			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
 
 		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
 			const slug = name.replace( '/', '-' );
 			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 	}
@@ -1147,6 +1151,8 @@ export const maybeUpdateFontSize = ( block ) => {
 			break;
 
 		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
 			if ( metaBlockElement && ampFitText ) {
@@ -1224,10 +1230,12 @@ export const maybeSetInitialSize = ( clientId ) => {
 			const slug = name.replace( '/', '-' );
 			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
 
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				if ( metaBlockElement && metaBlockElement.offsetHeight > height ) {
+			if ( metaBlockElement && ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) ) {
+				const metaBlockElementHeight = ampFitText ? metaBlockElement.offsetHeight : metaBlockElement.scrollHeight;
+
+				if ( metaBlockElementHeight > height ) {
 					updateBlockAttributes( clientId, {
-						height: metaBlockElement.offsetHeight,
+						height: metaBlockElementHeight,
 					} );
 				}
 			}
