@@ -871,15 +871,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test add_hooks() when admin bar is turned off.
-	 */
-	public function test_add_hooks_no_admin_bar() {
-		AMP_Options_Manager::update_option( 'disable_admin_bar', true );
-		AMP_Theme_Support::add_hooks();
-		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
-	}
-
-	/**
 	 * Test register_widgets().
 	 *
 	 * @covers AMP_Theme_Support::register_widgets()
