@@ -239,266 +239,266 @@ export default createHigherOrderComponent(
 
 			return (
 				<Fragment>
-					{ isMovableBlock && (
-						<StoryBlockMover
-							clientId={ props.clientId }
-							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection }
-						/>
-					) }
-					{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && (
-						<ResizableBox
-							isSelected={ isSelected }
-							width={ width }
-							height={ height }
-							angle={ rotationAngle }
-							minHeight={ MIN_BLOCK_HEIGHT }
-							minWidth={ MIN_BLOCK_WIDTH }
-							onResizeStop={ ( value ) => {
-								setAttributes( value );
-								stopBlockActions();
-							} }
-							onResizeStart={ () => {
-								startBlockActions();
-							} }
-						>
-							<RotatableBox
-								blockElementId={ `block-${ clientId }` }
-								initialAngle={ rotationAngle }
-								className="amp-story-editor__rotate-container"
+					<StoryBlockMover
+						clientId={ props.clientId }
+						blockElementId={ `block-${ props.clientId }` }
+						isDraggable={ ! props.isPartOfMultiSelection }
+						isMovable={ isMovableBlock }
+					>
+						{ ! isMovableBlock && ( <BlockEdit { ...props } /> ) }
+						{ isMovableBlock && (
+							<ResizableBox
+								isSelected={ isSelected }
+								width={ width }
+								height={ height }
 								angle={ rotationAngle }
-								onRotateStart={ () => {
-									startBlockActions();
-								} }
-								onRotateStop={ ( event, angle ) => {
-									setAttributes( {
-										rotationAngle: angle,
-									} );
-
+								minHeight={ MIN_BLOCK_HEIGHT }
+								minWidth={ MIN_BLOCK_WIDTH }
+								onResizeStop={ ( value ) => {
+									setAttributes( value );
 									stopBlockActions();
 								} }
+								onResizeStart={ () => {
+									startBlockActions();
+								} }
 							>
-								<BlockEdit { ...props } />
-							</RotatableBox>
-						</ResizableBox>
-					) }
-					{ ! ( isLast && isFirst ) && (
-						<InspectorControls>
-							<PanelBody
-								className="amp-story-order-controls"
-								title={ __( 'Block Position', 'amp' ) }
-							>
-								<div className="amp-story-order-controls-wrap">
-									<IconButton
-										className="amp-story-controls-bring-front"
-										onClick={ moveFront }
-										icon={ bringFrontIcon( { width: 24, height: 24 } ) }
-										label={ __( 'Send to front', 'amp' ) }
-										aria-describedby={ `amp-story-controls-bring-front-description-${ clientId }` }
-										aria-disabled={ isLast }
-									>
-										{ __( 'Front', 'amp' ) }
-									</IconButton>
-									<IconButton
-										className="amp-story-controls-bring-forward"
-										onClick={ bringForward }
-										icon={ bringForwardIcon( { width: 24, height: 24 } ) }
-										label={ __( 'Send Forward', 'amp' ) }
-										aria-describedby={ `amp-story-controls-bring-forward-description-${ clientId }` }
-										aria-disabled={ isLast }
-									>
-										{ __( 'Forward', 'amp' ) }
-									</IconButton>
-									<IconButton
-										className="amp-story-controls-send-backwards"
-										onClick={ sendBackward }
-										icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
-										label={ __( 'Send Backward', 'amp' ) }
-										aria-describedby={ `amp-story-controls-send-backward-description-${ clientId }` }
-										aria-disabled={ isFirst }
-									>
-										{ __( 'Backward', 'amp' ) }
-									</IconButton>
-									<IconButton
-										className="amp-story-controls-send-back"
-										onClick={ moveBack }
-										icon={ sendBackIcon( { width: 24, height: 24 } ) }
-										label={ __( 'Send to back', 'amp' ) }
-										aria-describedby={ `amp-story-controls-send-back-description-${ clientId }` }
-										aria-disabled={ isFirst }
-									>
-										{ __( 'Back', 'amp' ) }
-									</IconButton>
-								</div>
-								<span className="amp-story-controls-description" id={ `amp-story-controls-bring-front-description-${ clientId }` }>
-									{
-										getBlockOrderDescription(
-											blockType && blockType.title,
-											currentBlockPosition,
-											1,
-											isFirst,
-											isLast,
-											-1,
-										)
-									}
-								</span>
-								<span className="amp-story-controls-description" id={ `amp-story-controls-bring-forward-description-${ clientId }` }>
-									{
-										getBlockOrderDescription(
-											blockType && blockType.title,
-											currentBlockPosition,
-											currentBlockPosition - 1,
-											isFirst,
-											isLast,
-											-1,
-										)
-									}
-								</span>
-								<span className="amp-story-controls-description" id={ `amp-story-controls-send-backward-description-${ clientId }` }>
-									{
-										getBlockOrderDescription(
-											blockType && blockType.title,
-											currentBlockPosition,
-											currentBlockPosition + 1,
-											isFirst,
-											isLast,
-											1,
-										)
-									}
-								</span>
-								<span className="amp-story-controls-description" id={ `amp-story-controls-send-back-description-${ clientId }` }>
-									{
-										getBlockOrderDescription(
-											blockType && blockType.title,
-											currentBlockPosition,
-											numberOfBlocks,
-											isFirst,
-											isLast,
-											1,
-										)
-									}
-								</span>
-							</PanelBody>
-						</InspectorControls>
-					) }
-					{ needsTextSettings && (
-						<InspectorControls>
-							<PanelBody title={ __( 'Text Settings', 'amp' ) }>
-								<FontFamilyPicker
-									fonts={ ampStoriesFonts }
-									value={ ampFontFamily }
-									onChange={ ( value ) => {
-										maybeEnqueueFontStyle( value );
-										setAttributes( { ampFontFamily: value } );
+								<RotatableBox
+									blockElementId={ `block-${ clientId }` }
+									initialAngle={ rotationAngle }
+									className="amp-story-editor__rotate-container"
+									angle={ rotationAngle }
+									onRotateStart={ () => {
+										startBlockActions();
 									} }
-								/>
-								<ToggleControl
-									label={ __( 'Automatically fit text to container', 'amp' ) }
-									checked={ ampFitText }
-									onChange={ () => {
-										setAttributes( { ampFitText: ! ampFitText } );
-										if ( ! ampFitText ) {
-											setFontSize( attributes.autoFontSize );
+									onRotateStop={ ( event, angle ) => {
+										setAttributes( {
+											rotationAngle: angle,
+										} );
+
+										stopBlockActions();
+									} }
+								>
+									<BlockEdit { ...props } />
+								</RotatableBox>
+							</ResizableBox>
+						) }
+						{ ! ( isLast && isFirst ) && (
+							<InspectorControls>
+								<PanelBody
+									className="amp-story-order-controls"
+									title={ __( 'Block Position', 'amp' ) }
+								>
+									<div className="amp-story-order-controls-wrap">
+										<IconButton
+											className="amp-story-controls-bring-front"
+											onClick={ moveFront }
+											icon={ bringFrontIcon( { width: 24, height: 24 } ) }
+											label={ __( 'Send to front', 'amp' ) }
+											aria-describedby={ `amp-story-controls-bring-front-description-${ clientId }` }
+											aria-disabled={ isLast }
+										>
+											{ __( 'Front', 'amp' ) }
+										</IconButton>
+										<IconButton
+											className="amp-story-controls-bring-forward"
+											onClick={ bringForward }
+											icon={ bringForwardIcon( { width: 24, height: 24 } ) }
+											label={ __( 'Send Forward', 'amp' ) }
+											aria-describedby={ `amp-story-controls-bring-forward-description-${ clientId }` }
+											aria-disabled={ isLast }
+										>
+											{ __( 'Forward', 'amp' ) }
+										</IconButton>
+										<IconButton
+											className="amp-story-controls-send-backwards"
+											onClick={ sendBackward }
+											icon={ sendBackwardIcon( { width: 24, height: 24 } ) }
+											label={ __( 'Send Backward', 'amp' ) }
+											aria-describedby={ `amp-story-controls-send-backward-description-${ clientId }` }
+											aria-disabled={ isFirst }
+										>
+											{ __( 'Backward', 'amp' ) }
+										</IconButton>
+										<IconButton
+											className="amp-story-controls-send-back"
+											onClick={ moveBack }
+											icon={ sendBackIcon( { width: 24, height: 24 } ) }
+											label={ __( 'Send to back', 'amp' ) }
+											aria-describedby={ `amp-story-controls-send-back-description-${ clientId }` }
+											aria-disabled={ isFirst }
+										>
+											{ __( 'Back', 'amp' ) }
+										</IconButton>
+									</div>
+									<span className="amp-story-controls-description" id={ `amp-story-controls-bring-front-description-${ clientId }` }>
+										{
+											getBlockOrderDescription(
+												blockType && blockType.title,
+												currentBlockPosition,
+												1,
+												isFirst,
+												isLast,
+												-1,
+											)
 										}
-									} }
-								/>
-								{ ! ampFitText && (
-									<FontSizePicker
-										value={ fontSize.size }
-										onChange={ setFontSize }
+									</span>
+									<span className="amp-story-controls-description" id={ `amp-story-controls-bring-forward-description-${ clientId }` }>
+										{
+											getBlockOrderDescription(
+												blockType && blockType.title,
+												currentBlockPosition,
+												currentBlockPosition - 1,
+												isFirst,
+												isLast,
+												-1,
+											)
+										}
+									</span>
+									<span className="amp-story-controls-description" id={ `amp-story-controls-send-backward-description-${ clientId }` }>
+										{
+											getBlockOrderDescription(
+												blockType && blockType.title,
+												currentBlockPosition,
+												currentBlockPosition + 1,
+												isFirst,
+												isLast,
+												1,
+											)
+										}
+									</span>
+									<span className="amp-story-controls-description" id={ `amp-story-controls-send-back-description-${ clientId }` }>
+										{
+											getBlockOrderDescription(
+												blockType && blockType.title,
+												currentBlockPosition,
+												numberOfBlocks,
+												isFirst,
+												isLast,
+												1,
+											)
+										}
+									</span>
+								</PanelBody>
+							</InspectorControls>
+						) }
+						{ needsTextSettings && (
+							<InspectorControls>
+								<PanelBody title={ __( 'Text Settings', 'amp' ) }>
+									<FontFamilyPicker
+										fonts={ ampStoriesFonts }
+										value={ ampFontFamily }
+										onChange={ ( value ) => {
+											maybeEnqueueFontStyle( value );
+											setAttributes( { ampFontFamily: value } );
+										} }
 									/>
-								) }
-								{ isTextBlock && (
-									<SelectControl
-										label={ __( 'Select text type', 'amp' ) }
-										value={ textBlockTextType }
-										onChange={ ( selected ) => setAttributes( { type: selected } ) }
-										options={ [
-											{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-											{ value: 'p', label: __( 'Paragraph', 'amp' ) },
-											{ value: 'h1', label: __( 'Heading 1', 'amp' ) },
-											{ value: 'h2', label: __( 'Heading 2', 'amp' ) },
-										] }
+									<ToggleControl
+										label={ __( 'Automatically fit text to container', 'amp' ) }
+										checked={ ampFitText }
+										onChange={ () => {
+											setAttributes( { ampFitText: ! ampFitText } );
+											if ( ! ampFitText ) {
+												setFontSize( attributes.autoFontSize );
+											}
+										} }
 									/>
-								) }
-							</PanelBody>
-							<PanelColorSettings
-								title={ __( 'Color Settings', 'amp' ) }
-								initialOpen={ false }
-								colorSettings={ [
-									{
-										value: backgroundColor.color,
-										onChange: setBackgroundColor,
-										label: __( 'Background Color', 'amp' ),
-									},
-									{
-										value: textColor.color,
-										onChange: setTextColor,
-										label: __( 'Text Color', 'amp' ),
-									},
-								] }
-							>
-								<ContrastChecker
-									{ ...{
-										textColor: textColor.color,
-										backgroundColor: backgroundColor.color,
-										fallbackTextColor,
-										fallbackBackgroundColor,
-										fontSize: fontSize.size,
-									} }
-								/>
-								<RangeControl
-									label={ __( 'Background Opacity', 'amp' ) }
-									value={ opacity }
-									onChange={ ( value ) => setAttributes( { opacity: value } ) }
-									min={ 5 }
-									max={ 100 }
-									step={ 5 }
-								/>
-							</PanelColorSettings>
-						</InspectorControls>
-					) }
-					{ isMovableBlock && (
-						<InspectorControls>
-							<PanelBody
-								title={ __( 'Animation', 'amp' ) }
-							>
-								<AnimationControls
-									animatedBlocks={ getAnimatedBlocks }
-									animationType={ ampAnimationType }
-									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
-									animationAfter={ animationAfter }
-									onAnimationTypeChange={ onAnimationTypeChange }
-									onAnimationDurationChange={ onAnimationDurationChange }
-									onAnimationDelayChange={ onAnimationDelayChange }
-									onAnimationAfterChange={ onAnimationOrderChange }
-								/>
-							</PanelBody>
-						</InspectorControls>
-					) }
-					{ isImageBlock && (
-						<InspectorControls>
-							<PanelBody
-								title={ __( 'Story Settings', 'amp' ) }
-							>
-								<ToggleControl
-									label={ __( 'Show or hide the caption', 'amp' ) }
-									checked={ ampShowImageCaption }
-									onChange={
-										function() {
-											props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
-											if ( ! attributes.ampShowImageCaption ) {
-												props.setAttributes( { caption: '' } );
+									{ ! ampFitText && (
+										<FontSizePicker
+											value={ fontSize.size }
+											onChange={ setFontSize }
+										/>
+									) }
+									{ isTextBlock && (
+										<SelectControl
+											label={ __( 'Select text type', 'amp' ) }
+											value={ textBlockTextType }
+											onChange={ ( selected ) => setAttributes( { type: selected } ) }
+											options={ [
+												{ value: 'auto', label: __( 'Automatic', 'amp' ) },
+												{ value: 'p', label: __( 'Paragraph', 'amp' ) },
+												{ value: 'h1', label: __( 'Heading 1', 'amp' ) },
+												{ value: 'h2', label: __( 'Heading 2', 'amp' ) },
+											] }
+										/>
+									) }
+								</PanelBody>
+								<PanelColorSettings
+									title={ __( 'Color Settings', 'amp' ) }
+									initialOpen={ false }
+									colorSettings={ [
+										{
+											value: backgroundColor.color,
+											onChange: setBackgroundColor,
+											label: __( 'Background Color', 'amp' ),
+										},
+										{
+											value: textColor.color,
+											onChange: setTextColor,
+											label: __( 'Text Color', 'amp' ),
+										},
+									] }
+								>
+									<ContrastChecker
+										{ ...{
+											textColor: textColor.color,
+											backgroundColor: backgroundColor.color,
+											fallbackTextColor,
+											fallbackBackgroundColor,
+											fontSize: fontSize.size,
+										} }
+									/>
+									<RangeControl
+										label={ __( 'Background Opacity', 'amp' ) }
+										value={ opacity }
+										onChange={ ( value ) => setAttributes( { opacity: value } ) }
+										min={ 5 }
+										max={ 100 }
+										step={ 5 }
+									/>
+								</PanelColorSettings>
+							</InspectorControls>
+						) }
+						{ isMovableBlock && (
+							<InspectorControls>
+								<PanelBody
+									title={ __( 'Animation', 'amp' ) }
+								>
+									<AnimationControls
+										animatedBlocks={ getAnimatedBlocks }
+										animationType={ ampAnimationType }
+										animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
+										animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+										animationAfter={ animationAfter }
+										onAnimationTypeChange={ onAnimationTypeChange }
+										onAnimationDurationChange={ onAnimationDurationChange }
+										onAnimationDelayChange={ onAnimationDelayChange }
+										onAnimationAfterChange={ onAnimationOrderChange }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						) }
+						{ isImageBlock && (
+							<InspectorControls>
+								<PanelBody
+									title={ __( 'Story Settings', 'amp' ) }
+								>
+									<ToggleControl
+										label={ __( 'Show or hide the caption', 'amp' ) }
+										checked={ ampShowImageCaption }
+										onChange={
+											function() {
+												props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
+												if ( ! attributes.ampShowImageCaption ) {
+													props.setAttributes( { caption: '' } );
+												}
 											}
 										}
-									}
-									help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
-								/>
-							</PanelBody>
-						</InspectorControls>
-					) }
+										help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+									/>
+								</PanelBody>
+							</InspectorControls>
+						) }
+					</StoryBlockMover>
 				</Fragment>
 			);
 		} );

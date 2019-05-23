@@ -8,12 +8,7 @@ import classnames from 'classnames';
  */
 import BlockDraggable from './block-draggable';
 
-export const IconDragHandle = ( { isVisible, className, icon, onDragStart, onDragEnd, blockElementId, clientId } ) => {
-	if ( ! isVisible ) {
-		return null;
-	}
-
-	const dragHandleClassNames = classnames( 'editor-block-mover__control-drag-handle block-editor-block-mover__control-drag-handle', className );
+export const BlockDragArea = ( { children, className, onDragStart, onDragEnd, blockElementId, clientId } ) => {
 
 	return (
 		<BlockDraggable
@@ -25,13 +20,13 @@ export const IconDragHandle = ( { isVisible, className, icon, onDragStart, onDra
 			{
 				( { onDraggableStart, onDraggableEnd } ) => (
 					<div
-						className={ dragHandleClassNames }
+						className={ className }
 						aria-hidden="true"
 						onDragStart={ onDraggableStart }
 						onDragEnd={ onDraggableEnd }
 						draggable
 					>
-						{ icon }
+						{ children }
 					</div>
 				) }
 		</BlockDraggable>
