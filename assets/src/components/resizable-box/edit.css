@@ -18,7 +18,7 @@
 	display: none !important;
 }
 
-.wp-block-image.is-resized .components-resizable-box__container img {
+.wp-block-image .components-resizable-box__container img {
 	height: 100%;
 	object-fit: cover;
 }
