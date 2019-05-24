@@ -4,6 +4,11 @@
  */
 
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -54,6 +59,13 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 		</Fragment>
 	);
 }
+
+StoryControls.propTypes = {
+	isReordering: PropTypes.bool.isRequired,
+	startReordering: PropTypes.func.isRequired,
+	saveOrder: PropTypes.func.isRequired,
+	resetOrder: PropTypes.func.isRequired,
+};
 
 export default compose(
 	withSelect( ( select ) => {

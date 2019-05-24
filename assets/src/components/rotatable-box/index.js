@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -182,6 +183,18 @@ class RotatableBox extends Component {
 		);
 	}
 }
+
+RotatableBox.propTypes = {
+	blockElementId: PropTypes.string.isRequired,
+	className: PropTypes.string,
+	angle: PropTypes.number.isRequired,
+	initialAngle: PropTypes.number.isRequired,
+	speak: PropTypes.func.isRequired,
+	onRotateStart: PropTypes.func,
+	onRotate: PropTypes.func,
+	onRotateStop: PropTypes.func,
+	children: PropTypes.object.isRequired,
+};
 
 export default compose(
 	withSpokenMessages,

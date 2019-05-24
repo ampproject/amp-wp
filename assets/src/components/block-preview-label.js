@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { Fragment } from '@wordpress/element';
@@ -8,7 +13,7 @@ import { withSelect } from '@wordpress/data';
 import { __experimentalGetSettings as getDateSettings, dateI18n } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 
-const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'left', accessibilityText } ) => {
+const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'left', accessibilityText = false } ) => {
 	return (
 		<Fragment>
 			{ displayIcon && 'left' === alignIcon && <BlockIcon icon={ icon } /> }
@@ -17,6 +22,17 @@ const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'le
 			{ displayIcon && 'right' === alignIcon && <BlockIcon icon={ icon } /> }
 		</Fragment>
 	);
+};
+
+BlockPreviewLabel.propTypes = {
+	content: PropTypes.string.isRequired,
+	icon: PropTypes.object,
+	displayIcon: PropTypes.bool,
+	alignIcon: PropTypes.oneOf( [ 'left', 'right' ] ),
+	accessibilityText: PropTypes.oneOfType( [
+		PropTypes.bool,
+		PropTypes.string,
+	] ),
 };
 
 export default withSelect( ( select, { block, label } ) => {

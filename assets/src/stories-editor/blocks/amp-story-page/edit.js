@@ -3,6 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -57,6 +58,18 @@ class EditPage extends Component {
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
 
+	/**
+	 * Media selection callback.
+	 *
+	 * @param {Object} media            Media object.
+	 * @param {string} media.icon       Media icon.
+	 * @param {string} media.url        Media URL.
+	 * @param {string} media.media_type Media type.
+	 * @param {string} media.type       Media type if it was an existing attachment.
+	 * @param {number} media.id         Attachment ID.
+	 * @param {Object} media.image      Media image object.
+	 * @param {string} media.image.src  Media image URL
+	 */
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
 			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
@@ -370,6 +383,28 @@ class EditPage extends Component {
 		);
 	}
 }
+
+EditPage.propTypes = {
+	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
+		backgroundColors: PropTypes.string,
+		mediaId: PropTypes.number,
+		mediaType: PropTypes.string,
+		mediaUrl: PropTypes.string,
+		focalPoint: PropTypes.shape( {
+			x: PropTypes.number.isRequired,
+			y: PropTypes.number.isRequired,
+		} ),
+		overlayOpacity: PropTypes.number,
+		poster: PropTypes.string,
+		autoAdvanceAfter: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.string,
+	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	media: PropTypes.object,
+	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	totalAnimationDuration: PropTypes.number.isRequired,
+};
 
 export default withSelect( ( select, { clientId, attributes } ) => {
 	const { getMedia } = select( 'core' );

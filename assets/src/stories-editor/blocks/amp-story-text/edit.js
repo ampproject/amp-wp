@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -142,5 +143,43 @@ class TextBlockEdit extends Component {
 		);
 	}
 }
+
+TextBlockEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		width: PropTypes.number,
+		height: PropTypes.number,
+		placeholder: PropTypes.string,
+		content: PropTypes.string,
+		align: PropTypes.string,
+		ampFitText: PropTypes.bool,
+		autoFontSize: PropTypes.number,
+		tagName: PropTypes.string,
+		opacity: PropTypes.number,
+	} ).isRequired,
+	isSelected: PropTypes.bool.isRequired,
+	onReplace: PropTypes.func.isRequired,
+	name: PropTypes.string.isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	className: PropTypes.string,
+	fontSize: PropTypes.shape( {
+		name: PropTypes.string,
+		shortName: PropTypes.string,
+		size: PropTypes.number,
+		slug: PropTypes.string,
+	} ).isRequired,
+	backgroundColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+	customBackgroundColor: PropTypes.string,
+	textColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+};
 
 export default TextBlockEdit;

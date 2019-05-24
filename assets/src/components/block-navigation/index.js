@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { withSelect, withDispatch } from '@wordpress/data';
@@ -41,6 +46,14 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
 	);
 }
 
+BlockNavigationList.propTypes = {
+	blocks: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ) ).isRequired,
+	selectedBlockClientId: PropTypes.string,
+	selectBlock: PropTypes.func.isRequired,
+};
+
 function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReordering } ) {
 	const hasBlocks = blocks.length > 0;
 
@@ -69,6 +82,15 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 		</NavigableMenu>
 	);
 }
+
+BlockNavigation.propTypes = {
+	blocks: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ) ).isRequired,
+	selectedBlockClientId: PropTypes.string,
+	selectBlock: PropTypes.func.isRequired,
+	isReordering: PropTypes.bool.isRequired,
+};
 
 export default compose(
 	withSelect( ( select ) => {

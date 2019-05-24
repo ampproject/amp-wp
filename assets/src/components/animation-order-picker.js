@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -52,5 +57,18 @@ function AnimationOrderPicker( {
 		/>
 	);
 }
+
+AnimationOrderPicker.propTypes = {
+	value: PropTypes.string,
+	options: PropTypes.arrayOf( PropTypes.shape( {
+		value: PropTypes.string.isRequired,
+		label: PropTypes.string.isRequired,
+		block: PropTypes.object.isRequired,
+		blockType: PropTypes.shape( {
+			title: PropTypes.string.isRequired,
+		} ),
+	} ) ),
+	onChange: PropTypes.func.isRequired,
+};
 
 export default AnimationOrderPicker;

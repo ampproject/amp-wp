@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -59,5 +64,14 @@ function FontFamilyPicker( {
 		/>
 	);
 }
+
+FontFamilyPicker.propTypes = {
+	value: PropTypes.string,
+	fonts: PropTypes.arrayOf( PropTypes.shape( {
+		value: PropTypes.string,
+		label: PropTypes.string,
+	} ) ),
+	onChange: PropTypes.func.isRequired,
+};
 
 export default FontFamilyPicker;

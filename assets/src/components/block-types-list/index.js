@@ -1,8 +1,14 @@
 /**
- * This is a 1:1 copy of the BlockTypesList component in @wordpress/block-editor.
+ * This is an almost 1:1 1:1 copy of the BlockTypesList component in @wordpress/block-editor.
  *
  * It is included here because the component is not exported to the public by that package.
+ * The only modification compared to the original one is the addition of PropTypes.
  */
+
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -47,5 +53,22 @@ function BlockTypesList( { items, onSelect, onHover = () => {}, children } ) {
 		/* eslint-enable jsx-a11y/no-redundant-roles */
 	);
 }
+
+BlockTypesList.propTypes = {
+	items: PropTypes.arrayOf( PropTypes.shape( {
+		id: PropTypes.string.isRequired,
+		icon: PropTypes.shape( {
+			background: PropTypes.string,
+			foreground: PropTypes.string,
+			shadowColor: PropTypes.string,
+		} ),
+		hasChildBlocksWithInserterSupport: PropTypes.bool.isRequired,
+		title: PropTypes.string.isRequired,
+		isDisabled: PropTypes.bool.isRequired,
+	} ) ),
+	onSelect: PropTypes.func.isRequired,
+	onHover: PropTypes.func,
+	children: PropTypes.object.isRequired,
+};
 
 export default BlockTypesList;
