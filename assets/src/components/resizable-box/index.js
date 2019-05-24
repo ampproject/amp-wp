@@ -50,7 +50,7 @@ export default ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
-	const isText = 'amp/amp-story-text' === blockName;
+	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
 
 	return (
 		<ResizableBox
@@ -99,8 +99,21 @@ export default ( props ) => {
 				if ( isImage ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
-				if ( isText && ! ampFitText ) {
-					textElement = blockElement.querySelector( '.block-editor-rich-text__editable.editor-rich-text__editable' );
+				if ( isBlockWithText && ! ampFitText ) {
+					switch ( blockName ) {
+						case 'amp/amp-story-text':
+							textElement = blockElement.querySelector( '.block-editor-rich-text__editable.editor-rich-text__editable' );
+							break;
+						case 'amp/amp-story-post-title':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-title' );
+							break;
+						case 'amp/amp-story-post-author':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-author' );
+							break;
+						case 'amp/amp-story-post-date':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
+							break;
+					}
 				}
 
 				onResizeStart();
