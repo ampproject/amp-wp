@@ -39,6 +39,7 @@ install:
 
 script:
   - source "$DEV_LIB_PATH/travis.script.sh"
+  - if [ ! -z $JS_TESTS ]; then npm run test:js; fi
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
@@ -49,16 +50,16 @@ jobs:
     - stage: lint
       name: Lint
       php: "7.3"
-      env: WP_VERSION=latest
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpunit
 
     - stage: test
       name: JavaScript unit tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY="npm run test:js"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,phpsyntax,phpunit JS_TESTS=1
 
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,phpsyntax
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
@@ -78,7 +79,7 @@ jobs:
 
     - name: PHP unit tests (5.6, WordPress 5.1)
       php: "5.6"
-      env: WP_VERSION=5.1    DEV_LIB_SKIP=phpcs,eslint
+      env: WP_VERSION=5.1    DEV_LIB_SKIP=phpcs,eslint,phpsyntax
 
     - name: PHP unit tests (5.5, WordPress 5.0)
       php: "5.5"
