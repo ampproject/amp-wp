@@ -24,6 +24,8 @@ import { BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
+	lastWidth,
+	lastHeight,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
@@ -72,15 +74,12 @@ export default ( props ) => {
 			} }
 			onResizeStop={ ( event, direction ) => {
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
-				const appliedWidth = width + deltaW;
-				const appliedHeight = height + deltaH;
+				let appliedWidth = width + deltaW;
+				let appliedHeight = height + deltaH;
 
 				if ( textElement ) {
-					// Check the element's scrollWidth and scrollHeight.
-					// If any of these is getting over the limit then we should prevent resizing.
-					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
-						return;
-					}
+					appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
+					appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
 				}
 
 				onResizeStop( {
@@ -93,6 +92,8 @@ export default ( props ) => {
 			onResizeStart={ ( event, direction, element ) => {
 				lastSeenX = event.clientX;
 				lastSeenY = event.clientY;
+				lastWidth = width;
+				lastHeight = height;
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
@@ -126,8 +127,26 @@ export default ( props ) => {
 					width = blockElement.clientWidth;
 					height = blockElement.clientHeight;
 				}
-				const appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
-				const appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+				let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
+				let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+
+				if ( textElement ) {
+					// If we have a rotated block, let's assign the width and height for measuring.
+					// Without assigning the new measure, the calculation would be incorrect due to angle.
+					if ( angle ) {
+						textElement.style.width = appliedWidth + 'px';
+						textElement.style.height = appliedHeight + 'px';
+					}
+					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
+						appliedWidth = lastWidth;
+						appliedHeight = lastHeight;
+						// If we have rotated block, let's restore the correct measures.
+						if ( angle ) {
+							textElement.style.width = appliedWidth + 'px';
+							textElement.style.height = appliedHeight + 'px';
+						}
+					}
+				}
 
 				if ( angle ) {
 					const radianAngle = getRadianFromDeg( angle );
@@ -163,6 +182,9 @@ export default ( props ) => {
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+				lastWidth = appliedWidth;
+				lastHeight = appliedHeight;
+
 				// If it's image, let's change the width and height of the image, too.
 				if ( imageWrapper && isImage ) {
 					imageWrapper.style.width = appliedWidth + 'px';
