@@ -43,6 +43,23 @@ class AMP_DOM_Utils {
 	);
 
 	/**
+	 * List of elements allowed in head.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
+	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 * @var array
+	 */
+	private static $elements_allowed_in_head = array(
+		'title',
+		'base',
+		'link',
+		'meta',
+		'style',
+		'noscript',
+		'script',
+	);
+
+	/**
 	 * Stored noscript/comment replacements for libxml<2.8.
 	 *
 	 * @since 0.7
@@ -141,7 +158,51 @@ class AMP_DOM_Utils {
 			}
 		}
 
+		// Make sure there is a head and a body.
+		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( ! $head ) {
+			$head = $dom->createElement( 'head' );
+			$dom->documentElement->insertBefore( $head, $dom->documentElement->firstChild );
+		}
+		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
+		if ( ! $body ) {
+			$body = $dom->createElement( 'body' );
+			$dom->documentElement->appendChild( $body );
+		}
+		self::move_invalid_head_nodes_to_body( $head, $body );
+
 		return $dom;
+	}
+
+	/**
+	 * Move elements not allowed in the head to the body.
+	 *
+	 * Apparently PHP's DOM is more lenient when parsing HTML to allow nodes in the HEAD which do not belong. A proper
+	 * HTML5 parser should rather prematurely short-circuit the HEAD when it finds an illegal element.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
+	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 *
+	 * @param DOMElement $head HEAD element.
+	 * @param DOMElement $body BODY element.
+	 */
+	private static function move_invalid_head_nodes_to_body( $head, $body ) {
+		// Walking backwards is to make it easier to prepend them to the body in the expected order.
+		$node = $head->lastChild;
+		while ( $node ) {
+			$next_sibling = $node->previousSibling;
+			$is_valid     = (
+				$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
+				||
+				$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue )
+				||
+				$node instanceof DOMComment
+			);
+			if ( ! $is_valid ) {
+				$body->insertBefore( $head->removeChild( $node ), $body->firstChild );
+			}
+			$node = $next_sibling;
+		}
 	}
 
 	/**

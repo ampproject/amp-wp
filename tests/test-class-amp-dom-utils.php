@@ -309,4 +309,42 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$output = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $body, $output );
 	}
+
+	/**
+	 * Test that HEAD and BODY elements are always present.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_ensuring_head_body() {
+		$html = '<html><body><p>Hello</p></body></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( $dom->documentElement->lastChild, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
+
+		$html = '<html><head><title>foo</title></head></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->lastChild->childNodes->length );
+
+		$html = '<html><head><title>foo</title></head><p>no body</p></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
+		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( 'no body', $p->textContent );
+
+		$html = 'Hello world';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
+		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( 'Hello world', $p->textContent );
+	}
 }
