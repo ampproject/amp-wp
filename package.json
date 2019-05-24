@@ -20,8 +20,7 @@
   },
   "dependencies": {
     "classnames": "2.2.6",
-    "dom-scroll-into-view": "1.2.1",
-    "timeago.js": "3.0.2"
+    "dom-scroll-into-view": "1.2.1"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",

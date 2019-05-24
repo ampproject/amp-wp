@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import timeago from 'timeago.js';
 import moment from 'moment';
 
 /**
@@ -77,14 +76,15 @@ export const settings = {
 		const { attributes, setAttributes } = props;
 		const { align, cutoff } = attributes;
 		let timeAgo;
+
 		if ( attributes.dateTime ) {
 			if ( attributes.cutoff && parseInt( attributes.cutoff ) < Math.abs( moment( attributes.dateTime ).diff( moment(), 'seconds' ) ) ) {
 				timeAgo = moment( attributes.dateTime ).format( 'dddd D MMMM HH:mm' );
 			} else {
-				timeAgo = timeago().format( attributes.dateTime );
+				timeAgo = moment( attributes.dateTime ).fromNow();
 			}
 		} else {
-			timeAgo = timeago().format( new Date() );
+			timeAgo = moment( Date.now() ).fromNow();
 			setAttributes( { dateTime: moment( moment(), moment.ISO_8601, true ).format() } );
 		}
 
