@@ -161,6 +161,9 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			'add_nav_menu_styles' => array(),
 		),
+
+		'twentyeleven'    => array(),
+		'twentyten'       => array(),
 	);
 
 	/**
