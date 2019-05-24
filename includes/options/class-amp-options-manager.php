@@ -379,6 +379,7 @@ class AMP_Options_Manager {
 		<style type="text/css">
 			.amp-welcome-notice {
 				padding: 38px;
+				min-height: 200px;
 			}
 			.amp-welcome-notice + .notice {
 				clear: both;
