@@ -113,7 +113,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'amp-live-list',
 			'[submit-error]',
 			'[submit-success]',
-			'amp-carousel',
 		),
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
