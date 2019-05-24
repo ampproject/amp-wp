@@ -1232,12 +1232,16 @@ export const maybeSetInitialSize = ( clientId ) => {
 
 			if ( metaBlockElement && ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) ) {
 				const metaBlockElementHeight = ampFitText ? metaBlockElement.offsetHeight : metaBlockElement.scrollHeight;
+				const metaBlockElementWidth = ampFitText ? metaBlockElement.offsetWidth : metaBlockElement.scrollWidth;
 
+				const sizeAtts = {};
 				if ( metaBlockElementHeight > height ) {
-					updateBlockAttributes( clientId, {
-						height: metaBlockElementHeight,
-					} );
+					sizeAtts.height = metaBlockElementHeight;
 				}
+				if ( metaBlockElementWidth > width ) {
+					sizeAtts.width = metaBlockElementWidth;
+				}
+				updateBlockAttributes( clientId, sizeAtts );
 			}
 
 			break;
