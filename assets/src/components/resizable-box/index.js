@@ -129,8 +129,9 @@ export default ( props ) => {
 				}
 				let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 				let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+				const isReducing = 0 > deltaW || 0 > deltaH;
 
-				if ( textElement ) {
+				if ( textElement && isReducing ) {
 					// If we have a rotated block, let's assign the width and height for measuring.
 					// Without assigning the new measure, the calculation would be incorrect due to angle.
 					if ( angle ) {
@@ -140,11 +141,11 @@ export default ( props ) => {
 					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;
-						// If we have rotated block, let's restore the correct measures.
-						if ( angle ) {
-							textElement.style.width = appliedWidth + 'px';
-							textElement.style.height = appliedHeight + 'px';
-						}
+					}
+					// If we have rotated block, let's restore the correct measures.
+					if ( angle ) {
+						textElement.style.width = 'initial';
+						textElement.style.height = '100%';
 					}
 				}
 
