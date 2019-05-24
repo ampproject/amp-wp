@@ -20,6 +20,7 @@ draggable.js: This file has been modified to display the clone in relation to th
 - Creating the clone has been updated to take the initial position based on the wrapper element;
 - The clone styling has been changed to ignore the % values and to match the size of the original element;
 - Resizing the dragged clone has been removed.
+block-drag-area.js: This was renamed from from drag-handle.js
 
 index.js: There are slight differences between the original file and this file.
 - The labels of the icons have been changed;
@@ -31,3 +32,4 @@ index.js: There are slight differences between the original file and this file.
 The following file of the component was removed since it wasn't needed:
 - mover-descriptiong.js
 - style.scss
+- icons.js
