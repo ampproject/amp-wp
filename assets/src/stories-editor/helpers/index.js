@@ -1211,19 +1211,6 @@ export const maybeSetInitialSize = ( clientId ) => {
 
 			break;
 
-		case 'amp/amp-story-text':
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
-
-				if ( element && element.offsetHeight !== height ) {
-					updateBlockAttributes( clientId, {
-						height: element.offsetHeight,
-					} );
-				}
-			}
-
-			break;
-
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
 		case 'amp/amp-story-post-title':

@@ -20,18 +20,22 @@ import {
 	getRadianFromDeg,
 } from '../../stories-editor/helpers';
 
+import { BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
+
 let lastSeenX = 0,
 	lastSeenY = 0,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
-	imageWrapper;
+	imageWrapper,
+	textElement;
 
 export default ( props ) => {
 	const {
 		isSelected,
 		angle,
 		blockName,
+		ampFitText,
 		minWidth,
 		minHeight,
 		onResizeStart,
@@ -46,6 +50,7 @@ export default ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
+	const isText = 'amp/amp-story-text' === blockName;
 
 	return (
 		<ResizableBox
@@ -67,9 +72,20 @@ export default ( props ) => {
 			} }
 			onResizeStop={ ( event, direction ) => {
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
+				const appliedWidth = width + deltaW;
+				const appliedHeight = height + deltaH;
+
+				if ( textElement ) {
+					// Check the element's scrollWidth and scrollHeight.
+					// If any of these is getting over the limit then we should prevent resizing.
+					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
+						return;
+					}
+				}
+
 				onResizeStop( {
-					width: parseInt( width + deltaW, 10 ),
-					height: parseInt( height + deltaH, 10 ),
+					width: parseInt( appliedWidth, 10 ),
+					height: parseInt( appliedHeight, 10 ),
 					positionTop: parseInt( blockElement.style.top, 10 ),
 					positionLeft: parseInt( blockElement.style.left, 10 ),
 				} );
@@ -83,6 +99,10 @@ export default ( props ) => {
 				if ( isImage ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
+				if ( isText && ! ampFitText ) {
+					textElement = blockElement.querySelector( '.block-editor-rich-text__editable.editor-rich-text__editable' );
+				}
+
 				onResizeStart();
 			} }
 			onResize={ ( event, direction, element ) => {
