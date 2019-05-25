@@ -13,7 +13,7 @@
     "ext-libxml": "*",
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.6",
-    "fasterimage/fasterimage": "1.4.0",
+    "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "8.3.0"
   },
   "suggest": {
