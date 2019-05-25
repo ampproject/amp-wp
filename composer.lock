@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1b379c91db7623d61c80d8bcd1af8d9f",
+    "content-hash": "ed6e9218f0370c7515f173953ef737fc",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -52,16 +52,16 @@
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab"
+                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/2a85079bef8090c2820bcad5c649cdc41f7b53ab",
-                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/42d125a15dc124520aff2157bbed9a4b2d4f310a",
+                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a",
                 "shasum": ""
             },
             "require": {
@@ -69,8 +69,9 @@
                 "willwashburn/stream": ">=1.0"
             },
             "require-dev": {
-                "mockery/mockery": "~0.9",
-                "phpunit/phpunit": "~4.0"
+                "php-coveralls/php-coveralls": "^2.1",
+                "php-mock/php-mock-phpunit": "^2.3",
+                "phpunit/phpunit": "~6.0"
             },
             "type": "library",
             "autoload": {
@@ -86,6 +87,9 @@
                 {
                     "name": "Will Washburn",
                     "email": "will@tailwindapp.com"
+                },
+                {
+                    "name": "Weston Ruter"
                 }
             ],
             "description": "FasterImage finds the size or type of a set of images given their uris by fetching as little as needed, in parallel. Originally ported by Tom Moor.",
@@ -99,7 +103,7 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2019-03-07T05:20:21+00:00"
+            "time": "2019-05-25T14:33:33+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
