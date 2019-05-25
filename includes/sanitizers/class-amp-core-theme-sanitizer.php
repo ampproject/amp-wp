@@ -183,65 +183,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Acceptable errors.
 	 */
 	public static function get_acceptable_errors( $template ) {
-		switch ( $template ) {
-			case 'twentyfourteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfourteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfourteen-style-css',
-							),
-						),
+		if ( isset( self::$theme_features[ $template ] ) ) {
+			return array(
+				'removed_unused_css_rules' => true,
+				'illegal_css_at_rule'      => array(
+					array(
+						'at_rule' => 'viewport',
 					),
-				);
-			case 'twentyfifteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfifteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfifteen-style-css',
-							),
-						),
+					array(
+						'at_rule' => '-ms-viewport',
 					),
-				);
-			case 'twentysixteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentysixteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentysixteen-style-css',
-							),
-						),
-					),
-				);
-			case 'twentyseventeen':
-				return array(
-					'removed_unused_css_rules' => true,
-				);
+				),
+			);
 		}
 		return array();
 	}
