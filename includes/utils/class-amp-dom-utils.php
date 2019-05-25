@@ -180,9 +180,6 @@ class AMP_DOM_Utils {
 	 * Apparently PHP's DOM is more lenient when parsing HTML to allow nodes in the HEAD which do not belong. A proper
 	 * HTML5 parser should rather prematurely short-circuit the HEAD when it finds an illegal element.
 	 *
-	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
-	 * @link https://www.w3.org/TR/html5/document-metadata.html
-	 *
 	 * @param DOMElement $head HEAD element.
 	 * @param DOMElement $body BODY element.
 	 */
@@ -191,18 +188,30 @@ class AMP_DOM_Utils {
 		$node = $head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
-			$is_valid     = (
-				$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
-				||
-				$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue )
-				||
-				$node instanceof DOMComment
-			);
-			if ( ! $is_valid ) {
+			if ( ! self::is_valid_head_node( $node ) ) {
 				$body->insertBefore( $head->removeChild( $node ), $body->firstChild );
 			}
 			$node = $next_sibling;
 		}
+	}
+
+	/**
+	 * Determine whether a node can be in the head.
+	 *
+	 * @link https://github.com/ampproject/amphtml/blob/445d6e3be8a5063e2738c6f90fdcd57f2b6208be/validator/engine/htmlparser.js#L83-L100
+	 * @link https://www.w3.org/TR/html5/document-metadata.html
+	 *
+	 * @param DOMNode $node Node.
+	 * @return bool Whether valid head node.
+	 */
+	public static function is_valid_head_node( DOMNode $node ) {
+		return (
+			$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
+			||
+			$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) // Whitespace text nodes are OK.
+			||
+			$node instanceof DOMComment
+		);
 	}
 
 	/**
