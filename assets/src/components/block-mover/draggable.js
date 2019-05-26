@@ -13,6 +13,8 @@ import { noop } from 'lodash';
 import { Component } from '@wordpress/element';
 import { withSafeTimeout } from '@wordpress/compose';
 
+const { Image } = window;
+
 /**
  * Internal dependencies
  */
@@ -94,6 +96,15 @@ class Draggable extends Component {
 			event.preventDefault();
 			return;
 		}
+
+		/*
+		 * On dragging, the browser creates an image of the target, for example, the entire text block.
+		 * But there's already a clone below that's rotated in case the block is rotated,
+		 * and this can create a non-rotated duplicate of that.
+		 * So override this with an empty image.
+		 */
+		const dragImage = new Image();
+		event.dataTransfer.setDragImage( dragImage, 0, 0 );
 
 		event.dataTransfer.setData( 'text', JSON.stringify( transferData ) );
 
