@@ -1078,7 +1078,7 @@ class AMP_Theme_Support {
 		</div>
 		<div submit-error>
 			<template type="amp-mustache">
-				<p class="amp-comment-submit-error">{{{error}}}</p>
+				<p class="amp-comment-submit-error">{{{message}}}</p>
 			</template>
 		</div>
 		<?php

@@ -414,7 +414,7 @@ class AMP_HTTP {
 		// Message will be shown in template defined by AMP_Theme_Support::amend_comment_form().
 		wp_send_json(
 			array(
-				'error' => amp_wp_kses_mustache( $error ),
+				'message' => amp_wp_kses_mustache( $error ),
 			)
 		);
 	}

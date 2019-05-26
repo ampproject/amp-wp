@@ -28,3 +28,24 @@ body amp-audio:not([controls]) {
 	display: inline-block;
 	height: auto;
 }
+
+.amp-wp-default-form-message > div {
+	margin: 1em 0;
+	padding: 0.5em;
+}
+.amp-wp-default-form-message[submitting] > div {
+	font-style: italic;
+}
+.amp-wp-default-form-message[submit-success] > div {
+	border: solid 1px green;
+	background-color: lightgreen;
+}
+.amp-wp-default-form-message[submit-error] > div {
+	border: solid 1px red;
+	background-color: lightpink;
+}
+
+/* Prevent showing empty success message in the case of an AMP-Redirect-To response header. */
+.amp-wp-default-form-message[submit-success] > div:empty {
+	display: none;
+}

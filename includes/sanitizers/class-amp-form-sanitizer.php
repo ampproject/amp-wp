@@ -95,8 +95,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					// Record that action was converted tp action-xhr.
 					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
 					$node->setAttribute( 'action-xhr', $action_url );
-					// Append error handler if not found.
-					$this->ensure_submit_error_element( $node );
+					// Append success/error handlers if not found.
+					$this->ensure_response_message_elements( $node );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
 					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
 				}
@@ -119,28 +119,52 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Checks if the form has an error handler else create one if not.
+	 * Ensure that the form has a submit-success and submit-error element templates.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
-	 * @since 0.7
+	 * @since 1.2
 	 *
 	 * @param DOMElement $form The form node to check.
 	 */
-	public function ensure_submit_error_element( $form ) {
+	public function ensure_response_message_elements( $form ) {
+		/**
+		 * Parent node.
+		 *
+		 * @var DOMElement $parent
+		 */
+		$elements = array(
+			'submit-error'   => null,
+			'submit-success' => null,
+			'submitting'     => null,
+		);
+
 		$templates = $form->getElementsByTagName( 'template' );
 		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-			if ( $templates->item( $i )->parentNode->hasAttribute( 'submit-error' ) ) {
-				return; // Found error template, do nothing.
+			$parent = $templates->item( $i )->parentNode;
+			foreach ( array_keys( $elements ) as $attribute ) {
+				if ( $parent->hasAttribute( $attribute ) ) {
+					$elements[ $attribute ] = $parent;
+				}
 			}
 		}
 
-		$div      = $this->dom->createElement( 'div' );
-		$template = $this->dom->createElement( 'template' );
-		$mustache = $this->dom->createTextNode( '{{{error}}}' );
-		$div->setAttribute( 'submit-error', '' );
-		$template->setAttribute( 'type', 'amp-mustache' );
-		$template->appendChild( $mustache );
-		$div->appendChild( $template );
-		$form->appendChild( $div );
+		foreach ( $elements as $attribute => $element ) {
+			if ( $element ) {
+				continue;
+			}
+			$div      = $this->dom->createElement( 'div' );
+			$template = $this->dom->createElement( 'template' );
+			$div->setAttribute( 'class', 'amp-wp-default-form-message' );
+			if ( 'submitting' === $attribute ) {
+				$mustache = $this->dom->createTextNode( esc_html__( 'Submitting…', 'amp' ) );
+			} else {
+				$mustache = $this->dom->createTextNode( '{{{message}}}' );
+			}
+			$div->setAttribute( $attribute, '' );
+			$template->setAttribute( 'type', 'amp-mustache' );
+			$template->appendChild( $mustache );
+			$div->appendChild( $template );
+			$form->appendChild( $div );
+		}
 	}
 }
