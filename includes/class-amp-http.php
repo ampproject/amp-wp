@@ -12,6 +12,14 @@
 class AMP_HTTP {
 
 	/**
+	 * Query var which is submitted with a form which had an action attribute which was automatically converted into action-xhr.
+	 *
+	 * @see \AMP_Form_Sanitizer::sanitize()
+	 * @var string
+	 */
+	const ACTION_XHR_CONVERTED_QUERY_VAR = '_wp_amp_action_xhr_converted';
+
+	/**
 	 * Headers sent (or attempted to be sent).
 	 *
 	 * @since 1.0
@@ -130,7 +138,7 @@ class AMP_HTTP {
 	public static function purge_amp_query_vars() {
 		$query_vars = array(
 			'__amp_source_origin',
-			'_wp_amp_action_xhr_converted',
+			self::ACTION_XHR_CONVERTED_QUERY_VAR,
 			'amp_latest_update_time',
 			'amp_last_check_time',
 		);
@@ -302,7 +310,7 @@ class AMP_HTTP {
 	 */
 	public static function handle_xhr_request() {
 		$is_amp_xhr = (
-			! empty( self::$purged_amp_query_vars['_wp_amp_action_xhr_converted'] )
+			! empty( self::$purged_amp_query_vars[ self::ACTION_XHR_CONVERTED_QUERY_VAR ] )
 			&&
 			( ! empty( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'] )
 		);

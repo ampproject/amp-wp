@@ -374,8 +374,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers AMP_HTTP::handle_xhr_request()
 	 */
 	public function test_handle_xhr_request() {
-		$_GET['_wp_amp_action_xhr_converted'] = 1;
-		$_SERVER['REQUEST_METHOD']            = 'POST';
+		$_GET[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = 1;
+		$_SERVER['REQUEST_METHOD']                        = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', array( 'AMP_HTTP', 'intercept_post_request_redirect' ) ) );

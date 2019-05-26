@@ -92,8 +92,8 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( 'post' === $method ) {
 				$node->removeAttribute( 'action' );
 				if ( ! $xhr_action ) {
-					// record that action was converted tp action-xhr.
-					$action_url = add_query_arg( '_wp_amp_action_xhr_converted', 1, $action_url );
+					// Record that action was converted tp action-xhr.
+					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
 					$node->setAttribute( 'action-xhr', $action_url );
 					// Append error handler if not found.
 					$this->ensure_submit_error_element( $node );
