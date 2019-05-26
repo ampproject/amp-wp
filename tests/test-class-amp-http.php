@@ -516,12 +516,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 
 		ob_start();
 		AMP_HTTP::handle_wp_die( 'string' );
-		$this->assertEquals( '{"error":"string"}', ob_get_clean() );
+		$this->assertEquals( '{"message":"string"}', ob_get_clean() );
 
 		ob_start();
 		$error = new WP_Error( 'code', 'The Message' );
 		AMP_HTTP::handle_wp_die( $error );
-		$this->assertEquals( '{"error":"The Message"}', ob_get_clean() );
+		$this->assertEquals( '{"message":"The Message"}', ob_get_clean() );
 	}
 
 	/**

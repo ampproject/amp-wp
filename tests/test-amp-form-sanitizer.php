@@ -29,6 +29,8 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
+		$form_templates = '<div class="amp-wp-default-form-message" submit-error=""><template type="amp-mustache">{{{message}}}</template></div><div class="amp-wp-default-form-message" submit-success=""><template type="amp-mustache">{{{message}}}</template></div><div class="amp-wp-default-form-message" submitting=""><template type="amp-mustache">Submitting…</template></div>';
+
 		return array(
 			'no_form' => array(
 				'<p>Lorem Ipsum Demet Delorit.</p>',
@@ -48,7 +50,7 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'form_with_post_method_http_action_and_no_target' => array(
 				'<form method="post" action="http://example.org/example-page/"></form>',
-				'<form method="post" action-xhr="//example.org/example-page/?_wp_amp_action_xhr_converted=1" target="_top"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" action-xhr="//example.org/example-page/?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
 			),
 			'form_with_post_method_http_action_and_blank_target' => array(
 				'<form method="post" action-xhr="http://example.org/example-page/" target="_blank"></form>',
@@ -60,23 +62,23 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			),
 			'form_with_post_method_https_action_and_custom_target' => array(
 				'<form method="post" action="https://example.org/" target="some_other_target"></form>',
-				'<form method="post" target="_blank" action-xhr="https://example.org/?_wp_amp_action_xhr_converted=1"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" target="_blank" action-xhr="https://example.org/?_wp_amp_action_xhr_converted=1">' . $form_templates . '</form>',
 			),
 			'jetpack_contact_form' => array(
 				'<form action="https://src.wordpress-develop.test/contact/#contact-form-9" method="post" class="contact-form commentsblock"><div class="element-has-attributes">hello</div><div><label for="g9-favoritenumber" class="grunion-field-label text">Favorite number</label><input type="text" name="g9-favoritenumber" id="g9-favoritenumber" value="" class="text"></div><p class="contact-submit"><input type="submit" value="Submit" class="pushbutton-wide"><input type="hidden" id="_wpnonce" name="_wpnonce" value="640996fb1e"><input type="hidden" name="_wp_http_referer" value="/contact/"><input type="hidden" name="contact-form-id" value="9"><input type="hidden" name="action" value="grunion-contact-form"><input type="hidden" name="contact-form-hash" value="df9f9136763f5eb819f433e4fe4af3447534e8cc"></p></form>',
-				'<form method="post" class="contact-form commentsblock" action-xhr="https://src.wordpress-develop.test/contact/?_wp_amp_action_xhr_converted=1#contact-form-9" target="_top"><div class="element-has-attributes">hello</div><div><label for="g9-favoritenumber" class="grunion-field-label text">Favorite number</label><input type="text" name="g9-favoritenumber" id="g9-favoritenumber" value="" class="text"></div><p class="contact-submit"><input type="submit" value="Submit" class="pushbutton-wide"><input type="hidden" id="_wpnonce" name="_wpnonce" value="640996fb1e"><input type="hidden" name="_wp_http_referer" value="/contact/"><input type="hidden" name="contact-form-id" value="9"><input type="hidden" name="action" value="grunion-contact-form"><input type="hidden" name="contact-form-hash" value="df9f9136763f5eb819f433e4fe4af3447534e8cc"></p><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" class="contact-form commentsblock" action-xhr="https://src.wordpress-develop.test/contact/?_wp_amp_action_xhr_converted=1#contact-form-9" target="_top"><div class="element-has-attributes">hello</div><div><label for="g9-favoritenumber" class="grunion-field-label text">Favorite number</label><input type="text" name="g9-favoritenumber" id="g9-favoritenumber" value="" class="text"></div><p class="contact-submit"><input type="submit" value="Submit" class="pushbutton-wide"><input type="hidden" id="_wpnonce" name="_wpnonce" value="640996fb1e"><input type="hidden" name="_wp_http_referer" value="/contact/"><input type="hidden" name="contact-form-id" value="9"><input type="hidden" name="action" value="grunion-contact-form"><input type="hidden" name="contact-form-hash" value="df9f9136763f5eb819f433e4fe4af3447534e8cc"></p>' . $form_templates . '</form>',
 			),
 			'form_with_upload' => array(
 				'<form action="https://src.wordpress-develop.test/upload/" method="post"><input type="file" name="upload"><button type="submit">Submit</button></form>',
-				'<form method="post" action-xhr="https://src.wordpress-develop.test/upload/?_wp_amp_action_xhr_converted=1" target="_top"><input type="file" name="upload"><button type="submit">Submit</button><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" action-xhr="https://src.wordpress-develop.test/upload/?_wp_amp_action_xhr_converted=1" target="_top"><input type="file" name="upload"><button type="submit">Submit</button>' . $form_templates . '</form>',
 			),
 			'form_with_password' => array(
 				'<form action="https://src.wordpress-develop.test/login/" method="post"><input type="password" name="password"><button type="submit">Submit</button></form>',
-				'<form method="post" action-xhr="https://src.wordpress-develop.test/login/?_wp_amp_action_xhr_converted=1" target="_top"><input type="password" name="password"><button type="submit">Submit</button><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" action-xhr="https://src.wordpress-develop.test/login/?_wp_amp_action_xhr_converted=1" target="_top"><input type="password" name="password"><button type="submit">Submit</button>' . $form_templates . '</form>',
 			),
 			'form_with_relative_action_url' => array(
 				'<form method="post" action="/login/"></form>',
-				'<form method="post" action-xhr="//example.org/login/?_wp_amp_action_xhr_converted=1" target="_top"><div submit-error=""><template type="amp-mustache">{{{error}}}</template></div></form>',
+				'<form method="post" action-xhr="//example.org/login/?_wp_amp_action_xhr_converted=1" target="_top">' . $form_templates . '</form>',
 			),
 		);
 	}
