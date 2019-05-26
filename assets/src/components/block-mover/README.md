@@ -11,7 +11,6 @@ In addition the component also uses default `IgnoreNestedEvents` component which
 The following files of the component are 100% or almost unchanged:
 - block-draggable.js:
   - This file is mainly copied from core, the only difference is switching to using internal Draggable
-- block-drag-area.js (modified from drag-handle.js)
 - icons.js (unchanged)
 - ignore-nested-events.js (unchanged)
 
