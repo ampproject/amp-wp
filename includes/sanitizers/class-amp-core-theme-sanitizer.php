@@ -90,6 +90,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_has_header_video_body_class'     => array(),
 			'add_nav_menu_styles'                 => array(
 				'sub_menu_button_toggle_class' => 'toggled-on',
+				'no_js_submenu_visible'        => true,
 			),
 			'add_smooth_scrolling'                => array(
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
@@ -115,6 +116,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			'add_nav_menu_styles' => array(
 				'sub_menu_button_toggle_class' => 'toggled-on',
+				'no_js_submenu_visible'        => true,
 			),
 		),
 
@@ -133,9 +135,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			),
 			'add_nav_menu_styles' => array(
 				'sub_menu_button_toggle_class' => 'toggle-on',
+				'no_js_submenu_visible'        => true,
 			),
 		),
 
+		// Twenty Fourteen.
 		'twentyfourteen'  => array(
 			// @todo Figure out an AMP solution for onResizeARIA().
 			'dequeue_scripts'                    => array(
@@ -149,6 +153,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_twentyfourteen_slider_carousel' => array(),
 			'add_twentyfourteen_search'          => array(),
 		),
+
+		// Twenty Twelve.
+		'twentytwelve'    => array(
+			'dequeue_scripts'     => array(
+				'twentytwelve-navigation',
+			),
+			'add_nav_menu_styles' => array(),
+		),
+
+		'twentyeleven'    => array(),
+		'twentyten'       => array(),
 	);
 
 	/**
@@ -171,65 +186,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Acceptable errors.
 	 */
 	public static function get_acceptable_errors( $template ) {
-		switch ( $template ) {
-			case 'twentyfourteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfourteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfourteen-style-css',
-							),
-						),
+		if ( isset( self::$theme_features[ $template ] ) ) {
+			return array(
+				'removed_unused_css_rules' => true,
+				'illegal_css_at_rule'      => array(
+					array(
+						'at_rule' => 'viewport',
 					),
-				);
-			case 'twentyfifteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfifteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentyfifteen-style-css',
-							),
-						),
+					array(
+						'at_rule' => '-ms-viewport',
 					),
-				);
-			case 'twentysixteen':
-				return array(
-					'removed_unused_css_rules' => true,
-					'illegal_css_at_rule'      => array(
-						array(
-							'at_rule'         => 'viewport',
-							'node_attributes' => array(
-								'id' => 'twentysixteen-style-css',
-							),
-						),
-						array(
-							'at_rule'         => '-ms-viewport',
-							'node_attributes' => array(
-								'id' => 'twentysixteen-style-css',
-							),
-						),
-					),
-				);
-			case 'twentyseventeen':
-				return array(
-					'removed_unused_css_rules' => true,
-				);
+				),
+			);
 		}
 		return array();
 	}
@@ -269,6 +237,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	protected static function get_theme_support_args( $theme ) {
 		// phpcs:disable WordPress.WP.I18n.TextDomainMismatch
 		switch ( $theme ) {
+			case 'twentytwelve':
+				return array(
+					'nav_menu_toggle' => array(
+						'nav_container_id'           => 'menu-primary',
+						'nav_container_toggle_class' => 'toggled-on',
+						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
+						'menu_button_toggle_class'   => 'toggled-on',
+					),
+				);
+
 			case 'twentyfourteen':
 				return array(
 					'nav_menu_toggle' => array(
@@ -933,10 +911,15 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				ob_start();
 				?>
 				<style>
-				/* Override no-js selector in parent theme. */
-				.no-js .main-navigation ul ul {
-					display: none;
-				}
+				<?php if ( ! empty( $args['no_js_submenu_visible'] ) ) : ?>
+					/* Override no-js selector in parent theme. */
+					<?php
+					$selector = is_string( $args['no_js_submenu_visible'] ) ? $args['no_js_submenu_visible'] : '.no-js .main-navigation ul ul';
+					?>
+					<?php echo esc_html( $selector ); ?> {
+						display: none;
+					}
+				<?php endif; ?>
 
 				<?php if ( ! empty( $args['sub_menu_button_toggle_class'] ) ) : ?>
 					/* Use sibling selector and re-use class on button instead of toggling toggle-on class on ul.sub-menu */
@@ -1091,6 +1074,18 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 							left: 202px;
 						}
 					}
+
+				<?php elseif ( 'twentytwelve' === get_template() ) : ?>
+					@media screen and (min-width: 600px) {
+						.main-navigation .menu-item-has-children:focus-within > ul {
+							border-left: 0;
+							clip: inherit;
+							overflow: inherit;
+							height: inherit;
+							width: inherit;
+						}
+					}
+
 				<?php endif; ?>
 				</style>
 				<?php
