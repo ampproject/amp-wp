@@ -1705,11 +1705,38 @@ class AMP_Theme_Support {
 			unset( $args['validation_error_callback'] );
 		}
 
+		$status_code = http_response_code();
+
 		/*
-		 * Check if the response starts with HTML markup.
-		 * Without this check, JSON responses will be erroneously corrupted,
-		 * being wrapped in HTML documents.
+		 * Send a JSON response when the site is failing to handle AMP form submissions with a JSON response as required
+		 * or an AMP-Redirect-To response header was not sent. This is a common scenario for plugins that handle form
+		 * submissions and show the success page via the POST request's response body instead of invoking wp_redirect(),
+		 * in which case AMP_HTTP::intercept_post_request_redirect() will automatically send the AMP-Redirect-To header.
+		 * If the POST response is an HTML document then the form submission will appear to not have worked since there
+		 * is no success or failure message shown. By catching the case where HTML is sent in the response, we can
+		 * automatically send a generic success message when a 200 status is returned or a failure message when a 400+
+		 * response code is sent.
 		 */
+		$is_form_submission = (
+			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&&
+			isset( $_SERVER['REQUEST_METHOD'] )
+			&&
+			'POST' === $_SERVER['REQUEST_METHOD']
+		);
+		if ( $is_form_submission && null === json_decode( $response ) && json_last_error() && ( ( $status_code >= 200 && $status_code < 300 ) || $status_code >= 400 ) ) {
+			return wp_json_encode(
+				array(
+					'message' => sprintf(
+						/* translators: %1$d: the HTTP response code, %2$s: the status description */
+						__( 'Server responded with status code %1$d: %2$s', 'amp' ),
+						$status_code,
+						esc_html( get_status_header_desc( $status_code ) )
+					),
+				)
+			);
+		}
+
 		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
 		}
