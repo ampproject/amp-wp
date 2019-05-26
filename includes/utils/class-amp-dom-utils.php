@@ -184,7 +184,7 @@ class AMP_DOM_Utils {
 	 * @param DOMElement $body BODY element.
 	 */
 	private static function move_invalid_head_nodes_to_body( $head, $body ) {
-		// Walking backwards is to make it easier to prepend them to the body in the expected order.
+		// Walking backwards makes it easier to move elements in the expected order.
 		$node = $head->lastChild;
 		while ( $node ) {
 			$next_sibling = $node->previousSibling;
