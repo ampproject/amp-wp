@@ -40,13 +40,26 @@ class AMP_Script_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			$is_inside_head_el = ( $noscript->parentNode && 'head' === $noscript->parentNode->nodeName );
+			$must_move_to_body = false;
+
 			$fragment = $this->dom->createDocumentFragment();
 			$fragment->appendChild( $this->dom->createComment( 'noscript' ) );
 			while ( $noscript->firstChild ) {
+				if ( $is_inside_head_el && ! $must_move_to_body ) {
+					$must_move_to_body = ! AMP_DOM_Utils::is_valid_head_node( $noscript->firstChild );
+				}
 				$fragment->appendChild( $noscript->firstChild );
 			}
 			$fragment->appendChild( $this->dom->createComment( '/noscript' ) );
-			$noscript->parentNode->replaceChild( $fragment, $noscript );
+
+			if ( $must_move_to_body ) {
+				$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+				$body->insertBefore( $fragment, $body->firstChild );
+				$noscript->parentNode->removeChild( $noscript );
+			} else {
+				$noscript->parentNode->replaceChild( $fragment, $noscript );
+			}
 
 			$this->did_convert_elements = true;
 		}
