@@ -47,13 +47,12 @@ after_script:
 jobs:
   fast_finish: true
   include:
-    - stage: lint
+    - stage: test
       name: Lint
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpunit
 
-    - stage: test
-      name: JavaScript unit tests
+    - name: JavaScript unit tests
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit JS_TESTS=1
 
