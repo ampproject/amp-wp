@@ -54,7 +54,7 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       before_script:
-        - composer require localheinz/composer-normalize
+        - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - composer validate --no-check-all
