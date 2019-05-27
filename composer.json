@@ -18,6 +18,7 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
+    "php-coveralls/php-coveralls": "2.1.0",
     "phpcompatibility/php-compatibility": "9.1.1",
     "wp-coding-standards/wpcs": "2.1.1",
     "xwp/wp-dev-lib": "1.1.1"
