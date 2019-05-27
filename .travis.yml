@@ -53,9 +53,12 @@ jobs:
       name: Lint (PHP, JavaScript, and configuration files)
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
+      before_script:
+        - composer require localheinz/composer-normalize
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - composer validate --no-check-all
+        - composer normalize --dry-run
         - npm run lint:php
         - npm run lint:js
         - npm run lint:pkg-json
