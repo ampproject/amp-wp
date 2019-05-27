@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
 PROJECT_SLUG=amp
@@ -29,10 +31,9 @@ function after_wp_install {
 
 # Removes Xdebug for a huge performance increase:
 function maybe_disable_xdebug {
-	echo "Removing Xdebug...";
-	if [[ ! can_generate_coverage_clover && -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]]; then
-		phpenv config-rm xdebug.ini
-		echo "Done!"
+	if ! can_generate_coverage_clover; then
+		echo "Removing Xdebug...";
+		phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
+		echo "Done."
 	fi
-	echo "xdebug.ini does not exist."
 }
