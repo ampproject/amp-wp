@@ -1139,7 +1139,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_class_amp_bind_preservation() {
 		ob_start();
@@ -1192,7 +1192,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test that auto-removal is performed when remove_unused_rules=sometimes (the default), and that excessive CSS will be removed entirely.
 	 *
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_large_custom_css_and_rule_removal() {
 		$custom_max_size = null;
@@ -2286,6 +2286,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Get prioritization test data.
 	 *
+	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
 	 * @return array
 	 */
 	public function get_prioritization_data() {
@@ -2373,6 +2375,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
+		if ( ! wp_get_theme( 'twentyten' )->exists() ) {
+			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 
 		add_theme_support( 'amp' );

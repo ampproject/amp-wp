@@ -132,12 +132,12 @@ function amp_get_test_data_entries() {
 			'content' => 'http://i1259.photobucket.com/albums/ii543/iamnotpeterpan/EditPostlsaquoDennisDoesCricketmdashWordPress_zpsf72cc13d.png',
 		),
 		array(
-			'heading' => 'Polldaddy Poll Embed',
-			'content' => 'https://polldaddy.com/poll/7012505/',
+			'heading' => 'Crowdsingal Poll Embed',
+			'content' => 'https://poll.fm/7012505',
 		),
 		array(
 			'heading' => 'Polldaddy Survey Embed',
-			'content' => 'https://rydk.polldaddy.com/s/test-survey',
+			'content' => 'https://rydk.survey.fm/test-survey',
 		),
 		array(
 			'heading' => 'Reddit Embed',
