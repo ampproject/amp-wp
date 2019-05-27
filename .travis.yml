@@ -106,3 +106,8 @@ jobs:
             $(pwd)/bin/keys/id_rsa_ampconfdemo \
             $pantheon_branch
       after_script: skip
+
+  allow_failures:
+    - name: PHP unit tests (7.3, WordPress trunk)
+        php: "7.3"
+        env: WP_VERSION=trunk DEV_LIB_ONLY=phpunit
