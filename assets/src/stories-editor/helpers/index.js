@@ -389,20 +389,13 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	// Always add anchor ID regardless of block support. Needed for animations.
 	newProps.id = attributes.anchor || uuid();
 
-	if ( attributes.ampAnimationType ) {
-		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
-
-		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = parseInt( attributes.ampAnimationDelay ) + 'ms';
-		}
-
-		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = parseInt( attributes.ampAnimationDuration ) + 'ms';
-		}
-
-		if ( attributes.ampAnimationAfter ) {
-			ampAttributes[ 'animate-in-after' ] = attributes.ampAnimationAfter;
-		}
+	if ( attributes.rotationAngle ) {
+		let style = ! newProps.style ? {} : newProps.style;
+		style = {
+			...style,
+			transform: `rotate(${ parseInt( attributes.rotationAngle ) }deg)`,
+		};
+		ampAttributes.style = style;
 	}
 
 	if ( attributes.ampFontFamily ) {
@@ -462,7 +455,16 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	const { positionTop, positionLeft, rotationAngle, width, height } = attributes;
+	const {
+		ampAnimationType,
+		ampAnimationDelay,
+		ampAnimationDuration,
+		ampAnimationAfter,
+		positionTop,
+		positionLeft,
+		width,
+		height,
+	} = attributes;
 
 	const style = {
 		style: {},
@@ -480,16 +482,6 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
-	if ( rotationAngle ) {
-		const rotationStyle = {
-			transform: `rotate(${ parseInt( rotationAngle ) }deg)`,
-		};
-		style.style = {
-			...style.style,
-			...rotationStyle,
-		};
-	}
-
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
 	if ( width && height ) {
 		const resizeStyle = {
@@ -502,9 +494,28 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
+	const animationAtts = {};
+
+	// Add animation if necessary.
+	if ( ampAnimationType ) {
+		animationAtts[ 'animate-in' ] = ampAnimationType;
+
+		if ( ampAnimationDelay ) {
+			animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
+		}
+
+		if ( ampAnimationDuration ) {
+			animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
+		}
+
+		if ( ampAnimationAfter ) {
+			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
+		}
+	}
+
 	return (
 		<amp-story-grid-layer template="vertical">
-			<div className="amp-story-block-wrapper" { ...style }>
+			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
