@@ -398,7 +398,7 @@ EditPage.propTypes = {
 		overlayOpacity: PropTypes.number,
 		poster: PropTypes.string,
 		autoAdvanceAfter: PropTypes.string,
-		autoAdvanceAfterDuration: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
