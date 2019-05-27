@@ -47,7 +47,7 @@ after_script:
 jobs:
   fast_finish: true
   include:
-    - stage: test
+    - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
@@ -58,7 +58,8 @@ jobs:
         - npm run lint:js
         - npm run lint:pkg-json
 
-    - name: JavaScript unit tests
+    - stage: test
+      name: JavaScript unit tests
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
