@@ -325,12 +325,11 @@ class AMP_HTTP {
 		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
 
 		// Add die handler for AMP error display, most likely due to problem with comment.
-		add_filter(
-			'wp_die_handler',
-			function () {
-				return array( __CLASS__, 'handle_wp_die' );
-			}
-		);
+		$handle_wp_die = function () {
+			return array( __CLASS__, 'handle_wp_die' );
+		};
+		add_filter( 'wp_die_json_handler', $handle_wp_die );
+		add_filter( 'wp_die_handler', $handle_wp_die ); // Needed for WP<5.1.
 	}
 
 	/**
