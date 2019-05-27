@@ -47,9 +47,7 @@ after_script:
 jobs:
   fast_finish: true
   allow_failures:
-    - name: PHP unit tests (7.3, WordPress trunk)
-      php: "7.3"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+    - stage: bleeding-edge
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -101,6 +99,11 @@ jobs:
     - name: PHP unit tests (5.4, WordPress 4.9)
       php: "5.4"
       env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax
+
+    - stage: bleeding-edge
+      name: PHP unit tests (7.3, WordPress trunk)
+      php: "7.3"
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
