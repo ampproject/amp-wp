@@ -20,7 +20,7 @@ draggable.js: This file has been modified to display the clone in relation to th
 - Resizing the dragged clone has been removed.
 
 block-drag-area.js: This was renamed from from drag-handle.js
-- Now wraps accepts draggable element(s) as children, whereas it used to appear alongside them.
+- Now wraps draggable element(s) as children, whereas it used to appear alongside them.
 - Enables dragging the entire block.
 
 index.js: There are slight differences between the original file and this file.
