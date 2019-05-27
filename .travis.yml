@@ -38,7 +38,7 @@ install:
   - source "$DEV_LIB_PATH/travis.install.sh"
 
 before_script:
-  - maybe_disable_xdebug
+  - phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
 
 script:
   - npm run build:js
@@ -58,7 +58,7 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       before_script:
-        - maybe_disable_xdebug
+        - phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
         - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
@@ -120,6 +120,8 @@ jobs:
       if: branch = develop
       php: "7.3"
       env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit,coverage                      INSTALL_PWA_PLUGIN=1
+      before_script:
+        - composer require --dev php-coveralls/php-coverall --ignore-platform-reqs
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )

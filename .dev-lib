@@ -28,12 +28,3 @@ function after_wp_install {
 		echo "done"
 	fi
 }
-
-# Removes Xdebug for a huge performance increase:
-function maybe_disable_xdebug {
-	if ! can_generate_coverage_clover; then
-		echo "Removing Xdebug...";
-		phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
-		echo "Done."
-	fi
-}
