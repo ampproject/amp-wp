@@ -1186,68 +1186,36 @@ export const maybeSetInitialSize = ( clientId ) => {
 	}
 
 	const { name, attributes } = block;
-	const { width, height, ampFitText } = attributes;
 
-	switch ( name ) {
-		/**
-		 * Sets width and height to image if it hasn't been set via resizing yet.
-		 *
-		 * Takes the values from the original image.
-		 */
-		case 'core/image':
-			if ( ! width && ! height && attributes.id > 0 ) {
-				const { getMedia } = select( 'core' );
+	if ( 'core/image' !== name ) {
+		return;
+	}
+	const { width, height } = attributes;
 
-				const media = getMedia( attributes.id );
-				// If the width and height haven't been set for the media, we should get it from the original image.
-				if ( media && media.media_details ) {
-					const { height: imageHeight, width: imageWidth } = media.media_details;
+	/**
+	 * Sets width and height to image if it hasn't been set via resizing yet.
+	 *
+	 * Takes the values from the original image.
+	 */
+	if ( ! width && ! height && attributes.id > 0 ) {
+		const { getMedia } = select( 'core' );
 
-					let ratio = 1;
-					// If the image exceeds the page limits, adjust the width and height accordingly.
-					if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
-						ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
-					}
+		const media = getMedia( attributes.id );
+		// If the width and height haven't been set for the media, we should get it from the original image.
+		if ( media && media.media_details ) {
+			const { height: imageHeight, width: imageWidth } = media.media_details;
 
-					updateBlockAttributes( clientId, {
-						width: Math.round( imageWidth / ratio ),
-						height: Math.round( imageHeight / ratio ),
-					} );
-				}
+			let ratio = 1;
+			// If the image exceeds the page limits, adjust the width and height accordingly.
+			if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
+				ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
 			}
 
-			break;
-
-		case 'amp/amp-story-text':
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
-
-				if ( element && element.offsetHeight !== height ) {
-					updateBlockAttributes( clientId, {
-						height: element.offsetHeight,
-					} );
-				}
-			}
-
-			break;
-
-		case 'amp/amp-story-post-author':
-		case 'amp/amp-story-post-date':
-		case 'amp/amp-story-post-title':
-			const slug = name.replace( '/', '-' );
-			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-
-			if ( metaBlockElement && ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) ) {
-				const metaBlockElementHeight = ampFitText ? metaBlockElement.offsetHeight : metaBlockElement.scrollHeight;
-
-				if ( metaBlockElementHeight > height ) {
-					updateBlockAttributes( clientId, {
-						height: metaBlockElementHeight,
-					} );
-				}
-			}
-
-			break;
+			updateBlockAttributes( clientId, {
+				width: Math.round( imageWidth / ratio ),
+				height: Math.round( imageHeight / ratio ),
+			} );
+		}
 	}
 };
 
