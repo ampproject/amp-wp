@@ -42,6 +42,7 @@ class AMP_Autoloader {
 		'AMP_Admin_Pointers'                 => 'includes/admin/class-amp-admin-pointers',
 		'AMP_Post_Type_Support'              => 'includes/class-amp-post-type-support',
 		'AMP_Base_Embed_Handler'             => 'includes/embeds/class-amp-base-embed-handler',
+		'AMP_Crowdsignal_Embed_Handler'      => 'includes/embeds/class-amp-crowdsignal-embed-handler',
 		'AMP_DailyMotion_Embed_Handler'      => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'         => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'          => 'includes/embeds/class-amp-gallery-embed',
@@ -106,7 +107,6 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'WPCOM_AMP_Polldaddy_Embed'          => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/stubs',
 		'AMP_Test_World_Sanitizer'           => 'tests/stubs',
 	);
