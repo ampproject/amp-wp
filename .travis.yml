@@ -48,6 +48,7 @@ jobs:
   fast_finish: true
   allow_failures:
     - stage: bleeding-edge
+    - stage: coverage
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -68,7 +69,7 @@ jobs:
     - stage: test
       name: JavaScript unit tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit,coverage
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - npm run test:js
@@ -109,6 +110,12 @@ jobs:
       name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
       env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+
+    - stage: coverage
+      name: PHP unit tests (7.3, WordPress trunk, with code coverage)
+      if: branch = develop
+      php: "7.3"
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit,coverage                      INSTALL_PWA_PLUGIN=1
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
