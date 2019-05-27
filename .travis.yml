@@ -109,5 +109,5 @@ jobs:
 
   allow_failures:
     - name: PHP unit tests (7.3, WordPress trunk)
-        php: "7.3"
-        env: WP_VERSION=trunk DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+      php: "7.3"
+      env: WP_VERSION=trunk DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
