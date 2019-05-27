@@ -31,7 +31,6 @@ import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
-	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -266,6 +265,29 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'number',
 			default: 0,
 		};
+
+		addedAttributes.ampAnimationType = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in',
+		};
+		addedAttributes.ampAnimationDelay = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-delay',
+			default: 0,
+		};
+		addedAttributes.ampAnimationDuration = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-duration',
+			default: 0,
+		};
+		addedAttributes.ampAnimationAfter = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-after',
+		};
 	}
 
 	if ( isImageBlock ) {
@@ -294,32 +316,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		addedAttributes.controls = {
 			...settings.attributes.controls,
 			default: false,
-		};
-	}
-
-	// Define selector according to mappings.
-	if ( BLOCK_TAG_MAPPING[ name ] ) {
-		addedAttributes.ampAnimationType = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in',
-		};
-		addedAttributes.ampAnimationDelay = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-delay',
-			default: 0,
-		};
-		addedAttributes.ampAnimationDuration = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-duration',
-			default: 0,
-		};
-		addedAttributes.ampAnimationAfter = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-after',
 		};
 	}
 
