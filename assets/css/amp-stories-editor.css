@@ -129,3 +129,13 @@ div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
 .wp-block .is-amp-fit-text {
 	overflow-wrap: normal;
 }
+
+.wp-block-video,
+.wp-block-video .components-disabled {
+	height: 100%;
+}
+
+.wp-block-video video {
+	height: 100%;
+	width: 100%;
+}
