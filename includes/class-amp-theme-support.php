@@ -1731,7 +1731,7 @@ class AMP_Theme_Support {
 						/* translators: %1$d: the HTTP response code, %2$s: the status description */
 						__( 'Server responded with status code %1$d: %2$s', 'amp' ),
 						$status_code,
-						esc_html( get_status_header_desc( $status_code ) )
+						get_status_header_desc( $status_code )
 					),
 				)
 			);

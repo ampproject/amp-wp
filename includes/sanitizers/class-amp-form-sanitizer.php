@@ -156,7 +156,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			$template = $this->dom->createElement( 'template' );
 			$div->setAttribute( 'class', 'amp-wp-default-form-message' );
 			if ( 'submitting' === $attribute ) {
-				$mustache = $this->dom->createTextNode( esc_html__( 'Submitting…', 'amp' ) );
+				$mustache = $this->dom->createTextNode( __( 'Submitting…', 'amp' ) );
 			} else {
 				$mustache = $this->dom->createTextNode( '{{{message}}}' );
 			}
