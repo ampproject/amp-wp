@@ -27,6 +27,7 @@ branches:
   only:
     - master
     - develop
+    - /^\d+\.\d+$/
 
 env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
