@@ -59,23 +59,23 @@ jobs:
 
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.1, WordPress latest)
       php: "7.1"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (7.0, WordPress latest)
       php: "7.0"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (5.6, WordPress latest)
       php: "5.6"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
 
     - name: PHP unit tests (5.6, WordPress 5.1)
       php: "5.6"
@@ -110,4 +110,4 @@ jobs:
   allow_failures:
     - name: PHP unit tests (7.3, WordPress trunk)
         php: "7.3"
-        env: WP_VERSION=trunk DEV_LIB_ONLY=phpunit
+        env: WP_VERSION=trunk DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
