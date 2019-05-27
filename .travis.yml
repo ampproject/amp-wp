@@ -48,11 +48,15 @@ jobs:
   fast_finish: true
   include:
     - stage: test
-      name: Lint
+      name: Lint (PHP, JavaScript, and configuration files)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpunit
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
+        - composer validate --no-check-all
+        - npm run lint:php
+        - npm run lint:js
+        - npm run lint:pkg-json
 
     - name: JavaScript unit tests
       php: "7.3"
