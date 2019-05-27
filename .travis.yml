@@ -59,35 +59,35 @@ jobs:
 
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
 
     - name: PHP unit tests (7.1, WordPress latest)
       php: "7.1"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
 
     - name: PHP unit tests (7.0, WordPress latest)
       php: "7.0"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
 
     - name: PHP unit tests (5.6, WordPress latest)
       php: "5.6"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax
 
     - name: PHP unit tests (5.6, WordPress 5.1)
       php: "5.6"
-      env: WP_VERSION=5.1    DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax
+      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit
 
     - name: PHP unit tests (5.5, WordPress 5.0)
       php: "5.5"
-      env: WP_VERSION=5.0    DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax
 
     - name: PHP unit tests (5.4, WordPress 4.9)
       php: "5.4"
-      env: WP_VERSION=4.9    DEV_LIB_SKIP=phpcs,eslint,xmllint
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
