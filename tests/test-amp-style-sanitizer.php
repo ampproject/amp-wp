@@ -2286,6 +2286,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Get prioritization test data.
 	 *
+	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
 	 * @return array
 	 */
 	public function get_prioritization_data() {
@@ -2373,6 +2375,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+
+		if ( ! wp_get_theme( 'twentyten' )->exists() ) {
+			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 
 		add_theme_support( 'amp' );
