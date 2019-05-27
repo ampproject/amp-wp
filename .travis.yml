@@ -46,6 +46,10 @@ after_script:
 
 jobs:
   fast_finish: true
+  allow_failures:
+    - name: PHP unit tests (7.3, WordPress trunk)
+      php: "7.3"
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -116,7 +120,3 @@ jobs:
             $pantheon_branch
       after_script: skip
 
-  allow_failures:
-    - name: PHP unit tests (7.3, WordPress trunk)
-      php: "7.3"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
