@@ -393,8 +393,10 @@ class AMP_HTTP {
 	 *
 	 *     @type int $response The HTTP response code. Default 200 for Ajax requests, 500 otherwise.
 	 * }
+	 * @global string $pagenow
 	 */
 	public static function handle_wp_die( $error, $title = '', $args = array() ) {
+		global $pagenow;
 		if ( is_int( $title ) ) {
 			$status_code = $title;
 		} elseif ( is_int( $args ) ) {
@@ -404,7 +406,20 @@ class AMP_HTTP {
 		} else {
 			$status_code = 500;
 		}
-		status_header( $status_code );
+
+		/*
+		 * Handle apparent defect in core where invalid comment form submissions return with a 200 status code.
+		 * Successful requests to wp-comments-post.php should always end up doing a redirect after applying the
+		 * comment_post_redirect filter, and as such the \AMP_HTTP::filter_comment_post_redirect() method will
+		 * ensure that redirect works in AMP. When there is no comment_post_redirect then the alternative is a wp_die()
+		 * scenario which should always be considered an error. This workaround is important because otherwise an error
+		 * case will get rendered unexpectedly in the div[submit-success] element, when it should be rendered in the
+		 * div[submit-error] element. For a fix to the core defect which will make this unnecessary,
+		 * see <https://core.trac.wordpress.org/ticket/47393>.
+		 */
+		if ( 200 === $status_code && isset( $pagenow ) && 'wp-comments-post.php' === $pagenow ) {
+			$status_code = 400;
+		}
 
 		if ( is_wp_error( $error ) ) {
 			$error = $error->get_error_message();
@@ -414,7 +429,8 @@ class AMP_HTTP {
 		wp_send_json(
 			array(
 				'message' => amp_wp_kses_mustache( $error ),
-			)
+			),
+			$status_code
 		);
 	}
 
@@ -462,7 +478,8 @@ class AMP_HTTP {
 		wp_send_json(
 			array(
 				'message' => amp_wp_kses_mustache( $message ),
-			)
+			),
+			200
 		);
 
 		return null;
