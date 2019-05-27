@@ -53,9 +53,9 @@
 	--admin-menu-expanded-sidebar-width: 160px;
 	--admin-menu-collapsed-sidebar-width: 36px;
 	--amp-story-content-width: 334px;
-	--block-editor-horizontal-margin: 40px;
+	--block-editor-horizontal-margin: 50px;
 	--scrollbar-width: 20px;
-	--block-navigation-right-margin: 50px;
+	--block-navigation-right-margin: 45px;
 }
 
 /* Navigator in the context of the open sidebar, settings hidden. */
