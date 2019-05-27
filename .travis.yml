@@ -37,6 +37,9 @@ install:
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - source "$DEV_LIB_PATH/travis.install.sh"
 
+before_script:
+  - maybe_disable_xdebug
+
 script:
   - npm run build:js
   - source "$DEV_LIB_PATH/travis.script.sh"
@@ -55,6 +58,7 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       before_script:
+        - maybe_disable_xdebug
         - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"

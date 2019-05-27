@@ -26,3 +26,13 @@ function after_wp_install {
 		echo "done"
 	fi
 }
+
+# Removes Xdebug for a huge performance increase:
+function maybe_disable_xdebug {
+	echo "Removing Xdebug...";
+	if [[ ! can_generate_coverage_clover && -f ~/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini ]]; then
+		phpenv config-rm xdebug.ini
+		echo "Done!"
+	fi
+	echo "xdebug.ini does not exist."
+}
