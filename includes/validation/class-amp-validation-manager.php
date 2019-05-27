@@ -136,6 +136,20 @@ class AMP_Validation_Manager {
 	protected static $amp_admin_bar_item_added = false;
 
 	/**
+	 * Cached template directory to prevent infinite recursion.
+	 *
+	 * @var string
+	 */
+	protected static $template_directory;
+
+	/**
+	 * Cached stylesheet directory to prevent infinite recursion.
+	 *
+	 * @var string
+	 */
+	protected static $stylesheet_directory;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @param array $args {
@@ -456,6 +470,9 @@ class AMP_Validation_Manager {
 				ksort( self::$validation_error_status_overrides );
 			}
 		}
+
+		self::$template_directory   = get_template_directory();
+		self::$stylesheet_directory = get_stylesheet_directory();
 
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
@@ -1391,6 +1408,12 @@ class AMP_Validation_Manager {
 			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
 				$source['name'] = $matches[1];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$template_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['type'] = 'theme';
+				$source['name'] = get_template();
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$stylesheet_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['type'] = 'theme';
+				$source['name'] = get_stylesheet();
 			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'theme';
 				$source['name'] = $matches[1];

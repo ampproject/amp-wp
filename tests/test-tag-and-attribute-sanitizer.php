@@ -1569,6 +1569,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta property="og:site_name" content="AMP Site"></head><body></body></html>',
 				null, // No change.
 			),
+			'head_with_valid_amp_illegal_parent'      => array(
+				'<html amp><head><meta charset="utf-8"><amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body><amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics></body></html>',
+				array( 'amp-analytics' ),
+			),
+			'head_with_invalid_nodes'                 => array(
+				'<html amp><head><meta charset="utf-8"><META NAME="foo" CONTENT="bar"><bad>bad!</bad> other</head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="foo" content="bar"></head><body>bad!<p> other</p></body></html>',
+			),
 		);
 
 		// Also include the body tests.

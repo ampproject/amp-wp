@@ -40,11 +40,10 @@ $_amp_required_extensions = array(
 	// Required by FasterImage.
 	'curl'   => array(
 		'functions' => array(
+			'curl_close',
 			'curl_error',
+			'curl_exec',
 			'curl_init',
-			'curl_multi_add_handle',
-			'curl_multi_exec',
-			'curl_multi_init',
 			'curl_setopt',
 		),
 	),
