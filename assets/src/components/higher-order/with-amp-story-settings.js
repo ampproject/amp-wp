@@ -295,7 +295,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ ! ( isLast && isFirst && isMovableBlock ) && (
+					{ ! ( isLast && isFirst ) && isMovableBlock && (
 						<InspectorControls>
 							<PanelBody
 								className="amp-story-order-controls"
