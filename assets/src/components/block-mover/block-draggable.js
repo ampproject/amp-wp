@@ -3,6 +3,11 @@
  */
 
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { withSelect } from '@wordpress/data';
@@ -37,6 +42,16 @@ const BlockDraggable = ( { children, clientId, rootClientId, blockElementId, ind
 			}
 		</Draggable>
 	);
+};
+
+BlockDraggable.propTypes = {
+	index: PropTypes.number.isRequired,
+	rootClientId: PropTypes.string,
+	clientId: PropTypes.string,
+	blockElementId: PropTypes.string,
+	children: PropTypes.object,
+	onDragStart: PropTypes.func,
+	onDragEnd: PropTypes.func,
 };
 
 export default withSelect( ( select, { clientId } ) => {
