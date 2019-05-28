@@ -1405,22 +1405,14 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$script                = wp_scripts()->registered[ $slug ];
 		$expected_dependencies = array(
 			'lodash',
-			'react',
 			'wp-block-editor',
-			'wp-blocks',
 			'wp-components',
 			'wp-compose',
 			'wp-data',
-			'wp-date',
-			'wp-edit-post',
-			'wp-editor',
 			'wp-element',
 			'wp-hooks',
 			'wp-i18n',
-			'wp-keycodes',
 			'wp-polyfill',
-			'wp-url',
-			'wp-wordcount',
 		);
 
 		$this->assertContains( 'js/amp-block-validation.js', $script->src );
