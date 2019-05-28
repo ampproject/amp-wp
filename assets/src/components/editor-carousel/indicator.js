@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -17,7 +22,7 @@ import { Button, Tooltip } from '@wordpress/components';
  *
  * @return {Object} Carousel indicator.
  */
-export default function Indicator( { pages, currentPage, onClick } ) {
+const Indicator = ( { pages, currentPage, onClick } ) => {
 	/* translators: %s: Page number */
 	const label = ( pageNumber ) => sprintf( __( 'Page %s', 'amp' ), pageNumber );
 
@@ -49,4 +54,14 @@ export default function Indicator( { pages, currentPage, onClick } ) {
 			} ) }
 		</ul>
 	);
-}
+};
+
+Indicator.propTypes = {
+	pages: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string,
+	} ) ),
+	currentPage: PropTypes.string,
+	onClick: PropTypes.func,
+};
+
+export default Indicator;

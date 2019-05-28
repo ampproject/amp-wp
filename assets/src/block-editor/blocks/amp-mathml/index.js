@@ -2,7 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PlainText } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import edit from './edit';
+import save from './save';
 
 export const name = 'amp/amp-mathml';
 
@@ -23,25 +28,7 @@ export const settings = {
 		},
 	},
 
-	edit( { attributes, setAttributes } ) {
-		const { dataFormula } = attributes;
+	edit,
 
-		return (
-			<PlainText
-				value={ dataFormula }
-				placeholder={ __( 'Insert formula', 'amp' ) }
-				onChange={ ( value ) => setAttributes( { dataFormula: value } ) }
-			/>
-		);
-	},
-
-	save( { attributes } ) {
-		const mathmlProps = {
-			'data-formula': attributes.dataFormula,
-			layout: 'container',
-		};
-		return (
-			<amp-mathml { ...mathmlProps }></amp-mathml>
-		);
-	},
+	save,
 };

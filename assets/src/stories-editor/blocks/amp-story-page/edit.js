@@ -3,6 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -15,7 +16,7 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	PanelBody,
 	Button,
@@ -46,7 +47,7 @@ const TEMPLATE = [
 	[ 'amp/amp-story-text' ],
 ];
 
-class EditPage extends Component {
+class PageEdit extends Component {
 	constructor( props ) {
 		super( ...arguments );
 
@@ -57,6 +58,18 @@ class EditPage extends Component {
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
 
+	/**
+	 * Media selection callback.
+	 *
+	 * @param {Object} media            Media object.
+	 * @param {string} media.icon       Media icon.
+	 * @param {string} media.url        Media URL.
+	 * @param {string} media.media_type Media type.
+	 * @param {string} media.type       Media type if it was an existing attachment.
+	 * @param {number} media.id         Attachment ID.
+	 * @param {Object} media.image      Media image object.
+	 * @param {string} media.image.src  Media image URL
+	 */
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
 			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
@@ -197,7 +210,7 @@ class EditPage extends Component {
 		const colorSettings = this.getOverlayColorSettings();
 
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
@@ -232,7 +245,7 @@ class EditPage extends Component {
 						/>
 					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
-						<Fragment>
+						<>
 							<BaseControl>
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
@@ -315,7 +328,7 @@ class EditPage extends Component {
 								</MediaUploadCheck>
 							) }
 							{ mediaUrl && (
-								<Fragment>
+								<>
 									{ /* Note: FocalPointPicker is only available in Gutenberg 5.1+ */ }
 									{ IMAGE_BACKGROUND_TYPE === mediaType && FocalPointPicker && (
 										<FocalPointPicker
@@ -325,9 +338,9 @@ class EditPage extends Component {
 											onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 										/>
 									) }
-								</Fragment>
+								</>
 							) }
-						</Fragment>
+						</>
 					</PanelBody>
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
@@ -366,10 +379,32 @@ class EditPage extends Component {
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
-			</Fragment>
+			</>
 		);
 	}
 }
+
+PageEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
+		backgroundColors: PropTypes.string,
+		mediaId: PropTypes.number,
+		mediaType: PropTypes.string,
+		mediaUrl: PropTypes.string,
+		focalPoint: PropTypes.shape( {
+			x: PropTypes.number.isRequired,
+			y: PropTypes.number.isRequired,
+		} ),
+		overlayOpacity: PropTypes.number,
+		poster: PropTypes.string,
+		autoAdvanceAfter: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.number,
+	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	media: PropTypes.object,
+	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
+	totalAnimationDuration: PropTypes.number.isRequired,
+};
 
 export default withSelect( ( select, { clientId, attributes } ) => {
 	const { getMedia } = select( 'core' );
@@ -392,4 +427,4 @@ export default withSelect( ( select, { clientId, attributes } ) => {
 		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
-} )( EditPage );
+} )( PageEdit );

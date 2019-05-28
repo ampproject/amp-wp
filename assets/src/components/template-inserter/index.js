@@ -1,8 +1,8 @@
-
 /**
  * External dependencies
  */
 import { includes } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -141,6 +141,15 @@ class TemplateInserter extends Component {
 		);
 	}
 }
+
+TemplateInserter.propTypes = {
+	allBlocks: PropTypes.array,
+	insertBlock: PropTypes.func.isRequired,
+	onToggle: PropTypes.func,
+	fetchReusableBlocks: PropTypes.func.isRequired,
+	reusableBlocks: PropTypes.array.isRequired,
+	getBlock: PropTypes.func.isRequired,
+};
 
 export default compose(
 	withSelect( ( select ) => {

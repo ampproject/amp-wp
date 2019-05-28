@@ -16,7 +16,6 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Fragment } from '@wordpress/element';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import {
 	IconButton,
@@ -240,7 +239,7 @@ export default createHigherOrderComponent(
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
 
 			return (
-				<Fragment>
+				<>
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && (
 						<ResizableBox
@@ -255,6 +254,7 @@ export default createHigherOrderComponent(
 								stopBlockActions();
 							} }
 							blockName={ name }
+							ampFitText={ ampFitText }
 							onResizeStart={ () => {
 								startBlockActions();
 							} }
@@ -502,7 +502,7 @@ export default createHigherOrderComponent(
 							</PanelBody>
 						</InspectorControls>
 					) }
-				</Fragment>
+				</>
 			);
 		} );
 	},

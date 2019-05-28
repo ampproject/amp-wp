@@ -286,7 +286,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test remove_title_from_embed.
 	 *
-	 * @covers \AMP_Editor_Blocks::remove_title_from_embed()
+	 * @covers \AMP_Story_Post_Type::remove_title_from_embed()
 	 */
 	public function test_remove_title_from_embed() {
 		$initial_output = '<iframe src="https://example.com/baz"></iframe>';
@@ -311,7 +311,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Test change_embed_iframe_attributes.
 	 *
-	 * @covers \AMP_Editor_Blocks::change_embed_iframe_attributes()
+	 * @covers \AMP_Story_Post_Type::change_embed_iframe_attributes()
 	 */
 	public function test_change_embed_iframe_attributes() {
 		remove_theme_support( 'amp' );

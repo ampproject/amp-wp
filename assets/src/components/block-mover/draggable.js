@@ -6,6 +6,7 @@
  * External dependencies
  */
 import { noop } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -187,5 +188,14 @@ class Draggable extends Component {
 		} );
 	}
 }
+
+Draggable.propTypes = {
+	elementId: PropTypes.string,
+	transferData: PropTypes.object,
+	onDragStart: PropTypes.func,
+	onDragEnd: PropTypes.func,
+	setTimeout: PropTypes.func.isRequired,
+	children: PropTypes.any.isRequired,
+};
 
 export default withSafeTimeout( Draggable );

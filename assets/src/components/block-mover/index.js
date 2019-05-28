@@ -1,7 +1,14 @@
 /**
  * This file is mainly copied from the default BlockMover component, there are some small differences.
  * The arrows' labels are changed and are switched. Also, dragging is enabled even if the element is the only block.
+ *
+ * In addition, this copy also contains prop types.
  **/
+
+/**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -41,5 +48,12 @@ export class BlockMover extends Component {
 		);
 	}
 }
+
+BlockMover.propTypes = {
+	isDraggable: PropTypes.bool,
+	onDragStart: PropTypes.func,
+	clientId: PropTypes.string,
+	blockElementId: PropTypes.string,
+};
 
 export default BlockMover;

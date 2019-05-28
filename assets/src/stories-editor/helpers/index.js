@@ -13,7 +13,7 @@ import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -25,13 +25,13 @@ import {
 	StoryControls,
 	Shortcuts,
 	withMetaBlockEdit,
+	withMetaBlockSave,
 	Inserter,
 } from '../../components';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,
 	ALLOWED_TOP_LEVEL_BLOCKS,
-	BLOCK_TAG_MAPPING,
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
@@ -266,6 +266,29 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'number',
 			default: 0,
 		};
+
+		addedAttributes.ampAnimationType = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in',
+		};
+		addedAttributes.ampAnimationDelay = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-delay',
+			default: 0,
+		};
+		addedAttributes.ampAnimationDuration = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-duration',
+			default: 0,
+		};
+		addedAttributes.ampAnimationAfter = {
+			source: 'attribute',
+			selector: '.amp-story-block-wrapper',
+			attribute: 'animate-in-after',
+		};
 	}
 
 	if ( isImageBlock ) {
@@ -294,32 +317,6 @@ export const addAMPAttributes = ( settings, name ) => {
 		addedAttributes.controls = {
 			...settings.attributes.controls,
 			default: false,
-		};
-	}
-
-	// Define selector according to mappings.
-	if ( BLOCK_TAG_MAPPING[ name ] ) {
-		addedAttributes.ampAnimationType = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in',
-		};
-		addedAttributes.ampAnimationDelay = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-delay',
-			default: 0,
-		};
-		addedAttributes.ampAnimationDuration = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-duration',
-			default: 0,
-		};
-		addedAttributes.ampAnimationAfter = {
-			source: 'attribute',
-			selector: BLOCK_TAG_MAPPING[ name ],
-			attribute: 'animate-in-after',
 		};
 	}
 
@@ -389,20 +386,13 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	// Always add anchor ID regardless of block support. Needed for animations.
 	newProps.id = attributes.anchor || uuid();
 
-	if ( attributes.ampAnimationType ) {
-		ampAttributes[ 'animate-in' ] = attributes.ampAnimationType;
-
-		if ( attributes.ampAnimationDelay ) {
-			ampAttributes[ 'animate-in-delay' ] = parseInt( attributes.ampAnimationDelay ) + 'ms';
-		}
-
-		if ( attributes.ampAnimationDuration ) {
-			ampAttributes[ 'animate-in-duration' ] = parseInt( attributes.ampAnimationDuration ) + 'ms';
-		}
-
-		if ( attributes.ampAnimationAfter ) {
-			ampAttributes[ 'animate-in-after' ] = attributes.ampAnimationAfter;
-		}
+	if ( attributes.rotationAngle ) {
+		let style = ! newProps.style ? {} : newProps.style;
+		style = {
+			...style,
+			transform: `rotate(${ parseInt( attributes.rotationAngle ) }deg)`,
+		};
+		ampAttributes.style = style;
 	}
 
 	if ( attributes.ampFontFamily ) {
@@ -462,7 +452,16 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	const { positionTop, positionLeft, rotationAngle, width, height } = attributes;
+	const {
+		ampAnimationType,
+		ampAnimationDelay,
+		ampAnimationDuration,
+		ampAnimationAfter,
+		positionTop,
+		positionLeft,
+		width,
+		height,
+	} = attributes;
 
 	const style = {
 		style: {},
@@ -480,16 +479,6 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
-	if ( rotationAngle ) {
-		const rotationStyle = {
-			transform: `rotate(${ parseInt( rotationAngle ) }deg)`,
-		};
-		style.style = {
-			...style.style,
-			...rotationStyle,
-		};
-	}
-
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
 	if ( width && height ) {
 		const resizeStyle = {
@@ -502,9 +491,28 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
+	const animationAtts = {};
+
+	// Add animation if necessary.
+	if ( ampAnimationType ) {
+		animationAtts[ 'animate-in' ] = ampAnimationType;
+
+		if ( ampAnimationDelay ) {
+			animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
+		}
+
+		if ( ampAnimationDuration ) {
+			animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
+		}
+
+		if ( ampAnimationAfter ) {
+			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
+		}
+	}
+
 	return (
 		<amp-story-grid-layer template="vertical">
-			<div className="amp-story-block-wrapper" { ...style }>
+			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
@@ -701,9 +709,13 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  * @param {number} maxFontSize    Maximum font size.
  * @param {number} minFontSize    Minimum font size.
  *
- * @return {number} Calculated font size.
+ * @return {number|boolean} Calculated font size. False if calculation wasn't possible.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	// Return false if calculation is not possible due to width and height missing, e.g. in disabled preview.
+	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
+		return false;
+	}
 	measurer.classList.toggle( 'is-measuring-fontsize' );
 
 	maxFontSize++;
@@ -965,33 +977,7 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 	return {
 		supports,
 		attributes: schema,
-		save: ( { attributes } ) => {
-			const { ampFitText } = attributes;
-
-			const className = getClassNameFromBlockAttributes( attributes );
-			const styles = getStylesFromBlockAttributes( attributes );
-
-			if ( ! ampFitText ) {
-				return (
-					<RichText.Content
-						tagName={ tagName }
-						style={ styles }
-						className={ className }
-						value="{content}" // Placeholder to be replaced server-side.
-					/>
-				);
-			}
-
-			const ContentTag = tagName;
-
-			return (
-				<ContentTag
-					style={ styles }
-					className={ className }>
-					<amp-fit-text layout="flex-item" className="amp-text-content">{ '{content}' }</amp-fit-text>
-				</ContentTag>
-			);
-		},
+		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
 };
@@ -1143,7 +1129,7 @@ export const maybeUpdateFontSize = ( block ) => {
 			if ( element && ampFitText && content.length ) {
 				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}
@@ -1157,7 +1143,7 @@ export const maybeUpdateFontSize = ( block ) => {
 
 			if ( metaBlockElement && ampFitText ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}
@@ -1179,68 +1165,36 @@ export const maybeSetInitialSize = ( clientId ) => {
 	}
 
 	const { name, attributes } = block;
-	const { width, height, ampFitText } = attributes;
 
-	switch ( name ) {
-		/**
-		 * Sets width and height to image if it hasn't been set via resizing yet.
-		 *
-		 * Takes the values from the original image.
-		 */
-		case 'core/image':
-			if ( ! width && ! height && attributes.id > 0 ) {
-				const { getMedia } = select( 'core' );
+	if ( 'core/image' !== name ) {
+		return;
+	}
+	const { width, height } = attributes;
 
-				const media = getMedia( attributes.id );
-				// If the width and height haven't been set for the media, we should get it from the original image.
-				if ( media && media.media_details ) {
-					const { height: imageHeight, width: imageWidth } = media.media_details;
+	/**
+	 * Sets width and height to image if it hasn't been set via resizing yet.
+	 *
+	 * Takes the values from the original image.
+	 */
+	if ( ! width && ! height && attributes.id > 0 ) {
+		const { getMedia } = select( 'core' );
 
-					let ratio = 1;
-					// If the image exceeds the page limits, adjust the width and height accordingly.
-					if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
-						ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
-					}
+		const media = getMedia( attributes.id );
+		// If the width and height haven't been set for the media, we should get it from the original image.
+		if ( media && media.media_details ) {
+			const { height: imageHeight, width: imageWidth } = media.media_details;
 
-					updateBlockAttributes( clientId, {
-						width: Math.round( imageWidth / ratio ),
-						height: Math.round( imageHeight / ratio ),
-					} );
-				}
+			let ratio = 1;
+			// If the image exceeds the page limits, adjust the width and height accordingly.
+			if ( STORY_PAGE_INNER_WIDTH < imageWidth || STORY_PAGE_INNER_HEIGHT < imageHeight ) {
+				ratio = Math.max( imageWidth / STORY_PAGE_INNER_WIDTH, imageHeight / STORY_PAGE_INNER_HEIGHT );
 			}
 
-			break;
-
-		case 'amp/amp-story-text':
-			if ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) {
-				const element = document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
-
-				if ( element && element.offsetHeight !== height ) {
-					updateBlockAttributes( clientId, {
-						height: element.offsetHeight,
-					} );
-				}
-			}
-
-			break;
-
-		case 'amp/amp-story-post-author':
-		case 'amp/amp-story-post-date':
-		case 'amp/amp-story-post-title':
-			const slug = name.replace( '/', '-' );
-			const metaBlockElement = document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-
-			if ( metaBlockElement && ( height === getDefaultMinimumBlockHeight( name ) || ! ampFitText ) ) {
-				const metaBlockElementHeight = ampFitText ? metaBlockElement.offsetHeight : metaBlockElement.scrollHeight;
-
-				if ( metaBlockElementHeight > height ) {
-					updateBlockAttributes( clientId, {
-						height: metaBlockElementHeight,
-					} );
-				}
-			}
-
-			break;
+			updateBlockAttributes( clientId, {
+				width: Math.round( imageWidth / ratio ),
+				height: Math.round( imageHeight / ratio ),
+			} );
+		}
 	}
 };
 
