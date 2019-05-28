@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, Placeholder, TextControl, ToggleControl } from '@wordpress/components';
 
@@ -29,7 +28,7 @@ const BlockEdit = ( props ) => {
 		dataSet = true;
 	}
 	return (
-		<Fragment>
+		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 					<TextControl
@@ -63,7 +62,7 @@ const BlockEdit = ( props ) => {
 					</Placeholder>
 				)
 			}
-		</Fragment>
+		</>
 	);
 };
 

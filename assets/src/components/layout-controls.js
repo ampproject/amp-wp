@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { Notice, SelectControl, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -26,7 +25,7 @@ const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 	const showWidthNotice = ! width && 'fixed' === ampLayout;
 
 	return (
-		<Fragment>
+		<>
 			<SelectControl
 				label={ __( 'Layout', 'amp' ) }
 				value={ ampLayout }
@@ -67,7 +66,7 @@ const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 				value={ height }
 				onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
 			/>
-		</Fragment>
+		</>
 	);
 };
 

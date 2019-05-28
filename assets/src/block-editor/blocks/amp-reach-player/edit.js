@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, Placeholder, TextControl } from '@wordpress/components';
 
@@ -32,7 +31,7 @@ const BlockEdit = ( props ) => {
 		url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
 	}
 	return (
-		<Fragment>
+		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Reach settings', 'amp' ) }>
 					<TextControl
@@ -51,7 +50,7 @@ const BlockEdit = ( props ) => {
 					</Placeholder>
 				)
 			}
-		</Fragment>
+		</>
 	);
 };
 

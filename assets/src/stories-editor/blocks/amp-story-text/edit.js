@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	RichText,
 	BlockControls,
@@ -106,7 +106,7 @@ class TextBlockEdit extends Component {
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 		return (
-			<Fragment>
+			<>
 				<BlockControls>
 					<AlignmentToolbar
 						value={ align }
@@ -139,7 +139,7 @@ class TextBlockEdit extends Component {
 					} ) }
 					placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 				/>
-			</Fragment>
+			</>
 		);
 	}
 }

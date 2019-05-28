@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
@@ -36,7 +35,7 @@ const BlockEdit = ( props ) => {
 		url = `http://cf.c.ooyala.com/${ dataEmbedCode }`;
 	}
 	return (
-		<Fragment>
+		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
 					<TextControl
@@ -72,7 +71,7 @@ const BlockEdit = ( props ) => {
 					<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 				</Placeholder>
 			) }
-		</Fragment>
+		</>
 	);
 };
 

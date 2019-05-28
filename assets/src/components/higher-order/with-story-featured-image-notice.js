@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -35,7 +34,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<Fragment>
+				<>
 					<Notice
 						status="warning"
 						isDismissible={ false }
@@ -49,7 +48,7 @@ export default createHigherOrderComponent(
 						} ) }
 					</Notice>
 					<PostFeaturedImage { ...props } />
-				</Fragment>
+				</>
 			);
 		};
 

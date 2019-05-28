@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { compose } from '@wordpress/compose';
 import { Draggable, DropZone } from '@wordpress/components';
-import { Fragment, Component } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 
 /**
@@ -104,7 +104,7 @@ class ReordererItem extends Component {
 				>
 					{
 						( { onDraggableStart, onDraggableEnd } ) => (
-							<Fragment>
+							<>
 								<DropZone
 									className={ this.state.isDragging ? 'is-dragging-page' : undefined }
 									onDrop={ this.onDrop }
@@ -122,7 +122,7 @@ class ReordererItem extends Component {
 										<BlockPreview { ...page } />
 									</div>
 								</div>
-							</Fragment>
+							</>
 						)
 					}
 				</Draggable>

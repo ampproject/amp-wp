@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 import { InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, Placeholder, TextControl, ToggleControl } from '@wordpress/components';
 
@@ -33,7 +32,7 @@ const BlockEdit = ( props ) => {
 		url = `http://cdn.brid.tv/live/partners/${ dataPartner }`;
 	}
 	return (
-		<Fragment>
+		<>
 			<InspectorControls>
 				<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
 					<TextControl
@@ -77,7 +76,7 @@ const BlockEdit = ( props ) => {
 					</Placeholder>
 				)
 			}
-		</Fragment>
+		</>
 	);
 };
 

@@ -13,7 +13,6 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton, Button } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -27,7 +26,7 @@ import './edit.css';
 function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
 	if ( isReordering ) {
 		return (
-			<Fragment>
+			<>
 				<IconButton
 					className="amp-story-controls-reorder-cancel"
 					onClick={ resetOrder }
@@ -43,12 +42,12 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 				>
 					{ __( 'Save Changes', 'amp' ) }
 				</Button>
-			</Fragment>
+			</>
 		);
 	}
 
 	return (
-		<Fragment>
+		<>
 			<TemplateInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
@@ -56,7 +55,7 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 				label={ __( 'Reorder Pages', 'amp' ) }
 				onClick={ startReordering }
 			/>
-		</Fragment>
+		</>
 	);
 }
 

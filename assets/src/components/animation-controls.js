@@ -8,7 +8,6 @@ import PropTypes from 'prop-types';
  */
 import { withSelect } from '@wordpress/data';
 import { RangeControl, SelectControl } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -44,7 +43,7 @@ const AnimationControls = ( {
 	} );
 
 	return (
-		<Fragment>
+		<>
 			<SelectControl
 				label={ __( 'Animation Type', 'amp' ) }
 				value={ animationType }
@@ -58,7 +57,7 @@ const AnimationControls = ( {
 				} }
 			/>
 			{ animationType && (
-				<Fragment>
+				<>
 					<RangeControl
 						label={ __( 'Duration (ms)', 'amp' ) }
 						value={ animationDuration }
@@ -80,9 +79,9 @@ const AnimationControls = ( {
 						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }
 					/>
-				</Fragment>
+				</>
 			) }
-		</Fragment>
+		</>
 	);
 };
 
