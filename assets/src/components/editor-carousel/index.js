@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -93,6 +98,18 @@ class EditorCarousel extends Component {
 		);
 	}
 }
+
+EditorCarousel.propTypes = {
+	pages: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string,
+	} ) ),
+	currentIndex: PropTypes.number.isRequired,
+	currentPage: PropTypes.string,
+	previousPage: PropTypes.string,
+	nextPage: PropTypes.string,
+	onChangePage: PropTypes.func.isRequired,
+	isReordering: PropTypes.bool,
+};
 
 export default compose(
 	withSelect( ( select ) => {

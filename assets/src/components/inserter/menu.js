@@ -6,7 +6,7 @@
  * top-level blocks (story page) or child-level blocks (text block, call-to-action, et al).
  * Child-level blocks are inserted on the current page as determined by the getCurrentPage() selector, regardless
  * of block selection.
- * In addition, this custom inserter does not make use of the ChildBlocks component.
+ * In addition, this custom inserter does not make use of the ChildBlocks component. Also contains prop types.
  */
 
 /**
@@ -27,6 +27,7 @@ import {
 	deburr,
 } from 'lodash';
 import scrollIntoView from 'dom-scroll-into-view';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -359,6 +360,18 @@ export class InserterMenu extends Component {
 		/* eslint-enable jsx-a11y/no-autofocus, jsx-a11y/no-noninteractive-element-interactions */
 	}
 }
+
+InserterMenu.propTypes = {
+	instanceId: PropTypes.string.isRequired,
+	onSelect: PropTypes.func.isRequired,
+	showInsertionPoint: PropTypes.func.isRequired,
+	hideInsertionPoint: PropTypes.func.isRequired,
+	setTimeout: PropTypes.func.isRequired,
+	debouncedSpeak: PropTypes.func.isRequired,
+	maxSuggestedItems: PropTypes.number,
+	rootChildBlocks: PropTypes.array.isRequired,
+	items: PropTypes.array,
+};
 
 export default compose(
 	withSelect( ( select, { clientId, isAppender, rootClientId } ) => {

@@ -13,7 +13,7 @@ import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -25,6 +25,7 @@ import {
 	StoryControls,
 	Shortcuts,
 	withMetaBlockEdit,
+	withMetaBlockSave,
 	Inserter,
 } from '../../components';
 import {
@@ -972,33 +973,7 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 	return {
 		supports,
 		attributes: schema,
-		save: ( { attributes } ) => {
-			const { ampFitText } = attributes;
-
-			const className = getClassNameFromBlockAttributes( attributes );
-			const styles = getStylesFromBlockAttributes( attributes );
-
-			if ( ! ampFitText ) {
-				return (
-					<RichText.Content
-						tagName={ tagName }
-						style={ styles }
-						className={ className }
-						value="{content}" // Placeholder to be replaced server-side.
-					/>
-				);
-			}
-
-			const ContentTag = tagName;
-
-			return (
-				<ContentTag
-					style={ styles }
-					className={ className }>
-					<amp-fit-text layout="flex-item" className="amp-text-content">{ '{content}' }</amp-fit-text>
-				</ContentTag>
-			);
-		},
+		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
 };

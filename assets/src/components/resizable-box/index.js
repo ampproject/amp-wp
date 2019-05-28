@@ -201,6 +201,7 @@ const EnhancedResizableBox = ( props ) => {
 
 EnhancedResizableBox.propTypes = {
 	isSelected: PropTypes.bool,
+	ampFitText: PropTypes.bool,
 	angle: PropTypes.number,
 	blockName: PropTypes.string,
 	minWidth: PropTypes.number,

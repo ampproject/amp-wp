@@ -47,7 +47,7 @@ const TEMPLATE = [
 	[ 'amp/amp-story-text' ],
 ];
 
-class EditPage extends Component {
+class PageEdit extends Component {
 	constructor( props ) {
 		super( ...arguments );
 
@@ -384,7 +384,7 @@ class EditPage extends Component {
 	}
 }
 
-EditPage.propTypes = {
+PageEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		anchor: PropTypes.string,
 		backgroundColors: PropTypes.string,
@@ -427,4 +427,4 @@ export default withSelect( ( select, { clientId, attributes } ) => {
 		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 		totalAnimationDuration: totalAnimationDurationInSeconds,
 	};
-} )( EditPage );
+} )( PageEdit );
