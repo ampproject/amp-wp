@@ -103,23 +103,6 @@ export const ANIMATION_DURATION_DEFAULTS = {
 	'zoom-out': 1000,
 };
 
-export const BLOCK_TAG_MAPPING = {
-	'core/button': 'div.wp-block-button',
-	'core/code': 'pre',
-	'core/embed': 'figure',
-	'core/image': '.wp-block-image',
-	'amp/amp-story-text': 'p,h1,h2',
-	'amp/amp-story-post-author': 'div',
-	'amp/amp-story-post-date': 'div',
-	'amp/amp-story-post-title': 'h1',
-	'core/preformatted': 'pre',
-	'core/pullquote': 'blockquote',
-	'core/quote': 'blockquote',
-	'core/table': 'table',
-	'core/verse': 'pre',
-	'core/video': 'figure',
-};
-
 export const AMP_ANIMATION_TYPE_OPTIONS = [
 	{
 		value: '',

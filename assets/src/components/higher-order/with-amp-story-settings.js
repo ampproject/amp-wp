@@ -270,6 +270,7 @@ export default createHigherOrderComponent(
 								stopBlockActions();
 							} }
 							blockName={ name }
+							ampFitText={ ampFitText }
 							onResizeStart={ () => {
 								startBlockActions();
 							} }
