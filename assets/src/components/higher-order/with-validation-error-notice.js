@@ -9,6 +9,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
+// @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
 import ValidationErrorMessage from '../validation-error-message';
 
 const applyWithSelect = withSelect( ( select, { clientId } ) => {

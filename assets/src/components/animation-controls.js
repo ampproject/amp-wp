@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { withSelect } from '@wordpress/data';
@@ -78,6 +83,19 @@ const AnimationControls = ( {
 			) }
 		</>
 	);
+};
+
+AnimationControls.propTypes = {
+	animatedBlocks: PropTypes.func.isRequired,
+	onAnimationTypeChange: PropTypes.func.isRequired,
+	onAnimationDurationChange: PropTypes.func.isRequired,
+	onAnimationDelayChange: PropTypes.func.isRequired,
+	onAnimationAfterChange: PropTypes.func.isRequired,
+	animationType: PropTypes.string,
+	animationDuration: PropTypes.string,
+	animationDelay: PropTypes.string,
+	animationAfter: PropTypes.string,
+	selectedBlock: PropTypes.string,
 };
 
 export default withSelect( ( select ) => {

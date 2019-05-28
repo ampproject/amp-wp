@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
@@ -362,7 +367,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
  * @return {Function} Edit function.
  */
 export const filterBlocksEdit = ( BlockEdit ) => {
-	return function( props ) {
+	const EnhancedBlockEdit = function( props ) {
 		const { attributes: { text, ampLayout }, setAttributes, name } = props;
 
 		let inspectorControls;
@@ -406,6 +411,17 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 			</>
 		);
 	};
+
+	EnhancedBlockEdit.propTypes = {
+		attributes: PropTypes.shape( {
+			text: PropTypes.string,
+			ampLayout: PropTypes.string,
+		} ),
+		setAttributes: PropTypes.func.isRequired,
+		name: PropTypes.string,
+	};
+
+	return EnhancedBlockEdit;
 };
 
 /**
@@ -462,6 +478,10 @@ export const setUpInspectorControls = ( props ) => {
 	);
 };
 
+setUpInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
+};
+
 /**
  * Get AMP Layout select control.
  *
@@ -493,6 +513,14 @@ const AmpLayoutControl = ( props ) => {
 	);
 };
 
+AmpLayoutControl.propTypes = {
+	name: PropTypes.string,
+	attributes: PropTypes.shape( {
+		ampLayout: PropTypes.string,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
+};
+
 /**
  * Get AMP Noloading toggle control.
  *
@@ -512,6 +540,14 @@ const AmpNoloadingToggle = ( props ) => {
 			onChange={ () => setAttributes( { ampNoLoading: ! ampNoLoading } ) }
 		/>
 	);
+};
+
+AmpNoloadingToggle.propTypes = {
+	name: PropTypes.string,
+	attributes: PropTypes.shape( {
+		ampNoLoading: PropTypes.string,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
 };
 
 /**
@@ -640,6 +676,17 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 	);
 };
 
+setUpTextBlocksInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
+	attributes: PropTypes.shape( {
+		ampFitText: PropTypes.string,
+		minFont: PropTypes.number,
+		maxFont: PropTypes.number,
+		height: PropTypes.number,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
+};
+
 /**
  * Set up inspector controls for shortcode block.
  * Adds ampCarousel attribute in case of gallery shortcode.
@@ -665,6 +712,11 @@ const setUpShortcodeInspectorControls = ( props ) => {
 			</PanelBody>
 		</InspectorControls>
 	);
+};
+
+setUpShortcodeInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
+	attributes: PropTypes.object,
 };
 
 /**
@@ -698,6 +750,15 @@ const AmpLightboxToggle = ( props ) => {
 	);
 };
 
+AmpLightboxToggle.propTypes = {
+	attributes: PropTypes.shape( {
+		ampLightbox: PropTypes.string,
+		ampLayout: PropTypes.string,
+		linkTo: PropTypes.string,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
+};
+
 /**
  * Get AMP Carousel toggle control.
  *
@@ -718,6 +779,13 @@ const AmpCarouselToggle = ( props ) => {
 			onChange={ () => setAttributes( { ampCarousel: ! ampCarousel } ) }
 		/>
 	);
+};
+
+AmpCarouselToggle.propTypes = {
+	attributes: PropTypes.shape( {
+		ampCarousel: PropTypes.string,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
 };
 
 /**
@@ -746,6 +814,10 @@ const setUpImageInspectorControls = ( props ) => {
 	);
 };
 
+setUpImageInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
+};
+
 /**
  * Set up inspector controls for Gallery block.
  * Adds ampCarousel attribute for displaying the output as amp-carousel.
@@ -772,6 +844,10 @@ const setUpGalleryInspectorControls = ( props ) => {
 			</PanelBody>
 		</InspectorControls>
 	);
+};
+
+setUpGalleryInspectorControls.propTypes = {
+	isSelected: PropTypes.bool,
 };
 
 /**

@@ -3,6 +3,7 @@
  * External dependencies
  */
 import { errorMessages } from 'amp-block-editor-data';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -62,6 +63,11 @@ function AMPToggle( { isEnabled, onChange } ) {
 		</>
 	);
 }
+
+AMPToggle.propTypes = {
+	isEnabled: PropTypes.bool.isRequired,
+	onChange: PropTypes.func.isRequired,
+};
 
 export const name = 'amp';
 

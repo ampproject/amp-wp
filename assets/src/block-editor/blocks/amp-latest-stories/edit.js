@@ -6,6 +6,7 @@
  * External dependencies
  */
 import { isUndefined, pickBy } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -94,6 +95,16 @@ class LatestStoriesEdit extends Component {
 		);
 	}
 }
+
+LatestStoriesEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		order: PropTypes.string,
+		orderBy: PropTypes.string,
+		storiesToShow: PropTypes.number,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
+	latestStories: PropTypes.array.isRequired,
+};
 
 export default withSelect( ( select, props ) => {
 	const { storiesToShow, order, orderBy } = props.attributes;

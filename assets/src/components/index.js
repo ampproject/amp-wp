@@ -20,6 +20,7 @@ export { default as ValidationErrorMessage } from './validation-error-message';
 export { default as MediaPlaceholder } from './media-placeholder';
 export { default as LayoutControls } from './layout-controls';
 export { default as withMetaBlockEdit } from './with-meta-block-edit';
+export { default as withMetaBlockSave } from './with-meta-block-save';
 export { default as withAmpStorySettings } from './higher-order/with-amp-story-settings';
 export { default as withAttributes } from './higher-order/with-attributes';
 export { default as withBlockName } from './higher-order/with-block-name';

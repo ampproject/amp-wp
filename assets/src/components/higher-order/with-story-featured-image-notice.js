@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
@@ -19,7 +24,7 @@ import { validateFeaturedImage } from '../../common/helpers';
  */
 export default createHigherOrderComponent(
 	( PostFeaturedImage ) => {
-		return ( props ) => {
+		const withStoryFeaturedImageNotice = ( props ) => {
 			const { media } = props;
 
 			const errors = validateFeaturedImage( media, getMinimumStoryPosterDimensions(), true );
@@ -46,6 +51,12 @@ export default createHigherOrderComponent(
 				</>
 			);
 		};
+
+		withStoryFeaturedImageNotice.propTypes = {
+			media: PropTypes.object,
+		};
+
+		return withStoryFeaturedImageNotice;
 	},
 	'withStoryFeaturedImageNotice'
 );

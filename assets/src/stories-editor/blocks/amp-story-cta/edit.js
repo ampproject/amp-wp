@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import uuid from 'uuid/v4';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -98,5 +99,34 @@ class CallToActionEdit extends Component {
 		);
 	}
 }
+
+CallToActionEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		text: PropTypes.string,
+		url: PropTypes.string,
+		anchor: PropTypes.string,
+	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	isSelected: PropTypes.bool,
+	className: PropTypes.string,
+	fontSize: PropTypes.shape( {
+		name: PropTypes.string,
+		shortName: PropTypes.string,
+		size: PropTypes.number,
+		slug: PropTypes.string,
+	} ).isRequired,
+	backgroundColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+	textColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+};
 
 export default CallToActionEdit;

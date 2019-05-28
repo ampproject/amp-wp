@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { Notice, SelectControl, TextControl } from '@wordpress/components';
@@ -7,15 +12,14 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Layout controls for AMP blocks' attributes: layout, width, height.
  *
- * @param {Object} props                      Props.
- * @param {Object} props.attributes           Block attributes.
- * @param {string} props.attributes.ampLayout AMP layout option.
- * @param {Array}  props.ampLayoutOptions     Layout options.
+ * @param {Object}   attributes           Block attributes.
+ * @param {string}   attributes.ampLayout AMP layout option.
+ * @param {Function} setAttributes        Callback to update block attributes.
+ * @param {Array}    ampLayoutOptions     Layout options.
  *
  * @return {Component} Controls.
  */
-export default ( props ) => {
-	const { attributes, setAttributes, ampLayoutOptions } = props;
+const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 	const { ampLayout, height, width } = attributes;
 	const showHeightNotice = ! height && ( 'fixed' === ampLayout || 'fixed-height' === ampLayout );
 	const showWidthNotice = ! width && 'fixed' === ampLayout;
@@ -65,3 +69,18 @@ export default ( props ) => {
 		</>
 	);
 };
+
+LayoutControls.propTypes = {
+	attributes: PropTypes.shape( {
+		ampLayout: PropTypes.string,
+		width: PropTypes.number,
+		height: PropTypes.number,
+	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	ampLayoutOptions: PropTypes.arrayOf( PropTypes.shape( {
+		value: PropTypes.string.isRequired,
+		label: PropTypes.string.isRequired,
+	} ) ).isRequired,
+};
+
+export default LayoutControls;

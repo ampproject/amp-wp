@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -107,6 +108,45 @@ class MetaBlockEdit extends Component {
 		);
 	}
 }
+
+MetaBlockEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		ampFitText: PropTypes.bool,
+		width: PropTypes.number,
+		height: PropTypes.number,
+	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	blockContent: PropTypes.string,
+	placeholder: PropTypes.string,
+	className: PropTypes.string,
+	tagName: PropTypes.string,
+	isSelected: PropTypes.bool,
+	isEditable: PropTypes.bool,
+	fontSize: PropTypes.shape( {
+		name: PropTypes.string,
+		shortName: PropTypes.string,
+		size: PropTypes.number,
+		slug: PropTypes.string,
+	} ).isRequired,
+	backgroundColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+	customBackgroundColor: PropTypes.string,
+	textColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+	colors: PropTypes.arrayOf( PropTypes.shape( {
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		color: PropTypes.string,
+	} ) ),
+};
 
 export default ( { attribute, placeholder, tagName, isEditable } ) => {
 	return compose(

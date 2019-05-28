@@ -2,18 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
-import {
-	PanelBody,
-	TextControl,
-	Placeholder,
-	ToggleControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { LayoutControls, MediaPlaceholder } from '../../../components';
+import edit from './edit';
+import save from './save';
 
 export const name = 'amp/amp-ima-video';
 
@@ -69,73 +63,7 @@ export const settings = {
 		},
 	},
 
-	edit( props ) {
-		const { attributes, setAttributes } = props;
-		const { dataDelayAdRequest, dataTag, dataSrc, dataPoster } = attributes;
-		const ampLayoutOptions = [
-			{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-			{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
+	edit,
 
-		];
-		let dataSet = false;
-		if ( dataTag && dataSrc ) {
-			dataSet = true;
-		}
-		return (
-			<>
-				<InspectorControls>
-					<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
-						<TextControl
-							label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
-							value={ dataTag }
-							onChange={ ( value ) => ( setAttributes( { dataTag: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Https URL of your video content (required)', 'amp' ) }
-							value={ dataSrc }
-							onChange={ ( value ) => ( setAttributes( { dataSrc: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Https URL to preview image', 'amp' ) }
-							value={ dataPoster }
-							onChange={ ( value ) => ( setAttributes( { dataPoster: value } ) ) }
-						/>
-						<ToggleControl
-							label={ __( 'Delay Ad Request', 'amp' ) }
-							checked={ dataDelayAdRequest }
-							onChange={ () => ( setAttributes( { dataDelayAdRequest: ! dataDelayAdRequest } ) ) }
-						/>
-						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
-					</PanelBody>
-				</InspectorControls>
-				{ dataSet && <MediaPlaceholder name={ __( 'IMA Video', 'amp' ) } url={ dataSrc } /> }
-				{
-					! dataSet && (
-						<Placeholder label={ __( 'IMA Video', 'amp' ) }>
-							<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
-						</Placeholder>
-					)
-				}
-			</>
-		);
-	},
-
-	save( { attributes } ) {
-		const imaProps = {
-			layout: attributes.ampLayout,
-			height: attributes.height,
-			width: attributes.width,
-			'data-tag': attributes.dataTag,
-			'data-src': attributes.dataSrc,
-		};
-		if ( attributes.dataPoster ) {
-			imaProps[ 'data-poster' ] = attributes.dataPoster;
-		}
-		if ( attributes.dataDelayAdRequest ) {
-			imaProps[ 'data-delay-ad-request' ] = attributes.dataDelayAdRequest;
-		}
-		return (
-			<amp-ima-video { ...imaProps }></amp-ima-video>
-		);
-	},
+	save,
 };

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -6,15 +11,14 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Get message for validation error.
  *
- * @param {Object} error             Validation error.
- * @param {string} error.code        Error code.
- * @param {string} error.node_name   Node name.
- * @param {string} error.parent_name Parent node name.
- * @param {string} error.message     Error message.
+ * @param {?string} code       Error code.
+ * @param {?string} nodeName   Node name.
+ * @param {?string} parentName Parent node name.
+ * @param {?string} message    Error message.
  *
  * @return {Component} Validation error message.
  */
-export default ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
+const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
 	if ( message ) {
 		return message;
 	}
@@ -42,3 +46,12 @@ export default ( { message, code, node_name: nodeName, parent_name: parentName }
 		</>
 	);
 };
+
+ValidationErrorMessage.propTypes = {
+	message: PropTypes.string,
+	code: PropTypes.string,
+	node_name: PropTypes.string,
+	parent_name: PropTypes.string,
+};
+
+export default ValidationErrorMessage;

@@ -2,18 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
-import {
-	PanelBody,
-	TextControl,
-	Placeholder,
-	SelectControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { LayoutControls, MediaPlaceholder } from '../../../components';
+import edit from './edit';
+import save from './save';
 
 export const name = 'amp/amp-ooyala-player';
 
@@ -70,77 +64,7 @@ export const settings = {
 		},
 	},
 
-	edit( props ) {
-		const { attributes, setAttributes } = props;
-		const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion } = attributes;
-		const ampLayoutOptions = [
-			{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-			{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-			{ value: 'fill', label: __( 'Fill', 'amp' ) },
-			{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
+	edit,
 
-		];
-		let url = false;
-		if ( dataEmbedCode && dataPlayerId && dataPcode ) {
-			url = `http://cf.c.ooyala.com/${ dataEmbedCode }`;
-		}
-		return (
-			<>
-				<InspectorControls>
-					<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
-						<TextControl
-							label={ __( 'Video embed code (required)', 'amp' ) }
-							value={ dataEmbedCode }
-							onChange={ ( value ) => ( setAttributes( { dataEmbedCode: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Player ID (required)', 'amp' ) }
-							value={ dataPlayerId }
-							onChange={ ( value ) => ( setAttributes( { dataPlayerId: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Provider code for the account (required)', 'amp' ) }
-							value={ dataPcode }
-							onChange={ ( value ) => ( setAttributes( { dataPcode: value } ) ) }
-						/>
-						<SelectControl
-							label={ __( 'Player version', 'amp' ) }
-							value={ dataPlayerVersion }
-							options={ [
-								{ value: 'v3', label: __( 'V3', 'amp' ) },
-								{ value: 'v4', label: __( 'V4', 'amp' ) },
-							] }
-							onChange={ ( value ) => ( setAttributes( { dataPlayerVersion: value } ) ) }
-						/>
-						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
-					</PanelBody>
-				</InspectorControls>
-				{ url && <MediaPlaceholder name={ __( 'Ooyala Player', 'amp' ) } url={ url } /> }
-				{ ! url && (
-					<Placeholder label={ __( 'Ooyala Player', 'amp' ) }>
-						<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
-					</Placeholder>
-				) }
-			</>
-		);
-	},
-
-	save( { attributes } ) {
-		const { dataEmbedCode, dataPlayerId, dataPcode, dataPlayerVersion, ampLayout, height, width } = attributes;
-
-		const ooyalaProps = {
-			layout: ampLayout,
-			height,
-			'data-embedcode': dataEmbedCode,
-			'data-playerid': dataPlayerId,
-			'data-pcode': dataPcode,
-			'data-playerversion': dataPlayerVersion,
-		};
-		if ( 'fixed-height' !== ampLayout && width ) {
-			ooyalaProps.width = width;
-		}
-		return (
-			<amp-ooyala-player { ...ooyalaProps }></amp-ooyala-player>
-		);
-	},
+	save,
 };

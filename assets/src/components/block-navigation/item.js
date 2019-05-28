@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -137,6 +138,16 @@ class BlockNavigationItem extends Component {
 		);
 	}
 }
+
+BlockNavigationItem.propTypes = {
+	getBlockIndex: PropTypes.func.isRequired,
+	moveBlockToPosition: PropTypes.func.isRequired,
+	block: PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ),
+	isSelected: PropTypes.bool,
+	onClick: PropTypes.func.isRequired,
+};
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
 	const { getBlockOrder, getBlockRootClientId, getBlocksByClientId } = select( 'core/block-editor' );

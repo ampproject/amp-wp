@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { compose } from '@wordpress/compose';
@@ -125,6 +130,14 @@ class ReordererItem extends Component {
 		);
 	}
 }
+
+ReordererItem.propTypes = {
+	page: PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ).isRequired,
+	index: PropTypes.number.isRequired,
+	movePageToPosition: PropTypes.func.isRequired,
+};
 
 const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {
 	const { getBlockIndex } = select( 'amp/story' );

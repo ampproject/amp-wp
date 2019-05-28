@@ -2,18 +2,12 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InspectorControls } from '@wordpress/block-editor';
-import {
-	PanelBody,
-	TextControl,
-	Placeholder,
-	ToggleControl,
-} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import { LayoutControls, MediaPlaceholder } from '../../../components';
+import edit from './edit';
+import save from './save';
 
 export const name = 'amp/amp-o2-player';
 
@@ -71,88 +65,7 @@ export const settings = {
 		},
 	},
 
-	edit( props ) {
-		const { attributes, setAttributes } = props;
-		const { autoPlay, dataPid, dataVid, dataBcid, dataBid } = attributes;
-		const ampLayoutOptions = [
-			{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-			{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
-			{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-			{ value: 'fill', label: __( 'Fill', 'amp' ) },
-			{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
-			{ value: 'nodisplay', label: __( 'No Display', 'amp' ) },
+	edit,
 
-		];
-		let url = false;
-		if ( dataPid && ( dataBcid || dataVid ) ) {
-			url = `https://delivery.vidible.tv/htmlembed/pid=${ dataPid }/`;
-		}
-		return (
-			<>
-				<InspectorControls>
-					<PanelBody title={ __( 'O2 Player Settings', 'amp' ) }>
-						<TextControl
-							label={ __( 'Player ID (required)', 'amp' ) }
-							value={ dataPid }
-							onChange={ ( value ) => ( setAttributes( { dataPid: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Buyer Company ID (either buyer or video ID is required)', 'amp' ) }
-							value={ dataBcid }
-							onChange={ ( value ) => ( setAttributes( { dataBcid: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Video ID (either buyer or video ID is required)', 'amp' ) }
-							value={ dataVid }
-							onChange={ ( value ) => ( setAttributes( { dataVid: value } ) ) }
-						/>
-						<TextControl
-							label={ __( 'Playlist ID', 'amp' ) }
-							value={ dataBid }
-							onChange={ ( value ) => ( setAttributes( { dataBid: value } ) ) }
-						/>
-						<ToggleControl
-							label={ __( 'Autoplay', 'amp' ) }
-							checked={ autoPlay }
-							onChange={ () => ( setAttributes( { autoPlay: ! autoPlay } ) ) }
-						/>
-						<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
-					</PanelBody>
-				</InspectorControls>
-				{ url && <MediaPlaceholder name={ __( 'O2 Player', 'amp' ) } url={ url } /> }
-				{
-					! url && (
-						<Placeholder label={ __( 'O2 Player', 'amp' ) }>
-							<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
-						</Placeholder>
-					)
-				}
-			</>
-		);
-	},
-
-	save( { attributes } ) {
-		const o2Props = {
-			layout: attributes.ampLayout,
-			height: attributes.height,
-			'data-pid': attributes.dataPid,
-		};
-		if ( 'fixed-height' !== attributes.ampLayout && attributes.width ) {
-			o2Props.width = attributes.width;
-		}
-		if ( ! attributes.autoPlay ) {
-			o2Props[ 'data-macros' ] = 'm.playback=click';
-		}
-		if ( attributes.dataVid ) {
-			o2Props[ 'data-vid' ] = attributes.dataVid;
-		} else if ( attributes.dataBcid ) {
-			o2Props[ 'data-bcid' ] = attributes.dataBcid;
-		}
-		if ( attributes.dataBid ) {
-			o2Props[ 'data-bid' ] = attributes.dataBid;
-		}
-		return (
-			<amp-o2-player { ...o2Props }></amp-o2-player>
-		);
-	},
+	save,
 };

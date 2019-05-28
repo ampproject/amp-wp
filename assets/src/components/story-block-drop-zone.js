@@ -4,6 +4,11 @@
  */
 
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import {
@@ -64,6 +69,12 @@ class BlockDropZone extends Component {
 		);
 	}
 }
+
+BlockDropZone.propTypes = {
+	updateBlockAttributes: PropTypes.func,
+	srcClientId: PropTypes.string,
+};
+
 export default withDispatch( ( dispatch ) => {
 	const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 

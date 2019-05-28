@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -32,7 +33,7 @@ let lastSeenX = 0,
 	imageWrapper,
 	textElement;
 
-export default ( props ) => {
+const EnhancedResizableBox = ( props ) => {
 	const {
 		isSelected,
 		angle,
@@ -197,3 +198,19 @@ export default ( props ) => {
 		</ResizableBox>
 	);
 };
+
+EnhancedResizableBox.propTypes = {
+	isSelected: PropTypes.bool,
+	ampFitText: PropTypes.bool,
+	angle: PropTypes.number,
+	blockName: PropTypes.string,
+	minWidth: PropTypes.number,
+	minHeight: PropTypes.number,
+	onResizeStart: PropTypes.func.isRequired,
+	onResizeStop: PropTypes.func.isRequired,
+	children: PropTypes.any.isRequired,
+	width: PropTypes.number,
+	height: PropTypes.number,
+};
+
+export default EnhancedResizableBox;
