@@ -1840,7 +1840,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
 				$this->remove_invalid_child( $child_element );
 			} else {
-				$this->remove_disallowed_descendants( $child, $allowed_descendants );
+				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
 			}
 		}
 	}
