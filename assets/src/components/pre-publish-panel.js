@@ -3,7 +3,6 @@
  */
 import { Notice } from '@wordpress/components';
 import { PluginPrePublishPanel } from '@wordpress/edit-post';
-import { Fragment } from '@wordpress/element';
 import { withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -25,7 +24,7 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<PluginPrePublishPanel
 				title={ __( 'Featured Image', 'amp' ) }
 				initialOpen="true"
@@ -43,7 +42,7 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 					} ) }
 				</Notice>
 			</PluginPrePublishPanel>
-		</Fragment>
+		</>
 	);
 };
 

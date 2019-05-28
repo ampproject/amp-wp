@@ -15,7 +15,7 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	PanelBody,
 	Button,
@@ -197,7 +197,7 @@ class EditPage extends Component {
 		const colorSettings = this.getOverlayColorSettings();
 
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
@@ -232,7 +232,7 @@ class EditPage extends Component {
 						/>
 					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
-						<Fragment>
+						<>
 							<BaseControl>
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
@@ -315,7 +315,7 @@ class EditPage extends Component {
 								</MediaUploadCheck>
 							) }
 							{ mediaUrl && (
-								<Fragment>
+								<>
 									{ /* Note: FocalPointPicker is only available in Gutenberg 5.1+ */ }
 									{ IMAGE_BACKGROUND_TYPE === mediaType && FocalPointPicker && (
 										<FocalPointPicker
@@ -325,9 +325,9 @@ class EditPage extends Component {
 											onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 										/>
 									) }
-								</Fragment>
+								</>
 							) }
-						</Fragment>
+						</>
 					</PanelBody>
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
@@ -366,7 +366,7 @@ class EditPage extends Component {
 					) }
 					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
 				</div>
-			</Fragment>
+			</>
 		);
 	}
 }

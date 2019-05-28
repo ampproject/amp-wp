@@ -13,7 +13,6 @@ import {
 	PanelBody,
 	TextControl,
 } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -95,7 +94,7 @@ export const settings = {
 		];
 
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'AMP Timeago Settings', 'amp' ) }>
 						<DateTimePicker
@@ -123,7 +122,7 @@ export const settings = {
 					/>
 				</BlockControls>
 				<time dateTime={ attributes.dateTime }>{ timeAgo }</time>
-			</Fragment>
+			</>
 		);
 	},
 
