@@ -9,7 +9,8 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { ValidationErrorMessage } from '../';
+// @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
+import ValidationErrorMessage from '../validation-error-message';
 
 const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const { getBlockValidationErrors } = select( 'amp/block-validation' );
