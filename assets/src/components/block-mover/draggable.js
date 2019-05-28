@@ -184,7 +184,7 @@ Draggable.propTypes = {
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
-	children: PropTypes.object,
+	children: PropTypes.any.isRequired,
 };
 
 export default withSafeTimeout( Draggable );

@@ -193,7 +193,7 @@ RotatableBox.propTypes = {
 	onRotateStart: PropTypes.func,
 	onRotate: PropTypes.func,
 	onRotateStop: PropTypes.func,
-	children: PropTypes.object.isRequired,
+	children: PropTypes.any.isRequired,
 };
 
 export default compose(

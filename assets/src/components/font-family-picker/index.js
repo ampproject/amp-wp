@@ -71,7 +71,7 @@ FontFamilyPicker.propTypes = {
 		value: PropTypes.string,
 		label: PropTypes.string,
 	} ) ),
-	onChange: PropTypes.func.isRequired,
+	onChange: PropTypes.func,
 };
 
 export default FontFamilyPicker;
