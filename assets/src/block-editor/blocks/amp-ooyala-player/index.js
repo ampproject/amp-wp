@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
@@ -86,7 +85,7 @@ export const settings = {
 			url = `http://cf.c.ooyala.com/${ dataEmbedCode }`;
 		}
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
 						<TextControl
@@ -122,7 +121,7 @@ export const settings = {
 						<p>{ __( 'Add required data to use the block.', 'amp' ) }</p>
 					</Placeholder>
 				) }
-			</Fragment>
+			</>
 		);
 	},
 

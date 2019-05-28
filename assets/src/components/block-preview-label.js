@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { getBlockType } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
@@ -10,12 +9,12 @@ import { __ } from '@wordpress/i18n';
 
 const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'left', accessibilityText } ) => {
 	return (
-		<Fragment>
+		<>
 			{ displayIcon && 'left' === alignIcon && <BlockIcon icon={ icon } /> }
 			{ content.length > 20 ? `${ content.substr( 0, 20 ) }…` : content }
 			{ accessibilityText && <span className="screen-reader-text">{ accessibilityText }</span> }
 			{ displayIcon && 'right' === alignIcon && <BlockIcon icon={ icon } /> }
-		</Fragment>
+		</>
 	);
 };
 

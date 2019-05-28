@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
@@ -95,7 +94,7 @@ export const settings = {
 			url = 'https://cms.springboardplatform.com/embed_iframe/';
 		}
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
 						<TextControl
@@ -144,7 +143,7 @@ export const settings = {
 						</Placeholder>
 					)
 				}
-			</Fragment>
+			</>
 		);
 	},
 

@@ -4,7 +4,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { select } from '@wordpress/data';
-import { Fragment } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 
 /**
@@ -41,7 +40,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<Fragment>
+				<>
 					<Notice
 						status="error"
 						isDismissible={ false }
@@ -49,7 +48,7 @@ export default createHigherOrderComponent(
 						{ __( 'A poster is required for videos in stories.', 'amp' ) }
 					</Notice>
 					<MediaUpload { ...props } />
-				</Fragment>
+				</>
 			);
 		};
 	},

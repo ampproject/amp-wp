@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
@@ -83,7 +82,7 @@ export const settings = {
 			dataSet = true;
 		}
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 						<TextControl
@@ -117,7 +116,7 @@ export const settings = {
 						</Placeholder>
 					)
 				}
-			</Fragment>
+			</>
 		);
 	},
 

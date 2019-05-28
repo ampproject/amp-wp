@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
-import { Fragment } from '@wordpress/element';
 import {
 	PanelBody,
 	TextControl,
@@ -69,7 +68,7 @@ export const settings = {
 			url = 'https://media-cdn.beachfrontreach.com/acct_1/video/';
 		}
 		return (
-			<Fragment>
+			<>
 				<InspectorControls>
 					<PanelBody title={ __( 'Reach settings', 'amp' ) }>
 						<TextControl
@@ -88,7 +87,7 @@ export const settings = {
 						</Placeholder>
 					)
 				}
-			</Fragment>
+			</>
 		);
 	},
 

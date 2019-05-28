@@ -11,7 +11,7 @@ import {
 	AlignmentToolbar,
 	BlockControls,
 } from '@wordpress/block-editor';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpress/date';
@@ -77,7 +77,7 @@ class MetaBlockEdit extends Component {
 		const ContentTag = tagName;
 
 		return (
-			<Fragment>
+			<>
 				<BlockControls>
 					<AlignmentToolbar
 						value={ align }
@@ -103,7 +103,7 @@ class MetaBlockEdit extends Component {
 				>
 					{ blockContent || placeholder }
 				</ContentTag>
-			</Fragment>
+			</>
 		);
 	}
 }

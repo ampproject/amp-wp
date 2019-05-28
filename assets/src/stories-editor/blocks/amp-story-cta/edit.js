@@ -8,10 +8,7 @@ import uuid from 'uuid/v4';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	Dashicon,
 	IconButton,
@@ -62,7 +59,7 @@ class CallToActionEdit extends Component {
 		} = attributes;
 
 		return (
-			<Fragment>
+			<>
 				<div className={ className } ref={ this.bindRef }>
 					<RichText
 						placeholder={ __( 'Add text…', 'amp' ) }
@@ -97,7 +94,7 @@ class CallToActionEdit extends Component {
 						<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
 					</form>
 				) }
-			</Fragment>
+			</>
 		);
 	}
 }

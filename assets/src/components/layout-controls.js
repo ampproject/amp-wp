@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { Notice, SelectControl, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
@@ -22,7 +21,7 @@ export default ( props ) => {
 	const showWidthNotice = ! width && 'fixed' === ampLayout;
 
 	return (
-		<Fragment>
+		<>
 			<SelectControl
 				label={ __( 'Layout', 'amp' ) }
 				value={ ampLayout }
@@ -63,6 +62,6 @@ export default ( props ) => {
 				value={ height }
 				onChange={ ( value ) => ( setAttributes( { height: value } ) ) }
 			/>
-		</Fragment>
+		</>
 	);
 };

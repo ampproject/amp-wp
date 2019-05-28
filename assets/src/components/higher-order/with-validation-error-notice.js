@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { createHigherOrderComponent } from '@wordpress/compose';
@@ -45,7 +44,7 @@ export default createHigherOrderComponent(
 			];
 
 			return (
-				<Fragment>
+				<>
 					<Notice
 						status="warning"
 						isDismissible={ false }
@@ -75,7 +74,7 @@ export default createHigherOrderComponent(
 						</details>
 					</Notice>
 					<BlockEdit { ...props } />
-				</Fragment>
+				</>
 			);
 		} );
 	},

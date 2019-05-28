@@ -2,7 +2,7 @@
  * WordPress dependencies
  */
 import { __, _x } from '@wordpress/i18n';
-import { cloneElement, RawHTML, Fragment } from '@wordpress/element';
+import { cloneElement, RawHTML } from '@wordpress/element';
 import { TextControl, SelectControl, ToggleControl, Notice, PanelBody, FontSizePicker } from '@wordpress/components';
 import { InspectorControls } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
@@ -400,10 +400,10 @@ export const filterBlocksEdit = ( BlockEdit ) => {
 		}
 
 		return (
-			<Fragment>
+			<>
 				<BlockEdit { ...props } />
 				{ inspectorControls }
-			</Fragment>
+			</>
 		);
 	};
 };
@@ -576,7 +576,7 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 				/>
 			</PanelBody>
 			{ ampFitText && (
-				<Fragment>
+				<>
 					<TextControl
 						label={ __( 'Height', 'amp' ) }
 						value={ height }
@@ -634,7 +634,7 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 							} }
 						/>
 					</PanelBody>
-				</Fragment>
+				</>
 			) }
 		</InspectorControls>
 	);

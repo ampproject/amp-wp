@@ -9,7 +9,7 @@ import { errorMessages } from 'amp-block-editor-data';
  */
 import { __ } from '@wordpress/i18n';
 import { FormToggle, Notice } from '@wordpress/components';
-import { Fragment, RawHTML } from '@wordpress/element';
+import { RawHTML } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { PluginPostStatusInfo } from '@wordpress/edit-post';
 import { compose, withInstanceId } from '@wordpress/compose';
@@ -30,7 +30,7 @@ import { isAMPEnabled } from '../helpers';
  */
 function AMPToggle( { isEnabled, onChange } ) {
 	return (
-		<Fragment>
+		<>
 			<PluginPostStatusInfo>
 				{ ! errorMessages.length && <label htmlFor="amp-enabled">{ __( 'Enable AMP', 'amp' ) }</label> }
 				{
@@ -59,7 +59,7 @@ function AMPToggle( { isEnabled, onChange } ) {
 					)
 				}
 			</PluginPostStatusInfo>
-		</Fragment>
+		</>
 	);
 }
 
