@@ -36,7 +36,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration, addBackgroundColorToOverlay } from '../../helpers';
+import { getTotalAnimationDuration, addBackgroundColorToOverlay, getCallToActionBlock } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -153,7 +153,6 @@ class EditPage extends Component {
 	ensureCTABeingLast() {
 		const {
 			getBlockOrder,
-			getBlock,
 			moveBlockToPosition,
 			clientId,
 		} = this.props;
@@ -161,18 +160,11 @@ class EditPage extends Component {
 		if ( 1 >= order.length ) {
 			return;
 		}
-		let ctaClientID = false;
-		order.forEach( ( childId ) => {
-			const block = getBlock( childId );
-			if ( 'amp/amp-story-cta' === block.name ) {
-				ctaClientID = childId;
-				return false;
-			}
-		} );
-		if ( ctaClientID ) {
+		const ctaBlock = getCallToActionBlock( clientId );
+		if ( ctaBlock ) {
 			// If the CTA is not the last block, move it there.
-			if ( order[ order.length - 1 ] !== ctaClientID ) {
-				moveBlockToPosition( ctaClientID, clientId, clientId, order.length - 1 );
+			if ( order[ order.length - 1 ] !== ctaBlock.clientId ) {
+				moveBlockToPosition( ctaBlock.clientId, clientId, clientId, order.length - 1 );
 			}
 		}
 	}
@@ -410,11 +402,10 @@ class EditPage extends Component {
 export default compose(
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlocksByClientId, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
 
-		const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
-		const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
+		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const { mediaId } = attributes;
@@ -429,7 +420,6 @@ export default compose(
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
-			getBlock,
 		};
 	} ),
 	withDispatch( () => {

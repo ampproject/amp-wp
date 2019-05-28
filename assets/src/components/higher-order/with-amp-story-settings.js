@@ -33,7 +33,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS, MIN_BLOCK_WIDTH, MIN_BLOCK_HEIGHT } from '../../stories-editor/constants';
-import { getBlockOrderDescription, maybeEnqueueFontStyle, pageHasCTABlock } from '../../stories-editor/helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
 import sendBackwardIcon from '../../../images/send-backwards.svg';
 import bringFrontIcon from '../../../images/bring-front.svg';
@@ -85,7 +85,7 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		numberOfBlocks: blockClientIds.length,
 		isFirst: 0 === blockIndex,
 		// Don't consider CTA block in looking for isLast.
-		isLast: pageHasCTABlock( blockClientIds ) ? blockIndex === blockClientIds.length - 2 : blockIndex === blockClientIds.length - 1,
+		isLast: getCallToActionBlock( parentBlockId ) ? blockIndex === blockClientIds.length - 2 : blockIndex === blockClientIds.length - 1,
 		parentBlock: getBlock( parentBlockId ),
 		rootClientId: parentBlockId,
 		// Use parent's clientId instead of anchor attribute.

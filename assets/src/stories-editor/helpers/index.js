@@ -1392,19 +1392,12 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 };
 
 /**
- * Check if a page has CTA block.
- * It is assumed that the CTA block is always the last block.
+ * Get CTA block.
  *
- * @param {Array} clientIds Block IDs.
- * @return {boolean} If CTA block was found.
+ * @param {Array} pageClientId Root ID.
+ * @return {Object} CTA block.
  */
-export const pageHasCTABlock = ( clientIds ) => {
-	if ( clientIds.length ) {
-		const lastId = clientIds[ clientIds.length - 1 ];
-		const lastBlock = getBlock( lastId );
-		if ( 'amp/amp-story-cta' === lastBlock.name ) {
-			return true;
-		}
-	}
-	return false;
+export const getCallToActionBlock = ( pageClientId ) => {
+	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
 };
