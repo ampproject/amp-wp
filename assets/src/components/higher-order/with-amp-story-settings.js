@@ -78,13 +78,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
 	}
 
-	// @todo:
-	/*
-	+ Remove the block navigations for CTA block.
-	- Add a check for isLast to exclude CTA block from consideration
-	- Make sure that the CTA block is always the last, as part of subscribe()
-	 */
-
 	const reversedIndex = blockClientIds.length - 1 - blockIndex;
 
 	return {
