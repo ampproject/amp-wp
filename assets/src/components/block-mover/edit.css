@@ -20,3 +20,12 @@
 	display: block;
 	margin: 0 auto;
 }
+
+.wp-block [draggable="true"] {
+	cursor: grab;
+}
+
+/* The editable area of the Text block shouldn't have cursor: grab. */
+.wp-block[data-type="amp/amp-story-text"] .editor-rich-text__editable {
+	cursor: default;
+}
