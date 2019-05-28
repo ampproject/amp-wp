@@ -68,7 +68,7 @@ BlockTypesList.propTypes = {
 	} ) ),
 	onSelect: PropTypes.func.isRequired,
 	onHover: PropTypes.func,
-	children: PropTypes.any.isRequired,
+	children: PropTypes.any,
 };
 
 export default BlockTypesList;

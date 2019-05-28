@@ -362,7 +362,7 @@ export class InserterMenu extends Component {
 }
 
 InserterMenu.propTypes = {
-	instanceId: PropTypes.string.isRequired,
+	instanceId: PropTypes.number.isRequired,
 	onSelect: PropTypes.func.isRequired,
 	showInsertionPoint: PropTypes.func.isRequired,
 	hideInsertionPoint: PropTypes.func.isRequired,
