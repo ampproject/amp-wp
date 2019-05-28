@@ -25,6 +25,11 @@
 	-webkit-user-drag: none;
 }
 
+/* Dragging the preview image in the image block engaged the drop zone for an image, so make this non-draggable in webkit. */
+.block-editor-block-list__block[data-type="core/image"] .components-placeholder__preview img {
+	-webkit-user-drag: none;
+}
+
 .amp-story-resize-container .components-resizable-box__handle-bottom::before {
 	margin: 0 auto;
 }
