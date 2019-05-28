@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.1.2-alpha
+ * Version: 1.1.2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -200,7 +200,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.1.2-alpha' );
+define( 'AMP__VERSION', '1.1.2' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
