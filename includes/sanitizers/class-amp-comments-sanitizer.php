@@ -147,7 +147,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$script = $this->dom->createElement( 'script' );
 		$script->setAttribute( 'type', 'application/json' );
 		$amp_state->appendChild( $script );
-		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state ) ) );
+		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state, JSON_UNESCAPED_UNICODE ) ) );
 		$comment_form->insertBefore( $amp_state, $comment_form->firstChild );
 
 		// Update state when submitting form.
@@ -172,7 +172,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			sprintf(
 				'submit-success:AMP.setState( { %s: %s } )',
 				$state_id,
-				wp_json_encode( $form_reset_state )
+				wp_json_encode( $form_reset_state, JSON_UNESCAPED_UNICODE )
 			),
 		);
 		$comment_form->setAttribute( 'on', implode( ';', $on ) );

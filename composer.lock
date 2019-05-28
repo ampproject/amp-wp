@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0757e57a7b0898c3827df97a397c8643",
+    "content-hash": "ed6e9218f0370c7515f173953ef737fc",
     "packages": [
         {
             "name": "cweagans/composer-patches",
-            "version": "1.6.5",
+            "version": "1.6.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3"
+                "reference": "1d89dcc730e7f42426c434b88261fcfb3bce651e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3",
-                "reference": "2ec4f00ff5fb64de584c8c4aea53bf9053ecb0b3",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/1d89dcc730e7f42426c434b88261fcfb3bce651e",
+                "reference": "1d89dcc730e7f42426c434b88261fcfb3bce651e",
                 "shasum": ""
             },
             "require": {
@@ -48,20 +48,20 @@
                 }
             ],
             "description": "Provides a way to patch Composer packages.",
-            "time": "2018-05-11T18:00:16+00:00"
+            "time": "2018-10-24T15:51:16+00:00"
         },
         {
             "name": "fasterimage/fasterimage",
-            "version": "v1.4.0",
+            "version": "v1.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/willwashburn/fasterimage.git",
-                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab"
+                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/2a85079bef8090c2820bcad5c649cdc41f7b53ab",
-                "reference": "2a85079bef8090c2820bcad5c649cdc41f7b53ab",
+                "url": "https://api.github.com/repos/willwashburn/fasterimage/zipball/42d125a15dc124520aff2157bbed9a4b2d4f310a",
+                "reference": "42d125a15dc124520aff2157bbed9a4b2d4f310a",
                 "shasum": ""
             },
             "require": {
@@ -69,8 +69,9 @@
                 "willwashburn/stream": ">=1.0"
             },
             "require-dev": {
-                "mockery/mockery": "~0.9",
-                "phpunit/phpunit": "~4.0"
+                "php-coveralls/php-coveralls": "^2.1",
+                "php-mock/php-mock-phpunit": "^2.3",
+                "phpunit/phpunit": "~6.0"
             },
             "type": "library",
             "autoload": {
@@ -86,6 +87,9 @@
                 {
                     "name": "Will Washburn",
                     "email": "will@tailwindapp.com"
+                },
+                {
+                    "name": "Weston Ruter"
                 }
             ],
             "description": "FasterImage finds the size or type of a set of images given their uris by fetching as little as needed, in parallel. Originally ported by Tom Moor.",
@@ -99,7 +103,7 @@
                 "image size",
                 "parallel"
             ],
-            "time": "2019-03-07T05:20:21+00:00"
+            "time": "2019-05-25T14:33:33+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
@@ -372,16 +376,16 @@
         },
         {
             "name": "wp-coding-standards/wpcs",
-            "version": "2.1.0",
+            "version": "2.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git",
-                "reference": "8c7a2e7682de9ef5955251874b639deda51ef470"
+                "reference": "bd9c33152115e6741e3510ff7189605b35167908"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress-Coding-Standards/WordPress-Coding-Standards/zipball/8c7a2e7682de9ef5955251874b639deda51ef470",
-                "reference": "8c7a2e7682de9ef5955251874b639deda51ef470",
+                "url": "https://api.github.com/repos/WordPress-Coding-Standards/WordPress-Coding-Standards/zipball/bd9c33152115e6741e3510ff7189605b35167908",
+                "reference": "bd9c33152115e6741e3510ff7189605b35167908",
                 "shasum": ""
             },
             "require": {
@@ -413,7 +417,7 @@
                 "standards",
                 "wordpress"
             ],
-            "time": "2019-04-08T10:53:57+00:00"
+            "time": "2019-05-21T02:50:00+00:00"
         },
         {
             "name": "xwp/wp-dev-lib",
@@ -461,10 +465,12 @@
     "prefer-lowest": false,
     "platform": {
         "php": "^5.4 || ^7.0",
+        "ext-curl": "*",
+        "ext-date": "*",
         "ext-dom": "*",
         "ext-iconv": "*",
-        "ext-intl": "*",
-        "ext-libxml": "*"
+        "ext-libxml": "*",
+        "ext-spl": "*"
     },
     "platform-dev": [],
     "platform-overrides": {

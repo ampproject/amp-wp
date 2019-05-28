@@ -220,16 +220,21 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Sanitizes a CSS dimension specifier while being sensitive to dimension context.
 	 *
-	 * @param string $value A valid CSS dimension specifier; e.g. 50, 50px, 50%.
-	 * @param string $dimension 'width' or ignored. 'width' only affects $values ending in '%'.
+	 * @param string $value     A valid CSS dimension specifier; e.g. 50, 50px, 50%. Can be 'auto' for width.
+	 * @param string $dimension Dimension, either 'width' or 'height'.
 	 *
-	 * @return float|int|string Returns a numeric dimension value, or an empty string.
+	 * @return float|int|string Returns a numeric dimension value, 'auto', or an empty string.
 	 */
 	public function sanitize_dimension( $value, $dimension ) {
 
 		// Allows 0 to be used as valid dimension.
 		if ( null === $value ) {
 			return '';
+		}
+
+		// Allow special 'auto' value for fixed-height layout.
+		if ( 'width' === $dimension && 'auto' === $value ) {
+			return $value;
 		}
 
 		// Accepts both integers and floats & prevents negative values.
