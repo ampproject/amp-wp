@@ -708,9 +708,13 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  * @param {number} maxFontSize    Maximum font size.
  * @param {number} minFontSize    Minimum font size.
  *
- * @return {number} Calculated font size.
+ * @return {number|boolean} Calculated font size. False if calculation wasn't possible.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	// Return false if calculation is not possible due to width and height missing, e.g. in disabled preview.
+	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
+		return false;
+	}
 	measurer.classList.toggle( 'is-measuring-fontsize' );
 
 	maxFontSize++;
@@ -1150,7 +1154,7 @@ export const maybeUpdateFontSize = ( block ) => {
 			if ( element && ampFitText && content.length ) {
 				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}
@@ -1164,7 +1168,7 @@ export const maybeUpdateFontSize = ( block ) => {
 
 			if ( metaBlockElement && ampFitText ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}
