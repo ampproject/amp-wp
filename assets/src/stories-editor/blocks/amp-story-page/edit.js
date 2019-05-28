@@ -26,7 +26,12 @@ import {
 	RangeControl,
 	ResponsiveWrapper,
 } from '@wordpress/components';
-import { withSelect } from '@wordpress/data';
+import {
+	withSelect,
+	withDispatch,
+	dispatch,
+} from '@wordpress/data';
+import { compose } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -47,6 +52,10 @@ const TEMPLATE = [
 ];
 
 class EditPage extends Component {
+	shouldComponentUpdate() {
+		this.ensureCTABeingLast();
+		return true;
+	}
 	constructor( props ) {
 		super( ...arguments );
 
@@ -139,6 +148,33 @@ class EditPage extends Component {
 		} );
 
 		return backgroundColorSettings;
+	}
+
+	ensureCTABeingLast() {
+		const {
+			getBlockOrder,
+			getBlock,
+			moveBlockToPosition,
+			clientId,
+		} = this.props;
+		const order = getBlockOrder( clientId );
+		if ( 1 >= order.length ) {
+			return;
+		}
+		let ctaClientID = false;
+		order.forEach( ( childId ) => {
+			const block = getBlock( childId );
+			if ( 'amp/amp-story-cta' === block.name ) {
+				ctaClientID = childId;
+				return false;
+			}
+		} );
+		if ( ctaClientID ) {
+			// If the CTA is not the last block, move it there.
+			if ( order[ order.length - 1 ] !== ctaClientID ) {
+				moveBlockToPosition( ctaClientID, clientId, clientId, order.length - 1 );
+			}
+		}
 	}
 
 	render() {
@@ -371,25 +407,37 @@ class EditPage extends Component {
 	}
 }
 
-export default withSelect( ( select, { clientId, attributes } ) => {
-	const { getMedia } = select( 'core' );
-	const { getBlockOrder, getBlocksByClientId, getBlockRootClientId } = select( 'core/block-editor' );
+export default compose(
+	withSelect( ( select, { clientId, attributes } ) => {
+		const { getMedia } = select( 'core' );
+		const { getBlockOrder, getBlocksByClientId, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
 
-	const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
-	const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
-	const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
-	const { getAnimatedBlocks } = select( 'amp/story' );
+		const innerBlocks = getBlocksByClientId( getBlockOrder( clientId ) );
+		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
+		const isCallToActionAllowed = ! isFirstPage && ! innerBlocks.some( ( { name } ) => name === 'amp/amp-story-cta' );
+		const { getAnimatedBlocks } = select( 'amp/story' );
 
-	const { mediaId } = attributes;
+		const { mediaId } = attributes;
 
-	const animatedBlocks = getAnimatedBlocks();
-	const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
-	const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
-	const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
+		const animatedBlocks = getAnimatedBlocks();
+		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
+		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
+		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
-	return {
-		media: mediaId ? getMedia( mediaId ) : null,
-		allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
-		totalAnimationDuration: totalAnimationDurationInSeconds,
-	};
-} )( EditPage );
+		return {
+			media: mediaId ? getMedia( mediaId ) : null,
+			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
+			totalAnimationDuration: totalAnimationDurationInSeconds,
+			getBlockOrder,
+			getBlock,
+		};
+	} ),
+	withDispatch( () => {
+		const {
+			moveBlockToPosition,
+		} = dispatch( 'core/block-editor' );
+		return {
+			moveBlockToPosition,
+		};
+	} )
+)( EditPage );

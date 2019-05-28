@@ -64,7 +64,9 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
-const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+const {
+	updateBlockAttributes,
+} = dispatch( 'core/block-editor' );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -1412,4 +1414,22 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
+};
+
+/**
+ * Check if a page has CTA block.
+ * It is assumed that the CTA block is always the last block.
+ *
+ * @param {Array} clientIds Block IDs.
+ * @return {boolean} If CTA block was found.
+ */
+export const pageHasCTABlock = ( clientIds ) => {
+	if ( clientIds.length ) {
+		const lastId = clientIds[ clientIds.length - 1 ];
+		const lastBlock = getBlock( lastId );
+		if ( 'amp/amp-story-cta' === lastBlock.name ) {
+			return true;
+		}
+	}
+	return false;
 };
