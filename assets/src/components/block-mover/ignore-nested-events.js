@@ -1,12 +1,15 @@
 /**
  * This file is a direct copy from WordPress cores @wordpress/block-editor package.
  * It is copied since at this moment it's not made available for public usage.
+ *
+ * In addition, this copy also contains prop types.
  */
 
 /**
  * External dependencies
  */
 import { reduce } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -105,9 +108,15 @@ export class IgnoreNestedEvents extends Component {
 	}
 }
 
+IgnoreNestedEvents.propTypes = {
+	childHandledEvents: PropTypes.array,
+	forwardedRef: PropTypes.object,
+};
+
 const forwardedIgnoreNestedEvents = ( props, ref ) => {
 	return <IgnoreNestedEvents { ...props } forwardedRef={ ref } />;
 };
+
 forwardedIgnoreNestedEvents.displayName = 'IgnoreNestedEvents';
 
 export default forwardRef( forwardedIgnoreNestedEvents );

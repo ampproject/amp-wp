@@ -1,13 +1,15 @@
 /**
- * This is a 1:1 copy of the InserterListItem component in @wordpress/block-editor.
+ * This is an almost 1:1 copy of the InserterListItem component in @wordpress/block-editor.
  *
  * It is included here because the component is not exported to the public by that package.
+ * The only modification compared to the original one is the addition of PropTypes.
  */
 
 /**
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -71,5 +73,18 @@ function InserterListItem( {
 		</li>
 	);
 }
+
+InserterListItem.propTypes = {
+	icon: PropTypes.shape( {
+		background: PropTypes.string,
+		foreground: PropTypes.string,
+		shadowColor: PropTypes.string,
+	} ),
+	hasChildBlocksWithInserterSupport: PropTypes.bool,
+	onClick: PropTypes.func.isRequired,
+	isDisabled: PropTypes.bool,
+	title: PropTypes.string.isRequired,
+	className: PropTypes.string,
+};
 
 export default InserterListItem;

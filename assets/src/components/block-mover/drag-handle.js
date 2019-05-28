@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * Internal dependencies
@@ -37,3 +38,14 @@ export const IconDragHandle = ( { isVisible, className, icon, onDragStart, onDra
 		</BlockDraggable>
 	);
 };
+
+IconDragHandle.propTypes = {
+	icon: PropTypes.object,
+	isVisible: PropTypes.bool,
+	className: PropTypes.string,
+	onDragStart: PropTypes.func,
+	onDragEnd: PropTypes.func,
+	blockElementId: PropTypes.string,
+	clientId: PropTypes.string,
+};
+

@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "classnames": "2.2.6",
-    "dom-scroll-into-view": "1.2.1"
+    "dom-scroll-into-view": "1.2.1",
+    "prop-types": "15.7.2"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
@@ -54,6 +55,7 @@
     "babel-jest": "24.8.0",
     "babel-loader": "8.0.6",
     "babel-plugin-inline-react-svg": "1.1.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "browserslist": "4.6.0",
     "core-js": "3.1.3",
     "cross-env": "5.2.0",

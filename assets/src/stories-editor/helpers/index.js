@@ -13,7 +13,7 @@ import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
-import { getColorClassName, getColorObjectByAttributeValues, getFontSize, RichText } from '@wordpress/block-editor';
+import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -25,6 +25,7 @@ import {
 	StoryControls,
 	Shortcuts,
 	withMetaBlockEdit,
+	withMetaBlockSave,
 	Inserter,
 } from '../../components';
 import {
@@ -710,9 +711,13 @@ export const getTagName = ( attributes, canUseH1 = true ) => {
  * @param {number} maxFontSize    Maximum font size.
  * @param {number} minFontSize    Minimum font size.
  *
- * @return {number} Calculated font size.
+ * @return {number|boolean} Calculated font size. False if calculation wasn't possible.
  */
 export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxFontSize, minFontSize ) => {
+	// Return false if calculation is not possible due to width and height missing, e.g. in disabled preview.
+	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
+		return false;
+	}
 	measurer.classList.toggle( 'is-measuring-fontsize' );
 
 	maxFontSize++;
@@ -974,33 +979,7 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 	return {
 		supports,
 		attributes: schema,
-		save: ( { attributes } ) => {
-			const { ampFitText } = attributes;
-
-			const className = getClassNameFromBlockAttributes( attributes );
-			const styles = getStylesFromBlockAttributes( attributes );
-
-			if ( ! ampFitText ) {
-				return (
-					<RichText.Content
-						tagName={ tagName }
-						style={ styles }
-						className={ className }
-						value="{content}" // Placeholder to be replaced server-side.
-					/>
-				);
-			}
-
-			const ContentTag = tagName;
-
-			return (
-				<ContentTag
-					style={ styles }
-					className={ className }>
-					<amp-fit-text layout="flex-item" className="amp-text-content">{ '{content}' }</amp-fit-text>
-				</ContentTag>
-			);
-		},
+		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
 	};
 };
@@ -1152,7 +1131,7 @@ export const maybeUpdateFontSize = ( block ) => {
 			if ( element && ampFitText && content.length ) {
 				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}
@@ -1166,7 +1145,7 @@ export const maybeUpdateFontSize = ( block ) => {
 
 			if ( metaBlockElement && ampFitText ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
-				if ( autoFontSize !== fitFontSize ) {
+				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
 			}

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { createBlock } from '@wordpress/blocks';
@@ -27,6 +32,13 @@ const BlockPreview = ( { clientId, name, attributes, innerBlocks = [] } ) => {
 			/>
 		</Disabled>
 	);
+};
+
+BlockPreview.propTypes = {
+	clientId: PropTypes.string,
+	name: PropTypes.string.isRequired,
+	attributes: PropTypes.object.isRequired,
+	innerBlocks: PropTypes.arrayOf( PropTypes.object ),
 };
 
 export default BlockPreview;

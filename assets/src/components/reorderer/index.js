@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { withSelect } from '@wordpress/data';
@@ -34,6 +39,12 @@ const Reorderer = ( { pages } ) => {
 			</div>
 		</DropZoneProvider>
 	);
+};
+
+Reorderer.propTypes = {
+	pages: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ) ),
 };
 
 export default withSelect( ( select ) => {

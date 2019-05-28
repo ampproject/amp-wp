@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { getBlockType, createBlock } from '@wordpress/blocks';
@@ -33,6 +38,11 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 			);
 		} )
 	);
+};
+
+Shortcuts.propTypes = {
+	insertBlock: PropTypes.func.isRequired,
+	canInsertBlockType: PropTypes.func.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select ) => {

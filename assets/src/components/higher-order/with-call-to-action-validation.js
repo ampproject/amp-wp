@@ -7,7 +7,6 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { Warning } from '@wordpress/editor';
 import { createHigherOrderComponent, compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { Fragment } from '@wordpress/element';
 
 const enhance = compose(
 	/**
@@ -77,7 +76,7 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 		}
 
 		return (
-			<Fragment>
+			<>
 				<div style={ { minHeight: '60px' } }>
 					<BlockEdit key="block-edit" { ...props } />
 				</div>
@@ -88,7 +87,7 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 						__( 'This block can not be used on the first page.', 'amp' )
 					}
 				</Warning>
-			</Fragment>
+			</>
 		);
 	} );
 }, 'withCallToActionValidation' );
