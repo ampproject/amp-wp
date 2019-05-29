@@ -147,6 +147,10 @@ class AMP_Story_Post_Type {
 					'name_admin_bar'           => _x( 'Story', 'add new on admin bar', 'amp' ),
 				),
 				'menu_icon'    => 'dashicons-book',
+				'taxonomies'   => array(
+					'post_tag',
+					'category',
+				),
 				'supports'     => array(
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
