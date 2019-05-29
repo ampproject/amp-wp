@@ -125,9 +125,9 @@ jobs:
       script:
         - npm run build:js
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - bash <(curl -s https://codecov.io/bash) -cF php
+        - bash <(curl -s https://codecov.io/bash) -cF php -f build/logs/clover.xml
         - npm run test:js -- --collectCoverage
-        - bash <(curl -s https://codecov.io/bash) -cF javascript
+        - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
