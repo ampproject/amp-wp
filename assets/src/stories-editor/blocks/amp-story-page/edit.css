@@ -112,6 +112,11 @@
 	margin-bottom: 0;
 }
 
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-rotating {
+	z-index: 100;
+}
+
 /*
  * Make all the inner blocks positioned with absolute.
  */
