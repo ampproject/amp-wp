@@ -16,7 +16,6 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { Fragment } from '@wordpress/element';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import {
 	IconButton,
@@ -33,7 +32,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS, MIN_BLOCK_WIDTH, MIN_BLOCK_HEIGHT } from '../../stories-editor/constants';
-import { getBlockOrderDescription, maybeEnqueueFontStyle } from '../../stories-editor/helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
 import sendBackwardIcon from '../../../images/send-backwards.svg';
 import bringFrontIcon from '../../../images/bring-front.svg';
@@ -84,7 +83,8 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		currentBlockPosition: reversedIndex + 1,
 		numberOfBlocks: blockClientIds.length,
 		isFirst: 0 === blockIndex,
-		isLast: blockIndex === blockClientIds.length - 1,
+		// Don't consider CTA block in looking for isLast.
+		isLast: getCallToActionBlock( parentBlockId ) ? blockIndex === blockClientIds.length - 2 : blockIndex === blockClientIds.length - 1,
 		parentBlock: getBlock( parentBlockId ),
 		rootClientId: parentBlockId,
 		// Use parent's clientId instead of anchor attribute.
@@ -240,7 +240,7 @@ export default createHigherOrderComponent(
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
 
 			return (
-				<Fragment>
+				<>
 					{ isMovableBlock && (
 						<StoryBlockMover
 							clientId={ props.clientId }
@@ -262,6 +262,7 @@ export default createHigherOrderComponent(
 								stopBlockActions();
 							} }
 							blockName={ name }
+							ampFitText={ ampFitText }
 							onResizeStart={ () => {
 								startBlockActions();
 							} }
@@ -286,7 +287,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ ! ( isLast && isFirst ) && (
+					{ ! ( isLast && isFirst ) && isMovableBlock && (
 						<InspectorControls>
 							<PanelBody
 								className="amp-story-order-controls"
@@ -502,7 +503,7 @@ export default createHigherOrderComponent(
 							</PanelBody>
 						</InspectorControls>
 					) }
-				</Fragment>
+				</>
 			);
 		} );
 	},

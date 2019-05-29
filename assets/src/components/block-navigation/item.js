@@ -2,13 +2,14 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
 import { compose } from '@wordpress/compose';
 import { Button, Draggable, DropZone } from '@wordpress/components';
-import { Fragment, Component } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -106,7 +107,7 @@ class BlockNavigationItem extends Component {
 				>
 					{
 						( { onDraggableStart, onDraggableEnd } ) => (
-							<Fragment>
+							<>
 								<DropZone
 									className={ this.state.isDragging ? 'is-dragging-block' : undefined }
 									onDrop={ this.onDrop }
@@ -129,7 +130,7 @@ class BlockNavigationItem extends Component {
 										accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
 									/>
 								</Button>
-							</Fragment>
+							</>
 						)
 					}
 				</Draggable>
@@ -137,6 +138,16 @@ class BlockNavigationItem extends Component {
 		);
 	}
 }
+
+BlockNavigationItem.propTypes = {
+	getBlockIndex: PropTypes.func.isRequired,
+	moveBlockToPosition: PropTypes.func.isRequired,
+	block: PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ),
+	isSelected: PropTypes.bool,
+	onClick: PropTypes.func.isRequired,
+};
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
 	const { getBlockOrder, getBlockRootClientId, getBlocksByClientId } = select( 'core/block-editor' );

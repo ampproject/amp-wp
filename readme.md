@@ -8,7 +8,7 @@ Enable AMP on your WordPress site, the WordPress way.
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [mobile](https://wordpress.org/plugins/tags/mobile)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.2  
-**Stable tag:** 1.1.1  
+**Stable tag:** 1.1.2  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 

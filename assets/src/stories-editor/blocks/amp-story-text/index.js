@@ -2,18 +2,13 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { RichText } from '@wordpress/block-editor';
-import { RawHTML } from '@wordpress/element';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
-import {
-	getClassNameFromBlockAttributes,
-	getStylesFromBlockAttributes,
-} from '../../helpers';
+import save from './save';
 
 export const name = 'amp/amp-story-text';
 
@@ -67,41 +62,7 @@ export const settings = {
 
 	edit,
 
-	save: ( { attributes } ) => {
-		const {
-			content,
-			ampFitText,
-			tagName,
-		} = attributes;
-
-		const className = getClassNameFromBlockAttributes( attributes );
-		const styles = getStylesFromBlockAttributes( attributes );
-
-		if ( ! ampFitText ) {
-			return (
-				<RichText.Content
-					tagName={ tagName }
-					style={ styles }
-					className={ className }
-					value={ content }
-					format="string"
-				/>
-			);
-		}
-
-		const ContentTag = tagName;
-
-		styles.display = 'flex';
-
-		// Uses RawHTML to mimic RichText.Content behavior.
-		return (
-			<ContentTag
-				style={ styles }
-				className={ className }>
-				<amp-fit-text layout="flex-item" className="amp-text-content"><RawHTML>{ content }</RawHTML></amp-fit-text>
-			</ContentTag>
-		);
-	},
+	save,
 
 	transforms: {
 		from: [

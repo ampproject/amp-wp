@@ -2,6 +2,7 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -20,18 +21,24 @@ import {
 	getRadianFromDeg,
 } from '../../stories-editor/helpers';
 
+import { BLOCKS_WITH_TEXT_SETTINGS } from '../../stories-editor/constants';
+
 let lastSeenX = 0,
 	lastSeenY = 0,
+	lastWidth,
+	lastHeight,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
-	imageWrapper;
+	imageWrapper,
+	textElement;
 
-export default ( props ) => {
+const EnhancedResizableBox = ( props ) => {
 	const {
 		isSelected,
 		angle,
 		blockName,
+		ampFitText,
 		minWidth,
 		minHeight,
 		onResizeStart,
@@ -46,6 +53,7 @@ export default ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
+	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
 
 	return (
 		<ResizableBox
@@ -67,9 +75,17 @@ export default ( props ) => {
 			} }
 			onResizeStop={ ( event, direction ) => {
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
+				let appliedWidth = width + deltaW;
+				let appliedHeight = height + deltaH;
+
+				if ( textElement ) {
+					appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
+					appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
+				}
+
 				onResizeStop( {
-					width: parseInt( width + deltaW, 10 ),
-					height: parseInt( height + deltaH, 10 ),
+					width: parseInt( appliedWidth, 10 ),
+					height: parseInt( appliedHeight, 10 ),
 					positionTop: parseInt( blockElement.style.top, 10 ),
 					positionLeft: parseInt( blockElement.style.left, 10 ),
 				} );
@@ -77,12 +93,31 @@ export default ( props ) => {
 			onResizeStart={ ( event, direction, element ) => {
 				lastSeenX = event.clientX;
 				lastSeenY = event.clientY;
+				lastWidth = width;
+				lastHeight = height;
 				blockElement = element.closest( '.wp-block' );
 				blockElementTop = blockElement.style.top;
 				blockElementLeft = blockElement.style.left;
 				if ( isImage ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
+				if ( isBlockWithText && ! ampFitText ) {
+					switch ( blockName ) {
+						case 'amp/amp-story-text':
+							textElement = blockElement.querySelector( '.block-editor-rich-text__editable.editor-rich-text__editable' );
+							break;
+						case 'amp/amp-story-post-title':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-title' );
+							break;
+						case 'amp/amp-story-post-author':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-author' );
+							break;
+						case 'amp/amp-story-post-date':
+							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
+							break;
+					}
+				}
+
 				onResizeStart();
 			} }
 			onResize={ ( event, direction, element ) => {
@@ -93,8 +128,27 @@ export default ( props ) => {
 					width = blockElement.clientWidth;
 					height = blockElement.clientHeight;
 				}
-				const appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
-				const appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+				let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
+				let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+				const isReducing = 0 > deltaW || 0 > deltaH;
+
+				if ( textElement && isReducing ) {
+					// If we have a rotated block, let's assign the width and height for measuring.
+					// Without assigning the new measure, the calculation would be incorrect due to angle.
+					if ( angle ) {
+						textElement.style.width = appliedWidth + 'px';
+						textElement.style.height = appliedHeight + 'px';
+					}
+					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
+						appliedWidth = lastWidth;
+						appliedHeight = lastHeight;
+					}
+					// If we have rotated block, let's restore the correct measures.
+					if ( angle ) {
+						textElement.style.width = 'initial';
+						textElement.style.height = '100%';
+					}
+				}
 
 				if ( angle ) {
 					const radianAngle = getRadianFromDeg( angle );
@@ -130,6 +184,9 @@ export default ( props ) => {
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+				lastWidth = appliedWidth;
+				lastHeight = appliedHeight;
+
 				// If it's image, let's change the width and height of the image, too.
 				if ( imageWrapper && isImage ) {
 					imageWrapper.style.width = appliedWidth + 'px';
@@ -141,3 +198,19 @@ export default ( props ) => {
 		</ResizableBox>
 	);
 };
+
+EnhancedResizableBox.propTypes = {
+	isSelected: PropTypes.bool,
+	ampFitText: PropTypes.bool,
+	angle: PropTypes.number,
+	blockName: PropTypes.string,
+	minWidth: PropTypes.number,
+	minHeight: PropTypes.number,
+	onResizeStart: PropTypes.func.isRequired,
+	onResizeStop: PropTypes.func.isRequired,
+	children: PropTypes.any.isRequired,
+	width: PropTypes.number,
+	height: PropTypes.number,
+};
+
+export default EnhancedResizableBox;

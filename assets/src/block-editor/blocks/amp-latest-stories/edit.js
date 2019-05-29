@@ -6,14 +6,12 @@
  * External dependencies
  */
 import { isUndefined, pickBy } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
-import {
-	Component,
-	Fragment,
-} from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	PanelBody,
 	Placeholder,
@@ -69,7 +67,7 @@ class LatestStoriesEdit extends Component {
 		const hasStories = Array.isArray( latestStories ) && latestStories.length;
 		if ( ! hasStories ) {
 			return (
-				<Fragment>
+				<>
 					{ inspectorControls }
 					<Placeholder
 						icon="admin-post"
@@ -80,23 +78,33 @@ class LatestStoriesEdit extends Component {
 							__( 'No stories found.', 'amp' )
 						}
 					</Placeholder>
-				</Fragment>
+				</>
 			);
 		}
 
 		const serverSideAttributes = Object.assign( {}, attributes, { useCarousel: false } );
 
 		return (
-			<Fragment>
+			<>
 				{ inspectorControls }
 				<ServerSideRender
 					block={ blockName }
 					attributes={ serverSideAttributes }
 				/>
-			</Fragment>
+			</>
 		);
 	}
 }
+
+LatestStoriesEdit.propTypes = {
+	attributes: PropTypes.shape( {
+		order: PropTypes.string,
+		orderBy: PropTypes.string,
+		storiesToShow: PropTypes.number,
+	} ),
+	setAttributes: PropTypes.func.isRequired,
+	latestStories: PropTypes.array.isRequired,
+};
 
 export default withSelect( ( select, props ) => {
 	const { storiesToShow, order, orderBy } = props.attributes;

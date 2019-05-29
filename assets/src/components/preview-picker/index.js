@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { BaseControl, Button, Dashicon, Dropdown, NavigableMenu } from '@wordpress/components';
@@ -68,5 +73,20 @@ function PreviewPicker( {
 		</BaseControl>
 	);
 }
+
+PreviewPicker.propTypes = {
+	value: PropTypes.string,
+	options: PropTypes.arrayOf( PropTypes.shape( {
+		value: PropTypes.string.isRequired,
+		label: PropTypes.string.isRequired,
+	} ) ),
+	defaultOption: PropTypes.object.isRequired,
+	onChange: PropTypes.func.isRequired,
+	label: PropTypes.string.isRequired,
+	id: PropTypes.string.isRequired,
+	renderToggle: PropTypes.func.isRequired,
+	renderOption: PropTypes.func.isRequired,
+	ariaLabel: PropTypes.func.isRequired,
+};
 
 export default PreviewPicker;

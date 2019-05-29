@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { createHigherOrderComponent } from '@wordpress/compose';
 import { Notice } from '@wordpress/components';
-import { Fragment } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -20,7 +24,7 @@ import { validateFeaturedImage } from '../../common/helpers';
  */
 export default createHigherOrderComponent(
 	( PostFeaturedImage ) => {
-		return ( props ) => {
+		const withStoryFeaturedImageNotice = ( props ) => {
 			const { media } = props;
 
 			const errors = validateFeaturedImage( media, getMinimumStoryPosterDimensions(), true );
@@ -30,7 +34,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<Fragment>
+				<>
 					<Notice
 						status="warning"
 						isDismissible={ false }
@@ -44,9 +48,15 @@ export default createHigherOrderComponent(
 						} ) }
 					</Notice>
 					<PostFeaturedImage { ...props } />
-				</Fragment>
+				</>
 			);
 		};
+
+		withStoryFeaturedImageNotice.propTypes = {
+			media: PropTypes.object,
+		};
+
+		return withStoryFeaturedImageNotice;
 	},
 	'withStoryFeaturedImageNotice'
 );

@@ -1,9 +1,14 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { IconButton } from '@wordpress/components';
-import { Component, Fragment } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -63,7 +68,7 @@ class EditorCarousel extends Component {
 		}
 
 		return (
-			<Fragment>
+			<>
 				<div className="amp-story-editor-carousel-navigation">
 					<IconButton
 						icon="arrow-left-alt2"
@@ -89,10 +94,22 @@ class EditorCarousel extends Component {
 						disabled={ null === nextPage }
 					/>
 				</div>
-			</Fragment>
+			</>
 		);
 	}
 }
+
+EditorCarousel.propTypes = {
+	pages: PropTypes.arrayOf( PropTypes.shape( {
+		clientId: PropTypes.string,
+	} ) ),
+	currentIndex: PropTypes.number.isRequired,
+	currentPage: PropTypes.string,
+	previousPage: PropTypes.string,
+	nextPage: PropTypes.string,
+	onChangePage: PropTypes.func.isRequired,
+	isReordering: PropTypes.bool,
+};
 
 export default compose(
 	withSelect( ( select ) => {
@@ -106,10 +123,12 @@ export default compose(
 		const currentPage = getCurrentPage();
 		const pages = getBlocksByClientId( getBlockOrder() );
 
+		const currentIndex = pages.findIndex( ( { clientId } ) => clientId === currentPage );
+
 		return {
 			pages,
 			currentPage,
-			currentIndex: pages.findIndex( ( { clientId } ) => clientId === currentPage ),
+			currentIndex: Math.max( 0, currentIndex ), // Prevent -1 from being used for calculation.
 			previousPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, -1 ) : null,
 			nextPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, 1 ) : null,
 			isReordering: isReordering(),

@@ -20,7 +20,8 @@
   },
   "dependencies": {
     "classnames": "2.2.6",
-    "dom-scroll-into-view": "1.2.1"
+    "dom-scroll-into-view": "1.2.1",
+    "prop-types": "15.7.2"
   },
   "devDependencies": {
     "@babel/cli": "7.4.4",
@@ -54,7 +55,8 @@
     "babel-jest": "24.8.0",
     "babel-loader": "8.0.6",
     "babel-plugin-inline-react-svg": "1.1.0",
-    "browserslist": "4.6.0",
+    "babel-plugin-transform-react-remove-prop-types": "0.4.24",
+    "browserslist": "4.6.1",
     "core-js": "3.1.3",
     "cross-env": "5.2.0",
     "css-loader": "2.1.1",
@@ -69,7 +71,7 @@
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
     "lodash": "4.17.11",
-    "mini-css-extract-plugin": "0.6.0",
+    "mini-css-extract-plugin": "0.7.0",
     "moment": "2.24.0",
     "npm-run-all": "4.1.5",
     "null-loader": "2.0.0",

@@ -61,6 +61,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $rev_alternate_attr_name_lookup = array();
 
 	/**
+	 * Mapping of JSON-serialized tag spec to the number of instances encountered in the document.
+	 *
+	 * @var array
+	 */
+	protected $visited_unique_tag_specs = array();
+
+	/**
 	 * Stack.
 	 *
 	 * @since 0.5
@@ -508,6 +515,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
 
 				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+			}
+		}
+
+		// Enforce unique constraint.
+		if ( ! empty( $tag_spec['unique'] ) ) {
+			$removed      = false;
+			$tag_spec_key = wp_json_encode( $tag_spec );
+			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
+				$removed = $this->remove_invalid_child(
+					$node,
+					array( 'code' => 'duplicate_element' )
+				);
+			}
+			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
+			if ( $removed ) {
+				return;
 			}
 		}
 
@@ -1817,7 +1840,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
 				$this->remove_invalid_child( $child_element );
 			} else {
-				$this->remove_disallowed_descendants( $child, $allowed_descendants );
+				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
 			}
 		}
 	}
