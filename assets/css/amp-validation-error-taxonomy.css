@@ -1,6 +1,7 @@
 #col-left {
 	display: none;
 }
+
 #col-right {
 	float: none;
 	width: auto;
@@ -50,6 +51,7 @@ details[open] .details-attributes__summary {
 .column-details .notice details > summary::-webkit-details-marker {
 	display: none;
 }
+
 .details-attributes__summary::after,
 .single-error-detail-summary::after {
 	order: 99;
@@ -109,6 +111,7 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 .column-sources_with_invalid_output details[open] .details-attributes__summary {
 	margin-bottom: 5px;
 }
+
 .column-sources_with_invalid_output details > div {
 	padding-left: 25px;
 }
@@ -167,12 +170,17 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 .status-text.new::before {
 	background-image: url("../images/baseline-error.svg");
 }
-.status-text.new.new-accepted::before, .status-text.new.accepted::before{
+
+.status-text.new.new-accepted::before,
+.status-text.new.accepted::before {
 	background-image: url("../images/baseline-error-green.svg");
 }
-.status-text.new.new-rejected::before, .status-text.new.rejected::before {
+
+.status-text.new.new-rejected::before,
+.status-text.new.rejected::before {
 	background-image: url("../images/baseline-error-red.svg");
 }
+
 .status-text.accepted::before {
 	background-image: url("../images/baseline-check-circle-green.svg");
 }
@@ -180,22 +188,28 @@ details.single-error-detail[open] .single-error-detail-summary::after {
 .status-text.rejected::before {
 	background-image: url("../images/error-rejected.svg");
 }
+
 .single-error-detail {
 	margin: 5px 0 5px 0;
 }
-.single-error-detail-summary:after {
+
+.single-error-detail-summary::after {
 	display: inline-block;
 }
+
 .single-error-detail-summary strong {
 	margin-right: 10px;
 	font-size: 15px;
 }
+
 .single-error-detail ul.secondary-details-array .details-attributes__attr {
 	margin-left: 20px;
 }
+
 .single-error-detail ul.secondary-details-array .details-attributes__value {
 	margin-left: 30px;
 }
+
 .single-error-detail .details-attributes__value {
 	margin-left: 10px;
 }
@@ -237,6 +251,7 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	flex-grow: 10;
 	margin-right: 20px;
 }
+
 .notice.accept-reject-error > .button {
 	display: inline-block;
 	margin: 5px 5px 0 5px;
@@ -244,10 +259,14 @@ body.taxonomy-amp_validation_error .wp-list-table .new th.check-column input {
 	flex-grow: 1;
 	text-align: center;
 }
+
 .notice.accept-reject-error > .button.accept {
+
 	/* @todo Add green colors */
 }
+
 .notice.accept-reject-error > .button.reject {
+
 	/* @todo Add red colors */
 }
 
