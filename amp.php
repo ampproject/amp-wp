@@ -185,15 +185,24 @@ function _amp_show_load_errors_admin_notice() {
 // Abort if dependencies are not satisfied.
 if ( ! empty( $_amp_load_errors->errors ) ) {
 	add_action( 'admin_notices', '_amp_show_load_errors_admin_notice' );
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+
+	if ( ( defined( 'WP_CLI' ) && WP_CLI ) || 'true' === getenv( 'CI' ) ) {
 		$messages = array( __( 'AMP plugin unable to initialize.', 'amp' ) );
 		foreach ( array_keys( $_amp_load_errors->errors ) as $error_code ) {
 			$messages = array_merge( $messages, $_amp_load_errors->get_error_messages( $error_code ) );
 		}
 		$message = implode( "\n * ", $messages );
+
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			echo "$message\n";
+
+			return;
+		}
+
 		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
 		WP_CLI::warning( $message );
 	}
+
 	return;
 }
 
