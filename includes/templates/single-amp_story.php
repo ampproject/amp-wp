@@ -40,6 +40,17 @@ the_post();
 		?>
 		<amp-story
 			standalone
+			<?php
+			/**
+			 * Filters whether the story supports landscape.
+			 *
+			 * @param bool    $supports_landscape Whether supports landscape. Currently false by default, but this will change in the future (e.g. via user toggle).
+			 * @param wp_Post $post               The current amp_story post object.
+			 */
+			if ( apply_filters( 'amp_story_supports_landscape', false, get_post() ) ) {
+				echo 'supports-landscape';
+			}
+			?>
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
