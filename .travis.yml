@@ -58,7 +58,7 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
       before_script:
-        - phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
+        - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
         - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
