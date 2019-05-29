@@ -126,7 +126,7 @@ jobs:
         - npm run build:js
         - source "$DEV_LIB_PATH/travis.script.sh"
         - bash <(curl -s https://codecov.io/bash) -cF php
-        - npm run test:js
+        - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript
 
     - stage: deploy
