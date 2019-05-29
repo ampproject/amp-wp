@@ -64,7 +64,9 @@ const {
 	getAnimatedBlocks,
 } = select( 'amp/story' );
 
-const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+const {
+	updateBlockAttributes,
+} = dispatch( 'core/block-editor' );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -1366,4 +1368,15 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
+};
+
+/**
+ * Get CTA block.
+ *
+ * @param {Array} pageClientId Root ID.
+ * @return {Object} CTA block.
+ */
+export const getCallToActionBlock = ( pageClientId ) => {
+	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
 };
