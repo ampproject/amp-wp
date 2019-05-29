@@ -48,6 +48,10 @@
 	}
 }
 
+#amp-story-editor .wp-block[data-type="amp/amp-story-page"] {
+	background: #fff;
+}
+
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"],
 #amp-story-editor .wp-block[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type {
 	width: 100%;
