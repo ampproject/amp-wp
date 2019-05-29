@@ -30,7 +30,8 @@
 	margin: 0 auto;
 }
 
-.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected {
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-rotating {
 	z-index: 100;
 }
 
