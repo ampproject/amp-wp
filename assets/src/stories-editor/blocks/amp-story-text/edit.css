@@ -30,6 +30,10 @@
 	margin: 0 auto;
 }
 
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected {
+	z-index: 100;
+}
+
 .editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
 	width: initial;
 }
