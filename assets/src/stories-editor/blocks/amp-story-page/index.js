@@ -49,7 +49,7 @@ const schema = {
 		default: '[]',
 	},
 	overlayOpacity: {
-		default: 50,
+		default: 100,
 	},
 };
 
