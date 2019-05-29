@@ -38,7 +38,7 @@ install:
   - source "$DEV_LIB_PATH/travis.install.sh"
 
 before_script:
-  - phpenv config-rm xdebug.ini || "xdebug.ini does not exist."
+  - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
 
 script:
   - npm run build:js
