@@ -11,6 +11,7 @@
 }
 
 @media (min-width: 961px) {
+
 	#amp-story-block-navigation {
 		display: block;
 	}
@@ -24,7 +25,7 @@
 }
 
 #amp-story-block-navigation .components-popover:not(.is-mobile).is-center .components-popover__content {
-	transform: translateX( -13% );
+	transform: translateX(-13%);
 }
 
 .post-type-amp_story.folded #amp-story-block-navigation .components-popover:not(.is-mobile):not(.is-middle).is-right .components-popover__content {
@@ -60,46 +61,39 @@
 
 /* Navigator in the context of the open sidebar, settings hidden. */
 .post-type-amp_story:not(.folded) .edit-post-layout #amp-story-block-navigation {
-	max-width: calc(
-		calc(
-		100vw
+	max-width:
+		calc(calc(100vw
 		-
 		var(--admin-menu-expanded-sidebar-width)
 		-
 		var(--amp-story-content-width)
 		-
-		calc( var(--block-editor-horizontal-margin) * 2 )
+		calc(var(--block-editor-horizontal-margin) * 2)
 		-
-		var( --scrollbar-width )
-		) / 2
+		var(--scrollbar-width)) / 2
 		-
-		var(--block-navigation-right-margin)
-	);
+		var(--block-navigation-right-margin));
 }
 
 .post-type-amp_story.folded .edit-post-layout #amp-story-block-navigation {
-	max-width: calc(
-		calc(
-		100vw
+	max-width:
+		calc(calc(100vw
 		-
 		var(--admin-menu-collapsed-sidebar-width)
 		-
 		var(--amp-story-content-width)
 		-
-		calc( var(--block-editor-horizontal-margin) * 2 )
+		calc(var(--block-editor-horizontal-margin) * 2)
 		-
-		var( --scrollbar-width )
-		) / 2
+		var(--scrollbar-width)) / 2
 		-
-		var(--block-navigation-right-margin)
-	);
+		var(--block-navigation-right-margin));
 }
 
 /* Navigator in the context of minimum available space - open sidebar, settings shown. */
 .post-type-amp_story .edit-post-layout.is-sidebar-opened #amp-story-block-navigation {
-	max-width: calc(
-		calc(
-		100vw
+	max-width:
+		calc(calc(100vw
 		-
 		var(--admin-menu-expanded-sidebar-width)
 		-
@@ -107,25 +101,22 @@
 		-
 		var(--amp-story-content-width)
 		-
-		calc( var(--block-editor-horizontal-margin) * 2 )
+		calc(var(--block-editor-horizontal-margin) * 2)
 		-
-		var( --scrollbar-width )
-		) / 2
+		var(--scrollbar-width)) / 2
 		-
-		var(--block-navigation-right-margin)
-	);
+		var(--block-navigation-right-margin));
 }
 
 /* Navigator in the context of folded sidebar, settings hidden. */
 .post-type-amp_story.folded #amp-story-block-navigation {
-	max-width: calc( 100vw - var(--admin-menu-collapsed-sidebar-width) - var(--amp-story-content-width) );
+	max-width: calc(100vw - var(--admin-menu-collapsed-sidebar-width) - var(--amp-story-content-width));
 }
 
 /* Navigator in the context of folded sidebar, settings shown. */
 .post-type-amp_story.folded .edit-post-layout.is-sidebar-opened #amp-story-block-navigation {
-	max-width: calc(
-		calc(
-		100vw
+	max-width:
+		calc(calc(100vw
 		-
 		var(--admin-menu-collapsed-sidebar-width)
 		-
@@ -133,26 +124,26 @@
 		-
 		var(--amp-story-content-width)
 		-
-		calc( var(--block-editor-horizontal-margin) * 2 )
+		calc(var(--block-editor-horizontal-margin) * 2)
 		-
-		var( --scrollbar-width )
-		) / 2
+		var(--scrollbar-width)) / 2
 		-
-		var(--block-navigation-right-margin)
-	);
+		var(--block-navigation-right-margin));
 }
 
 /*
  * Hide the toggler and show the block navigation by default on large screens.
  */
 
-@media( max-width: 960px) {
+@media ( max-width: 960px) {
+
 	.block-editor-block-list__block-edit > div > .editor-selectors {
 		display: none;
 	}
 }
 
 @media (min-width: 961px) {
+
 	.edit-post-header-toolbar #amp-story-shortcuts {
 		display: flex;
 	}

@@ -18,6 +18,7 @@
 }
 
 @media screen and (min-width: 1280px) {
+
 	#amp-story-editor {
 		min-width: 820px;
 	}
@@ -40,7 +41,7 @@
 /* Completely hide default appenders/inserters */
 #amp-story-editor .block-editor-block-list__block .block-editor-block-list__empty-block-inserter,
 #amp-story-editor .block-editor-block-list__layout .block-editor-default-block-appender,
-#amp-story-editor .block-editor-block-list__block>.block-editor-block-list__insertion-point {
+#amp-story-editor .block-editor-block-list__block > .block-editor-block-list__insertion-point {
 	display: none !important;
 }
 
@@ -87,7 +88,7 @@
  * @see https://github.com/WordPress/gutenberg/issues/7180
  */
 
-.wp-block-image .components-resizable-box__container + .__resizable_base__ {
+.wp-block-image .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
 	left: 0 !important;
 }
 
@@ -134,6 +135,7 @@ div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
 .wp-block-video .components-disabled {
 	height: 100%;
 }
+
 .wp-block-video .components-disabled {
 	overflow: hidden;
 }
