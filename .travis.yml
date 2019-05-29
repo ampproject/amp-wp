@@ -62,8 +62,7 @@ jobs:
         - npm run lint:php
         - npm run lint:js
         - npm run lint:pkg-json
-        # Enable once all CSS adheres to stylelint rules.
-        # - npm run lint:css
+        - npm run lint:css
 
     - stage: test
       name: JavaScript unit tests
