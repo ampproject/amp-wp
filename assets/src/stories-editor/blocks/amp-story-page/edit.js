@@ -414,6 +414,7 @@ class PageEdit extends Component {
 }
 
 PageEdit.propTypes = {
+	clientId: PropTypes.string.isRequired,
 	attributes: PropTypes.shape( {
 		anchor: PropTypes.string,
 		backgroundColors: PropTypes.string,
@@ -433,6 +434,8 @@ PageEdit.propTypes = {
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	totalAnimationDuration: PropTypes.number.isRequired,
+	getBlockOrder: PropTypes.func.isRequired,
+	moveBlockToPosition: PropTypes.func.isRequired,
 };
 
 export default compose(
