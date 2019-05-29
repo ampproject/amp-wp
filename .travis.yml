@@ -73,7 +73,7 @@ jobs:
     - stage: test
       name: JavaScript unit tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit,coverage
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - npm run test:js
@@ -116,12 +116,17 @@ jobs:
       env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
 
     - stage: coverage
-      name: PHP unit tests (7.3, WordPress trunk, with code coverage)
+      name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
       if: branch = develop
       php: "7.3"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit,coverage                      INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
       before_script:
-        - composer require --dev php-coveralls/php-coveralls --ignore-platform-reqs
+        - echo "Running unit tests with code coverage..."
+      script:
+        - source "$DEV_LIB_PATH/travis.script.sh"
+        - bash <(curl -s https://codecov.io/bash) -cF php
+        - npm run test:js
+        - bash <(curl -s https://codecov.io/bash) -cF javascript
 
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )

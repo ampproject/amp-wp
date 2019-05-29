@@ -13,5 +13,6 @@ module.exports = {
 		'<rootDir>/build',
 		'.*/e2e/.*',
 	],
-	coverageDirectory: '<rootDir>/build/logs/js-unit',
+	coverageReporters: [ 'lcov' ],
+	coverageDirectory: '<rootDir>/build/logs',
 };
