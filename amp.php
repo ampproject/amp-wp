@@ -196,7 +196,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 		if ( ! class_exists( 'WP_CLI' ) ) {
 			echo "$message\n";
 
-			return;
+			exit( 1 );
 		}
 
 		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
