@@ -134,6 +134,9 @@ div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
 .wp-block-video .components-disabled {
 	height: 100%;
 }
+.wp-block-video .components-disabled {
+	overflow: hidden;
+}
 
 .wp-block-video video {
 	height: 100%;
