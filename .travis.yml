@@ -125,7 +125,7 @@ jobs:
       script:
         - npm run build:js
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - bash <(curl -s https://codecov.io/bash) -cF php -f build/logs/clover.xml
+        - bash <(curl -s https://codecov.io/bash) -cF php -f clover.xml
         - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
 

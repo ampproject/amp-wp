@@ -31,6 +31,6 @@ function after_wp_install {
 
 function coverage_clover {
 	if [[ ! -z $RUN_PHPUNIT_COVERAGE ]]; then
-		echo --coverage-clover build/logs/clover.xml
+		echo --coverage-clover clover.xml
 	fi
 }
