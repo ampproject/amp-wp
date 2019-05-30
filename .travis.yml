@@ -119,7 +119,7 @@ jobs:
       name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
       if: branch = develop
       php: "7.3"
-      env: WP_VERSION=latest  DEV_LIB_ONLY=phpunit                              INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
       before_script:
         - echo "Running unit tests with code coverage..."
       script:
