@@ -201,6 +201,22 @@ class AMP_Story_Templates {
 				'title' => __( 'Template: Vertical', 'amp' ),
 				'name'  => 'travel-vertical',
 			),
+			array(
+				'title' => __( 'Template: Fandom Title', 'amp' ),
+				'name'  => 'fandom-title',
+			),
+			array(
+				'title' => __( 'Template: Fandom CTA', 'amp' ),
+				'name'  => 'fandom-cta',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact', 'amp' ),
+				'name'  => 'fandom-fact',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact Text', 'amp' ),
+				'name'  => 'fandom-fact-text',
+			),
 		);
 	}
 
