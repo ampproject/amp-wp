@@ -240,7 +240,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			case 'twentytwelve':
 				return array(
 					'nav_menu_toggle' => array(
-						'nav_container_id'           => 'menu-primary',
+						'nav_container_xpath'        => '//nav[ @id = "site-navigation" ]//ul',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
 						'menu_button_toggle_class'   => 'toggled-on',
