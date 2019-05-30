@@ -153,7 +153,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_twentyfourteen_slider_carousel' => array(),
 			'add_twentyfourteen_search'          => array(),
 		),
-
+		// Twenty Thirteen
+		'twentythirteen'    => array(
+			'dequeue_scripts'                    => array(
+				'jquery-masonry',
+				'twentythirteen-script',
+			),
+		),
 		// Twenty Twelve.
 		'twentytwelve'    => array(
 			'dequeue_scripts'     => array(
@@ -246,7 +252,14 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'menu_button_toggle_class'   => 'toggled-on',
 					),
 				);
-
+			case 'twentythirteen':
+				return array(
+					'nav_menu_toggle' => array(
+						'nav_container_id'           => 'site-navigation',
+						'nav_container_toggle_class' => 'toggled-on',
+						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
+					),
+				);
 			case 'twentyfourteen':
 				return array(
 					'nav_menu_toggle' => array(
