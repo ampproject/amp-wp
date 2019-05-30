@@ -14,6 +14,6 @@
     "Set": true
   },
   "rules": {
-    "react/prop-types": 1
+    "react/prop-types": 2
   }
 }

@@ -78,10 +78,9 @@ const EnhancedResizableBox = ( props ) => {
 				let appliedWidth = width + deltaW;
 				let appliedHeight = height + deltaH;
 
-				if ( textElement ) {
-					appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
-					appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
-				}
+				// Ensure the measures not crossing limits.
+				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
+				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
 
 				onResizeStop( {
 					width: parseInt( appliedWidth, 10 ),
