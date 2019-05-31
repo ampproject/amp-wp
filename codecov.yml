@@ -7,3 +7,6 @@ coverage:
         target: auto
 
 comment: off
+
+ignore:
+  - "/bin"
