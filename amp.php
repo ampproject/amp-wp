@@ -195,7 +195,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
 
 		if ( ! class_exists( 'WP_CLI' ) ) {
-			echo "$message\n";
+			echo "$message\n"; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
 
 			exit( 1 );
 		}
