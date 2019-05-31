@@ -31,20 +31,20 @@ class TemplateInserter extends Component {
 		this.onToggle = this.onToggle.bind( this );
 
 		this.state = {
-			reusableBlocks: [],
+			storyTemplates: [],
 		};
 	}
 
 	componentDidMount() {
-		this.props.fetchReusableBlocks();
+		this.props.fetchStoryTemplates();
 	}
 
 	componentDidUpdate( prevProps ) {
 		const { getBlock } = this.props;
 
 		// This check is needed to make sure that the blocks are loaded in time.
-		if ( prevProps.reusableBlocks !== this.props.reusableBlocks || prevProps.allBlocks !== this.props.allBlocks ) {
-			for ( const template of this.props.reusableBlocks ) {
+		if ( prevProps.storyTemplates !== this.props.storyTemplates || prevProps.allBlocks !== this.props.allBlocks ) {
+			for ( const template of this.props.storyTemplates ) {
 				const templateBlock = getBlock( template.clientId );
 
 				if ( ! templateBlock ) {
@@ -59,7 +59,7 @@ class TemplateInserter extends Component {
 			}
 
 			this.setState( {
-				reusableBlocks: this.props.reusableBlocks,
+				storyTemplates: this.props.storyTemplates,
 			} );
 		}
 	}
@@ -118,7 +118,7 @@ class TemplateInserter extends Component {
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ this.state.reusableBlocks.map( ( item ) => (
+									{ this.state.storyTemplates.map( ( item ) => (
 										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
 											role="button"
@@ -153,8 +153,8 @@ TemplateInserter.propTypes = {
 	allBlocks: PropTypes.array,
 	insertBlock: PropTypes.func.isRequired,
 	onToggle: PropTypes.func,
-	fetchReusableBlocks: PropTypes.func.isRequired,
-	reusableBlocks: PropTypes.array.isRequired,
+	fetchStoryTemplates: PropTypes.func.isRequired,
+	storyTemplates: PropTypes.array.isRequired,
 	getBlock: PropTypes.func.isRequired,
 };
 
@@ -177,7 +177,7 @@ export default compose(
 		};
 
 		return {
-			reusableBlocks: reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) ),
+			storyTemplates: reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) ),
 			getBlock,
 			allBlocks: getBlocks(),
 		};
@@ -190,7 +190,7 @@ export default compose(
 		const { insertBlock } = dispatch( 'core/block-editor' );
 
 		return {
-			fetchReusableBlocks,
+			fetchStoryTemplates: fetchReusableBlocks,
 			insertBlock,
 		};
 	} )
