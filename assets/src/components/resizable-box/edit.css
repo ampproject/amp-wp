@@ -21,6 +21,7 @@
 .wp-block-image .components-resizable-box__container img {
 	height: 100%;
 	object-fit: cover;
+
 	/* Prevents dragging the image itself, as its container is draggable. */
 	-webkit-user-drag: none;
 }
