@@ -153,11 +153,16 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'add_twentyfourteen_slider_carousel' => array(),
 			'add_twentyfourteen_search'          => array(),
 		),
-		// Twenty Thirteen
+		// Twenty Thirteen.
 		'twentythirteen'    => array(
 			'dequeue_scripts'                    => array(
 				'jquery-masonry',
 				'twentythirteen-script',
+			),
+			'add_nav_menu_toggle'                => array(),
+			'add_nav_sub_menu_buttons'           => array(),
+			'add_nav_menu_styles'                => array(
+				'sub_menu_button_toggle_class' => 'toggle-on',
 			),
 		),
 		// Twenty Twelve.
@@ -259,6 +264,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
 					),
+					'nav_menu_dropdown' => array(
+						'sub_menu_button_class'        => 'dropdown-toggle',
+						'sub_menu_button_toggle_class' => 'toggle-on',
+						'expand_text'                  => __( 'expand child menu', 'amp' ),
+						'collapse_text'                => __( 'collapse child menu', 'amp' ),
+					),
+					'nav_menu_styles'   => array(),
 				);
 			case 'twentyfourteen':
 				return array(
@@ -1085,6 +1097,99 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 						.secondary-navigation ul li:focus-within > ul {
 							left: 202px;
+						}
+					}
+
+				<?php elseif ( 'twentythirteen' === get_template() ) : ?>
+					@media (min-width: 644px) {
+						.dropdown-toggle {
+							display: none;
+						}
+					}
+					@media (max-width: 643px) {
+						.nav-menu .<?php echo esc_html( $args['sub_menu_button_toggle_class'] ); ?> + .sub-menu {
+							clip: inherit;
+							overflow: inherit;
+							height: inherit;
+							width: inherit;
+						}
+						ul.nav-menu li:hover button:not( .<?php echo esc_html( $args['sub_menu_button_toggle_class'] ); ?> ) +  ul,
+						.nav-menu ul li:hover button:not( .<?php echo esc_html( $args['sub_menu_button_toggle_class'] ); ?> ) +  ul {
+							height: 1px;
+							width: 1px;
+							overflow: hidden;
+							clip: rect(1px, 1px, 1px, 1px);
+						}
+						.menu-item-has-children {
+							position: relative;
+						}
+						.menu-item-has-children > .dropdown-toggle {
+							position: absolute;
+							top: 0;
+							<?php if ( is_rtl() ): ?>
+								left: 0;
+							<?php else: ?>
+								right: 0;
+							<?php endif; ?>
+						}
+						.dropdown-toggle {
+							-moz-osx-font-smoothing: grayscale;
+							-webkit-font-smoothing: antialiased;
+							display: inline-block;
+							font-family: "Genericons";
+							font-size: 16px;
+							font-style: normal;
+							font-weight: normal;
+							font-variant: normal;
+							line-height: 1;
+							speak: none;
+							text-align: center;
+							text-decoration: inherit;
+							text-transform: none;
+							vertical-align: top;
+							background-color: transparent;
+							border: 0;
+							-webkit-box-sizing: content-box;
+							-moz-box-sizing: content-box;
+							box-sizing: content-box;
+							content: "";
+							height: 42px;
+							padding: 0;
+							background: transparent;
+							position: absolute;
+							text-transform: lowercase; /* Stop screen readers to read the text as capital letters */
+							top: 3px;
+							right: 0;
+							width: 42px;
+						}
+						.dropdown-toggle:active,
+						.dropdown-toggle:focus,
+						.dropdown-toggle:hover {
+							padding: 0;
+							border: 0;
+							background: transparent;
+						}
+						.dropdown-toggle:after {
+							color: #333;
+							content: "\f431";
+							font-size: 24px;
+							line-height: 42px;
+							position: relative;
+							top: 0;
+							left: 1px;
+							width: 42px;
+						}
+						.dropdown-toggle:hover,
+						.dropdown-toggle:focus {
+							background-color: #eaeaea;
+							background-color: rgba(51, 51, 51, 0.1);
+
+						.dropdown-toggle:focus {
+							outline: 1px solid #c1c1c1;
+							outline: 1px solid rgba(51, 51, 51, 0.3);
+						}
+						.dropdown-toggle.toggle-on:after {
+							content: "\f432";
 						}
 					}
 
