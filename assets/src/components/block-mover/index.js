@@ -55,7 +55,7 @@ BlockMover.propTypes = {
 	onDragStart: PropTypes.func,
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
-	children: PropTypes.func,
+	children: PropTypes.any.isRequired,
 };
 
 export default BlockMover;
