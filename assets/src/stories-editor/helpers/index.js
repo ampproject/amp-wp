@@ -454,6 +454,11 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
+	// Prevent double wrapping elements, see https://github.com/ampproject/amp-wp/issues/2370.
+	if ( element.tagName && 'amp-story-grid-layer' === element.tagName.toLowerCase() ) {
+		return element;
+	}
+
 	const {
 		ampAnimationType,
 		ampAnimationDelay,
