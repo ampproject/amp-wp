@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.2.7';
+	const STORY_TEMPLATES_VERSION = '0.2.9';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -196,6 +196,10 @@ class AMP_Story_Templates {
 			array(
 				'title' => __( 'Template: Title Page', 'amp' ),
 				'name'  => 'title-page',
+			),
+			array(
+				'title' => __( 'Template: Travel Vertical', 'amp' ),
+				'name'  => 'travel-vertical',
 			),
 			array(
 				'title' => __( 'Template: Fandom Title', 'amp' ),

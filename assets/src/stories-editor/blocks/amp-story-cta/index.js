@@ -26,6 +26,15 @@ const schema = {
 		type: 'string',
 		default: 'center',
 	},
+	// The rest of the color attributes are added by addAMPAttributes()
+	customTextColor: {
+		type: 'string',
+		default: '#ffffff',
+	},
+	customBackgroundColor: {
+		type: 'string',
+		default: '#32373c',
+	},
 };
 
 export const name = 'amp/amp-story-cta';
