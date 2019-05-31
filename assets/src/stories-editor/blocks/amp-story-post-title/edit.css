@@ -10,6 +10,7 @@
 	flex-direction: column;
 	flex-wrap: nowrap;
 	justify-content: center;
+	font-weight: 700;
 }
 
 .wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title.is-amp-fit-text.is-measuring-fontsize {
