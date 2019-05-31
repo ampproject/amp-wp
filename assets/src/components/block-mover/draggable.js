@@ -39,6 +39,20 @@ class Draggable extends Component {
 		this.isChromeAndHasIframes = false;
 	}
 
+	/**
+	 * In the image block, ensure that the preview image itself isn't draggable.
+	 *
+	 * When the image is draggable, it engages the DropZone of the Image block,
+	 * not the DropZone that allows dragging the block on the page.
+	 * There looks to be an easier way to do this with CSS,
+	 * but -moz-user-drag: none; didn't work on Firefox.
+	 */
+	componentDidMount() {
+		document.querySelectorAll( '.block-editor-block-list__block[data-type="core/image"] img' ).forEach( ( image ) => {
+			image.setAttribute( 'draggable', 'false' );
+		} );
+	}
+
 	componentWillUnmount() {
 		this.resetDragState();
 	}
