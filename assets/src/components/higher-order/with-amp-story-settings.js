@@ -37,7 +37,7 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
-	MIN_BLOCK_HEIGHT
+	MIN_BLOCK_HEIGHT,
 } from '../../stories-editor/constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
