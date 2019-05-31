@@ -198,10 +198,6 @@ class AMP_Story_Templates {
 				'name'  => 'title-page',
 			),
 			array(
-				'title' => __( 'Template: Vertical', 'amp' ),
-				'name'  => 'travel-vertical',
-			),
-			array(
 				'title' => __( 'Template: Fandom Title', 'amp' ),
 				'name'  => 'fandom-title',
 			),
