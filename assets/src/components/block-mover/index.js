@@ -51,9 +51,11 @@ export class BlockMover extends Component {
 
 BlockMover.propTypes = {
 	isDraggable: PropTypes.bool,
+	isMovable: PropTypes.bool,
 	onDragStart: PropTypes.func,
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
+	children: PropTypes.func,
 };
 
 export default BlockMover;

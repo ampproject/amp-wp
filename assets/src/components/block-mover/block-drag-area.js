@@ -40,4 +40,5 @@ BlockDragArea.propTypes = {
 	onDragEnd: PropTypes.func,
 	blockElementId: PropTypes.string,
 	clientId: PropTypes.string,
+	children: PropTypes.func,
 };
