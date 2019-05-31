@@ -114,6 +114,9 @@
 }
 
 .editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-typing,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-focused,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-dragging,
 .editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-rotating {
 	z-index: 100;
 }
