@@ -31,7 +31,14 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
-import { ALLOWED_CHILD_BLOCKS, ALLOWED_MOVABLE_BLOCKS, BLOCKS_WITH_TEXT_SETTINGS, MIN_BLOCK_WIDTH, MIN_BLOCK_HEIGHT } from '../../stories-editor/constants';
+import {
+	ALLOWED_CHILD_BLOCKS,
+	ALLOWED_MOVABLE_BLOCKS,
+	BLOCKS_WITH_TEXT_SETTINGS,
+	BLOCKS_WITH_COLOR_SETTINGS,
+	MIN_BLOCK_WIDTH,
+	MIN_BLOCK_HEIGHT
+} from '../../stories-editor/constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../stories-editor/helpers';
 import bringForwardIcon from '../../../images/bring-forward.svg';
 import sendBackwardIcon from '../../../images/send-backwards.svg';
@@ -216,6 +223,7 @@ export default createHigherOrderComponent(
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
@@ -427,6 +435,10 @@ export default createHigherOrderComponent(
 									/>
 								) }
 							</PanelBody>
+						</InspectorControls>
+					) }
+					{ needsColorSettings && (
+						<InspectorControls>
 							<PanelColorSettings
 								title={ __( 'Color Settings', 'amp' ) }
 								initialOpen={ false }
