@@ -177,7 +177,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 export const addAMPAttributes = ( settings, name ) => {
 	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
 
-	if ( ! isChildBlock ) {
+	if ( ! isChildBlock || 'core/template' === name ) {
 		return settings;
 	}
 
@@ -321,6 +321,17 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: false,
 		};
 	}
+
+	// Keep default values of possibly already existing default values.
+	Object.keys( addedAttributes ).forEach( ( attribute ) => {
+		if ( 'undefined' !== typeof addedAttributes[ attribute ].default ) {
+			return;
+		}
+
+		if ( 'undefined' !== typeof settings.attributes[ attribute ] && 'undefined' !== typeof settings.attributes[ attribute ].default ) {
+			addedAttributes[ attribute ].default = settings.attributes[ attribute ].default;
+		}
+	} );
 
 	return {
 		...settings,

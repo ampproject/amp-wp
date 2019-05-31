@@ -23,6 +23,8 @@ import {
  * Internal dependencies
  */
 import './edit.css';
+import { select } from '@wordpress/data';
+import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
@@ -57,7 +59,12 @@ class CallToActionEdit extends Component {
 		const {
 			text,
 			url,
+			customBackgroundColor,
+			opacity,
 		} = attributes;
+
+		const { colors } = select( 'core/block-editor' ).getSettings();
+		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
 		return (
 			<>
@@ -76,7 +83,7 @@ class CallToActionEdit extends Component {
 							}
 						) }
 						style={ {
-							backgroundColor: backgroundColor.color,
+							backgroundColor: appliedBackgroundColor,
 							color: textColor.color,
 							fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 						} }

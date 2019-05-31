@@ -66,6 +66,14 @@ export const BLOCKS_WITH_TEXT_SETTINGS = [
 	'amp/amp-story-post-title',
 ];
 
+export const BLOCKS_WITH_COLOR_SETTINGS = [
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
+	'amp/amp-story-cta',
+];
+
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',

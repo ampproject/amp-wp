@@ -60,6 +60,11 @@ const withWrapperProps = ( BlockListBlock ) => {
 				left: `${ attributes.positionLeft }%`,
 				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`,
 			};
+
+			if ( 'amp/amp-story-cta' === blockName ) {
+				style.transform = `scale(var(--preview-scale))`;
+			}
+
 			if ( props.wrapperProps && props.wrapperProps.style ) {
 				style = {
 					...style,
