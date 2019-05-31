@@ -22,9 +22,7 @@ import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
 import './edit.css';
-import { createSkeletonTemplate } from '../../stories-editor/helpers';
-
-const storyPageBlockName = 'amp/amp-story-page';
+import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 
 class TemplateInserter extends Component {
 	constructor() {
@@ -42,8 +40,24 @@ class TemplateInserter extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
+		const { getBlock } = this.props;
+
 		// This check is needed to make sure that the blocks are loaded in time.
 		if ( prevProps.reusableBlocks !== this.props.reusableBlocks || prevProps.allBlocks !== this.props.allBlocks ) {
+			for ( const template of this.props.reusableBlocks ) {
+				const templateBlock = getBlock( template.clientId );
+
+				if ( ! templateBlock ) {
+					continue;
+				}
+
+				for ( const innerBlock of templateBlock.innerBlocks ) {
+					if ( innerBlock.attributes.ampFontFamily ) {
+						maybeEnqueueFontStyle( innerBlock.attributes.ampFontFamily );
+					}
+				}
+			}
+
 			this.setState( {
 				reusableBlocks: this.props.reusableBlocks,
 			} );
@@ -78,19 +92,12 @@ class TemplateInserter extends Component {
 					/>
 				) }
 				renderContent={ ( { onClose } ) => {
-					const isStoryBlock = ( clientId ) => {
-						const block = getBlock( clientId );
-						return block && storyPageBlockName === block.name;
-					};
-
 					const onSelect = ( item ) => {
-						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
+						const block = ! item ? createBlock( 'amp/amp-story-page' ) : getBlock( item.clientId );
 						const skeletonBlock = createSkeletonTemplate( block );
 						insertBlock( skeletonBlock );
 						onClose();
 					};
-
-					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
 						<div className="amp-stories__editor-inserter__menu">
@@ -111,7 +118,7 @@ class TemplateInserter extends Component {
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ storyTemplates && storyTemplates.map( ( item ) => (
+									{ this.state.reusableBlocks.map( ( item ) => (
 										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
 											role="button"
@@ -162,8 +169,15 @@ export default compose(
 			getBlocks,
 		} = select( 'core/block-editor' );
 
+		const reusableBlocks = getReusableBlocks();
+
+		const isStoryBlock = ( clientId ) => {
+			const block = getBlock( clientId );
+			return block && 'amp/amp-story-page' === block.name;
+		};
+
 		return {
-			reusableBlocks: getReusableBlocks(),
+			reusableBlocks: reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) ),
 			getBlock,
 			allBlocks: getBlocks(),
 		};
