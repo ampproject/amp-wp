@@ -22,7 +22,7 @@ import './edit.css';
 
 // This is the sum of left (20px) and right (30px) margin.
 const TOTAL_PAGE_MARGIN = 50;
-const PAGE_BORDER = 3;
+const PAGE_BORDER = 1;
 
 class EditorCarousel extends Component {
 	constructor() {
