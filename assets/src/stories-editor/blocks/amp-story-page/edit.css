@@ -113,6 +113,19 @@
 	margin-bottom: 0;
 }
 
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-selected,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-typing,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-focused,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-dragging,
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block.is-rotating {
+	z-index: 100;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__block.is-selected > .block-editor-block-list__block-edit::before {
+	box-shadow: none;
+	border-left: 1px solid rgba(66, 88, 99, .4);
+}
+
 /*
  * Make all the inner blocks positioned with absolute.
  */
