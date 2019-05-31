@@ -217,6 +217,10 @@ class AMP_Story_Templates {
 				'title' => __( 'Template: Fandom Fact Text', 'amp' ),
 				'name'  => 'fandom-fact-text',
 			),
+			array(
+				'title' => __( 'Template: Fandom Intro', 'amp' ),
+				'name'  => 'fandom-intro',
+			),
 		);
 	}
 
