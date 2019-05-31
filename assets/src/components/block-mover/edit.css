@@ -21,11 +21,12 @@
 	margin: 0 auto;
 }
 
-.wp-block [draggable="true"] {
+.wp-block [draggable="true"]:hover {
 	cursor: grab;
 }
 
 /* The editable area of the Text block shouldn't have cursor: grab. */
-.wp-block[data-type="amp/amp-story-text"] .editor-rich-text__editable {
+.wp-block[data-type="amp/amp-story-text"] .editor-rich-text__editable:hover,
+.wp-block[data-type="core/quote"] .editor-rich-text__editable:hover {
 	cursor: default;
 }
