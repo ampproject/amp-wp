@@ -2376,8 +2376,15 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}
-
-		if ( ! wp_get_theme( 'twentyten' )->exists() ) {
+		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
+		$theme_exists = false;
+		foreach ( $wp_theme_directories as $theme_root ) {
+			$theme_exists = wp_get_theme( 'twentyten', $theme_root )->exists();
+			if ( $theme_exists ) {
+				break;
+			}
+		}
+		if ( ! $theme_exists ) {
 			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 

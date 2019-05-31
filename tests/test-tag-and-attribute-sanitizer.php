@@ -1465,6 +1465,13 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				null,
 				array( 'amp-link-rewriter' ),
 			),
+
+			'unique_constraint' => array(
+				str_repeat( '<amp-geo layout="nodisplay"><script type="application/json">{}</script></amp-geo>', 2 ),
+				'<amp-geo layout="nodisplay"><script type="application/json">{}</script></amp-geo>',
+				array( 'amp-geo' ),
+				array( 'duplicate_element' ),
+			),
 		);
 	}
 
@@ -1499,19 +1506,32 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_body_data
 	 * @group        allowed-tags
 	 *
-	 * @param string $source   Markup to process.
-	 * @param string $expected The markup to expect.
-	 * @param array  $scripts  The AMP component script names that are obtained through sanitization.
+	 * @param string     $source               Markup to process.
+	 * @param string     $expected             The markup to expect.
+	 * @param array      $expected_scripts     The AMP component script names that are obtained through sanitization.
+	 * @param array|null $expected_error_codes Expected validation error codes.
 	 */
-	public function test_body_sanitizer( $source, $expected = null, $scripts = array() ) {
-		$expected  = isset( $expected ) ? $expected : $source;
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+	public function test_body_sanitizer( $source, $expected = null, $expected_scripts = array(), $expected_error_codes = null ) {
+		$expected           = isset( $expected ) ? $expected : $source;
+		$dom                = AMP_DOM_Utils::get_dom_from_content( $source );
+		$actual_error_codes = array();
+		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
+			$dom,
+			array(
+				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+					$actual_error_codes[] = $error['code'];
+					return true;
+				},
+			)
+		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->assertEqualMarkup( $expected, $content );
-		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
+		$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
+		if ( is_array( $expected_error_codes ) ) {
+			$this->assertEqualSets( $expected_error_codes, $actual_error_codes );
+		}
 	}
 
 	/**
@@ -1578,22 +1598,33 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><META NAME="foo" CONTENT="bar"><bad>bad!</bad> other</head><body></body></html>',
 				'<html amp><head><meta charset="utf-8"><meta name="foo" content="bar"></head><body>bad!<p> other</p></body></html>',
 			),
+			'head_with_duplicate_charset'             => array(
+				'<html amp><head><meta charset="UTF-8"><meta charset="utf-8"><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="UTF-8"></head><body><p>Content</p></body></html>',
+				array(),
+				array( 'duplicate_element' ),
+			),
+			'head_with_duplicate_viewport'            => array(
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"><meta name="viewport" content="width=device-width"></head><body><p>Content</p></body></html>',
+				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"></head><body><p>Content</p></body></html>',
+				array(),
+				array( 'duplicate_element' ),
+			),
 		);
 
 		// Also include the body tests.
 		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
 		foreach ( $this->get_body_data() as $body_test ) {
 			$html_test = array(
-				sprintf( $html_doc_format, $body_test[0] ),
+				sprintf( $html_doc_format, array_shift( $body_test ) ),
 			);
-			if ( isset( $body_test[1] ) ) {
-				$html_test[] = sprintf( $html_doc_format, $body_test[1] );
-			} else {
-				$html_test[] = null;
+			$expected  = array_shift( $body_test );
+			if ( isset( $expected ) ) {
+				$expected = sprintf( $html_doc_format, $expected );
 			}
-			if ( 3 === count( $body_test ) ) {
-				$html_test[] = $body_test[2];
-			}
+			$html_test[] = $expected;
+			array_push( $html_test, array_shift( $body_test ) );
+			array_push( $html_test, array_shift( $body_test ) );
 			$data[] = $html_test;
 		}
 
@@ -1606,25 +1637,37 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 	 * @dataProvider get_html_data
 	 * @group        allowed-tags
 	 *
-	 * @param string $source   Markup to process.
-	 * @param string $expected The markup to expect.
-	 * @param array  $scripts  The AMP component script names that are obtained through sanitization.
+	 * @param string     $source               Markup to process.
+	 * @param string     $expected             The markup to expect.
+	 * @param array      $expected_scripts     The AMP component script names that are obtained through sanitization.
+	 * @param array|null $expected_error_codes Expected validation error codes.
 	 */
-	public function test_html_sanitizer( $source, $expected = null, $scripts = array() ) {
-		$expected  = isset( $expected ) ? $expected : $source;
-		$dom       = AMP_DOM_Utils::get_dom( $source );
-		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
+	public function test_html_sanitizer( $source, $expected = null, $expected_scripts = array(), $expected_error_codes = null ) {
+		$expected           = isset( $expected ) ? $expected : $source;
+		$dom                = AMP_DOM_Utils::get_dom( $source );
+		$actual_error_codes = array();
+		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			array(
-				'use_document_element' => true,
+				'use_document_element'      => true,
+				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+					$actual_error_codes[] = $error['code'];
+					return true;
+				},
 			)
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 
+		if ( is_array( $expected_error_codes ) ) {
+			$this->assertEqualSets( $expected_error_codes, $actual_error_codes );
+		}
+
 		$this->assertEqualMarkup( $expected, $content );
 
-		$this->assertEqualSets( $scripts, array_keys( $sanitizer->get_scripts() ) );
+		if ( is_array( $expected_scripts ) ) {
+			$this->assertEqualSets( $expected_scripts, array_keys( $sanitizer->get_scripts() ) );
+		}
 	}
 
 	/**

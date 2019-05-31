@@ -35,7 +35,7 @@
 }
 
 .wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
-.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle{
+.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
