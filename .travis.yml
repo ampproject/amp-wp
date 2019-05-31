@@ -125,6 +125,9 @@ jobs:
       script:
         - npm run build:js
         - source "$DEV_LIB_PATH/travis.script.sh"
+        - find . -type f -name 'clover.xml'
+        - find /tmp/wordpress/src/wp-content/plugins/amp -type f -name 'clover.xml'
+        - find /home/travis/build/ampproject/amp-wp -type f -name 'clover.xml'
         - bash <(curl -s https://codecov.io/bash) -cF php -f -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage
         - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
