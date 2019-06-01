@@ -64,7 +64,10 @@ jobs:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - composer validate --no-check-all
         - composer normalize --dry-run
-        - npm run lint
+        - npm run lint:pkg-json
+        - npm run lint:css
+        - npm run lint:js
+        - npm run lint:php
 
     - stage: test
       name: JavaScript unit tests
