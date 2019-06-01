@@ -39,6 +39,13 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
+	 * The default image size for the image block and background media in an AMP Story page.
+	 *
+	 * @var string
+	 */
+	const STORY_PAGE_IMAGE_SIZE = 'amp_story_page';
+
+	/**
 	 * The large dimension of the AMP Story poster images.
 	 *
 	 * @var int
@@ -210,6 +217,9 @@ class AMP_Story_Post_Type {
 
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
+
+		// The default image size for AMP Story image block and background media image.
+		add_image_size( self::STORY_PAGE_IMAGE_SIZE, 99999, 1440, false );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
