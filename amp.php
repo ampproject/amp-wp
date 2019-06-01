@@ -714,9 +714,3 @@ function amp_redirect_old_slug_to_new_url( $link ) {
 
 	return $link;
 }
-
-// The following is intentionally bad to test PHPCS.
-function fooBarBaz()
-{    //sdad
-   $xYz="123";
-}
