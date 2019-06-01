@@ -75,7 +75,7 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - npm run test:js
+        - npm run test:js -- --ci
 
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
