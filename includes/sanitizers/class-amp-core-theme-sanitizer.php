@@ -1105,6 +1105,13 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 						.dropdown-toggle {
 							display: none;
 						}
+						ul.nav-menu :focus-within > ul,
+						.nav-menu :focus-within > ul {
+							clip: inherit;
+							overflow: inherit;
+							height: inherit;
+							width: inherit;
+						}
 					}
 					@media (max-width: 643px) {
 						.nav-menu .toggle-on + .sub-menu {
