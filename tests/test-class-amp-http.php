@@ -404,7 +404,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
-		$redirecting_json = wp_json_encode( array( 'message' => __( 'Redirecting…' ) ) );
+		$redirecting_json = wp_json_encode(
+			array(
+				'message'     => __( 'Redirecting…', 'amp' ),
+				'redirecting' => true,
+			)
+		);
 
 		// Test redirecting to full URL with HTTPS protocol.
 		AMP_HTTP::$headers_sent = array();

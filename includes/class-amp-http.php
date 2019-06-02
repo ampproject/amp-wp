@@ -374,7 +374,8 @@ class AMP_HTTP {
 
 		wp_send_json(
 			array(
-				'message' => __( 'Redirecting…', 'amp' ),
+				'message'     => __( 'Redirecting…', 'amp' ),
+				'redirecting' => true, // Make sure that the submit-success doesn't get styled as success since redirection _could_ be to error page.
 			),
 			200
 		);

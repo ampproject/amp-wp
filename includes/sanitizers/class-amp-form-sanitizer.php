@@ -161,6 +161,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 				$template->appendChild( $p );
 			} else {
 				$p = $this->dom->createElement( 'p' );
+				$p->setAttribute( 'class', '{{#redirecting}}amp-wp-form-redirecting{{/redirecting}}' );
 				$p->appendChild( $this->dom->createTextNode( '{{#message}}{{{message}}}{{/message}}' ) );
 
 				// Show generic message for HTTP success/failure.
