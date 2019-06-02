@@ -1063,24 +1063,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Adds the form submit success and fail templates.
+	 * Amend the comment form with the redirect_to field to persist the AMP page after submission.
 	 */
 	public static function amend_comment_form() {
 		?>
 		<?php if ( is_singular() && ! amp_is_canonical() ) : ?>
 			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
 		<?php endif; ?>
-
-		<div submit-success>
-			<template type="amp-mustache">
-				<p>{{{message}}}</p>
-			</template>
-		</div>
-		<div submit-error>
-			<template type="amp-mustache">
-				<p class="amp-comment-submit-error">{{{message}}}</p>
-			</template>
-		</div>
 		<?php
 	}
 

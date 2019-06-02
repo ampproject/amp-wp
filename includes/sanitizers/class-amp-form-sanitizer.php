@@ -173,7 +173,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$p->appendChild( $this->dom->createTextNode( __( 'It appears your submission was successful.', 'amp' ) ) );
 					$reason = __( 'Even though the server responded OK, it is possible the submission was not processed.' );
 				}
-				$reason .= ' ' . __( 'Please contact the developer for the form processor to better integrate with this form.', 'amp' );
+				$reason .= ' ' . __( 'Please contact the developer of this form processor to improve this message.', 'amp' );
 
 				$p->appendChild( $this->dom->createTextNode( ' ' ) );
 				$small = $this->dom->createElement( 'small' );

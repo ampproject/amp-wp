@@ -924,8 +924,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::amend_comment_form();
 		$output = ob_get_clean();
 		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 
 		// Test transitional AMP.
 		add_theme_support(
@@ -939,8 +937,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::amend_comment_form();
 		$output = ob_get_clean();
 		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 	}
 
 	/**
