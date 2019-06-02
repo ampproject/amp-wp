@@ -1709,13 +1709,14 @@ class AMP_Theme_Support {
 		$is_form_submission = (
 			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
-			wp_is_json_request()
-			&&
 			isset( $_SERVER['REQUEST_METHOD'] )
 			&&
 			'POST' === $_SERVER['REQUEST_METHOD']
 		);
-		if ( $is_form_submission && null === json_decode( $response ) && json_last_error() && ( ( $status_code >= 200 && $status_code < 300 ) || $status_code >= 400 ) ) {
+		if ( $is_form_submission && null === json_decode( $response ) && json_last_error() && ( is_bool( $status_code ) || ( $status_code >= 200 && $status_code < 300 ) || $status_code >= 400 ) ) {
+			if ( is_bool( $status_code ) ) {
+				$status_code = 200; // Not a web server environment.
+			}
 			return wp_json_encode(
 				array(
 					'status_code' => $status_code,
