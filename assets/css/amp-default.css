@@ -29,23 +29,25 @@ body amp-audio:not([controls]) {
 	height: auto;
 }
 
-.amp-wp-default-form-message > div {
+.amp-wp-default-form-message > p {
 	margin: 1em 0;
 	padding: 0.5em;
 }
-.amp-wp-default-form-message[submitting] > div {
+.amp-wp-default-form-message[submitting] > p {
 	font-style: italic;
 }
-.amp-wp-default-form-message[submit-success] > div {
+.amp-wp-default-form-message[submit-success] > p {
 	border: solid 1px green;
 	background-color: lightgreen;
+	color: black;
 }
-.amp-wp-default-form-message[submit-error] > div {
+.amp-wp-default-form-message[submit-error] > p {
 	border: solid 1px red;
 	background-color: lightpink;
+	color: black;
 }
 
 /* Prevent showing empty success message in the case of an AMP-Redirect-To response header. */
-.amp-wp-default-form-message[submit-success] > div:empty {
+.amp-wp-default-form-message[submit-success] > p:empty {
 	display: none;
 }
