@@ -404,11 +404,13 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
+		$redirecting_json = wp_json_encode( array( 'message' => __( 'Redirecting…' ) ) );
+
 		// Test redirecting to full URL with HTTPS protocol.
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -433,7 +435,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		$url = home_url( '/', 'http' );
 		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -457,7 +459,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -473,7 +475,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		$url = home_url( '/new-location/' );
 		AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -488,7 +490,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',

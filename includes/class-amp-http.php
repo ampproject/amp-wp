@@ -372,7 +372,12 @@ class AMP_HTTP {
 		self::send_header( 'AMP-Redirect-To', $absolute_location );
 		self::send_header( 'Access-Control-Expose-Headers', 'AMP-Redirect-To', array( 'replace' => false ) );
 
-		wp_send_json_success();
+		wp_send_json(
+			array(
+				'message' => __( 'Redirecting…', 'amp' ),
+			),
+			200
+		);
 	}
 
 	/**
