@@ -19,7 +19,7 @@ const { wp } = window;
  * @augments Backbone.View
  */
 const FeaturedImageSelectionError = wp.media.View.extend( {
-	className: 'notice notice-error notice-alt inline',
+	className: 'notice notice-warning notice-alt inline',
 	template: ( () => {
 		const message = sprintf(
 			/* translators: 1: image width in pixels. 2: image height in pixels. 3: required minimum width in pixels. 4: required minimum height in pixels. */
