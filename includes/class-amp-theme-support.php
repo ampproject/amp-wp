@@ -669,12 +669,12 @@ class AMP_Theme_Support {
 						'supported' => true,
 					)
 				);
-			} else {
-				return array_merge(
-					$default_response,
-					array( 'errors' => array( 'no_matching_template' ) )
-				);
 			}
+
+			return array_merge(
+				$default_response,
+				array( 'errors' => array( 'no_matching_template' ) )
+			);
 		}
 		$matching_template = array_merge( $default_response, $matching_template );
 
