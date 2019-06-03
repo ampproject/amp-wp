@@ -59,8 +59,8 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	justify-content: center;
 }
 
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text,
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text * {
+.wp-block[data-type="amp/amp-story-text"] .block-mover,
+.wp-block[data-type="amp/amp-story-text"] .block-mover * {
 	height: 100%;
 }
 

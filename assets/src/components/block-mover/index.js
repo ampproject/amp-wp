@@ -35,7 +35,7 @@ export class BlockMover extends Component {
 		// to an unfocused state (body as active element) without firing blur on,
 		// the rendering parent, leaving it unable to react to focus out.
 		return (
-			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] }>
+			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] } className="block-mover">
 				<div>
 					<BlockDragArea
 						children={ children }
