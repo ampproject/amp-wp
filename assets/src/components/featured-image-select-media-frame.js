@@ -84,14 +84,6 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 					height: attachment.get( 'height' ),
 				} )
 			);
-
-			if ( this._views ) {
-				for ( const button of Object.values( this._views ) ) {
-					if ( button.model ) {
-						button.model.set( 'disabled', true );
-					}
-				}
-			}
 		}
 	},
 } );
