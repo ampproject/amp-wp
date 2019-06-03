@@ -50,8 +50,7 @@ after_script:
 jobs:
   fast_finish: true
   allow_failures:
-    - name: PHP unit tests (7.3, WordPress trunk)
-    - name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
+    - env: ALLOW_FAILURES=1
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -108,12 +107,12 @@ jobs:
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
-      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1                        ALLOW_FAILURES=1
 
     - name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
       if: branch = develop
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1 ALLOW_FAILURES=1
       before_script:
         - echo "Running unit tests with code coverage..."
       script:
