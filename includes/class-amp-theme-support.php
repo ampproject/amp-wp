@@ -1024,7 +1024,7 @@ class AMP_Theme_Support {
 				)
 			);
 
-			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+			if ( ! $embed_handler instanceof \AMP_Base_Embed_Handler ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(
