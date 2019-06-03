@@ -81,7 +81,7 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 	public function test_conversion( $url, $expected, $oembed_response ) {
 		add_filter(
 			'pre_http_request',
-			static function ( $pre, $r, $request_url ) use ( $url, $oembed_response ) {
+			static function ( $pre, $r, $request_url ) use ( $oembed_response ) {
 				if ( false === strpos( $request_url, 'crowdsignal' ) ) {
 					return $pre;
 				}

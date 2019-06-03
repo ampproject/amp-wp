@@ -1295,7 +1295,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Test headers absent.
 		self::factory()->post->create();
-		$filter = static function() use ( $validation_errors ) {
+		$filter = static function() {
 			return array(
 				'body'    => '',
 				'headers' => array(),
