@@ -50,7 +50,7 @@
     "@wordpress/scripts": "3.2.1",
     "@wordpress/url": "2.6.0",
     "@wordpress/wordcount": "2.3.0",
-    "autoprefixer": "9.5.1",
+    "autoprefixer": "9.6.0",
     "babel-eslint": "10.0.1",
     "babel-jest": "24.8.0",
     "babel-loader": "8.0.6",
