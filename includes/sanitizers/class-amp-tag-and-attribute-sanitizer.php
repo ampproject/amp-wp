@@ -1144,17 +1144,17 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $attr_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 					return AMP_Rule_Spec::PASS;
-				} else {
-					return AMP_Rule_Spec::FAIL;
 				}
+
+				return AMP_Rule_Spec::FAIL;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $alternative_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 							return AMP_Rule_Spec::PASS;
-						} else {
-							return AMP_Rule_Spec::FAIL;
 						}
+
+						return AMP_Rule_Spec::FAIL;
 					}
 				}
 			}
@@ -1225,18 +1225,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
 				if ( $attr_value === (string) $rule_value ) {
 					return AMP_Rule_Spec::PASS;
-				} else {
-					$result = AMP_Rule_Spec::FAIL;
 				}
+
+				$result = AMP_Rule_Spec::FAIL;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$attr_value = strtolower( $node->getAttribute( $alternative_name ) );
 						if ( $attr_value === (string) $rule_value ) {
 							return AMP_Rule_Spec::PASS;
-						} else {
-							$result = AMP_Rule_Spec::FAIL;
 						}
+
+						$result = AMP_Rule_Spec::FAIL;
 					}
 				}
 			}
@@ -1271,9 +1271,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( preg_match( '/^(' . $rule_value . ')$/u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				return AMP_Rule_Spec::FAIL;
 			}
+
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1302,9 +1302,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// See note above regarding the '^' and '$' that are added here.
 			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				return AMP_Rule_Spec::FAIL;
 			}
+
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1433,9 +1433,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
 				)
 			);
-		} else {
-			return array( $attribute_node->nodeValue );
 		}
+
+		return array( $attribute_node->nodeValue );
 	}
 
 	/**
@@ -1563,18 +1563,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attr_value = $node->getAttribute( $attr_name );
 				if ( preg_match( $pattern, $attr_value ) ) {
 					return AMP_Rule_Spec::FAIL;
-				} else {
-					return AMP_Rule_Spec::PASS;
 				}
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+
+				return AMP_Rule_Spec::PASS;
+			}
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$attr_value = $node->getAttribute( $alternative_name );
 						if ( preg_match( $pattern, $attr_value ) ) {
 							return AMP_Rule_Spec::FAIL;
-						} else {
-							return AMP_Rule_Spec::PASS;
 						}
+
+						return AMP_Rule_Spec::PASS;
 					}
 				}
 			}

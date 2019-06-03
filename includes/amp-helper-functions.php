@@ -181,12 +181,10 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
+	} elseif ( is_singular() ) {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	} else {
-		if ( is_singular() ) {
-			$amp_url = amp_get_permalink( get_queried_object_id() );
-		} else {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 
 	if ( ! $amp_url ) {
@@ -1108,12 +1106,10 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	if ( is_amp_endpoint() ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
+	} elseif ( is_singular() ) {
+		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		if ( is_singular() ) {
-			$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
-		} else {
-			$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-		}
+		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
 	$icon = '&#x1F517;'; // LINK SYMBOL.

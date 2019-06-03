@@ -52,11 +52,12 @@ class AMP_HTML_Utils {
 			$decoded = json_decode( $data );
 			if ( function_exists( 'json_last_error' ) ) {
 				return ( json_last_error() === JSON_ERROR_NONE );
-			} else {
-				// For PHP 5.2 back-compatibility.
-				return null !== $decoded;
 			}
+
+			// For PHP 5.2 back-compatibility.
+			return null !== $decoded;
 		}
+
 		return false;
 	}
 }
