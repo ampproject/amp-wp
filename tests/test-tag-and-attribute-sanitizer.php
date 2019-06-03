@@ -1554,7 +1554,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'style_external'                          => array(
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" src="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'style_inline'                            => array(
