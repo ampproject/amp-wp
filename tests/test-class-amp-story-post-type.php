@@ -355,7 +355,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			$new_story = self::factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
-			array_push( $stories, $new_story );
+			$stories[] = $new_story;
 
 			// Create the featured image.
 			$thumbnail_id = wp_insert_attachment(

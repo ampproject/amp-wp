@@ -1623,9 +1623,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				$expected = sprintf( $html_doc_format, $expected );
 			}
 			$html_test[] = $expected;
-			array_push( $html_test, array_shift( $body_test ) );
-			array_push( $html_test, array_shift( $body_test ) );
-			$data[] = $html_test;
+			$html_test[] = array_shift( $body_test );
+			$html_test[] = array_shift( $body_test );
+			$data[]      = $html_test;
 		}
 
 		return $data;
