@@ -397,8 +397,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 				return array(
 					'ad-attributes' => array(
 						'type'      => 'doubleclick',
-						'data-slot' => '/30497360/a4a/amp_story_dfp_example'
-					)
+						'data-slot' => '/30497360/a4a/amp_story_dfp_example',
+					),
 				);
 			}
 		);
