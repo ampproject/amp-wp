@@ -392,7 +392,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_amp_print_story_auto_ads() {
 		add_filter(
-			'amp_stories_auto_ads_configuration',
+			'amp_story_auto_ads_configuration',
 			static function() {
 				return array(
 					'ad-attributes' => array(

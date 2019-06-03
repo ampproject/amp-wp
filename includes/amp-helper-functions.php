@@ -1138,14 +1138,14 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
  */
 function amp_print_story_auto_ads() {
 	/**
-	 * Filters the configuration data for <amp-story-auto-ads>
+	 * Filters the configuration data for <amp-story-auto-ads>.
 	 *
 	 * This allows Dynamically inserting ads into a story.
 	 *
 	 * @param array   $data Story ads configuration data.
 	 * @param WP_Post $post The current story's post object.
 	 */
-	$data = apply_filters( 'amp_stories_auto_ads_configuration', array(), get_post() );
+	$data = apply_filters( 'amp_story_auto_ads_configuration', array(), get_post() );
 
 	if ( empty( $data ) ) {
 		return;
