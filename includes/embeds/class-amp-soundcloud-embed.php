@@ -102,14 +102,14 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 		$output = '';
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			if ( empty( $attr['url'] ) && ! empty( $attr['id'] ) ) {
-				$attr['url'] = 'https://api.soundcloud.com/tracks/' . intval( $attr['id'] );
+				$attr['url'] = 'https://api.soundcloud.com/tracks/' . (int) $attr['id'];
 			}
 			$output = soundcloud_shortcode( $attr, $content );
 			$output = $this->parse_amp_component_from_iframe( $output );
 		} else {
 			$url = null;
 			if ( isset( $attr['id'] ) ) {
-				$url = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F' . intval( $attr['id'] );
+				$url = 'https://w.soundcloud.com/player/?url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F' . (int) $attr['id'];
 			}
 
 			if ( isset( $attr['url'] ) ) {

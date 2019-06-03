@@ -301,7 +301,7 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		$scope = intval( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] );
+		$scope = (int) $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
 		if ( WP_Service_Workers::SCOPE_ADMIN !== $scope && WP_Service_Workers::SCOPE_FRONT !== $scope ) {
 			wp_die(
 				esc_html__( 'No service workers registered for the requested scope.', 'amp' ),

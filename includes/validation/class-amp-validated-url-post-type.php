@@ -960,7 +960,7 @@ class AMP_Validated_URL_Post_Type {
 				$items = array();
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ] as $name => $count ) {
-						if ( 1 === intval( $count ) ) {
+						if ( 1 === (int) $count ) {
 							$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 						} else {
 							$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
@@ -969,7 +969,7 @@ class AMP_Validated_URL_Post_Type {
 				}
 				if ( ! empty( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] ) ) {
 					foreach ( $error_summary[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] as $name => $count ) {
-						if ( 1 === intval( $count ) ) {
+						if ( 1 === (int) $count ) {
 							$items[] = sprintf( '<code>[%s]</code>', esc_html( $name ) );
 						} else {
 							$items[] = sprintf( '<code>[%s]</code> (%d)', esc_html( $name ), $count );
@@ -1211,7 +1211,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? (int) $_GET[ self::URLS_TESTED ] : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors_remain ) {
 				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
@@ -1229,7 +1229,7 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? (int) $_GET['amp_taxonomy_terms_updated'] : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $count > 0 ) {
 			$class = 'updated';
 			printf(
@@ -1409,7 +1409,7 @@ class AMP_Validated_URL_Post_Type {
 
 		try {
 			if ( isset( $_GET['post'] ) ) {
-				$post = intval( $_GET['post'] );
+				$post = (int) $_GET['post'];
 				if ( $post <= 0 ) {
 					throw new Exception( 'unknown_post' );
 				}

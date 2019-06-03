@@ -1379,12 +1379,12 @@ class AMP_Story_Post_Type {
 
 		$cropped = wp_crop_image(
 			$attachment_id,
-			intval( $crop_details['x1'] ),
-			intval( $crop_details['y1'] ),
-			intval( $crop_details['width'] ),
-			intval( $crop_details['height'] ),
-			intval( $dimensions['dst_width'] ),
-			intval( $dimensions['dst_height'] )
+			(int) $crop_details['x1'],
+			(int) $crop_details['y1'],
+			(int) $crop_details['width'],
+			(int) $crop_details['height'],
+			(int) $dimensions['dst_width'],
+			(int) $dimensions['dst_height']
 		);
 
 		if ( ! $cropped || is_wp_error( $cropped ) ) {
@@ -1493,7 +1493,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// Add 4px more height, as the <iframe> needs that to display the full image.
-		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		$new_height = (string) ( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
 		return preg_replace(
 			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
 			sprintf( '${1}%s${3}', $new_height ),

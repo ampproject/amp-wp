@@ -1007,7 +1007,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				array_merge( self::get_error_types(), array( strval( self::NO_FILTER_VALUE ) ) ),
+				array_merge( self::get_error_types(), array( (string) self::NO_FILTER_VALUE ) ),
 				true
 			)
 		) {
@@ -1523,7 +1523,7 @@ class AMP_Validation_Error_Taxonomy {
 		// Show success messages for accepting/rejecting validation errors.
 		if ( ! empty( $_GET['amp_actioned'] ) && ! empty( $_GET['amp_actioned_count'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$actioned = sanitize_key( $_GET['amp_actioned'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$count    = intval( $_GET['amp_actioned_count'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count    = (int) $_GET['amp_actioned_count']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$message  = null;
 			if ( self::VALIDATION_ERROR_ACCEPT_ACTION === $actioned ) {
 				$message = sprintf(
@@ -1949,7 +1949,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( ! isset( $_GET['post'], $_GET['action'] ) || 'edit' !== $_GET['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					break;
 				}
-				$url_post_id       = intval( $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$url_post_id       = (int) $_GET['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $url_post_id );
 				$validation_errors = array_filter(
 					$validation_errors,
@@ -2005,7 +2005,7 @@ class AMP_Validation_Error_Taxonomy {
 	public static function render_single_url_error_details( $validation_error, $term ) {
 		// Get the sources, if they exist.
 		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( intval( $_GET['post'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( (int) $_GET['post'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			foreach ( $validation_errors as $error ) {
 				if ( isset( $error['data']['sources'], $error['term']->term_id ) && $error['term']->term_id === $term->term_id ) {
 					$validation_error['sources'] = $error['data']['sources'];
@@ -2141,7 +2141,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$referer  = wp_get_referer();
-		$term_id  = intval( $_GET['term_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$term_id  = (int) $_GET['term_id']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
 
 		if ( $redirect !== $referer ) {

@@ -60,7 +60,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$atts['lightbox'] = filter_var( $attr['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
 		}
 
-		$id = intval( $atts['id'] );
+		$id = (int) $atts['id'];
 
 		if ( ! empty( $atts['include'] ) ) {
 			$attachments = get_posts(

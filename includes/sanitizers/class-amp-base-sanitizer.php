@@ -239,7 +239,7 @@ abstract class AMP_Base_Sanitizer {
 
 		// Accepts both integers and floats & prevents negative values.
 		if ( is_numeric( $value ) ) {
-			return max( 0, floatval( $value ) );
+			return max( 0, (float) $value );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
