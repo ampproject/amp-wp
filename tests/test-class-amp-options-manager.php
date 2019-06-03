@@ -324,23 +324,19 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		// If this is not the main 'AMP Settings' page, this should not render the notice.
 		wp_set_current_user( self::factory()->user->create() );
 		set_current_screen( 'edit.php' );
-		ob_start();
-		AMP_Options_Manager::render_welcome_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_welcome_notice' ) );
+		$this->assertEmpty( $output );
 
 		// This is the correct page, but the notice was dismissed, so it should not display.
 		$GLOBALS['current_screen']->id = 'toplevel_page_' . AMP_Options_Manager::OPTION_NAME;
 		$id                            = 'amp-welcome-notice-1';
 		update_user_meta( get_current_user_id(), 'dismissed_wp_pointers', $id );
-		ob_start();
-		AMP_Options_Manager::render_welcome_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_welcome_notice' ) );
+		$this->assertEmpty( $output );
 
 		// This is the correct page, and the notice has not been dismissed, so it should display.
 		delete_user_meta( get_current_user_id(), 'dismissed_wp_pointers' );
-		ob_start();
-		AMP_Options_Manager::render_welcome_notice();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_welcome_notice' ) );
 		$this->assertContains( 'Welcome to AMP for WordPress', $output );
 		$this->assertContains( 'Bring the speed and features of the open source AMP project to your site, complete with the tools to support content authoring and website development.', $output );
 		$this->assertContains( $id, $output );
@@ -356,26 +352,22 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$text = 'The AMP plugin performs at its best when persistent object cache is enabled.';
 
 		wp_using_ext_object_cache( null );
-		ob_start();
-		AMP_Options_Manager::persistent_object_caching_notice();
-		$this->assertContains( $text, ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'persistent_object_caching_notice' ) );
+		$this->assertContains( $text, $output );
 
 		wp_using_ext_object_cache( true );
-		ob_start();
-		AMP_Options_Manager::persistent_object_caching_notice();
-		$this->assertNotContains( $text, ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'persistent_object_caching_notice' ) );
+		$this->assertNotContains( $text, $output );
 
 		set_current_screen( 'edit.php' );
 
 		wp_using_ext_object_cache( null );
-		ob_start();
-		AMP_Options_Manager::persistent_object_caching_notice();
-		$this->assertNotContains( $text, ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'persistent_object_caching_notice' ) );
+		$this->assertNotContains( $text, $output );
 
 		wp_using_ext_object_cache( true );
-		ob_start();
-		AMP_Options_Manager::persistent_object_caching_notice();
-		$this->assertNotContains( $text, ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'persistent_object_caching_notice' ) );
+		$this->assertNotContains( $text, $output );
 
 		wp_using_ext_object_cache( false );
 	}
@@ -412,41 +404,34 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
 
 		// Test default state.
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertEmpty( $output );
 
 		// Test when disabled but not exceeded.
 		AMP_Options_Manager::update_option( 'enable_response_caching', false );
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertEmpty( $output );
 
 		// Test when disabled and exceeded, but external object cache is disabled.
 		add_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, site_url() );
 		wp_using_ext_object_cache( false ); // turn off external object cache flag.
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertEmpty( $output );
 
 		// Test when disabled, exceeded, and external object cache is enabled.
 		wp_using_ext_object_cache( true ); // turn off external object cache flag.
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$notice = ob_get_clean();
-		$this->assertContains( '<div class="notice notice-warning is-dismissible">', $notice );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertContains( '<div class="notice notice-warning is-dismissible">', $output );
 
 		// Test when enabled but not exceeded.
 		delete_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION );
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertEmpty( $output );
 
 		// Test when on a different screen.
 		set_current_screen( 'edit.php' );
-		ob_start();
-		AMP_Options_Manager::render_cache_miss_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Options_Manager', 'render_cache_miss_notice' ) );
+		$this->assertEmpty( $output );
 
 		wp_using_ext_object_cache( false ); // turn off external object cache flag.
 	}

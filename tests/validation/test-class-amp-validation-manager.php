@@ -576,10 +576,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 		$this->set_capability();
-		$post = self::factory()->post->create_and_get();
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$post   = self::factory()->post->create_and_get();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
@@ -599,9 +597,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 
 		// In 'Transitional' mode with 'auto_accept_sanitization' set to false.
 		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.';
@@ -611,9 +607,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// In 'Native' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 		$this->assertContains( 'There is content which fails AMP validation. Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', $output );
 
 		/*
@@ -625,9 +619,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 	}
 
@@ -1356,9 +1348,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_print_plugin_notice() {
 		global $pagenow;
-		ob_start();
-		AMP_Validation_Manager::print_plugin_notice();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_plugin_notice' ) );
 		$this->assertEmpty( $output );
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
@@ -1377,9 +1367,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			)
 		);
-		ob_start();
-		AMP_Validation_Manager::print_plugin_notice();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_plugin_notice' ) );
 		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );
 		$this->assertContains( 'More details', $output );

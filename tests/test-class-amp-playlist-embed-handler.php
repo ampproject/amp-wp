@@ -232,9 +232,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$state_id     = 'fooId1';
 		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( array( $this->instance, 'print_tracks' ), array( $state_id, $data['tracks'] ) );
 		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );
 		$this->assertContains( $state_id, $tracks );
 		$this->assertContains( $expected_on, $tracks );
@@ -243,9 +241,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$data        = $this->instance->get_data( $attr );
 		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( array( $this->instance, 'print_tracks' ), array( $state_id, $data['tracks'] ) );
 		$this->assertContains( $expected_on, $tracks );
 	}
 

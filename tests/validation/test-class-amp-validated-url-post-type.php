@@ -223,9 +223,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 'new', $error['data']['code'] );
 		$this->assertEquals( AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_REJECTED_STATUS, $error['term_status'] );
 
-		ob_start();
-		AMP_Validated_URL_Post_Type::display_invalid_url_validation_error_counts_summary( $invalid_url_post_id );
-		$summary = ob_get_clean();
+		$summary = get_echo( array( 'AMP_Validated_URL_Post_Type', 'display_invalid_url_validation_error_counts_summary' ), array( $invalid_url_post_id ) );
 		$this->assertContains( 'New Rejected: 1', $summary );
 		$this->assertContains( 'Accepted: 1', $summary );
 		$this->assertContains( 'Rejected: 1', $summary );
@@ -648,9 +646,8 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Validation_Manager::init();
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors( $errors, home_url( '/' ) );
 
-		ob_start();
-		AMP_Validated_URL_Post_Type::output_custom_column( $column_name, $invalid_url_post_id );
-		$this->assertContains( $expected_value, ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'output_custom_column' ), array( $column_name, $invalid_url_post_id ) );
+		$this->assertContains( $expected_value, $output );
 	}
 
 	/**
@@ -674,16 +671,12 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		);
 
 		// If there is an embed and a theme source, this should only output the embed icon.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$sources_column = ob_get_clean();
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
 		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>Embed</strong>', $sources_column );
 
 		// If there is no embed source, but there is a theme, this should output the theme icon.
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$sources_column      = ob_get_clean();
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
 		$expected_theme_icon = '<div class="source"><span class="dashicons dashicons-admin-appearance"></span><strong>' . $theme_name . '</strong></div>';
 		$this->assertEquals( $expected_theme_icon, $sources_column );
 
@@ -692,37 +685,30 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$error_summary['sources_with_invalid_output']['plugin'] = array( $plugin_name );
 		$expected_plugin_icon                                   = '<strong class="source"><span class="dashicons dashicons-admin-plugins"></span>' . $plugin_name . '</strong>';
 		unset( $error_summary['sources_with_invalid_output']['embed'] );
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$sources_column = ob_get_clean();
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
 		$this->assertEquals( $expected_plugin_icon . $expected_theme_icon, $sources_column );
 
 		// If there is a 'core' source, it should appear in the column output.
 		$error_summary['sources_with_invalid_output']['core'] = array();
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$sources_column = ob_get_clean();
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
 		$this->assertContains( '<strong><span class="dashicons dashicons-wordpress-alt"></span>Other (0)</strong>', $sources_column );
 
 		// Even if there is a hook in the sources, it should not appear in the column if there is any other source.
 		$hook_name = 'wp_header';
 		$error_summary['sources_with_invalid_output']['hook'] = array( $hook_name );
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$this->assertNotContains( $hook_name, ob_get_clean() );
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
+		$this->assertNotContains( $hook_name, $sources_column );
 
 		// If a hook is the only source, it should appear in the column.
 		$error_summary['sources_with_invalid_output'] = array( 'hook' => $hook_name );
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>' . $hook_name . '</strong>', ob_get_clean() );
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
+		$this->assertEquals( '<strong class="source"><span class="dashicons dashicons-wordpress-alt"></span>' . $hook_name . '</strong>', $sources_column );
 
 		// If there's no source in 'sources_with_invalid_output', this should output the theme name.
 		update_post_meta( $post_id, '_amp_validated_environment', array( 'theme' => $theme_name ) );
 		$error_summary['sources_with_invalid_output'] = array();
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_sources_column( $error_summary, $post_id );
-		$this->assertEquals( '<div class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . ' (?)</div>', ob_get_clean() );
+		$sources_column = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_sources_column' ), array( $error_summary, $post_id ) );
+		$this->assertEquals( '<div class="source"><span class="dashicons dashicons-admin-appearance"></span>' . $theme_name . ' (?)</div>', $sources_column );
 	}
 
 	/**
@@ -834,43 +820,36 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertEmpty( $output );
 
 		$_GET['post_type'] = 'post';
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertEmpty( $output );
 
 		set_current_screen( 'edit.php' );
 		get_current_screen()->post_type = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
 
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '1';
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ]      = '1';
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertContains( 'The rechecked URL still has unaccepted validation errors', ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertContains( 'The rechecked URL still has unaccepted validation errors', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '2';
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertContains( 'The rechecked URLs still have unaccepted validation errors', ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertContains( 'The rechecked URLs still have unaccepted validation errors', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::REMAINING_ERRORS ] = '0';
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertContains( 'The rechecked URLs are free of unaccepted validation errors', ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertContains( 'The rechecked URLs are free of unaccepted validation errors', $output );
 
 		$_GET[ AMP_Validated_URL_Post_Type::URLS_TESTED ] = '1';
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertContains( 'The rechecked URL is free of unaccepted validation errors', ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertContains( 'The rechecked URL is free of unaccepted validation errors', $output );
 
 		$_GET['amp_validate_error'] = array( 'http_request_failed' );
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_admin_notice();
-		$this->assertContains( 'Failed to fetch URL(s) to validate', ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_admin_notice' ) );
+		$this->assertContains( 'Failed to fetch URL(s) to validate', $output );
 
 		unset( $GLOBALS['current_screen'] );
 	}
@@ -1175,15 +1154,12 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		global $current_screen;
 		set_current_screen( 'index.php' );
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_link_to_error_index_screen();
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_link_to_error_index_screen' ) );
+		$this->assertEmpty( $output );
 
 		set_current_screen( 'edit.php' );
 		$current_screen->post_type = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_link_to_error_index_screen();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_link_to_error_index_screen' ) );
 		$this->assertContains( 'View Error Index', $output );
 	}
 
@@ -1290,9 +1266,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		$post_storing_error = get_post( $invalid_url_post_id );
 
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_status_meta_box( get_post( $invalid_url_post_id ) );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_status_meta_box' ), array( get_post( $invalid_url_post_id ) ) );
 
 		$this->assertContains( date_i18n( 'M j, Y @ H:i', strtotime( $post_storing_error->post_date ) ), $output );
 		$this->assertContains( 'Last checked:', $output );
@@ -1316,14 +1290,11 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$GLOBALS['current_screen']->taxonomy = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 
 		// If the post type is wrong, so the conditional should be false, and this should not echo anything.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_single_url_list_table( $post_wrong_post_type );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_single_url_list_table' ), array( $post_wrong_post_type ) );
+		$this->assertEmpty( $output );
 
 		// Now that the current user has permissions, this should output the correct markup.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_single_url_list_table( $post_correct_post_type );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_single_url_list_table' ), array( $post_wrong_post_type ) );
 		$this->assertContains( '<form class="search-form wp-clearfix" method="get">', $output );
 		$this->assertContains( '<div id="accept-reject-buttons" class="hidden">', $output );
 		$this->assertContains( '<button type="button" class="button action accept">', $output );
@@ -1339,9 +1310,8 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$post_wrong_post_type = self::factory()->post->create_and_get();
 
 		// The $post has the wrong post type, so the method should exit without echoing anything.
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_url_as_title( $post_wrong_post_type );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_url_as_title' ), array( $post_wrong_post_type ) );
+		$this->assertEmpty( $output );
 
 		// The post type is correct, but it doesn't have a validation URL associated with it, so this shouldn't output anything.
 		$post_correct_post_type = self::factory()->post->create_and_get(
@@ -1349,9 +1319,8 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 				'post-type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 			)
 		);
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_url_as_title( $post_correct_post_type );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_url_as_title' ), array( $post_correct_post_type ) );
+		$this->assertEmpty( $output );
 
 		// The post has the correct type and a validation URL in the title, so this should output markup.
 		$post_correct_post_type = self::factory()->post->create_and_get(
@@ -1360,9 +1329,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 				'post_title' => home_url(),
 			)
 		);
-		ob_start();
-		AMP_Validated_URL_Post_Type::print_url_as_title( $post_correct_post_type );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'print_url_as_title' ), array( $post_correct_post_type ) );
 		$this->assertContains( '<h2 class="amp-validated-url">', $output );
 		$this->assertContains( home_url(), $output );
 	}
@@ -1452,19 +1419,15 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$wrong_which_second_argument   = 'bottom';
 
 		// This has an incorrect post type as the first argument, so it should not output anything.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_post_filters( $wrong_post_type, $correct_which_second_argument );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_post_filters' ), array( $wrong_post_type, $correct_which_second_argument ) );
+		$this->assertEmpty( $output );
 
 		// This has an incorrect second argument, so again it should not output anything.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_post_filters( $correct_post_type, $wrong_which_second_argument );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_post_filters' ), array( $correct_post_type, $wrong_which_second_argument  ) );
+		$this->assertEmpty( $output );
 
 		// This is now on the invalid URL post type edit.php screen, so it should output a <select> element.
-		ob_start();
-		AMP_Validated_URL_Post_Type::render_post_filters( $correct_post_type, $correct_which_second_argument );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validated_URL_Post_Type', 'render_post_filters' ), array( $correct_post_type, $correct_which_second_argument  ) );
 		$this->assertContains(
 			sprintf( 'With New Errors <span class="count">(%d)</span>', $number_of_new_errors ),
 			$output

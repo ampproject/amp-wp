@@ -920,9 +920,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test native AMP.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
-		ob_start();
-		AMP_Theme_Support::amend_comment_form();
-		$output = ob_get_clean();
+		$output = get_echo( 'AMP_Theme_Support', 'amend_comment_form' );
 		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
 		$this->assertContains( '<div submit-success>', $output );
 		$this->assertContains( '<div submit-error>', $output );
@@ -935,9 +933,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			)
 		);
 		$this->assertFalse( amp_is_canonical() );
-		ob_start();
-		AMP_Theme_Support::amend_comment_form();
-		$output = ob_get_clean();
+		$output = get_echo( 'AMP_Theme_Support', 'amend_comment_form' );
 		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
 		$this->assertContains( '<div submit-success>', $output );
 		$this->assertContains( '<div submit-error>', $output );

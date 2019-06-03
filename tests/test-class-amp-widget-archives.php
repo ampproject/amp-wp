@@ -74,9 +74,7 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 			'title'    => 'Test Archives Widget',
 			'dropdown' => 1,
 		);
-		ob_start();
-		$this->widget->widget( $arguments, $instance );
-		$output = ob_get_clean();
+		$output    = get_echo( array( $this->widget, 'widget' ), array( $arguments, $instance ) );
 
 		$this->assertContains( 'on="change:AMP.navigateTo(url=event.value)"', $output );
 		$this->assertNotContains( 'onchange=', $output );

@@ -60,14 +60,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
-			ob_start();
-			AMP_Story_Post_Type::the_single_story_card(
+			$card_markup = get_echo(
+				array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
 				array(
-					'post' => $story,
-					'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					array(
+						'post' => $story,
+						'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					),
 				)
 			);
-			$card_markup = ob_get_clean();
 			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
 			$this->assertContains( ' class="latest_stories__link"', $card_markup );
 			// Because there's no 'disable_link' argument, this should have an <a> with an href.
@@ -75,20 +76,24 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		}
 
 		$first_story = reset( $stories );
-		ob_start();
-		AMP_Story_Post_Type::the_single_story_card(
+		$card_markup = get_echo(
+			array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
 			array(
-				'post'         => $first_story,
-				'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
-				'disable_link' => true,
+				array(
+					'post'         => $first_story,
+					'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					'disable_link' => true,
+				),
 			)
 		);
-		$this->assertNotContains( '<a', ob_get_clean() );
+		$this->assertNotContains( '<a', $card_markup );
 
 		// If the 'post' argument isn't either an int or a WP_Post, this shouldn't output anything.
-		ob_start();
-		AMP_Story_Post_Type::the_single_story_card( array( 'post' => 'foo post' ) );
-		$this->assertEmpty( ob_get_clean() );
+		$card_markup = get_echo(
+			array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
+			array( array( 'post' => 'foo post' ) )
+		);
+		$this->assertEmpty( $card_markup );
 	}
 
 	/**

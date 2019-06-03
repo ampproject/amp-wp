@@ -183,25 +183,19 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// This is in AMP native mode with a template that can be rendered.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( 'post type does not support it', $output );
 		$this->assertNotContains( $checkbox_enabled, $output );
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -209,9 +203,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
 		$this->assertNotContains( $checkbox_enabled, $output );
 
@@ -225,9 +217,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			)
 		);
 
-		ob_start();
-		$this->instance->render_status( $post );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
+		$this->assertEmpty( $output );
 	}
 
 	/**

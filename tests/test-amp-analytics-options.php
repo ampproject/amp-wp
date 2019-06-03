@@ -62,12 +62,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			)
 		);
 
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
-
-		return $amp_rendered;
+		return get_echo( 'amp_render_post', array( $post_id ) );
 	}
 
 	/**
@@ -262,9 +257,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
-		ob_start();
-		amp_print_analytics( $analytics );
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_print_analytics', array( $analytics ) );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
@@ -289,9 +282,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			$this->vendor,
 			$this->config_one
 		);
-		ob_start();
-		amp_print_analytics( '' );
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_print_analytics', array( '' ) );
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}

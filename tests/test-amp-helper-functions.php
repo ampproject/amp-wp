@@ -286,9 +286,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		$get_amp_html_link = function() {
-			ob_start();
-			amp_add_amphtml_link();
-			return ob_get_clean();
+			return get_echo( 'amp_add_amphtml_link' );
 		};
 
 		$assert_amphtml_link_present = function() use ( $amphtml_url, $get_amp_html_link ) {
@@ -478,23 +476,18 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_add_generator_metadata' );
 		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_add_generator_metadata' );
+
 		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_add_generator_metadata' );
 		$this->assertContains( 'mode=native', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 	}
@@ -526,9 +519,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Try overriding URL.
 		wp_scripts()->registered['amp-mustache']->src = 'https://cdn.ampproject.org/v0/amp-mustache-latest.js';
 
-		ob_start();
-		wp_print_scripts();
-		$output = ob_get_clean();
+		$output = get_echo( 'wp_print_scripts' );
 
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
@@ -548,9 +539,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Try some experimental component to ensure expected script attributes are added.
 		wp_register_script( 'amp-foo', 'https://cdn.ampproject.org/v0/amp-foo-0.1.js', array( 'amp-runtime' ), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter, WordPress.WP.EnqueuedResourceParameters.MissingVersion
-		ob_start();
-		wp_print_scripts( 'amp-foo' );
-		$output = ob_get_clean();
+		$output = get_echo( 'wp_print_scripts', array( 'amp-foo' ) );
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-foo-0.1.js\' async custom-element="amp-foo"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 	}
 

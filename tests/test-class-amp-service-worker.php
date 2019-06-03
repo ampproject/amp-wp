@@ -209,9 +209,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	 * @covers \AMP_Service_Worker::install_service_worker()
 	 */
 	public function test_install_service_worker() {
-		ob_start();
-		AMP_Service_Worker::install_service_worker();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Service_Worker', 'install_service_worker' ) );
 
 		$this->assertContains( '<amp-install-serviceworker', $output );
 	}
