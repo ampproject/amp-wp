@@ -449,14 +449,14 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {Object} element                  Block element.
- * @param {Object} blockType                Block type object.
- * @param {Object} attributes               Block attributes.
- * @param {number} attributes.positionTop   Top offset in pixel.
- * @param {number} attributes.positionLeft  Left offset in pixel.
- * @param {number} attributes.rotationAngle Rotation angle in degrees.
- * @param {number} attributes.width         Block width in pixels.
- * @param {number} attributes.height        Block height in pixels.
+ * @param {WPElement} element                  Block element.
+ * @param {Object}    blockType                Block type object.
+ * @param {Object}    attributes               Block attributes.
+ * @param {number}    attributes.positionTop   Top offset in pixel.
+ * @param {number}    attributes.positionLeft  Left offset in pixel.
+ * @param {number}    attributes.rotationAngle Rotation angle in degrees.
+ * @param {number}    attributes.width         Block width in pixels.
+ * @param {number}    attributes.height        Block height in pixels.
  *
  * @return {Object} The wrapped element.
  */
@@ -466,7 +466,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	}
 
 	// Prevent double wrapping elements, see https://github.com/ampproject/amp-wp/issues/2370.
-	if ( element.tagName && 'amp-story-grid-layer' === element.tagName.toLowerCase() ) {
+	if ( element.props.children && element.props.children.startsWith && element.props.children.startsWith( '<amp-story-grid-layer' ) ) {
 		return element;
 	}
 
