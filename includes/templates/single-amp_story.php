@@ -62,7 +62,10 @@ the_post();
 				poster-landscape-src="<?php echo esc_url( $poster_landscape ); ?>"
 			<?php endif; ?>
 		>
-			<?php the_content(); ?>
+			<?php
+			amp_print_story_auto_ads();
+			the_content();
+			?>
 		</amp-story>
 
 		<?php
