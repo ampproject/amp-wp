@@ -1401,7 +1401,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	/**
 	 * Test render_post_filters.
 	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_post_filters()
+	 * @covers \AMP_Validated_URL_Post_Type::render_post_filters()
 	 */
 	public function test_render_post_filters() {
 		set_current_screen( 'edit.php' );
