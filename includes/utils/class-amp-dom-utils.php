@@ -105,10 +105,10 @@ class AMP_DOM_Utils {
 			 */
 			$document = preg_replace_callback(
 				'#^.+?(?=<body)#is',
-				function( $head_matches ) {
+				static function( $head_matches ) {
 					return preg_replace_callback(
 						'#<noscript[^>]*>.*?</noscript>#si',
-						function( $noscript_matches ) {
+						static function( $noscript_matches ) {
 							$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
 							AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $noscript_matches[0];
 							return $placeholder;
@@ -294,7 +294,7 @@ class AMP_DOM_Utils {
 		 * @param array $tag_matches Tag matches.
 		 * @return string Replacement.
 		 */
-		$replace_callback = function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
+		$replace_callback = static function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
 			$old_attrs = rtrim( $tag_matches['attrs'] );
 			$new_attrs = '';
 			$offset    = 0;

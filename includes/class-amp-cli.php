@@ -399,9 +399,7 @@ class AMP_CLI {
 
 		return array_filter(
 			$ids,
-			function( $id ) {
-				return post_supports_amp( $id );
-			}
+			'post_supports_amp'
 		);
 	}
 

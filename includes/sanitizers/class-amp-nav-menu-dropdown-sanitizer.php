@@ -66,7 +66,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'walker_nav_menu_start_el',
-			function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
+			static function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
 				unset( $depth );
 
 				// Skip adding buttons to nav menu widgets for now.

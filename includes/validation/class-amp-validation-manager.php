@@ -188,7 +188,7 @@ class AMP_Validation_Manager {
 		// Actions and filters involved in validation.
 		add_action(
 			'activate_plugin',
-			function() {
+			static function() {
 				if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
 					add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
 				}
@@ -198,7 +198,7 @@ class AMP_Validation_Manager {
 		// Prevent query vars from persisting after redirect.
 		add_filter(
 			'removable_query_args',
-			function( $query_vars ) {
+			static function( $query_vars ) {
 				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
 				return $query_vars;
 			}
@@ -421,7 +421,7 @@ class AMP_Validation_Manager {
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
 				'wp_before_admin_bar_render',
-				function() {
+				static function() {
 					?>
 				<script>
 				(function( queryVar ) {
@@ -555,7 +555,7 @@ class AMP_Validation_Manager {
 	public static function validate_queued_posts_on_frontend() {
 		$posts = array_filter(
 			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
-			function( $post ) {
+			static function( $post ) {
 				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
 			}
 		);
@@ -1223,7 +1223,7 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
+				$callback['function'] = static function() use ( &$callback, $wrapped_callback, $original_function ) {
 					$callback['function'] = $original_function; // Restore original.
 					return call_user_func_array( $wrapped_callback, func_get_args() );
 				};
@@ -1491,7 +1491,7 @@ class AMP_Validation_Manager {
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
 	public static function wrapped_callback( $callback ) {
-		return function() use ( $callback ) {
+		return static function() use ( $callback ) {
 			global $wp_styles, $wp_scripts;
 
 			$function      = $callback['function'];
