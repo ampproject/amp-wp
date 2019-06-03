@@ -163,7 +163,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Render embed fallback.
 	 *
 	 * @param string $url URL.
-	 * @returns string
+	 * @return string
 	 */
 	private function render_embed_fallback( $url ) {
 		return AMP_HTML_Utils::build_tag(

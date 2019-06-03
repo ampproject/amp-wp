@@ -397,7 +397,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get stylesheets for amp-custom.
 	 *
 	 * @since 0.7
-	 * @returns array Values are the CSS stylesheets.
+	 * @return array Values are the CSS stylesheets.
 	 */
 	public function get_stylesheets() {
 		return wp_list_pluck(

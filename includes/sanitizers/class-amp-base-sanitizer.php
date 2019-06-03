@@ -193,7 +193,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Get stylesheets.
 	 *
 	 * @since 0.7
-	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 * @return array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
 	 */
 	public function get_stylesheets() {
 		$stylesheets = array();
