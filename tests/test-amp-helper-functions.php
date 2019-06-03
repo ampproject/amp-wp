@@ -145,7 +145,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$add_anchor_fragment = function( $url ) {
+		$add_anchor_fragment = static function( $url ) {
 			return $url . '#anchor';
 		};
 
@@ -285,7 +285,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_add_amphtml_link( $canonical_url, $amphtml_url ) {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
-		$get_amp_html_link = function() {
+		$get_amp_html_link = static function() {
 			return get_echo( 'amp_add_amphtml_link' );
 		};
 
@@ -611,7 +611,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Make sure the style and whitelist sanitizers are always at the end, even after filtering.
 		add_filter(
 			'amp_content_sanitizers',
-			function( $classes ) {
+			static function( $classes ) {
 				$classes['Even_After_Whitelist_Sanitizer'] = array();
 				return $classes;
 			}
@@ -936,7 +936,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$self = $this;
 		add_filter(
 			'amp_post_template_metadata',
-			function( $meta, $post ) use ( $self, $post_id ) {
+			static function( $meta, $post ) use ( $self, $post_id ) {
 				$self->assertEquals( $post_id, $post->ID );
 				$meta['did_amp_post_template_metadata'] = true;
 				$self->assertArrayNotHasKey( 'amp_schemaorg_metadata', $meta );
@@ -947,7 +947,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_schemaorg_metadata',
-			function( $meta ) use ( $self ) {
+			static function( $meta ) use ( $self ) {
 				$meta['did_amp_schemaorg_metadata'] = true;
 				$self->assertArrayHasKey( 'did_amp_post_template_metadata', $meta );
 				$meta['author']['name'] = 'George';

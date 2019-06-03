@@ -272,7 +272,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'reference-points-amp-story' => call_user_func(
-				function () {
+				static function () {
 					$html = str_replace(
 						array( "\n", "\t" ),
 						'',
@@ -548,7 +548,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_amp_accordion_value' => call_user_func(
-				function() {
+				static function() {
 					$html = str_replace(
 						array( "\n", "\t" ),
 						'',
@@ -1518,7 +1518,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			array(
-				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
 					$actual_error_codes[] = $error['code'];
 					return true;
 				},
@@ -1650,7 +1650,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
 					$actual_error_codes[] = $error['code'];
 					return true;
 				},
@@ -1770,7 +1770,7 @@ EOB;
 			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 				$dom,
 				array(
-					'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
+					'validation_error_callback' => static function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
 						$expected = $expected_errors[ $error_index ];
 						$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 						$tag = $expected['node_name'];

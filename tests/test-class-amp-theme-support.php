@@ -107,7 +107,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'available_callback' => function() {
+				'available_callback' => static function() {
 					return (bool) wp_rand( 0, 1 );
 				},
 			)
@@ -283,7 +283,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$redirect_status_code = null;
 		add_filter(
 			'wp_redirect_status',
-			function( $code ) use ( &$redirect_status_code ) {
+			static function( $code ) use ( &$redirect_status_code ) {
 				$redirect_status_code = $code;
 				return $code;
 			},
@@ -366,7 +366,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_supportable_templates',
-			function( $supportable_templates ) {
+			static function( $supportable_templates ) {
 				$supportable_templates['is_singular']['supported'] = true;
 				$supportable_templates['is_search']['supported']   = false;
 				return $supportable_templates;
@@ -573,7 +573,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_special', 'is_custom' ) );
 		add_filter(
 			'amp_supportable_templates',
-			function( $templates ) {
+			static function( $templates ) {
 				$templates['is_single']        = array(
 					'label'     => 'Single post',
 					'supported' => false,
@@ -582,7 +582,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				$templates['is_special']       = array(
 					'label'    => 'Special post',
 					'parent'   => 'is_single',
-					'callback' => function( WP_Query $query ) {
+					'callback' => static function( WP_Query $query ) {
 						return $query->is_singular() && 'special' === get_post( $query->get_queried_object_id() )->post_name;
 					},
 				);
@@ -593,14 +593,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				);
 				$templates['is_custom']        = array(
 					'label'    => 'Custom',
-					'callback' => function( WP_Query $query ) {
+					'callback' => static function( WP_Query $query ) {
 						return false !== $query->get( 'custom', false );
 					},
 				);
 				$templates['is_custom[thing]'] = array(
 					'label'    => 'Custom Thing',
 					'parent'   => 'is_custom',
-					'callback' => function( WP_Query $query ) {
+					'callback' => static function( WP_Query $query ) {
 						return 'thing' === $query->get( 'custom', false );
 					},
 				);
@@ -609,7 +609,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		add_filter(
 			'query_vars',
-			function( $vars ) {
+			static function( $vars ) {
 				$vars[] = 'custom';
 				return $vars;
 			}
@@ -772,13 +772,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test inclusion of custom template, forcing category to be not-supported, and singular to be supported.
 		add_filter(
 			'amp_supportable_templates',
-			function( $templates ) {
+			static function( $templates ) {
 				$templates['is_category']['supported'] = false;
 				$templates['is_singular']['supported'] = true;
 
 				$templates['is_custom'] = array(
 					'label'    => 'Custom',
-					'callback' => function( WP_Query $query ) {
+					'callback' => static function( WP_Query $query ) {
 						return false !== $query->get( 'custom', false );
 					},
 				);
@@ -1233,7 +1233,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		ob_start();
 		echo 'foo';
 		ob_start(
-			function( $response ) {
+			static function( $response ) {
 					return strtoupper( $response );
 			}
 		);
@@ -1314,7 +1314,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_filter(
 			'home_url',
-			function ( $url ) {
+			static function ( $url ) {
 				return set_url_scheme( $url, 'https' );
 			}
 		);
@@ -1327,7 +1327,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// phpcs:disable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$original_html = $this->get_original_html();
 
-		$call_prepare_response = function() use ( $original_html, &$prepare_response_args ) {
+		$call_prepare_response = static function() use ( $original_html, &$prepare_response_args ) {
 			AMP_HTTP::$headers_sent                     = array();
 			AMP_Validation_Manager::$validation_results = array();
 			return AMP_Theme_Support::prepare_response( $original_html, $prepare_response_args );
@@ -1571,21 +1571,21 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				wp_enqueue_script( 'amp-list' );
 			wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', array(), null ); // phpcs:ignore
 			}
 		);
 		add_action(
 			'wp_print_scripts',
-			function() {
+			static function() {
 				echo '<!-- wp_print_scripts -->';
 			}
 		);
 
 		add_filter(
 			'script_loader_tag',
-			function( $tag, $handle ) {
+			static function( $tag, $handle ) {
 				if ( ! wp_scripts()->get_data( $handle, 'conditional' ) ) {
 					$tag = preg_replace( '/(?<=<script)/', " handle='$handle' ", $tag );
 				}
@@ -1597,7 +1597,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_action(
 			'wp_footer',
-			function() {
+			static function() {
 				wp_print_scripts( 'amp-mathml' );
 				?>
 			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
@@ -1608,7 +1608,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		add_filter(
 			'get_site_icon_url',
-			function() {
+			static function() {
 				return home_url( '/favicon.png' );
 			}
 		);
@@ -1669,7 +1669,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	private function get_server_timing_headers() {
 		return array_filter(
 			AMP_HTTP::$headers_sent,
-			function( $header ) {
+			static function( $header ) {
 				return 'Server-Timing' === $header['name'];
 			}
 		);
@@ -1751,7 +1751,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				$sanitizers['AMP_Theme_Support_Sanitizer_Counter'] = array();
 				return $sanitizers;
 			}
@@ -1775,7 +1775,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$redirects = array();
 		add_filter(
 			'wp_redirect',
-			function( $url ) use ( &$redirects ) {
+			static function( $url ) use ( &$redirects ) {
 				array_unshift( $redirects, $url );
 				return '';
 			}

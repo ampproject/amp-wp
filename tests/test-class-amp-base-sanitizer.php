@@ -281,7 +281,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer(
 			$dom,
 			array(
-				'validation_error_callback' => function( $error, $context ) use ( $that ) {
+				'validation_error_callback' => static function( $error, $context ) use ( $that ) {
 					$that->assertEquals(
 						array(
 							'node_name'          => 'onload',
@@ -311,7 +311,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer = new AMP_Video_Sanitizer(
 			$dom,
 			array(
-				'validation_error_callback' => function( $error, $context ) use ( $that ) {
+				'validation_error_callback' => static function( $error, $context ) use ( $that ) {
 					$that->assertEquals(
 						array(
 							'node_name'          => 'onload',

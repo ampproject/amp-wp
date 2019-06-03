@@ -1322,7 +1322,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function test_handle_clear_empty_terms_request() {
 		add_filter(
 			'wp_redirect',
-			function() {
+			static function() {
 				throw new Exception( 'redirected' );
 			}
 		);

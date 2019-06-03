@@ -22,7 +22,7 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		// Mock the HTTP request.
 		add_filter(
 			'pre_oembed_result',
-			function( $pre, $url ) {
+			static function( $pre, $url ) {
 				if ( false === strpos( $url, 'tautwhoppingcougar' ) ) {
 					return $pre;
 				}

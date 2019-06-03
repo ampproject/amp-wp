@@ -164,7 +164,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_analytics_entries',
-			function () {
+			static function () {
 				return array(
 					array(
 						'type'   => 'foo',
@@ -222,8 +222,8 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_handle_service_worker_iframe_install() {
 		add_filter(
 			'wp_die_handler',
-			function () {
-				return function() {
+			static function () {
+				return static function() {
 					throw new Exception( 'exited' );
 				};
 			}

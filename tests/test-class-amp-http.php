@@ -190,13 +190,13 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		// Note that filters are used instead of updating option because of WP_HOME and WP_SITEURL constants.
 		add_filter(
 			'home_url',
-			function () {
+			static function () {
 				return 'https://example.com';
 			}
 		);
 		add_filter(
 			'site_url',
-			function () {
+			static function () {
 				return 'https://example.org';
 			}
 		);
@@ -399,7 +399,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
-			function () {
+			static function () {
 				return '__return_false';
 			}
 		);
@@ -509,7 +509,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
-			function() {
+			static function() {
 				return '__return_null';
 			}
 		);
@@ -533,7 +533,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		add_filter( 'wp_doing_ajax', '__return_true' );
 		add_filter(
 			'wp_die_ajax_handler',
-			function() {
+			static function() {
 				return '__return_null';
 			}
 		);
@@ -563,7 +563,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_comment_posted_message',
-			function( $message, WP_Comment $filter_comment ) {
+			static function( $message, WP_Comment $filter_comment ) {
 				return sprintf( '(comment=%d,approved=%d)', $filter_comment->comment_ID, $filter_comment->comment_approved );
 			},
 			10,

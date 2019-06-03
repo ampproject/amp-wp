@@ -324,7 +324,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return new WP_Error( 'http_request_made' );
 			}
 		);
@@ -432,7 +432,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals(
 			$field['results'],
 			array_map(
-				function ( $error ) {
+				static function ( $error ) {
 					return array(
 						'sanitized'   => false,
 						'error'       => $error,
@@ -448,7 +448,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// PUT request.
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return array(
 					'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
 					'response' => array(
@@ -500,7 +500,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$node = $this->node;
 		add_filter(
 			'amp_validation_error',
-			function( $error, $context ) use ( $node, $that ) {
+			static function( $error, $context ) use ( $node, $that ) {
 				$error['filtered'] = true;
 				$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
 				$that->assertSame( $node, $context['node'] );
@@ -932,13 +932,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertNotContains( '<!--/amp-source-stack ', $output );
 
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
-		$handle_outer_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+		$handle_outer_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
 			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			do_action( 'inner_action' );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 		};
-		$handle_inner_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+		$handle_inner_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
 			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			echo '<b>Hello</b>';
@@ -989,7 +989,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		add_shortcode(
 			'test',
-			function() {
+			static function() {
 				return '<b>test</b>';
 			}
 		);
@@ -1055,7 +1055,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_filter_wrapped_callback() {
 		$test_string     = 'Filter-amended Value';
 		$filter_callback = array(
-			'function'      => function ( $value ) use ( $test_string ) {
+			'function'      => static function ( $value ) use ( $test_string ) {
 				return $value . $test_string;
 			},
 			'accepted_args' => 1,
@@ -1085,7 +1085,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_action_wrapped_callback() {
 		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
 		$action_callback = array(
-			'function'      => function() use ( $test_string ) {
+			'function'      => static function() use ( $test_string ) {
 				echo $test_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			'accepted_args' => 1,
@@ -1264,7 +1264,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		self::factory()->post->create();
-		$filter = function() use ( $validation ) {
+		$filter = static function() use ( $validation ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
@@ -1295,7 +1295,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Test headers absent.
 		self::factory()->post->create();
-		$filter = function() use ( $validation_errors ) {
+		$filter = static function() use ( $validation_errors ) {
 			return array(
 				'body'    => '',
 				'headers' => array(),
@@ -1310,7 +1310,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// Test success.
 		$that          = $this;
 		$validated_url = home_url( '/foo/' );
-		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
+		$filter        = static function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
 			unset( $pre, $r );
 			$that->assertStringStartsWith(
 				add_query_arg(

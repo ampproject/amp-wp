@@ -22,7 +22,7 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 		// Mock the HTTP request.
 		add_filter(
 			'pre_http_request',
-			function( $pre, $r, $url ) {
+			static function( $pre, $r, $url ) {
 				unset( $r );
 				if ( false === strpos( $url, '771496' ) ) {
 					return $pre;

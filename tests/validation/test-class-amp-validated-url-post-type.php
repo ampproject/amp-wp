@@ -179,7 +179,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		add_filter(
 			'amp_validation_error_sanitized',
-			function( $sanitized, $error ) {
+			static function( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
 					$sanitized = true;
 				} elseif ( 'rejected' === $error['code'] ) {
@@ -311,7 +311,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		// Check URL scheme.
 		add_filter(
 			'home_url',
-			function ( $url ) {
+			static function ( $url ) {
 				return set_url_scheme( $url, 'http' );
 			},
 			10
@@ -319,7 +319,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( 'http', wp_parse_url( AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id ), PHP_URL_SCHEME ) );
 		add_filter(
 			'home_url',
-			function ( $url ) {
+			static function ( $url ) {
 				return set_url_scheme( $url, 'https' );
 			},
 			10
@@ -340,7 +340,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		add_filter(
 			'amp_validation_error_sanitized',
-			function( $sanitized, $error ) {
+			static function( $sanitized, $error ) {
 				if ( 'accepted' === $error['code'] ) {
 					$sanitized = true;
 				} elseif ( 'rejected' === $error['code'] ) {
@@ -449,7 +449,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals(
 			$errors,
 			array_map(
-				function( $stored_error ) {
+				static function( $stored_error ) {
 					return $stored_error['data'];
 				},
 				$stored_errors
@@ -757,14 +757,14 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$this->assertEquals( $initial_redirect, AMP_Validated_URL_Post_Type::handle_bulk_action( $initial_redirect, 'trash', $items ) );
 
 		$that   = $this;
-		$filter = function() use ( $that ) {
+		$filter = static function() use ( $that ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
 					'AMP_VALIDATION:' . wp_json_encode(
 						array(
 							'results' => array_map(
-								function( $error ) {
+								static function( $error ) {
 									return array_merge(
 										compact( 'error' ),
 										array( 'sanitized' => false )
@@ -793,7 +793,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		// Test error scenario.
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return array(
 					'body' => '<html></html>',
 				);
@@ -877,7 +877,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		$exception = null;
 		add_filter(
 			'wp_redirect',
-			function( $url, $status ) {
+			static function( $url, $status ) {
 				throw new Exception( $url, $status );
 			},
 			10,
@@ -885,14 +885,14 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		);
 
 		$that   = $this;
-		$filter = function() use ( $that ) {
+		$filter = static function() use ( $that ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
 					'AMP_VALIDATION:' . wp_json_encode(
 						array(
 							'results' => array_map(
-								function( $error ) {
+								static function( $error ) {
 									return array_merge(
 										compact( 'error' ),
 										array( 'sanitized' => false )
@@ -907,7 +907,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		};
 		add_filter( 'pre_http_request', $filter, 10, 3 );
 
-		$handle_validate_request = function() {
+		$handle_validate_request = static function() {
 			try {
 				AMP_Validated_URL_Post_Type::handle_validate_request();
 			} catch ( Exception $exception ) {
@@ -1014,7 +1014,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		);
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return array(
 					'body' => sprintf(
 						'<html amp><head></head><body></body><!--%s--></html>',
@@ -1078,7 +1078,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		);
 		add_filter(
 			'pre_http_request',
-			function() use ( $error ) {
+			static function() use ( $error ) {
 				return array(
 					'body' => sprintf(
 						'<html amp><head></head><body></body><!--%s--></html>',
@@ -1107,7 +1107,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 
 		add_filter(
 			'wp_redirect',
-			function( $url, $status ) {
+			static function( $url, $status ) {
 				throw new Exception( $url, $status );
 			},
 			10,

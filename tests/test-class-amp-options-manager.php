@@ -470,7 +470,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'theme_support', 'native' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
-		$filter = function() {
+		$filter = static function() {
 			$validation = array(
 				'results' => array(
 					array(
@@ -518,7 +518,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'theme_support', 'native' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
-		$filter = function() {
+		$filter = static function() {
 			return array(
 				'body' => '<html amp><head></head><body></body>',
 			);
@@ -553,7 +553,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'theme_support', 'paired' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
-		$filter = function() {
+		$filter = static function() {
 			$validation = array(
 				'results' => array(
 					array(
