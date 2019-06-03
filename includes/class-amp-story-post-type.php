@@ -273,7 +273,7 @@ class AMP_Story_Post_Type {
 
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
 
@@ -290,7 +290,7 @@ class AMP_Story_Post_Type {
 		// Omit the core theme sanitizer for the story template.
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
 				}
@@ -366,7 +366,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -399,7 +399,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -924,7 +924,7 @@ class AMP_Story_Post_Type {
 		}
 
 		$fonts = array_map(
-			function ( $font ) use ( $fonts_url, $subsets ) {
+			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
 				if ( isset( $font['gfont'] ) ) {
@@ -955,7 +955,7 @@ class AMP_Story_Post_Type {
 	public static function get_font( $name ) {
 		$fonts = array_filter(
 			self::get_fonts(),
-			function ( $font ) use ( $name ) {
+			static function ( $font ) use ( $name ) {
 				return $font['name'] === $name;
 			}
 		);
@@ -1347,7 +1347,7 @@ class AMP_Story_Post_Type {
 		// Check if the rewrite rule for showing preview exists for different permalink settings.
 		$story_rules = array_filter(
 			array_keys( $current_rules ),
-			function( $rule ) {
+			static function( $rule ) {
 				return 0 === strpos( $rule, self::REWRITE_SLUG ) || false !== strpos( $rule, '/' . self::REWRITE_SLUG . '/' );
 			}
 		);

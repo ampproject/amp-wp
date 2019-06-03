@@ -144,7 +144,7 @@ class AMP_Theme_Support {
 		} elseif ( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
 			add_action(
 				'wp',
-				function () {
+				static function () {
 					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 						self::finish_init();
 					}
@@ -783,7 +783,7 @@ class AMP_Theme_Support {
 			$templates[ sprintf( 'is_tax[%s]', $taxonomy->name ) ] = array(
 				'label'    => $taxonomy->labels->name,
 				'parent'   => 'is_archive',
-				'callback' => function ( WP_Query $query ) use ( $taxonomy ) {
+				'callback' => static function ( WP_Query $query ) use ( $taxonomy ) {
 					return $query->is_tax( $taxonomy->name );
 				},
 			);
@@ -797,7 +797,7 @@ class AMP_Theme_Support {
 			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = array(
 				'label'    => $post_type->labels->archives,
 				'parent'   => 'is_archive',
-				'callback' => function ( WP_Query $query ) use ( $post_type ) {
+				'callback' => static function ( WP_Query $query ) use ( $post_type ) {
 					return $query->is_post_type_archive( $post_type->name );
 				},
 			);
@@ -883,13 +883,13 @@ class AMP_Theme_Support {
 		// Prevent MediaElement.js scripts/styles from being enqueued.
 		add_filter(
 			'wp_video_shortcode_library',
-			function() {
+			static function() {
 				return 'amp';
 			}
 		);
 		add_filter(
 			'wp_audio_shortcode_library',
-			function() {
+			static function() {
 				return 'amp';
 			}
 		);
@@ -897,7 +897,7 @@ class AMP_Theme_Support {
 		// Don't show loading indicator on custom logo since it makes most sense for larger images.
 		add_filter(
 			'get_custom_logo',
-			function( $html ) {
+			static function( $html ) {
 				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
@@ -918,14 +918,14 @@ class AMP_Theme_Support {
 		 */
 		add_action(
 			'wp_head',
-			function() {
+			static function() {
 				echo '<style amp-custom></style>';
 			},
 			0
 		);
 		add_action(
 			'wp_head',
-			function() {
+			static function() {
 				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			PHP_INT_MAX
@@ -956,14 +956,14 @@ class AMP_Theme_Support {
 		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
 		add_action(
 			'wp_print_footer_scripts',
-			function() {
+			static function() {
 				wp_dequeue_script( 'wp-custom-header' );
 			},
 			0
 		);
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
@@ -1284,7 +1284,7 @@ class AMP_Theme_Support {
 		// Remove customize support script since not valid AMP.
 		add_action(
 			'admin_bar_menu',
-			function() {
+			static function() {
 				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
 			},
 			41
@@ -1309,7 +1309,7 @@ class AMP_Theme_Support {
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(
 			'body_class',
-			function( $body_classes ) {
+			static function( $body_classes ) {
 				return array_merge(
 					array_diff(
 						$body_classes,
@@ -1869,7 +1869,7 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
+			$cache_response = static function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
 				$caches_for_url[] = $response_cache_key;
 				wp_cache_set(
 					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY,

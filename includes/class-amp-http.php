@@ -146,7 +146,7 @@ class AMP_HTTP {
 		}
 
 		if ( isset( $scrubbed ) ) {
-			$build_query = function ( $query ) use ( $query_vars ) {
+			$build_query = static function ( $query ) use ( $query_vars ) {
 				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
 				$pairs   = array();
 				foreach ( explode( '&', $query ) as $pair ) {
@@ -319,7 +319,7 @@ class AMP_HTTP {
 		// Add die handler for AMP error display, most likely due to problem with comment.
 		add_filter(
 			'wp_die_handler',
-			function () {
+			static function () {
 				return array( __CLASS__, 'handle_wp_die' );
 			}
 		);

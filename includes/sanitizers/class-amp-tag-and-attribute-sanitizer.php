@@ -1426,7 +1426,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'srcset' === $attribute_node->nodeName || 'srcset' === $spec_attr_name ) {
 			return array_filter(
 				array_map(
-					function ( $srcset_part ) {
+					static function ( $srcset_part ) {
 						// Remove descriptors for width and pixel density.
 						return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
 					},
