@@ -530,7 +530,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function( $preempt, $request, $url ) {
-				unset( $request, $preempt );
 				$preempt = array(
 					'response' => array(
 						'code' => 200,
@@ -1505,7 +1504,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
-				unset( $request );
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = array(
@@ -2122,7 +2120,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'pre_http_request',
 			static function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
 				$http_request_count++;
-				unset( $request );
 				if ( $mock_response ) {
 					$body = $mock_response( $url, $stylesheet_urls );
 					if ( null !== $body ) {

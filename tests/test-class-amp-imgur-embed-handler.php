@@ -23,7 +23,6 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 		add_filter(
 			'pre_http_request',
 			static function( $pre, $r, $url ) {
-				unset( $r );
 				if ( false === strpos( $url, 'f462IUj' ) ) {
 					return $pre;
 				}

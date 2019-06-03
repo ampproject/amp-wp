@@ -48,7 +48,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function oembed( $matches, $attr, $url ) {
 		_deprecated_function( __METHOD__, '0.6' );
-		unset( $matches, $attr );
 		$track_id = $this->get_track_id_from_url( $url );
 		return $this->render( compact( 'track_id' ) );
 	}

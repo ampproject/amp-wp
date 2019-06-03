@@ -1241,7 +1241,6 @@ class AMP_Theme_Support {
 	 * @return string Cancel reply link.
 	 */
 	public static function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
-		unset( $formatted_link, $link );
 		if ( empty( $text ) ) {
 			$text = __( 'Click here to cancel reply.', 'default' );
 		}

@@ -587,7 +587,6 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  */
 function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href ) {
 	static $allowed_font_src_regex = null;
-	unset( $handle );
 	if ( ! $allowed_font_src_regex ) {
 		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {

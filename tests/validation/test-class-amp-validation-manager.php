@@ -1311,7 +1311,6 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$that          = $this;
 		$validated_url = home_url( '/foo/' );
 		$filter        = static function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
-			unset( $pre, $r );
 			$that->assertStringStartsWith(
 				add_query_arg(
 					AMP_Validation_Manager::VALIDATE_QUERY_VAR,

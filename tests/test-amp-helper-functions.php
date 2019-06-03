@@ -1022,7 +1022,6 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @return string $site_icon The filtered publisher logo in the schema.org data.
 	 */
 	public static function mock_site_icon( $site_icon ) {
-		unset( $site_icon );
 		return self::MOCK_SITE_ICON;
 	}
 }

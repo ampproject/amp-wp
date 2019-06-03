@@ -70,7 +70,6 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
-		unset( $r );
 		if ( false !== strpos( $url, 'soundcloud.com' ) ) {
 			return array(
 				'body'          => $this->oembed_response,

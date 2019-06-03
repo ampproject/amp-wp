@@ -1481,7 +1481,6 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array All caps.
 	 */
 	public static function filter_user_has_cap_for_hiding_term_list_table_checkbox( $allcaps, $caps, $args ) {
-		unset( $caps );
 		if ( isset( $args[0] ) && 'delete_term' === $args[0] ) {
 			$term  = get_term( $args[2] );
 			$error = json_decode( $term->description, true );
