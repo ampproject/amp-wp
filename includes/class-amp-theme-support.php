@@ -2233,7 +2233,7 @@ class AMP_Theme_Support {
 		// If there is no video, just pass the image through.
 		if ( ! has_header_video() || ! is_header_video_active() ) {
 			return $image_markup;
-		};
+		}
 
 		$video_settings   = get_header_video_settings();
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );
