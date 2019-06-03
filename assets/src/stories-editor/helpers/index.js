@@ -1391,3 +1391,24 @@ export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
 };
+
+/**
+ * Replaces the 'full' image size with a custom size, which has a limited height.
+ *
+ * This prevents the user from selecting an image in the Image block that's too big.
+ * For example, 3200 x 4000.
+ */
+export const replaceFullSizeImage = () => {
+	const blockEditorStore = 'core/block-editor';
+	const initialSizes = select( blockEditorStore ).getSettings( 'imageSizes' ).imageSizes;
+	const sizesWithoutFullSize = initialSizes.filter( ( size ) => {
+		return 'full' !== size.slug;
+	} );
+	sizesWithoutFullSize.push(
+		{
+			slug: 'amp_story_page',
+			name: __( 'AMP Story Max Size', 'amp' ),
+		}
+	);
+	dispatch( blockEditorStore ).updateSettings( { 'imageSizes': sizesWithoutFullSize } );
+}

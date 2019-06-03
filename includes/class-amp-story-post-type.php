@@ -39,7 +39,7 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
-	 * The default image size for the image block and background media in an AMP Story page.
+	 * The largest image size for the image block in an AMP Story page.
 	 *
 	 * @var string
 	 */
