@@ -50,8 +50,8 @@ after_script:
 jobs:
   fast_finish: true
   allow_failures:
-    - stage: bleeding-edge
-    - stage: coverage
+    - name: PHP unit tests (7.3, WordPress trunk)
+    - name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
@@ -106,13 +106,11 @@ jobs:
       php: "5.4"
       env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax
 
-    - stage: bleeding-edge
-      name: PHP unit tests (7.3, WordPress trunk)
+    - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
       env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
 
-    - stage: coverage
-      name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
+    - name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
       if: branch = develop
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
