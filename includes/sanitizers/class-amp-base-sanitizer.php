@@ -199,7 +199,7 @@ abstract class AMP_Base_Sanitizer {
 		$stylesheets = array();
 
 		foreach ( $this->get_styles() as $selector => $properties ) {
-			$stylesheet = sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' );
+			$stylesheet = sprintf( '%s { %s }', $selector, implode( '; ', $properties ) . ';' );
 
 			$stylesheets[ md5( $stylesheet ) ] = $stylesheet;
 		}

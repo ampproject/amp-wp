@@ -640,13 +640,13 @@ class AMP_Options_Manager {
 			case 'native':
 				$message = esc_html__( 'Native mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case 'paired':
 				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case 'disabled':

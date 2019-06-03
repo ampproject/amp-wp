@@ -147,7 +147,7 @@ class AMP_HTTP {
 
 		if ( isset( $scrubbed ) ) {
 			$build_query = static function ( $query ) use ( $query_vars ) {
-				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
+				$pattern = '/^(' . implode( '|', $query_vars ) . ')(?==|$)/';
 				$pairs   = array();
 				foreach ( explode( '&', $query ) as $pair ) {
 					if ( ! preg_match( $pattern, $pair ) ) {
@@ -155,7 +155,7 @@ class AMP_HTTP {
 					}
 				}
 
-				return join( '&', $pairs );
+				return implode( '&', $pairs );
 			};
 
 			// Scrub QUERY_STRING.

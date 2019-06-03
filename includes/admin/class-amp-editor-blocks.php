@@ -127,7 +127,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function tally_content_requiring_amp_scripts( $content ) {
 		if ( ! is_amp_endpoint() ) {
-			$pattern = sprintf( '/<(%s)\b.*?>/s', join( '|', $this->amp_blocks ) );
+			$pattern = sprintf( '/<(%s)\b.*?>/s', implode( '|', $this->amp_blocks ) );
 			if ( preg_match_all( $pattern, $content, $matches ) ) {
 				$this->content_required_amp_scripts = array_merge(
 					$this->content_required_amp_scripts,

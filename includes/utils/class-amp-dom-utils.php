@@ -320,7 +320,7 @@ class AMP_DOM_Utils {
 		};
 
 		// Match all start tags that contain a binding attribute.
-		$pattern   = join(
+		$pattern   = implode(
 			'',
 			array(
 				'#<',

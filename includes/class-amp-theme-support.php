@@ -189,8 +189,8 @@ class AMP_Theme_Support {
 						sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 							/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
 							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-							join( ', ', $keys ),
-							join( ', ', array_keys( $args ) )
+							implode( ', ', $keys ),
+							implode( ', ', array_keys( $args ) )
 						)
 					),
 					'1.0'
