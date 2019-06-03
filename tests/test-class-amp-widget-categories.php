@@ -74,7 +74,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 			'title'    => 'Test Categories Widget',
 			'dropdown' => 1,
 		);
-		$output = get_echo( array( $this->widget, 'widget' ), array(  $arguments, $instance ) );
+		$output    = get_echo( array( $this->widget, 'widget' ), array( $arguments, $instance ) );
 
 		$this->assertContains( 'on="change:', $output );
 		$this->assertNotContains( '<script type=', $output );

@@ -972,7 +972,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		$count                      = 5;
 		$_GET['amp_actioned_count'] = $count;
 		$current_screen->taxonomy   = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
-		$message = get_echo( array( 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ) );
+		$message                    = get_echo( array( 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ) );
 		$this->assertEquals(
 			sprintf( '<div class="notice notice-success is-dismissible"><p>Accepted %s errors. They will no longer block related URLs from being served as AMP.</p></div>', $count ),
 			$message
@@ -980,7 +980,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 
 		// Test the second conditional, where the error is rejected.
 		$_GET['amp_actioned'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_REJECT_ACTION;
-		$message = get_echo( array( 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ) );
+		$message              = get_echo( array( 'AMP_Validation_Error_Taxonomy', 'add_admin_notices' ) );
 		$this->assertEquals(
 			sprintf( '<div class="notice notice-success is-dismissible"><p>Rejected %s errors. They will continue to block related URLs from being served as AMP.</p></div>', $count ),
 			$message
