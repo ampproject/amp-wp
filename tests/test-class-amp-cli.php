@@ -304,7 +304,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			$offset                    = 10;
 			$actual_links_using_offset = AMP_CLI::get_taxonomy_links( $taxonomy, $offset, $number_of_links );
 			$this->assertEquals( array_slice( $expected_links, $offset, $number_of_links ), array_values( $actual_links_using_offset ) );
-			$this->assertEquals( $number_of_links, count( $actual_links_using_offset ) );
+			$this->assertCount( $number_of_links, $actual_links_using_offset );
 		}
 	}
 
@@ -347,7 +347,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
-		$this->assertTrue( is_string( AMP_CLI::get_search_page() ) );
+		$this->assertInternalType( 'string', AMP_CLI::get_search_page() );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
 		AMP_CLI::$include_conditionals = array( 'is_author' );
@@ -355,7 +355,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 		// If $include_conditionals has is_search, this should return a URL.
 		AMP_CLI::$include_conditionals = array( 'is_search' );
-		$this->assertTrue( is_string( AMP_CLI::get_search_page() ) );
+		$this->assertInternalType( 'string', AMP_CLI::get_search_page() );
 		AMP_CLI::$include_conditionals = array();
 	}
 
@@ -401,7 +401,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		AMP_CLI::crawl_site();
 
 		// All of the posts created above should be present in $validated_urls.
-		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
 			$terms[] = self::factory()->category->create();
@@ -411,11 +411,11 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		wp_set_post_terms( $posts[0], $terms, 'category' );
 		AMP_CLI::crawl_site();
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
-		$actual_validated_urls   = self::get_validated_urls();
+		$actual_validated_urls   = $this->get_validated_urls();
 
 		// All of the terms created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $expected_validated_urls, $actual_validated_urls ) );
-		$this->assertTrue( in_array( home_url( '/' ), self::get_validated_urls(), true ) );
+		$this->assertContains( home_url( '/' ), $this->get_validated_urls() );
 	}
 
 	/**
@@ -426,7 +426,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		AMP_CLI::validate_and_store_url( $single_post_permalink, 'post' );
-		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
+		$this->assertContains( $single_post_permalink, $this->get_validated_urls() );
 
 		$number_of_posts = 30;
 		$post_permalinks = array();
@@ -438,7 +438,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		}
 
 		// All of the posts created should be present in the validated URLs.
-		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 	}
 
 	/**

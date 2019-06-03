@@ -729,7 +729,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertFalse( is_numeric( $id ) );
+			$this->assertNotInternalType( 'numeric', $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 			$this->assertTrue( $supportable_template['supported'] );
 			$this->assertFalse( $supportable_template['immutable'] );
@@ -762,7 +762,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		update_option( 'page_on_front', $page_on_front );
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
 		foreach ( $supportable_templates as $id => $supportable_template ) {
-			$this->assertFalse( is_numeric( $id ) );
+			$this->assertNotInternalType( 'numeric', $id );
 			$this->assertArrayHasKey( 'label', $supportable_template, "$id has label" );
 		}
 		$this->assertArrayHasKey( 'is_front_page', $supportable_templates );
@@ -1455,20 +1455,20 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// Test that response cache is return upon second call.
 		$this->assertEquals( $first_response, $call_prepare_response() );
 		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
+		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test new cache upon argument change.
 		$prepare_response_args['test_reset_by_arg'] = true;
 		$call_prepare_response();
 		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
+		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test response is cached.
 		$call_prepare_response();
 		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
+		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
 		$this->reset_post_processor_cache_effectiveness();
 
 		// Test that response is no longer cached due to a change whether validation errors are sanitized.
@@ -1476,7 +1476,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_filter( 'amp_validation_error_sanitized', '__return_false' );
 		$prepared_html         = $call_prepare_response();
 		$server_timing_headers = $this->get_server_timing_headers();
-		$this->assertSame( count( $server_timing_headers ), count( $this->get_server_timing_headers() ) );
+		$this->assertCount( count( $server_timing_headers ), $this->get_server_timing_headers() );
 		$this->assertContains( '<html>', $prepared_html ); // Note: no AMP because unsanitized validation error.
 		$this->reset_post_processor_cache_effectiveness();
 
@@ -1485,7 +1485,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$server_timing_headers     = $this->get_server_timing_headers();
 		$last_server_timing_header = array_pop( $server_timing_headers );
 		$this->assertStringStartsWith( 'amp_processor_cache_hit;', $last_server_timing_header['value'] );
-		$this->assertSame( count( $server_timing_headers ), count( $initial_server_timing_headers ) );
+		$this->assertCount( count( $server_timing_headers ), $initial_server_timing_headers );
 
 		// phpcs:enable WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
@@ -1532,13 +1532,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 			// When we've met the threshold, check that caching did not happen.
 			if ( $num_calls > AMP_Theme_Support::CACHE_MISS_THRESHOLD ) {
-				$this->assertEquals( AMP_Theme_Support::CACHE_MISS_THRESHOLD, count( $caches_for_url ) );
+				$this->assertCount( AMP_Theme_Support::CACHE_MISS_THRESHOLD, $caches_for_url );
 				$this->assertEquals( amp_get_current_url(), $cache_miss_url );
 
 				// Check that response caching was automatically disabled.
 				$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 			} else {
-				$this->assertEquals( $num_calls, count( $caches_for_url ) );
+				$this->assertCount( $num_calls, $caches_for_url );
 				$this->assertFalse( $cache_miss_url );
 				$this->assertTrue( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 			}
@@ -1826,8 +1826,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		wp_dequeue_script( $script_slug );
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertTrue( in_array( $script_slug, wp_scripts()->queue, true ) );
-		$this->assertTrue( in_array( $style_slug, wp_styles()->queue, true ) );
+		$this->assertContains( $script_slug, wp_scripts()->queue );
+		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
 	/**

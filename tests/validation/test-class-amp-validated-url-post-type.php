@@ -38,7 +38,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
 
-		$this->assertTrue( in_array( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types(), true ) );
+		$this->assertContains( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, get_post_types() );
 		$this->assertEquals( array(), get_all_post_type_supports( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
 		$this->assertEquals( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, $amp_post_type->name );
 		$this->assertEquals( 'AMP Validated URLs', $amp_post_type->label );
