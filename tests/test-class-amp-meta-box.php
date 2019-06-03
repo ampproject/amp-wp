@@ -123,7 +123,6 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			array(
 				'lodash',
 				'moment',
-				'react',
 				'wp-block-editor',
 				'wp-blocks',
 				'wp-components',
@@ -131,15 +130,11 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-data',
 				'wp-date',
 				'wp-edit-post',
-				'wp-editor',
 				'wp-element',
 				'wp-hooks',
 				'wp-i18n',
-				'wp-keycodes',
 				'wp-plugins',
 				'wp-polyfill',
-				'wp-url',
-				'wp-wordcount',
 			),
 			$block_script->deps
 		);
