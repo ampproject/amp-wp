@@ -98,7 +98,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 1, count( $options ) );
+		$this->assertCount( 1, $options );
 	}
 
 	/**
@@ -119,7 +119,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 2, count( $options ) );
+		$this->assertCount( 2, $options );
 	}
 
 	/**
@@ -226,7 +226,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 
 		$analytics = amp_get_analytics();
-		$this->assertEquals( 1, count( $analytics ) );
+		$this->assertCount( 1, $analytics );
 
 		$key = key( $analytics );
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );

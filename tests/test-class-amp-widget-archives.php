@@ -48,7 +48,7 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 	 * @see AMP_Widget_Archives::__construct().
 	 */
 	public function test_construct() {
-		$this->assertEquals( 'AMP_Widget_Archives', get_class( $this->widget ) );
+		$this->assertInstanceOf( '\\AMP_Widget_Archives', $this->widget );
 		$this->assertEquals( 'archives', $this->widget->id_base );
 		$this->assertEquals( 'Archives', $this->widget->name );
 		$this->assertEquals( 'widget_archive', $this->widget->widget_options['classname'] );

@@ -105,7 +105,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		AMP_Service_Worker::add_image_caching( wp_service_workers()->get_registry() );
 		$after = wp_service_workers()->get_registry()->caching_routes()->get_all();
 
-		$this->assertSame( count( $before ) + 1, count( $after ) );
+		$this->assertCount( count( $before ) + 1, $after );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$before = wp_service_workers()->get_registry()->caching_routes()->get_all();
 		AMP_Service_Worker::add_google_fonts_caching( wp_service_workers()->get_registry() );
 		$after = wp_service_workers()->get_registry()->caching_routes()->get_all();
-		$this->assertSame( count( $before ) + 2, count( $after ) );
+		$this->assertCount( count( $before ) + 2, $after );
 	}
 
 	/**

@@ -65,7 +65,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$removed_shortcode = 'wp_playlist_shortcode';
 		add_shortcode( 'playlist', $removed_shortcode );
 		$this->instance->register_embed();
-		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] ) );
+		$this->assertInstanceOf( '\\AMP_Playlist_Embed_Handler', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] );
 		$this->assertEquals( 'shortcode', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][1] );
 		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode_callback );
 		$this->instance->unregister_embed();
@@ -93,8 +93,8 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertFalse( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
-		$this->assertFalse( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
+		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
 
 		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';

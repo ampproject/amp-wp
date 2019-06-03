@@ -1069,9 +1069,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$value = 'Some Value';
 		apply_filters( 'foo', $value );
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
-		$this->assertTrue( $wrapped_callback instanceof Closure );
+		$this->assertInstanceOf( '\\Closure', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		$filtered_value = call_user_func( $wrapped_callback, $value );
+		$filtered_value = $wrapped_callback( $value );
 		$output = ob_get_clean();
 		$this->assertEquals( $value . $test_string, $filtered_value );
 		$this->assertEmpty( $output, 'Expected no output since no action triggered.' );
@@ -1098,12 +1098,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		do_action( 'bar' ); // So that output buffering will be done.
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertTrue( $wrapped_callback instanceof Closure );
+		$this->assertInstanceOf( '\\Closure', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		call_user_func( $wrapped_callback );
+		$wrapped_callback();
 		$output = ob_get_clean();
 
-		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
+		$this->assertInstanceOf( '\\Closure', $wrapped_callback );
 		$this->assertContains( $test_string, $output );
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
@@ -1119,13 +1119,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertTrue( $wrapped_callback instanceof Closure );
+		$this->assertInstanceOf( '\\Closure', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		$result = call_user_func( $wrapped_callback );
+		$result = $wrapped_callback();
 		$output = ob_get_clean();
-		$this->assertEquals( 'Closure', get_class( $wrapped_callback ) );
+		$this->assertInstanceOf( '\\Closure', $wrapped_callback );
 		$this->assertEquals( '', $output );
-		$this->assertEquals( call_user_func( array( $this, 'get_string' ) ), $result );
+		$this->assertEquals( $this->get_string(), $result );
 		unset( $post );
 	}
 
@@ -1160,7 +1160,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_get_amp_validate_nonce() {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
-		$this->assertTrue( is_string( $nonce ) );
+		$this->assertInternalType( 'string', $nonce );
 		$this->assertEquals( 10, strlen( $nonce ) );
 	}
 
