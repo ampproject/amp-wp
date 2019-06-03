@@ -2,7 +2,6 @@
  * WordPress dependencies
  */
 import { withSelect } from '@wordpress/data';
-import { Fragment } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
 
@@ -59,7 +58,7 @@ export default createHigherOrderComponent(
 			}
 
 			return (
-				<Fragment>
+				<>
 					<div className="amp-story-page-number">
 						{
 							/* translators: %s: Page number */
@@ -67,7 +66,7 @@ export default createHigherOrderComponent(
 						}
 					</div>
 					<BlockEdit { ...props } />
-				</Fragment>
+				</>
 			);
 		} );
 	},

@@ -12,22 +12,17 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	display: flex;
 }
 
-.wp-block-amp-amp-story-cta {
-	color: #fff;
-	margin-bottom: 1.5em;
-}
-
 .wp-block-amp-amp-story-cta.aligncenter {
 	text-align: center;
 }
 
 .wp-block-amp-amp-story-cta.alignright {
+
 	/*rtl:ignore*/
 	text-align: right;
 }
 
 .amp-block-story-cta__link {
-	background-color: #32373c;
 	border: none;
 	box-shadow: none;
 	color: inherit;
@@ -40,13 +35,6 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	text-decoration: none;
 	white-space: normal;
 	overflow-wrap: break-word;
-}
-
-.amp-block-story-cta__link:hover,
-.amp-block-story-cta__link:focus,
-.amp-block-story-cta__link:active,
-.amp-block-story-cta__link:visited {
-	color: inherit;
 }
 
 .is-style-rounded,

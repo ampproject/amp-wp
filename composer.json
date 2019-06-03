@@ -13,13 +13,8 @@
     "ext-libxml": "*",
     "ext-spl": "*",
     "cweagans/composer-patches": "1.6.6",
-    "fasterimage/fasterimage": "1.4.0",
+    "fasterimage/fasterimage": "1.5.0",
     "sabberworm/php-css-parser": "8.3.0"
-  },
-  "suggest": {
-    "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
-    "ext-json": "Provides native implementation of json_encode()/json_decode().",
-    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
@@ -27,10 +22,16 @@
     "wp-coding-standards/wpcs": "2.1.1",
     "xwp/wp-dev-lib": "1.1.1"
   },
+  "suggest": {
+    "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
+    "ext-json": "Provides native implementation of json_encode()/json_decode().",
+    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
+  },
   "config": {
     "platform": {
       "php": "5.4"
-    }
+    },
+    "sort-packages": true
   },
   "extra": {
     "patches": {

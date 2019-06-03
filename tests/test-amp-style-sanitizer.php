@@ -1139,7 +1139,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_class_amp_bind_preservation() {
 		ob_start();
@@ -1192,7 +1192,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Test that auto-removal is performed when remove_unused_rules=sometimes (the default), and that excessive CSS will be removed entirely.
 	 *
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_large_custom_css_and_rule_removal() {
 		$custom_max_size = null;
@@ -2286,6 +2286,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Get prioritization test data.
 	 *
+	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
 	 * @return array
 	 */
 	public function get_prioritization_data() {
@@ -2305,7 +2307,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$render_template = function () {
 			ob_start();
 			?>
-			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body><?php wp_footer(); ?></body></html>
+			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body <?php body_class(); ?>><?php wp_footer(); ?></body></html>
 			<?php
 			return ob_get_clean();
 		};
@@ -2313,6 +2315,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return array(
 			'admin_bar_included' => array(
 				function () use ( $render_template ) {
+					$this->go_to( home_url() );
 					show_admin_bar( true );
 					_wp_admin_bar_init();
 					switch_theme( 'twentyten' );
@@ -2342,6 +2345,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					 */
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
 					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
+					$this->assertContains( 'admin-bar', $original_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
 					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
 
 					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
@@ -2350,6 +2354,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
+					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
 					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			),
@@ -2370,6 +2375,17 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
+		$theme_exists = false;
+		foreach ( $wp_theme_directories as $theme_root ) {
+			$theme_exists = wp_get_theme( 'twentyten', $theme_root )->exists();
+			if ( $theme_exists ) {
+				break;
+			}
+		}
+		if ( ! $theme_exists ) {
+			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
 		}
 
 		add_theme_support( 'amp' );

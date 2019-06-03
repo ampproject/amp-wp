@@ -4,7 +4,7 @@
  * See <https://github.com/ampproject/amphtml/issues/21371#issuecomment-475443219>.
  * Also use object-fit:contain in worst case scenario when we can't figure out dimensions for an image.
  */
-amp-img.amp-wp-enforced-sizes[layout=intrinsic] > img,
+amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,
 .amp-wp-unknown-size > img {
 	object-fit: contain;
 }

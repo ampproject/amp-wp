@@ -9,7 +9,9 @@ module.exports = {
 		'expect-puppeteer',
 	],
 	testPathIgnorePatterns: [
-		'/\.git/',
-		'/node_modules/',
+		'<rootDir>/.git',
+		'<rootDir>/node_modules',
+		'<rootDir>/build',
+		'.*/e2e/.*',
 	],
 };

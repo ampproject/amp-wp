@@ -35,7 +35,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 }
 
 /* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
-.latest_stories__link:after {
+.latest_stories__link::after {
 	display: block;
 	position: absolute;
 	border-radius: 0.5rem;
@@ -51,6 +51,7 @@ div.amp-block-latest-stories > ul.latest-stories-carousel {
 	border-radius: 0.5rem;
 	object-fit: cover; /* For non-AMP. */
 }
+
 amp-img.latest-stories__featured-img > img {
 	object-fit: cover;
 }
@@ -93,8 +94,4 @@ amp-img.latest-stories__featured-img > img {
 	border-bottom: 0;
 	vertical-align: middle;
 	color: #d3d3d3;
-}
-
-.amp-story-embed {
-
 }

@@ -16,13 +16,23 @@
 }
 
 .block-editor-block-list__block .rotatable-box-wrap {
-	box-shadow: -1px 0 rgba(66, 88, 99, .4);
-	width: 0;
-	height: 25px;
 	position: absolute;
-	bottom: -40px;
-	margin-left: 50%;
-	border-left: 1px solid theme( outlines );
+	right: -14px;
+	bottom: -25px;
+	left: calc(50% - 15px);
+	width: 30px;
+	height: 25px;
+}
+
+.block-editor-block-list__block .rotatable-box-wrap::before {
+	display: block;
+	content: "";
+	cursor: inherit;
+	border-left: 1px solid theme(outlines);
+	box-shadow: inset -3px 0 0 0 #555d66;
+	height: 40px;
+	width: 0;
+	margin: 0 auto;
 }
 
 .block-editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
@@ -31,7 +41,7 @@
 	transition: opacity .3s;
 	position: absolute;
 	bottom: -20px;
-	left: calc(50% - 26px);
+	left: calc(50% - 25px);
 	width: 50px;
 	height: 24px;
 	padding: 4px;
@@ -41,7 +51,7 @@
 }
 
 .rotatable-box-wrap .rotatable-box-wrap__handle::before {
-	background: theme( primary );
+	background: theme(primary);
 	border: 2px solid #fff;
 	border-radius: 50%;
 	content: "";
@@ -54,7 +64,7 @@
 
 
 .wp-block .rotatable-box-wrap,
-.wp-block.is-typing .rotatable-box-wrap{
+.wp-block.is-typing .rotatable-box-wrap {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
@@ -65,6 +75,7 @@
 .wp-block.amp-page-active .wp-block.is-rotating .rotatable-box-wrap {
 	opacity: 1;
 }
+
 .wp-block.amp-page-active .wp-block.is-rotating:hover .components-resizable-box__handle,
 .wp-block.amp-page-active .wp-block.is-rotating .components-resizable-box__handle:hover {
 	opacity: 0;

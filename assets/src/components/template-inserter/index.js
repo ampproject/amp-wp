@@ -1,8 +1,8 @@
-
 /**
  * External dependencies
  */
 import { includes } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
@@ -22,9 +22,7 @@ import { BlockPreview } from '../';
 import pageIcon from '../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../images/add-template.svg';
 import './edit.css';
-import { createSkeletonTemplate } from '../../stories-editor/helpers';
-
-const storyPageBlockName = 'amp/amp-story-page';
+import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../stories-editor/helpers';
 
 class TemplateInserter extends Component {
 	constructor() {
@@ -33,19 +31,35 @@ class TemplateInserter extends Component {
 		this.onToggle = this.onToggle.bind( this );
 
 		this.state = {
-			reusableBlocks: [],
+			storyTemplates: [],
 		};
 	}
 
 	componentDidMount() {
-		this.props.fetchReusableBlocks();
+		this.props.fetchStoryTemplates();
 	}
 
 	componentDidUpdate( prevProps ) {
+		const { getBlock } = this.props;
+
 		// This check is needed to make sure that the blocks are loaded in time.
-		if ( prevProps.reusableBlocks !== this.props.reusableBlocks || prevProps.allBlocks !== this.props.allBlocks ) {
+		if ( prevProps.storyTemplates !== this.props.storyTemplates || prevProps.allBlocks !== this.props.allBlocks ) {
+			for ( const template of this.props.storyTemplates ) {
+				const templateBlock = getBlock( template.clientId );
+
+				if ( ! templateBlock ) {
+					continue;
+				}
+
+				for ( const innerBlock of templateBlock.innerBlocks ) {
+					if ( innerBlock.attributes.ampFontFamily ) {
+						maybeEnqueueFontStyle( innerBlock.attributes.ampFontFamily );
+					}
+				}
+			}
+
 			this.setState( {
-				reusableBlocks: this.props.reusableBlocks,
+				storyTemplates: this.props.storyTemplates,
 			} );
 		}
 	}
@@ -78,19 +92,12 @@ class TemplateInserter extends Component {
 					/>
 				) }
 				renderContent={ ( { onClose } ) => {
-					const isStoryBlock = ( clientId ) => {
-						const block = getBlock( clientId );
-						return block && storyPageBlockName === block.name;
-					};
-
 					const onSelect = ( item ) => {
-						const block = ! item ? createBlock( storyPageBlockName ) : getBlock( item.clientId );
+						const block = ! item ? createBlock( 'amp/amp-story-page' ) : getBlock( item.clientId );
 						const skeletonBlock = createSkeletonTemplate( block );
 						insertBlock( skeletonBlock );
 						onClose();
 					};
-
-					const storyTemplates = this.state.reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) );
 
 					return (
 						<div className="amp-stories__editor-inserter__menu">
@@ -111,7 +118,7 @@ class TemplateInserter extends Component {
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ storyTemplates && storyTemplates.map( ( item ) => (
+									{ this.state.storyTemplates.map( ( item ) => (
 										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
 											role="button"
@@ -142,6 +149,15 @@ class TemplateInserter extends Component {
 	}
 }
 
+TemplateInserter.propTypes = {
+	allBlocks: PropTypes.array,
+	insertBlock: PropTypes.func.isRequired,
+	onToggle: PropTypes.func,
+	fetchStoryTemplates: PropTypes.func.isRequired,
+	storyTemplates: PropTypes.array.isRequired,
+	getBlock: PropTypes.func.isRequired,
+};
+
 export default compose(
 	withSelect( ( select ) => {
 		const {
@@ -153,8 +169,15 @@ export default compose(
 			getBlocks,
 		} = select( 'core/block-editor' );
 
+		const reusableBlocks = getReusableBlocks();
+
+		const isStoryBlock = ( clientId ) => {
+			const block = getBlock( clientId );
+			return block && 'amp/amp-story-page' === block.name;
+		};
+
 		return {
-			reusableBlocks: getReusableBlocks(),
+			storyTemplates: reusableBlocks.filter( ( { clientId } ) => isStoryBlock( clientId ) ),
 			getBlock,
 			allBlocks: getBlocks(),
 		};
@@ -167,7 +190,7 @@ export default compose(
 		const { insertBlock } = dispatch( 'core/block-editor' );
 
 		return {
-			fetchReusableBlocks,
+			fetchStoryTemplates: fetchReusableBlocks,
 			insertBlock,
 		};
 	} )

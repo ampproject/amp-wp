@@ -26,7 +26,6 @@
 		<exclude-pattern>includes/embeds/class-amp-vimeo-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-vine-embed.php</exclude-pattern>
 		<exclude-pattern>includes/embeds/class-amp-youtube-embed.php</exclude-pattern>
-		<exclude-pattern>wpcom/class-amp-polldaddy-embed.php</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Arrays.MultipleStatementAlignment.LongIndexSpaceBeforeDoubleArrow">
 		<exclude-pattern>tests/test-tag-and-attribute-sanitizer.php</exclude-pattern>
@@ -92,6 +91,6 @@
 
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
-	<exclude-pattern>build/*</exclude-pattern>
+	<exclude-pattern type="relative">^build/*</exclude-pattern>
 	<exclude-pattern>includes/sanitizers/class-amp-allowed-tags-generated.php</exclude-pattern>
 </ruleset>

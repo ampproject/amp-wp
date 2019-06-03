@@ -67,7 +67,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$button_el = $this->get_menu_button();
 
 		// If no navigation element or no toggle class provided, bail.
-		if ( ! $nav_el || empty( $this->args['nav_container_toggle_class'] ) ) {
+		if ( ! $nav_el ) {
 			if ( $button_el ) {
 
 				// Remove the button since it won't be used.
@@ -83,14 +83,16 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$state_id = 'navMenuToggledOn';
 		$expanded = false;
 
-		$nav_el->setAttribute(
-			AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
-			sprintf(
-				"%s + ( $state_id ? %s : '' )",
-				wp_json_encode( $nav_el->getAttribute( 'class' ) ),
-				wp_json_encode( ' ' . $this->args['nav_container_toggle_class'] )
-			)
-		);
+		if ( ! empty( $this->args['nav_container_toggle_class'] ) ) {
+			$nav_el->setAttribute(
+				AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
+				sprintf(
+					"%s + ( $state_id ? %s : '' )",
+					wp_json_encode( $nav_el->getAttribute( 'class' ) ),
+					wp_json_encode( ' ' . $this->args['nav_container_toggle_class'] )
+				)
+			);
+		}
 
 		$state_el = $this->dom->createElement( 'amp-state' );
 		$state_el->setAttribute( 'id', $state_id );

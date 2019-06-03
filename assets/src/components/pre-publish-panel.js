@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { Notice } from '@wordpress/components';
 import { PluginPrePublishPanel } from '@wordpress/edit-post';
-import { Fragment } from '@wordpress/element';
 import { withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
@@ -15,6 +19,10 @@ import { validateFeaturedImage } from '../common/helpers';
 /**
  * Conditionally adds a notice to the pre-publish panel for the featured image.
  *
+ * @param {Object}  featuredMedia Media object.
+ * @param {Array}   dimensions    Required image dimensions.
+ * @param {boolean} required      Whether selecting a featured image is required.
+ *
  * @return {Function} Either a plain pre-publish panel, or the panel with a featured image notice.
  */
 const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
@@ -25,7 +33,7 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 	}
 
 	return (
-		<Fragment>
+		<>
 			<PluginPrePublishPanel
 				title={ __( 'Featured Image', 'amp' ) }
 				initialOpen="true"
@@ -43,8 +51,17 @@ const PrePublishPanel = ( { featuredMedia, dimensions, required } ) => {
 					} ) }
 				</Notice>
 			</PluginPrePublishPanel>
-		</Fragment>
+		</>
 	);
+};
+
+PrePublishPanel.propTypes = {
+	featuredMedia: PropTypes.object,
+	dimensions: PropTypes.shape( {
+		width: PropTypes.number.isRequired,
+		height: PropTypes.number.isRequired,
+	} ),
+	required: PropTypes.bool,
 };
 
 export default withSelect( ( select ) => {

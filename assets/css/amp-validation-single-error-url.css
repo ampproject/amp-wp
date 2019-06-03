@@ -158,6 +158,7 @@ table.striped > tbody > tr.even {
 	height: 30px;
 	border-right: 1px solid #a0a5aa;
 }
+
 .amp-validation-error-status {
 	width: auto;
 	float: none;

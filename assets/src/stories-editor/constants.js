@@ -66,6 +66,14 @@ export const BLOCKS_WITH_TEXT_SETTINGS = [
 	'amp/amp-story-post-title',
 ];
 
+export const BLOCKS_WITH_COLOR_SETTINGS = [
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
+	'amp/amp-story-cta',
+];
+
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
@@ -101,23 +109,6 @@ export const ANIMATION_DURATION_DEFAULTS = {
 	'pan-up': 1000,
 	'zoom-in': 1000,
 	'zoom-out': 1000,
-};
-
-export const BLOCK_TAG_MAPPING = {
-	'core/button': 'div.wp-block-button',
-	'core/code': 'pre',
-	'core/embed': 'figure',
-	'core/image': '.wp-block-image',
-	'amp/amp-story-text': 'p,h1,h2',
-	'amp/amp-story-post-author': 'div',
-	'amp/amp-story-post-date': 'div',
-	'amp/amp-story-post-title': 'h1',
-	'core/preformatted': 'pre',
-	'core/pullquote': 'blockquote',
-	'core/quote': 'blockquote',
-	'core/table': 'table',
-	'core/verse': 'pre',
-	'core/video': 'figure',
 };
 
 export const AMP_ANIMATION_TYPE_OPTIONS = [

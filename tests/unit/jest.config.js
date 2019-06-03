@@ -8,9 +8,12 @@ module.exports = {
 		'<rootDir>/tests/unit/setup-globals',
 	],
 	testPathIgnorePatterns: [
-		'/\.git/',
-		'/node_modules/',
-		'/build/',
+		'<rootDir>/.git',
+		'<rootDir>/node_modules',
+		'<rootDir>/build',
 		'.*/e2e/.*',
 	],
+	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/', '<rootDir>/assets/src/test/helpers/' ],
+	coverageReporters: [ 'lcov' ],
+	coverageDirectory: '<rootDir>/build/logs',
 };

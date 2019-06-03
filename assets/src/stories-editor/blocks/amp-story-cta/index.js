@@ -1,22 +1,13 @@
 /**
- * External dependencies
- */
-import classnames from 'classnames';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	RichText,
-	getColorClassName,
-	getFontSizeClass,
-} from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
+import save from './save';
 import blockIcon from '../../../../images/call-to-action.svg';
 
 const schema = {
@@ -34,6 +25,15 @@ const schema = {
 	align: {
 		type: 'string',
 		default: 'center',
+	},
+	// The rest of the color attributes are added by addAMPAttributes()
+	customTextColor: {
+		type: 'string',
+		default: '#ffffff',
+	},
+	customBackgroundColor: {
+		type: 'string',
+		default: '#32373c',
 	},
 };
 
@@ -59,46 +59,5 @@ export const settings = {
 
 	edit,
 
-	save( { attributes } ) {
-		const {
-			url,
-			text,
-			backgroundColor,
-			textColor,
-			customBackgroundColor,
-			customTextColor,
-			fontSize,
-			customFontSize,
-		} = attributes;
-
-		const textClass = getColorClassName( 'color', textColor );
-		const backgroundClass = getColorClassName( 'background-color', backgroundColor );
-		const fontSizeClass = getFontSizeClass( fontSize );
-
-		const className = classnames( 'amp-block-story-cta__link', {
-			'has-text-color': textColor || customTextColor,
-			[ textClass ]: textClass,
-			'has-background': backgroundColor || customBackgroundColor,
-			[ backgroundClass ]: backgroundClass,
-			[ fontSizeClass ]: fontSizeClass,
-		} );
-
-		const styles = {
-			backgroundColor: backgroundClass ? undefined : customBackgroundColor,
-			color: textClass ? undefined : customTextColor,
-			fontSize: fontSizeClass ? undefined : customFontSize,
-		};
-
-		return (
-			<amp-story-cta-layer>
-				<RichText.Content
-					tagName="a"
-					className={ className }
-					href={ url }
-					style={ styles }
-					value={ text }
-				/>
-			</amp-story-cta-layer>
-		);
-	},
+	save,
 };

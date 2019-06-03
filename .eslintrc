@@ -12,5 +12,8 @@
     "page": true,
     "wp": true,
     "Set": true
+  },
+  "rules": {
+    "react/prop-types": 2
   }
 }

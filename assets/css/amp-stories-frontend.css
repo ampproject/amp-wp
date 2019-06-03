@@ -89,6 +89,7 @@ amp-story-grid-layer .wp-block-quote {
 	width: 100% !important;
 	height: 100% !important;
 }
+
 .wp-block-image amp-img > img {
 	object-fit: cover;
 }
@@ -100,6 +101,11 @@ amp-story-grid-layer .wp-block-quote {
 }
 
 .amp-story-block-wrapper > :first-child {
+	width: 100%;
+	height: 100%;
+}
+
+.wp-block-video amp-video {
 	width: 100%;
 	height: 100%;
 }

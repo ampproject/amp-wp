@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { Placeholder } from '@wordpress/components';
@@ -12,7 +17,7 @@ import { __ } from '@wordpress/i18n';
  *
  * @return {Component} Placeholder.
  */
-export default ( { name, url } ) => {
+const MediaPlaceholder = ( { name, url } ) => {
 	return (
 		<Placeholder label={ name }>
 			<p className="components-placeholder__error">{ url }</p>
@@ -20,3 +25,10 @@ export default ( { name, url } ) => {
 		</Placeholder>
 	);
 };
+
+MediaPlaceholder.propTypes = {
+	name: PropTypes.string.isRequired,
+	url: PropTypes.string,
+};
+
+export default MediaPlaceholder;

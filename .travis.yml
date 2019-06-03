@@ -23,6 +23,12 @@ cache:
     - $HOME/phpunit-bin
     - $HOME/deployment-targets
 
+branches:
+  only:
+    - master
+    - develop
+    - /^\d+\.\d+$/
+
 env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 install:
@@ -30,33 +36,95 @@ install:
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
   - source "$DEV_LIB_PATH/travis.install.sh"
-  - npm run build:js
+
+before_script:
+  - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
 
 script:
+  - npm run build:js
   - source "$DEV_LIB_PATH/travis.script.sh"
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
 
 jobs:
+  fast_finish: true
+  allow_failures:
+    - stage: bleeding-edge
+    - stage: coverage
   include:
-    - stage: test
+    - stage: lint
+      name: Lint (PHP, JavaScript, and configuration files)
       php: "7.3"
-      env: WP_VERSION=latest
-    - php: "5.4"
-      env: WP_VERSION=4.9    DEV_LIB_SKIP=phpcs
-    - php: "5.5"
-      env: WP_VERSION=5.0    DEV_LIB_SKIP=phpcs
-    - php: "5.6"
-      env: WP_VERSION=5.1    DEV_LIB_SKIP=phpcs
-    - php: "5.6"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
-    - php: "7.0"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
-    - php: "7.1"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
-    - php: "7.2"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpsyntax
+      before_script:
+        - phpenv config-rm xdebug.ini || echo "xdebug.ini does not exist."
+        - composer require --dev localheinz/composer-normalize --ignore-platform-reqs
+      script:
+        - source "$DEV_LIB_PATH/travis.script.sh"
+        - composer validate --no-check-all
+        - composer normalize --dry-run
+        - npm run lint
+
+    - stage: test
+      name: JavaScript unit tests
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
+      script:
+        - source "$DEV_LIB_PATH/travis.script.sh"
+        - npm run test:js -- --ci
+
+    - name: PHP unit tests (7.3, WordPress latest)
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
+
+    - name: PHP unit tests (7.2, WordPress latest)
+      php: "7.2"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+
+    - name: PHP unit tests (7.1, WordPress latest)
+      php: "7.1"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+
+    - name: PHP unit tests (7.0, WordPress latest)
+      php: "7.0"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+
+    - name: PHP unit tests (5.6, WordPress latest)
+      php: "5.6"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit,phpsyntax                      INSTALL_PWA_PLUGIN=1
+
+    - name: PHP unit tests (5.6, WordPress 5.1)
+      php: "5.6"
+      env: WP_VERSION=5.1    DEV_LIB_ONLY=phpunit
+
+    - name: PHP unit tests (5.5, WordPress 5.0)
+      php: "5.5"
+      env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax
+
+    - name: PHP unit tests (5.4, WordPress 4.9)
+      php: "5.4"
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax
+
+    - stage: bleeding-edge
+      name: PHP unit tests (7.3, WordPress trunk)
+      php: "7.3"
+      env: WP_VERSION=trunk  DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1
+
+    - stage: coverage
+      name: PHP and JavaScript unit tests (7.3, WordPress trunk, with code coverage)
+      if: branch = develop
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                               INSTALL_PWA_PLUGIN=1 RUN_PHPUNIT_COVERAGE=1
+      before_script:
+        - echo "Running unit tests with code coverage..."
+      script:
+        - npm run build:js
+        - source "$DEV_LIB_PATH/travis.script.sh"
+        - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
+        - npm run test:js -- --collectCoverage
+        - bash <(curl -s https://codecov.io/bash) -cF javascript -f build/logs/lcov.info
+
     - stage: deploy
       if: type = push AND fork = false AND ( branch =~ ^[a-z][a-z0-9-]{0,10}$ OR branch =~ ^[0-9]+\.[0-9]+$ ) AND NOT branch IN ( live, test, dev, settings, team, support, debug, multidev, files, tags, billing )
       php: "7.1"

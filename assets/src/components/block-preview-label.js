@@ -1,22 +1,37 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
-import { Fragment } from '@wordpress/element';
 import { getBlockType } from '@wordpress/blocks';
 import { BlockIcon } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
 import { __experimentalGetSettings as getDateSettings, dateI18n } from '@wordpress/date';
 import { __ } from '@wordpress/i18n';
 
-const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'left', accessibilityText } ) => {
+const BlockPreviewLabel = ( { content, icon, displayIcon = true, alignIcon = 'left', accessibilityText = false } ) => {
 	return (
-		<Fragment>
+		<>
 			{ displayIcon && 'left' === alignIcon && <BlockIcon icon={ icon } /> }
 			{ content.length > 20 ? `${ content.substr( 0, 20 ) }…` : content }
 			{ accessibilityText && <span className="screen-reader-text">{ accessibilityText }</span> }
 			{ displayIcon && 'right' === alignIcon && <BlockIcon icon={ icon } /> }
-		</Fragment>
+		</>
 	);
+};
+
+BlockPreviewLabel.propTypes = {
+	content: PropTypes.string.isRequired,
+	icon: PropTypes.object,
+	displayIcon: PropTypes.bool,
+	alignIcon: PropTypes.oneOf( [ 'left', 'right' ] ),
+	accessibilityText: PropTypes.oneOfType( [
+		PropTypes.bool,
+		PropTypes.string,
+	] ),
 };
 
 export default withSelect( ( select, { block, label } ) => {
