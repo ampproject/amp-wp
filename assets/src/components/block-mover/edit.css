@@ -30,3 +30,11 @@
 .wp-block[data-type="core/quote"] .editor-rich-text__editable:hover {
 	cursor: default;
 }
+
+.wp-block[data-type="amp/amp-story-text"] div[draggable="true"] {
+	border: 5px solid transparent;
+}
+
+.wp-block[data-type="amp/amp-story-text"] div[draggable="true"]:hover {
+	border-color: #ffffff;
+}
