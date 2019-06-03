@@ -99,7 +99,7 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		);
 
 		// Post type support.
-		$book_id = $this->factory()->post->create( array( 'post_type' => 'book' ) );
+		$book_id = self::factory()->post->create( array( 'post_type' => 'book' ) );
 		$this->assertEquals( array( 'post-type-support' ), AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );

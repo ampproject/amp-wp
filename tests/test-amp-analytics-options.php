@@ -8,7 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
 	private $vendor = 'googleanalytics';
@@ -55,8 +55,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}
 
 	private function render_post() {
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create(
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create(
 			array(
 				'post_author' => $user_id,
 			)

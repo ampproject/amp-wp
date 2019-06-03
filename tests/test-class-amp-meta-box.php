@@ -169,9 +169,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Settings::render_status()
 	 */
 	public function test_render_status() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)
@@ -218,7 +218,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'subscriber',
 				)
@@ -242,7 +242,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// A post of type post shouldn't have errors, and AMP should be enabled.
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->assertEquals(
 			$expected_status_and_errors,
 			$this->instance->get_status_and_errors( $post )
@@ -328,12 +328,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_save_amp_status() {
 		// Test failure.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Setup for success.
 		wp_set_current_user(
-			$this->factory->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)
@@ -343,13 +343,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'disabled';
 
 		// Test revision bail.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_save_post_revision( $post_id );
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Test post update success to disable.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_update_post(
 			array(

@@ -39,7 +39,7 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 		 * So on WP<4.9 we set a post global to ensure oEmbeds get processed.
 		 */
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
-			$post = $this->factory()->post->create_and_get();
+			$post = self::factory()->post->create_and_get();
 		}
 	}
 

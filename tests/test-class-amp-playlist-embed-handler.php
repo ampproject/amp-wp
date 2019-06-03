@@ -96,7 +96,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$this->assertFalse( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
 		$this->assertFalse( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
 
-		$post               = $this->factory()->post->create_and_get();
+		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
@@ -329,7 +329,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	public function get_file_ids( $files, $mime_type ) {
 		$ids = array();
 		foreach ( $files as $file ) {
-			$ids[] = $this->factory()->attachment->create_object(
+			$ids[] = self::factory()->attachment->create_object(
 				$file,
 				0,
 				array(

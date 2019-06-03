@@ -45,11 +45,11 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertEquals( $number_original_urls, AMP_CLI::count_urls_to_validate() );
 		AMP_CLI::$limit_type_validate_count = 100;
 
-		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
+		$category         = self::factory()->term->create( array( 'taxonomy' => 'category' ) );
 		$number_new_posts = AMP_CLI::$limit_type_validate_count / 2;
 		$post_ids         = array();
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
-			$post_ids[] = $this->factory()->post->create(
+			$post_ids[] = self::factory()->post->create(
 				array(
 					'tax_input' => array( 'category' => $category ),
 				)
@@ -68,7 +68,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$taxonomy                   = 'category';
 		$terms_for_current_taxonomy = array();
 		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
-			$terms_for_current_taxonomy[] = $this->factory()->term->create(
+			$terms_for_current_taxonomy[] = self::factory()->term->create(
 				array(
 					'taxonomy' => $taxonomy,
 				)
@@ -94,7 +94,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$number_of_posts = 20;
 		$ids             = array();
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$ids[] = $this->factory()->post->create();
+			$ids[] = self::factory()->post->create();
 		}
 
 		// This should count all of the newly-created posts as supporting AMP.
@@ -239,7 +239,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				array_unshift(
 					$expected_posts,
-					$this->factory()->post->create(
+					self::factory()->post->create(
 						array(
 							'post_type' => $post_type,
 						)
@@ -275,7 +275,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			$expected_links             = array_map( 'get_term_link', get_terms( array( 'taxonomy' => $taxonomy ) ) );
 			$terms_for_current_taxonomy = array();
 			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
-				$terms_for_current_taxonomy[] = $this->factory()->term->create(
+				$terms_for_current_taxonomy[] = self::factory()->term->create(
 					array(
 						'taxonomy' => $taxonomy,
 					)
@@ -284,7 +284,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
 			wp_set_post_terms(
-				$this->factory()->post->create(),
+				self::factory()->post->create(),
 				$terms_for_current_taxonomy,
 				$taxonomy
 			);
@@ -314,7 +314,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @covers AMP_CLI::get_author_page_urls()
 	 */
 	public function test_get_author_page_urls() {
-		$this->factory()->user->create();
+		self::factory()->user->create();
 		$users             = get_users();
 		$first_author      = $users[0];
 		$first_author_url  = get_author_posts_url( $first_author->ID, $first_author->user_nicename );
@@ -394,7 +394,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$terms           = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$post_id           = $this->factory()->post->create();
+			$post_id           = self::factory()->post->create();
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
@@ -404,7 +404,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
 
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
-			$terms[] = $this->factory()->category->create();
+			$terms[] = self::factory()->category->create();
 		}
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
@@ -424,7 +424,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @covers AMP_CLI::validate_and_store_url()
 	 */
 	public function test_validate_and_store_url() {
-		$single_post_permalink = get_permalink( $this->factory()->post->create() );
+		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		AMP_CLI::validate_and_store_url( $single_post_permalink, 'post' );
 		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
 
@@ -432,7 +432,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$post_permalinks = array();
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$permalink         = get_permalink( $this->factory()->post->create() );
+			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
 			AMP_CLI::validate_and_store_url( $permalink, 'post' );
 		}

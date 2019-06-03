@@ -57,7 +57,7 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
 
-		$story_id = $this->factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$story_id = self::factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		wp_set_object_terms( $story_id, AMP_Story_Templates::TEMPLATES_TERM, AMP_Story_Templates::TEMPLATES_TAXONOMY );
 
 		$amp_story_templates = new AMP_Story_Templates();

@@ -93,7 +93,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
 	 */
 	public function test_get_and_set_options() {
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		global $wp_settings_errors;
 		wp_using_ext_object_cache( true ); // turn on external object cache flag.
@@ -322,7 +322,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 */
 	public function test_render_welcome_notice() {
 		// If this is not the main 'AMP Settings' page, this should not render the notice.
-		wp_set_current_user( $this->factory()->user->create() );
+		wp_set_current_user( self::factory()->user->create() );
 		set_current_screen( 'edit.php' );
 		ob_start();
 		AMP_Options_Manager::render_welcome_notice();
@@ -458,10 +458,10 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_disabled() {
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::init();
 
-		$page_id = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_id = self::factory()->post->create( array( 'post_type' => 'page' ) );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'page' ) );
 		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
 		AMP_Options_Manager::handle_updated_theme_support_option();
@@ -479,9 +479,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_native_success_but_error() {
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
 		AMP_Options_Manager::update_option( 'theme_support', 'native' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
@@ -527,8 +527,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_native_validate_error() {
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
-		$this->factory()->post->create( array( 'post_type' => 'post' ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		self::factory()->post->create( array( 'post_type' => 'post' ) );
 
 		AMP_Options_Manager::update_option( 'theme_support', 'native' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
@@ -562,9 +562,9 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_paired() {
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
-		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
 		AMP_Options_Manager::update_option( 'theme_support', 'paired' );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 

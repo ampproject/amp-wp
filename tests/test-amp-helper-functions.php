@@ -85,21 +85,21 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		delete_option( 'permalink_structure' );
 		flush_rewrite_rules();
 
-		$drafted_post   = $this->factory()->post->create(
+		$drafted_post   = self::factory()->post->create(
 			array(
 				'post_name'   => 'draft',
 				'post_status' => 'draft',
 				'post_type'   => 'post',
 			)
 		);
-		$published_post = $this->factory()->post->create(
+		$published_post = self::factory()->post->create(
 			array(
 				'post_name'   => 'publish',
 				'post_status' => 'publish',
 				'post_type'   => 'post',
 			)
 		);
-		$published_page = $this->factory()->post->create(
+		$published_page = self::factory()->post->create(
 			array(
 				'post_name'   => 'publish',
 				'post_status' => 'publish',
@@ -149,19 +149,19 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			return $url . '#anchor';
 		};
 
-		$drafted_post   = $this->factory()->post->create(
+		$drafted_post   = self::factory()->post->create(
 			array(
 				'post_name'   => 'draft',
 				'post_status' => 'draft',
 			)
 		);
-		$published_post = $this->factory()->post->create(
+		$published_post = self::factory()->post->create(
 			array(
 				'post_name'   => 'publish',
 				'post_status' => 'publish',
 			)
 		);
-		$published_page = $this->factory()->post->create(
+		$published_page = self::factory()->post->create(
 			array(
 				'post_name'   => 'publish',
 				'post_status' => 'publish',
@@ -216,7 +216,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules();
 
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->assertEquals( get_permalink( $post_id ), amp_get_permalink( $post_id ) );
 
 		add_theme_support(
@@ -257,7 +257,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_amphtml_urls() {
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		return array(
 			'home' => array(
 				home_url( '/' ),
@@ -335,7 +335,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::is_amp_endpoint()
 	 */
 	public function test_is_amp_endpoint() {
-		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// Legacy query var.
@@ -372,7 +372,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
 
 		// A post shouldn't be an AMP endpoint, as it was unchecked in the UI via the options above.
-		$this->go_to( $this->factory()->post->create() );
+		$this->go_to( self::factory()->post->create() );
 		$this->assertFalse( is_amp_endpoint() );
 
 		// The homepage shouldn't be an AMP endpoint, as it was also unchecked in the UI.
@@ -392,7 +392,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_is_amp_endpoint_for_post_embeds_and_feeds() {
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$post_id = $this->factory()->post->create_and_get()->ID;
+		$post_id = self::factory()->post->create_and_get()->ID;
 
 		$this->go_to( home_url( "?p=$post_id" ) );
 		$this->assertTrue( is_amp_endpoint() );
@@ -560,7 +560,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		add_filter( 'amp_content_embed_handlers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
@@ -586,7 +586,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers_deprecated_param() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_embed_handlers' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_embed_handlers( $post );
@@ -598,7 +598,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		add_filter( 'amp_content_sanitizers', array( $this, 'capture_filter_call' ), 10, 2 );
 
 		$this->last_filter_call = null;
@@ -639,7 +639,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers_deprecated_param() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->setExpectedDeprecated( 'amp_get_content_sanitizers' );
 		add_theme_support( AMP_Theme_Support::SLUG );
 		amp_get_content_sanitizers( $post );
@@ -655,7 +655,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Test disabled by default for page for posts and show on front.
 		update_option( 'show_on_front', 'page' );
-		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) );
+		$post = self::factory()->post->create_and_get( array( 'post_type' => 'page' ) );
 		$this->assertTrue( post_supports_amp( $post ) );
 		update_option( 'show_on_front', 'page' );
 		$this->assertTrue( post_supports_amp( $post ) );
@@ -681,7 +681,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @covers ::amp_get_post_image_metadata()
 	 */
 	public function test_amp_get_post_image_metadata() {
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->assertFalse( amp_get_post_image_metadata( $post_id ) );
 
 		$first_test_image = '/tmp/test-image.jpg';
@@ -718,7 +718,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$attachment_src          = 'example/attachment.jpeg';
 		$attachment_height       = 45;
 		$attachment_width        = 600;
-		$attachment_id           = $this->factory()->attachment->create_object(
+		$attachment_id           = self::factory()->attachment->create_object(
 			$attachment_src,
 			0,
 			array(
@@ -749,7 +749,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Test a video as an 'attachment' post type, which shouldn't have a schema.org image.
 		$attachment_src = 'example/test-video.mpeg';
-		$attachment_id  = $this->factory()->attachment->create_object(
+		$attachment_id  = self::factory()->attachment->create_object(
 			$attachment_src,
 			0,
 			array(
@@ -774,20 +774,20 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			'name'  => 'Foo',
 		);
 
-		$user_id = $this->factory()->user->create(
+		$user_id = self::factory()->user->create(
 			array(
 				'first_name' => 'John',
 				'last_name'  => 'Smith',
 			)
 		);
-		$page_id = $this->factory()->post->create(
+		$page_id = self::factory()->post->create(
 			array(
 				'post_type'   => 'page',
 				'post_title'  => 'Example Page',
 				'post_author' => $user_id,
 			)
 		);
-		$post_id = $this->factory()->post->create(
+		$post_id = self::factory()->post->create(
 			array(
 				'post_type'   => 'post',
 				'post_title'  => 'Example Post',
@@ -807,7 +807,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$custom_logo_src    = 'example/custom-logo.jpeg';
 		$custom_logo_height = 45;
 		$custom_logo_width  = 600;
-		$custom_logo_id     = $this->factory()->attachment->create_object(
+		$custom_logo_id     = self::factory()->attachment->create_object(
 			$custom_logo_src,
 			0,
 			array(
@@ -839,7 +839,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		// Test the site icon as the publisher logo.
 		$site_icon_src          = 'foo/site-icon.jpeg';
-		$site_icon_id           = $this->factory()->attachment->create_object(
+		$site_icon_id           = self::factory()->attachment->create_object(
 			$site_icon_src,
 			0,
 			array(
@@ -981,7 +981,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	public function test_amp_add_admin_bar_item() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
 
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 		global $wp_query; // Must be here after the go_to() call.
 

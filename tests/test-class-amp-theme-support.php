@@ -163,7 +163,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::finish_init()
 	 */
 	public function test_finish_init() {
-		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
+		$post_id = self::factory()->post->create( array( 'post_title' => 'Test' ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
@@ -329,7 +329,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_is_paired_available() {
 
 		// Establish initial state.
-		$post_id = $this->factory()->post->create( array( 'post_title' => 'Test' ) );
+		$post_id = self::factory()->post->create( array( 'post_title' => 'Test' ) );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
 		$this->assertTrue( is_singular() );
@@ -483,7 +483,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test no theme support.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		$availability = AMP_Theme_Support::get_template_availability();
 		$this->assertEquals( array( 'no_theme_support' ), $availability['errors'] );
 		$this->assertFalse( $availability['supported'] );
@@ -499,7 +499,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_get_template_availability_with_available_callback() {
 		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
-		$this->go_to( get_permalink( $this->factory()->post->create() ) );
+		$this->go_to( get_permalink( self::factory()->post->create() ) );
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
@@ -545,7 +545,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_get_template_availability() {
 		remove_action( 'parse_query', 'wp_hide_admin_bar_offline' );
 		global $wp_query;
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		query_posts( array( 'p' => $post_id ) ); // phpcs:ignore
 
 		// Test successful match of singular template.
@@ -620,7 +620,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( $availability['immutable'] );
 		$this->assertEquals( 'is_single', $availability['template'] );
 
-		$special_id   = $this->factory()->post->create(
+		$special_id   = self::factory()->post->create(
 			array(
 				'post_type' => 'post',
 				'post_name' => 'special',
@@ -632,12 +632,12 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( $availability['immutable'] );
 
 		remove_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
-		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$availability = AMP_Theme_Support::get_template_availability( self::factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertFalse( $availability['supported'] );
 		$this->assertEquals( array( 'post-type-support' ), $availability['errors'] );
 		$this->assertEquals( 'is_page', $availability['template'] );
 		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
-		$availability = AMP_Theme_Support::get_template_availability( $this->factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
+		$availability = AMP_Theme_Support::get_template_availability( self::factory()->post->create_and_get( array( 'post_type' => 'page' ) ) );
 		$this->assertTrue( $availability['supported'] );
 
 		// Test is_custom.
@@ -669,7 +669,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'publicly_queryable' => true,
 			)
 		);
-		$this->factory()->post->create(
+		self::factory()->post->create(
 			array(
 				'post_type'  => $custom_post_type,
 				'post_title' => 'test',
@@ -755,8 +755,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 'is_archive', $supportable_templates['is_post_type_archive[announcement]']['parent'] );
 
 		// Test static homepage and page for posts.
-		$page_on_front  = $this->factory()->post->create( array( 'post_type' => 'page' ) );
-		$page_for_posts = $this->factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_on_front  = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		$page_for_posts = self::factory()->post->create( array( 'post_type' => 'page' ) );
 		update_option( 'show_on_front', 'page' );
 		update_option( 'page_for_posts', $page_for_posts );
 		update_option( 'page_on_front', $page_on_front );
@@ -913,7 +913,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::amend_comment_form()
 	 */
 	public function test_amend_comment_form() {
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 
@@ -988,7 +988,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$wp->query_vars   = $added_query_vars;
 		$this->assertEquals( add_query_arg( $added_query_vars, $home_url ), AMP_Theme_Support::get_current_canonical_url() );
 
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->go_to( get_permalink( $post ) );
 		$this->assertEquals( wp_get_canonical_url(), AMP_Theme_Support::get_current_canonical_url() );
 
@@ -1013,7 +1013,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_form_defaults() {
 		global $post;
-		$post     = $this->factory()->post->create_and_get();
+		$post     = self::factory()->post->create_and_get();
 		$defaults = AMP_Theme_Support::filter_comment_form_defaults(
 			array(
 				'title_reply_to'      => 'Reply To',
@@ -1034,8 +1034,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_comment_reply_link() {
 		global $post;
-		$post          = $this->factory()->post->create_and_get();
-		$comment       = $this->factory()->comment->create_and_get();
+		$post          = self::factory()->post->create_and_get();
+		$comment       = self::factory()->comment->create_and_get();
 		$link          = sprintf( '<a href="%s">', get_comment_link( $comment ) );
 		$respond_id    = '5234';
 		$reply_text    = 'Reply';
@@ -1043,7 +1043,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$before        = '<div class="reply">';
 		$after         = '</div>';
 		$args          = compact( 'respond_id', 'reply_text', 'reply_to_text', 'before', 'after' );
-		$comment       = $this->factory()->comment->create_and_get();
+		$comment       = self::factory()->comment->create_and_get();
 
 		update_option( 'comment_registration', true );
 		$filtered_link = AMP_Theme_Support::filter_comment_reply_link( $link, $args, $comment );
@@ -1069,10 +1069,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_filter_cancel_comment_reply_link() {
 		global $post;
-		$post                   = $this->factory()->post->create_and_get();
+		$post                   = self::factory()->post->create_and_get();
 		$url                    = get_permalink( $post );
 		$_SERVER['REQUEST_URI'] = $url;
-		$this->factory()->comment->create_and_get();
+		self::factory()->comment->create_and_get();
 		$formatted_link = get_cancel_comment_reply_link();
 		$link           = remove_query_arg( 'replytocom' );
 		$text           = 'Cancel your reply';
@@ -1800,7 +1800,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( home_url( '/' ), $redirects[0] );
 		$this->assertEquals( 1, AMP_Theme_Support_Sanitizer_Counter::$count, 'Expected sanitizer to not be invoked.' );
 
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::add_validation_error_sourcing();
 
 		AMP_Validation_Manager::reset_validation_results();

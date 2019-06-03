@@ -189,7 +189,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		remove_all_actions( 'wp_footer' );
 		remove_theme_support( 'amp' );
 
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 
 		AMP_Service_Worker::add_install_hooks();

@@ -539,8 +539,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		);
 
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$post    = $this->factory()->post->create_and_get();
-		$comment = $this->factory()->comment->create_and_get(
+		$post    = self::factory()->post->create_and_get();
+		$comment = self::factory()->comment->create_and_get(
 			array(
 				'comment_post_ID' => $post->ID,
 			)

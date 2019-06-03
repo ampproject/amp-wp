@@ -10,8 +10,8 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	}
 
 	public function test__valid_post() {
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create( array( 'post_author' => $user_id ) );
 
 		// Need to use ob here since the method echos
 		ob_start();
@@ -35,8 +35,8 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	 * @covers ::is_amp_endpoint()
 	 */
 	public function test__is_amp_endpoint() {
-		$user_id = $this->factory()->user->create();
-		$post_id = $this->factory()->post->create(
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create(
 			array(
 				'post_author' => $user_id,
 			)

@@ -2330,7 +2330,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
 					AMP_Theme_Support::add_hooks();
 					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
-					wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 					return $render_template();
 				},
