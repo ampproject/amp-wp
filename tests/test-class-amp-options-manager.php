@@ -455,7 +455,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * Test handle_updated_theme_support_option for reader mode.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers \amp_admin_get_preview_permalink()
+	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_disabled() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -476,7 +476,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers \amp_admin_get_preview_permalink()
+	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_native_success_but_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -524,7 +524,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers \amp_admin_get_preview_permalink()
+	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_native_validate_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -559,7 +559,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 * Test handle_updated_theme_support_option for transitional mode.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
-	 * @covers \amp_admin_get_preview_permalink()
+	 * @covers ::amp_admin_get_preview_permalink()
 	 */
 	public function test_handle_updated_theme_support_option_paired() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );

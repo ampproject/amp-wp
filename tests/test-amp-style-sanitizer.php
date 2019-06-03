@@ -1847,7 +1847,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests that font URLs get validated.
 	 *
-	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
+	 * @covers ::amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 * @dataProvider get_font_urls
 	 * @param string $url         Font URL.
 	 * @param array  $error_codes Error codes.
@@ -1890,7 +1890,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test addition of crossorigin attribute to external stylesheet links.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_link_element()
-	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
+	 * @covers ::amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 */
 	public function test_cors_enabled_stylesheet_url() {
 

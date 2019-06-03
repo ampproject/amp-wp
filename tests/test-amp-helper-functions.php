@@ -43,7 +43,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_slug().
 	 *
-	 * @covers \amp_get_slug()
+	 * @covers ::amp_get_slug()
 	 */
 	public function test_amp_get_slug() {
 		$this->assertSame( 'amp', amp_get_slug() );
@@ -52,7 +52,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_current_url().
 	 *
-	 * @covers \amp_get_current_url()
+	 * @covers ::amp_get_current_url()
 	 */
 	public function test_amp_get_current_url() {
 		$request_uris = array(
@@ -78,7 +78,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_permalink() without pretty permalinks.
 	 *
-	 * @covers \amp_get_permalink()
+	 * @covers ::amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_without_pretty_permalinks() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
@@ -136,7 +136,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_permalink() with pretty permalinks.
 	 *
-	 * @covers \amp_get_permalink()
+	 * @covers ::amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_with_pretty_permalinks() {
 		global $wp_rewrite;
@@ -205,7 +205,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_permalink() with theme support transitional mode.
 	 *
-	 * @covers \amp_get_permalink()
+	 * @covers ::amp_get_permalink()
 	 */
 	public function test_amp_get_permalink_with_theme_support() {
 		global $wp_rewrite;
@@ -230,7 +230,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_remove_endpoint.
 	 *
-	 * @covers \amp_remove_endpoint()
+	 * @covers ::amp_remove_endpoint()
 	 */
 	public function test_amp_remove_endpoint() {
 		$this->assertEquals( 'https://example.com/foo/', amp_remove_endpoint( 'https://example.com/foo/?amp' ) );
@@ -243,7 +243,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test that hook is added.
 	 *
-	 * @covers \amp_add_frontend_actions()
+	 * @covers ::amp_add_frontend_actions()
 	 */
 	public function test_amp_add_frontend_actions() {
 		$this->assertFalse( has_action( 'wp_head', 'amp_add_amphtml_link' ) );
@@ -278,7 +278,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * Adding link when theme support is not present.
 	 *
 	 * @dataProvider get_amphtml_urls
-	 * @covers \amp_add_amphtml_link()
+	 * @covers ::amp_add_amphtml_link()
 	 * @param string $canonical_url Canonical URL.
 	 * @param string $amphtml_url   The amphtml URL.
 	 */
@@ -332,7 +332,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 */
 	public function test_is_amp_endpoint() {
 		$this->go_to( get_permalink( $this->factory()->post->create() ) );
@@ -387,7 +387,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function for post embeds and feeds.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 * global WP_Query $wp_the_query
 	 */
 	public function test_is_amp_endpoint_for_post_embeds_and_feeds() {
@@ -414,7 +414,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function before the parse_query action happens.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 * @expectedIncorrectUsage is_amp_endpoint
 	 */
 	public function test_is_amp_endpoint_before_parse_query_action() {
@@ -426,7 +426,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function when there is no WP_Query.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 * @expectedIncorrectUsage is_feed
 	 * @expectedIncorrectUsage is_embed
 	 * @expectedIncorrectUsage is_amp_endpoint
@@ -440,7 +440,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint() function before the wp action happens.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 * @expectedIncorrectUsage is_amp_endpoint
 	 */
 	public function test_is_amp_endpoint_before_wp_action() {
@@ -474,7 +474,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_add_generator_metadata.
 	 *
-	 * @covers \amp_add_generator_metadata()
+	 * @covers ::amp_add_generator_metadata()
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
@@ -502,9 +502,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test script registering.
 	 *
-	 * @covers \amp_register_default_scripts()
-	 * @covers \amp_filter_script_loader_tag()
-	 * @covers \amp_render_scripts()
+	 * @covers ::amp_register_default_scripts()
+	 * @covers ::amp_filter_script_loader_tag()
+	 * @covers ::amp_render_scripts()
 	 * @global WP_Scripts $wp_scripts
 	 */
 	public function test_script_registering() {
@@ -557,7 +557,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_content_embed_handlers().
 	 *
-	 * @covers \amp_get_content_embed_handlers()
+	 * @covers ::amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers() {
 		$post = $this->factory()->post->create_and_get();
@@ -583,7 +583,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test deprecated $post param for amp_get_content_embed_handlers().
 	 *
-	 * @covers \amp_get_content_embed_handlers()
+	 * @covers ::amp_get_content_embed_handlers()
 	 */
 	public function test_amp_get_content_embed_handlers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
@@ -595,7 +595,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_content_sanitizers().
 	 *
-	 * @covers \amp_get_content_sanitizers()
+	 * @covers ::amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers() {
 		$post = $this->factory()->post->create_and_get();
@@ -636,7 +636,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test deprecated $post param for amp_get_content_sanitizers().
 	 *
-	 * @covers \amp_get_content_sanitizers()
+	 * @covers ::amp_get_content_sanitizers()
 	 */
 	public function test_amp_get_content_sanitizers_deprecated_param() {
 		$post = $this->factory()->post->create_and_get();
@@ -648,7 +648,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test post_supports_amp().
 	 *
-	 * @covers \post_supports_amp()
+	 * @covers ::post_supports_amp()
 	 */
 	public function test_post_supports_amp() {
 		add_post_type_support( 'page', AMP_Post_Type_Support::SLUG );
@@ -678,7 +678,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_post_image_metadata()
 	 *
-	 * @covers \amp_get_post_image_metadata()
+	 * @covers ::amp_get_post_image_metadata()
 	 */
 	public function test_amp_get_post_image_metadata() {
 		$post_id = $this->factory()->post->create();
@@ -763,7 +763,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_schemaorg_metadata().
 	 *
-	 * @covers \amp_get_schemaorg_metadata()
+	 * @covers ::amp_get_schemaorg_metadata()
 	 */
 	public function test_amp_get_schemaorg_metadata() {
 		update_option( 'blogname', 'Foo' );
@@ -975,7 +975,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	/**
 	 * Test amp_add_admin_bar_view_link()
 	 *
-	 * @covers \amp_add_admin_bar_view_link()
+	 * @covers ::amp_add_admin_bar_view_link()
 	 * @global \WP_Query $wp_query
 	 */
 	public function test_amp_add_admin_bar_item() {

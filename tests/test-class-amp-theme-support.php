@@ -1311,7 +1311,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @global WP_Scripts $wp_scripts
 	 * @covers AMP_Theme_Support::prepare_response()
 	 * @covers AMP_Theme_Support::ensure_required_markup()
-	 * @covers \amp_render_scripts()
+	 * @covers ::amp_render_scripts()
 	 */
 	public function test_prepare_response() {
 		remove_action( 'wp_print_scripts', 'wp_print_service_workers', 9 );

@@ -32,7 +32,7 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 */
 	public function test__is_amp_endpoint() {
 		$user_id = $this->factory()->user->create();

@@ -222,7 +222,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_get_analytics()
 	 *
-	 * @covers \amp_get_analytics()
+	 * @covers ::amp_get_analytics()
 	 */
 	public function test_amp_get_analytics() {
 		$this->insert_one_option(
@@ -252,7 +252,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_print_analytics()
 	 *
-	 * @covers \amp_print_analytics()
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics() {
 		$this->insert_one_option(
@@ -277,7 +277,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * This test asserts that an issue discovered in PHP 7.1 is fixed.
 	 *
 	 * @see AMP_Theme_Support::add_hooks() Where add_action( 'wp_footer', 'amp_print_analytics' ) is done.
-	 * @covers \amp_print_analytics()
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics_when_empty() {
 
