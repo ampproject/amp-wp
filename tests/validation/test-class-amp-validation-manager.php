@@ -278,7 +278,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
 			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
 		}
 
@@ -757,7 +757,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
 			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
 		}
 
