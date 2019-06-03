@@ -465,11 +465,6 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	// Prevent double wrapping elements, see https://github.com/ampproject/amp-wp/issues/2370.
-	if ( element.props.children && element.props.children.startsWith && element.props.children.startsWith( '<amp-story-grid-layer' ) ) {
-		return element;
-	}
-
 	const {
 		ampAnimationType,
 		ampAnimationDelay,

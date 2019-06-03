@@ -69,7 +69,7 @@ export const settings = {
 			{
 				type: 'raw',
 				priority: 20,
-				selector: 'p,h1,h2,amp-story-grid-layer',
+				selector: 'p,h1,h2',
 				transform: ( node ) => {
 					const innerHTML = node.outerHTML;
 					const blockAttributes = getBlockAttributes( name, innerHTML );
