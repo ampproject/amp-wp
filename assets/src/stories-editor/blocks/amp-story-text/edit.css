@@ -51,12 +51,25 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	display: inline-block;
 }
 
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text {
+	position: relative;
+}
+
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text {
-	line-height: 1.15;
-	display: flex;
-	flex-direction: column;
-	flex-wrap: nowrap;
-	justify-content: center;
+	display: inline-block;
+	vertical-align: middle;
+	line-height: normal;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: inherit;
+	z-index: -1;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text,
