@@ -2287,13 +2287,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$important_ruleset->setSelectors(
 			array_map(
 				/**
-				* Modify selectors to be more specific to roughly match the effect of !important.
-				*
-				* @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
-				*
-				* @param Selector $old_selector Original selector.
-				* @return Selector The new more-specific selector.
-				*/
+				 * Modify selectors to be more specific to roughly match the effect of !important.
+				 *
+				 * @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
+				 *
+				 * @param Selector $old_selector Original selector.
+				 * @return Selector The new more-specific selector.
+				 */
 				static function( Selector $old_selector ) {
 					// Calculate the specificity multiplier for the placeholder.
 					$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
