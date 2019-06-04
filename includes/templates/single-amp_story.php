@@ -62,12 +62,17 @@ the_post();
 				poster-landscape-src="<?php echo esc_url( $poster_landscape ); ?>"
 			<?php endif; ?>
 		>
-			<?php the_content(); ?>
+			<?php
+			amp_print_story_auto_ads();
+			the_content();
+			?>
 		</amp-story>
 
 		<?php
 		// Note that \AMP_Story_Post_Type::filter_frontend_print_styles_array() will limit which styles are printed.
 		print_late_styles();
+
+		amp_print_analytics( '' );
 		?>
 	</body>
 </html>
