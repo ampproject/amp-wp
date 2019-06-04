@@ -225,11 +225,11 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * @covers AMP_Playlist_Embed_Handler::print_tracks()
 	 */
 	public function test_tracks() {
-		$type         = 'video';
-		$attr         = $this->get_attributes( $type );
-		$data         = $this->instance->get_data( $attr );
-		$state_id     = 'fooId1';
-		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
+		$type        = 'video';
+		$attr        = $this->get_attributes( $type );
+		$data        = $this->instance->get_data( $attr );
+		$state_id    = 'fooId1';
+		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
 		$tracks = get_echo( array( $this->instance, 'print_tracks' ), array( $state_id, $data['tracks'] ) );
 		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );

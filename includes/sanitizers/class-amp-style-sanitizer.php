@@ -2090,7 +2090,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					foreach ( $subcomponents as $subcomponent ) {
 						$sources[] = array( $subcomponent );
 					}
-				} else if ( empty( $sources ) ) {
+				} elseif ( empty( $sources ) ) {
 					$sources[] = array( $component );
 				} else {
 					$sources[ count( $sources ) - 1 ][] = $component;
