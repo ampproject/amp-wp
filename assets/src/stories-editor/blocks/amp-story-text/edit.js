@@ -106,7 +106,7 @@ class TextBlockEdit extends Component {
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const wrapperStyle = ampFitText ? { lineHeight: height + 'px' } : null;
+		const wrapperStyle = ampFitText && content.length ? { lineHeight: height + 'px' } : null;
 
 		return (
 			<>
@@ -134,6 +134,7 @@ class TextBlockEdit extends Component {
 							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 							textAlign: align,
+							position: ampFitText && content.length ? 'static' : undefined,
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
