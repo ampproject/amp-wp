@@ -1908,7 +1908,7 @@ class AMP_Validation_Manager {
 			default:
 				/* translators: %s is error code */
 				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-		};
+		}
 	}
 
 	/**
