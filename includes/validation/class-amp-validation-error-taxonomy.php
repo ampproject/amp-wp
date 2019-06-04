@@ -2284,8 +2284,6 @@ class AMP_Validation_Error_Taxonomy {
 			);
 		} elseif ( 'disallowed_file_extension' === $error_code ) {
 			$error_title = __( 'Disallowed file extension', 'amp' );
-		} elseif ( 'file_path_not_allowed' === $error_code ) {
-			$error_title = __( 'File path not allowed', 'amp' );
 		} elseif ( 'removed_unused_css_rules' === $error_code ) {
 			$error_title = __( 'Remove unused CSS rules', 'amp' );
 		}
