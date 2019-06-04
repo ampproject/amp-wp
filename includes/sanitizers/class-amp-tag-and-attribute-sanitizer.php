@@ -1666,11 +1666,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return true;
 		}
 
-		$is_allowed_alt_name_attr = (
-			isset( $this->rev_alternate_attr_name_lookup[ $attr_name ] )
-			&&
-			isset( $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] )
-		);
+		$is_allowed_alt_name_attr = isset( $this->rev_alternate_attr_name_lookup[ $attr_name ], $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] );
 		if ( $is_allowed_alt_name_attr ) {
 			return true;
 		}

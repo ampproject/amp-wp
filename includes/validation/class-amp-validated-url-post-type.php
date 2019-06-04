@@ -1769,7 +1769,7 @@ class AMP_Validated_URL_Post_Type {
 						<?php
 						$view_label     = __( 'View URL', 'amp' );
 						$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
-						if ( isset( $queried_object['id'] ) && isset( $queried_object['type'] ) ) {
+						if ( isset( $queried_object['id'], $queried_object['type'] ) ) {
 							$after = ' | ';
 							if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) && post_type_exists( get_post( $queried_object['id'] )->post_type ) ) {
 								$post_type_object = get_post_type_object( get_post( $queried_object['id'] )->post_type );

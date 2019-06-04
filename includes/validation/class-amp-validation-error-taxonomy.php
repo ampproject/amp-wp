@@ -2119,7 +2119,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function handle_inline_edit_request() {
 		// Check for necessary arguments.
-		if ( ! isset( $_GET['action'] ) || ! isset( $_GET['_wpnonce'] ) || ! isset( $_GET['term_id'] ) ) {  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['action'], $_GET['_wpnonce'], $_GET['term_id'] ) ) {  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -2235,7 +2235,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * Handle request to delete empty terms.
 	 */
 	public static function handle_clear_empty_terms_request() {
-		if ( ! isset( $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION ] ) || ! isset( $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] ) ) {
+		if ( ! isset( $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION ], $_POST[ self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce' ] ) ) {
 			return;
 		}
 		if ( ! check_ajax_referer( self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION, self::VALIDATION_ERROR_CLEAR_EMPTY_ACTION . '_nonce', false ) ) {

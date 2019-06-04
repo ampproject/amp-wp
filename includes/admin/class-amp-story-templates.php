@@ -282,7 +282,7 @@ class AMP_Story_Templates {
 			return $args;
 		}
 		parse_str( $parts['query'], $params );
-		if ( ! isset( $params['post'] ) || ! isset( $params['action'] ) ) {
+		if ( ! isset( $params['post'], $params['action'] ) ) {
 			return $args;
 		}
 

@@ -373,9 +373,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function save_amp_status( $post_id ) {
 		$verify = (
-			isset( $_POST[ self::NONCE_NAME ] )
-			&&
-			isset( $_POST[ self::STATUS_INPUT_NAME ] )
+			isset( $_POST[ self::NONCE_NAME ], $_POST[ self::STATUS_INPUT_NAME ] )
 			&&
 			wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::NONCE_NAME ] ) ), self::NONCE_ACTION )
 			&&

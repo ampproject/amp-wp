@@ -148,7 +148,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
-		if ( isset( $meta_data['width'] ) && isset( $meta_data['height'] ) ) {
+		if ( isset( $meta_data['width'], $meta_data['height'] ) ) {
 			$block_content = preg_replace(
 				'/(?<=<video\s)/',
 				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),
