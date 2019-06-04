@@ -798,7 +798,7 @@ class AMP_Validated_URL_Post_Type {
 			'theme'   => get_stylesheet(),
 			'plugins' => get_option( 'active_plugins', array() ),
 			'options' => array(
-				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ),
+				'accept_tree_shaking' => AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ),
 			),
 		);
 	}

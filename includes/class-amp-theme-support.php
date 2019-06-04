@@ -214,7 +214,7 @@ class AMP_Theme_Support {
 			add_theme_support(
 				self::SLUG,
 				array(
-					'paired' => ( 'paired' === $theme_support_option ),
+					'paired' => 'paired' === $theme_support_option,
 				)
 			);
 			self::$support_added_via_option = true;

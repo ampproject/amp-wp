@@ -1092,12 +1092,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
 
-		if ( $element->hasAttribute( 'amp-custom' ) ) {
-			if ( ! $this->amp_custom_style_element ) {
-				$this->amp_custom_style_element = $element;
-			} else {
-				$element->parentNode->removeChild( $element ); // There can only be one. #highlander.
-			}
+		if ( $element->hasAttribute( 'amp-custom' ) && ! $this->amp_custom_style_element ) {
+			$this->amp_custom_style_element = $element;
 		} else {
 
 			// Remove from DOM since we'll be adding it to amp-custom.
@@ -2094,12 +2090,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					foreach ( $subcomponents as $subcomponent ) {
 						$sources[] = array( $subcomponent );
 					}
+				} else if ( empty( $sources ) ) {
+					$sources[] = array( $component );
 				} else {
-					if ( empty( $sources ) ) {
-						$sources[] = array( $component );
-					} else {
-						$sources[ count( $sources ) - 1 ][] = $component;
-					}
+					$sources[ count( $sources ) - 1 ][] = $component;
 				}
 			}
 
@@ -2865,41 +2859,39 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$selectors = array();
 					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 						$should_include = (
+							// If all class names are used in the doc.
 							(
-								// If all class names are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-									||
-									$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-								)
-								&&
-								// If all IDs are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
-									||
-									0 === count(
-										array_filter(
-											$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-											function( $id ) {
-												return ! $this->dom->getElementById( $id );
-											}
-										)
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+								||
+								$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+							)
+							&&
+							// If all IDs are used in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
+								||
+								0 === count(
+									array_filter(
+										$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
+										function( $id ) {
+											return ! $this->dom->getElementById( $id );
+										}
 									)
 								)
-								&&
-								// If tag names are present in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-									||
-									$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-								)
-								&&
-								// If all attribute names are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-									||
-									$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-								)
+							)
+							&&
+							// If tag names are present in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+								||
+								$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+							)
+							&&
+							// If all attribute names are used in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+								||
+								$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 							)
 						);
 						if ( $should_include ) {

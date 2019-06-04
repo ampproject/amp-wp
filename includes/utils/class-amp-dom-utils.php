@@ -504,7 +504,7 @@ class AMP_DOM_Utils {
 				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
 			}
 
-			$boundary       = 'fragment_boundary:' . (string) wp_rand();
+			$boundary       = 'fragment_boundary:' . wp_rand();
 			$start_boundary = $boundary . ':start';
 			$end_boundary   = $boundary . ':end';
 			$comment_start  = $dom->createComment( $start_boundary );

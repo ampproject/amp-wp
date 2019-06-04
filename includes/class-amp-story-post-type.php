@@ -1424,7 +1424,7 @@ class AMP_Story_Post_Type {
 			unset( $error );
 		}
 
-		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
+		$image_type = $size ? $size['mime'] : 'image/jpeg';
 		$object     = array(
 			'ID'             => $parent_attachment_id,
 			'post_title'     => basename( $cropped ),

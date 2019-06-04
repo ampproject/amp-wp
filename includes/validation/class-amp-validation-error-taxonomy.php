@@ -259,7 +259,7 @@ class AMP_Validation_Error_Taxonomy {
 				'show_tagcloud'      => false,
 				'show_in_quick_edit' => false,
 				'hierarchical'       => false, // Or true? Code could be the parent term?
-				'show_in_menu'       => ( self::should_show_in_menu() || AMP_Validated_URL_Post_Type::should_show_in_menu() ),
+				'show_in_menu'       => self::should_show_in_menu() || AMP_Validated_URL_Post_Type::should_show_in_menu(),
 				'meta_box_cb'        => false,
 				'capabilities'       => array(
 					// Note that delete_terms is needed so the checkbox (cb) table column will work.

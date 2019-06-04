@@ -1106,20 +1106,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
 	 */
 	private function check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) && ( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) && $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				// Check if an alternative name list is specified.
-				if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
-					foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alt_name ) {
-						if ( $node->hasAttribute( $alt_name ) ) {
-							return AMP_Rule_Spec::PASS;
-						}
+			}
+
+			// Check if an alternative name list is specified.
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alt_name ) {
+					if ( $node->hasAttribute( $alt_name ) ) {
+						return AMP_Rule_Spec::PASS;
 					}
 				}
-				return AMP_Rule_Spec::FAIL;
 			}
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1223,7 +1223,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$rule_value = strtolower( $rule_value );
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
-				if ( $attr_value === (string) $rule_value ) {
+				if ( $attr_value === $rule_value ) {
 					return AMP_Rule_Spec::PASS;
 				}
 
@@ -1232,7 +1232,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$attr_value = strtolower( $node->getAttribute( $alternative_name ) );
-						if ( $attr_value === (string) $rule_value ) {
+						if ( $attr_value === $rule_value ) {
 							return AMP_Rule_Spec::PASS;
 						}
 
@@ -1325,29 +1325,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
-			if ( $node->hasAttribute( $attr_name ) ) {
-				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
-					$url = urldecode( $url );
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) && $node->hasAttribute( $attr_name ) ) {
+			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+				$url = urldecode( $url );
 
-					// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
-					$protocol = $this->parse_protocol( $url );
-					if ( isset( $protocol ) ) {
-						if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
-							return AMP_Rule_Spec::FAIL;
-						}
-						$url = substr( $url, strlen( $protocol ) + 1 );
-					}
-
-					// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
-					$host = wp_parse_url( $url, PHP_URL_HOST );
-					if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
+				// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
+				$protocol = $this->parse_protocol( $url );
+				if ( isset( $protocol ) ) {
+					if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
+					$url = substr( $url, strlen( $protocol ) + 1 );
 				}
 
-				return AMP_Rule_Spec::PASS;
+				// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
+				$host = wp_parse_url( $url, PHP_URL_HOST );
+				if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
+					return AMP_Rule_Spec::FAIL;
+				}
 			}
+
+			return AMP_Rule_Spec::PASS;
 		}
 
 		return AMP_Rule_Spec::NOT_APPLICABLE;
@@ -1452,7 +1450,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$parsed_url = wp_parse_url( $url );
@@ -1469,7 +1467,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				return AMP_Rule_Spec::PASS;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
@@ -1500,7 +1500,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && $node->hasAttribute( $attr_name ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
 				return AMP_Rule_Spec::FAIL;

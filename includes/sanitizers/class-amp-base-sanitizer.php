@@ -246,11 +246,9 @@ abstract class AMP_Base_Sanitizer {
 			return absint( $value );
 		}
 
-		if ( AMP_String_Utils::endswith( $value, '%' ) ) {
-			if ( 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
-				$percentage = absint( $value ) / 100;
-				return round( $percentage * $this->args['content_max_width'] );
-			}
+		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
+			$percentage = absint( $value ) / 100;
+			return round( $percentage * $this->args['content_max_width'] );
 		}
 
 		return '';
