@@ -56,9 +56,10 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text {
+	position: static;
 	display: inline-block;
 	vertical-align: middle;
-	line-height: normal;
+	line-height: 1.15;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text::before {
@@ -70,11 +71,6 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	height: 100%;
 	background: inherit;
 	z-index: -1;
-}
-
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text,
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text * {
-	height: 100%;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring-fontsize {
