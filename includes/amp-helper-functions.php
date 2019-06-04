@@ -1130,3 +1130,34 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	$wp_admin_bar->add_menu( $parent );
 }
+
+/**
+ * Prints AMP Stories auto ads.
+ *
+ * @since 1.2
+ */
+function amp_print_story_auto_ads() {
+	/**
+	 * Filters the configuration data for <amp-story-auto-ads>.
+	 *
+	 * This allows Dynamically inserting ads into a story.
+	 *
+	 * @param array   $data Story ads configuration data.
+	 * @param WP_Post $post The current story's post object.
+	 */
+	$data = apply_filters( 'amp_story_auto_ads_configuration', array(), get_post() );
+
+	if ( empty( $data ) ) {
+		return;
+	}
+
+	$script_element = AMP_HTML_Utils::build_tag(
+		'script',
+		array(
+			'type' => 'application/json',
+		),
+		wp_json_encode( $data )
+	);
+
+	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', array(), $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+}

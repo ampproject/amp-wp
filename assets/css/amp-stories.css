@@ -9,6 +9,11 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 .wp-block-amp-amp-story-post-title,
 .wp-block-amp-amp-story-post-date {
 	padding: 7px !important;
+}
+
+.wp-block-amp-amp-story-post-author,
+.wp-block-amp-amp-story-post-title,
+.wp-block-amp-amp-story-post-date {
 	display: flex;
 }
 

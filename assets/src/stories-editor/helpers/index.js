@@ -27,7 +27,7 @@ import {
 	withMetaBlockEdit,
 	withMetaBlockSave,
 	Inserter,
-} from '../../components';
+} from '../components';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,

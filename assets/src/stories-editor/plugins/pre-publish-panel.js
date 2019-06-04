@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { PrePublishPanel } from '../../components';
+import { PrePublishPanel } from '../../common/components';
 import { getMinimumStoryPosterDimensions } from '../helpers';
 
 export const name = 'amp-story-pre-publish-panel';
