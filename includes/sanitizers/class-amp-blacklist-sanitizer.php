@@ -183,7 +183,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// If the href starts with a '/', append the home_url to it for validation purposes.
-		if ( 0 === stripos( $href, '/' ) ) {
+		if ( 0 === strpos( $href, '/' ) ) {
 			$href = untrailingslashit( get_home_url() ) . $href;
 		}
 
