@@ -58,8 +58,7 @@ class AMP_Story_Templates {
 	public function filter_user_has_cap( $allcaps, $caps, $args ) {
 		if ( 'edit_post' === $args[0] && isset( $args[2] ) ) {
 			if ( has_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY, $args[2] ) ) {
-				unset( $allcaps['edit_others_posts'] );
-				unset( $allcaps['edit_published_posts'] );
+				unset( $allcaps['edit_others_posts'], $allcaps['edit_published_posts'] );
 			}
 		}
 		return $allcaps;

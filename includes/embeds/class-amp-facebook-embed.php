@@ -161,15 +161,25 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( false !== strpos( $class_attr, 'fb-post' ) ) {
 			return 'post';
-		} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-video' ) ) {
 			return 'video';
-		} elseif ( false !== strpos( $class_attr, 'fb-page' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-page' ) ) {
 			return 'page';
-		} elseif ( false !== strpos( $class_attr, 'fb-like' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-like' ) ) {
 			return 'like';
-		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comments' ) ) {
 			return 'comments';
-		} elseif ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
 			return 'comment';
 		}
 

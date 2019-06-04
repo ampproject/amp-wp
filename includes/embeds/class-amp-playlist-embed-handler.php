@@ -320,9 +320,12 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function get_title( $track ) {
 		if ( ! empty( $track['caption'] ) ) {
 			return $track['caption'];
-		} elseif ( ! empty( $track['title'] ) ) {
+		}
+
+		if ( ! empty( $track['title'] ) ) {
 			return $track['title'];
 		}
+
 		return '';
 	}
 

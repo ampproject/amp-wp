@@ -388,9 +388,9 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( ! $multiple ) {
 			return array_shift( $statuses );
-		} else {
-			return $statuses;
 		}
+
+		return $statuses;
 	}
 
 	/**
@@ -1904,8 +1904,7 @@ class AMP_Validation_Error_Taxonomy {
 				if ( isset( $validation_error['parent_name'] ) ) {
 					$summary = self::get_details_summary_label( $validation_error );
 
-					unset( $validation_error['error_type'] );
-					unset( $validation_error['parent_name'] );
+					unset( $validation_error['error_type'], $validation_error['parent_name'] );
 
 					$attributes         = array();
 					$attributes_heading = '';

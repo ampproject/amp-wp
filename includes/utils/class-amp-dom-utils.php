@@ -347,7 +347,7 @@ class AMP_DOM_Utils {
 		 * See https://github.com/ampproject/amp-wp/issues/993 for additional context on this issue.
 		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
 		 */
-		return ( ! is_null( $converted ) ) ? $converted : $html;
+		return ( $converted !== null ) ? $converted : $html;
 	}
 
 	/**
@@ -413,7 +413,7 @@ class AMP_DOM_Utils {
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
 		// The DOMDocument may contain no body. In which case return nothing.
-		if ( is_null( $body ) ) {
+		if ( $body === null ) {
 			return '';
 		}
 
@@ -649,7 +649,7 @@ class AMP_DOM_Utils {
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
 		_deprecated_function( __METHOD__, '0.7' );
 
-		if ( is_null( $node ) ) {
+		if ( $node === null ) {
 			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
 		}
 

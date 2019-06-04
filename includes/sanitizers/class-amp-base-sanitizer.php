@@ -548,8 +548,7 @@ abstract class AMP_Base_Sanitizer {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
-			unset( $new_attributes['width'] );
-			unset( $new_attributes['height'] );
+			unset( $new_attributes['width'], $new_attributes['height'] );
 		} elseif ( 'responsive' === $layout ) {
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		} elseif ( 'fixed' === $layout ) {

@@ -173,7 +173,7 @@ class AMP_Content {
 		foreach ( $embed_handler_classes as $embed_handler_class => $args ) {
 			$embed_handler = new $embed_handler_class( array_merge( $this->args, $args ) );
 
-			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+			if ( ! $embed_handler instanceof \AMP_Base_Embed_Handler ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(

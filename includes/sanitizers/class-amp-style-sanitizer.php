@@ -1407,9 +1407,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				$results[] = compact( 'error', 'sanitized' );
 				return $results;
-			} else {
-				$stylesheet = $contents;
 			}
+
+			$stylesheet = $contents;
 		} elseif ( is_wp_error( $css_file_path ) ) {
 			$error     = array(
 				'code'    => $css_file_path->get_error_code(),
@@ -2932,9 +2932,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
 						if ( empty( $stylesheet_part ) ) {
 							continue; // There was a shaken rule.
-						} elseif ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
+						}
+
+						if ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
 							continue; // The rule opens is empty from the start.
-						} elseif ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+						}
+
+						if ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
 							$open_braces++;
 						} elseif ( '}' === $stylesheet_part ) {
 							$open_braces--;

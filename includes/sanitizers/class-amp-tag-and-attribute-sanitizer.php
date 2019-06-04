@@ -703,11 +703,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
-			return false;
-		}
-
-		return true;
+		return ! ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) );
 	}
 
 	/**
@@ -1147,7 +1143,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				return AMP_Rule_Spec::FAIL;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $alternative_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
@@ -1390,7 +1388,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				return AMP_Rule_Spec::PASS;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
@@ -1606,7 +1606,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 2 !== count( $pair_parts ) ) {
 					return 0;
 				}
-				$properties[ trim( strtolower( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
+				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			// Fail if there are unrecognized properties.

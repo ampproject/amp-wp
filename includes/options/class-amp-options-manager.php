@@ -349,7 +349,7 @@ class AMP_Options_Manager {
 
 		$notice_id = 'amp-welcome-notice-1';
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
-		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
+		if ( in_array( $notice_id, explode( ',', (string) $dismissed ), true ) ) {
 			return;
 		}
 

@@ -171,7 +171,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			return $html;
-		} elseif ( isset( $attributes['size'] ) && 'thumbnail' === $attributes['size'] ) {
+		}
+
+		if ( isset( $attributes['size'] ) && 'thumbnail' === $attributes['size'] ) {
 			/*
 			 * If the 'gallery' shortcode has a 'size' attribute of 'thumbnail', prevent outputting an <amp-carousel>.
 			 * That will often get thumbnail images around 150 x 150,
@@ -181,6 +183,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			 */
 			return '';
 		}
+
 		return $this->shortcode( $attributes );
 	}
 

@@ -1857,7 +1857,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( strlen( trim( $response ) ) === 0 ) {
+		if ( trim( $response ) === '' ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}

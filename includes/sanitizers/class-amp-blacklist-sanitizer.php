@@ -62,7 +62,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'font' === $node_name ) {
 			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
 			return;
-		} elseif ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
+		}
+
+		if ( 'a' === $node_name && false === $this->validate_a_node( $node ) ) {
 			$this->replace_node_with_children( $node, $bad_attributes, $bad_protocols );
 			return;
 		}
@@ -81,7 +83,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 				if ( 0 === stripos( $attribute_name, 'on' ) && 'on' !== $attribute_name ) {
 					$this->remove_invalid_attribute( $node, $attribute_name );
 					continue;
-				} elseif ( 'a' === $node_name ) {
+				}
+
+				if ( 'a' === $node_name ) {
 					$this->sanitize_a_attribute( $node, $attribute );
 				}
 			}

@@ -86,7 +86,7 @@ class AMP_Content_Sanitizer {
 			 */
 			$sanitizer = new $sanitizer_class( $dom, array_merge( $args, $sanitizer_args ) );
 
-			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
+			if ( ! $sanitizer instanceof \AMP_Base_Sanitizer ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(

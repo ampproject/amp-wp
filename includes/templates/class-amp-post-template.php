@@ -166,10 +166,10 @@ class AMP_Post_Template {
 	public function get( $property, $default = null ) {
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
-		} else {
-			/* translators: %s is key name */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 		}
+
+		/* translators: %s is key name */
+		_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 
 		return $default;
 	}
