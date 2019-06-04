@@ -31,6 +31,10 @@
 	cursor: default;
 }
 
-.wp-block[data-type="amp/amp-story-text"] div[draggable="true"] {
-	border: 5px solid transparent;
+.editor-block-list__layout .wp-block[data-type="amp/amp-story-text"] .editor-block-list__block-edit:before {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	right: 2px;
+	bottom: 2px;
 }

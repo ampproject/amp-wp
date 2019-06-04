@@ -479,17 +479,12 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	const style = {
 		style: {},
 	};
-	const isTextBlock = ( 'amp/amp-story-text' === blockType.name );
-	const textBlockDelta = 5;
 
-	// The Text block has a border: 5px around the draggable area, so compensate for this.
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		const adjustedPositionTop = isTextBlock ? positionTop + getPercentageFromPixels( 'y', textBlockDelta ) : positionTop;
-		const adjustedPositionLeft = isTextBlock ? positionLeft + getPercentageFromPixels( 'x', textBlockDelta ) : positionLeft;
 		const positionStyle = {
 			position: 'absolute',
-			top: `${ adjustedPositionTop }%`,
-			left: `${ adjustedPositionLeft }%`,
+			top: `${ positionTop }%`,
+			left: `${ positionLeft }%`,
 		};
 		style.style = {
 			...style.style,
@@ -497,13 +492,11 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		};
 	}
 
-	// If the block has width and height set, set responsive values.
+	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
 	if ( width && height ) {
-		const adjustedWidth = isTextBlock ? width - ( textBlockDelta * 2 ) : width;
-		const adjustedHeight = isTextBlock ? height - ( textBlockDelta * 2 ) : height;
 		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', adjustedWidth ) }%`,
-			height: `${ getPercentageFromPixels( 'y', adjustedHeight ) }%`,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 		style.style = {
 			...style.style,
