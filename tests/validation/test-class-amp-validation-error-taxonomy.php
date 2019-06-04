@@ -1133,6 +1133,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			)
 		);
 		// Test the 'error' block in the switch.
+		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
 		$this->assertEquals( $initial_content . '<button type="button" aria-label="Toggle error details" class="single-url-detail-toggle"><code>illegal_css_at_rule</code>: <code>@-ms-viewport</code></button>', $filtered_content );
 
