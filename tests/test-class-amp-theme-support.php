@@ -922,8 +922,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( amp_is_canonical() );
 		$output = get_echo( array( 'AMP_Theme_Support', 'amend_comment_form' ) );
 		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 
 		// Test transitional AMP.
 		add_theme_support(
@@ -935,8 +933,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertFalse( amp_is_canonical() );
 		$output = get_echo( array( 'AMP_Theme_Support', 'amend_comment_form' ) );
 		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 	}
 
 	/**
@@ -1505,6 +1501,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		$this->assertContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+	}
+
+	/**
+	 * Test prepare_response when submitting form.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_for_submitted_form() {
+		AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = true;
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+
+		$response = AMP_Theme_Support::prepare_response( '<p>¡Tienes éxito!</p>' );
+		$this->assertEquals( '{"status_code":200,"status_text":"OK"}', $response );
+
+		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
+		unset( $_SERVER['REQUEST_METHOD'] );
 	}
 
 	/**

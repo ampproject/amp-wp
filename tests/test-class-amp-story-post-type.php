@@ -378,4 +378,39 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		return $stories;
 	}
+
+	/**
+	 * Test amp_print_story_auto_ads()
+	 *
+	 * @covers ::amp_print_story_auto_ads()
+	 */
+	public function test_amp_print_story_auto_ads_empty() {
+		$actual = get_echo( 'amp_print_story_auto_ads' );
+
+		$this->assertEmpty( $actual );
+	}
+
+	/**
+	 * Test amp_print_story_auto_ads()
+	 *
+	 * @covers ::amp_print_story_auto_ads()
+	 */
+	public function test_amp_print_story_auto_ads() {
+		add_filter(
+			'amp_story_auto_ads_configuration',
+			static function() {
+				return array(
+					'ad-attributes' => array(
+						'type'      => 'doubleclick',
+						'data-slot' => '/30497360/a4a/amp_story_dfp_example',
+					),
+				);
+			}
+		);
+
+		$actual = get_echo( 'amp_print_story_auto_ads' );
+
+		$this->assertStringStartsWith( '<amp-story-auto-ads', $actual );
+		$this->assertContains( '<script type="application/json">{"ad-attributes":{"type":"doubleclick"', $actual );
+	}
 }

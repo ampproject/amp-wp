@@ -374,8 +374,8 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 	 * @covers AMP_HTTP::handle_xhr_request()
 	 */
 	public function test_handle_xhr_request() {
-		$_GET['_wp_amp_action_xhr_converted'] = 1;
-		$_SERVER['REQUEST_METHOD']            = 'POST';
+		$_GET[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = 1;
+		$_SERVER['REQUEST_METHOD']                        = 'POST';
 		AMP_HTTP::purge_amp_query_vars();
 		AMP_HTTP::handle_xhr_request();
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'wp_redirect', array( 'AMP_HTTP', 'intercept_post_request_redirect' ) ) );
@@ -404,11 +404,18 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			}
 		);
 
+		$redirecting_json = wp_json_encode(
+			array(
+				'message'     => __( 'Redirecting…', 'amp' ),
+				'redirecting' => true,
+			)
+		);
+
 		// Test redirecting to full URL with HTTPS protocol.
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -433,7 +440,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		$url = home_url( '/', 'http' );
 		AMP_HTTP::intercept_post_request_redirect( $url );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -457,7 +464,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '/new-location/' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -473,7 +480,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		ob_start();
 		$url = home_url( '/new-location/' );
 		AMP_HTTP::intercept_post_request_redirect( substr( $url, strpos( $url, ':' ) + 1 ) );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -488,7 +495,7 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 		AMP_HTTP::$headers_sent = array();
 		ob_start();
 		AMP_HTTP::intercept_post_request_redirect( '' );
-		$this->assertEquals( '{"success":true}', ob_get_clean() );
+		$this->assertEquals( $redirecting_json, ob_get_clean() );
 		$this->assertContains(
 			array(
 				'name'        => 'AMP-Redirect-To',
@@ -516,12 +523,12 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 
 		ob_start();
 		AMP_HTTP::handle_wp_die( 'string' );
-		$this->assertEquals( '{"error":"string"}', ob_get_clean() );
+		$this->assertEquals( '{"message":"string"}', ob_get_clean() );
 
 		ob_start();
 		$error = new WP_Error( 'code', 'The Message' );
 		AMP_HTTP::handle_wp_die( $error );
-		$this->assertEquals( '{"error":"The Message"}', ob_get_clean() );
+		$this->assertEquals( '{"message":"The Message"}', ob_get_clean() );
 	}
 
 	/**

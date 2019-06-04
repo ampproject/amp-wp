@@ -92,11 +92,14 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			} elseif ( 'post' === $method ) {
 				$node->removeAttribute( 'action' );
 				if ( ! $xhr_action ) {
-					// record that action was converted tp action-xhr.
-					$action_url = add_query_arg( '_wp_amp_action_xhr_converted', 1, $action_url );
+					// Record that action was converted to action-xhr.
+					$action_url = add_query_arg( AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR, 1, $action_url );
+					if ( ! amp_is_canonical() ) {
+						$action_url = add_query_arg( amp_get_slug(), '', $action_url );
+					}
 					$node->setAttribute( 'action-xhr', $action_url );
-					// Append error handler if not found.
-					$this->ensure_submit_error_element( $node );
+					// Append success/error handlers if not found.
+					$this->ensure_response_message_elements( $node );
 				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
 					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
 				}
@@ -119,28 +122,81 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Checks if the form has an error handler else create one if not.
+	 * Ensure that the form has a submit-success and submit-error element templates.
 	 *
 	 * @link https://www.ampproject.org/docs/reference/components/amp-form#success/error-response-rendering
-	 * @since 0.7
+	 * @since 1.2
 	 *
 	 * @param DOMElement $form The form node to check.
 	 */
-	public function ensure_submit_error_element( $form ) {
+	public function ensure_response_message_elements( $form ) {
+		/**
+		 * Parent node.
+		 *
+		 * @var DOMElement $parent
+		 */
+		$elements = array(
+			'submit-error'   => null,
+			'submit-success' => null,
+			'submitting'     => null,
+		);
+
 		$templates = $form->getElementsByTagName( 'template' );
 		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {
-			if ( $templates->item( $i )->parentNode->hasAttribute( 'submit-error' ) ) {
-				return; // Found error template, do nothing.
+			$parent = $templates->item( $i )->parentNode;
+			foreach ( array_keys( $elements ) as $attribute ) {
+				if ( $parent->hasAttribute( $attribute ) ) {
+					$elements[ $attribute ] = $parent;
+				}
 			}
 		}
 
-		$div      = $this->dom->createElement( 'div' );
-		$template = $this->dom->createElement( 'template' );
-		$mustache = $this->dom->createTextNode( '{{{error}}}' );
-		$div->setAttribute( 'submit-error', '' );
-		$template->setAttribute( 'type', 'amp-mustache' );
-		$template->appendChild( $mustache );
-		$div->appendChild( $template );
-		$form->appendChild( $div );
+		foreach ( $elements as $attribute => $element ) {
+			if ( $element ) {
+				continue;
+			}
+			$div      = $this->dom->createElement( 'div' );
+			$template = $this->dom->createElement( 'template' );
+			$div->setAttribute( 'class', 'amp-wp-default-form-message' );
+			if ( 'submitting' === $attribute ) {
+				$p = $this->dom->createElement( 'p' );
+				$p->appendChild( $this->dom->createTextNode( __( 'Submitting…', 'amp' ) ) );
+				$template->appendChild( $p );
+			} else {
+				$p = $this->dom->createElement( 'p' );
+				$p->setAttribute( 'class', '{{#redirecting}}amp-wp-form-redirecting{{/redirecting}}' );
+				$p->appendChild( $this->dom->createTextNode( '{{#message}}{{{message}}}{{/message}}' ) );
+
+				// Show generic message for HTTP success/failure.
+				$p->appendChild( $this->dom->createTextNode( '{{^message}}' ) );
+				if ( 'submit-error' === $attribute ) {
+					$p->appendChild( $this->dom->createTextNode( __( 'Your submission failed.', 'amp' ) ) );
+					/* translators: %1$s: HTTP status text, %2$s: HTTP status code */
+					$reason = sprintf( __( 'The server responded with %1$s (code %2$s).', 'amp' ), '{{status_text}}', '{{status_code}}' );
+				} else {
+					$p->appendChild( $this->dom->createTextNode( __( 'It appears your submission was successful.', 'amp' ) ) );
+					$reason = __( 'Even though the server responded OK, it is possible the submission was not processed.' );
+				}
+				$reason .= ' ' . __( 'Please contact the developer of this form processor to improve this message.', 'amp' );
+
+				$p->appendChild( $this->dom->createTextNode( ' ' ) );
+				$small = $this->dom->createElement( 'small' );
+				$small->appendChild( $this->dom->createTextNode( $reason ) );
+				$small->appendChild( $this->dom->createTextNode( ' ' ) );
+				$link = $this->dom->createElement( 'a' );
+				$link->setAttribute( 'href', 'https://amp-wp.org/?p=5463' );
+				$link->setAttribute( 'target', '_blank' );
+				$link->appendChild( $this->dom->createTextNode( __( 'Learn more', 'amp' ) ) );
+				$small->appendChild( $link );
+				$p->appendChild( $small );
+
+				$p->appendChild( $this->dom->createTextNode( '{{/message}}' ) );
+				$template->appendChild( $p );
+			}
+			$div->setAttribute( $attribute, '' );
+			$template->setAttribute( 'type', 'amp-mustache' );
+			$div->appendChild( $template );
+			$form->appendChild( $div );
+		}
 	}
 }
