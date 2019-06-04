@@ -106,7 +106,7 @@ class TextBlockEdit extends Component {
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const wrapperStyle = ampFitText ? { style: { lineHeight: height + 'px' } } : null;
+		const wrapperStyle = ampFitText ? { lineHeight: height + 'px' } : null;
 
 		return (
 			<>
@@ -116,7 +116,9 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<div { ...wrapperStyle }>
+				<div className={ classnames( 'wp-block-amp-story-text-wrapper', {
+					'with-line-height': ampFitText,
+				} ) } style={ wrapperStyle } >
 					<RichText
 						wrapperClassName="wp-block-amp-story-text"
 						tagName="p"
