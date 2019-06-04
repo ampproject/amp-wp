@@ -694,12 +694,12 @@ class AMP_Validation_Error_Taxonomy {
 				if ( ! isset( $removed_elements[ $validation_error['node_name'] ] ) ) {
 					$removed_elements[ $validation_error['node_name'] ] = 0;
 				}
-				$removed_elements[ $validation_error['node_name'] ] += 1;
+				++$removed_elements[ $validation_error['node_name'] ];
 			} elseif ( self::INVALID_ATTRIBUTE_CODE === $code ) {
 				if ( ! isset( $removed_attributes[ $validation_error['node_name'] ] ) ) {
 					$removed_attributes[ $validation_error['node_name'] ] = 0;
 				}
-				$removed_attributes[ $validation_error['node_name'] ] += 1;
+				++$removed_attributes[ $validation_error['node_name'] ];
 			}
 
 			if ( ! empty( $validation_error['sources'] ) ) {
