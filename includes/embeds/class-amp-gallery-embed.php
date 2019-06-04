@@ -114,10 +114,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			}
 
 			$href = null;
-			if ( empty( $atts['lightbox'] ) ) {
-				if ( ! empty( $atts['link'] ) && 'file' === $atts['link'] ) {
+			if ( empty( $atts['lightbox'] ) && ! empty( $atts['link'] ) ) {
+				if ( 'file' === $atts['link'] ) {
 					$href = $url;
-				} elseif ( ! empty( $atts['link'] ) && 'post' === $atts['link'] ) {
+				} elseif ( 'post' === $atts['link'] ) {
 					$href = get_attachment_link( $attachment_id );
 				}
 			}
