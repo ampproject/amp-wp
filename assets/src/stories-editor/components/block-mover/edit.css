@@ -31,7 +31,7 @@
 	cursor: default;
 }
 
-.editor-block-list__layout .wp-block[data-type="amp/amp-story-text"] .editor-block-list__block-edit:before {
+.editor-block-list__layout .wp-block[data-type="amp/amp-story-text"] .editor-block-list__block-edit::before {
 	position: absolute;
 	top: 2px;
 	left: 2px;
