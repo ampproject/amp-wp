@@ -127,11 +127,16 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function shortcode( $attr ) {
 		$data = $this->get_data( $attr );
+
 		if ( isset( $data['type'] ) && ( 'audio' === $data['type'] ) ) {
 			return $this->audio_playlist( $data );
-		} elseif ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
+		}
+
+		if ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
 			return $this->video_playlist( $data );
 		}
+
+		return '';
 	}
 
 	/**
