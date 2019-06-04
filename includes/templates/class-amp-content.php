@@ -32,14 +32,6 @@ class AMP_Content {
 	private $amp_scripts = array();
 
 	/**
-	 * AMP styles.
-	 *
-	 * @deprecated
-	 * @var array
-	 */
-	private $amp_styles = array();
-
-	/**
 	 * AMP stylesheets.
 	 *
 	 * @since 1.0
