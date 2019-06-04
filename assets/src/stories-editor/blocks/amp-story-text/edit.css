@@ -70,6 +70,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	height: 100%;
 	background: inherit;
 	z-index: -1;
+	border-radius: inherit;
 }
 
 .wp-block-amp-story-text-wrapper:not(.with-line-height),
