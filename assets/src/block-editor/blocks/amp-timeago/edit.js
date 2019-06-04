@@ -18,7 +18,7 @@ import {
 /**
  * Internal dependencies
  */
-import { LayoutControls } from '../../../components';
+import { LayoutControls } from '../../components';
 
 const BlockEdit = ( props ) => {
 	const { attributes, setAttributes } = props;

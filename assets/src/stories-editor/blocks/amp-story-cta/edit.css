@@ -43,10 +43,6 @@
 	cursor: text;
 }
 
-.wp-block-amp-amp-story-cta:not(.has-text-color):not(.is-style-outline) .block-editor-rich-text__editable[data-is-placeholder-visible="true"] + .block-editor-rich-text__editable {
-	color: #fff;
-}
-
 .wp-block-amp-amp-story-cta .block-editor-rich-text__editable[data-is-placeholder-visible="true"] + .block-editor-rich-text__editable {
 	opacity: 0.8;
 }
@@ -67,10 +63,8 @@
 }
 
 .amp-block-story-cta__link {
-	background-color: #32373c;
 	border: none;
 	box-shadow: none;
-	color: inherit;
 	cursor: pointer;
 	display: inline-block;
 	font-size: 18px;

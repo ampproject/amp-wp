@@ -27,7 +27,7 @@ import {
 	withMetaBlockEdit,
 	withMetaBlockSave,
 	Inserter,
-} from '../../components';
+} from '../components';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MOVABLE_BLOCKS,
@@ -177,7 +177,7 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 export const addAMPAttributes = ( settings, name ) => {
 	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
 
-	if ( ! isChildBlock ) {
+	if ( ! isChildBlock || 'core/template' === name ) {
 		return settings;
 	}
 
@@ -321,6 +321,17 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: false,
 		};
 	}
+
+	// Keep default values of possibly already existing default values.
+	Object.keys( addedAttributes ).forEach( ( attribute ) => {
+		if ( 'undefined' !== typeof addedAttributes[ attribute ].default ) {
+			return;
+		}
+
+		if ( 'undefined' !== typeof settings.attributes[ attribute ] && 'undefined' !== typeof settings.attributes[ attribute ].default ) {
+			addedAttributes[ attribute ].default = settings.attributes[ attribute ].default;
+		}
+	} );
 
 	return {
 		...settings,
@@ -838,7 +849,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {

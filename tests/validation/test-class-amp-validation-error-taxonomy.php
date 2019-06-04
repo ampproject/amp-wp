@@ -513,7 +513,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	/**
 	 * Test summarize_validation_errors.
 	 *
-	 * @covers AMP_Validation_Manager::summarize_validation_errors()
+	 * @covers AMP_Validation_Error_Taxonomy::summarize_validation_errors()
 	 */
 	public function test_summarize_validation_errors() {
 		$attribute_node_name = 'button';
