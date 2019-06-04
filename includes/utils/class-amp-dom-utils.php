@@ -206,9 +206,9 @@ class AMP_DOM_Utils {
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
 		return (
-			$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
+			( $node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true ) )
 			||
-			$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) // Whitespace text nodes are OK.
+			( $node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) ) // Whitespace text nodes are OK.
 			||
 			$node instanceof DOMComment
 		);
