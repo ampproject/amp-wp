@@ -2676,6 +2676,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
+		unset( $pending_stylesheet );
+
 		if ( ! $included ) {
 			// Remove admin-bar class from body element.
 			// @todo It would be nice if any style rules which refer to .admin-bar could also be removed, but this would mean retroactively going back over the CSS again and re-shaking it.
@@ -2794,6 +2796,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
 					}
 				}
+
+				unset( $edited_selector );
 			}
 			$selectors = array_merge( $selectors, $edited_selectors );
 		}
@@ -2971,6 +2975,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
 			unset( $stylesheet_parts );
 		}
+
+		unset( $pending_stylesheet );
 
 		// Determine which stylesheets are included based on their priorities.
 		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );

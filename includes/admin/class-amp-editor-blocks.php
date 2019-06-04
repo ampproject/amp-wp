@@ -85,6 +85,8 @@ class AMP_Editor_Blocks {
 			$tag['data-close-button-aria-label'] = true;
 		}
 
+		unset( $tag );
+
 		foreach ( $this->amp_blocks as $amp_block ) {
 			if ( ! isset( $tags[ $amp_block ] ) ) {
 				$tags[ $amp_block ] = array();

@@ -1712,6 +1712,8 @@ class AMP_Validation_Manager {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
 
+		unset( $args );
+
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
 			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
 

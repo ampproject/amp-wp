@@ -187,6 +187,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->allowed_tags['html'] as &$rule_spec ) {
 				unset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ][ AMP_Rule_Spec::MANDATORY_PARENT ] );
 			}
+
+			unset( $rule_spec );
 		}
 
 		foreach ( $this->allowed_tags as &$tag_specs ) {
@@ -195,7 +197,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->process_alternate_names( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
 				}
 			}
+
+			unset( $tag_spec );
 		}
+
+		unset( $tag_specs );
+
 		$this->globally_allowed_attributes = $this->process_alternate_names( $this->args['amp_globally_allowed_attributes'] );
 		$this->layout_allowed_attributes   = $this->process_alternate_names( $this->args['amp_layout_allowed_attributes'] );
 	}
