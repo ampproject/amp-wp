@@ -49,11 +49,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
-			$block_content = call_user_func(
-				array( $this, $this->block_ampify_methods[ $block['blockName'] ] ),
-				$block_content,
-				$block
-			);
+			$block_content = $this->{$this->block_ampify_methods[ $block['blockName'] ]}( $block_content, $block );
 		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
 			/*
 			 * While the video block placeholder just outputs an empty video element, the placeholders for image and

@@ -497,7 +497,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$theme_features = self::get_theme_features( $this->args, false );
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( $this, $theme_feature ) ) {
-				call_user_func( array( $this, $theme_feature ), $feature_args );
+				$this->$theme_feature( $feature_args );
 			}
 		}
 	}

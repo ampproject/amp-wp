@@ -529,7 +529,7 @@ class AMP_Theme_Support {
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
 			} elseif ( is_callable( $callback ) ) {
-				$is_match = call_user_func( $callback, $query );
+				$is_match = $callback( $query );
 			} else {
 				/* translators: %s: the supportable template ID. */
 				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Supportable template "%s" does not have a callable callback.', 'amp' ), $id ) ), '1.0' );
@@ -1299,7 +1299,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', $header_callback );
 		if ( '__return_false' !== $header_callback ) {
 			ob_start();
-			call_user_func( $header_callback );
+			$header_callback();
 			$style = ob_get_clean();
 			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
 			wp_add_inline_style( 'admin-bar', $data );
