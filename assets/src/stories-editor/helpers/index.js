@@ -12,7 +12,7 @@ import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
@@ -347,8 +347,13 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' transformations.
+ * Filters block transformations.
+ *
  * Removes prefixed list transformations to prevent automatic transformation.
+ *
+ * Adds a custom transform for blocks within <amp-story-grid-layer>.
+ *
+ * @see https://github.com/ampproject/amp-wp/issues/2370
  *
  * @param {Object} settings Settings.
  * @param {string} name     Block name.
@@ -362,18 +367,45 @@ export const filterBlockTransforms = ( settings, name ) => {
 		return settings;
 	}
 
-	if ( 'core/list' !== name || ! settings.transforms ) {
-		return settings;
+	const gridWrapperTransform = {
+		type: 'raw',
+		priority: 20,
+		selector: `amp-story-grid-layer[data-block-name="${ name }"]`,
+		transform: ( node ) => {
+			const innerHTML = node.outerHTML;
+			const blockAttributes = getBlockAttributes( name, innerHTML );
+
+			if ( 'amp/amp-story-text' === name ) {
+				/*
+				 * When there is nothing that matches the content selector (.amp-text-content), the pasted content
+				 * lacks lacks the amp-fit-text wrapper and thus ampFitText is false.
+				 */
+				if ( ! blockAttributes.content ) {
+					blockAttributes.content = node.textContent;
+					blockAttributes.tagName = node.nodeName;
+					blockAttributes.ampFitText = false;
+				}
+			}
+
+			return createBlock( name, blockAttributes );
+		},
+	};
+
+	const transforms = settings.transforms ? { ...settings.transforms } : {};
+	let fromTransforms = transforms.from ? [ ...transforms.from ] : [];
+
+	if ( 'core/list' === name ) {
+		fromTransforms = fromTransforms.filter( ( { type } ) => 'prefix' !== type );
 	}
 
-	const transforms = {
-		...settings.transforms,
-		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
-	};
+	fromTransforms.push( gridWrapperTransform );
 
 	return {
 		...settings,
-		transforms,
+		transforms: {
+			...transforms,
+			from: fromTransforms,
+		},
 	};
 };
 
@@ -524,7 +556,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	}
 
 	return (
-		<amp-story-grid-layer template="vertical">
+		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
 			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
 				{ element }
 			</div>

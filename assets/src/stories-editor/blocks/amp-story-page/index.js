@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -78,4 +79,21 @@ export const settings = {
 	edit,
 
 	save,
+
+	transforms: {
+		from: [
+			{
+				type: 'raw',
+				priority: 20,
+				selector: 'amp-story-page',
+				transform: ( node ) => {
+					const innerHTML = node.outerHTML;
+					const blockAttributes = getBlockAttributes( name, innerHTML );
+
+					// @todo: Somehow extract inner blocks.
+					return createBlock( name, blockAttributes );
+				},
+			},
+		],
+	},
 };
