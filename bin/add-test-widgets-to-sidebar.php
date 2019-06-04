@@ -381,8 +381,7 @@ function amp_create_widget( $widget ) {
 	$settings   = isset( $widget['settings'] ) ? $widget['settings'] : array();
 
 	if ( ! isset( $settings['title'] ) ) {
-		$title             = str_replace( '_', ' ', $id_base );
-		$title             = str_replace( '-', ' ', $title );
+		$title             = str_replace( array( '_', '-' ), ' ', $id_base );
 		$settings['title'] = sprintf( 'Test %s Widget', ucwords( $title ) );
 	}
 

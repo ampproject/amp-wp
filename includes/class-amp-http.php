@@ -222,8 +222,7 @@ class AMP_HTTP {
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
-			$subdomain = str_replace( '-', '--', $domain );
-			$subdomain = str_replace( '.', '-', $subdomain );
+			$subdomain = str_replace( array( '-', '.' ), array( '--', '-' ), $domain );
 
 			// Google AMP Cache subdomain.
 			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
