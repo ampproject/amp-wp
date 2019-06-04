@@ -152,7 +152,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 				break;
 			}
 		}
-		$this->AssertTrue( $analytics_js_found );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
+		$this->assertTrue( $analytics_js_found );
 
 	}
 
@@ -177,11 +181,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 
-		// One amp-analytics component should be in the page
-		$this->assertEquals( 1, $components->length );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 
+		// One amp-analytics component should be in the page
+		$this->assertEquals( 1, $components->length );
 	}
 
 	/**
@@ -206,12 +210,12 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
-		// Two amp-analytics components should be in the page
-		$this->assertEquals( 2, $components->length );
 
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 
+		// Two amp-analytics components should be in the page
+		$this->assertEquals( 2, $components->length );
 	}
 
 	/**
