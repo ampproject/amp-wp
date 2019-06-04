@@ -228,7 +228,6 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$type         = 'video';
 		$attr         = $this->get_attributes( $type );
 		$data         = $this->instance->get_data( $attr );
-		$container_id = 'fooContainerId1';
 		$state_id     = 'fooId1';
 		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 

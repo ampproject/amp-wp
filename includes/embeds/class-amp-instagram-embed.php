@@ -67,7 +67,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function shortcode( $attr ) {
 		$url = false;
 
-		$instagram_id = false;
 		if ( isset( $attr['url'] ) ) {
 			$url = trim( $attr['url'] );
 		}

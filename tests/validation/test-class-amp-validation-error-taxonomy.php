@@ -1121,17 +1121,6 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 			)
 		);
 
-		$term = get_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
-
-		$url = admin_url(
-			add_query_arg(
-				array(
-					AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG => $term->name,
-					'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-				),
-				'edit.php'
-			)
-		);
 		// Test the 'error' block in the switch.
 		$GLOBALS['pagenow'] = 'post.php';
 		$filtered_content = AMP_Validation_Error_Taxonomy::filter_manage_custom_columns( $initial_content, 'error', $term_id );
