@@ -20,17 +20,19 @@ import {
  * Internal dependencies
  */
 import {
+	withCroppedFeaturedImage,
+} from '../common/components';
+import {
 	withAmpStorySettings,
 	withPageNumber,
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
-	withCroppedFeaturedImage,
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 	withVideoPosterImageNotice,
-} from '../components';
+} from './components';
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,

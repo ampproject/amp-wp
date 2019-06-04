@@ -89,6 +89,7 @@ class TextBlockEdit extends Component {
 			align,
 			ampFitText,
 			autoFontSize,
+			height,
 			tagName,
 			opacity,
 		} = attributes;
@@ -105,6 +106,8 @@ class TextBlockEdit extends Component {
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
+		const wrapperStyle = ampFitText && content.length ? { lineHeight: height + 'px' } : null;
+
 		return (
 			<>
 				<BlockControls>
@@ -113,32 +116,37 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<RichText
-					wrapperClassName="wp-block-amp-story-text"
-					tagName="p"
-					// Ensure line breaks are normalised to HTML.
-					value={ content }
-					onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-					// The 2 following lines are necessary for pasting to work.
-					onReplace={ this.onReplace }
-					onSplit={ () => {} }
-					style={ {
-						backgroundColor: appliedBackgroundColor,
-						color: textColor.color,
-						fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-						fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
-						textAlign: align,
-					} }
-					className={ classnames( className, {
-						'has-text-color': textColor.color,
-						'has-background': backgroundColor.color,
-						[ backgroundColor.class ]: backgroundColor.class,
-						[ textColor.class ]: textColor.class,
-						[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-						'is-amp-fit-text': ampFitText,
-					} ) }
-					placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-				/>
+				<div className={ classnames( 'wp-block-amp-story-text-wrapper', {
+					'with-line-height': ampFitText,
+				} ) } style={ wrapperStyle } >
+					<RichText
+						wrapperClassName="wp-block-amp-story-text"
+						tagName="p"
+						// Ensure line breaks are normalised to HTML.
+						value={ content }
+						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
+						// The 2 following lines are necessary for pasting to work.
+						onReplace={ this.onReplace }
+						onSplit={ () => {} }
+						style={ {
+							backgroundColor: appliedBackgroundColor,
+							color: textColor.color,
+							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
+							textAlign: align,
+							position: ampFitText && content.length ? 'static' : undefined,
+						} }
+						className={ classnames( className, {
+							'has-text-color': textColor.color,
+							'has-background': backgroundColor.color,
+							[ backgroundColor.class ]: backgroundColor.class,
+							[ textColor.class ]: textColor.class,
+							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+							'is-amp-fit-text': ampFitText,
+						} ) }
+						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+					/>
+				</div>
 			</>
 		);
 	}

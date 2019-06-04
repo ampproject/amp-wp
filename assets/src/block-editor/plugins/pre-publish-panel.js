@@ -1,8 +1,7 @@
 /**
  * Internal dependencies
  */
-// @todo Import from '../components' and use tree shaking in development mode to prevent warnings.
-import PrePublishPanel from '../../components/pre-publish-panel';
+import { PrePublishPanel } from '../../common/components';
 import { getMinimumFeaturedImageDimensions } from '../../common/helpers';
 
 export const name = 'amp-post-featured-image-pre-publish-panel';
