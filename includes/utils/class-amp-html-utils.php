@@ -48,16 +48,7 @@ class AMP_HTML_Utils {
 	 * @return bool True if the string is valid JSON, false otherwise.
 	 */
 	public static function is_valid_json( $data ) {
-		if ( ! empty( $data ) ) {
-			$decoded = json_decode( $data );
-			if ( function_exists( 'json_last_error' ) ) {
-				return ( json_last_error() === JSON_ERROR_NONE );
-			}
-
-			// For PHP 5.2 back-compatibility.
-			return null !== $decoded;
-		}
-
-		return false;
+		json_decode( $data );
+		return ( json_last_error() === JSON_ERROR_NONE );
 	}
 }
