@@ -62,7 +62,7 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
