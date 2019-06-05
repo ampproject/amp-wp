@@ -13,7 +13,7 @@ import { PanelBody, Placeholder, TextControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { LayoutControls, MediaPlaceholder } from '../../../components';
+import { LayoutControls, MediaPlaceholder } from '../../components';
 
 const BlockEdit = ( props ) => {
 	const { attributes, setAttributes } = props;

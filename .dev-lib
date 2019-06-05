@@ -1,3 +1,5 @@
+#!/bin/bash
+
 DEFAULT_BASE_BRANCH=develop
 ASSETS_DIR=wp-assets
 PROJECT_SLUG=amp
@@ -24,5 +26,11 @@ function after_wp_install {
 		wget -O "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip" https://github.com/xwp/pwa-wp/releases/download/0.2-alpha2/pwa.zip
 		unzip -d "$WP_CORE_DIR/src/wp-content/plugins/pwa/" "$WP_CORE_DIR/src/wp-content/plugins/pwa.zip"
 		echo "done"
+	fi
+}
+
+function coverage_clover {
+	if [[ ! -z $RUN_PHPUNIT_COVERAGE ]]; then
+		echo --coverage-clover build/logs/clover.xml
 	fi
 }

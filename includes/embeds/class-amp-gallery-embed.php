@@ -204,6 +204,9 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
+		$max_width  = 0;
+		$max_height = 0;
+
 		$images = array();
 		foreach ( $args['images'] as $props ) {
 			$image_atts = array(
@@ -212,6 +215,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'height' => $props['height'],
 				'layout' => 'responsive',
 			);
+			$max_width  = max( $max_width, $props['width'] );
+			$max_height = max( $max_height, $props['height'] );
 			if ( ! empty( $args['lightbox'] ) ) {
 				$image_atts['lightbox'] = '';
 				$image_atts['on']       = 'tap:' . AMP_Img_Sanitizer::AMP_IMAGE_LIGHTBOX_ID;
@@ -239,8 +244,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		return AMP_HTML_Utils::build_tag(
 			'amp-carousel',
 			array(
-				'width'  => $this->args['width'],
-				'height' => $this->args['height'],
+				'width'  => $max_width,
+				'height' => $max_height,
 				'type'   => 'slides',
 				'layout' => 'responsive',
 			),

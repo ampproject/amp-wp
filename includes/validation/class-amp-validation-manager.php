@@ -206,11 +206,6 @@ class AMP_Validation_Manager {
 
 		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
 
-		// Add filter to auto-accept tree shaking validation error.
-		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
-			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
-		}
-
 		if ( self::$should_locate_sources ) {
 			self::add_validation_error_sourcing();
 		}
@@ -238,20 +233,6 @@ class AMP_Validation_Manager {
 	 */
 	public static function is_sanitization_auto_accepted() {
 		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
-	}
-
-	/**
-	 * Filter a tree-shaking validation error as accepted for sanitization.
-	 *
-	 * @param bool  $sanitized Sanitized.
-	 * @param array $error     Error.
-	 * @return bool Sanitized.
-	 */
-	public static function filter_tree_shaking_validation_error_as_accepted( $sanitized, $error ) {
-		if ( AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] ) {
-			$sanitized = true;
-		}
-		return $sanitized;
 	}
 
 	/**
@@ -761,8 +742,8 @@ class AMP_Validation_Manager {
 		);
 
 		/*
-		 * Ignore validation errors which are forcibly sanitized by filter. This includes tree shaking error
-		 * accepted by options and via AMP_Validation_Error_Taxonomy::accept_validation_errors()).
+		 * Ignore validation errors which are forcibly sanitized by filter. This includes errors accepted via
+		 * AMP_Validation_Error_Taxonomy::accept_validation_errors(), such as the acceptable_errors in core themes.
 		 * This was introduced in <https://github.com/ampproject/amp-wp/pull/1413> to prevent forcibly-sanitized
 		 * validation errors from being reported, to avoid noise and wasted storage. It was inadvertently
 		 * reverted in de7b04b but then restored as part of <https://github.com/ampproject/amp-wp/pull/1413>.
@@ -1742,7 +1723,6 @@ class AMP_Validation_Manager {
 			if ( ! empty( $css_validation_errors ) ) {
 				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
-			$sanitizers['AMP_Style_Sanitizer']['accept_tree_shaking'] = AMP_Options_Manager::get_option( 'accept_tree_shaking' );
 		}
 
 		return $sanitizers;
