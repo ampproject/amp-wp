@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { dispatch, select } from '@wordpress/data';
 
 /**
+ * Internal dependencies
+ */
+import { MAX_IMAGE_SIZE_SLUG } from '../../constants';
+
+/**
  * A component that extends the BlockEdit components, replacing the 'full' image size with a custom max size.
  *
  * @param {Function} BlockEdit A block's edit component to be extended.
@@ -43,15 +48,14 @@ export default ( BlockEdit ) => {
 		 */
 		ampReplaceFullSizeImage() {
 			const blockEditorStore = 'core/block-editor';
-			const newMaxImageSizeSlug = 'amp_story_page';
 			const initialSizes = select( blockEditorStore ).getSettings( 'imageSizes' ).imageSizes;
 			const sizesWithoutFullSize = initialSizes.filter( ( size ) => 'full' !== size.slug );
 
 			// If the AMP Story slug isn't present, add it.
-			if ( ! sizesWithoutFullSize.filter( ( size ) => newMaxImageSizeSlug === size.slug ).length ) {
+			if ( ! sizesWithoutFullSize.filter( ( size ) => MAX_IMAGE_SIZE_SLUG === size.slug ).length ) {
 				sizesWithoutFullSize.push(
 					{
-						slug: newMaxImageSizeSlug,
+						slug: MAX_IMAGE_SIZE_SLUG,
 						name: __( 'AMP Story Max Size', 'amp' ),
 					}
 				);

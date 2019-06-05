@@ -4,6 +4,7 @@
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -31,6 +32,7 @@ import {
 	withSelect,
 	withDispatch,
 	dispatch,
+	select,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -45,6 +47,7 @@ import {
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
+	MAX_IMAGE_SIZE_SLUG,
 } from '../../constants';
 import './edit.css';
 
@@ -106,9 +109,11 @@ class PageEdit extends Component {
 
 			mediaType = media.type;
 		}
+		const fetchedMedia = select( 'core' ).getMedia( media.id );
+		const mediaUrl = has( fetchedMedia, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG ] ) ? fetchedMedia.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url : media.url;
 
 		this.props.setAttributes( {
-			mediaUrl: media.url,
+			mediaUrl,
 			mediaId: media.id,
 			mediaType,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
