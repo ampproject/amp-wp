@@ -54,9 +54,10 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
+		// @todo this 5px is compensating for the dragging border, however, it should only be applied for Text block and 5 should be a constant.
 		updateBlockAttributes( srcClientId, {
-			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
-			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
+			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + 5 ),
+			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + 5 ),
 		} );
 	}
 

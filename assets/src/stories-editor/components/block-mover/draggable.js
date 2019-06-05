@@ -136,9 +136,16 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
+		// @todo This is a "draft", it needs optimizing and applying in case of Text block only.
+		let split = clone.style.top.split( '%' );
+		let percentage = split[0].replace( 'calc(', '' );
+		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentage ) - 6 }px`;
+		split = clone.style.left.split( '%' );
+		percentage = split[0].replace( 'calc(', '' );
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentage ) - 5 }px`;
+		//this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
 		// Add 5px adjustment for having the block mover right next to the clone.
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		//this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
