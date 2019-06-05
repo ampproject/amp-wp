@@ -1,10 +1,11 @@
 /**
- * Internal dependencies
+ * WordPress dependencies
  */
-import { replaceFullSizeImage } from '../../helpers';
+import { __ } from '@wordpress/i18n';
+import { dispatch, select } from '@wordpress/data';
 
 /**
- * A component that extends block edit components, replacing the 'full' image size with a custom max size.
+ * A component that extends the BlockEdit components, replacing the 'full' image size with a custom max size.
  *
  * @param {Function} BlockEdit A block's edit component to be extended.
  * @return {Function} A function returning an extended BlockEdit.
@@ -17,6 +18,7 @@ export default ( BlockEdit ) => {
 		constructor() {
 			super( ...arguments );
 			this.componentDidUpdate = this.componentDidUpdate.bind( this );
+			this.ampReplaceFullSizeImage = this.ampReplaceFullSizeImage.bind( this );
 		}
 
 		/**
@@ -25,11 +27,35 @@ export default ( BlockEdit ) => {
 		componentDidUpdate() {
 			const { name } = this.props;
 			if ( 'core/image' === name ) {
-				replaceFullSizeImage();
+				this.ampReplaceFullSizeImage();
 			}
 
 			if ( super.componentDidUpdate ) {
 				super.componentDidUpdate();
+			}
+		}
+
+		/**
+		 * Replaces the 'full' image size with a custom size, which has a limited height.
+		 *
+		 * This prevents the user from selecting an image in the Image block that's too big.
+		 * For example, 3200 x 4000.
+		 */
+		ampReplaceFullSizeImage() {
+			const blockEditorStore = 'core/block-editor';
+			const newMaxImageSizeSlug = 'amp_story_page';
+			const initialSizes = select( blockEditorStore ).getSettings( 'imageSizes' ).imageSizes;
+			const sizesWithoutFullSize = initialSizes.filter( ( size ) => 'full' !== size.slug );
+
+			// If the AMP Story slug isn't present, add it.
+			if ( ! sizesWithoutFullSize.filter( ( size ) => newMaxImageSizeSlug === size.slug ).length ) {
+				sizesWithoutFullSize.push(
+					{
+						slug: newMaxImageSizeSlug,
+						name: __( 'AMP Story Max Size', 'amp' ),
+					}
+				);
+				dispatch( blockEditorStore ).updateSettings( { imageSizes: sizesWithoutFullSize } );
 			}
 		}
 	};

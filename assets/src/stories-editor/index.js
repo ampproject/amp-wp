@@ -51,7 +51,6 @@ import {
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
-	replaceFullSizeImage,
 } from './helpers';
 
 import { ALLOWED_BLOCKS } from './constants';
@@ -118,7 +117,6 @@ domReady( () => {
 	}
 
 	renderStoryComponents();
-	replaceFullSizeImage();
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
 	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
