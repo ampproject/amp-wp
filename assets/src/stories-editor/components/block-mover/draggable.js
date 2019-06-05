@@ -139,13 +139,14 @@ class Draggable extends Component {
 		// Position clone over the original element.
 		if ( 'amp/amp-story-text' === blockName ) {
 			// Add an adjustment for having the block mover right next to the clone.
-			let split = clone.style.top.split( '%' );
-			let percentage = split[ 0 ].replace( 'calc(', '' );
-			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentage ) - TEXT_BLOCK_BORDER }px`;
+			const pattern = /calc\(([\d\.]+)%/;
+			const matchesTop = clone.style.top.match( pattern );
+			const percentageTop = matchesTop ? matchesTop[ 1 ] : 0;
+			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentageTop ) - TEXT_BLOCK_BORDER }px`;
 
-			split = clone.style.left.split( '%' );
-			percentage = split[ 0 ].replace( 'calc(', '' );
-			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentage ) - TEXT_BLOCK_BORDER }px`;
+			const matchesLeft = clone.style.left.match( pattern );
+			const percentageLeft = matchesLeft ? matchesLeft[ 1 ] : 0;
+			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentageLeft ) - TEXT_BLOCK_BORDER }px`;
 		} else {
 			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
 			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
