@@ -13,12 +13,6 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
 
 const sharedConfig = {
-	watch: true,
-	watchOptions: {
-		poll: true,
-		ignored: /node_modules/
-	},
-	devtool: 'cheap-eval-source-map',
 	output: {
 		path: path.resolve( process.cwd(), 'assets', 'js' ),
 		filename: '[name].js',

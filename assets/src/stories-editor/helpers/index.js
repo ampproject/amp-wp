@@ -1400,15 +1400,18 @@ export const getCallToActionBlock = ( pageClientId ) => {
  */
 export const replaceFullSizeImage = () => {
 	const blockEditorStore = 'core/block-editor';
+	const ampStorySizeSlug = 'amp_story_page';
 	const initialSizes = select( blockEditorStore ).getSettings( 'imageSizes' ).imageSizes;
-	const sizesWithoutFullSize = initialSizes.filter( ( size ) => {
-		return 'full' !== size.slug;
-	} );
-	sizesWithoutFullSize.push(
-		{
-			slug: 'amp_story_page',
-			name: __( 'AMP Story Max Size', 'amp' ),
-		}
-	);
-	dispatch( blockEditorStore ).updateSettings( { 'imageSizes': sizesWithoutFullSize } );
+	const sizesWithoutFullSize = initialSizes.filter( ( size ) => 'full' !== size.slug );
+
+	// If the AMP Story slug isn't present, add it.
+	if ( ! sizesWithoutFullSize.filter( ( size ) => ampStorySizeSlug === size.slug ).length ) {
+		sizesWithoutFullSize.push(
+			{
+				slug: ampStorySizeSlug,
+				name: __( 'AMP Story Max Size', 'amp' ),
+			}
+		);
+		dispatch( blockEditorStore ).updateSettings( { imageSizes: sizesWithoutFullSize } );
+	}
 }
