@@ -105,7 +105,6 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'supported_post_types'     => array( 'post' ),
 				'analytics'                => array(),
 				'auto_accept_sanitization' => true,
-				'accept_tree_shaking'      => true,
 				'all_templates_supported'  => true,
 				'supported_templates'      => array( 'is_singular' ),
 				'enable_response_caching'  => true,

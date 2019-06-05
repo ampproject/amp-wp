@@ -270,15 +270,8 @@ class AMP_Options_Menu {
 					'code' => 'non_existent',
 				)
 			);
-			remove_filter( 'amp_validation_error_sanitized', array( 'AMP_Validation_Manager', 'filter_tree_shaking_validation_error_as_accepted' ) );
-			$tree_shaking_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
-				array(
-					'code' => AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE,
-				)
-			);
 
 			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
-			$forced_tree_shaking = $forced_sanitization || 'with_filter' === $tree_shaking_sanitization['forced'];
 			?>
 
 			<?php if ( $forced_sanitization ) : ?>
@@ -320,22 +313,6 @@ class AMP_Options_Menu {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( $forced_tree_shaking ) : ?>
-				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[accept_tree_shaking]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ? 'on' : ''; ?>">
-			<?php else : ?>
-				<div class="amp-tree-shaking">
-					<p>
-						<label for="accept_tree_shaking">
-							<input id="accept_tree_shaking" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[accept_tree_shaking]' ); ?>" <?php checked( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) ); ?>>
-							<?php esc_html_e( 'Automatically remove CSS rules that are not relevant to a given page (tree shaking).', 'amp' ); ?>
-						</label>
-					</p>
-					<p class="description">
-						<?php esc_html_e( 'AMP limits the total amount of CSS to no more than 50KB; any more than this will cause a validation error. The need to tree shake the CSS is not done by default because in some situations (in particular for dynamic content) it can result in CSS rules being removed that are needed.', 'amp' ); ?>
-					</p>
-				</div>
-			<?php endif; ?>
-
 			<script>
 			(function( $ ) {
 				var getThemeSupportMode = function() {
@@ -346,21 +323,14 @@ class AMP_Options_Menu {
 					return checkedInput.val();
 				};
 
-				var updateTreeShakingHiddenClass = function() {
-					var checkbox = $( '#auto_accept_sanitization' );
-					$( '.amp-tree-shaking' ).toggleClass( 'hidden', checkbox.prop( 'checked' ) && 'native' !== getThemeSupportMode() );
-				};
-
 				var updateHiddenClasses = function() {
 					var themeSupportMode = getThemeSupportMode();
 					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', 'native' === themeSupportMode );
 					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
 					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', 'native' !== themeSupportMode );
-					updateTreeShakingHiddenClass();
 				};
 
 				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
-				$( '#auto_accept_sanitization' ).change( updateTreeShakingHiddenClass );
 
 				updateHiddenClasses();
 			})( jQuery );
