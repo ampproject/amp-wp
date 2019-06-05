@@ -411,9 +411,6 @@ export default createHigherOrderComponent(
 									checked={ ampFitText }
 									onChange={ () => {
 										setAttributes( { ampFitText: ! ampFitText } );
-										if ( ! ampFitText ) {
-											setFontSize( attributes.autoFontSize );
-										}
 									} }
 								/>
 								{ ! ampFitText && (

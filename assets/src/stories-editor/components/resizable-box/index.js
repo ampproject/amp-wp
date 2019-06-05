@@ -116,6 +116,8 @@ const EnhancedResizableBox = ( props ) => {
 							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
 							break;
 					}
+				} else {
+					textElement = null;
 				}
 
 				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
