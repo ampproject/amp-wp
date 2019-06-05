@@ -84,7 +84,6 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	position: absolute !important;
 }
 
-
 .editor-block-list__layout .wp-block[data-type="amp/amp-story-text"] .editor-block-list__block-edit::before {
 	position: absolute;
 	top: 2px;

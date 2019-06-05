@@ -212,3 +212,5 @@ export const AMP_STORY_FONT_IMAGES = {
 	'Source Sans Pro': SourceSansPro,
 	Ubuntu,
 };
+
+export const TEXT_BLOCK_BORDER = 5;

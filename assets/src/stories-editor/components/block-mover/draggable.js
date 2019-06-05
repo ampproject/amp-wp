@@ -20,6 +20,7 @@ const { Image } = window;
  * Internal dependencies
  */
 import { getPixelsFromPercentage } from '../../helpers';
+import { TEXT_BLOCK_BORDER } from '../../constants';
 
 const cloneWrapperClass = 'components-draggable__clone';
 
@@ -104,7 +105,7 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { elementId, transferData, onDragStart = noop } = this.props;
+		const { elementId, blockName, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {
@@ -136,16 +137,19 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// Position clone over the original element.
-		// @todo This is a "draft", it needs optimizing and applying in case of Text block only.
-		let split = clone.style.top.split( '%' );
-		let percentage = split[0].replace( 'calc(', '' );
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentage ) - 6 }px`;
-		split = clone.style.left.split( '%' );
-		percentage = split[0].replace( 'calc(', '' );
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentage ) - 5 }px`;
-		//this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-		// Add 5px adjustment for having the block mover right next to the clone.
-		//this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		if ( 'amp/amp-story-text' === blockName ) {
+			// Add an adjustment for having the block mover right next to the clone.
+			let split = clone.style.top.split( '%' );
+			let percentage = split[ 0 ].replace( 'calc(', '' );
+			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentage ) - TEXT_BLOCK_BORDER }px`;
+
+			split = clone.style.left.split( '%' );
+			percentage = split[ 0 ].replace( 'calc(', '' );
+			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentage ) - TEXT_BLOCK_BORDER }px`;
+		} else {
+			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
+			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		}
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -212,6 +216,7 @@ class Draggable extends Component {
 
 Draggable.propTypes = {
 	elementId: PropTypes.string,
+	blockName: PropTypes.string,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,

@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, TEXT_BLOCK_BORDER } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
 const wrapperWithSelect = compose(
@@ -58,8 +58,8 @@ const withWrapperProps = ( BlockListBlock ) => {
 			let style = {};
 			if ( 'amp/amp-story-text' === blockName ) {
 				style = {
-					top: `calc(${ attributes.positionTop }% - 5px)`,
-					left: `calc(${ attributes.positionLeft }% - 5px)`,
+					top: `calc(${ attributes.positionTop }% - ${ TEXT_BLOCK_BORDER }px)`,
+					left: `calc(${ attributes.positionLeft }% - ${ TEXT_BLOCK_BORDER }px)`,
 				};
 			} else {
 				style = {

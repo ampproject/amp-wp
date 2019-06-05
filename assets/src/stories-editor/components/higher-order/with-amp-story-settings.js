@@ -286,6 +286,7 @@ export default createHigherOrderComponent(
 							>
 								<StoryBlockMover
 									clientId={ props.clientId }
+									blockName={ name }
 									blockElementId={ `block-${ props.clientId }` }
 									isDraggable={ ! props.isPartOfMultiSelection }
 									isMovable={ isMovableBlock }
