@@ -361,9 +361,9 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
-	if ( ! isChildBlock ) {
+	if ( ! isMovableBlock ) {
 		return settings;
 	}
 
