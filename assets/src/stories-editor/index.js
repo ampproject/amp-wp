@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { has } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
@@ -63,6 +68,7 @@ const {
 	getBlockRootClientId,
 	getBlockOrder,
 	getBlock,
+	getBlocks,
 	getBlockAttributes,
 } = select( 'core/block-editor' );
 
@@ -268,6 +274,28 @@ store.subscribe( () => {
 				ampAnimationDelay: delay,
 			} );
 		}
+	}
+
+	/*
+	 * Prevent an issue where cloned pages had the same anchor attribute, and didn't look right on the front-end.
+	 * @see https://github.com/ampproject/amp-wp/issues/2510
+	 */
+	const usedAnchors = [];
+	const conditionallyUpdateAnchor = ( block ) => {
+		if ( ! has( block, [ 'attributes', 'anchor' ] ) ) {
+			return;
+		}
+
+		if ( usedAnchors.includes( block.attributes.anchor ) ) {
+			updateBlockAttributes( block.clientId, { anchor: block.clientId } );
+		} else {
+			usedAnchors.push( block.attributes.anchor );
+		}
+	};
+
+	const blocksToVerifyAnchor = getBlocks();
+	for ( const blockToVerifyAnchor of blocksToVerifyAnchor ) {
+		conditionallyUpdateAnchor( blockToVerifyAnchor );
 	}
 } );
 
