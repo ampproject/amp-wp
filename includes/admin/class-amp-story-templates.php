@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.2.8';
+	const STORY_TEMPLATES_VERSION = '0.2.9';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -200,6 +200,26 @@ class AMP_Story_Templates {
 			array(
 				'title' => __( 'Template: Travel Vertical', 'amp' ),
 				'name'  => 'travel-vertical',
+			),
+			array(
+				'title' => __( 'Template: Fandom Title', 'amp' ),
+				'name'  => 'fandom-title',
+			),
+			array(
+				'title' => __( 'Template: Fandom CTA', 'amp' ),
+				'name'  => 'fandom-cta',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact', 'amp' ),
+				'name'  => 'fandom-fact',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact Text', 'amp' ),
+				'name'  => 'fandom-fact-text',
+			),
+			array(
+				'title' => __( 'Template: Fandom Intro', 'amp' ),
+				'name'  => 'fandom-intro',
 			),
 		);
 	}
