@@ -277,7 +277,7 @@ store.subscribe( () => {
 	}
 
 	/*
-	 * Prevent an issue where cloned pages had the same anchor attribute, and didn't look right on the front-end.
+	 * Prevent an issue where duplicated page blocks had the same anchor attribute, and didn't look right on the front-end.
 	 * @see https://github.com/ampproject/amp-wp/issues/2510
 	 */
 	const usedAnchors = [];
