@@ -1436,10 +1436,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<button id="img">Insert &lt;img&gt;</button>
 						</div>
 					</amp-script>
-					
-					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
-						<div class="root">should be empty</div>
-					</amp-script>
 				',
 				null,
 				array( 'amp-script' ),
@@ -1448,6 +1444,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'
 					<amp-script src="https://example.com/examples/amp-script/todomvc.ssr.js" layout="container">
 						<div><header class="header"><h1>todos</h1><input class="new-todo" placeholder="What needs to be done?" autofocus="true"></header></div>
+					</amp-script>
+				',
+				null,
+				array( 'amp-script' ),
+			),
+
+			'amp-script-4' => array(
+				'
+					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
+						<div class="root">should be empty</div>
 					</amp-script>
 				',
 				null,
