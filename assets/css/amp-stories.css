@@ -42,6 +42,10 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	overflow-wrap: break-word;
 }
 
+.wp-block-amp-amp-story-text {
+	font-weight: normal;
+}
+
 .is-style-rounded,
 .is-style-rounded img {
 	border-radius: 5px;
