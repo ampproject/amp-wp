@@ -17210,7 +17210,6 @@ class AMP_Allowed_Tags_Generated {
 				'spec_url' => 'https://amp.dev/documentation/components/amp-story',
 			),
 		),
-		'AMP-VIDEO-IFRAME > I-AMPHTML-SIZER [style]' => NULL,
 		'AMP-VIDEO-IFRAME > [placeholder]' => array(
 			'attr_spec_list' => array(
 				'placeholder' => array(
