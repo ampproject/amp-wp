@@ -4,7 +4,7 @@
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has } from 'lodash';
+import { has, reduceRight } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -68,6 +68,8 @@ class PageEdit extends Component {
 		}
 
 		this.onSelectMedia = this.onSelectMedia.bind( this );
+		this.isVideoSizeExcessive = this.isVideoSizeExcessive.bind( this );
+		this.getSecondsFromTime = this.getSecondsFromTime.bind( this );
 	}
 
 	/**
@@ -110,12 +112,52 @@ class PageEdit extends Component {
 		}
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
 
+		let isExcessiveVideoSize = false;
+		if ( VIDEO_BACKGROUND_TYPE === mediaType ) {
+			isExcessiveVideoSize = this.isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
+		}
+
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
 			mediaType,
+			isExcessiveVideoSize,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
+	}
+
+	/**
+	 * Gets whether the file is more than 1 MB per second, like 3 MB for 3 seconds.
+	 *
+	 * @param {number} fileSize The size of the file in bytes.
+	 * @param {string} length A colon-separated time length of the file, like '01:04'.
+	 * @return {boolean} Whether the file size is more than 1MB per second.
+	 */
+	isVideoSizeExcessive( fileSize, length ) {
+		const fileLengthInSeconds = this.getSecondsFromTime( length );
+		const megabyteInBytes = 1000000;
+		return fileSize > fileLengthInSeconds * megabyteInBytes;
+	}
+
+	/**
+	 * Gets the number of seconds in a colon-separated time string, like '01:10'.
+	 *
+	 * @param {string} time A colon-separated time, like '0:12'.
+	 * @return {number} seconds The number of seconds in the time, like 12.
+	 */
+	getSecondsFromTime( time ) {
+		const minuteInSeconds = 60;
+		const splitTime = time.split( ':' );
+
+		return reduceRight(
+			splitTime,
+			( totalSeconds, timeSection, index ) => {
+				const distanceFromRight = splitTime.length - 1 - index;
+				const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, etc...
+				return totalSeconds + ( multiple * parseInt( timeSection ) );
+			},
+			0
+		);
 	}
 
 	removeBackgroundColor( index ) {
@@ -193,6 +235,7 @@ class PageEdit extends Component {
 			mediaId,
 			mediaType,
 			mediaUrl,
+			isExcessiveVideoSize,
 			focalPoint = { x: .5, y: .5 },
 			overlayOpacity,
 			poster,
@@ -278,6 +321,12 @@ class PageEdit extends Component {
 					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<>
+							{
+								isExcessiveVideoSize &&
+								<Notice status="error" isDismissible={ false } >
+									{ __( 'The video size is more than 1 MB per second.', 'amp' ) }
+								</Notice>
+							}
 							<BaseControl>
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
@@ -424,6 +473,7 @@ PageEdit.propTypes = {
 		mediaId: PropTypes.number,
 		mediaType: PropTypes.string,
 		mediaUrl: PropTypes.string,
+		isExcessiveVideoSize: PropTypes.bool,
 		focalPoint: PropTypes.shape( {
 			x: PropTypes.number.isRequired,
 			y: PropTypes.number.isRequired,
