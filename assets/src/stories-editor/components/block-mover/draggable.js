@@ -14,13 +14,13 @@ import PropTypes from 'prop-types';
 import { Component } from '@wordpress/element';
 import { withSafeTimeout } from '@wordpress/compose';
 
-const { Image } = window;
-
 /**
  * Internal dependencies
  */
 import { getPixelsFromPercentage } from '../../helpers';
 import { TEXT_BLOCK_BORDER } from '../../constants';
+
+const { Image } = window;
 
 const cloneWrapperClass = 'components-draggable__clone';
 
