@@ -379,7 +379,10 @@ class PageEdit extends Component {
 										}
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
-											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
+											onSelect={ ( image ) => {
+												const imageUrl = has( image, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? image.sizes[ MAX_IMAGE_SIZE_SLUG ].url : image.url;
+												setAttributes( { poster: imageUrl } );
+											} }
 											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
