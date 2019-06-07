@@ -39,11 +39,11 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
-	 * The largest image size for the image block in an AMP Story page.
+	 * The slug of the largest image size allowed in an AMP Story page.
 	 *
 	 * @var string
 	 */
-	const STORY_PAGE_IMAGE_SIZE = 'amp_story_page';
+	const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
 
 	/**
 	 * The large dimension of the AMP Story poster images.
@@ -219,7 +219,7 @@ class AMP_Story_Post_Type {
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// The default image size for AMP Story image block and background media image.
-		add_image_size( self::STORY_PAGE_IMAGE_SIZE, 99999, 1440, false );
+		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440, false );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
@@ -1532,7 +1532,7 @@ class AMP_Story_Post_Type {
 	public static function add_new_max_image_size( $image_sizes ) {
 		if ( self::POST_TYPE_SLUG === get_post_type() ) {
 			unset( $image_sizes['full'] );
-			$image_sizes[ self::STORY_PAGE_IMAGE_SIZE ] = __( 'Story Background', 'amp' );
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = __( 'Story Background', 'amp' );
 		}
 
 		return $image_sizes;
