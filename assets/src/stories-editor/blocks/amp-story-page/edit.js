@@ -47,6 +47,7 @@ import {
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
+	MEGABYTE_IN_BYTES,
 } from '../../constants';
 import './edit.css';
 
@@ -131,8 +132,7 @@ class PageEdit extends Component {
 	 */
 	isVideoSizeExcessive( fileSize, length ) {
 		const fileLengthInSeconds = this.getSecondsFromTime( length );
-		const megabyteInBytes = 1000000;
-		return fileSize > fileLengthInSeconds * megabyteInBytes;
+		return fileSize > fileLengthInSeconds * MEGABYTE_IN_BYTES;
 	}
 
 	/**
@@ -320,7 +320,13 @@ class PageEdit extends Component {
 							{
 								isExcessiveVideoSize &&
 								<Notice status="warning" isDismissible={ false } >
-									{ __( 'The video size is more than 1 MB per second.', 'amp' ) }
+									{
+										sprintf(
+											/* translators: %d: the number of bytes in a megabyte */
+											__( 'The video size is more than %d bytes per second.', 'amp' ),
+											MEGABYTE_IN_BYTES
+										)
+									}
 								</Notice>
 							}
 							<BaseControl>
