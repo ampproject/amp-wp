@@ -219,7 +219,7 @@ class AMP_Story_Post_Type {
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// The default image size for AMP Story image block and background media image.
-		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440, false );
+		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
