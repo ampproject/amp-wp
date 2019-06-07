@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { withSelect, withDispatch } from '@wordpress/data';
 import { DropZoneProvider, NavigableMenu } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
+import { compose, ifCondition } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -54,12 +54,8 @@ BlockNavigationList.propTypes = {
 	selectBlock: PropTypes.func.isRequired,
 };
 
-function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReordering } ) {
+function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 	const hasBlocks = blocks.length > 0;
-
-	if ( isReordering ) {
-		return null;
-	}
 
 	return (
 		<NavigableMenu
@@ -112,5 +108,6 @@ export default compose(
 				onSelect( clientId );
 			},
 		};
-	} )
+	} ),
+	ifCondition( ( { isReordering } ) => ! isReordering ),
 )( BlockNavigation );
