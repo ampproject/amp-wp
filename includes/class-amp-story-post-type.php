@@ -1514,10 +1514,12 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Adds a new max image size to the images sizes available in the Media Library.
+	 * Adds a new max image size to the images sizes available, and removes 'full'.
 	 *
 	 * In the AMP story editor, when selecting Background Media,
 	 * it will use this custom image size.
+	 * This will also be available for image blocks.
+	 * But the new size will only be available if the original image was at least as big as it is.
 	 *
 	 * @param array $image_sizes {
 	 *     An associative array of image sizes.
