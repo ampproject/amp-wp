@@ -62,7 +62,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 			role="presentation"
 			className="block-editor-block-navigation__container"
 		>
-			<p className="block-editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">{ __( 'Elements', 'amp' ) }</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }
@@ -72,7 +72,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 			) }
 			{ ! hasBlocks && (
 				<p className="block-editor-block-navigation__paragraph">
-					{ __( 'No blocks created yet.', 'amp' ) }
+					{ __( 'No elements added to this page yet.', 'amp' ) }
 				</p>
 			) }
 		</NavigableMenu>
