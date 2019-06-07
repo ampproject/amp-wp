@@ -599,4 +599,13 @@ class Test_AMP_HTTP extends WP_UnitTestCase {
 			$response['message']
 		);
 	}
+
+	/**
+	 * Test get_response_content_type().
+	 *
+	 * @covers \AMP_HTTP::get_response_content_type()
+	 */
+	public function test_get_response_content_type() {
+		$this->assertSame( ini_get( 'default_mimetype' ), AMP_HTTP::get_response_content_type() );
+	}
 }

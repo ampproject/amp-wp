@@ -31,6 +31,7 @@ let lastSeenX = 0,
 	blockElementTop,
 	blockElementLeft,
 	imageWrapper,
+	textBlockWrapper,
 	textElement;
 
 const EnhancedResizableBox = ( props ) => {
@@ -115,6 +116,12 @@ const EnhancedResizableBox = ( props ) => {
 							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
 							break;
 					}
+				} else {
+					textElement = null;
+				}
+
+				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
+					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
 				}
 
 				onResizeStart();
@@ -185,6 +192,10 @@ const EnhancedResizableBox = ( props ) => {
 				element.style.height = appliedHeight + 'px';
 				lastWidth = appliedWidth;
 				lastHeight = appliedHeight;
+
+				if ( textBlockWrapper && ampFitText ) {
+					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+				}
 
 				// If it's image, let's change the width and height of the image, too.
 				if ( imageWrapper && isImage ) {
