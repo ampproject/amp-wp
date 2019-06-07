@@ -1529,7 +1529,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
 		if ( self::POST_TYPE_SLUG === get_post_type() ) {
-			$image_sizes[ self::STORY_PAGE_IMAGE_SIZE ] = __( 'AMP Story Maximum Image', 'amp' );
+			$image_sizes[ self::STORY_PAGE_IMAGE_SIZE ] = __( 'Story Background', 'amp' );
 		}
 
 		return $image_sizes;
