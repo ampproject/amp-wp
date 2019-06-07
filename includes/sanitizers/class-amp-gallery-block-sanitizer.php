@@ -128,13 +128,16 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			list( $width, $height ) = $this->get_carousel_dimensions( $node );
+
 			$amp_carousel = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'amp-carousel',
 				array(
-					'height' => $this->get_carousel_height( $node ),
+					'width'  => $width,
+					'height' => $height,
 					'type'   => 'slides',
-					'layout' => 'fixed-height',
+					'layout' => 'responsive',
 				)
 			);
 			foreach ( $images as $image ) {
@@ -150,15 +153,20 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get carousel height by containing images.
 	 *
 	 * @param DOMElement $element The UL element.
-	 * @return int Height.
+	 * @return array {
+	 *     Dimensions.
+	 *
+	 *     @type int $width  Width.
+	 *     @type int $height Height.
+	 * }
 	 */
-	protected function get_carousel_height( $element ) {
+	protected function get_carousel_dimensions( $element ) {
 		$images     = $element->getElementsByTagName( 'amp-img' );
 		$num_images = $images->length;
 		$max_height = 0;
 		$max_width  = 0;
 		if ( 0 === $num_images ) {
-			return self::FALLBACK_HEIGHT;
+			return array( self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT );
 		}
 		foreach ( $images as $image ) {
 			/**
@@ -170,17 +178,13 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			if ( is_numeric( $image_height ) ) {
 				$max_height = max( $max_height, $image_height );
 			}
-			$image_width = $image->getAttribute( 'height' );
+			$image_width = $image->getAttribute( 'width' );
 			if ( is_numeric( $image_width ) ) {
 				$max_width = max( $max_width, $image_width );
 			}
 		}
 
-		if ( ! empty( $this->args['content_max_width'] ) && $max_height > 0 && $max_width > $this->args['content_max_width'] ) {
-			$max_height = ( $max_width * $this->args['content_max_width'] ) / $max_height;
-		}
-
-		return ! $max_height ? self::FALLBACK_HEIGHT : $max_height;
+		return array( $max_width, $max_height );
 	}
 
 	/**
