@@ -141,7 +141,7 @@ class Draggable extends Component {
 			// Add an adjustment for having the block mover right next to the clone.
 			const pattern = /calc\(([\d\.]+)%/;
 			const matchesTop = clone.style.top.match( pattern );
-			const percentageTop = matchesTop ? matchesTop[ 1 ] : 0;
+			const percentageTop = matchesTop ? matchesTop[ 1 ] : 0; // Retrieves 98.53 from calc(98.53%).
 			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentageTop ) - TEXT_BLOCK_BORDER }px`;
 
 			const matchesLeft = clone.style.left.match( pattern );
