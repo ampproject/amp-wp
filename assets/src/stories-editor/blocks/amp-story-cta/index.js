@@ -9,6 +9,7 @@ import { __ } from '@wordpress/i18n';
 import edit from './edit';
 import save from './save';
 import blockIcon from '../../../../images/call-to-action.svg';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 const schema = {
 	url: {
@@ -60,4 +61,20 @@ export const settings = {
 	edit,
 
 	save,
+
+	transforms: {
+		from: [
+			{
+				type: 'raw',
+				priority: 20,
+				selector: 'amp-story-cta-layer',
+				transform: ( node ) => {
+					const innerHTML = node.outerHTML;
+					const blockAttributes = getBlockAttributes( name, innerHTML );
+
+					return createBlock( name, blockAttributes );
+				},
+			},
+		],
+	},
 };
