@@ -280,16 +280,13 @@ store.subscribe( () => {
 	 * Prevent an issue where duplicated page blocks had the same anchor attribute, and didn't look right on the front-end.
 	 * @see https://github.com/ampproject/amp-wp/issues/2510
 	 */
-	const usedAnchors = [];
 	const conditionallyUpdateAnchor = ( block ) => {
 		if ( ! has( block, [ 'attributes', 'anchor' ] ) ) {
 			return;
 		}
 
-		if ( usedAnchors.includes( block.attributes.anchor ) ) {
+		if ( block.attributes.anchor !== block.clientId ) {
 			updateBlockAttributes( block.clientId, { anchor: block.clientId } );
-		} else {
-			usedAnchors.push( block.attributes.anchor );
 		}
 	};
 
