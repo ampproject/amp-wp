@@ -31,7 +31,6 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
-	withReplacedFullSizeImage,
 	withVideoPosterImageNotice,
 } from './components';
 import {
@@ -297,7 +296,6 @@ addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAtt
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withCallToActionValidation', withCallToActionValidation );
-addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/withReplacedFullSizeImage', withReplacedFullSizeImage );
 addFilter( 'blocks.getBlockAttributes', 'ampStoryEditorBlocks/filterBlockAttributes', filterBlockAttributes );
 
 const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );

@@ -30,5 +30,4 @@ export { default as withWrapperProps } from './with-wrapper-props';
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';
 export { default as withCallToActionValidation } from './higher-order/with-call-to-action-validation';
-export { default as withReplacedFullSizeImage } from './higher-order/with-replaced-full-size-image';
 export { default as withVideoPosterImageNotice } from './higher-order/with-video-poster-image-notice';
