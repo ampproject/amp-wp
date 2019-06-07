@@ -87,7 +87,15 @@ class PageEdit extends Component {
 	 */
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
+			this.props.setAttributes(
+				{
+					mediaUrl: undefined,
+					mediaId: undefined,
+					mediaType: undefined,
+					poster: undefined,
+					isExcessiveVideoSize: undefined,
+				}
+			);
 			return;
 		}
 
@@ -344,7 +352,7 @@ class PageEdit extends Component {
 								</MediaUploadCheck>
 								{ !! mediaId &&
 								<MediaUploadCheck>
-									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
+									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, isExcessiveVideoSize: undefined } ) } isLink isDestructive>
 										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>

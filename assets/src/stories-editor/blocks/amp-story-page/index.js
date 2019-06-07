@@ -51,6 +51,10 @@ const schema = {
 	overlayOpacity: {
 		default: 50,
 	},
+	isExcessiveVideoSize: {
+		type: 'boolean',
+		default: false,
+	},
 };
 
 export const settings = {
