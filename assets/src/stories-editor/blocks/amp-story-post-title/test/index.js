@@ -9,7 +9,7 @@ import { addFilter, removeFilter } from '@wordpress/hooks';
 import { name, settings } from '../';
 import { blockEditRender } from '../../../../test/helpers';
 import { addAMPAttributes } from '../../../helpers';
-import { withAmpStorySettings } from '../../../../components';
+import { withAmpStorySettings } from '../../../components';
 
 describe( 'amp/amp-story-post-title', () => {
 	beforeAll( () => {

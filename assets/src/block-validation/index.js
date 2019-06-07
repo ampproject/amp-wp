@@ -16,7 +16,7 @@ import { select, subscribe } from '@wordpress/data';
  */
 import { updateValidationErrors, maybeResetValidationErrors } from './helpers';
 import { isAMPEnabled } from '../block-editor/helpers';
-import withValidationErrorNotice from '../components/higher-order/with-validation-error-notice';
+import { withValidationErrorNotice } from './components';
 import './store';
 import '../block-editor/store';
 

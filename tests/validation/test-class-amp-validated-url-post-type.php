@@ -495,22 +495,15 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_get_validated_environment() {
 		switch_theme( 'twentysixteen' );
 		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
-		AMP_Options_Manager::update_option( 'accept_tree_shaking', true );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$old_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
-		$this->assertArrayHasKey( 'options', $old_env );
-		$this->assertArrayHasKey( 'accept_tree_shaking', $old_env['options'] );
-		$this->assertTrue( $old_env['options']['accept_tree_shaking'] );
 		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
 
 		switch_theme( 'twentyseventeen' );
 		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
-		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
 		$new_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertNotEquals( $old_env, $new_env );
-		$this->assertFalse( $new_env['options']['accept_tree_shaking'] );
 		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
 	}
 

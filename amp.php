@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2-beta1
+ * Version: 1.2-beta2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -151,7 +151,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
 		sprintf(
 			/* translators: %s: composer install && npm install && npm run build */
 			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-			'<code>composer install && npm install && npm run build</code>'
+			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
 		)
 	);
 }
@@ -193,6 +193,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 		}
 		$message = implode( "\n * ", $messages );
 		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
+		$message = html_entity_decode( $message, ENT_QUOTES );
 
 		if ( ! class_exists( 'WP_CLI' ) ) {
 			echo "$message\n"; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -208,7 +209,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-beta1' );
+define( 'AMP__VERSION', '1.2-beta2' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).

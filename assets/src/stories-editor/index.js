@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { has } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { addFilter } from '@wordpress/hooks';
@@ -20,17 +25,19 @@ import {
  * Internal dependencies
  */
 import {
+	withCroppedFeaturedImage,
+} from '../common/components';
+import {
 	withAmpStorySettings,
 	withPageNumber,
 	withEditFeaturedImage,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
-	withCroppedFeaturedImage,
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 	withVideoPosterImageNotice,
-} from '../components';
+} from './components';
 import {
 	maybeEnqueueFontStyle,
 	setBlockParent,
@@ -61,6 +68,7 @@ const {
 	getBlockRootClientId,
 	getBlockOrder,
 	getBlock,
+	getBlocks,
 	getBlockAttributes,
 } = select( 'core/block-editor' );
 
@@ -266,6 +274,25 @@ store.subscribe( () => {
 				ampAnimationDelay: delay,
 			} );
 		}
+	}
+
+	/*
+	 * Prevent an issue where duplicated page blocks had the same anchor attribute, and didn't look right on the front-end.
+	 * @see https://github.com/ampproject/amp-wp/issues/2510
+	 */
+	const conditionallyUpdateAnchor = ( block ) => {
+		if ( ! has( block, [ 'attributes', 'anchor' ] ) ) {
+			return;
+		}
+
+		if ( block.attributes.anchor !== block.clientId ) {
+			updateBlockAttributes( block.clientId, { anchor: block.clientId } );
+		}
+	};
+
+	const blocksToVerifyAnchor = getBlocks();
+	for ( const blockToVerifyAnchor of blocksToVerifyAnchor ) {
+		conditionallyUpdateAnchor( blockToVerifyAnchor );
 	}
 } );
 
