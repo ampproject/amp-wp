@@ -38,7 +38,12 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration, addBackgroundColorToOverlay, getCallToActionBlock } from '../../helpers';
+import {
+	getTotalAnimationDuration,
+	addBackgroundColorToOverlay,
+	getCallToActionBlock,
+	isVideoSizeExcessive,
+} from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -69,8 +74,6 @@ class PageEdit extends Component {
 		}
 
 		this.onSelectMedia = this.onSelectMedia.bind( this );
-		this.isVideoSizeExcessive = this.isVideoSizeExcessive.bind( this );
-		this.getSecondsFromTime = this.getSecondsFromTime.bind( this );
 	}
 
 	/**
@@ -120,7 +123,7 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && this.isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
 
 		this.props.setAttributes( {
 			mediaUrl,
@@ -129,39 +132,6 @@ class PageEdit extends Component {
 			isExcessiveVideoSize,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
-	}
-
-	/**
-	 * Gets whether the file is more than 1 MB per second, like 3 MB for 3 seconds.
-	 *
-	 * @param {number} fileSize The size of the file in bytes.
-	 * @param {string} length A colon-separated time length of the file, like '01:04'.
-	 * @return {boolean} Whether the file size is more than 1MB per second.
-	 */
-	isVideoSizeExcessive( fileSize, length ) {
-		const fileLengthInSeconds = this.getSecondsFromTime( length );
-		return fileSize > fileLengthInSeconds * MEGABYTE_IN_BYTES;
-	}
-
-	/**
-	 * Gets the number of seconds in a colon-separated time string, like '01:10'.
-	 *
-	 * @param {string} time A colon-separated time, like '0:12'.
-	 * @return {number} seconds The number of seconds in the time, like 12.
-	 */
-	getSecondsFromTime( time ) {
-		const minuteInSeconds = 60;
-		const splitTime = time.split( ':' );
-
-		return reduce(
-			splitTime,
-			( totalSeconds, timeSection, index ) => {
-				const distanceFromRight = splitTime.length - 1 - index;
-				const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, etc...
-				return totalSeconds + ( multiple * parseInt( timeSection ) );
-			},
-			0
-		);
 	}
 
 	removeBackgroundColor( index ) {

@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, isEqual, reduce } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -36,6 +36,7 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MEGABYTE_IN_BYTES,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1390,4 +1391,37 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+};
+
+/**
+ * Gets the number of seconds in a colon-separated time string, like '01:10'.
+ *
+ * @param {string} time A colon-separated time, like '0:12'.
+ * @return {number} seconds The number of seconds in the time, like 12.
+ */
+const getSecondsFromTime = ( time ) => {
+	const minuteInSeconds = 60;
+	const splitTime = time.split( ':' );
+
+	return reduce(
+		splitTime,
+		( totalSeconds, timeSection, index ) => {
+			const distanceFromRight = splitTime.length - 1 - index;
+			const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, etc...
+			return totalSeconds + ( multiple * parseInt( timeSection ) );
+		},
+		0
+	);
+};
+
+/**
+ * Gets whether the file is more than 1 MB per second, like 3 MB for 3 seconds.
+ *
+ * @param {number} fileSize The size of the file in bytes.
+ * @param {string} length A colon-separated time length of the file, like '01:04'.
+ * @return {boolean} Whether the file size is more than 1MB per second.
+ */
+export const isVideoSizeExcessive = ( fileSize, length ) => {
+	const fileLengthInSeconds = getSecondsFromTime( length );
+	return fileSize > fileLengthInSeconds * MEGABYTE_IN_BYTES;
 };
