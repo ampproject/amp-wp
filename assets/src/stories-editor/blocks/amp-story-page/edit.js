@@ -319,7 +319,7 @@ class PageEdit extends Component {
 						<>
 							{
 								isExcessiveVideoSize &&
-								<Notice status="error" isDismissible={ false } >
+								<Notice status="warning" isDismissible={ false } >
 									{ __( 'The video size is more than 1 MB per second.', 'amp' ) }
 								</Notice>
 							}
