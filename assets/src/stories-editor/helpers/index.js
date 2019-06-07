@@ -377,8 +377,8 @@ export const filterBlockTransforms = ( settings, name ) => {
 
 			if ( 'amp/amp-story-text' === name ) {
 				/*
-				 * When there is nothing that matches the content selector (.amp-text-content), the pasted content
-				 * lacks lacks the amp-fit-text wrapper and thus ampFitText is false.
+				 * When there is nothing that matches the content selector (.amp-text-content),
+				 * the pasted content lacks the amp-fit-text wrapper and thus ampFitText is false.
 				 */
 				if ( ! blockAttributes.content ) {
 					blockAttributes.content = node.textContent;
