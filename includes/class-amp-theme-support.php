@@ -1725,7 +1725,8 @@ class AMP_Theme_Support {
 			);
 		}
 
-		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
+		// Abort if the response was not HTML.
+		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
 		}
 
