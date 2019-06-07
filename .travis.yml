@@ -47,12 +47,10 @@ script:
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
 
-matrix:
+jobs:
   fast_finish: true
   allow_failures:
     - env: ALLOW_FAILURES=1
-
-jobs:
   include:
     - stage: lint
       name: Lint (PHP, JavaScript, and configuration files)
