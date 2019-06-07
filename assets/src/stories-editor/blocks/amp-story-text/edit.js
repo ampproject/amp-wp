@@ -132,7 +132,6 @@ class TextBlockEdit extends Component {
 							backgroundColor: appliedBackgroundColor,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-							fontWeight: 'h1' === tagName || 'h2' === tagName ? 700 : 'normal',
 							textAlign: align,
 							position: ampFitText && content.length ? 'static' : undefined,
 						} }
