@@ -4,7 +4,7 @@
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has, reduceRight } from 'lodash';
+import { has, reduce } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -111,11 +111,7 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
-
-		let isExcessiveVideoSize = false;
-		if ( VIDEO_BACKGROUND_TYPE === mediaType ) {
-			isExcessiveVideoSize = this.isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
-		}
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && this.isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
 
 		this.props.setAttributes( {
 			mediaUrl,
@@ -149,7 +145,7 @@ class PageEdit extends Component {
 		const minuteInSeconds = 60;
 		const splitTime = time.split( ':' );
 
-		return reduceRight(
+		return reduce(
 			splitTime,
 			( totalSeconds, timeSection, index ) => {
 				const distanceFromRight = splitTime.length - 1 - index;
