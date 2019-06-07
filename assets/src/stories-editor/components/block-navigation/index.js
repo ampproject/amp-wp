@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { withSelect, withDispatch } from '@wordpress/data';
 import { DropZoneProvider, NavigableMenu } from '@wordpress/components';
-import { compose } from '@wordpress/compose';
+import { compose, ifCondition } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -54,19 +54,15 @@ BlockNavigationList.propTypes = {
 	selectBlock: PropTypes.func.isRequired,
 };
 
-function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReordering } ) {
+function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 	const hasBlocks = blocks.length > 0;
-
-	if ( isReordering ) {
-		return null;
-	}
 
 	return (
 		<NavigableMenu
 			role="presentation"
 			className="block-editor-block-navigation__container"
 		>
-			<p className="block-editor-block-navigation__label">{ __( 'Block Navigation', 'amp' ) }</p>
+			<p className="block-editor-block-navigation__label">{ __( 'Elements', 'amp' ) }</p>
 			{ hasBlocks && (
 				<BlockNavigationList
 					blocks={ blocks }
@@ -76,7 +72,7 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId, isReorde
 			) }
 			{ ! hasBlocks && (
 				<p className="block-editor-block-navigation__paragraph">
-					{ __( 'No blocks created yet.', 'amp' ) }
+					{ __( 'No elements added to this page yet.', 'amp' ) }
 				</p>
 			) }
 		</NavigableMenu>
@@ -112,5 +108,6 @@ export default compose(
 				onSelect( clientId );
 			},
 		};
-	} )
+	} ),
+	ifCondition( ( { isReordering } ) => ! isReordering ),
 )( BlockNavigation );
