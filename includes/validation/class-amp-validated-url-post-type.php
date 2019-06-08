@@ -837,13 +837,6 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		if ( isset( $old_validated_environment['options'] ) ) {
-			$differing_options = array_diff_assoc( $new_validated_environment['options'], $old_validated_environment['options'] );
-			if ( $differing_options ) {
-				$staleness['options'] = $differing_options;
-			}
-		}
-
 		return $staleness;
 	}
 
@@ -1749,10 +1742,6 @@ class AMP_Validated_URL_Post_Type {
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
 								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
-								echo ' ';
-							}
-							if ( ! empty( $staleness['options'] ) ) {
-								esc_html_e( 'Options have changed.', 'amp' );
 								echo ' ';
 							}
 							esc_html_e( 'Please recheck.', 'amp' );
