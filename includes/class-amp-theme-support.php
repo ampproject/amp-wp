@@ -55,6 +55,22 @@ class AMP_Theme_Support {
 	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
 
 	/**
+	 * Slug identifying native mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const NATIVE_MODE_SLUG = 'native';
+
+	/**
+	 * Slug identifying transitional mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const TRANSITIONAL_MODE_SLUG = 'paired';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -110,12 +126,23 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
-	 * Theme support options that were added via option.
+	 * Theme support mode that was added via option.
+	 *
+	 * This should be either null (reader), 'native', or 'transitional'.
 	 *
 	 * @since 1.0
-	 * @var bool
+	 * @var null|string
 	 */
-	protected static $support_added_via_option = false;
+	protected static $support_added_via_option = null;
+
+	/**
+	 * Theme support mode which was added via the theme.
+	 *
+	 * This should be either null (reader), 'native', or 'transitional'.
+	 *
+	 * @var null|string
+	 */
+	protected static $support_added_via_theme = null;
 
 	/**
 	 * Initialize.
@@ -159,11 +186,63 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::get_support_mode()
+	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
 	 *
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
+		_deprecated_function( __METHOD__, '1.2', 'AMP_Theme_Support::get_support_mode_added_via_option' );
+		return null !== self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @since 1.2
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 */
+	public static function get_support_mode_added_via_option() {
 		return self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @since 1.2
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 */
+	public static function get_support_mode_added_via_theme() {
+		return self::$support_added_via_theme;
+	}
+
+	/**
+	 * Get theme support mode.
+	 *
+	 * @since 1.2
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
+	 *
+	 * @return string Theme support mode.
+	 */
+	public static function get_support_mode() {
+		$theme_support = self::get_support_mode_added_via_option();
+		if ( ! $theme_support ) {
+			$theme_support = self::get_support_mode_added_via_theme();
+		}
+		if ( ! $theme_support ) {
+			$theme_support = 'disabled';
+		}
+		return $theme_support;
 	}
 
 	/**
@@ -171,10 +250,14 @@ class AMP_Theme_Support {
 	 *
 	 * The DB option is only considered if the theme does not already explicitly support AMP.
 	 *
-	 * @see AMP_Theme_Support::is_support_added_via_option()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_theme()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_option()
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 */
 	public static function read_theme_support() {
+		self::$support_added_via_theme  = null;
+		self::$support_added_via_option = null;
+
 		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
@@ -209,16 +292,33 @@ class AMP_Theme_Support {
 					'1.0'
 				);
 			}
-			self::$support_added_via_option = false;
+
+			$is_paired = ! empty( $args['paired'] );
+
+			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::NATIVE_MODE_SLUG;
+
+			/*
+			 * If the theme has transitional support, allow the user to opt for native mode via an option, since a theme
+			 * in transitional mode entails that it supports serving templates as both AMP and non-AMP, and this it is
+			 * able to serve AMP-first pages just as well as paired pages. Otherwise, consider that the the mode was
+			 * not set at all via option.
+			 */
+			self::$support_added_via_option = ( $is_paired && self::NATIVE_MODE_SLUG === $theme_support_option ) ? self::NATIVE_MODE_SLUG : null;
+			if ( self::NATIVE_MODE_SLUG === self::$support_added_via_option ) {
+				$args['paired'] = false;
+				add_theme_support( 'amp', $args );
+			}
 		} elseif ( 'disabled' !== $theme_support_option ) {
+			$is_paired = ( 'paired' === $theme_support_option );
 			add_theme_support(
 				self::SLUG,
 				array(
-					'paired' => ( 'paired' === $theme_support_option ),
+					'paired' => $is_paired,
 				)
 			);
-			self::$support_added_via_option = true;
+			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::NATIVE_MODE_SLUG;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+			self::$support_added_via_option = self::NATIVE_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
 	}
