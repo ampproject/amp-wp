@@ -179,32 +179,34 @@ class AMP_Validation_Manager {
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
-
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
-
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
-		// Actions and filters involved in validation.
-		add_action(
-			'activate_plugin',
-			function() {
-				if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
-					add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
+		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			// Actions and filters involved in validation.
+			add_action(
+				'activate_plugin',
+				function() {
+					if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
+						add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+					}
 				}
-			}
-		);
+			);
 
-		// Prevent query vars from persisting after redirect.
-		add_filter(
-			'removable_query_args',
-			function( $query_vars ) {
-				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-				return $query_vars;
-			}
-		);
+			// Prevent query vars from persisting after redirect.
+			add_filter(
+				'removable_query_args',
+				function( $query_vars ) {
+					$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+					return $query_vars;
+				}
+			);
 
-		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
+			add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
+
+			add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
+		}
 
 		if ( self::$should_locate_sources ) {
 			/*
@@ -218,6 +220,49 @@ class AMP_Validation_Manager {
 
 			self::add_validation_error_sourcing();
 		}
+	}
+
+	/**
+	 * Determine if a post supports AMP validation.
+	 *
+	 * @since 1.2
+	 *
+	 * @param WP_Post|int $post Post.
+	 * @return bool Whether post supports AMP validation.
+	 */
+	public static function post_supports_validation( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$supports_validation = (
+			// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
+			is_post_type_viewable( $post->post_type )
+			&&
+			! wp_is_post_autosave( $post )
+			&&
+			! wp_is_post_revision( $post )
+			&&
+			'auto-draft' !== $post->post_status
+			&&
+			'trash' !== $post->post_status
+		);
+		if ( ! $supports_validation ) {
+			return false;
+		}
+
+		// Story post type always supports validation.
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+			return true;
+		}
+
+		// Prevent doing post validation in Reader mode.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			return false;
+		}
+
+		return post_supports_amp( $post );
 	}
 
 	/**
@@ -515,13 +560,7 @@ class AMP_Validation_Manager {
 		$should_validate_post = (
 			$is_classic_editor_post_save
 			&&
-			is_post_type_viewable( $post->post_type )
-			&&
-			! wp_is_post_autosave( $post )
-			&&
-			! wp_is_post_revision( $post )
-			&&
-			'auto-draft' !== $post->post_status
+			self::post_supports_validation( $post )
 			&&
 			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
@@ -546,7 +585,7 @@ class AMP_Validation_Manager {
 		$posts = array_filter(
 			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
 			function( $post ) {
-				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
+				return self::post_supports_validation( $post );
 			}
 		);
 
@@ -599,8 +638,10 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( amp_is_canonical() ) {
-			$object_types = get_post_types_by_support( 'editor' );
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$object_types = array( AMP_Story_Post_Type::POST_TYPE_SLUG ); // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
+		} elseif ( amp_is_canonical() ) {
+			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
 		} else {
 			$object_types = array_intersect(
 				get_post_types_by_support( 'amp' ),
@@ -638,7 +679,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
 		unset( $field_name );
-		if ( ! current_user_can( 'edit_post', $post_data['id'] ) ) {
+		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
 		$post = get_post( $post_data['id'] );
@@ -794,12 +835,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status( $post ) {
-		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
-			return;
-		}
-
-		// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! self::post_supports_validation( $post ) || ! self::has_cap() ) {
 			return;
 		}
 
@@ -1955,6 +1991,25 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function enqueue_block_validation() {
+		/*
+		 * The AMP_Validation_Manager::post_supports_validation() method is not being used here because
+		 * a post's status for validation checking can change during the life of the editor, such as when
+		 * the user to toggle AMP back on after having turned it off, and then get the validation
+		 * warnings appearing due to the amp-block-validation having been enqueued already.
+		 */
+		$should_enqueue_block_validation = (
+			self::has_cap()
+			&&
+			(
+				current_theme_supports( AMP_Theme_Support::SLUG )
+				||
+				AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type()
+			)
+		);
+		if ( ! $should_enqueue_block_validation ) {
+			return;
+		}
+
 		$slug = 'amp-block-validation';
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
