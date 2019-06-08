@@ -4,7 +4,7 @@
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has, reduce } from 'lodash';
+import { has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -52,7 +52,7 @@ import {
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
-	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../../constants';
 import './edit.css';
 
@@ -301,8 +301,8 @@ class PageEdit extends Component {
 									{
 										sprintf(
 											/* translators: %d: the number of bytes in a megabyte */
-											__( 'The video size is more than %d bytes per second.', 'amp' ),
-											MEGABYTE_IN_BYTES
+											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
+											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
 										)
 									}
 								</Notice>

@@ -37,6 +37,7 @@ import {
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1415,7 +1416,7 @@ const getSecondsFromTime = ( time ) => {
 };
 
 /**
- * Gets whether the file is more than 1 MB per second, like 3 MB for 3 seconds.
+ * Gets whether the video file size is over a certain amount of MB per second.
  *
  * @param {number} fileSize The size of the file in bytes.
  * @param {string} length A colon-separated time length of the file, like '01:04'.
@@ -1423,5 +1424,5 @@ const getSecondsFromTime = ( time ) => {
  */
 export const isVideoSizeExcessive = ( fileSize, length ) => {
 	const fileLengthInSeconds = getSecondsFromTime( length );
-	return fileSize > fileLengthInSeconds * MEGABYTE_IN_BYTES;
+	return fileSize > fileLengthInSeconds * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };
