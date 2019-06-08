@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual, reduce } from 'lodash';
+import { every, isEqual, has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -1395,34 +1395,15 @@ export const getCallToActionBlock = ( pageClientId ) => {
 };
 
 /**
- * Gets the number of seconds in a colon-separated time string, like '01:10'.
- *
- * @param {string} time A colon-separated time, like '0:12'.
- * @return {number} seconds The number of seconds in the time, like 12.
- */
-const getSecondsFromTime = ( time ) => {
-	const minuteInSeconds = 60;
-	const splitTime = time.split( ':' );
-
-	return reduce(
-		splitTime,
-		( totalSeconds, timeSection, index ) => {
-			const distanceFromRight = splitTime.length - 1 - index;
-			const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, etc...
-			return totalSeconds + ( multiple * parseInt( timeSection ) );
-		},
-		0
-	);
-};
-
-/**
  * Gets whether the video file size is over a certain amount of MB per second.
  *
- * @param {number} fileSize The size of the file in bytes.
- * @param {string} length A colon-separated time length of the file, like '01:04'.
- * @return {boolean} Whether the file size is more than 1MB per second.
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
  */
-export const isVideoSizeExcessive = ( fileSize, length ) => {
-	const fileLengthInSeconds = getSecondsFromTime( length );
-	return fileSize > fileLengthInSeconds * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };

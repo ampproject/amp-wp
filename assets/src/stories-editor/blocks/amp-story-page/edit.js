@@ -96,7 +96,6 @@ class PageEdit extends Component {
 					mediaId: undefined,
 					mediaType: undefined,
 					poster: undefined,
-					isExcessiveVideoSize: undefined,
 				}
 			);
 			return;
@@ -123,13 +122,11 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media.filesizeInBytes, media.fileLength );
 
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
 			mediaType,
-			isExcessiveVideoSize,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
 	}
@@ -209,7 +206,6 @@ class PageEdit extends Component {
 			mediaId,
 			mediaType,
 			mediaUrl,
-			isExcessiveVideoSize,
 			focalPoint = { x: .5, y: .5 },
 			overlayOpacity,
 			poster,
@@ -257,6 +253,7 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
 
 		return (
 			<>
@@ -322,7 +319,7 @@ class PageEdit extends Component {
 								</MediaUploadCheck>
 								{ !! mediaId &&
 								<MediaUploadCheck>
-									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, isExcessiveVideoSize: undefined } ) } isLink isDestructive>
+									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
 										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>
@@ -456,7 +453,6 @@ PageEdit.propTypes = {
 		mediaId: PropTypes.number,
 		mediaType: PropTypes.string,
 		mediaUrl: PropTypes.string,
-		isExcessiveVideoSize: PropTypes.bool,
 		focalPoint: PropTypes.shape( {
 			x: PropTypes.number.isRequired,
 			y: PropTypes.number.isRequired,
