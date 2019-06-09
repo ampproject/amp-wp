@@ -88,6 +88,17 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
+			'amp_stories',
+			__( 'Stories', 'amp' ),
+			array( $this, 'render_amp_stories' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-stories-field',
+			)
+		);
+
+		add_settings_field(
 			'validation',
 			__( 'Validation Handling', 'amp' ),
 			array( $this, 'render_validation_handling' ),
@@ -106,17 +117,6 @@ class AMP_Options_Menu {
 			'general',
 			array(
 				'class' => 'amp-template-support-field',
-			)
-		);
-
-		add_settings_field(
-			'amp_stories',
-			__( 'Stories', 'amp' ),
-			array( $this, 'render_amp_stories' ),
-			AMP_Options_Manager::OPTION_NAME,
-			'general',
-			array(
-				'class' => 'amp-stories-field',
 			)
 		);
 
