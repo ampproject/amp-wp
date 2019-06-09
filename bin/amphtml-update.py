@@ -358,7 +358,9 @@ def ParseRules(out_dir):
 
 				# Handle the special $REFERENCE_POINT tag
 				if '$REFERENCE_POINT' == tag_spec.tag_name:
-					reference_points[ tag_spec.spec_name ] = GetTagSpec(tag_spec, attr_lists)
+					gotten_tag_spec = GetTagSpec(tag_spec, attr_lists)
+					if gotten_tag_spec is not None:
+						reference_points[ tag_spec.spec_name ] = gotten_tag_spec
 					continue
 
 				# If we made it here, then start adding the tag_spec
