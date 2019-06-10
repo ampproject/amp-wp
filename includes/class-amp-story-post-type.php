@@ -97,12 +97,14 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
+	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
+	 *
 	 * @todo Eventually the Gutenberg requirement should be removed.
 	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
-		if ( ! function_exists( 'register_block_type' ) ) {
+		if ( ! function_exists( 'register_block_type' ) || version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			return false;
 		}
 		return (
