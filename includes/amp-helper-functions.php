@@ -243,7 +243,7 @@ function post_supports_amp( $post ) {
  * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
  * present, this function returns true just if the query var is present. If theme support is
  * present, then it returns true in transitional mode if an AMP template is available and the query
- * var is present, or else in native mode if just the template is available.
+ * var is present, or else in standard mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
  * @global string $pagenow

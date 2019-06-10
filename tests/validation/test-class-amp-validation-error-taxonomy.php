@@ -297,7 +297,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => false,
+				AMP_Theme_Support::PAIRED_FLAG => false,
 			)
 		);
 		$this->assertTrue( amp_is_canonical() );

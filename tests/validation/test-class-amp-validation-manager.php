@@ -234,11 +234,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 	}
@@ -274,7 +274,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 
 		// Admin bar item available in AMP first mode.
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -284,7 +284,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -295,7 +295,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Admin bar item available in paired mode with validation errors.
 		$_GET[ AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ] = 3;
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -404,7 +404,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_add_rest_api_fields() {
 
 		// Test in a transitional context.
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
 		$post_types_non_canonical = array_intersect(
@@ -451,7 +451,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_get_amp_validity_rest_field() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -636,7 +636,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		AMP_Validated_URL_Post_Type::register();
@@ -688,7 +688,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		 * as there are errors with 'New Rejected' status.
 		 */
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		ob_start();

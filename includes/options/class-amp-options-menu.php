@@ -266,7 +266,7 @@ class AMP_Options_Menu {
 		$theme_support = AMP_Theme_Support::get_support_mode();
 
 		/* translators: %s: URL to the documentation. */
-		$native_description = sprintf( __( 'The active theme integrates AMP as the framework for your site by using its templates and styles to render webpages. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
+		$standard_description = sprintf( __( 'The active theme integrates AMP as the framework for your site by using its templates and styles to render webpages. This means your site is <b>AMP-first</b> and your canonical URLs are AMP! Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
 		/* translators: %s: URL to the documentation. */
 		$transitional_description = sprintf( __( 'The active theme’s templates are used to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
 		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
@@ -280,7 +280,7 @@ class AMP_Options_Menu {
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
 			<p>
-				<?php echo wp_kses_post( $native_description ); ?>
+				<?php echo wp_kses_post( $standard_description ); ?>
 			</p>
 			<p>
 				<?php echo wp_kses_post( $ecosystem_description ); ?>
@@ -300,13 +300,13 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 				<dl>
 					<dt>
-						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>>
-						<label for="theme_support_native">
+						<input type="radio" id="theme_support_standard" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>>
+						<label for="theme_support_standard">
 							<strong><?php esc_html_e( 'Standard', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
-						<?php echo wp_kses_post( $native_description ); ?>
+						<?php echo wp_kses_post( $standard_description ); ?>
 					</dd>
 					<dt>
 						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>

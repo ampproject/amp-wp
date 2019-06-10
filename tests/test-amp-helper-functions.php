@@ -490,12 +490,12 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 		$this->assertContains( 'experiences=website', $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$output = $get_generator_tag();
 		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$output = $get_generator_tag();
 		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
@@ -1004,7 +1004,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 
 		// Check that paired mode does add link.
-		add_theme_support( 'amp', array( 'paired' => true ) );
+		add_theme_support( 'amp', array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );

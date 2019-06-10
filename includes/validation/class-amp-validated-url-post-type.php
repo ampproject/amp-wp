@@ -1244,19 +1244,19 @@ class AMP_Validated_URL_Post_Type {
 		if ( 'post' !== get_current_screen()->base ) {
 			// Display admin notice according to the AMP mode.
 			if ( amp_is_canonical() ) {
-				$template_mode = 'native';
+				$template_mode = AMP_Theme_Support::STANDARD_MODE_SLUG;
 			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-				$template_mode = 'paired';
+				$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			} else {
 				$template_mode = 'reader';
 			}
 			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
-			if ( 'native' === $template_mode ) {
+			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode ) {
 				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode && $auto_sanitization ) {
 				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode ) {
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
 				$message = sprintf(
 					/* translators: %s is a link to the AMP settings screen */
 					__( 'The site is using transitional AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),

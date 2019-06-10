@@ -274,14 +274,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Test when 'all_templates_supported' is selected.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
 		// Test when 'all_templates_supported' is not selected.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( get_post_types() as $post_type ) {
 			if ( 'foo' !== $post_type ) {
@@ -493,7 +493,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {
@@ -541,7 +541,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->factory()->post->create( array( 'post_type' => 'post' ) );
 
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {
@@ -576,7 +576,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'paired' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {

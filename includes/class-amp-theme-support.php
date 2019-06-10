@@ -60,7 +60,7 @@ class AMP_Theme_Support {
 	 * @since 1.2
 	 * @var string
 	 */
-	const STANDARD_MODE_SLUG = 'native'; // aka 'standard'.
+	const STANDARD_MODE_SLUG = 'standard';
 
 	/**
 	 * Slug identifying transitional website mode.
@@ -68,7 +68,15 @@ class AMP_Theme_Support {
 	 * @since 1.2
 	 * @var string
 	 */
-	const TRANSITIONAL_MODE_SLUG = 'paired';
+	const TRANSITIONAL_MODE_SLUG = 'transitional';
+
+	/**
+	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const PAIRED_FLAG = 'paired';
 
 	/**
 	 * Sanitizer classes.
@@ -128,7 +136,7 @@ class AMP_Theme_Support {
 	/**
 	 * Theme support mode that was added via option.
 	 *
-	 * This should be either null (reader), 'native', or 'transitional'.
+	 * This should be either null (reader), 'standard', or 'transitional'.
 	 *
 	 * @since 1.0
 	 * @var null|string
@@ -138,7 +146,7 @@ class AMP_Theme_Support {
 	/**
 	 * Theme support mode which was added via the theme.
 	 *
-	 * This should be either null (reader), 'native', or 'transitional'.
+	 * This should be either null (reader), 'standard', or 'transitional'.
 	 *
 	 * @var null|string
 	 */
@@ -199,7 +207,7 @@ class AMP_Theme_Support {
 	/**
 	 * Get the theme support mode added via admin option.
 	 *
-	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
@@ -213,7 +221,7 @@ class AMP_Theme_Support {
 	/**
 	 * Get the theme support mode added via admin option.
 	 *
-	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
 	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
@@ -263,7 +271,7 @@ class AMP_Theme_Support {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
+			$keys = array( 'template_dir', 'comments_live_list', self::PAIRED_FLAG, 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong(
@@ -293,7 +301,7 @@ class AMP_Theme_Support {
 				);
 			}
 
-			$is_paired = ! empty( $args['paired'] );
+			$is_paired = ! empty( $args[ self::PAIRED_FLAG ] );
 
 			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 
@@ -305,15 +313,15 @@ class AMP_Theme_Support {
 			 */
 			self::$support_added_via_option = ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) ? self::STANDARD_MODE_SLUG : null;
 			if ( self::STANDARD_MODE_SLUG === self::$support_added_via_option ) {
-				$args['paired'] = false;
+				$args[ self::PAIRED_FLAG ] = false;
 				add_theme_support( 'amp', $args );
 			}
 		} elseif ( 'disabled' !== $theme_support_option ) {
-			$is_paired = ( 'paired' === $theme_support_option );
+			$is_paired = ( self::TRANSITIONAL_MODE_SLUG === $theme_support_option );
 			add_theme_support(
 				self::SLUG,
 				array(
-					'paired' => $is_paired,
+					self::PAIRED_FLAG => $is_paired,
 				)
 			);
 			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
@@ -339,7 +347,7 @@ class AMP_Theme_Support {
 		$support = get_theme_support( self::SLUG );
 		if ( true === $support ) {
 			return array(
-				'paired' => false,
+				self::PAIRED_FLAG => false,
 			);
 		}
 		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {

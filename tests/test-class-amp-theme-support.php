@@ -89,8 +89,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_bad_args_array() {
 		$args = array(
-			'paired'            => false,
-			'invalid_param_key' => array(),
+			AMP_Theme_Support::PAIRED_FLAG => false,
+			'invalid_param_key'            => array(),
 		);
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
 		AMP_Theme_Support::read_theme_support();
@@ -130,9 +130,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 
 		// Test that standard via option trumps transitional in theme.
 		$args = array(
-			'templates_supported' => 'all',
-			'paired'              => true,
-			'comments_live_list'  => true,
+			'templates_supported'          => 'all',
+			AMP_Theme_Support::PAIRED_FLAG => true,
+			'comments_live_list'           => true,
 		);
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG ); // Will override the theme support flag.
@@ -141,7 +141,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			array_merge(
 				$args,
 				array(
-					'paired' => false, // The 'native' user option overrides the theme flag.
+					AMP_Theme_Support::PAIRED_FLAG => false, // The standard user option overrides the theme flag.
 				)
 			),
 			AMP_Theme_Support::get_theme_support_args()
@@ -159,7 +159,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
-		$this->assertEquals( array( 'paired' => false ), AMP_Theme_Support::get_theme_support_args() );
+		$this->assertEquals( array( AMP_Theme_Support::PAIRED_FLAG => false ), AMP_Theme_Support::get_theme_support_args() );
 
 		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
@@ -197,8 +197,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired'       => true,
-				'template_dir' => 'amp',
+				AMP_Theme_Support::PAIRED_FLAG => true,
+				'template_dir'                 => 'amp',
 			)
 		);
 
@@ -221,8 +221,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired'       => false,
-				'template_dir' => 'amp',
+				AMP_Theme_Support::PAIRED_FLAG => false,
+				'template_dir'                 => 'amp',
 			)
 		);
 		$this->go_to( get_permalink( $post_id ) );
@@ -391,7 +391,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => true,
+				AMP_Theme_Support::PAIRED_FLAG => true,
 			)
 		);
 		add_filter(
@@ -1792,7 +1792,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => true,
+				AMP_Theme_Support::PAIRED_FLAG => true,
 			)
 		);
 		add_filter(

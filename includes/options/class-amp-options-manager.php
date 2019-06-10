@@ -114,6 +114,13 @@ class AMP_Options_Manager {
 			unset( $options['enable_amp_stories'] );
 		}
 
+		// Migrate theme support slugs.
+		if ( 'native' === $options['theme_support'] ) {
+			$options['theme_support'] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+		} elseif ( 'paired' === $options['theme_support'] ) {
+			$options['theme_support'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		}
+
 		return $options;
 	}
 
@@ -195,8 +202,8 @@ class AMP_Options_Manager {
 		// Theme support.
 		$recognized_theme_supports = array(
 			'disabled',
-			'paired',
-			'native', // aka 'standard'.
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+			AMP_Theme_Support::STANDARD_MODE_SLUG,
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
@@ -593,13 +600,13 @@ class AMP_Options_Manager {
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
-		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
+		$has_theme_support = ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode );
 		if ( $has_theme_support ) {
 			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
 				$theme_support = array();
 			}
-			$theme_support['paired'] = 'paired' === $template_mode;
+			$theme_support['paired'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode;
 			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
 		} else {
 			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for reader mode URL.
@@ -713,13 +720,13 @@ class AMP_Options_Manager {
 		}
 
 		switch ( $template_mode ) {
-			case 'native': // aka 'standard'.
+			case AMP_Theme_Support::STANDARD_MODE_SLUG:
 				$message = esc_html__( 'Standard mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );
 				}
 				break;
-			case 'paired':
+			case AMP_Theme_Support::TRANSITIONAL_MODE_SLUG:
 				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );

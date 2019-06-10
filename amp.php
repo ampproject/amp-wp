@@ -561,8 +561,8 @@ function amp_is_canonical() {
 	}
 
 	$args = AMP_Theme_Support::get_theme_support_args();
-	if ( isset( $args['paired'] ) ) {
-		return empty( $args['paired'] );
+	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
+		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
 	}
 
 	// If there is a template_dir, then transitional mode is implied.
