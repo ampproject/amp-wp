@@ -478,25 +478,37 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+
+		$get_generator_tag = function() {
+			ob_start();
+			amp_add_generator_metadata();
+			return ob_get_clean();
+		};
+
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertContains( 'experiences=website', $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
-		$this->assertContains( 'mode=native', $output );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=none', $output );
+		$this->assertContains( 'experiences=stories', $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
+		$this->assertContains( 'experiences=website,stories', $output );
 	}
 
 	/**

@@ -374,14 +374,22 @@ function amp_get_boilerplate_code() {
  * @since 1.0 Add template mode.
  */
 function amp_add_generator_metadata() {
-	if ( amp_is_canonical() ) {
-		$mode = 'native'; // aka 'standard'.
+	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+
+	if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		$mode = 'none';
+	} elseif ( amp_is_canonical() ) {
+		$mode = 'standard';
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'transitional';
 	} else {
 		$mode = 'reader';
 	}
-	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
+	$content .= sprintf( '; mode=%s', $mode );
+
+	$content .= sprintf( '; experiences=%s', implode( ',', AMP_Options_Manager::get_option( 'experiences' ) ) );
+
+	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
 
 /**

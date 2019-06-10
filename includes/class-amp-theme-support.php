@@ -200,7 +200,7 @@ class AMP_Theme_Support {
 	 * Get the theme support mode added via admin option.
 	 *
 	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
-	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
@@ -214,7 +214,7 @@ class AMP_Theme_Support {
 	 * Get the theme support mode added via admin option.
 	 *
 	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
-	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
@@ -228,7 +228,7 @@ class AMP_Theme_Support {
 	 * Get theme support mode.
 	 *
 	 * @return string Theme support mode.
-	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::read_theme_support()
 	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
 	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
 	 *
