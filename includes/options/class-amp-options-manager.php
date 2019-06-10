@@ -18,11 +18,24 @@ class AMP_Options_Manager {
 	const OPTION_NAME = 'amp-options';
 
 	/**
+	 * Slug for website experience.
+	 */
+	const WEBSITE_EXPERIENCE = 'website';
+
+	/**
+	 * Slug for stories experience.
+	 *
+	 * @var
+	 */
+	const STORIES_EXPERIENCE = 'stories';
+
+	/**
 	 * Default option values.
 	 *
 	 * @var array
 	 */
 	protected static $defaults = array(
+		'experiences'              => array( self::WEBSITE_EXPERIENCE ),
 		'theme_support'            => 'disabled',
 		'supported_post_types'     => array( 'post' ),
 		'analytics'                => array(),
@@ -30,7 +43,6 @@ class AMP_Options_Manager {
 		'all_templates_supported'  => true,
 		'supported_templates'      => array( 'is_singular' ),
 		'enable_response_caching'  => true,
-		'enable_amp_stories'       => false,
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
 	);
@@ -81,10 +93,19 @@ class AMP_Options_Manager {
 	public static function get_options() {
 		$options = get_option( self::OPTION_NAME, array() );
 		if ( empty( $options ) ) {
-			$options = array();
+			$options = array(); // Ensure empty string becomes array.
 		}
 		self::$defaults['enable_response_caching'] = wp_using_ext_object_cache();
-		return array_merge( self::$defaults, $options );
+
+		$options = array_merge( self::$defaults, $options );
+
+		// Migrate stories option from 1.2-beta.
+		if ( ! empty( $options['enable_amp_stories'] ) ) {
+			$options['experiences'][] = self::STORIES_EXPERIENCE;
+			unset( $options['enable_amp_stories'] );
+		}
+
+		return $options;
 	}
 
 	/**
@@ -118,6 +139,24 @@ class AMP_Options_Manager {
 			return $options;
 		}
 
+		// Experiences.
+		if ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
+
+			// Validate the selected experiences.
+			$options['experiences'] = array_intersect(
+				$new_options['experiences'],
+				array(
+					self::WEBSITE_EXPERIENCE,
+					self::STORIES_EXPERIENCE,
+				)
+			);
+
+			// At least one experience must be selected.
+			if ( empty( $options['experiences'] ) ) {
+				$options['experiences'] = array( self::WEBSITE_EXPERIENCE );
+			}
+		}
+
 		// Theme support.
 		$recognized_theme_supports = array(
 			'disabled',
@@ -134,7 +173,6 @@ class AMP_Options_Manager {
 		}
 
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
-		$options['enable_amp_stories']       = ! empty( $new_options['enable_amp_stories'] );
 
 		// Validate post type support.
 		$options['supported_post_types'] = array();

@@ -77,24 +77,24 @@ class AMP_Options_Menu {
 		);
 
 		add_settings_field(
-			'theme_support',
-			__( 'Template Mode', 'amp' ),
-			array( $this, 'render_theme_support' ),
+			'experiences',
+			__( 'Experiences', 'amp' ),
+			array( $this, 'render_experiences' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			array(
-				'class' => 'theme_support',
+				'class' => 'experiences',
 			)
 		);
 
 		add_settings_field(
-			'amp_stories',
-			__( 'Stories', 'amp' ),
-			array( $this, 'render_amp_stories' ),
+			'theme_support',
+			__( 'Website Mode', 'amp' ),
+			array( $this, 'render_theme_support' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			array(
-				'class' => 'amp-stories-field',
+				'class' => 'amp-website-mode',
 			)
 		);
 
@@ -120,6 +120,21 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_action(
+			'admin_print_styles',
+			function() {
+				?>
+				<style>
+					body:not(.amp-experience-website) .amp-website-mode,
+					body:not(.amp-experience-website) .amp-template-support-field,
+					body:not(.amp-experience-website) .amp-validation-field {
+						display: none;
+					}
+				</style>
+				<?php
+			}
+		);
+
 		if ( wp_using_ext_object_cache() ) {
 			add_settings_field(
 				'caching',
@@ -141,6 +156,105 @@ class AMP_Options_Menu {
 		foreach ( $submenus as $submenu ) {
 			$submenu->init();
 		}
+	}
+
+	/**
+	 * Render experiences.
+	 *
+	 * @since 1.2
+	 */
+	public function render_experiences() {
+		$experiences = AMP_Options_Manager::get_option( 'experiences' );
+
+		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
+		?>
+		<fieldset>
+			<dl>
+				<dt>
+					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="website_experience" value="<?php echo esc_attr( AMP_Options_Manager::WEBSITE_EXPERIENCE ); ?>" <?php checked( in_array( AMP_Options_Manager::WEBSITE_EXPERIENCE, $experiences, true ) ); ?>>
+					<label for="website_experience">
+						<strong><?php esc_html_e( 'Website', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: Stories documentation URL. */
+							__( 'AMP is a simple and robust format to ensure your website is fast, user-first, and makes money. AMP provides long-term success for your web strategy with distribution across popular platforms and reduced operating and development costs. Read more about <a href="%s" target="_blank">AMP Websites</a>.', 'amp' ),
+							esc_url( 'https://amp.dev/about/websites' )
+						)
+					);
+					?>
+				</dd>
+				<dt>
+					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
+					<label for="stories_experience">
+						<strong><?php esc_html_e( 'Stories', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php if ( ! $has_required_block_capabilities ) : ?>
+						<div class="notice notice-info notice-alt inline">
+							<p>
+								<?php
+								$gutenberg = 'Gutenberg';
+								// Link to Gutenberg plugin installation if eligible.
+								if ( current_user_can( 'install_plugins' ) ) {
+									$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
+								}
+								printf(
+									/* translators: %s: Gutenberg plugin name */
+									esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
+									$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+								);
+								?>
+							</p>
+						</div>
+					<?php endif; ?>
+					<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: Stories documentation URL. */
+							__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">AMP Stories</a>.', 'amp' ),
+							esc_url( 'https://amp.dev/about/stories' )
+						)
+					);
+					?>
+				</dd>
+			</dl>
+			<script>
+				/*
+				 * Toggle visibility of setting sections based on whether or not their respective experiences are enabled.
+				 * Ensure that at least one experience is selected, either Website, Stories, or both.
+				 */
+				( function( $, optionInputName, mustSelectMessage ) {
+					const websiteExperienceInput = $( '#website_experience' )[0];
+					const checkboxInputs = $( 'input[name="' + optionInputName + '"]' );
+
+					const handleExperiencesUpdate = () => {
+						const checkedCount = checkboxInputs.filter( ':checked' ).length;
+						if ( 0 === checkedCount ) {
+							websiteExperienceInput.setCustomValidity( mustSelectMessage );
+						} else {
+							websiteExperienceInput.setCustomValidity( '' );
+						}
+
+						checkboxInputs.each( function() {
+							document.body.classList.toggle( 'amp-experience-' + this.value, this.checked );
+						} );
+					};
+
+					checkboxInputs.on( 'change', handleExperiencesUpdate );
+					handleExperiencesUpdate();
+				})(
+					jQuery,
+					<?php echo wp_json_encode( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>,
+					<?php echo wp_json_encode( __( 'You must select at least once experience.', 'amp' ) ); ?>
+				);
+			</script>
+		</fieldset>
+		<?php
 	}
 
 	/**
@@ -175,7 +289,7 @@ class AMP_Options_Menu {
 			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 				<?php if ( $builtin_support ) : ?>
 					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in transitional or native mode.', 'amp' ); ?></p>
+						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
 
@@ -188,7 +302,7 @@ class AMP_Options_Menu {
 					<dt>
 						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, AMP_Theme_Support::NATIVE_MODE_SLUG ); ?>>
 						<label for="theme_support_native">
-							<strong><?php esc_html_e( 'Native', 'amp' ); ?></strong>
+							<strong><?php esc_html_e( 'Standard', 'amp' ); ?></strong>
 						</label>
 					</dt>
 					<dd>
@@ -466,52 +580,6 @@ class AMP_Options_Menu {
 				})( jQuery );
 			</script>
 		<?php endif; ?>
-		<?php
-	}
-
-	/**
-	 * AMP Stories section renderer.
-	 *
-	 * @since 1.2
-	 */
-	public function render_amp_stories() {
-		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
-		?>
-		<?php if ( ! $has_required_block_capabilities ) : ?>
-			<div class="notice notice-info notice-alt inline">
-				<p>
-					<?php
-					$gutenberg = 'Gutenberg';
-					// Link to Gutenberg plugin installation if eligible.
-					if ( current_user_can( 'install_plugins' ) ) {
-						$gutenberg = '<a href="' . esc_url( add_query_arg( 'tab', 'beta', admin_url( 'plugin-install.php' ) ) ) . '">' . $gutenberg . '</a>';
-					}
-					printf(
-						/* translators: %s: Gutenberg plugin name */
-						esc_html__( 'To use stories, you currently must have the latest version of the %s plugin installed and activated.', 'amp' ),
-						$gutenberg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					);
-					?>
-				</p>
-			</div>
-		<?php endif; ?>
-		<p>
-			<label for="enable_amp_stories">
-				<input id="enable_amp_stories" type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[enable_amp_stories]' ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ); ?>>
-				<?php esc_html_e( 'Enable experimental support for Stories.', 'amp' ); ?>
-			</label>
-		</p>
-		<p class="description">
-			<?php
-			echo wp_kses_post(
-				sprintf(
-					/* translators: %s: Stories documentation URL. */
-					__( 'Stories is a visual storytelling format for the open web which immerses your readers in fast-loading, full-screen, and visually rich experiences. Stories can be a great addition to your overall content strategy. Read more about <a href="%s" target="_blank">Stories</a>.', 'amp' ),
-					esc_url( 'https://amp.dev/about/stories' )
-				)
-			);
-			?>
-		</p>
 		<?php
 	}
 
