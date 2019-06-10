@@ -159,7 +159,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::init()
 	 */
 	public function test_init_without_theme_or_stories_support() {
-		AMP_Options_Manager::update_option( 'enable_amp_stories', false );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
@@ -172,7 +172,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::init()
 	 */
 	public function test_init_with_stories_and_without_theme_support() {
-		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'Environment does not support Stories.' );
+		}
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Validation_Manager::init();
 
@@ -189,7 +192,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Ensure that story posts can be validated even when theme support is absent.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
 		AMP_Story_Post_Type::register();
 		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			$post = $this->factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
