@@ -68,7 +68,7 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Flush rewrite rules if the supported_post_types have changed.
+	 * Flush rewrite rules if the supported_post_types or experiences have changed.
 	 *
 	 * @since 0.6.2
 	 *
@@ -80,8 +80,17 @@ class AMP_Options_Manager {
 		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : array();
 		sort( $old_post_types );
 		sort( $new_post_types );
-		if ( $old_post_types !== $new_post_types ) {
-			flush_rewrite_rules( false );
+		$old_experiences = isset( $old_options['experiences'] ) ? $old_options['experiences'] : array();
+		$new_experiences = isset( $new_options['experiences'] ) ? $new_options['experiences'] : array();
+		sort( $old_experiences );
+		sort( $new_experiences );
+		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
+			if ( self::is_website_experience_enabled() ) {
+				add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+				flush_rewrite_rules( false );
+			} else {
+				amp_deactivate();
+			}
 		}
 	}
 
