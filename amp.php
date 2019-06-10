@@ -343,6 +343,7 @@ function amp_init() {
 	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
 	add_action( 'wp_loaded', 'amp_add_options_menu' );
 	add_action( 'wp_loaded', 'amp_admin_pointer' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' ); // Used in both Website and Stories experiences.
 
 	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
 		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
@@ -351,7 +352,6 @@ function amp_init() {
 		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
 		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
 		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-		add_action( 'wp_loaded', 'amp_post_meta_box' );
 		add_filter( 'request', 'amp_force_query_var_value' );
 
 		// Add actions for reader mode templates.

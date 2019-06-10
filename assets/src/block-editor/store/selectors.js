@@ -22,16 +22,36 @@ export function hasThemeSupport( state ) {
 }
 
 /**
- * Returns whether the current site uses AMP first (as opposed to paired).
- *
- * @todo Rename to isStandardAMP or isAMPFirst?
+ * Returns whether the current site is in Standard mode (AMP first) as opposed to Transitional (paired).
  *
  * @param {Object} state Editor state.
  *
  * @return {boolean} Whether the current site uses AMP first.
  */
-export function isNativeAMP( state ) {
-	return Boolean( state.isNativeAMP );
+export function isStandardMode( state ) {
+	return Boolean( state.isStandardMode );
+}
+
+/**
+ * Returns whether the website experience is enabled.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {boolean} Whether website experienced enabled.
+ */
+export function isWebsiteEnabled( state ) {
+	return Boolean( state.isWebsiteEnabled );
+}
+
+/**
+ * Returns whether the stories experience is enabled.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {boolean} Whether stories experienced enabled.
+ */
+export function isStoriesEnabled( state ) {
+	return Boolean( state.isStoriesEnabled );
 }
 
 export function getDefaultStatus( state ) {
