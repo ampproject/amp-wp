@@ -297,7 +297,7 @@ class PageEdit extends Component {
 								<Notice status="warning" isDismissible={ false } >
 									{
 										sprintf(
-											/* translators: %d: the number of bytes in a megabyte */
+											/* translators: %d: the number of recommended megabytes per second */
 											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
 											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
 										)
