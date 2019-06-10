@@ -160,7 +160,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function should_show_in_menu() {
 		global $pagenow;
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
 		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
