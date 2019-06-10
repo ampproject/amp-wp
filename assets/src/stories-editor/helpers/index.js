@@ -513,26 +513,20 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	};
 
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		const positionStyle = {
+		style.style = {
+			...style.style,
 			position: 'absolute',
 			top: `${ positionTop }%`,
 			left: `${ positionLeft }%`,
-		};
-		style.style = {
-			...style.style,
-			...positionStyle,
 		};
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
 	if ( width && height ) {
-		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
-		};
 		style.style = {
 			...style.style,
-			...resizeStyle,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 	}
 
