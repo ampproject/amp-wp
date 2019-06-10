@@ -117,6 +117,14 @@
 	cursor: initial;
 }
 
+.block-library-list {
+	padding: 5px;
+}
+
+.block-library-list ul {
+	margin: 0;
+}
+
 .wp-block-verse pre,
 .wp-block-preformatted pre {
 	margin: 0;
