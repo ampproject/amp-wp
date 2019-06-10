@@ -253,13 +253,6 @@ export default createHigherOrderComponent(
 
 			return (
 				<>
-					{ isMovableBlock && (
-						<StoryBlockMover
-							clientId={ props.clientId }
-							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection }
-						/>
-					) }
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && (
 						<ResizableBox
@@ -295,7 +288,15 @@ export default createHigherOrderComponent(
 									stopBlockActions();
 								} }
 							>
-								<BlockEdit { ...props } />
+								<StoryBlockMover
+									clientId={ props.clientId }
+									blockName={ name }
+									blockElementId={ `block-${ props.clientId }` }
+									isDraggable={ ! props.isPartOfMultiSelection }
+									isMovable={ isMovableBlock }
+								>
+									<BlockEdit { ...props } />
+								</StoryBlockMover>
 							</RotatableBox>
 						</ResizableBox>
 					) }

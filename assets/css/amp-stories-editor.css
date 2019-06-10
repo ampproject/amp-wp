@@ -93,6 +93,43 @@
 	left: 0 !important;
 }
 
+.wp-block[data-type="core/list"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/list"] .block-mover,
+.wp-block[data-type="core/list"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/verse"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/verse"] .block-mover,
+.wp-block[data-type="core/verse"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/preformatted"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/preformatted"] .block-mover,
+.wp-block[data-type="core/preformatted"] .block-mover div {
+	height: 100%;
+}
+
+.block-library-list ul li,
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	cursor: initial;
+}
+
+.block-library-list {
+	padding: 5px;
+}
+
+.block-library-list ul {
+	margin: 0;
+}
+
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	margin: 0;
+}
+
 /**
  * Hide option to toggle fixed toolbar.
  */
