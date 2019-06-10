@@ -18,6 +18,13 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * Minimum required version of Gutenberg required.
+	 *
+	 * @var string
+	 */
+	const REQUIRED_GUTENBERG_VERSION = '5.8';
+
+	/**
 	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
 	 *
 	 * @var string
@@ -90,15 +97,19 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
+	 * @todo Eventually the Gutenberg requirement should be removed.
+	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			return false;
 		}
-
-		// TODO: Require only the latest WordPress version itself, not the plugin.
-		return function_exists( 'gutenberg_pre_init' );
+		return (
+			( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && GUTENBERG_DEVELOPMENT_MODE )
+			||
+			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::REQUIRED_GUTENBERG_VERSION, '>=' ) )
+		);
 	}
 
 	/**
