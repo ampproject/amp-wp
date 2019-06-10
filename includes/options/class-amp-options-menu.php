@@ -250,7 +250,7 @@ class AMP_Options_Menu {
 				})(
 					jQuery,
 					<?php echo wp_json_encode( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>,
-					<?php echo wp_json_encode( __( 'You must select at least once experience.', 'amp' ) ); ?>
+					<?php echo wp_json_encode( __( 'You must select at least one experience.', 'amp' ) ); ?>
 				);
 			</script>
 		</fieldset>
