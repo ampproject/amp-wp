@@ -352,7 +352,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
-		// Native theme support.
+		// Standard theme support.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 

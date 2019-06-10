@@ -484,12 +484,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
 	 * @covers \amp_admin_get_preview_permalink()
 	 */
-	public function test_handle_updated_theme_support_option_native_success_but_error() {
+	public function test_handle_updated_theme_support_option_standard_success_but_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
@@ -517,7 +517,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', $filter );
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			array(
@@ -532,12 +532,12 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
 	 * @covers \amp_admin_get_preview_permalink()
 	 */
-	public function test_handle_updated_theme_support_option_native_validate_error() {
+	public function test_handle_updated_theme_support_option_standard_validate_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->factory()->post->create( array( 'post_type' => 'post' ) );
 
@@ -555,7 +555,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
 		$invalid_url_posts = get_posts(
 			array(
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,

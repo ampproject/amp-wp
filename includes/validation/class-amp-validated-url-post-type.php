@@ -592,7 +592,7 @@ class AMP_Validated_URL_Post_Type {
 	 * Normalize a URL for storage.
 	 *
 	 * This ensures that query vars like utm_* and the like will not cause duplicates.
-	 * The AMP query param is removed to facilitate switching between native and transitional.
+	 * The AMP query param is removed to facilitate switching between standard and transitional.
 	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
 	 *
 	 * @param string $url URL.
@@ -1253,7 +1253,7 @@ class AMP_Validated_URL_Post_Type {
 			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
 			if ( 'native' === $template_mode ) {
-				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
+				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
 			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
 				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
 			} elseif ( 'paired' === $template_mode ) {

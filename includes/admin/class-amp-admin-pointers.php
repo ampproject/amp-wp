@@ -64,7 +64,7 @@ class AMP_Admin_Pointers {
 					'selector'        => '#toplevel_page_amp-options',
 					'heading'         => __( 'AMP', 'amp' ),
 					'subheading'      => __( 'New AMP Template Modes', 'amp' ),
-					'description'     => __( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Transitional&#8221; and &#8220;Native&#8221; modes.', 'amp' ),
+					'description'     => __( 'You can now reuse your theme\'s templates and styles in AMP responses, in both &#8220;Transitional&#8221; and &#8220;Standard&#8221; modes.', 'amp' ),
 					'position'        => array(
 						'align' => 'middle',
 					),

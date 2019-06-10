@@ -517,7 +517,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  *      add_theme_support( AMP_Theme_Support::SLUG );
  *
- * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
@@ -530,7 +530,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          'template_dir' => 'amp',
  *      ) );
  *
- * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ * If you want to have AMP-specific templates in addition to serving AMP-first, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired'       => false,
@@ -553,7 +553,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      ) );
  *
  * @see AMP_Theme_Support::read_theme_support()
- * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not separate AMP URL current URL.
  */
 function amp_is_canonical() {
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {

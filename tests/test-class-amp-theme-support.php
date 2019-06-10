@@ -128,14 +128,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_and_support_args() {
 
-		// Test that native via option trumps transitional in theme.
+		// Test that standard via option trumps transitional in theme.
 		$args = array(
 			'templates_supported' => 'all',
 			'paired'              => true,
 			'comments_live_list'  => true,
 		);
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::NATIVE_MODE_SLUG ); // Will override the theme support flag.
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG ); // Will override the theme support flag.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertEquals(
 			array_merge(
@@ -146,27 +146,27 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			),
 			AMP_Theme_Support::get_theme_support_args()
 		);
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 
-		// Test that native via theme always trumps transitional via option.
+		// Test that standard via theme always trumps transitional via option.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since native in theme overrides transitional option.
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since standard in theme overrides transitional option.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_option() );
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertEquals( array( 'paired' => false ), AMP_Theme_Support::get_theme_support_args() );
 
 		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::NATIVE_MODE_SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 
 		// Test that no support via theme can be overridden with option.
@@ -182,7 +182,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		AMP_Theme_Support::read_theme_support();
-		$this->assertSame( AMP_Theme_Support::NATIVE_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
 	}
@@ -947,7 +947,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 
-		// Test native AMP.
+		// Test AMP first.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		ob_start();
@@ -1521,11 +1521,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response for native mode when some validation errors aren't auto-sanitized.
+	 * Test prepare_response for standard mode when some validation errors aren't auto-sanitized.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_native_mode_non_amp() {
+	public function test_prepare_response_standard_mode_non_amp() {
 		wp();
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.

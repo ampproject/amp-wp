@@ -275,7 +275,7 @@ class AMP_Options_Menu {
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
-		<?php if ( AMP_Theme_Support::NATIVE_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+		<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
 			<div class="notice notice-info notice-alt inline">
 				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
 			</div>
@@ -300,7 +300,7 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 				<dl>
 					<dt>
-						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="native" <?php checked( $theme_support, AMP_Theme_Support::NATIVE_MODE_SLUG ); ?>>
+						<input type="radio" id="theme_support_native" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>>
 						<label for="theme_support_native">
 							<strong><?php esc_html_e( 'Standard', 'amp' ); ?></strong>
 						</label>
@@ -309,7 +309,7 @@ class AMP_Options_Menu {
 						<?php echo wp_kses_post( $native_description ); ?>
 					</dd>
 					<dt>
-						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="paired" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
+						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
 						<label for="theme_support_transitional">
 							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
 						</label>
@@ -334,7 +334,7 @@ class AMP_Options_Menu {
 										echo wp_kses_post(
 											sprintf(
 												/* translators: %1: link to invalid URLs. 2: link to validation errors. */
-												__( 'View current site compatibility results for native and transitional modes: %1$s and %2$s.', 'amp' ),
+												__( 'View current site compatibility results for standard and transitional modes: %1$s and %2$s.', 'amp' ),
 												sprintf(
 													'<a href="%s">%s</a>',
 													esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
@@ -376,7 +376,7 @@ class AMP_Options_Menu {
 	/**
 	 * Post types support section renderer.
 	 *
-	 * @todo If dirty AMP is ever allowed (that is, post-processed documents which can be served with non-sanitized valdation errors), then automatically forcing sanitization in native should be able to be turned off.
+	 * @todo If dirty AMP is ever allowed (that is, post-processed documents which can be served with non-sanitized valdation errors), then automatically forcing sanitization in standard mode should be able to be turned off.
 	 *
 	 * @since 1.0
 	 */
@@ -400,7 +400,7 @@ class AMP_Options_Menu {
 				<input type="hidden" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[auto_accept_sanitization]' ); ?>" value="<?php echo AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ? 'on' : ''; ?>">
 			<?php else : ?>
 				<div class="amp-auto-accept-sanitize-canonical notice notice-info notice-alt inline">
-					<p><?php esc_html_e( 'All new validation errors are automatically accepted when in native mode.', 'amp' ); ?></p>
+					<p><?php esc_html_e( 'All new validation errors are automatically accepted when in standard mode.', 'amp' ); ?></p>
 				</div>
 				<div class="amp-auto-accept-sanitize">
 					<p>
@@ -433,26 +433,26 @@ class AMP_Options_Menu {
 			<?php endif; ?>
 
 			<script>
-			(function( $, nativeModeSlug ) {
+			(function( $, standardModeSlug ) {
 				const getThemeSupportMode = () => {
 					const checkedInput = $( 'input[type=radio][name="amp-options[theme_support]"]:checked' );
 					if ( 0 === checkedInput.length ) {
-						return nativeModeSlug;
+						return standardModeSlug;
 					}
 					return checkedInput.val();
 				};
 
 				var updateHiddenClasses = function() {
 					const themeSupportMode = getThemeSupportMode();
-					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', nativeModeSlug === themeSupportMode );
+					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', standardModeSlug === themeSupportMode );
 					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
-					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', nativeModeSlug !== themeSupportMode );
+					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', standardModeSlug !== themeSupportMode );
 				};
 
 				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
 
 				updateHiddenClasses();
-			})( jQuery, <?php echo wp_json_encode( AMP_Theme_Support::NATIVE_MODE_SLUG ); ?> );
+			})( jQuery, <?php echo wp_json_encode( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?> );
 			</script>
 		</fieldset>
 		<?php

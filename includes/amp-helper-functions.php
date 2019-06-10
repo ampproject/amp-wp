@@ -318,7 +318,7 @@ function is_amp_endpoint() {
 		return $has_amp_query_var;
 	}
 
-	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
+	// When there is no query var and AMP is not canonical (AMP first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
@@ -375,7 +375,7 @@ function amp_get_boilerplate_code() {
  */
 function amp_add_generator_metadata() {
 	if ( amp_is_canonical() ) {
-		$mode = 'native';
+		$mode = 'native'; // aka 'standard'.
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'transitional';
 	} else {

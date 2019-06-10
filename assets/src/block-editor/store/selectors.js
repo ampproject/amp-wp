@@ -22,11 +22,13 @@ export function hasThemeSupport( state ) {
 }
 
 /**
- * Returns whether the current site uses native AMP.
+ * Returns whether the current site uses AMP first (as opposed to paired).
+ *
+ * @todo Rename to isStandardAMP or isAMPFirst?
  *
  * @param {Object} state Editor state.
  *
- * @return {boolean} Whether the current site uses native AMP.
+ * @return {boolean} Whether the current site uses AMP first.
  */
 export function isNativeAMP( state ) {
 	return Boolean( state.isNativeAMP );

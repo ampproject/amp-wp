@@ -196,7 +196,7 @@ class AMP_Options_Manager {
 		$recognized_theme_supports = array(
 			'disabled',
 			'paired',
-			'native',
+			'native', // aka 'standard'.
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
@@ -311,7 +311,7 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/transitional theme support.
+		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
 		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {
 			return;
 		}
@@ -713,8 +713,8 @@ class AMP_Options_Manager {
 		}
 
 		switch ( $template_mode ) {
-			case 'native':
-				$message = esc_html__( 'Native mode activated!', 'amp' );
+			case 'native': // aka 'standard'.
+				$message = esc_html__( 'Standard mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );
 				}
@@ -729,7 +729,7 @@ class AMP_Options_Manager {
 				$message = wp_kses_post(
 					sprintf(
 						/* translators: %s is an AMP URL */
-						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Transitional mode.', 'amp' ),
+						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Standard or Transitional mode.', 'amp' ),
 						esc_url( $url )
 					)
 				);

@@ -273,7 +273,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		remove_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 
-		// Admin bar item available in native mode.
+		// Admin bar item available in AMP first mode.
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
@@ -417,7 +417,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
-		// Test in a Native AMP (canonical) context.
+		// Test in a AMP first (canonical) context.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
@@ -675,7 +675,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertContains( '<code>script</code>', $output );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 
-		// In 'Native' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
+		// In 'Standard' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
@@ -775,7 +775,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_block_data() {
-		if ( ! class_exists( 'WP_Block_Type_Registry' ) || 1 ) {
+		if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
 		$latest_posts_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/latest-posts' );

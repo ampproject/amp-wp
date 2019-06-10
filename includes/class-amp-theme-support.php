@@ -55,15 +55,15 @@ class AMP_Theme_Support {
 	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
 
 	/**
-	 * Slug identifying native mode.
+	 * Slug identifying standard website mode.
 	 *
 	 * @since 1.2
 	 * @var string
 	 */
-	const NATIVE_MODE_SLUG = 'native';
+	const STANDARD_MODE_SLUG = 'native'; // aka 'standard'.
 
 	/**
-	 * Slug identifying transitional mode.
+	 * Slug identifying transitional website mode.
 	 *
 	 * @since 1.2
 	 * @var string
@@ -199,12 +199,12 @@ class AMP_Theme_Support {
 	/**
 	 * Get the theme support mode added via admin option.
 	 *
-	 * @since 1.2
-	 * @see AMP_Theme_Support::read_theme_support()
-	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
-	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
-	 *
 	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
 	 */
 	public static function get_support_mode_added_via_option() {
 		return self::$support_added_via_option;
@@ -213,12 +213,12 @@ class AMP_Theme_Support {
 	/**
 	 * Get the theme support mode added via admin option.
 	 *
-	 * @since 1.2
-	 * @see AMP_Theme_Support::read_theme_support()
-	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
-	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
-	 *
 	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'native' or 'paired'.
+	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
 	 */
 	public static function get_support_mode_added_via_theme() {
 		return self::$support_added_via_theme;
@@ -227,12 +227,12 @@ class AMP_Theme_Support {
 	/**
 	 * Get theme support mode.
 	 *
-	 * @since 1.2
-	 * @see AMP_Theme_Support::read_theme_support()
-	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
-	 * @see AMP_Theme_Support::NATIVE_MODE_SLUG
-	 *
 	 * @return string Theme support mode.
+	 *@see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
 	 */
 	public static function get_support_mode() {
 		$theme_support = self::get_support_mode_added_via_option();
@@ -295,16 +295,16 @@ class AMP_Theme_Support {
 
 			$is_paired = ! empty( $args['paired'] );
 
-			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::NATIVE_MODE_SLUG;
+			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 
 			/*
-			 * If the theme has transitional support, allow the user to opt for native mode via an option, since a theme
+			 * If the theme has transitional support, allow the user to opt for AMP first mode via an option, since a theme
 			 * in transitional mode entails that it supports serving templates as both AMP and non-AMP, and this it is
 			 * able to serve AMP-first pages just as well as paired pages. Otherwise, consider that the the mode was
 			 * not set at all via option.
 			 */
-			self::$support_added_via_option = ( $is_paired && self::NATIVE_MODE_SLUG === $theme_support_option ) ? self::NATIVE_MODE_SLUG : null;
-			if ( self::NATIVE_MODE_SLUG === self::$support_added_via_option ) {
+			self::$support_added_via_option = ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) ? self::STANDARD_MODE_SLUG : null;
+			if ( self::STANDARD_MODE_SLUG === self::$support_added_via_option ) {
 				$args['paired'] = false;
 				add_theme_support( 'amp', $args );
 			}
@@ -316,9 +316,9 @@ class AMP_Theme_Support {
 					'paired' => $is_paired,
 				)
 			);
-			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::NATIVE_MODE_SLUG;
+			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
-			self::$support_added_via_option = self::NATIVE_MODE_SLUG;
+			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
 	}
@@ -403,7 +403,7 @@ class AMP_Theme_Support {
 
 		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
-			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * When AMP first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
 			 * Permanent redirect is used for unauthenticated users since switching between modes
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
@@ -2111,7 +2111,7 @@ class AMP_Theme_Support {
 
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
-			 * In native AMP, strip html@amp attribute to prevent GSC from complaining about a validation error
+			 * In AMP first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
