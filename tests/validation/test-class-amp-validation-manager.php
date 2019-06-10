@@ -696,6 +696,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_block_data() {
+		if ( ! class_exists( 'WP_Block_Type_Registry' ) || 1 ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
 		$latest_posts_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/latest-posts' );
 
 		$reflection_function = new ReflectionFunction( $latest_posts_block->render_callback );
