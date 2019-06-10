@@ -87,7 +87,7 @@ class AMP_Admin_Pointers {
 						if ( 'toplevel_page_amp-options' === $hook_suffix ) {
 							return false;
 						}
-						return ! AMP_Options_Manager::get_option( 'enable_amp_stories' );
+						return ! AMP_Options_Manager::is_stories_experience_enabled();
 					},
 				)
 			),
@@ -104,7 +104,7 @@ class AMP_Admin_Pointers {
 						if ( 'edit.php' === $hook_suffix && AMP_Story_Post_Type::POST_TYPE_SLUG === filter_input( INPUT_GET, 'post_type' ) ) {
 							return false;
 						}
-						return AMP_Story_Post_Type::has_required_block_capabilities() && AMP_Options_Manager::get_option( 'enable_amp_stories' );
+						return AMP_Options_Manager::is_stories_experience_enabled();
 					},
 				)
 			),

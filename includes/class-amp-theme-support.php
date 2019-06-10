@@ -154,7 +154,7 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		if ( current_theme_supports( self::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( self::SLUG ) ) {
 			// Ensure extra theme support for core themes is in place.
 			AMP_Core_Theme_Sanitizer::extend_theme_support();
 
@@ -168,7 +168,7 @@ class AMP_Theme_Support {
 			 * action to template_redirect--the wp action--is used instead.
 			 */
 			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
-		} elseif ( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 			add_action(
 				'wp',
 				function () {

@@ -173,7 +173,7 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
@@ -183,7 +183,7 @@ class AMP_Validation_Manager {
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
 		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			// Actions and filters involved in validation.
 			add_action(
 				'activate_plugin',
@@ -254,11 +254,11 @@ class AMP_Validation_Manager {
 
 		// Story post type always supports validation.
 		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
-			return true;
+			return AMP_Options_Manager::is_stories_experience_enabled();
 		}
 
-		// Prevent doing post validation in Reader mode.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
 			return false;
 		}
 
@@ -2001,9 +2001,9 @@ class AMP_Validation_Manager {
 			self::has_cap()
 			&&
 			(
-				current_theme_supports( AMP_Theme_Support::SLUG )
+				( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) )
 				||
-				AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type()
+				( AMP_Options_Manager::is_stories_experience_enabled() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() )
 			)
 		);
 		if ( ! $should_enqueue_block_validation ) {

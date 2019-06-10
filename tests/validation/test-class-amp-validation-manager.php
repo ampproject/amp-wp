@@ -85,11 +85,20 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @global $wp_registered_widgets
 	 */
 	public function setUp() {
+		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		parent::setUp();
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
+
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+					WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+				}
+			}
+		}
 	}
 
 	/**
@@ -1492,6 +1501,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = $this->factory()->post->create_and_get();
@@ -1500,7 +1511,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::enqueue_block_validation();
 		$this->assertNotContains( $slug, wp_scripts()->queue );
 
-		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
 		AMP_Story_Post_Type::register();
 		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			$post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );

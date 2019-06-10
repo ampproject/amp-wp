@@ -333,38 +333,42 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
-	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Story_Post_Type::register();
 	AMP_Service_Worker::init();
-	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_admin_pointer' );
+
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		AMP_Post_Type_Support::add_post_type_support();
+		add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+		add_action( 'wp_loaded', 'amp_post_meta_box' );
+		add_filter( 'request', 'amp_force_query_var_value' );
+
+		// Add actions for reader mode templates.
+		add_action( 'wp', 'amp_maybe_add_actions' );
+
+		// Redirect the old url of amp page to the updated url.
+		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
+	}
+
+	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+		AMP_Story_Post_Type::register();
+		add_action( 'wp_loaded', 'amp_story_templates' );
+	}
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
-
-	add_filter( 'request', 'amp_force_query_var_value' );
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_story_templates' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'wp_loaded', 'amp_admin_pointer' );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
-
-	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-
-	// Add actions for legacy post templates.
-	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	/*
 	 * Broadcast plugin updates.

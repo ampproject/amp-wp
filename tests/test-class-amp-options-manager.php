@@ -88,6 +88,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Options_Manager::get_options()
 	 * @covers AMP_Options_Manager::get_option()
+	 * @covers AMP_Options_Manager::is_website_experience_enabled()
+	 * @covers AMP_Options_Manager::is_stories_experience_enabled()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
 	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
@@ -101,6 +103,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			array(
+				'experiences'              => array( AMP_Options_Manager::WEBSITE_EXPERIENCE ),
 				'theme_support'            => 'disabled',
 				'supported_post_types'     => array( 'post' ),
 				'analytics'                => array(),
@@ -110,12 +113,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'enable_response_caching'  => true,
 				'version'                  => AMP__VERSION,
 				'story_templates_version'  => false,
-				'enable_amp_stories'       => false,
 			),
 			AMP_Options_Manager::get_options()
 		);
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
+
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'page', 'attachment' ) );
 		$this->assertSame(
@@ -241,6 +246,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'enable_response_caching', true );
 		$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
+
+		// Test that enabling Stories experience works.
+		if ( AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
+			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
+		}
 	}
 
 	/**

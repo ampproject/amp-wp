@@ -127,6 +127,32 @@ class AMP_Options_Manager {
 	}
 
 	/**
+	 * Determine whether website experience is enabled.
+	 *
+	 * @since 1.2
+	 *
+	 * @return bool Enabled.
+	 */
+	public static function is_website_experience_enabled() {
+		return in_array( self::WEBSITE_EXPERIENCE, self::get_option( 'experiences' ), true );
+	}
+
+	/**
+	 * Determine whether stories experience is enabled.
+	 *
+	 * @since 1.2
+	 *
+	 * @return bool Enabled.
+	 */
+	public static function is_stories_experience_enabled() {
+		return (
+			AMP_Story_Post_Type::has_required_block_capabilities()
+			&&
+			in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true )
+		);
+	}
+
+	/**
 	 * Validate options.
 	 *
 	 * @param array $new_options Plugin options.
@@ -175,13 +201,15 @@ class AMP_Options_Manager {
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
 
 		// Validate post type support.
-		$options['supported_post_types'] = array();
-		if ( isset( $new_options['supported_post_types'] ) ) {
-			foreach ( $new_options['supported_post_types'] as $post_type ) {
-				if ( ! post_type_exists( $post_type ) ) {
-					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-				} else {
-					$options['supported_post_types'][] = $post_type;
+		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
+			$options['supported_post_types'] = array();
+			if ( isset( $new_options['supported_post_types'] ) ) {
+				foreach ( $new_options['supported_post_types'] as $post_type ) {
+					if ( ! post_type_exists( $post_type ) ) {
+						add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+					} else {
+						$options['supported_post_types'][] = $post_type;
+					}
 				}
 			}
 		}
@@ -270,6 +298,9 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
+		if ( ! self::is_website_experience_enabled() ) {
+			return;
+		}
 
 		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/transitional theme support.
 		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {

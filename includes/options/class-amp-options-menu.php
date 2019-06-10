@@ -502,13 +502,23 @@ class AMP_Options_Menu {
 		<?php endif; ?>
 
 		<fieldset id="supported_post_types_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
-			<?php $element_name = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]'; ?>
+			<?php
+			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
+			$supported_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
+			?>
 			<h4 class="title"><?php esc_html_e( 'Content Types', 'amp' ); ?></h4>
 			<p>
 				<?php esc_html_e( 'The following content types will be available as AMP:', 'amp' ); ?>
 			</p>
 			<ul>
 			<?php foreach ( array_map( 'get_post_type_object', AMP_Post_Type_Support::get_eligible_post_types() ) as $post_type ) : ?>
+				<?php
+				$checked = (
+					post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG )
+					||
+					( ! AMP_Options_Manager::is_website_experience_enabled() && in_array( $post_type->name, $supported_post_types, true ) )
+				);
+				?>
 				<li>
 					<?php $element_id = AMP_Options_Manager::OPTION_NAME . "-supported_post_types-{$post_type->name}"; ?>
 					<input
@@ -516,7 +526,7 @@ class AMP_Options_Menu {
 						id="<?php echo esc_attr( $element_id ); ?>"
 						name="<?php echo esc_attr( $element_name ); ?>"
 						value="<?php echo esc_attr( $post_type->name ); ?>"
-						<?php checked( post_type_supports( $post_type->name, AMP_Post_Type_Support::SLUG ) ); ?>
+						<?php checked( $checked ); ?>
 						>
 					<label for="<?php echo esc_attr( $element_id ); ?>">
 						<?php echo esc_html( $post_type->label ); ?>
