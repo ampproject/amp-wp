@@ -12,9 +12,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
-		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
-			if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
-				WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+					WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+				}
 			}
 		}
 
