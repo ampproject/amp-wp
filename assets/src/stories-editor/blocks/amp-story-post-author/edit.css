@@ -17,3 +17,9 @@
 	width: initial !important;
 	position: absolute !important;
 }
+
+.wp-block[data-type="amp/amp-story-post-author"] .amp-story-editor__rotate-container,
+.wp-block[data-type="amp/amp-story-post-author"] .block-mover,
+.wp-block[data-type="amp/amp-story-post-author"] .block-mover div {
+	height: 100%;
+}
