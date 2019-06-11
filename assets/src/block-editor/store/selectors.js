@@ -1,16 +1,4 @@
 /**
- * Returns the block validation errors for a given clientId.
- *
- * @param {Object} state    Editor state.
- * @param {string} clientId Block client ID.
- *
- * @return {Array} Block validation errors.
- */
-export function getBlockValidationErrors( state, clientId ) {
-	return state.errorsByClientId[ clientId ] || [];
-}
-
-/**
  * Returns whether the current theme has AMP support.
  *
  * @param {Object} state Editor state.
@@ -54,10 +42,24 @@ export function isStoriesEnabled( state ) {
 	return Boolean( state.isStoriesEnabled );
 }
 
+/**
+ * Returns the default AMP status.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {string} The default AMP status.
+ */
 export function getDefaultStatus( state ) {
 	return state.defaultStatus;
 }
 
+/**
+ * Returns the possible AMP statuses.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {string[]} The possible AMP statuses, 'enabled' and 'disabled'.
+ */
 export function getPossibleStatuses( state ) {
 	return state.possibleStatuses;
 }

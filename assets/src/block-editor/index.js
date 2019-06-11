@@ -14,17 +14,16 @@ import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave 
 import { getMinimumFeaturedImageDimensions } from '../common/helpers';
 import './store';
 
+const {
+	isWebsiteEnabled,
+	isStoriesEnabled,
+	isStandardMode,
+} = select( 'amp/block-editor' );
+
 const { ampLatestStoriesBlockData } = window;
 
 // Add filters if AMP for Website experience is enabled.
-if ( select( 'amp/block-editor' ).isWebsiteEnabled() ) {
-	addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
-	addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
-	addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
-	addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
-	addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
-	addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
-
+if ( isWebsiteEnabled() ) {
 	const plugins = require.context( './plugins', true, /.*\.js$/ );
 
 	plugins.keys().forEach( ( modulePath ) => {
@@ -32,6 +31,13 @@ if ( select( 'amp/block-editor' ).isWebsiteEnabled() ) {
 
 		registerPlugin( name, { icon, render } );
 	} );
+
+	addFilter( 'blocks.registerBlockType', 'ampEditorBlocks/addAttributes', addAMPAttributes );
+	addFilter( 'blocks.getSaveElement', 'ampEditorBlocks/filterSave', filterBlocksSave );
+	addFilter( 'editor.BlockEdit', 'ampEditorBlocks/filterEdit', filterBlocksEdit, 20 );
+	addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
+	addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
+	addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions() ) );
 }
 
 /*
@@ -59,16 +65,10 @@ blocks.keys().forEach( ( modulePath ) => {
 
 	const shouldRegister = (
 		(
-			select( 'amp/block-editor' ).isWebsiteEnabled() &&
-			(
-				( ! isLatestStoriesBlock && select( 'amp/block-editor' ).isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name ) ) ||
-				( isLatestStoriesBlock && select( 'amp/block-editor' ).isStoriesEnabled() )
-			)
+			isWebsiteEnabled() && isStandardMode() && AMP_DEPENDENT_BLOCKS.includes( name )
 		) ||
 		(
-			select( 'amp/block-editor' ).isStoriesEnabled() &&
-			isLatestStoriesBlock &&
-			typeof ampLatestStoriesBlockData !== 'undefined'
+			isStoriesEnabled() && isLatestStoriesBlock && typeof ampLatestStoriesBlockData !== 'undefined'
 		)
 	);
 
