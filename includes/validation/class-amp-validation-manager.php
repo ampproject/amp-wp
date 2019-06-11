@@ -2029,7 +2029,7 @@ class AMP_Validation_Manager {
 		$enabled_status    = $status_and_errors['status'];
 
 		$data = array(
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted() || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type(),
 			'possibleStatuses'           => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
 			'defaultStatus'              => $enabled_status,
 		);

@@ -306,7 +306,7 @@ class AMP_Theme_Support {
 			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 
 			/*
-			 * If the theme has transitional support, allow the user to opt for AMP first mode via an option, since a theme
+			 * If the theme has transitional support, allow the user to opt for AMP-first mode via an option, since a theme
 			 * in transitional mode entails that it supports serving templates as both AMP and non-AMP, and this it is
 			 * able to serve AMP-first pages just as well as paired pages. Otherwise, consider that the the mode was
 			 * not set at all via option.
@@ -411,7 +411,7 @@ class AMP_Theme_Support {
 
 		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
-			 * When AMP first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
 			 * Permanent redirect is used for unauthenticated users since switching between modes
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
@@ -2119,7 +2119,7 @@ class AMP_Theme_Support {
 
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
-			 * In AMP first, strip html@amp attribute to prevent GSC from complaining about a validation error
+			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
