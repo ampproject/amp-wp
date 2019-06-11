@@ -473,13 +473,13 @@ PageEdit.propTypes = {
 };
 
 export default compose(
-	withSelect( ( select, { clientId, attributes } ) => {
-		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+	withSelect( ( ownSelect, { clientId, attributes } ) => {
+		const { getMedia } = ownSelect( 'core' );
+		const { getBlockOrder, getBlockRootClientId } = ownSelect( 'core/block-editor' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
-		const { getAnimatedBlocks } = select( 'amp/story' );
+		const { getAnimatedBlocks } = ownSelect( 'amp/story' );
 
 		const { mediaId } = attributes;
 
