@@ -73,6 +73,10 @@ amp-story-grid-layer amp-img > img {
 	font-style: normal;
 }
 
+table.wp-block-table {
+	min-width: initial;
+}
+
 .is-style-white.wp-block-quote {
 	background-image: url("../images/quote-white.svg");
 }

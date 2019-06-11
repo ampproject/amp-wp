@@ -253,7 +253,20 @@ export default createHigherOrderComponent(
 			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
-			const minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
+			// In case of table, the min height depends on the number of rows, each row takes 45px.
+			let minHeight;
+			if ( 'core/table' === name ) {
+				let rows = attributes.body.length;
+				if ( attributes.foot && attributes.foot.length ) {
+					rows++;
+				}
+				if ( attributes.head && attributes.head.length ) {
+					rows++;
+				}
+				minHeight = rows * 45;
+			} else {
+				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
+			}
 
 			return (
 				<>
