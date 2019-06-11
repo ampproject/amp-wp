@@ -17,7 +17,7 @@ import {
 import {
 	URLInput,
 	RichText,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies

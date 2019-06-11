@@ -44,11 +44,11 @@ class AMP_Editor_Blocks {
 			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
 
 			/*
-			 * Dirty AMP is required when a site is in native mode but not all templates are being served
+			 * Dirty AMP is required when a site is in AMP-first mode but not all templates are being served
 			 * as AMP. In particular, if a single post is using AMP-specific Gutenberg Blocks which make
 			 * use of AMP components, and the singular template is served as AMP but the blog page is not,
 			 * then the non-AMP blog page need to load the AMP runtime scripts so that the AMP components
-			 * in the posts displayed there will be rendered properly. This is only relevant on native AMP
+			 * in the posts displayed there will be rendered properly. This is only relevant on AMP-first
 			 * sites because the AMP Gutenberg blocks are only made available in that mode; they are not
 			 * presented in the Gutenberg inserter in transitional mode. In general, using AMP components in
 			 * non-AMP documents is still not officially supported, so it's occurrence is being minimized

@@ -154,6 +154,7 @@ export const updateValidationErrors = () => {
 export const maybeDisplayNotice = () => {
 	const { getValidationErrors, isSanitizationAutoAccepted, getReviewLink } = select( 'amp/block-validation' );
 	const { createWarningNotice } = dispatch( 'core/notices' );
+	const { getCurrentPost } = select( 'core/editor' );
 
 	const validationErrors = getValidationErrors();
 	const validationErrorCount = validationErrors.length;
@@ -174,54 +175,56 @@ export const maybeDisplayNotice = () => {
 	const blockValidationErrors = validationErrors.filter( ( { clientId } ) => clientId );
 	const blockValidationErrorCount = blockValidationErrors.length;
 
-	if ( blockValidationErrorCount > 0 ) {
-		noticeMessage += ' ' + sprintf(
-			/* translators: %s: number of block errors. */
-			_n(
-				'%s issue is directly due to content here.',
-				'%s issues are directly due to content here.',
-				blockValidationErrorCount,
-				'amp'
-			),
-			blockValidationErrorCount
-		);
-	} else if ( validationErrors.length === 1 ) {
-		noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
-	} else {
-		noticeMessage += ' ' + __( 'The issues are not directly due to content here.', 'amp' );
-	}
-
-	noticeMessage += ' ';
-
-	if ( isSanitizationAutoAccepted() ) {
-		const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
-			return (
-				VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-				VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+	if ( 'amp_story' !== getCurrentPost().type ) {
+		if ( blockValidationErrorCount > 0 ) {
+			noticeMessage += ' ' + sprintf(
+				/* translators: %s: number of block errors. */
+				_n(
+					'%s issue is directly due to content here.',
+					'%s issues are directly due to content here.',
+					blockValidationErrorCount,
+					'amp'
+				),
+				blockValidationErrorCount
 			);
-		} );
-
-		const rejectedValidationErrors = validationErrors.filter( ( error ) => {
-			return (
-				VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
-				VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
-			);
-		} );
-
-		const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
-
-		if ( totalRejectedErrorsCount === 0 ) {
-			noticeMessage += __( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+		} else if ( validationErrors.length === 1 ) {
+			noticeMessage += ' ' + __( 'The issue is not directly due to content here.', 'amp' );
 		} else {
-			noticeMessage += _n(
-				'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-				'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
-				validationErrors.length,
-				'amp'
-			);
+			noticeMessage += ' ' + __( 'The issues are not directly due to content here.', 'amp' );
 		}
-	} else {
-		noticeMessage += __( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+
+		noticeMessage += ' ';
+
+		if ( isSanitizationAutoAccepted() ) {
+			const rejectedBlockValidationErrors = blockValidationErrors.filter( ( error ) => {
+				return (
+					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+				);
+			} );
+
+			const rejectedValidationErrors = validationErrors.filter( ( error ) => {
+				return (
+					VALIDATION_ERROR_NEW_REJECTED_STATUS === error.status ||
+					VALIDATION_ERROR_ACK_REJECTED_STATUS === error.status
+				);
+			} );
+
+			const totalRejectedErrorsCount = rejectedBlockValidationErrors.length + rejectedValidationErrors.length;
+
+			if ( totalRejectedErrorsCount === 0 ) {
+				noticeMessage += __( 'However, your site is configured to automatically accept sanitization of the offending markup.', 'amp' );
+			} else {
+				noticeMessage += _n(
+					'Your site is configured to automatically accept sanitization errors, but this error could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+					'Your site is configured to automatically accept sanitization errors, but these errors could be from when auto-acceptance was not selected, or from manually rejecting an error.',
+					validationErrors.length,
+					'amp'
+				);
+			}
+		} else {
+			noticeMessage += __( 'Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.', 'amp' );
+		}
 	}
 
 	const options = {
