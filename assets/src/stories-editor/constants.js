@@ -35,6 +35,7 @@ export const MIN_BLOCK_HEIGHTS = {
 	default: 30,
 	'core/pullquote': 180,
 	'core/table': 100,
+	'core/code': 45,
 };
 
 export const ALLOWED_TOP_LEVEL_BLOCKS = [

@@ -54,7 +54,7 @@ const EnhancedResizableBox = ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
-	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
+	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
 
 	return (
 		<ResizableBox
@@ -115,6 +115,8 @@ const EnhancedResizableBox = ( props ) => {
 						case 'amp/amp-story-post-date':
 							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
 							break;
+						case 'core/code':
+							textElement = blockElement.querySelector( '.wp-block-code' );
 					}
 				} else {
 					textElement = null;
