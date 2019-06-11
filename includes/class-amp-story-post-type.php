@@ -1534,7 +1534,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * In the AMP story editor, when selecting Background Media,
 	 * it will use this custom image size.
-	 * But this filter won't make it available in the Image block's 'Image Size' <select> element.
+	 * This filter will also make it available in the Image block's 'Image Size' <select> element.
 	 *
 	 * @param array $image_sizes {
 	 *     An associative array of image sizes.
@@ -1545,8 +1545,13 @@ class AMP_Story_Post_Type {
 	 * @return array $image_sizes The filtered image sizes.
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
+		$full_size_name = __( 'AMP Story Max Size', 'amp' );
+
 		if ( isset( $_POST['action'] ) && 'query-attachments' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = __( 'AMP Story Max Size', 'amp' );
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
+		} elseif ( get_post_type() && self::POST_TYPE_SLUG === get_post_type() ) {
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
+			unset( $image_sizes['full'] );
 		}
 
 		return $image_sizes;
