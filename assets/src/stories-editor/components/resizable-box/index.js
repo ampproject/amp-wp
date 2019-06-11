@@ -21,7 +21,7 @@ import {
 	getRadianFromDeg,
 } from '../../helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS } from '../../constants';
+import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -54,7 +54,11 @@ const EnhancedResizableBox = ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
+	const isText = 'amp/amp-story-text' === blockName;
 	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
+
+	const textBlockBorderInPercentageTop = Math.round( getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER ) );
+	const textBlockBorderInPercentageLeft = Math.round( getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER ) );
 
 	return (
 		<ResizableBox
@@ -83,11 +87,14 @@ const EnhancedResizableBox = ( props ) => {
 				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
 				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
 
+				const positionTop = ! isText ? parseInt( blockElement.style.top, 10 ) : parseInt( blockElement.style.top, 10 ) + textBlockBorderInPercentageTop;
+				const positionLeft = ! isText ? parseInt( blockElement.style.left, 10 ) : parseInt( blockElement.style.left, 10 ) + textBlockBorderInPercentageLeft;
+
 				onResizeStop( {
 					width: parseInt( appliedWidth, 10 ),
 					height: parseInt( appliedHeight, 10 ),
-					positionTop: parseInt( blockElement.style.top, 10 ),
-					positionLeft: parseInt( blockElement.style.left, 10 ),
+					positionTop,
+					positionLeft,
 				} );
 			} }
 			onResizeStart={ ( event, direction, element ) => {
@@ -122,6 +129,8 @@ const EnhancedResizableBox = ( props ) => {
 
 				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
 					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
+				} else {
+					textBlockWrapper = null;
 				}
 
 				onResizeStart();
@@ -184,12 +193,13 @@ const EnhancedResizableBox = ( props ) => {
 						top: originalPos.top + diff.top,
 					};
 
-					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+					blockElement.style.left = Math.round( getPercentageFromPixels( 'x', updatedPos.left ) ) + '%';
+					blockElement.style.top = Math.round( getPercentageFromPixels( 'y', updatedPos.top ) ) + '%';
 				}
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+
 				lastWidth = appliedWidth;
 				lastHeight = appliedHeight;
 
