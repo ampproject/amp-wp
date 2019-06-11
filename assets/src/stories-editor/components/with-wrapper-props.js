@@ -6,7 +6,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, TEXT_BLOCK_BORDER } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
 const wrapperWithSelect = compose(
@@ -55,11 +55,19 @@ const withWrapperProps = ( BlockListBlock ) => {
 		};
 
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
-			let style = {
-				top: `${ attributes.positionTop }%`,
-				left: `${ attributes.positionLeft }%`,
-				transform: `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`,
-			};
+			let style = {};
+			if ( 'amp/amp-story-text' === blockName ) {
+				style = {
+					top: `calc(${ attributes.positionTop }% - ${ TEXT_BLOCK_BORDER }px)`,
+					left: `calc(${ attributes.positionLeft }% - ${ TEXT_BLOCK_BORDER }px)`,
+				};
+			} else {
+				style = {
+					top: `${ attributes.positionTop }%`,
+					left: `${ attributes.positionLeft }%`,
+				};
+			}
+			style.transform = `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`;
 
 			if ( 'amp/amp-story-cta' === blockName ) {
 				style.transform = `scale(var(--preview-scale))`;

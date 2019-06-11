@@ -16,7 +16,7 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { compose, createHigherOrderComponent, withSafeTimeout } from '@wordpress/compose';
 import {
 	IconButton,
 	PanelBody,
@@ -174,6 +174,7 @@ const enhance = compose(
 	applyFallbackStyles,
 	applyWithSelect,
 	applyWithDispatch,
+	withSafeTimeout,
 );
 
 export default createHigherOrderComponent(
@@ -210,6 +211,7 @@ export default createHigherOrderComponent(
 				sendBackward,
 				moveFront,
 				moveBack,
+				setTimeout,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -242,20 +244,15 @@ export default createHigherOrderComponent(
 
 			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
 			if ( isVideoBlock && videoFeaturedImage ) {
-				setAttributes( { poster: videoFeaturedImage.source_url } );
+				setTimeout( () => {
+					setAttributes( { poster: videoFeaturedImage.source_url } );
+				}, 100 );
 			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
 
 			return (
 				<>
-					{ isMovableBlock && (
-						<StoryBlockMover
-							clientId={ props.clientId }
-							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection }
-						/>
-					) }
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && (
 						<ResizableBox
@@ -291,7 +288,15 @@ export default createHigherOrderComponent(
 									stopBlockActions();
 								} }
 							>
-								<BlockEdit { ...props } />
+								<StoryBlockMover
+									clientId={ props.clientId }
+									blockName={ name }
+									blockElementId={ `block-${ props.clientId }` }
+									isDraggable={ ! props.isPartOfMultiSelection }
+									isMovable={ isMovableBlock }
+								>
+									<BlockEdit { ...props } />
+								</StoryBlockMover>
 							</RotatableBox>
 						</ResizableBox>
 					) }

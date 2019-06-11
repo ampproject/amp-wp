@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.0';
+	const STORY_TEMPLATES_VERSION = '0.3.2';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -105,8 +105,8 @@ class AMP_Story_Templates {
 		if ( self::STORY_TEMPLATES_VERSION === AMP_Options_Manager::get_option( 'story_templates_version' ) ) {
 			return;
 		}
-		$this->import_story_templates();
 		AMP_Options_Manager::update_option( 'story_templates_version', self::STORY_TEMPLATES_VERSION );
+		$this->import_story_templates();
 	}
 
 	/**

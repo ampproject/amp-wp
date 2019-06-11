@@ -21,6 +21,7 @@ import { withDispatch } from '@wordpress/data';
  * Internal dependencies
  */
 import { getPercentageFromPixels } from '../helpers';
+import { TEXT_BLOCK_BORDER } from '../constants';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
@@ -32,7 +33,7 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { updateBlockAttributes, srcClientId } = this.props;
+		const { updateBlockAttributes, srcBlockName, srcClientId } = this.props;
 
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
@@ -54,9 +55,10 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
+		const possibleDelta = 'amp/amp-story-text' === srcBlockName ? TEXT_BLOCK_BORDER : 0;
 		updateBlockAttributes( srcClientId, {
-			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
-			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
+			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta ),
+			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta ),
 		} );
 	}
 
@@ -73,6 +75,7 @@ class BlockDropZone extends Component {
 BlockDropZone.propTypes = {
 	updateBlockAttributes: PropTypes.func,
 	srcClientId: PropTypes.string,
+	srcBlockName: PropTypes.string,
 };
 
 export default withDispatch( ( dispatch ) => {

@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
 /**
@@ -9,16 +8,11 @@ import PropTypes from 'prop-types';
  */
 import BlockDraggable from './block-draggable';
 
-export const IconDragHandle = ( { isVisible, className, icon, onDragStart, onDragEnd, blockElementId, clientId } ) => {
-	if ( ! isVisible ) {
-		return null;
-	}
-
-	const dragHandleClassNames = classnames( 'editor-block-mover__control-drag-handle block-editor-block-mover__control-drag-handle', className );
-
+export const BlockDragArea = ( { children, className, onDragStart, onDragEnd, blockElementId, blockName, clientId } ) => {
 	return (
 		<BlockDraggable
 			clientId={ clientId }
+			blockName={ blockName }
 			blockElementId={ blockElementId }
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
@@ -26,26 +20,27 @@ export const IconDragHandle = ( { isVisible, className, icon, onDragStart, onDra
 			{
 				( { onDraggableStart, onDraggableEnd } ) => (
 					<div
-						className={ dragHandleClassNames }
+						className={ className }
 						aria-hidden="true"
 						onDragStart={ onDraggableStart }
 						onDragEnd={ onDraggableEnd }
 						draggable
 					>
-						{ icon }
+						{ children }
 					</div>
 				) }
 		</BlockDraggable>
 	);
 };
 
-IconDragHandle.propTypes = {
+BlockDragArea.propTypes = {
 	icon: PropTypes.object,
 	isVisible: PropTypes.bool,
 	className: PropTypes.string,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	blockElementId: PropTypes.string,
+	blockName: PropTypes.string,
 	clientId: PropTypes.string,
+	children: PropTypes.any.isRequired,
 };
-

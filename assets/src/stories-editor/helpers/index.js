@@ -12,7 +12,7 @@ import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
@@ -349,8 +349,13 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' transformations.
+ * Filters block transformations.
+ *
  * Removes prefixed list transformations to prevent automatic transformation.
+ *
+ * Adds a custom transform for blocks within <amp-story-grid-layer>.
+ *
+ * @see https://github.com/ampproject/amp-wp/issues/2370
  *
  * @param {Object} settings Settings.
  * @param {string} name     Block name.
@@ -358,24 +363,51 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
-	if ( ! isChildBlock ) {
+	if ( ! isMovableBlock ) {
 		return settings;
 	}
 
-	if ( 'core/list' !== name || ! settings.transforms ) {
-		return settings;
-	}
+	const gridWrapperTransform = {
+		type: 'raw',
+		priority: 20,
+		selector: `amp-story-grid-layer[data-block-name="${ name }"]`,
+		transform: ( node ) => {
+			const innerHTML = node.outerHTML;
+			const blockAttributes = getBlockAttributes( name, innerHTML );
 
-	const transforms = {
-		...settings.transforms,
-		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
+			if ( 'amp/amp-story-text' === name ) {
+				/*
+				 * When there is nothing that matches the content selector (.amp-text-content),
+				 * the pasted content lacks the amp-fit-text wrapper and thus ampFitText is false.
+				 */
+				if ( ! blockAttributes.content ) {
+					blockAttributes.content = node.textContent;
+					blockAttributes.tagName = node.nodeName;
+					blockAttributes.ampFitText = false;
+				}
+			}
+
+			return createBlock( name, blockAttributes );
+		},
 	};
+
+	const transforms = settings.transforms ? { ...settings.transforms } : {};
+	let fromTransforms = transforms.from ? [ ...transforms.from ] : [];
+
+	if ( 'core/list' === name ) {
+		fromTransforms = fromTransforms.filter( ( { type } ) => 'prefix' !== type );
+	}
+
+	fromTransforms.push( gridWrapperTransform );
 
 	return {
 		...settings,
-		transforms,
+		transforms: {
+			...transforms,
+			from: fromTransforms,
+		},
 	};
 };
 
@@ -451,14 +483,14 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {Object} element                  Block element.
- * @param {Object} blockType                Block type object.
- * @param {Object} attributes               Block attributes.
- * @param {number} attributes.positionTop   Top offset in pixel.
- * @param {number} attributes.positionLeft  Left offset in pixel.
- * @param {number} attributes.rotationAngle Rotation angle in degrees.
- * @param {number} attributes.width         Block width in pixels.
- * @param {number} attributes.height        Block height in pixels.
+ * @param {WPElement} element                  Block element.
+ * @param {Object}    blockType                Block type object.
+ * @param {Object}    attributes               Block attributes.
+ * @param {number}    attributes.positionTop   Top offset in pixel.
+ * @param {number}    attributes.positionLeft  Left offset in pixel.
+ * @param {number}    attributes.rotationAngle Rotation angle in degrees.
+ * @param {number}    attributes.width         Block width in pixels.
+ * @param {number}    attributes.height        Block height in pixels.
  *
  * @return {Object} The wrapped element.
  */
@@ -483,26 +515,20 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	};
 
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		const positionStyle = {
+		style.style = {
+			...style.style,
 			position: 'absolute',
 			top: `${ positionTop }%`,
 			left: `${ positionLeft }%`,
-		};
-		style.style = {
-			...style.style,
-			...positionStyle,
 		};
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
 	if ( width && height ) {
-		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
-		};
 		style.style = {
 			...style.style,
-			...resizeStyle,
+			width: `${ getPercentageFromPixels( 'x', width ) }%`,
+			height: `${ getPercentageFromPixels( 'y', height ) }%`,
 		};
 	}
 
@@ -526,7 +552,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	}
 
 	return (
-		<amp-story-grid-layer template="vertical">
+		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
 			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
 				{ element }
 			</div>
