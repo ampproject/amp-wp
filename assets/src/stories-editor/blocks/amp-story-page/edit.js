@@ -32,7 +32,6 @@ import {
 	withSelect,
 	withDispatch,
 	dispatch,
-	select,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -122,10 +121,8 @@ class PageEdit extends Component {
 
 			mediaType = media.type;
 		}
-		const { getMedia } = select( 'core' );
-		const mediaObject = getMedia( media.id );
-		const mediaUrl = has( mediaObject, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ? mediaObject.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url : media.url;
 
+		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
@@ -474,13 +471,13 @@ PageEdit.propTypes = {
 };
 
 export default compose(
-	withSelect( ( ownSelect, { clientId, attributes } ) => {
-		const { getMedia } = ownSelect( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = ownSelect( 'core/block-editor' );
+	withSelect( ( select, { clientId, attributes } ) => {
+		const { getMedia } = select( 'core' );
+		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
-		const { getAnimatedBlocks } = ownSelect( 'amp/story' );
+		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const { mediaId } = attributes;
 
