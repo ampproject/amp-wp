@@ -4,7 +4,7 @@
 import { getBlockType } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { Warning } from '@wordpress/editor';
+import { Warning } from '@wordpress/block-editor';
 import { createHigherOrderComponent, compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 

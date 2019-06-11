@@ -21,7 +21,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( amp_is_canonical() ) {
+	if ( amp_is_canonical() || ! AMP_Options_Manager::is_website_experience_enabled() ) {
 		return;
 	}
 

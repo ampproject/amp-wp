@@ -9,6 +9,10 @@
  * Test AMP_Story_Post_Type.
  */
 class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
+
+	/**
+	 * Set up.
+	 */
 	public function setUp() {
 		parent::setUp();
 
@@ -22,7 +26,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		global $wp_styles;
 		$wp_styles = null;
-		AMP_Options_Manager::update_option( 'enable_amp_stories', true );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
 	}
 
 	/**
@@ -33,7 +37,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function tearDown() {
 		global $wp_rewrite;
 
-		AMP_Options_Manager::update_option( 'enable_amp_stories', false );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
@@ -42,10 +46,12 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test requires opt_in.
+	 *
 	 * @covers \AMP_Story_Post_Type::register()
 	 */
 	public function test_requires_opt_in() {
-		AMP_Options_Manager::update_option( 'enable_amp_stories', false );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
 
 		AMP_Story_Post_Type::register();
 
@@ -325,7 +331,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		// This is an AMP story embed, but the markup doesn't have an <iframe>, so it shouldn't be changed.
 		$amp_story                   = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
-		$embed_markup_without_iframe = '<div class="wp-embed"><img src="https://example.com/baz.jpeg></div>';
+		$embed_markup_without_iframe = '<div class="wp-embed"><img alt=baz src="https://example.com/baz.jpeg></div>';
 		$this->assertEquals( $embed_markup_without_iframe, AMP_Story_Post_Type::change_embed_iframe_attributes( $embed_markup_without_iframe, $amp_story ) );
 
 		// This is an AMP story embed, so it should change the height.
@@ -338,7 +344,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	/**
 	 * Creates amp_story posts with featured images of given heights.
 	 *
-	 * @param array $featured_images[][] {
+	 * @param array $featured_images {
 	 *     The featured image dimensions.
 	 *
 	 *     @type int width
