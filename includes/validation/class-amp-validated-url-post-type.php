@@ -172,8 +172,10 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_post_list_screen_scripts' ) );
 
-		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		}
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_edit_post_screen_scripts' ) );
