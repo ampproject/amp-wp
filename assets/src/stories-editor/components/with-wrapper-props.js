@@ -58,10 +58,11 @@ const withWrapperProps = ( BlockListBlock ) => {
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
 			let style = {};
 			if ( 'amp/amp-story-text' === blockName ) {
-				const textBlockBorderInPercentage = getPercentageFromPixels( TEXT_BLOCK_BORDER );
+				const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
+				const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
 				style = {
-					top: `${ attributes.positionTop - textBlockBorderInPercentage }%`,
-					left: `${ attributes.positionLeft - textBlockBorderInPercentage }%`,
+					top: `${ attributes.positionTop - textBlockBorderInPercentageTop }%`,
+					left: `${ attributes.positionLeft - textBlockBorderInPercentageLeft }%`,
 				};
 			} else {
 				style = {
