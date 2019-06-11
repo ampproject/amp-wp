@@ -11,6 +11,7 @@
 
 #amp-story-editor {
 	position: relative;
+	overflow: hidden;
 }
 
 #amp-story-editor > .editor-block-list__layout {
