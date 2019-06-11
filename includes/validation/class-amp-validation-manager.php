@@ -281,7 +281,7 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in AMP first mode or via user option.
+	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
@@ -303,7 +303,7 @@ class AMP_Validation_Manager {
 	 * - Parent admin item and first submenu item: link to non-AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
-	 * When on AMP first response:
+	 * When on AMP-first response:
 	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors.
 	 * - Parent admin and first submenu item: link to validate the URL.
 	 *
@@ -877,13 +877,13 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP first (standard) mode.
+		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP-first.
 		if ( self::is_sanitization_auto_accepted() ) {
 			if ( ! $has_rejected_error ) {
 				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			} else {
 				/*
-				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-standard mode, it will redirect to a non-AMP page.
+				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
 				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
 				 * In that case, this will block serving AMP.
 				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
@@ -1994,7 +1994,7 @@ class AMP_Validation_Manager {
 		/*
 		 * The AMP_Validation_Manager::post_supports_validation() method is not being used here because
 		 * a post's status for validation checking can change during the life of the editor, such as when
-		 * the user to toggle AMP back on after having turned it off, and then get the validation
+		 * the user toggles AMP back on after having turned it off, and then gets the validation
 		 * warnings appearing due to the amp-block-validation having been enqueued already.
 		 */
 		$should_enqueue_block_validation = (
