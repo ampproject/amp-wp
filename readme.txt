@@ -22,6 +22,7 @@ Features and capabilities provided by the plugin include:
 - **Gutenberg Support**: enabling AMP content creation fully integrated with Gutenberg.
 - **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
 - **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
+- **<span style="color:red">New!</span>** **AMP Stories**: the AMP Plugin enables the creation, editing, and publishing of AMP Stories in WordPress; leverage the magic of storytelling the WordPress way!
 
 The plugin can be configured to follow one of three different template modes: Standard, Transitional, and Reader. When configured to operate in Reader and Transitional modes, a given post/page will have a canonical URL as well as a corresponding (paired) AMP URL. The AMP plugin is not serving as a mobile theme; it does not redirect mobile devices to the AMP version. Instead, the AMP version is served to mobile visitors when they find the content on platforms such as Twitter, Pinterest, Google Search, and others.
 
@@ -44,13 +45,14 @@ If you are a developer, we encourage you to [follow along](https://github.com/am
 1. Theme support enables you to reuse the active theme's templates and stylesheets; all WordPress features (menus, widgets, comments) are available in AMP.
 2. Many themes can be served as AMP without any changes; the default experience is as if JavaScript is turned off in the browser since scripts are removed.
 3. Reader mode templates are still available, but they are are limited. Not only do they differ from the active theme, any validation errors are silently sanitized.
-4. Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
-5. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
-6. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
-7. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
-8. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
-9. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
-10. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
+4. Create great web experiences via AMP-powered websites or visually rich, engaging stories.
+5. Switch from Reader mode to Transitional or Standard mode in AMP settings screen. You may need to disable the admin bar in AMP if your theme has a larger amount of CSS.
+6. Make the entire site available in AMP or pick specific post types and templates; you can also opt-out on per-post basis.
+7. Plugin checks for AMP validity and will indicate when either: no issues are found, new issues need moderation, or issues block AMP from being served.
+8. The editor will surface validation issues during content authoring. The specific blocks with validation errors are indicated.
+9. Validated URLs include the list of validation errors encountered, giving control over whether sanitization for a validation error is accepted or rejected.
+10. Styles added by themes and plugins are automatically concatenated, minified, and tree-shaken to try to keep the total under 50KB of inline CSS.
+11. A WP-CLI command is provided to check the URLs on a site for AMP validity. Results are available in the admin for inspection.
 
 == Changelog ==
 
