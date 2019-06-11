@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { RichText } from '@wordpress/editor';
+import { RichText } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
