@@ -104,7 +104,7 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { elementId, blockName, transferData, onDragStart = noop } = this.props;
+		const { elementId, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {
@@ -204,7 +204,6 @@ class Draggable extends Component {
 
 Draggable.propTypes = {
 	elementId: PropTypes.string,
-	blockName: PropTypes.string,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
