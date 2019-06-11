@@ -224,6 +224,7 @@ export default createHigherOrderComponent(
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
+			const isPreformattedBlock = 'core/preformatted' === name;
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
@@ -255,7 +256,7 @@ export default createHigherOrderComponent(
 			return (
 				<>
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && ! isEmptyImageBlock && (
+					{ isMovableBlock && ! isEmptyImageBlock && ! isPreformattedBlock && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
@@ -300,6 +301,34 @@ export default createHigherOrderComponent(
 								</StoryBlockMover>
 							</RotatableBox>
 						</ResizableBox>
+					) }
+					{ isPreformattedBlock && (
+						<RotatableBox
+							blockElementId={ `block-${ clientId }` }
+							initialAngle={ rotationAngle }
+							className="amp-story-editor__rotate-container"
+							angle={ rotationAngle }
+							onRotateStart={ () => {
+								startBlockActions();
+							} }
+							onRotateStop={ ( event, angle ) => {
+								setAttributes( {
+									rotationAngle: angle,
+								} );
+
+								stopBlockActions();
+							} }
+						>
+							<StoryBlockMover
+								clientId={ props.clientId }
+								blockName={ name }
+								blockElementId={ `block-${ props.clientId }` }
+								isDraggable={ ! props.isPartOfMultiSelection }
+								isMovable={ isMovableBlock }
+							>
+								<BlockEdit { ...props } />
+							</StoryBlockMover>
+						</RotatableBox>
 					) }
 					{ ! ( isLast && isFirst ) && isMovableBlock && (
 						<InspectorControls>

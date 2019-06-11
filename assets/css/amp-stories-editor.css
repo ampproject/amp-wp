@@ -105,10 +105,12 @@
 	height: 100%;
 }
 
-.wp-block[data-type="core/preformatted"] .amp-story-editor__rotate-container,
-.wp-block[data-type="core/preformatted"] .block-mover,
-.wp-block[data-type="core/preformatted"] .block-mover div {
-	height: 100%;
+.wp-block[data-type="core/preformatted"] div[draggable="true"] {
+	border: 5px solid transparent;
+}
+
+.wp-block-preformatted .block-editor-rich-text__editable {
+	white-space: nowrap !important;
 }
 
 .wp-block[data-type="core/pullquote"] .block-mover,
