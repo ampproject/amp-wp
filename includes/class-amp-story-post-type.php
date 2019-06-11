@@ -271,8 +271,6 @@ class AMP_Story_Post_Type {
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'use_block_editor_for_story_post_type' ), PHP_INT_MAX, 2 );
 		add_filter( 'classic_editor_enabled_editors_for_post_type', array( __CLASS__, 'filter_enabled_editors_for_story_post_type' ), PHP_INT_MAX, 2 );
 
-		add_filter( 'image_size_names_choose', array( __CLASS__, 'add_new_max_image_size' ) );
-
 		self::register_block_latest_stories();
 
 		register_block_type(
@@ -1524,30 +1522,5 @@ class AMP_Story_Post_Type {
 			sprintf( '${1}%s${3}', $new_height ),
 			$output
 		);
-	}
-
-	/**
-	 * Adds a new max image size to the images sizes available, and removes 'full'.
-	 *
-	 * In the AMP story editor, when selecting Background Media,
-	 * it will use this custom image size.
-	 * This will also be available for image blocks.
-	 * But the new size will only be available if the original image was at least as big as it is.
-	 *
-	 * @param array $image_sizes {
-	 *     An associative array of image sizes.
-	 *
-	 *     @type string $slug Image size slug, like 'medium'.
-	 *     @type string $name Image size name, like 'Medium'.
-	 * }
-	 * @return array $image_sizes The filtered image sizes.
-	 */
-	public static function add_new_max_image_size( $image_sizes ) {
-		if ( self::POST_TYPE_SLUG === get_post_type() ) {
-			unset( $image_sizes['full'] );
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = __( 'Story Background', 'amp' );
-		}
-
-		return $image_sizes;
 	}
 }
