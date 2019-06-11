@@ -152,7 +152,10 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 200;
 
 		case 'core/pullquote':
-			return 215;
+			return 250;
+
+		case 'core/table':
+			return 100;
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':

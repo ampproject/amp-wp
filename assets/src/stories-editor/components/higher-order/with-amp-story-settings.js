@@ -37,7 +37,7 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
-	MIN_BLOCK_HEIGHT,
+	MIN_BLOCK_HEIGHTS,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/bring-forward.svg';
@@ -250,6 +250,7 @@ export default createHigherOrderComponent(
 			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
+			const minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 
 			return (
 				<>
@@ -260,7 +261,7 @@ export default createHigherOrderComponent(
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
-							minHeight={ MIN_BLOCK_HEIGHT }
+							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
 								setAttributes( value );

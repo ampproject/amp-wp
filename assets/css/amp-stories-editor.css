@@ -111,6 +111,18 @@
 	height: 100%;
 }
 
+.wp-block[data-type="core/pullquote"] .block-mover,
+.wp-block[data-type="core/pullquote"] .block-mover div,
+.wp-block-pullquote {
+	height: 100%;
+}
+
+.wp-block[data-type="core/table"] .block-mover,
+.wp-block[data-type="core/table"] .block-mover div,
+.wp-block-table {
+	height: 100%;
+}
+
 .block-library-list ul li,
 .wp-block-verse pre,
 .wp-block-preformatted pre {
