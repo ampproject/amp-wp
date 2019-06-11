@@ -18,6 +18,13 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * Minimum required version of Gutenberg required.
+	 *
+	 * @var string
+	 */
+	const REQUIRED_GUTENBERG_VERSION = '5.8';
+
+	/**
 	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
 	 *
 	 * @var string
@@ -90,15 +97,21 @@ class AMP_Story_Post_Type {
 	/**
 	 * Check if the required version of block capabilities available.
 	 *
+	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
+	 *
+	 * @todo Eventually the Gutenberg requirement should be removed.
+	 *
 	 * @return bool Whether capabilities are available.
 	 */
 	public static function has_required_block_capabilities() {
-		if ( ! function_exists( 'register_block_type' ) ) {
+		if ( ! function_exists( 'register_block_type' ) || version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			return false;
 		}
-
-		// TODO: Require only the latest WordPress version itself, not the plugin.
-		return function_exists( 'gutenberg_pre_init' );
+		return (
+			( defined( 'GUTENBERG_DEVELOPMENT_MODE' ) && GUTENBERG_DEVELOPMENT_MODE )
+			||
+			( defined( 'GUTENBERG_VERSION' ) && version_compare( GUTENBERG_VERSION, self::REQUIRED_GUTENBERG_VERSION, '>=' ) )
+		);
 	}
 
 	/**
@@ -107,7 +120,7 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 
@@ -482,11 +495,13 @@ class AMP_Story_Post_Type {
 	 * @return array Modified editor settings.
 	 */
 	public static function filter_block_editor_settings( $editor_settings, $post ) {
-		if ( self::POST_TYPE_SLUG === $post->post_type ) {
-			unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
+		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+			return $editor_settings;
 		}
 
-		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
+		unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
+
+		if ( isset( $editor_settings['styles'] ) ) {
 			foreach ( $editor_settings['styles'] as $key => $style ) {
 
 				// If the baseURL is not set or if the URL doesn't include theme styles, move to next.
@@ -505,6 +520,7 @@ class AMP_Story_Post_Type {
 				}
 			}
 		}
+
 		return $editor_settings;
 	}
 

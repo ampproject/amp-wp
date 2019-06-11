@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { addFilter, removeFilter } from '@wordpress/hooks';
+import '@wordpress/editor'; // So the data store is registered.
 
 /**
  * Internal dependencies

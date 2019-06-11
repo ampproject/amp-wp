@@ -85,11 +85,20 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @global $wp_registered_widgets
 	 */
 	public function setUp() {
+		unset( $GLOBALS['wp_scripts'], $GLOBALS['wp_styles'] );
 		parent::setUp();
 		$dom_document = new DOMDocument( '1.0', 'utf-8' );
 		$this->node   = $dom_document->createElement( self::TAG_NAME );
 		AMP_Validation_Manager::reset_validation_results();
 		$this->original_wp_registered_widgets = $GLOBALS['wp_registered_widgets'];
+
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+					WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+				}
+			}
+		}
 	}
 
 	/**
@@ -98,6 +107,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function tearDown() {
 		$GLOBALS['wp_registered_widgets'] = $this->original_wp_registered_widgets;
 		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
 		$_REQUEST = array();
 		unset( $GLOBALS['current_screen'] );
 		AMP_Validation_Manager::$should_locate_sources = false;
@@ -144,6 +154,72 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Test init when theme support and stories support are not present.
+	 *
+	 * @covers AMP_Validation_Manager::init()
+	 */
+	public function test_init_without_theme_or_stories_support() {
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Validation_Manager::init();
+
+		$this->assertFalse( has_action( 'save_post', array( 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ) ) );
+	}
+
+	/**
+	 * Test init when theme support is absent but stories support is.
+	 *
+	 * @covers AMP_Validation_Manager::init()
+	 */
+	public function test_init_with_stories_and_without_theme_support() {
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'Environment does not support Stories.' );
+		}
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Validation_Manager::init();
+
+		$this->assertSame( 10, has_action( 'save_post', array( 'AMP_Validation_Manager', 'handle_save_post_prompting_validation' ) ) );
+		$this->assertFalse( has_action( 'admin_bar_menu', array( self::TESTED_CLASS, 'add_admin_bar_menu_items' ) ) );
+	}
+
+	/**
+	 * Test \AMP_Validation_Manager::post_supports_validation.
+	 *
+	 * @covers \AMP_Validation_Manager::post_supports_validation()
+	 */
+	public function test_post_supports_validation() {
+
+		// Ensure that story posts can be validated even when theme support is absent.
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		AMP_Story_Post_Type::register();
+		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+			$post = $this->factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+			$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $post ) );
+		}
+
+		// Support absent if theme support is absent for regular posts.
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+
+		// Ensure normal case of validating published post when theme support present.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$this->assertTrue( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create() ) );
+
+		// Trashed posts are not validatable.
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $this->factory()->post->create( array( 'post_status' => 'trash' ) ) ) );
+
+		// An invalid post is not previewable.
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( 0 ) );
+
+		// Ensure non-viewable posts do not support validation.
+		register_post_type( 'not_viewable', array( 'publicly_queryable' => false ) );
+		$post = $this->factory()->post->create( array( 'post_type' => 'not_viewable' ) );
+		$this->assertFalse( AMP_Validation_Manager::post_supports_validation( $post ) );
+	}
+
+	/**
 	 * Test add_validation_hooks.
 	 *
 	 * @covers AMP_Validation_Manager::is_sanitization_auto_accepted()
@@ -161,11 +237,11 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$this->assertFalse( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
 		$this->assertTrue( AMP_Validation_Manager::is_sanitization_auto_accepted() );
 	}
@@ -200,8 +276,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		remove_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 
-		// Admin bar item available in native mode.
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		// Admin bar item available in AMP-first mode.
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -211,7 +287,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertInternalType( 'object', $admin_bar->get_node( 'amp-validity' ) );
 
 		// Admin bar item available in paired mode.
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -222,7 +298,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// Admin bar item available in paired mode with validation errors.
 		$_GET[ AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR ] = 3;
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
 		$node = $admin_bar->get_node( 'amp' );
@@ -282,6 +358,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_queued_posts_on_frontend()
 	 */
 	public function test_handle_save_post_prompting_validation_and_validate_queued_posts_on_frontend() {
+		add_theme_support( AMP_Theme_Support::SLUG );
 		$_SERVER['REQUEST_METHOD'] = 'POST';
 		$GLOBALS['pagenow']        = 'post.php';
 
@@ -328,7 +405,10 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::add_rest_api_fields()
 	 */
 	public function test_add_rest_api_fields() {
-		// Test in a non Native-AMP (canonical) context.
+
+		// Test in a transitional context.
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
+		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
 		$post_types_non_canonical = array_intersect(
 			get_post_types_by_support( 'amp' ),
@@ -340,8 +420,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
-		// Test in a Native AMP (canonical) context.
+		// Test in a AMP-first (canonical) context.
 		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();
 		$post_types_canonical = get_post_types_by_support( 'editor' );
 		$this->assert_rest_api_field_present( $post_types_canonical );
@@ -373,6 +454,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::validate_url()
 	 */
 	public function test_get_amp_validity_rest_field() {
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
@@ -557,7 +639,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @covers AMP_Validation_Manager::print_edit_form_validation_status()
 	 */
 	public function test_print_edit_form_validation_status() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 
 		AMP_Validated_URL_Post_Type::register();
@@ -596,7 +678,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertContains( '<code>script</code>', $output );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 
-		// In 'Native' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
+		// In 'Standard' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		AMP_Validation_Manager::print_edit_form_validation_status( $post );
@@ -609,7 +691,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		 * as there are errors with 'New Rejected' status.
 		 */
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', true );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		ob_start();
@@ -696,6 +778,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_block_data() {
+		if ( ! class_exists( 'WP_Block_Type_Registry' ) ) {
+			$this->markTestSkipped( 'Gutenberg not active.' );
+		}
 		$latest_posts_block = WP_Block_Type_Registry::get_instance()->get_registered( 'core/latest-posts' );
 
 		$reflection_function = new ReflectionFunction( $latest_posts_block->render_callback );
@@ -1383,6 +1468,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			$this->markTestSkipped( 'The block editor is not available.' );
 		}
 
+		add_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
 		$post = $this->factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
@@ -1406,6 +1492,37 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertContains( $slug, wp_scripts()->queue );
+	}
+
+	/**
+	 * Test enqueue_block_validation.
+	 *
+	 * @covers AMP_Validation_Manager::enqueue_block_validation()
+	 */
+	public function test_enqueue_block_validation_without_amp_support() {
+		if ( ! function_exists( 'register_block_type' ) ) {
+			$this->markTestSkipped( 'The block editor is not available.' );
+		}
+
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		global $post;
+		$post = $this->factory()->post->create_and_get();
+		$slug = 'amp-block-validation';
+		$this->set_capability();
+		AMP_Validation_Manager::enqueue_block_validation();
+		$this->assertNotContains( $slug, wp_scripts()->queue );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
+		AMP_Story_Post_Type::register();
+		if ( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+			$post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+			AMP_Validation_Manager::enqueue_block_validation();
+			$this->assertContains( $slug, wp_scripts()->queue );
+		}
 	}
 
 	/**

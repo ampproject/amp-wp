@@ -243,7 +243,7 @@ function post_supports_amp( $post ) {
  * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
  * present, this function returns true just if the query var is present. If theme support is
  * present, then it returns true in transitional mode if an AMP template is available and the query
- * var is present, or else in native mode if just the template is available.
+ * var is present, or else in standard mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
  * @global string $pagenow
@@ -318,7 +318,7 @@ function is_amp_endpoint() {
 		return $has_amp_query_var;
 	}
 
-	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
+	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}
@@ -374,14 +374,22 @@ function amp_get_boilerplate_code() {
  * @since 1.0 Add template mode.
  */
 function amp_add_generator_metadata() {
-	if ( amp_is_canonical() ) {
-		$mode = 'native';
+	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+
+	if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		$mode = 'none';
+	} elseif ( amp_is_canonical() ) {
+		$mode = 'standard';
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'transitional';
 	} else {
 		$mode = 'reader';
 	}
-	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
+	$content .= sprintf( '; mode=%s', $mode );
+
+	$content .= sprintf( '; experiences=%s', implode( ',', AMP_Options_Manager::get_option( 'experiences' ) ) );
+
+	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
 
 /**

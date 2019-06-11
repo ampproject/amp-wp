@@ -11,15 +11,12 @@ if [[ ! -z $TRAVIS ]]; then
 fi
 
 function after_wp_install {
-	echo -n "Installing Gutenberg..."
-	if [[ "$WP_VERSION" = "4.9" ]]; then
-		# The last version that supported WordPress 4.9:
-		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/tags/4.9.0/
-	else
+	if [[ "$WP_VERSION" != "4.9" ]]; then
+		echo -n "Installing Gutenberg..."
 		gutenberg_plugin_svn_url=https://plugins.svn.wordpress.org/gutenberg/trunk/
+		svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
+		echo "done"
 	fi
-	svn export -q "$gutenberg_plugin_svn_url" "$WP_CORE_DIR/src/wp-content/plugins/gutenberg"
-	echo "done"
 
 	if [[ ! -z $INSTALL_PWA_PLUGIN ]]; then
 		echo -n "Installing PWA 0.2-alpha2..."

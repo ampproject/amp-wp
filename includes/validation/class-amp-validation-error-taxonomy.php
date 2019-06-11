@@ -283,7 +283,7 @@ class AMP_Validation_Error_Taxonomy {
 	 */
 	public static function should_show_in_menu() {
 		global $pagenow;
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
 		return ( 'edit-tags.php' === $pagenow && ( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended

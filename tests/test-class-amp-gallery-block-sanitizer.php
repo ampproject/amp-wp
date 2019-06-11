@@ -58,7 +58,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test sanitizer.
 	 *
 	 * This only tests when theme support is present.
-	 * Like if Native or Transitional is selected in AMP Settings > Template Mode,
+	 * Like if Standard or Transitional is selected in AMP Settings > Template Mode,
 	 * or if this is added with add_theme_support( 'amp' ).
 	 * If there is no theme support, the sanitizer will have the argument array( 'carousel_required' => true ).
 	 *

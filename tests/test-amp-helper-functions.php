@@ -352,7 +352,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
-		// Native theme support.
+		// Standard theme support.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 
@@ -478,25 +478,37 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+
+		$get_generator_tag = function() {
+			ob_start();
+			amp_add_generator_metadata();
+			return ob_get_clean();
+		};
+
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertContains( 'experiences=website', $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
-		$this->assertContains( 'mode=native', $output );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=none', $output );
+		$this->assertContains( 'experiences=stories', $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
+		$this->assertContains( 'experiences=website,stories', $output );
 	}
 
 	/**
@@ -992,7 +1004,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 
 		// Check that paired mode does add link.
-		add_theme_support( 'amp', array( 'paired' => true ) );
+		add_theme_support( 'amp', array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
