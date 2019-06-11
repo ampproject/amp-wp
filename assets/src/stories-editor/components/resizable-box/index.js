@@ -57,8 +57,8 @@ const EnhancedResizableBox = ( props ) => {
 	const isText = 'amp/amp-story-text' === blockName;
 	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
 
-	const textBlockBorderInPercentageTop = Math.round( getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER ) );
-	const textBlockBorderInPercentageLeft = Math.round( getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER ) );
+	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
+	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
 
 	return (
 		<ResizableBox
@@ -87,8 +87,11 @@ const EnhancedResizableBox = ( props ) => {
 				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
 				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
 
-				const positionTop = ! isText ? parseInt( blockElement.style.top, 10 ) : parseInt( blockElement.style.top, 10 ) + textBlockBorderInPercentageTop;
-				const positionLeft = ! isText ? parseInt( blockElement.style.left, 10 ) : parseInt( blockElement.style.left, 10 ) + textBlockBorderInPercentageLeft;
+				const elementTop = parseFloat( blockElement.style.top );
+				const elementLeft = parseFloat( blockElement.style.left );
+
+				const positionTop = ! isText ? elementTop.toFixed( 2 ) : ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 );
+				const positionLeft = ! isText ? elementLeft.toFixed( 2 ) : ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 );
 
 				onResizeStop( {
 					width: parseInt( appliedWidth, 10 ),
@@ -177,8 +180,8 @@ const EnhancedResizableBox = ( props ) => {
 					};
 					// Get new position based on the difference.
 					const originalPos = {
-						left: getPixelsFromPercentage( 'x', parseInt( blockElementLeft, 10 ) ),
-						top: getPixelsFromPercentage( 'y', parseInt( blockElementTop, 10 ) ),
+						left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
+						top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
 					};
 
 					// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
@@ -193,8 +196,8 @@ const EnhancedResizableBox = ( props ) => {
 						top: originalPos.top + diff.top,
 					};
 
-					blockElement.style.left = Math.round( getPercentageFromPixels( 'x', updatedPos.left ) ) + '%';
-					blockElement.style.top = Math.round( getPercentageFromPixels( 'y', updatedPos.top ) ) + '%';
+					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 				}
 
 				element.style.width = appliedWidth + 'px';

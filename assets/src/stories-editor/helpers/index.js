@@ -243,12 +243,10 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
-			type: 'number',
 			default: 0,
 		};
 
 		addedAttributes.positionLeft = {
-			type: 'number',
 			default: 5,
 		};
 
