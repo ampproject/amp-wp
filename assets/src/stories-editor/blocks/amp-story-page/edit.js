@@ -32,6 +32,7 @@ import {
 	withSelect,
 	withDispatch,
 	dispatch,
+	select,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -121,7 +122,8 @@ class PageEdit extends Component {
 
 			mediaType = media.type;
 		}
-		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+		const mediaObject = select( 'core' ).getMedia( media.id );
+		const mediaUrl = has( mediaObject, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ? mediaObject.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url : media.url;
 
 		this.props.setAttributes( {
 			mediaUrl,
