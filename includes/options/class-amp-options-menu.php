@@ -181,7 +181,7 @@ class AMP_Options_Menu {
 					echo wp_kses_post(
 						sprintf(
 							/* translators: %s: Stories documentation URL. */
-							__( 'AMP is a simple and robust format to ensure your website is fast, user-first, and makes money. AMP provides long-term success for your web strategy with distribution across popular platforms and reduced operating and development costs. Read more about <a href="%s" target="_blank">AMP Websites</a>.', 'amp' ),
+							__( 'AMP is a powerful web components framework that helps you build fast, user-first websites that monetize well. AMP puts tons of advanced capabilities at your fingertips, effectively reducing the operating and development costs of your sites. Read more about <a href="%s" target="_blank">AMP Websites</a>.', 'amp' ),
 							esc_url( 'https://amp.dev/about/websites' )
 						)
 					);

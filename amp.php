@@ -553,7 +553,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      ) );
  *
  * @see AMP_Theme_Support::read_theme_support()
- * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not separate AMP URL current URL.
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
 function amp_is_canonical() {
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
