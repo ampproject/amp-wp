@@ -10,11 +10,11 @@ export function hasThemeSupport( state ) {
 }
 
 /**
- * Returns whether the current site is in Standard mode (AMP first) as opposed to Transitional (paired).
+ * Returns whether the current site is in Standard mode (AMP-first) as opposed to Transitional (paired).
  *
  * @param {Object} state Editor state.
  *
- * @return {boolean} Whether the current site is AMP first.
+ * @return {boolean} Whether the current site is AMP-first.
  */
 export function isStandardMode( state ) {
 	return Boolean( state.isStandardMode );

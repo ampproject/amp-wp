@@ -2444,7 +2444,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * On AMP first themes when there are new/rejected validation errors present, a parsed stylesheet may include
+			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
 			 */
 			$css = $stylesheet_groups['custom']['import_front_matter'];
