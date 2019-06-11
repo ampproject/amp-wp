@@ -36,6 +36,7 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	BLOCKS_WITH_RESIZING,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -152,7 +153,10 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 200;
 
 		case 'core/pullquote':
-			return 215;
+			return 250;
+
+		case 'core/table':
+			return 100;
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
@@ -183,8 +187,11 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+	// Image block already has width and heigh.
+	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
 		anchor: {
@@ -252,7 +259,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'number',
 		};
 
-		if ( ! isImageBlock ) {
+		if ( needsWidthHeight ) {
 			addedAttributes.height = {
 				type: 'number',
 				default: getDefaultMinimumBlockHeight( name ),

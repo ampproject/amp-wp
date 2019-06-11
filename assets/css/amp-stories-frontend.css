@@ -50,6 +50,7 @@ amp-story-grid-layer {
 	padding: 0.8em 1em;
 	border: 1px solid #e2e4e7;
 	border-radius: 4px;
+	overflow: hidden;
 }
 
 .wp-block-table {
