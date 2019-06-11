@@ -120,7 +120,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 		AMP_CLI::$force_crawl_urls = false;
 
-		// In AMP first, the IDs should include all of the newly-created posts.
+		// In AMP-first, the IDs should include all of the newly-created posts.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 

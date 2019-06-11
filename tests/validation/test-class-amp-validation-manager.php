@@ -276,7 +276,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		remove_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 
-		// Admin bar item available in AMP first mode.
+		// Admin bar item available in AMP-first mode.
 		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$admin_bar = new WP_Admin_Bar();
 		AMP_Validation_Manager::add_admin_bar_menu_items( $admin_bar );
@@ -420,7 +420,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 		$this->assert_rest_api_field_present( $post_types_non_canonical );
 
-		// Test in a AMP first (canonical) context.
+		// Test in a AMP-first (canonical) context.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
 		AMP_Validation_Manager::add_rest_api_fields();

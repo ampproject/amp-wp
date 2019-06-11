@@ -26,7 +26,7 @@ export function hasThemeSupport( state ) {
  *
  * @param {Object} state Editor state.
  *
- * @return {boolean} Whether the current site uses AMP first.
+ * @return {boolean} Whether the current site is AMP first.
  */
 export function isStandardMode( state ) {
 	return Boolean( state.isStandardMode );

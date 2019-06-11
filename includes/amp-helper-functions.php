@@ -318,7 +318,7 @@ function is_amp_endpoint() {
 		return $has_amp_query_var;
 	}
 
-	// When there is no query var and AMP is not canonical (AMP first), then this is definitely not an AMP endpoint.
+	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
 	}

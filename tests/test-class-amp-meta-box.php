@@ -183,7 +183,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
-		// This is in AMP first mode with a template that can be rendered.
+		// This is in AMP-first mode with a template that can be rendered.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		ob_start();
 		$this->instance->render_status( $post );
@@ -242,7 +242,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			$this->instance->get_status_and_errors( $post )
 		);
 
-		// In AMP first, there also shouldn't be errors.
+		// In AMP-first, there also shouldn't be errors.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertEquals(
 			$expected_status_and_errors,

@@ -947,7 +947,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 
-		// Test AMP first.
+		// Test AMP-first.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		ob_start();
