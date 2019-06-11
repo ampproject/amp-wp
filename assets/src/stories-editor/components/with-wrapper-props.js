@@ -8,6 +8,7 @@ import { compose } from '@wordpress/compose';
  */
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, TEXT_BLOCK_BORDER } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
+import { getPercentageFromPixels } from '../helpers';
 
 const wrapperWithSelect = compose(
 	withAttributes,
@@ -57,9 +58,11 @@ const withWrapperProps = ( BlockListBlock ) => {
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
 			let style = {};
 			if ( 'amp/amp-story-text' === blockName ) {
+				const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
+				const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
 				style = {
-					top: `calc(${ attributes.positionTop }% - ${ TEXT_BLOCK_BORDER }px)`,
-					left: `calc(${ attributes.positionLeft }% - ${ TEXT_BLOCK_BORDER }px)`,
+					top: `${ parseFloat( attributes.positionTop ) - textBlockBorderInPercentageTop }%`,
+					left: `${ parseFloat( attributes.positionLeft ) - textBlockBorderInPercentageLeft }%`,
 				};
 			} else {
 				style = {
