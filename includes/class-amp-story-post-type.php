@@ -120,7 +120,7 @@ class AMP_Story_Post_Type {
 	 * @return void
 	 */
 	public static function register() {
-		if ( ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) || ! self::has_required_block_capabilities() ) {
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() || ! self::has_required_block_capabilities() ) {
 			return;
 		}
 
@@ -495,11 +495,13 @@ class AMP_Story_Post_Type {
 	 * @return array Modified editor settings.
 	 */
 	public static function filter_block_editor_settings( $editor_settings, $post ) {
-		if ( self::POST_TYPE_SLUG === $post->post_type ) {
-			unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
+		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
+			return $editor_settings;
 		}
 
-		if ( get_current_screen()->is_block_editor && isset( $editor_settings['styles'] ) ) {
+		unset( $editor_settings['fontSizes'], $editor_settings['colors'] );
+
+		if ( isset( $editor_settings['styles'] ) ) {
 			foreach ( $editor_settings['styles'] as $key => $style ) {
 
 				// If the baseURL is not set or if the URL doesn't include theme styles, move to next.
@@ -518,6 +520,7 @@ class AMP_Story_Post_Type {
 				}
 			}
 		}
+
 		return $editor_settings;
 	}
 

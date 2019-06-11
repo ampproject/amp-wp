@@ -18,11 +18,24 @@ class AMP_Options_Manager {
 	const OPTION_NAME = 'amp-options';
 
 	/**
+	 * Slug for website experience.
+	 */
+	const WEBSITE_EXPERIENCE = 'website';
+
+	/**
+	 * Slug for stories experience.
+	 *
+	 * @var
+	 */
+	const STORIES_EXPERIENCE = 'stories';
+
+	/**
 	 * Default option values.
 	 *
 	 * @var array
 	 */
 	protected static $defaults = array(
+		'experiences'              => array( self::WEBSITE_EXPERIENCE ),
 		'theme_support'            => 'disabled',
 		'supported_post_types'     => array( 'post' ),
 		'analytics'                => array(),
@@ -30,7 +43,6 @@ class AMP_Options_Manager {
 		'all_templates_supported'  => true,
 		'supported_templates'      => array( 'is_singular' ),
 		'enable_response_caching'  => true,
-		'enable_amp_stories'       => false,
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
 	);
@@ -56,7 +68,7 @@ class AMP_Options_Manager {
 	}
 
 	/**
-	 * Flush rewrite rules if the supported_post_types have changed.
+	 * Flush rewrite rules if the supported_post_types or experiences have changed.
 	 *
 	 * @since 0.6.2
 	 *
@@ -68,8 +80,17 @@ class AMP_Options_Manager {
 		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : array();
 		sort( $old_post_types );
 		sort( $new_post_types );
-		if ( $old_post_types !== $new_post_types ) {
-			flush_rewrite_rules( false );
+		$old_experiences = isset( $old_options['experiences'] ) ? $old_options['experiences'] : array();
+		$new_experiences = isset( $new_options['experiences'] ) ? $new_options['experiences'] : array();
+		sort( $old_experiences );
+		sort( $new_experiences );
+		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
+			if ( self::is_website_experience_enabled() ) {
+				add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+				flush_rewrite_rules( false );
+			} else {
+				amp_deactivate();
+			}
 		}
 	}
 
@@ -81,10 +102,26 @@ class AMP_Options_Manager {
 	public static function get_options() {
 		$options = get_option( self::OPTION_NAME, array() );
 		if ( empty( $options ) ) {
-			$options = array();
+			$options = array(); // Ensure empty string becomes array.
 		}
 		self::$defaults['enable_response_caching'] = wp_using_ext_object_cache();
-		return array_merge( self::$defaults, $options );
+
+		$options = array_merge( self::$defaults, $options );
+
+		// Migrate stories option from 1.2-beta.
+		if ( ! empty( $options['enable_amp_stories'] ) ) {
+			$options['experiences'][] = self::STORIES_EXPERIENCE;
+			unset( $options['enable_amp_stories'] );
+		}
+
+		// Migrate theme support slugs.
+		if ( 'native' === $options['theme_support'] ) {
+			$options['theme_support'] = AMP_Theme_Support::STANDARD_MODE_SLUG;
+		} elseif ( 'paired' === $options['theme_support'] ) {
+			$options['theme_support'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		}
+
+		return $options;
 	}
 
 	/**
@@ -106,6 +143,32 @@ class AMP_Options_Manager {
 	}
 
 	/**
+	 * Determine whether website experience is enabled.
+	 *
+	 * @since 1.2
+	 *
+	 * @return bool Enabled.
+	 */
+	public static function is_website_experience_enabled() {
+		return in_array( self::WEBSITE_EXPERIENCE, self::get_option( 'experiences' ), true );
+	}
+
+	/**
+	 * Determine whether stories experience is enabled.
+	 *
+	 * @since 1.2
+	 *
+	 * @return bool Enabled.
+	 */
+	public static function is_stories_experience_enabled() {
+		return (
+			AMP_Story_Post_Type::has_required_block_capabilities()
+			&&
+			in_array( self::STORIES_EXPERIENCE, self::get_option( 'experiences' ), true )
+		);
+	}
+
+	/**
 	 * Validate options.
 	 *
 	 * @param array $new_options Plugin options.
@@ -118,11 +181,29 @@ class AMP_Options_Manager {
 			return $options;
 		}
 
+		// Experiences.
+		if ( isset( $new_options['experiences'] ) && is_array( $new_options['experiences'] ) ) {
+
+			// Validate the selected experiences.
+			$options['experiences'] = array_intersect(
+				$new_options['experiences'],
+				array(
+					self::WEBSITE_EXPERIENCE,
+					self::STORIES_EXPERIENCE,
+				)
+			);
+
+			// At least one experience must be selected.
+			if ( empty( $options['experiences'] ) ) {
+				$options['experiences'] = array( self::WEBSITE_EXPERIENCE );
+			}
+		}
+
 		// Theme support.
 		$recognized_theme_supports = array(
 			'disabled',
-			'paired',
-			'native',
+			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
+			AMP_Theme_Support::STANDARD_MODE_SLUG,
 		);
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
@@ -134,16 +215,17 @@ class AMP_Options_Manager {
 		}
 
 		$options['auto_accept_sanitization'] = ! empty( $new_options['auto_accept_sanitization'] );
-		$options['enable_amp_stories']       = ! empty( $new_options['enable_amp_stories'] );
 
 		// Validate post type support.
-		$options['supported_post_types'] = array();
-		if ( isset( $new_options['supported_post_types'] ) ) {
-			foreach ( $new_options['supported_post_types'] as $post_type ) {
-				if ( ! post_type_exists( $post_type ) ) {
-					add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
-				} else {
-					$options['supported_post_types'][] = $post_type;
+		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
+			$options['supported_post_types'] = array();
+			if ( isset( $new_options['supported_post_types'] ) ) {
+				foreach ( $new_options['supported_post_types'] as $post_type ) {
+					if ( ! post_type_exists( $post_type ) ) {
+						add_settings_error( self::OPTION_NAME, 'unknown_post_type', __( 'Unrecognized post type.', 'amp' ) );
+					} else {
+						$options['supported_post_types'][] = $post_type;
+					}
 				}
 			}
 		}
@@ -232,8 +314,11 @@ class AMP_Options_Manager {
 	 * @see add_settings_error()
 	 */
 	public static function check_supported_post_type_update_errors() {
+		if ( ! self::is_website_experience_enabled() ) {
+			return;
+		}
 
-		// If all templates are supported then skip check since all post types are also supported. This option only applies with native/transitional theme support.
+		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
 		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {
 			return;
 		}
@@ -515,13 +600,13 @@ class AMP_Options_Manager {
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Ensure theme support flags are set properly according to the new mode so that proper AMP URL can be generated.
-		$has_theme_support = ( 'native' === $template_mode || 'paired' === $template_mode );
+		$has_theme_support = ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode );
 		if ( $has_theme_support ) {
 			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
 				$theme_support = array();
 			}
-			$theme_support['paired'] = 'paired' === $template_mode;
+			$theme_support['paired'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode;
 			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
 		} else {
 			remove_theme_support( AMP_Theme_Support::SLUG ); // So that the amp_get_permalink() will work for reader mode URL.
@@ -635,13 +720,13 @@ class AMP_Options_Manager {
 		}
 
 		switch ( $template_mode ) {
-			case 'native':
-				$message = esc_html__( 'Native mode activated!', 'amp' );
+			case AMP_Theme_Support::STANDARD_MODE_SLUG:
+				$message = esc_html__( 'Standard mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );
 				}
 				break;
-			case 'paired':
+			case AMP_Theme_Support::TRANSITIONAL_MODE_SLUG:
 				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
 					$message .= ' ' . join( ' ', $review_messages );
@@ -651,7 +736,7 @@ class AMP_Options_Manager {
 				$message = wp_kses_post(
 					sprintf(
 						/* translators: %s is an AMP URL */
-						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Native or Transitional mode.', 'amp' ),
+						__( 'Reader mode activated! View the <a href="%s">AMP version of a recent post</a>. It is recommended that you upgrade to Standard or Transitional mode.', 'amp' ),
 						esc_url( $url )
 					)
 				);
