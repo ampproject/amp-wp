@@ -38,7 +38,7 @@ import {
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
 	MIN_BLOCK_HEIGHTS,
-	BLOCKS_WITHOUT_RESIZING,
+	BLOCKS_WITH_RESIZING,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/bring-forward.svg';
@@ -228,7 +228,7 @@ export default createHigherOrderComponent(
 
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
-			const needsResizing = ! BLOCKS_WITHOUT_RESIZING.includes( name );
+			const needsResizing = BLOCKS_WITH_RESIZING.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {

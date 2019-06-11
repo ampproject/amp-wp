@@ -79,9 +79,19 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-cta',
 ];
 
-export const BLOCKS_WITHOUT_RESIZING = [
-	'core/preformatted',
-	'core/verse',
+export const BLOCKS_WITH_RESIZING = [
+	'core/code',
+	'core/embed',
+	'core/image',
+	'core/list',
+	'core/pullquote',
+	'core/quote',
+	'core/table',
+	'core/video',
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
 ];
 
 export const ALLOWED_CHILD_BLOCKS = [

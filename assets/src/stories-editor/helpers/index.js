@@ -36,7 +36,7 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
-	BLOCKS_WITHOUT_RESIZING,
+	BLOCKS_WITH_RESIZING,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -190,7 +190,8 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
-	const needsWidthHeight = ! BLOCKS_WITHOUT_RESIZING.includes( name );
+	// Image block already has width and heigh.
+	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
 		anchor: {
@@ -258,7 +259,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			default: 5,
 		};
 
-		if ( ! isImageBlock && needsWidthHeight ) {
+		if ( needsWidthHeight ) {
 			addedAttributes.height = {
 				type: 'number',
 				default: getDefaultMinimumBlockHeight( name ),
