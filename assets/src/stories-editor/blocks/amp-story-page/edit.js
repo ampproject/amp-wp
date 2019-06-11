@@ -122,7 +122,8 @@ class PageEdit extends Component {
 
 			mediaType = media.type;
 		}
-		const mediaObject = select( 'core' ).getMedia( media.id );
+		const { getMedia } = select( 'core' );
+		const mediaObject = getMedia( media.id );
 		const mediaUrl = has( mediaObject, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ? mediaObject.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url : media.url;
 
 		this.props.setAttributes( {
