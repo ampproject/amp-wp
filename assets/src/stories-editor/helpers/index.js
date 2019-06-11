@@ -508,25 +508,23 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		height,
 	} = attributes;
 
-	const style = {
-		style: {},
-	};
+	let style = {};
 
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		style.style = {
-			...style.style,
+		style = {
+			...style,
 			position: 'absolute',
-			top: `${ positionTop }%`,
-			left: `${ positionLeft }%`,
+			top: `${ positionTop || 0 }%`,
+			left: `${ positionLeft || 0 }%`,
 		};
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( width && height ) {
-		style.style = {
-			...style.style,
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
+	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
+		style = {
+			...style,
+			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
+			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
 		};
 	}
 
@@ -551,7 +549,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 
 	return (
 		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
+			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
