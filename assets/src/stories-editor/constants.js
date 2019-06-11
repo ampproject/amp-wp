@@ -78,6 +78,11 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-cta',
 ];
 
+export const BLOCKS_WITHOUT_RESIZING = [
+	'core/preformatted',
+	'core/verse',
+];
+
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',

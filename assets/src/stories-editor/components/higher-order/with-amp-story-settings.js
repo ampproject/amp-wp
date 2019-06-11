@@ -38,6 +38,7 @@ import {
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
 	MIN_BLOCK_HEIGHTS,
+	BLOCKS_WITHOUT_RESIZING,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/bring-forward.svg';
@@ -224,9 +225,10 @@ export default createHigherOrderComponent(
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
-			const isPreformattedBlock = 'core/preformatted' === name;
+
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
+			const needsResizing = ! BLOCKS_WITHOUT_RESIZING.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
@@ -256,7 +258,7 @@ export default createHigherOrderComponent(
 			return (
 				<>
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && ! isEmptyImageBlock && ! isPreformattedBlock && (
+					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
@@ -302,7 +304,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isPreformattedBlock && (
+					{ ! needsResizing && (
 						<RotatableBox
 							blockElementId={ `block-${ clientId }` }
 							initialAngle={ rotationAngle }
