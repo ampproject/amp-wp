@@ -90,8 +90,8 @@ const EnhancedResizableBox = ( props ) => {
 				const elementTop = parseFloat( blockElement.style.top );
 				const elementLeft = parseFloat( blockElement.style.left );
 
-				const positionTop = ! isText ? elementTop.toFixed( 2 ) : ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 );
-				const positionLeft = ! isText ? elementLeft.toFixed( 2 ) : ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 );
+				const positionTop = ! isText ? Number( elementTop.toFixed( 2 ) ) : Number( ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 ) );
+				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
 
 				onResizeStop( {
 					width: parseInt( appliedWidth, 10 ),
