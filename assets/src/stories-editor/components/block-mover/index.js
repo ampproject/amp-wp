@@ -24,7 +24,7 @@ import './edit.css';
 
 export class BlockMover extends Component {
 	render() {
-		const { children, blockName, isDraggable, isMovable, onDragStart, clientId, blockElementId } = this.props;
+		const { children, isDraggable, isMovable, onDragStart, clientId, blockElementId } = this.props;
 
 		if ( ! isMovable || ! isDraggable ) {
 			return children;
@@ -38,7 +38,6 @@ export class BlockMover extends Component {
 			<IgnoreNestedEvents childHandledEvents={ [ 'onDragStart', 'onMouseDown' ] } className="block-mover">
 				<div>
 					<BlockDragArea
-						blockName={ blockName }
 						children={ children }
 						clientId={ clientId }
 						blockElementId={ blockElementId }
@@ -56,7 +55,6 @@ BlockMover.propTypes = {
 	onDragStart: PropTypes.func,
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
-	blockName: PropTypes.string,
 	children: PropTypes.any.isRequired,
 };
 

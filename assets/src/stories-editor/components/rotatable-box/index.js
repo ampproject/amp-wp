@@ -184,11 +184,16 @@ class RotatableBox extends Component {
 	}
 }
 
+RotatableBox.defaultProps = {
+	angle: 0,
+	initialAngle: 0,
+};
+
 RotatableBox.propTypes = {
 	blockElementId: PropTypes.string.isRequired,
 	className: PropTypes.string,
-	angle: PropTypes.number.isRequired,
-	initialAngle: PropTypes.number.isRequired,
+	angle: PropTypes.number,
+	initialAngle: PropTypes.number,
 	speak: PropTypes.func.isRequired,
 	onRotateStart: PropTypes.func,
 	onRotate: PropTypes.func,

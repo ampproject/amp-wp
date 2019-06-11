@@ -18,7 +18,6 @@ import { withSafeTimeout } from '@wordpress/compose';
  * Internal dependencies
  */
 import { getPixelsFromPercentage } from '../../helpers';
-import { TEXT_BLOCK_BORDER } from '../../constants';
 
 const { Image } = window;
 
@@ -105,7 +104,7 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { elementId, blockName, transferData, onDragStart = noop } = this.props;
+		const { elementId, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {
@@ -137,20 +136,8 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// Position clone over the original element.
-		if ( 'amp/amp-story-text' === blockName ) {
-			// Add an adjustment for having the block mover right next to the clone.
-			const pattern = /calc\(([\d\.]+)%/;
-			const matchesTop = clone.style.top.match( pattern );
-			const percentageTop = matchesTop ? matchesTop[ 1 ] : 0; // Retrieves 98.53 from calc(98.53%).
-			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', percentageTop ) - TEXT_BLOCK_BORDER }px`;
-
-			const matchesLeft = clone.style.left.match( pattern );
-			const percentageLeft = matchesLeft ? matchesLeft[ 1 ] : 0;
-			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', percentageLeft ) - TEXT_BLOCK_BORDER }px`;
-		} else {
-			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
-		}
+		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -217,7 +204,6 @@ class Draggable extends Component {
 
 Draggable.propTypes = {
 	elementId: PropTypes.string,
-	blockName: PropTypes.string,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,

@@ -35,6 +35,7 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	MEGABYTE_IN_BYTES,
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
@@ -154,7 +155,10 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 200;
 
 		case 'core/pullquote':
-			return 215;
+			return 250;
+
+		case 'core/table':
+			return 100;
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
@@ -185,8 +189,11 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+	// Image block already has width and heigh.
+	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
 		anchor: {
@@ -245,16 +252,16 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
-			type: 'number',
 			default: 0,
+			type: 'number',
 		};
 
 		addedAttributes.positionLeft = {
-			type: 'number',
 			default: 5,
+			type: 'number',
 		};
 
-		if ( ! isImageBlock ) {
+		if ( needsWidthHeight ) {
 			addedAttributes.height = {
 				type: 'number',
 				default: getDefaultMinimumBlockHeight( name ),
@@ -510,25 +517,23 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		height,
 	} = attributes;
 
-	const style = {
-		style: {},
-	};
+	let style = {};
 
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		style.style = {
-			...style.style,
+		style = {
+			...style,
 			position: 'absolute',
-			top: `${ positionTop }%`,
-			left: `${ positionLeft }%`,
+			top: `${ positionTop || 0 }%`,
+			left: `${ positionLeft || 0 }%`,
 		};
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( width && height ) {
-		style.style = {
-			...style.style,
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
+	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
+		style = {
+			...style,
+			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
+			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
 		};
 	}
 
@@ -553,7 +558,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 
 	return (
 		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
+			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
