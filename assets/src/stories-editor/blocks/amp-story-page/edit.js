@@ -43,6 +43,7 @@ import {
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
 	isVideoSizeExcessive,
+	getVideoBytesPerSecond,
 } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -53,6 +54,7 @@ import {
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	MEGABYTE_IN_BYTES,
 } from '../../constants';
 import './edit.css';
 
@@ -254,6 +256,7 @@ class PageEdit extends Component {
 
 		const colorSettings = this.getOverlayColorSettings();
 		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : -1;
 
 		return (
 			<>
@@ -300,6 +303,12 @@ class PageEdit extends Component {
 											/* translators: %d: the number of recommended megabytes per second */
 											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
 											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+										)
+									}
+									{
+										videoBytesPerSecond > 0 && ' ' + sprintf(
+											__( 'The selected video is %d MB per second.', 'amp' ),
+											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
 										)
 									}
 								</Notice>
