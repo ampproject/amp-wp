@@ -110,7 +110,9 @@ class TextBlockEdit extends Component {
 
 		const styleClasses = [];
 		let wrapperClass = 'wp-block-amp-story-text-wrapper';
-		if ( ampFitText && attributes.className && attributes.className.includes( 'is-style' ) ) {
+
+		// We need to assign the block styles to the wrapper, too.
+		if ( ampFitText && attributes.className && attributes.className.length ) {
 			const classNames = attributes.className.split( ' ' );
 			classNames.forEach( ( value ) => {
 				if ( value.includes( 'is-style' ) ) {
