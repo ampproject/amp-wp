@@ -34,7 +34,7 @@
     "@wordpress/browserslist-config": "2.4.0",
     "@wordpress/components": "7.4.0",
     "@wordpress/compose": "3.3.0",
-    "@wordpress/data": "4.5.0",
+    "@wordpress/data": "4.6.0",
     "@wordpress/date": "3.3.0",
     "@wordpress/dom-ready": "2.3.0",
     "@wordpress/e2e-test-utils": "2.0.0",
