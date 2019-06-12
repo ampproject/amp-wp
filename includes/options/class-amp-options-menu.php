@@ -168,6 +168,20 @@ class AMP_Options_Menu {
 
 		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
 		?>
+		<style>
+			label[for="stories_experience"] span {
+				text-transform: uppercase;
+				font-size: 0.7em;
+				border: 1px solid;
+				border-radius: 2px;
+				padding: 2px;
+				margin: -15px 0  0 3px;
+				position: relative;
+				top: -2px;
+				font-weight: 400;
+				line-height: 1;
+			}
+		</style>
 		<fieldset>
 			<dl>
 				<dt>
@@ -190,7 +204,7 @@ class AMP_Options_Menu {
 				<dt>
 					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
 					<label for="stories_experience">
-						<strong><?php esc_html_e( 'Stories', 'amp' ); ?></strong>
+						<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
 					</label>
 				</dt>
 				<dd>
