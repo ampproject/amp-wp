@@ -307,6 +307,7 @@ class PageEdit extends Component {
 									}
 									{
 										videoBytesPerSecond > 0 && ' ' + sprintf(
+											/* translators: %d: the number of actual megabytes per second */
 											__( 'The selected video is %d MB per second.', 'amp' ),
 											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
 										)
