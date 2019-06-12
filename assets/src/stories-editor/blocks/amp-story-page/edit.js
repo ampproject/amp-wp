@@ -312,7 +312,7 @@ class PageEdit extends Component {
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Select Media', 'amp' ) }
+												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
 									/>
