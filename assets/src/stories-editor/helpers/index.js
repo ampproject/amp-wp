@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, isEqual, has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -35,8 +35,10 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
-	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_RESIZING,
+	BLOCKS_WITH_TEXT_SETTINGS,
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1421,4 +1423,18 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of MB per second.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };

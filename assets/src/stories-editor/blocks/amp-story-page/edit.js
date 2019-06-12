@@ -4,6 +4,7 @@
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -37,7 +38,12 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration, addBackgroundColorToOverlay, getCallToActionBlock } from '../../helpers';
+import {
+	getTotalAnimationDuration,
+	addBackgroundColorToOverlay,
+	getCallToActionBlock,
+	isVideoSizeExcessive,
+} from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -45,6 +51,8 @@ import {
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
+	MAX_IMAGE_SIZE_SLUG,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../../constants';
 import './edit.css';
 
@@ -82,7 +90,14 @@ class PageEdit extends Component {
 	 */
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
+			this.props.setAttributes(
+				{
+					mediaUrl: undefined,
+					mediaId: undefined,
+					mediaType: undefined,
+					poster: undefined,
+				}
+			);
 			return;
 		}
 
@@ -107,8 +122,9 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 
+		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
 		this.props.setAttributes( {
-			mediaUrl: media.url,
+			mediaUrl,
 			mediaId: media.id,
 			mediaType,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
@@ -237,6 +253,7 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
 
 		return (
 			<>
@@ -275,6 +292,18 @@ class PageEdit extends Component {
 					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<>
+							{
+								isExcessiveVideoSize &&
+								<Notice status="warning" isDismissible={ false } >
+									{
+										sprintf(
+											/* translators: %d: the number of recommended megabytes per second */
+											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
+											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+										)
+									}
+								</Notice>
+							}
 							<BaseControl>
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
@@ -317,7 +346,10 @@ class PageEdit extends Component {
 										}
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
-											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
+											onSelect={ ( image ) => {
+												const imageUrl = has( image, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? image.sizes[ MAX_IMAGE_SIZE_SLUG ].url : image.url;
+												setAttributes( { poster: imageUrl } );
+											} }
 											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
