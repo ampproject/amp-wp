@@ -137,10 +137,6 @@
 	transform: initial;
 }
 
-.amp-stories__editor-inserter__results .components-resizable-box__container.amp-story-resize-container {
-	max-width: 160px;
-}
-
 .amp-stories__editor-inserter__results .components-resizable-box__container.amp-story-resize-container .amp-story-resize-container {
 	max-width: initial;
 }
