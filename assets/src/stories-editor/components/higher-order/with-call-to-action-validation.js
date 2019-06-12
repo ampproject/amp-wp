@@ -76,18 +76,13 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 		}
 
 		return (
-			<>
-				<div style={ { minHeight: '60px' } }>
-					<BlockEdit key="block-edit" { ...props } />
-				</div>
-				<Warning actions={ actions }>
-					<strong>{ blockType.title }: </strong>
-					{ originalBlockClientId ?
-						__( 'This block can only be used once per page.', 'amp' ) :
-						__( 'This block can not be used on the first page.', 'amp' )
-					}
-				</Warning>
-			</>
+			<Warning actions={ actions }>
+				<strong>{ blockType.title }: </strong>
+				{ originalBlockClientId ?
+					__( 'This block can only be used once per page.', 'amp' ) :
+					__( 'This block can not be used on the first page.', 'amp' )
+				}
+			</Warning>
 		);
 	} );
 }, 'withCallToActionValidation' );

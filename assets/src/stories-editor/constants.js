@@ -31,7 +31,12 @@ export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
 export const MIN_BLOCK_WIDTH = 40;
-export const MIN_BLOCK_HEIGHT = 30;
+export const MIN_BLOCK_HEIGHTS = {
+	default: 30,
+	'core/pullquote': 180,
+	'core/table': 100,
+	'core/code': 45,
+};
 
 export const ALLOWED_TOP_LEVEL_BLOCKS = [
 	'amp/amp-story-page',
@@ -74,6 +79,21 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-cta',
 ];
 
+export const BLOCKS_WITH_RESIZING = [
+	'core/code',
+	'core/embed',
+	'core/image',
+	'core/list',
+	'core/pullquote',
+	'core/quote',
+	'core/table',
+	'core/video',
+	'amp/amp-story-text',
+	'amp/amp-story-post-author',
+	'amp/amp-story-post-date',
+	'amp/amp-story-post-title',
+];
+
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
@@ -89,6 +109,9 @@ export const VIDEO_BACKGROUND_TYPE = 'video';
 export const ALLOWED_MEDIA_TYPES = [ 'image', 'video' ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
+export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
+export const MEGABYTE_IN_BYTES = 1000000;
+export const VIDEO_ALLOWED_MEGABYTES_PER_SECOND = 1;
 
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,
