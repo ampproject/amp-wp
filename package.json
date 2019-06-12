@@ -36,7 +36,7 @@
     "@wordpress/compose": "3.3.0",
     "@wordpress/data": "4.5.0",
     "@wordpress/date": "3.3.0",
-    "@wordpress/dom-ready": "2.3.0",
+    "@wordpress/dom-ready": "2.4.0",
     "@wordpress/e2e-test-utils": "2.0.0",
     "@wordpress/edit-post": "3.4.0",
     "@wordpress/editor": "9.3.0",
