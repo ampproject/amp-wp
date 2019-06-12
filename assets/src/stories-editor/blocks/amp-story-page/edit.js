@@ -256,7 +256,7 @@ class PageEdit extends Component {
 
 		const colorSettings = this.getOverlayColorSettings();
 		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
-		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : -1;
+		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
 			<>
@@ -306,7 +306,7 @@ class PageEdit extends Component {
 										)
 									}
 									{
-										videoBytesPerSecond > 0 && ' ' + sprintf(
+										videoBytesPerSecond && ' ' + sprintf(
 											/* translators: %d: the number of actual megabytes per second */
 											__( 'The selected video is %d MB per second.', 'amp' ),
 											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )

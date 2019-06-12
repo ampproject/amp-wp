@@ -1429,11 +1429,11 @@ export const getCallToActionBlock = ( pageClientId ) => {
  * Gets the number of megabytes per second for the video.
  *
  * @param {Object} media The media object of the video.
- * @return {number} Number of megabytes per second, or -1 if media details unavailable.
+ * @return {number|null} Number of megabytes per second, or null if media details unavailable.
  */
 export const getVideoBytesPerSecond = ( media ) => {
 	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return -1;
+		return null;
 	}
 	return media.media_details.filesize / media.media_details.length;
 };
