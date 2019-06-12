@@ -43,6 +43,7 @@ import {
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
 	isVideoSizeExcessive,
+	getVideoBytesPerSecond,
 } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -53,6 +54,7 @@ import {
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	MEGABYTE_IN_BYTES,
 } from '../../constants';
 import './edit.css';
 
@@ -254,6 +256,7 @@ class PageEdit extends Component {
 
 		const colorSettings = this.getOverlayColorSettings();
 		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
 			<>
@@ -302,6 +305,13 @@ class PageEdit extends Component {
 											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
 										)
 									}
+									{
+										videoBytesPerSecond && ' ' + sprintf(
+											/* translators: %d: the number of actual megabytes per second */
+											__( 'The selected video is %d MB per second.', 'amp' ),
+											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+										)
+									}
 								</Notice>
 							}
 							<BaseControl>
@@ -312,7 +322,7 @@ class PageEdit extends Component {
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Select Media', 'amp' ) }
+												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
 									/>
