@@ -116,9 +116,10 @@ class Draggable extends Component {
 		 * On dragging, the browser creates an image of the target, for example, the entire text block.
 		 * But there's already a clone below that's rotated in case the block is rotated,
 		 * and this can create a non-rotated duplicate of that.
-		 * So override this with an empty image.
+		 * So override this with a transparent image.
 		 */
 		const dragImage = new Image();
+		dragImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
 		event.dataTransfer.setDragImage( dragImage, 0, 0 );
 
 		event.dataTransfer.setData( 'text', JSON.stringify( transferData ) );
