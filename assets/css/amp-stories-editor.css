@@ -105,6 +105,16 @@
 	height: 100%;
 }
 
+.wp-block[data-type="core/video"] .block-mover,
+.wp-block[data-type="core/video"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/video"] .block-mover .editor-rich-text.block-editor-rich-text,
+.wp-block[data-type="core/video"] .block-mover .editor-rich-text.block-editor-rich-text div {
+	height: initial;
+}
+
 .wp-block-code textarea {
 	white-space: nowrap;
 }
