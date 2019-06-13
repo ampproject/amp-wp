@@ -139,7 +139,8 @@ class PageEdit extends Component {
 		if (
 			VIDEO_BACKGROUND_TYPE === this.props.attributes.mediaType &&
 			this.props.attributes.mediaUrl !== prevProps.attributes.mediaUrl &&
-			this.videoPlayer.current ) {
+			this.videoPlayer.current
+		) {
 			this.videoPlayer.current.load();
 		}
 	}
