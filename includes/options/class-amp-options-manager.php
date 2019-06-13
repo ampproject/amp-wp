@@ -128,7 +128,18 @@ class AMP_Options_Manager {
 		} elseif ( 'paired' === $options['theme_support'] ) {
 			$options['theme_support'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 		} elseif ( 'disabled' === $options['theme_support'] ) {
-			$options['theme_support'] = AMP_Theme_Support::READER_MODE_SLUG;
+			/*
+			 * Prior to 1.2, the theme support slug for Reader mode was 'disabled'. This would be saved in options for
+			 * themes that had 'amp' theme support defined. Also prior to 1.2, the user could not switch between modes
+			 * when the theme had 'amp' theme support. The result is that a site running 1.1 could be AMP-first and then
+			 * upon upgrading to 1.2, be switched to Reader mode. So when migrating the old 'disabled' slug to the new
+			 * value, we need to make sure we use the default theme support slug as it has been determined above. If the
+			 * site has non-paired 'amp' theme support and the theme support slug is 'disabled' then it should here be
+			 * set to 'standard' as opposed to 'reader', and the same goes for paired 'amp' theme support, as it should
+			 * become 'transitional'. Otherwise, if the theme lacks 'amp' theme support, then this will become the
+			 * default 'reader' mode.
+			 */
+			$options['theme_support'] = $defaults['theme_support'];
 		}
 
 		return $options;
