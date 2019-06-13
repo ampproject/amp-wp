@@ -21,7 +21,7 @@ import {
 	getRadianFromDeg,
 } from '../../helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER } from '../../constants';
+import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -56,6 +56,11 @@ const EnhancedResizableBox = ( props ) => {
 	const isImage = 'core/image' === blockName;
 	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
 	const isText = 'amp/amp-story-text' === blockName;
+
+	if ( isText ) {
+		height += TEXT_BLOCK_PADDING * 2;
+		width += TEXT_BLOCK_PADDING * 2;
+	}
 
 	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
 	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
@@ -94,8 +99,8 @@ const EnhancedResizableBox = ( props ) => {
 				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
 
 				onResizeStop( {
-					width: parseInt( appliedWidth, 10 ),
-					height: parseInt( appliedHeight, 10 ),
+					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedWidth, 10 ),
+					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedHeight, 10 ),
 					positionTop,
 					positionLeft,
 				} );
@@ -159,7 +164,9 @@ const EnhancedResizableBox = ( props ) => {
 						textElement.style.width = appliedWidth + 'px';
 						textElement.style.height = appliedHeight + 'px';
 					}
-					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
+					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
+					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
+					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;
 					}
