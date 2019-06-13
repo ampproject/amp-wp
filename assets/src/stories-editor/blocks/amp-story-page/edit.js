@@ -17,7 +17,7 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
-import { Component } from '@wordpress/element';
+import { Component, createRef } from '@wordpress/element';
 import {
 	PanelBody,
 	Button,
@@ -75,6 +75,7 @@ class PageEdit extends Component {
 			this.props.setAttributes( { anchor: uuid() } );
 		}
 
+		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
 
@@ -125,12 +126,23 @@ class PageEdit extends Component {
 		}
 
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
 			mediaType,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
+	}
+
+	componentDidUpdate( prevProps ) {
+		if (
+			VIDEO_BACKGROUND_TYPE === this.props.attributes.mediaType &&
+			this.props.attributes.mediaUrl !== prevProps.attributes.mediaUrl &&
+			this.videoPlayer.current
+		) {
+			this.videoPlayer.current.load();
+		}
 	}
 
 	removeBackgroundColor( index ) {
@@ -440,7 +452,7 @@ class PageEdit extends Component {
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster }>
+							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
 								<source src={ mediaUrl } type={ media.mime_type } />
 							</video>
 						</div>
