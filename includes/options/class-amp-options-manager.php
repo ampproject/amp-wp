@@ -36,7 +36,7 @@ class AMP_Options_Manager {
 	 */
 	protected static $defaults = array(
 		'experiences'              => array( self::WEBSITE_EXPERIENCE ),
-		'theme_support'            => 'disabled',
+		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
 		'supported_post_types'     => array( 'post' ),
 		'analytics'                => array(),
 		'auto_accept_sanitization' => true,
@@ -104,9 +104,17 @@ class AMP_Options_Manager {
 		if ( empty( $options ) ) {
 			$options = array(); // Ensure empty string becomes array.
 		}
-		self::$defaults['enable_response_caching'] = wp_using_ext_object_cache();
 
-		$options = array_merge( self::$defaults, $options );
+		$defaults = self::$defaults;
+
+		$defaults['enable_response_caching'] = wp_using_ext_object_cache();
+
+		$args = AMP_Theme_Support::get_theme_support_args();
+		if ( false !== $args ) {
+			$defaults['theme_support'] = empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ? AMP_Theme_Support::STANDARD_MODE_SLUG : AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		}
+
+		$options = array_merge( $defaults, $options );
 
 		// Migrate stories option from 1.2-beta.
 		if ( ! empty( $options['enable_amp_stories'] ) ) {
@@ -119,6 +127,8 @@ class AMP_Options_Manager {
 			$options['theme_support'] = AMP_Theme_Support::STANDARD_MODE_SLUG;
 		} elseif ( 'paired' === $options['theme_support'] ) {
 			$options['theme_support'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
+		} elseif ( 'disabled' === $options['theme_support'] ) {
+			$options['theme_support'] = AMP_Theme_Support::READER_MODE_SLUG;
 		}
 
 		return $options;
@@ -201,7 +211,7 @@ class AMP_Options_Manager {
 
 		// Theme support.
 		$recognized_theme_supports = array(
-			'disabled',
+			AMP_Theme_Support::READER_MODE_SLUG,
 			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 			AMP_Theme_Support::STANDARD_MODE_SLUG,
 		);
@@ -319,7 +329,7 @@ class AMP_Options_Manager {
 		}
 
 		// If all templates are supported then skip check since all post types are also supported. This option only applies with standard/transitional theme support.
-		if ( self::get_option( 'all_templates_supported', false ) && 'disabled' !== self::get_option( 'theme_support' ) ) {
+		if ( self::get_option( 'all_templates_supported', false ) && AMP_Theme_Support::READER_MODE_SLUG !== self::get_option( 'theme_support' ) ) {
 			return;
 		}
 
@@ -732,7 +742,7 @@ class AMP_Options_Manager {
 					$message .= ' ' . join( ' ', $review_messages );
 				}
 				break;
-			case 'disabled':
+			case AMP_Theme_Support::READER_MODE_SLUG:
 				$message = wp_kses_post(
 					sprintf(
 						/* translators: %s is an AMP URL */

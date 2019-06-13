@@ -35,6 +35,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		parent::setUp();
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $GLOBALS['current_screen'] );
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Theme_Support::read_theme_support();
 	}
@@ -128,6 +129,41 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_and_support_args() {
 
+		// Test default is reader mode.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertFalse( current_theme_supports( AMP_Theme_Support::SLUG ) );
+
+		// Test that when default options are used, the theme support flag is the default.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array( AMP_Theme_Support::PAIRED_FLAG => false )
+		);
+		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Options_Manager::get_option( 'theme_support' ) );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array( AMP_Theme_Support::PAIRED_FLAG => true )
+		);
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
+		// Test that reader mode being set via option overrides theme support flag.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG ); // Will override the theme support flag.
+		AMP_Theme_Support::read_theme_support();
+		$this->assertSame( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
+		// Test that Standard mode in theme overrides Transitional mode set via option.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
 		// Test that standard via option trumps transitional in theme.
 		$args = array(
 			'templates_supported'          => 'all',
@@ -141,7 +177,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			array_merge(
 				$args,
 				array(
-					AMP_Theme_Support::PAIRED_FLAG => false, // The standard user option overrides the theme flag.
+					AMP_Theme_Support::PAIRED_FLAG => false, // The Standard user option overrides the theme flag.
 				)
 			),
 			AMP_Theme_Support::get_theme_support_args()
@@ -833,11 +869,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'templates_supported' => 'all',
 			)
 		);
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+
 		AMP_Theme_Support::init();
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
-		foreach ( $supportable_templates as $supportable_template ) {
-			$this->assertTrue( $supportable_template['supported'] );
-			$this->assertTrue( $supportable_template['immutable'] );
+		foreach ( $supportable_templates as $key => $supportable_template ) {
+			$this->assertTrue( $supportable_template['supported'], "Expected $key to be supported" );
+			$this->assertTrue( $supportable_template['immutable'], "Expected $key to be immutable" );
 		}
 
 		// Test supporting templates by theme support args: selective templates.
