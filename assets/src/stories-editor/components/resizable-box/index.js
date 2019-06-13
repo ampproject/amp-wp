@@ -21,7 +21,7 @@ import {
 	getRadianFromDeg,
 } from '../../helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS } from '../../constants';
+import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -31,6 +31,7 @@ let lastSeenX = 0,
 	blockElementTop,
 	blockElementLeft,
 	imageWrapper,
+	textBlockWrapper,
 	textElement;
 
 const EnhancedResizableBox = ( props ) => {
@@ -53,7 +54,11 @@ const EnhancedResizableBox = ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
-	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
+	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
+	const isText = 'amp/amp-story-text' === blockName;
+
+	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
+	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
 
 	return (
 		<ResizableBox
@@ -82,11 +87,17 @@ const EnhancedResizableBox = ( props ) => {
 				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
 				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
 
+				const elementTop = parseFloat( blockElement.style.top );
+				const elementLeft = parseFloat( blockElement.style.left );
+
+				const positionTop = ! isText ? Number( elementTop.toFixed( 2 ) ) : Number( ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 ) );
+				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
+
 				onResizeStop( {
 					width: parseInt( appliedWidth, 10 ),
 					height: parseInt( appliedHeight, 10 ),
-					positionTop: parseInt( blockElement.style.top, 10 ),
-					positionLeft: parseInt( blockElement.style.left, 10 ),
+					positionTop,
+					positionLeft,
 				} );
 			} }
 			onResizeStart={ ( event, direction, element ) => {
@@ -114,7 +125,17 @@ const EnhancedResizableBox = ( props ) => {
 						case 'amp/amp-story-post-date':
 							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
 							break;
+						case 'core/code':
+							textElement = blockElement.querySelector( '.wp-block-code' );
 					}
+				} else {
+					textElement = null;
+				}
+
+				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
+					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
+				} else {
+					textBlockWrapper = null;
 				}
 
 				onResizeStart();
@@ -161,8 +182,8 @@ const EnhancedResizableBox = ( props ) => {
 					};
 					// Get new position based on the difference.
 					const originalPos = {
-						left: getPixelsFromPercentage( 'x', parseInt( blockElementLeft, 10 ) ),
-						top: getPixelsFromPercentage( 'y', parseInt( blockElementTop, 10 ) ),
+						left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
+						top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
 					};
 
 					// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
@@ -183,8 +204,13 @@ const EnhancedResizableBox = ( props ) => {
 
 				element.style.width = appliedWidth + 'px';
 				element.style.height = appliedHeight + 'px';
+
 				lastWidth = appliedWidth;
 				lastHeight = appliedHeight;
+
+				if ( textBlockWrapper && ampFitText ) {
+					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+				}
 
 				// If it's image, let's change the width and height of the image, too.
 				if ( imageWrapper && isImage ) {

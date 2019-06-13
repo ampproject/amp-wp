@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.2.8';
+	const STORY_TEMPLATES_VERSION = '0.3.2';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -105,8 +105,8 @@ class AMP_Story_Templates {
 		if ( self::STORY_TEMPLATES_VERSION === AMP_Options_Manager::get_option( 'story_templates_version' ) ) {
 			return;
 		}
-		$this->import_story_templates();
 		AMP_Options_Manager::update_option( 'story_templates_version', self::STORY_TEMPLATES_VERSION );
+		$this->import_story_templates();
 	}
 
 	/**
@@ -200,6 +200,26 @@ class AMP_Story_Templates {
 			array(
 				'title' => __( 'Template: Travel Vertical', 'amp' ),
 				'name'  => 'travel-vertical',
+			),
+			array(
+				'title' => __( 'Template: Fandom Title', 'amp' ),
+				'name'  => 'fandom-title',
+			),
+			array(
+				'title' => __( 'Template: Fandom CTA', 'amp' ),
+				'name'  => 'fandom-cta',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact', 'amp' ),
+				'name'  => 'fandom-fact',
+			),
+			array(
+				'title' => __( 'Template: Fandom Fact Text', 'amp' ),
+				'name'  => 'fandom-fact-text',
+			),
+			array(
+				'title' => __( 'Template: Fandom Intro', 'amp' ),
+				'name'  => 'fandom-intro',
 			),
 		);
 	}

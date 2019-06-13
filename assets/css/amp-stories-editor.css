@@ -93,6 +93,69 @@
 	left: 0 !important;
 }
 
+.wp-block[data-type="core/list"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/list"] .block-mover,
+.wp-block[data-type="core/list"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/code"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/code"] .block-mover,
+.wp-block[data-type="core/code"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block-code textarea {
+	white-space: nowrap;
+}
+
+.wp-block[data-type="core/preformatted"] div[draggable="true"],
+.wp-block[data-type="core/verse"] div[draggable="true"] {
+	border: 5px solid transparent;
+}
+
+.wp-block-preformatted .block-editor-rich-text__editable,
+.wp-block-verse .block-editor-rich-text__editable {
+	white-space: nowrap !important;
+	padding: 5px;
+}
+
+.wp-block[data-type="core/pullquote"] .block-mover,
+.wp-block[data-type="core/pullquote"] .block-mover div,
+.wp-block-pullquote {
+	height: 100%;
+}
+
+.wp-block[data-type="core/table"] .block-mover,
+.wp-block[data-type="core/table"] .block-mover div,
+.wp-block-table {
+	height: 100%;
+}
+
+.wp-block[data-type="core/table"] .block-mover .components-placeholder,
+.wp-block[data-type="core/table"] .block-mover .components-placeholder div {
+	height: initial;
+}
+
+.block-library-list ul li,
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	cursor: initial;
+}
+
+.block-library-list {
+	padding: 5px;
+}
+
+.block-library-list ul {
+	margin: 0;
+}
+
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	margin: 0;
+}
+
 /**
  * Hide option to toggle fixed toolbar.
  */

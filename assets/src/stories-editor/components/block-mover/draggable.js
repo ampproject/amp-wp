@@ -19,6 +19,8 @@ import { withSafeTimeout } from '@wordpress/compose';
  */
 import { getPixelsFromPercentage } from '../../helpers';
 
+const { Image } = window;
+
 const cloneWrapperClass = 'components-draggable__clone';
 
 const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
@@ -35,6 +37,20 @@ class Draggable extends Component {
 		this.resetDragState = this.resetDragState.bind( this );
 
 		this.isChromeAndHasIframes = false;
+	}
+
+	/**
+	 * In the image block, ensure that the preview image itself isn't draggable.
+	 *
+	 * When the image is draggable, it engages the DropZone of the Image block,
+	 * not the DropZone that allows dragging the block on the page.
+	 * There looks to be an easier way to do this with CSS,
+	 * but -moz-user-drag: none; didn't work on Firefox.
+	 */
+	componentDidMount() {
+		document.querySelectorAll( '.block-editor-block-list__block[data-type="core/image"] img' ).forEach( ( image ) => {
+			image.setAttribute( 'draggable', 'false' );
+		} );
 	}
 
 	componentWillUnmount() {
@@ -96,6 +112,15 @@ class Draggable extends Component {
 			return;
 		}
 
+		/*
+		 * On dragging, the browser creates an image of the target, for example, the entire text block.
+		 * But there's already a clone below that's rotated in case the block is rotated,
+		 * and this can create a non-rotated duplicate of that.
+		 * So override this with an empty image.
+		 */
+		const dragImage = new Image();
+		event.dataTransfer.setDragImage( dragImage, 0, 0 );
+
 		event.dataTransfer.setData( 'text', JSON.stringify( transferData ) );
 
 		// Prepare element clone and append to element wrapper.
@@ -112,7 +137,6 @@ class Draggable extends Component {
 
 		// Position clone over the original element.
 		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-		// Add 5px adjustment for having the block mover right next to the clone.
 		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
 
 		clone.id = `clone-${ elementId }`;

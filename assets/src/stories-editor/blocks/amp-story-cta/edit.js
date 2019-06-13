@@ -17,7 +17,7 @@ import {
 import {
 	URLInput,
 	RichText,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -87,7 +87,6 @@ class CallToActionEdit extends Component {
 							color: textColor.color,
 							fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 						} }
-						keepPlaceholderOnFocus
 					/>
 				</div>
 				{ isSelected && (
@@ -98,6 +97,7 @@ class CallToActionEdit extends Component {
 						<URLInput
 							value={ url }
 							onChange={ ( value ) => setAttributes( { url: value } ) }
+							autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
 						/>
 						<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
 					</form>

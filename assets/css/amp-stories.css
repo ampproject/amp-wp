@@ -9,6 +9,11 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 .wp-block-amp-amp-story-post-title,
 .wp-block-amp-amp-story-post-date {
 	padding: 7px !important;
+}
+
+.wp-block-amp-amp-story-post-author,
+.wp-block-amp-amp-story-post-title,
+.wp-block-amp-amp-story-post-date {
 	display: flex;
 }
 
@@ -37,6 +42,10 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	overflow-wrap: break-word;
 }
 
+.wp-block-amp-amp-story-text {
+	font-weight: normal;
+}
+
 .is-style-rounded,
 .is-style-rounded img {
 	border-radius: 5px;
@@ -62,6 +71,10 @@ amp-story-grid-layer amp-img > img {
 
 .wp-block-quote cite {
 	font-style: normal;
+}
+
+table.wp-block-table {
+	min-width: initial;
 }
 
 .is-style-white.wp-block-quote {

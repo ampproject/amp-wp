@@ -88,6 +88,8 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	 *
 	 * @covers AMP_Options_Manager::get_options()
 	 * @covers AMP_Options_Manager::get_option()
+	 * @covers AMP_Options_Manager::is_website_experience_enabled()
+	 * @covers AMP_Options_Manager::is_stories_experience_enabled()
 	 * @covers AMP_Options_Manager::update_option()
 	 * @covers AMP_Options_Manager::validate_options()
 	 * @covers AMP_Theme_Support::reset_cache_miss_url_option()
@@ -101,22 +103,24 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$this->assertEquals(
 			array(
+				'experiences'              => array( AMP_Options_Manager::WEBSITE_EXPERIENCE ),
 				'theme_support'            => 'disabled',
 				'supported_post_types'     => array( 'post' ),
 				'analytics'                => array(),
 				'auto_accept_sanitization' => true,
-				'accept_tree_shaking'      => true,
 				'all_templates_supported'  => true,
 				'supported_templates'      => array( 'is_singular' ),
 				'enable_response_caching'  => true,
 				'version'                  => AMP__VERSION,
 				'story_templates_version'  => false,
-				'enable_amp_stories'       => false,
 			),
 			AMP_Options_Manager::get_options()
 		);
+		$this->assertTrue( AMP_Options_Manager::is_website_experience_enabled() );
+		$this->assertFalse( AMP_Options_Manager::is_stories_experience_enabled() );
 		$this->assertSame( false, AMP_Options_Manager::get_option( 'foo' ) );
 		$this->assertSame( 'default', AMP_Options_Manager::get_option( 'foo', 'default' ) );
+
 		// Test supported_post_types validation.
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'page', 'attachment' ) );
 		$this->assertSame(
@@ -242,6 +246,13 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Options_Manager::update_option( 'enable_response_caching', true );
 		$this->assertFalse( AMP_Options_Manager::get_option( 'enable_response_caching' ) );
 		$this->assertEquals( 'http://example.org/test-post', get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, null ) );
+
+		// Test that enabling Stories experience works.
+		if ( AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+			$this->assertFalse( AMP_Options_Manager::is_website_experience_enabled() );
+			$this->assertTrue( AMP_Options_Manager::is_stories_experience_enabled() );
+		}
 	}
 
 	/**
@@ -263,14 +274,14 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		AMP_Post_Type_Support::add_post_type_support();
 
 		// Test when 'all_templates_supported' is selected.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'all_templates_supported', true );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$this->assertEmpty( get_settings_errors() );
 
 		// Test when 'all_templates_supported' is not selected.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( get_post_types() as $post_type ) {
 			if ( 'foo' !== $post_type ) {
@@ -473,16 +484,16 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
 	 * @covers \amp_admin_get_preview_permalink()
 	 */
-	public function test_handle_updated_theme_support_option_native_success_but_error() {
+	public function test_handle_updated_theme_support_option_standard_success_but_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {
@@ -506,7 +517,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		remove_filter( 'pre_http_request', $filter );
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
 		$this->assertContains( esc_url( amp_get_permalink( $post_id ) ), $new_error['message'], 'Expect amp_admin_get_preview_permalink() to return a post since it is the only post type supported.' );
 		$invalid_url_posts = get_posts(
 			array(
@@ -521,16 +532,16 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test handle_updated_theme_support_option for native when there is one auto-accepted issue.
+	 * Test handle_updated_theme_support_option for standard when there is one auto-accepted issue.
 	 *
 	 * @covers AMP_Options_Manager::handle_updated_theme_support_option()
 	 * @covers \amp_admin_get_preview_permalink()
 	 */
-	public function test_handle_updated_theme_support_option_native_validate_error() {
+	public function test_handle_updated_theme_support_option_standard_validate_error() {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->factory()->post->create( array( 'post_type' => 'post' ) );
 
-		AMP_Options_Manager::update_option( 'theme_support', 'native' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {
@@ -544,7 +555,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );
-		$this->assertStringStartsWith( 'Native mode activated!', $new_error['message'] );
+		$this->assertStringStartsWith( 'Standard mode activated!', $new_error['message'] );
 		$invalid_url_posts = get_posts(
 			array(
 				'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
@@ -565,7 +576,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		$post_id = $this->factory()->post->create( array( 'post_type' => 'post' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'paired' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 
 		$filter = function() {

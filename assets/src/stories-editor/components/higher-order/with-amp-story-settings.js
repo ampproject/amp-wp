@@ -16,7 +16,7 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { compose, createHigherOrderComponent, withSafeTimeout } from '@wordpress/compose';
 import {
 	IconButton,
 	PanelBody,
@@ -37,7 +37,8 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
-	MIN_BLOCK_HEIGHT,
+	MIN_BLOCK_HEIGHTS,
+	BLOCKS_WITH_RESIZING,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/bring-forward.svg';
@@ -174,6 +175,7 @@ const enhance = compose(
 	applyFallbackStyles,
 	applyWithSelect,
 	applyWithDispatch,
+	withSafeTimeout,
 );
 
 export default createHigherOrderComponent(
@@ -210,6 +212,7 @@ export default createHigherOrderComponent(
 				sendBackward,
 				moveFront,
 				moveBack,
+				setTimeout,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -222,8 +225,10 @@ export default createHigherOrderComponent(
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
+
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
+			const needsResizing = BLOCKS_WITH_RESIZING.includes( name );
 			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
@@ -242,28 +247,37 @@ export default createHigherOrderComponent(
 
 			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
 			if ( isVideoBlock && videoFeaturedImage ) {
-				setAttributes( { poster: videoFeaturedImage.source_url } );
+				setTimeout( () => {
+					setAttributes( { poster: videoFeaturedImage.source_url } );
+				}, 100 );
 			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
+			// In case of table, the min height depends on the number of rows, each row takes 45px.
+			let minHeight;
+			if ( 'core/table' === name ) {
+				let rows = attributes.body.length;
+				if ( attributes.foot && attributes.foot.length ) {
+					rows++;
+				}
+				if ( attributes.head && attributes.head.length ) {
+					rows++;
+				}
+				minHeight = rows * 45;
+			} else {
+				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
+			}
 
 			return (
 				<>
-					{ isMovableBlock && (
-						<StoryBlockMover
-							clientId={ props.clientId }
-							blockElementId={ `block-${ props.clientId }` }
-							isDraggable={ ! props.isPartOfMultiSelection }
-						/>
-					) }
 					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && ! isEmptyImageBlock && (
+					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
 							isSelected={ isSelected }
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
-							minHeight={ MIN_BLOCK_HEIGHT }
+							minHeight={ minHeight }
 							minWidth={ MIN_BLOCK_WIDTH }
 							onResizeStop={ ( value ) => {
 								setAttributes( value );
@@ -291,9 +305,45 @@ export default createHigherOrderComponent(
 									stopBlockActions();
 								} }
 							>
-								<BlockEdit { ...props } />
+								<StoryBlockMover
+									clientId={ props.clientId }
+									blockName={ name }
+									blockElementId={ `block-${ props.clientId }` }
+									isDraggable={ ! props.isPartOfMultiSelection }
+									isMovable={ isMovableBlock }
+								>
+									<BlockEdit { ...props } />
+								</StoryBlockMover>
 							</RotatableBox>
 						</ResizableBox>
+					) }
+					{ isMovableBlock && ! needsResizing && (
+						<RotatableBox
+							blockElementId={ `block-${ clientId }` }
+							initialAngle={ rotationAngle }
+							className="amp-story-editor__rotate-container"
+							angle={ rotationAngle }
+							onRotateStart={ () => {
+								startBlockActions();
+							} }
+							onRotateStop={ ( event, angle ) => {
+								setAttributes( {
+									rotationAngle: angle,
+								} );
+
+								stopBlockActions();
+							} }
+						>
+							<StoryBlockMover
+								clientId={ props.clientId }
+								blockName={ name }
+								blockElementId={ `block-${ props.clientId }` }
+								isDraggable={ ! props.isPartOfMultiSelection }
+								isMovable={ isMovableBlock }
+							>
+								<BlockEdit { ...props } />
+							</StoryBlockMover>
+						</RotatableBox>
 					) }
 					{ ! ( isLast && isFirst ) && isMovableBlock && (
 						<InspectorControls>
@@ -410,9 +460,6 @@ export default createHigherOrderComponent(
 									checked={ ampFitText }
 									onChange={ () => {
 										setAttributes( { ampFitText: ! ampFitText } );
-										if ( ! ampFitText ) {
-											setFontSize( attributes.autoFontSize );
-										}
 									} }
 								/>
 								{ ! ampFitText && (

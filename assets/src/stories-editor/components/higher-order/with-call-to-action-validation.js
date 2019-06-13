@@ -4,7 +4,7 @@
 import { getBlockType } from '@wordpress/blocks';
 import { Button } from '@wordpress/components';
 import { withSelect, withDispatch } from '@wordpress/data';
-import { Warning } from '@wordpress/editor';
+import { Warning } from '@wordpress/block-editor';
 import { createHigherOrderComponent, compose } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 
@@ -76,18 +76,13 @@ export default createHigherOrderComponent( ( BlockEdit ) => {
 		}
 
 		return (
-			<>
-				<div style={ { minHeight: '60px' } }>
-					<BlockEdit key="block-edit" { ...props } />
-				</div>
-				<Warning actions={ actions }>
-					<strong>{ blockType.title }: </strong>
-					{ originalBlockClientId ?
-						__( 'This block can only be used once per page.', 'amp' ) :
-						__( 'This block can not be used on the first page.', 'amp' )
-					}
-				</Warning>
-			</>
+			<Warning actions={ actions }>
+				<strong>{ blockType.title }: </strong>
+				{ originalBlockClientId ?
+					__( 'This block can only be used once per page.', 'amp' ) :
+					__( 'This block can not be used on the first page.', 'amp' )
+				}
+			</Warning>
 		);
 	} );
 }, 'withCallToActionValidation' );

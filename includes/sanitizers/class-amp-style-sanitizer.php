@@ -27,13 +27,6 @@ use \Sabberworm\CSS\CSSList\Document;
 class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
-	 * Error code for tree shaking.
-	 *
-	 * @var string
-	 */
-	const TREE_SHAKING_ERROR_CODE = 'removed_unused_css_rules';
-
-	/**
 	 * Error code for illegal at-rule.
 	 *
 	 * @var string
@@ -87,7 +80,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Array of flags used to control sanitization.
 	 *
 	 * @var array {
-	 *      @type string   $remove_unused_rules        Enum 'never', 'sometimes' (default), 'always'. If total CSS is greater than max_bytes, whether to strip selectors (and then empty rules) when they are not found to be used in doc. A validation error will be emitted when stripping happens since it is not completely safe in the case of dynamic content.
 	 *      @type string[] $dynamic_element_selectors  Selectors for elements (or their ancestors) which contain dynamic content; selectors containing these will not be filtered.
 	 *      @type bool     $use_document_element       Whether the root of the document should be used rather than the body.
 	 *      @type bool     $require_https_src          Require HTTPS URLs.
@@ -95,7 +87,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type callable $validation_error_callback  Function to call when a validation error is encountered.
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
-	 *      @type bool     $accept_tree_shaking        Whether to accept tree-shaking by default and bypass a validation error.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
 	 * }
 	 */
@@ -107,7 +98,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'remove_unused_rules'       => 'sometimes',
 		'dynamic_element_selectors' => array(
 			'amp-list',
 			'amp-live-list',
@@ -116,7 +106,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		),
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
-		'accept_tree_shaking'       => false,
 		'include_manifest_comment'  => 'always',
 	);
 
@@ -298,7 +287,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			self::ILLEGAL_AT_RULE_ERROR_CODE,
 			'illegal_css_important',
 			'illegal_css_property',
-			self::TREE_SHAKING_ERROR_CODE,
 			'unrecognized_css',
 			'disallowed_file_extension',
 			'file_path_not_found',
@@ -2388,7 +2376,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Finalize stylesheets for style[amp-custom] and style[amp-keyframes] elements.
 	 *
-	 * Concatenate all pending stylesheets, remove unused rules if necessary, and add to style elements in doc.
+	 * Concatenate all pending stylesheets, remove unused rules, and add to AMP style elements in document.
 	 * Combine all amp-keyframe styles and add them to the end of the body.
 	 *
 	 * @since 1.0
@@ -2398,19 +2386,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$stylesheet_groups = array(
 			'custom'    => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-custom.css */",
-				'total_size'          => 0,
 				'cdata_spec'          => $this->style_custom_cdata_spec,
 				'pending_stylesheets' => array(),
-				'remove_unused_rules' => $this->args['remove_unused_rules'],
 				'included_count'      => 0,
 				'import_front_matter' => '', // Extra @import statements that are prepended when fetch fails and validation error is rejected.
 			),
 			'keyframes' => array(
 				'source_map_comment'  => "\n\n/*# sourceURL=amp-keyframes.css */",
-				'total_size'          => 0,
 				'cdata_spec'          => $this->style_keyframes_cdata_spec,
 				'pending_stylesheets' => array(),
-				'remove_unused_rules' => 'never', // Not relevant.
 				'included_count'      => 0,
 				'import_front_matter' => '',
 			),
@@ -2433,7 +2417,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$size += strlen( $part[1] ); // Declaration block.
 				}
 			}
-			$stylesheet_groups[ $pending_stylesheet['group'] ]['total_size'] += $size; // Used in finalize_stylesheet_group() to determine if tree shaking is needed.
 
 			if ( ! empty( $pending_stylesheet['imported_font_urls'] ) ) {
 				$imported_font_urls = array_merge( $imported_font_urls, $pending_stylesheet['imported_font_urls'] );
@@ -2461,7 +2444,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			/*
-			 * On Native AMP themes when there are new/rejected validation errors present, a parsed stylesheet may include
+			 * On AMP-first themes when there are new/rejected validation errors present, a parsed stylesheet may include
 			 * @import rules. These must be moved to the beginning to be honored.
 			 */
 			$css = $stylesheet_groups['custom']['import_front_matter'];
@@ -2819,25 +2802,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return int Number of included stylesheets in group.
 	 */
 	private function finalize_stylesheet_group( $group, $group_config ) {
-		$included_count    = 0;
-		$max_bytes         = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
-		$is_too_much_css   = $group_config['total_size'] > $max_bytes;
-		$should_tree_shake = (
-			'always' === $group_config['remove_unused_rules'] || (
-				$is_too_much_css
-				&&
-				'sometimes' === $group_config['remove_unused_rules']
-			)
-		);
-
-		if ( $is_too_much_css && $should_tree_shake && empty( $this->args['accept_tree_shaking'] ) ) {
-			$should_tree_shake = $this->should_sanitize_validation_error(
-				array(
-					'code' => self::TREE_SHAKING_ERROR_CODE,
-					'type' => AMP_Validation_Error_Taxonomy::CSS_ERROR_TYPE,
-				)
-			);
-		}
+		$included_count = 0;
+		$max_bytes      = $group_config['cdata_spec']['max_bytes'] - strlen( $group_config['source_map_comment'] );
 
 		$previously_seen_stylesheet_index = array();
 		$indices_by_stylesheet_element_id = array();
@@ -2861,53 +2827,50 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				list( $selectors_parsed, $declaration_block ) = $stylesheet_part;
-				if ( $should_tree_shake ) {
-					$selectors = array();
-					foreach ( $selectors_parsed as $selector => $parsed_selector ) {
-						$should_include = (
+
+				$selectors = array();
+				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
+					$should_include = (
+						(
+							// If all class names are used in the doc.
 							(
-								// If all class names are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-									||
-									$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-								)
-								&&
-								// If all IDs are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
-									||
-									0 === count(
-										array_filter(
-											$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-											function( $id ) {
-												return ! $this->dom->getElementById( $id );
-											}
-										)
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+								||
+								$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+							)
+							&&
+							// If all IDs are used in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
+								||
+								0 === count(
+									array_filter(
+										$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
+										function( $id ) {
+											return ! $this->dom->getElementById( $id );
+										}
 									)
 								)
-								&&
-								// If tag names are present in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-									||
-									$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-								)
-								&&
-								// If all attribute names are used in the doc.
-								(
-									empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-									||
-									$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-								)
 							)
-						);
-						if ( $should_include ) {
-							$selectors[] = $selector;
-						}
+							&&
+							// If tag names are present in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+								||
+								$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+							)
+							&&
+							// If all attribute names are used in the doc.
+							(
+								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+								||
+								$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+							)
+						)
+					);
+					if ( $should_include ) {
+						$selectors[] = $selector;
 					}
-				} else {
-					$selectors = array_keys( $selectors_parsed );
 				}
 				$stylesheet_part = implode( ',', $selectors ) . $declaration_block;
 				$original_size  += strlen( $stylesheet_part );

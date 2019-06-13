@@ -160,7 +160,7 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function should_show_in_menu() {
 		global $pagenow;
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
 		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -172,8 +172,10 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_post_list_screen_scripts' ) );
 
-		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		}
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_edit_post_screen_scripts' ) );
@@ -592,7 +594,7 @@ class AMP_Validated_URL_Post_Type {
 	 * Normalize a URL for storage.
 	 *
 	 * This ensures that query vars like utm_* and the like will not cause duplicates.
-	 * The AMP query param is removed to facilitate switching between native and transitional.
+	 * The AMP query param is removed to facilitate switching between standard and transitional.
 	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
 	 *
 	 * @param string $url URL.
@@ -661,6 +663,14 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
+		$is_story = (
+			isset( $args['queried_object'], $args['queried_object']['type'], $args['queried_object']['id'] )
+			&&
+			'post' === $args['queried_object']['type']
+			&&
+			AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $args['queried_object']['id'] )
+		);
+
 		/*
 		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
 		 * The post content just contains the slugs for these terms and the sources for the given instance of
@@ -714,7 +724,7 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							)
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() ) {
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_story ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
 							$term_id,
@@ -797,9 +807,6 @@ class AMP_Validated_URL_Post_Type {
 		return array(
 			'theme'   => get_stylesheet(),
 			'plugins' => get_option( 'active_plugins', array() ),
-			'options' => array(
-				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ),
-			),
 		);
 	}
 
@@ -837,13 +844,6 @@ class AMP_Validated_URL_Post_Type {
 			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
 				$staleness['plugins']['old'] = array_values( $old_active_plugins );
-			}
-		}
-
-		if ( isset( $old_validated_environment['options'] ) ) {
-			$differing_options = array_diff_assoc( $new_validated_environment['options'], $old_validated_environment['options'] );
-			if ( $differing_options ) {
-				$staleness['options'] = $differing_options;
 			}
 		}
 
@@ -1254,19 +1254,19 @@ class AMP_Validated_URL_Post_Type {
 		if ( 'post' !== get_current_screen()->base ) {
 			// Display admin notice according to the AMP mode.
 			if ( amp_is_canonical() ) {
-				$template_mode = 'native';
+				$template_mode = AMP_Theme_Support::STANDARD_MODE_SLUG;
 			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-				$template_mode = 'paired';
+				$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			} else {
 				$template_mode = 'reader';
 			}
 			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
-			if ( 'native' === $template_mode ) {
-				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
+			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode ) {
+				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode && $auto_sanitization ) {
 				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode ) {
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
 				$message = sprintf(
 					/* translators: %s is a link to the AMP settings screen */
 					__( 'The site is using transitional AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
@@ -1752,10 +1752,6 @@ class AMP_Validated_URL_Post_Type {
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
 								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
-								echo ' ';
-							}
-							if ( ! empty( $staleness['options'] ) ) {
-								esc_html_e( 'Options have changed.', 'amp' );
 								echo ' ';
 							}
 							esc_html_e( 'Please recheck.', 'amp' );

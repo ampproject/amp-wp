@@ -22,6 +22,8 @@ class AMP_HTTP {
 	/**
 	 * Headers sent (or attempted to be sent).
 	 *
+	 * This is used primarily for the benefit of unit testing. Otherwise, `headers_list()` should be used.
+	 *
 	 * @since 1.0
 	 * @see AMP_HTTP::send_header()
 	 * @var array[]
@@ -489,5 +491,24 @@ class AMP_HTTP {
 		);
 
 		return null;
+	}
+
+	/**
+	 * Get the Content-Type for the response.
+	 *
+	 * @since 1.2
+	 *
+	 * @return string Content type.
+	 */
+	public static function get_response_content_type() {
+		$content_type = ini_get( 'default_mimetype' );
+		foreach ( headers_list() as $header ) {
+			list( $name, $value ) = explode( ':', $header, 2 );
+			if ( 'content-type' === strtolower( $name ) ) {
+				$content_type = trim( $value );
+				break;
+			}
+		}
+		return $content_type;
 	}
 }

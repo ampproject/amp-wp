@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2-beta1
+ * Version: 1.2-beta2
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -209,7 +209,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-beta1' );
+define( 'AMP__VERSION', '1.2-beta2' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -278,7 +278,7 @@ function amp_deactivate() {
 		}
 	}
 
-	flush_rewrite_rules();
+	flush_rewrite_rules( false );
 }
 
 /*
@@ -333,38 +333,42 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
 	AMP_HTTP::handle_xhr_request();
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
-	AMP_Post_Type_Support::add_post_type_support();
-	AMP_Story_Post_Type::register();
 	AMP_Service_Worker::init();
-	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_admin_pointer' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' ); // Used in both Website and Stories experiences.
+
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		AMP_Post_Type_Support::add_post_type_support();
+		add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+		add_filter( 'request', 'amp_force_query_var_value' );
+
+		// Add actions for reader mode templates.
+		add_action( 'wp', 'amp_maybe_add_actions' );
+
+		// Redirect the old url of amp page to the updated url.
+		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
+	}
+
+	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+		AMP_Story_Post_Type::register();
+		add_action( 'wp_loaded', 'amp_story_templates' );
+	}
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
-
-	add_filter( 'request', 'amp_force_query_var_value' );
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_story_templates' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'wp_loaded', 'amp_admin_pointer' );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
-
-	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-
-	// Add actions for legacy post templates.
-	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	/*
 	 * Broadcast plugin updates.
@@ -513,7 +517,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  *      add_theme_support( AMP_Theme_Support::SLUG );
  *
- * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
@@ -526,7 +530,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          'template_dir' => 'amp',
  *      ) );
  *
- * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ * If you want to have AMP-specific templates in addition to serving AMP-first, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired'       => false,
@@ -549,7 +553,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      ) );
  *
  * @see AMP_Theme_Support::read_theme_support()
- * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
 function amp_is_canonical() {
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
@@ -557,8 +561,8 @@ function amp_is_canonical() {
 	}
 
 	$args = AMP_Theme_Support::get_theme_support_args();
-	if ( isset( $args['paired'] ) ) {
-		return empty( $args['paired'] );
+	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
+		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
 	}
 
 	// If there is a template_dir, then transitional mode is implied.

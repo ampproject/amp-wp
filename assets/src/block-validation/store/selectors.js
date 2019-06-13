@@ -35,7 +35,7 @@ export function getReviewLink( state ) {
 /**
  * Returns whether sanitization errors are auto-accepted.
  *
- * Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+ * Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Standard mode.
  *
  * @param {Object} state Editor state.
  *
