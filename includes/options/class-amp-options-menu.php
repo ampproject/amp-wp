@@ -292,13 +292,13 @@ class AMP_Options_Menu {
 
 		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
-				<?php if ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<div class="notice notice-success notice-alt inline">
-						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
-					</div>
-				<?php elseif ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard mode.', 'amp' ); ?></p>
+					</div>
+				<?php elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+					<div class="notice notice-success notice-alt inline">
+						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
 			<?php endif; ?>
@@ -319,17 +319,15 @@ class AMP_Options_Menu {
 				<dd>
 					<?php echo wp_kses_post( $standard_description ); ?>
 				</dd>
-				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG !== AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<dt>
-						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php disabled( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ); ?> <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
-						<label for="theme_support_transitional">
-							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
-						</label>
-					</dt>
-					<dd>
-						<?php echo wp_kses_post( $transitional_description ); ?>
-					</dd>
-				<?php endif; ?>
+				<dt>
+					<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
+					<label for="theme_support_transitional">
+						<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php echo wp_kses_post( $transitional_description ); ?>
+				</dd>
 				<dt>
 					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
 					<label for="theme_support_disabled">

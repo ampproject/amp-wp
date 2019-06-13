@@ -158,11 +158,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::read_theme_support();
 		$this->assertSame( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 
-		// Test that Standard mode in theme overrides Transitional mode set via option.
+		// Test that Standard mode in theme does not override Transitional mode set via option (user option prevails).
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
 		AMP_Theme_Support::read_theme_support();
-		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 
 		// Test that standard via option trumps transitional in theme.
 		$args = array(
@@ -187,15 +187,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 
-		// Test that standard via theme always trumps transitional via option.
+		// Test that standard via theme does not trump transitional option.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since standard in theme overrides transitional option.
 		AMP_Theme_Support::read_theme_support();
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
-		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
-		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
-		$this->assertEquals( array( AMP_Theme_Support::PAIRED_FLAG => false ), AMP_Theme_Support::get_theme_support_args() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertEquals( array( AMP_Theme_Support::PAIRED_FLAG => true ), AMP_Theme_Support::get_theme_support_args() );
 
 		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
