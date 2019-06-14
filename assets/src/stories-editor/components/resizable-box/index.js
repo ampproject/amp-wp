@@ -158,22 +158,11 @@ const EnhancedResizableBox = ( props ) => {
 				const isReducing = 0 > deltaW || 0 > deltaH;
 
 				if ( textElement && isReducing ) {
-					// If we have a rotated block, let's assign the width and height for measuring.
-					// Without assigning the new measure, the calculation would be incorrect due to angle.
-					if ( angle ) {
-						textElement.style.width = appliedWidth - ( TEXT_BLOCK_BORDER * 2 ) + 'px';
-						textElement.style.height = appliedHeight - ( TEXT_BLOCK_BORDER * 2 ) + 'px';
-					}
 					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
 					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
 					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;
-					}
-					// If we have rotated block, let's restore the correct measures.
-					if ( angle ) {
-						textElement.style.width = 'initial';
-						textElement.style.height = '100%';
 					}
 				}
 
