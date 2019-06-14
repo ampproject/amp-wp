@@ -1525,8 +1525,8 @@ class AMP_Story_Post_Type {
 
 	/**
 	 * Ajax handler to export the story ZIP archive.
-     *
-     * This method returns an error as JSON and the binary data on success.
+	 *
+	 * This method returns an error as JSON and the binary data on success.
 	 */
 	public static function handle_export() {
 		check_ajax_referer( 'amp-story-export', 'nonce' );
@@ -1571,7 +1571,7 @@ class AMP_Story_Post_Type {
 	/**
 	 * Generates a Zip archive from the AMP Story.
 	 *
-     * @param int $post_id The post ID of the AMP Story.
+   	 * @param int $post_id The post ID of the AMP Story.
 	 * @return WP_Error
 	 */
 	private static function generate_export( $post_id ) {
@@ -1633,7 +1633,7 @@ class AMP_Story_Post_Type {
 					if ( false !== $contents ) {
 						$zip->addFromString( $slug . '/assets/' . basename( $asset ), $contents );
 					}
-                }
+				}
 			}
 
 			// Close the active archive.
@@ -1687,8 +1687,8 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-     * Ensures we can preview the story even when it's a draft.
-     *
+	 * Ensures we can preview the story even when it's a draft.
+	 *
 	 * @param WP_Post[] $posts Array of post objects.
 	 * @param WP_Query  $query The WP_Query instance (passed by reference).
 	 *
@@ -1701,11 +1701,11 @@ class AMP_Story_Post_Type {
 
 		$is_preview = (
 			$query->is_preview
-            && self::POST_TYPE_SLUG === $posts[0]->post_type
-            && isset( $_GET[ 'story_export' ] )
+			&& self::POST_TYPE_SLUG === $posts[0]->post_type
+  			&& isset( $_GET[ 'story_export' ] )
 			//&& isset( $_GET[ '_wpnonce' ] )
-            //&& wp_verify_nonce( wp_unslash( $_GET[ '_wpnonce' ] ), 'amp-story-export-' . $posts[0]->ID )
-        );
+			//&& wp_verify_nonce( wp_unslash( $_GET[ '_wpnonce' ] ), 'amp-story-export-' . $posts[0]->ID )
+		);
 
 		if ( $is_preview ) {
 			$query->_story_export = $posts;
@@ -1716,9 +1716,9 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-     * Replaces the array of retrieved posts after they've been fetched and
+	 * Replaces the array of retrieved posts after they've been fetched and
 	 * internally processed with the exported story.
-     *
+	 *
 	 * @param WP_Post[] $posts Array of post objects.
 	 * @param WP_Query  $query The WP_Query instance (passed by reference).
 	 *
@@ -1729,7 +1729,7 @@ class AMP_Story_Post_Type {
 
 		if ( isset( $query->_story_export ) ) {
 			return $query->_story_export;
-        }
+		}
 
 		return $posts;
 	}
