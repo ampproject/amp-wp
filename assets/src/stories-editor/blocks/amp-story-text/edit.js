@@ -40,12 +40,16 @@ class TextBlockEdit extends Component {
 			height,
 			width,
 			content,
+			ampFitText,
+			ampFontFamily,
 		} = attributes;
 
 		if (
 			prevProps.attributes.height === height &&
 			prevProps.attributes.width === width &&
-			prevProps.attributes.content === content
+			prevProps.attributes.content === content &&
+			prevProps.attributes.ampFitText === ampFitText &&
+			prevProps.attributes.ampFontFamily === ampFontFamily
 		) {
 			return;
 		}
@@ -179,6 +183,7 @@ TextBlockEdit.propTypes = {
 		autoFontSize: PropTypes.number,
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
+		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
