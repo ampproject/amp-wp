@@ -460,7 +460,7 @@ class PageEdit extends Component {
 					{ backgroundColors.length > 0 && (
 						<div style={ overlayStyle } />
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
+					<InnerBlocks allowedBlocks={ allowedBlocks } />
 				</div>
 			</>
 		);
