@@ -35,17 +35,17 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes } = this.props;
 		const {
 			height,
 			width,
+			content,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
 		if (
-			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			prevProps.attributes.content === content
 		) {
 			return;
 		}
