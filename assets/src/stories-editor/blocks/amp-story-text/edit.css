@@ -7,6 +7,7 @@
  */
 .wp-block-amp-story-text .block-editor-rich-text__editable {
 	padding: 7px !important;
+	width: 100%;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right {
@@ -56,10 +57,6 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 	display: inline-block;
 	vertical-align: middle;
 	line-height: 1.15;
-}
-
-.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .wp-block-amp-amp-story-text {
-	width: 100%;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring-fontsize {
