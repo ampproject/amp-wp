@@ -1461,11 +1461,5 @@ export const isVideoSizeExcessive = ( media ) => {
  * @return {string} Unique ID.
  */
 export const getUniqueId = () => {
-	let uniqueId = uuid();
-
-	while ( /^\d/.test( uniqueId ) ) {
-		uniqueId = uuid();
-	}
-
-	return uniqueId;
+	return uuid().replace( /^\d/, 'a' );
 };
