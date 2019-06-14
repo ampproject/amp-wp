@@ -439,7 +439,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const newProps = { ...props };
 
 	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || getUniqueId();
 
 	if ( attributes.rotationAngle ) {
 		let style = ! newProps.style ? {} : newProps.style;
@@ -1451,4 +1451,15 @@ export const isVideoSizeExcessive = ( media ) => {
 	}
 
 	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Returns a unique ID that is guaranteed to not start with a number.
+ *
+ * Useful for using in HTML attributes.
+ *
+ * @return {string} Unique ID.
+ */
+export const getUniqueId = () => {
+	return uuid().replace( /^\d/, 'a' );
 };
