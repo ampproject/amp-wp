@@ -469,7 +469,7 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * wp_localize_scripte the styles for the block editor.
+	 * Enqueue the styles for the block editor.
 	 */
 	public static function enqueue_block_editor_styles() {
 		if ( self::POST_TYPE_SLUG !== get_current_screen()->post_type ) {
