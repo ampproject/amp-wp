@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
 import { has } from 'lodash';
@@ -44,6 +43,7 @@ import {
 	getCallToActionBlock,
 	isVideoSizeExcessive,
 	getVideoBytesPerSecond,
+	getUniqueId,
 } from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -68,7 +68,7 @@ class PageEdit extends Component {
 		super( ...arguments );
 
 		if ( ! props.attributes.anchor ) {
-			this.props.setAttributes( { anchor: uuid() } );
+			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
 		this.videoPlayer = createRef();
