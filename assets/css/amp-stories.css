@@ -11,10 +11,18 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	padding: 7px !important;
 }
 
+/* with amp-fit-text */
 .wp-block-amp-amp-story-post-author,
 .wp-block-amp-amp-story-post-title,
 .wp-block-amp-amp-story-post-date {
 	display: flex;
+}
+
+/* no amp-fit-text */
+.wp-block-amp-amp-story-post-author.amp-text-content,
+.wp-block-amp-amp-story-post-title.amp-text-content,
+.wp-block-amp-amp-story-post-date.amp-text-content {
+	display: block;
 }
 
 .wp-block-amp-amp-story-cta.aligncenter {
