@@ -60,6 +60,9 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Add and sanitize the export assets for the AMP Story.
+	 *
+	 * @param string $name        The DOMElement name.
+	 * @param array  $attritbutes The DOMElement attributes.
 	 */
 	public function sanitize_assets( $name, $attritbutes ) {
 		$nodes     = $this->dom->getElementsByTagName( $name );
@@ -95,7 +98,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 							}
 						} elseif ( 'amp-story' === $name && 'publisher' === $attritbute ) {
 							if ( $update_path ) {
-								$parse = parse_url( $this->args['base_url'] );
+								$parse = wp_parse_url( $this->args['base_url'] );
 
 								if ( ! empty( $parse['host'] ) ) {
 									$node->setAttribute( $attritbute, $parse['host'] );

@@ -332,17 +332,16 @@ class AMP_Story_Post_Type {
 		add_filter(
 			'amp_content_sanitizers',
 			function( $sanitizers ) {
-				if ( is_singular( self::POST_TYPE_SLUG ) && isset( $_GET['story_export'] ) ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) && isset( $_GET['story_export'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					$sanitizers['AMP_Story_Export_Sanitizer'] = array(
 						'base_url' => untrailingslashit( AMP_Options_Manager::get_option( 'story_export_base_url' ) ),
-                        'slug'     => wp_unslash( $_GET[ 'story_export' ] ),
+						'slug'     => wp_unslash( $_GET['story_export'] ), // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 					);
 				}
 				return $sanitizers;
 			},
 			100 // Run sanitizer after the others (but before style sanitizer and validating sanitizer).
 		);
-
 
 		self::maybe_flush_rewrite_rules();
 	}
@@ -1533,45 +1532,60 @@ class AMP_Story_Post_Type {
 
 		// The user must have the correct permissions.
 		if ( ! current_user_can( 'edit_files' ) ) {
-			wp_send_json_error( array(
-				'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' )
-			), 403 );
+			wp_send_json_error(
+				array(
+					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
+				),
+				403
+			);
 		}
 
 		// We need the ZipArchive class to make this work.
 		if ( ! class_exists( 'ZipArchive', false ) ) {
-			wp_send_json_error( array(
-				'errorMessage' => esc_html__( 'The ZipArchive class is required to export AMP stories.', 'amp' )
-			), 403 );
+			wp_send_json_error(
+				array(
+					'errorMessage' => esc_html__( 'The ZipArchive class is required to export AMP stories.', 'amp' ),
+				),
+				403
+			);
 		}
 
 		// Bail if the user has not saved the story yet.
-		if ( 'auto-draft' === get_post_status( wp_unslash( $_POST[ 'post_ID' ] ) ) ) {
-			wp_send_json_error( array(
-				'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' )
-			), 403 );
+		if ( 'auto-draft' === get_post_status( wp_unslash( $_POST['post_ID'] ) ) ) {
+			wp_send_json_error(
+				array(
+					'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' ),
+				),
+				403
+			);
 		}
 
 		// Generate and export the archive.
-		$export = self::generate_export(  wp_unslash( $_POST[ 'post_ID' ] ) );
+		$export = self::generate_export( wp_unslash( $_POST['post_ID'] ) );
 
 		// Export failed.
 		if ( is_wp_error( $export ) ) {
-			wp_send_json_error( array(
-				'errorMessage' => $export->get_error_message()
-			), 403 );
+			wp_send_json_error(
+				array(
+					'errorMessage' => $export->get_error_message(),
+				),
+				403
+			);
 		}
 
 		// Failed to export for an unknown reason not related to generating the archive.
-		wp_send_json_error( array(
-			'errorMessage' => __( 'Could not generate the AMP story archive.', 'amp' )
-		), 403 );
+		wp_send_json_error(
+			array(
+				'errorMessage' => __( 'Could not generate the AMP story archive.', 'amp' ),
+			),
+			403
+		);
 	}
 
 	/**
 	 * Generates a Zip archive from the AMP Story.
 	 *
-   	 * @param int $post_id The post ID of the AMP Story.
+	 * @param int $post_id The post ID of the AMP Story.
 	 * @return WP_Error
 	 */
 	private static function generate_export( $post_id ) {
@@ -1629,7 +1643,7 @@ class AMP_Story_Post_Type {
 				$zip->addEmptyDir( $slug . '/assets' );
 
 				foreach ( $assets as $asset ) {
-					$contents = file_get_contents( $asset );
+					$contents = file_get_contents( $asset ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 					if ( false !== $contents ) {
 						$zip->addFromString( $slug . '/assets/' . basename( $asset ), $contents );
 					}
@@ -1640,7 +1654,7 @@ class AMP_Story_Post_Type {
 			$zip->close();
 
 			// Read the file.
-			$fo = @fopen( $file,'r' );
+			$fo = @fopen( $file, 'r' ); // phpcs:ignore
 
 			if ( ! $fo ) {
 				return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
@@ -1653,7 +1667,7 @@ class AMP_Story_Post_Type {
 				die();
 			}
 		} else {
-			switch( $res ) {
+			switch ( $res ) {
 				case ZipArchive::ER_EXISTS:
 					$msg = esc_html__( 'Zip archive already exists.', 'amp' );
 					break;
@@ -1695,16 +1709,16 @@ class AMP_Story_Post_Type {
 	 * @return WP_Post[] The post results array.
 	 */
 	public static function enable_export_preview( $posts, $query ) {
-		if ( 1 !== sizeof( $posts ) ) {
+		if ( 1 !== count( $posts ) ) {
 			return $posts;
 		}
 
 		$is_preview = (
 			$query->is_preview
 			&& self::POST_TYPE_SLUG === $posts[0]->post_type
-  			&& isset( $_GET[ 'story_export' ] )
-			//&& isset( $_GET[ '_wpnonce' ] )
-			//&& wp_verify_nonce( wp_unslash( $_GET[ '_wpnonce' ] ), 'amp-story-export-' . $posts[0]->ID )
+			&& isset( $_GET['story_export'] ) // phpcs:ignore
+			&& isset( $_GET['_wpnonce'] ) // phpcs:ignore
+			// phpcs:ignore && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'amp-story-export-' . $posts[0]->ID )
 		);
 
 		if ( $is_preview ) {

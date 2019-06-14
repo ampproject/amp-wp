@@ -45,7 +45,7 @@ class AMP_Options_Manager {
 		'enable_response_caching'  => true,
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
-		'story_export_base_url'     => '',
+		'story_export_base_url'    => '',
 	);
 
 	/**
