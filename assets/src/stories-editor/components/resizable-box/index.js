@@ -137,7 +137,7 @@ const EnhancedResizableBox = ( props ) => {
 					textElement = null;
 				}
 
-				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
+				if ( ampFitText && isText ) {
 					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
 				} else {
 					textBlockWrapper = null;
@@ -205,7 +205,7 @@ const EnhancedResizableBox = ( props ) => {
 				lastHeight = appliedHeight;
 
 				if ( textBlockWrapper && ampFitText ) {
-					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+					textBlockWrapper.style.lineHeight = isText ? appliedHeight - ( TEXT_BLOCK_PADDING * 2 ) + 'px' : appliedHeight + 'px';
 				}
 
 				// If it's image, let's change the width and height of the image, too.
