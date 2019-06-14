@@ -58,10 +58,6 @@ import {
 } from '../../constants';
 import './edit.css';
 
-const TEMPLATE = [
-	[ 'amp/amp-story-text' ],
-];
-
 class PageEdit extends Component {
 	shouldComponentUpdate() {
 		this.ensureCTABeingLast();
@@ -460,7 +456,7 @@ class PageEdit extends Component {
 					{ backgroundColors.length > 0 && (
 						<div style={ overlayStyle } />
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
+					<InnerBlocks allowedBlocks={ allowedBlocks } />
 				</div>
 			</>
 		);
