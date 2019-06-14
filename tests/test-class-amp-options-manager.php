@@ -13,6 +13,15 @@
 class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
+	}
+
+	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
@@ -104,7 +113,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		$this->assertEquals(
 			array(
 				'experiences'              => array( AMP_Options_Manager::WEBSITE_EXPERIENCE ),
-				'theme_support'            => 'disabled',
+				'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
 				'supported_post_types'     => array( 'post' ),
 				'analytics'                => array(),
 				'auto_accept_sanitization' => true,
@@ -294,7 +303,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		// Test when 'all_templates_supported' is not selected, and theme support is also disabled.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post' ) );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
@@ -307,7 +316,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		remove_post_type_support( 'foo', AMP_Post_Type_Support::SLUG );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'foo' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::check_supported_post_type_update_errors();
 		$settings_errors = get_settings_errors();
 		$this->assertCount( 1, $settings_errors );
@@ -474,7 +483,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 
 		$page_id = $this->factory()->post->create( array( 'post_type' => 'page' ) );
 		AMP_Options_Manager::update_option( 'supported_post_types', array( 'page' ) );
-		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG );
 		AMP_Options_Manager::handle_updated_theme_support_option();
 		$amp_settings_errors = get_settings_errors( AMP_Options_Manager::OPTION_NAME );
 		$new_error           = end( $amp_settings_errors );

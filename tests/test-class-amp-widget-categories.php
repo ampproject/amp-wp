@@ -27,6 +27,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		add_theme_support( AMP_Theme_Support::SLUG );
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		wp_maybe_load_widgets();
 		AMP_Theme_Support::init();
 		$this->widget = new AMP_Widget_Categories();

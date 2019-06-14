@@ -99,6 +99,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				}
 			}
 		}
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 	}
 
 	/**
