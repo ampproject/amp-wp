@@ -120,6 +120,17 @@ class AMP_Options_Menu {
 			)
 		);
 
+		add_settings_field(
+			'stories_export',
+			__( 'Stories Export', 'amp' ),
+			array( $this, 'render_stories_export' ),
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			array(
+				'class' => 'amp-stories-export-field',
+			)
+		);
+
 		add_action(
 			'admin_print_styles',
 			function() {
@@ -128,6 +139,9 @@ class AMP_Options_Menu {
 					body:not(.amp-experience-website) .amp-website-mode,
 					body:not(.amp-experience-website) .amp-template-support-field,
 					body:not(.amp-experience-website) .amp-validation-field {
+						display: none;
+					}
+					body:not(.amp-experience-stories) .amp-stories-export-field {
 						display: none;
 					}
 				</style>
@@ -631,6 +645,40 @@ class AMP_Options_Menu {
 				</label>
 			</p>
 			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render the stories export settings section.
+	 *
+	 * @since 1.2
+	 */
+	public function render_stories_export() {
+		?>
+		<style>
+			label[for="story_export_base_url"] span {
+				text-transform: uppercase;
+				font-size: 0.7em;
+				border: 1px solid;
+				border-radius: 2px;
+				padding: 2px;
+				margin: -15px 0  0 3px;
+				position: relative;
+				top: -2px;
+				font-weight: 400;
+				line-height: 1;
+			}
+		</style>
+		<fieldset <?php disabled( ! current_user_can( 'edit_files' ) ); ?>>
+			<p>
+				<label for="story_export_base_url">
+					<strong><?php echo wp_kses_post( __( 'Base URL for exported stories. <span>Beta</span>', 'amp' ) ); ?></strong>
+				</label>
+				<br />
+				<input id="story_export_base_url" type="text" placeholder="https://" class="regular-text code" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[story_export_base_url]' ); ?>" value="<?php echo esc_url( AMP_Options_Manager::get_option( 'story_export_base_url' ) ); ?>" />
+			</p>
+			<p class="description"><?php esc_html_e( 'AMP requires most asset URLs to be absolute as opposed to relative. In order to export stories with the desired absolute URLs, you can provide the required URL base here. This base URL will be used for the uploaded files, as well as, links to other stories. If left empty, the default URLs will be used. Meaning, uploaded images and videos will be referenced from the WordPress install. Remember that the provided URL should be HTTPS.', 'amp' ); ?></p>
 		</fieldset>
 		<?php
 	}

@@ -89,6 +89,7 @@ class AMP_Autoloader {
 		'AMP_Video_Sanitizer'                => 'includes/sanitizers/class-amp-video-sanitizer',
 		'AMP_Core_Theme_Sanitizer'           => 'includes/sanitizers/class-amp-core-theme-sanitizer',
 		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
+		'AMP_Story_Export_Sanitizer'         => 'includes/sanitizers/class-amp-story-export-sanitizer',
 		'AMP_Noscript_Fallback'              => 'includes/sanitizers/trait-amp-noscript-fallback',
 		'AMP_Customizer_Design_Settings'     => 'includes/settings/class-amp-customizer-design-settings',
 		'AMP_Customizer_Settings'            => 'includes/settings/class-amp-customizer-settings',

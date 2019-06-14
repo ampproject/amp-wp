@@ -45,6 +45,7 @@ class AMP_Options_Manager {
 		'enable_response_caching'  => true,
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
+		'story_export_base_url'     => '',
 	);
 
 	/**
@@ -303,6 +304,9 @@ class AMP_Options_Manager {
 		if ( $options['enable_response_caching'] ) {
 			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
+
+		// Handle the base URL for exported stories.
+		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], array( 'https' ) ) : '';
 
 		return $options;
 	}
