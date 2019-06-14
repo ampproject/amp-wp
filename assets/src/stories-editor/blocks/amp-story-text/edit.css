@@ -82,7 +82,3 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 .wp-block[data-type="amp/amp-story-text"] .block-mover div {
 	height: 100%;
 }
-
-.wp-block-amp-story-text {
-	line-height: initial;
-}
