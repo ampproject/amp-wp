@@ -160,11 +160,16 @@ const EnhancedResizableBox = ( props ) => {
 				if ( textElement && isReducing ) {
 					// If we have a rotated block, let's assign the width and height for measuring.
 					// Without assigning the new measure, the calculation would be incorrect due to angle.
-					// Text block is handled differently since the text block's content doesn't have 100% width/height.
-					if ( angle && ! isText ) {
-						textElement.style.width = appliedWidth + 'px';
-						textElement.style.height = appliedHeight + 'px';
+					// Text block is handled differently since the text block's content shouldn't have full width while measuring.
+					if ( angle ) {
+						if ( ! isText ) {
+							textElement.style.width = appliedWidth + 'px';
+							textElement.style.height = appliedHeight + 'px';
+						} else if ( isText && ! ampFitText ) {
+							textElement.style.width = 'initial';
+						}
 					}
+
 					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
 					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
 					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
@@ -172,9 +177,13 @@ const EnhancedResizableBox = ( props ) => {
 						appliedHeight = lastHeight;
 					}
 					// If we have rotated block, let's restore the correct measures.
-					if ( angle && ! isText ) {
-						textElement.style.width = 'initial';
-						textElement.style.height = '100%';
+					if ( angle ) {
+						if ( ! isText ) {
+							textElement.style.width = 'initial';
+							textElement.style.height = '100%';
+						} else if ( isText && ! ampFitText ) {
+							textElement.style.width = '100%';
+						}
 					}
 				}
 
@@ -182,8 +191,15 @@ const EnhancedResizableBox = ( props ) => {
 					const radianAngle = getRadianFromDeg( angle );
 
 					// Compare position between the initial and after resizing.
-					const initialPosition = getBlockPositioning( width, height, radianAngle );
-					const resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle );
+					let initialPosition, resizedPosition;
+					// If it's a text block, we shouldn't consider the added padding for measuring.
+					if ( isText ) {
+						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
+						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
+					} else {
+						initialPosition = getBlockPositioning( width, height, radianAngle );
+						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle );
+					}
 					const diff = {
 						left: resizedPosition.left - initialPosition.left,
 						top: resizedPosition.top - initialPosition.top,
