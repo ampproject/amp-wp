@@ -30,6 +30,10 @@ class TextBlockEdit extends Component {
 		this.onReplace = this.onReplace.bind( this );
 	}
 
+	componentDidMount() {
+		maybeUpdateFontSize( this.props );
+	}
+
 	componentDidUpdate( prevProps ) {
 		const { attributes, isSelected } = this.props;
 		const {
