@@ -58,10 +58,6 @@ import {
 } from '../../constants';
 import './edit.css';
 
-const TEMPLATE = [
-	[ 'amp/amp-story-text' ],
-];
-
 class PageEdit extends Component {
 	shouldComponentUpdate() {
 		this.ensureCTABeingLast();
