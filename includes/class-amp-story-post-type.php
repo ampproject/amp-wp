@@ -323,6 +323,8 @@ class AMP_Story_Post_Type {
 			}
 		);
 
+		add_action( 'wp_head', array( __CLASS__, 'print_feed_link' ) );
+
 		self::maybe_flush_rewrite_rules();
 	}
 
@@ -1382,6 +1384,30 @@ class AMP_Story_Post_Type {
 		if ( empty( $story_rules ) ) {
 			flush_rewrite_rules( false );
 		}
+	}
+
+	/**
+	 * Add RSS feed link for stories, if theme supports automatic-feed-links.
+	 *
+	 * @since 1.2
+	 */
+	public static function print_feed_link() {
+		if ( ! current_theme_supports( 'automatic-feed-links' ) ) {
+			return;
+		}
+
+		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
+		$feed_url         = add_query_arg(
+			'post_type',
+			self::POST_TYPE_SLUG,
+			get_feed_link()
+		);
+		printf(
+			'<link rel="alternate" type="%s" title="%s" href="%s">',
+			esc_attr( feed_content_type() ),
+			esc_attr( $post_type_object->labels->name ),
+			esc_url( $feed_url )
+		);
 	}
 
 	/**
