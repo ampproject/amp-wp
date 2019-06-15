@@ -1387,15 +1387,11 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Add RSS feed link for stories, if theme supports automatic-feed-links.
+	 * Add RSS feed link for stories.
 	 *
 	 * @since 1.2
 	 */
 	public static function print_feed_link() {
-		if ( ! current_theme_supports( 'automatic-feed-links' ) ) {
-			return;
-		}
-
 		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
 		$feed_url         = add_query_arg(
 			'post_type',
