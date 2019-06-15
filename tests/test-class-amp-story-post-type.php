@@ -38,6 +38,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		global $wp_rewrite;
 
 		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
@@ -51,11 +52,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Story_Post_Type::register()
 	 */
 	public function test_requires_opt_in() {
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+
 		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
-
 		AMP_Story_Post_Type::register();
-
 		$this->assertFalse( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		AMP_Story_Post_Type::register();
+		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 	}
 
 	/**
@@ -156,6 +161,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		if ( ! function_exists( 'register_block_type' ) ) {
 			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
 		}
+
+		AMP_Story_Post_Type::register();
 
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.

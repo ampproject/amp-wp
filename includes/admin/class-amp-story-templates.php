@@ -32,7 +32,7 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		if ( ! post_type_exists( 'amp_story' ) ) {
+		if ( ! post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			return;
 		}
 
