@@ -2407,7 +2407,8 @@ class AMP_Theme_Support {
 				array_merge(
 					$video_attributes,
 					[
-						'src' => $video_settings['videoUrl'],
+						'src'  => $video_settings['videoUrl'],
+						'loop' => '',
 					]
 				)
 			);
