@@ -16,6 +16,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
+		}
+
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
 				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
@@ -129,10 +133,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
 	 */
 	public function test_enqueue_embed_styling() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
-
 		AMP_Story_Post_Type::register();
 
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
@@ -157,10 +157,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_override_story_embed_callback() {
 		global $wp_rewrite;
-
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
 
 		AMP_Story_Post_Type::register();
 
@@ -223,10 +219,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::register_block_latest_stories()
 	 */
 	public function test_register_block_latest_stories() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
-		}
-
 		AMP_Story_Post_Type::register_block_latest_stories();
 
 		set_current_screen( 'edit.php' );
@@ -272,9 +264,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Story_Post_Type::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
 		AMP_Story_Post_Type::register();
 
 		$attributes = array(
