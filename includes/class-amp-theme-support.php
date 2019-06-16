@@ -2394,10 +2394,19 @@ class AMP_Theme_Support {
 				array_merge(
 					$video_attributes,
 					[
-						'data-videoid'        => $youtube_id,
-						'data-param-rel'      => '0', // Don't show related videos.
-						'data-param-showinfo' => '0', // Don't show video title at the top.
-						'data-param-controls' => '0', // Don't show video controls.
+						'data-videoid'              => $youtube_id,
+
+						// For documentation on the params, see <https://developers.google.com/youtube/player_parameters>.
+						'data-param-rel'            => '0', // Don't show related videos.
+						'data-param-showinfo'       => '0', // Don't show video title at the top.
+						'data-param-controls'       => '0', // Don't show video controls.
+						'data-param-iv_load_policy' => '3', // Suppress annotations.
+						'data-param-modestbranding' => '1', // Show modest branding.
+						'data-param-playsinline'    => '1', // Prevent fullscreen playback on iOS.
+						'data-param-disablekb'      => '1', // Disable keyboard conttrols.
+						'data-param-fs'             => '0', // Suppress full screen button.
+						'data-param-loop'           => '1', // Loop video playback.
+						'data-param-playlist'       => $youtube_id, // Currently needed to make looping work. See <https://developers.google.com/youtube/player_parameters#loop> and <https://github.com/ampproject/amphtml/pull/22856>.
 					]
 				)
 			);
