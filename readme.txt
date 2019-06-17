@@ -22,7 +22,7 @@ Features and capabilities provided by the plugin include:
 - **Gutenberg Support**: enabling AMP content creation fully integrated with Gutenberg.
 - **AMP-first Experiences support**: enabling full-site AMP experiences without sacrificing the flexibility of the platform, or the fidelity of content.
 - **Many Optimizations**: A myriad of code, performance, and developer experience improvements: from customization flexibility, to better UI flows, internationalization, accessibility, etc.
-- ✨ **AMP Stories** (new): the AMP Plugin enables the creation, editing, and publishing of AMP Stories in WordPress; leverage the magic of storytelling the WordPress way!
+- ✨ **AMP Stories** (beta): the AMP Plugin enables the creation, editing, and publishing of AMP Stories in WordPress; leverage the magic of storytelling the WordPress way!
 
 The plugin can be configured to follow one of three different template modes: Standard, Transitional, and Reader. When configured to operate in Reader and Transitional modes, a given post/page will have a canonical URL as well as a corresponding (paired) AMP URL. The AMP plugin is not serving as a mobile theme; it does not redirect mobile devices to the AMP version. Instead, the AMP version is served to mobile visitors when they find the content on platforms such as Twitter, Pinterest, Google Search, and others.
 
