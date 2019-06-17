@@ -239,6 +239,7 @@ export default createHigherOrderComponent(
 				opacity,
 				type: textBlockTextType,
 				ampShowImageCaption,
+				ampShowCaption,
 				ampAnimationType,
 				ampAnimationDuration,
 				ampAnimationDelay,
@@ -558,6 +559,27 @@ export default createHigherOrderComponent(
 										}
 									}
 									help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+								/>
+							</PanelBody>
+						</InspectorControls>
+					) }
+					{ isVideoBlock && (
+						<InspectorControls>
+							<PanelBody
+								title={ __( 'Story Settings', 'amp' ) }
+							>
+								<ToggleControl
+									label={ __( 'Show or hide the caption', 'amp' ) }
+									checked={ ampShowCaption }
+									onChange={
+										function() {
+											props.setAttributes( { ampShowCaption: ! attributes.ampShowCaption } );
+											if ( ! attributes.ampShowCaption ) {
+												props.setAttributes( { caption: '' } );
+											}
+										}
+									}
+									help={ __( 'Toggle on to show video caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
 								/>
 							</PanelBody>
 						</InspectorControls>

@@ -48,10 +48,13 @@ const withWrapperProps = ( BlockListBlock ) => {
 			return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
 		}
 
+		const noCaption = ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ||
+			( 'core/video' === blockName && ! attributes.ampShowCaption );
+
 		// If we have image caption or font-family set, add these to wrapper properties.
 		wrapperProps = {
 			...props.wrapperProps,
-			'data-amp-image-caption': ( 'core/image' === blockName && ! attributes.ampShowImageCaption ) ? 'noCaption' : undefined,
+			'data-amp-caption': noCaption ? 'noCaption' : undefined,
 			'data-font-family': attributes.ampFontFamily || undefined,
 		};
 

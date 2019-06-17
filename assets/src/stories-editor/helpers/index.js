@@ -311,6 +311,11 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	if ( isVideoBlock ) {
+		addedAttributes.ampShowCaption = {
+			type: 'boolean',
+			default: false,
+		};
+
 		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
 			...settings.attributes.autoplay,
