@@ -2,7 +2,6 @@
  * External dependencies
  */
 import classnames from 'classnames';
-import uuid from 'uuid/v4';
 import PropTypes from 'prop-types';
 
 /**
@@ -17,13 +16,14 @@ import {
 import {
 	URLInput,
 	RichText,
-} from '@wordpress/editor';
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
  */
 import './edit.css';
 import { select } from '@wordpress/data';
+import { getUniqueId } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 
 class CallToActionEdit extends Component {
@@ -31,7 +31,7 @@ class CallToActionEdit extends Component {
 		super( ...arguments );
 
 		if ( ! props.attributes.anchor ) {
-			this.props.setAttributes( { anchor: uuid() } );
+			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
 		this.nodeRef = null;

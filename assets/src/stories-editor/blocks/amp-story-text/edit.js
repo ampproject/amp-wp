@@ -35,17 +35,17 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes } = this.props;
 		const {
 			height,
 			width,
+			content,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
 		if (
-			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			prevProps.attributes.content === content
 		) {
 			return;
 		}
@@ -106,7 +106,27 @@ class TextBlockEdit extends Component {
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const wrapperStyle = ampFitText && content.length ? { lineHeight: height + 'px' } : null;
+		const wrapperStyle = { backgroundColor: appliedBackgroundColor };
+		if ( ampFitText && content.length ) {
+			wrapperStyle.lineHeight = height + 'px';
+		}
+
+		const styleClasses = [];
+		let wrapperClass = 'wp-block-amp-story-text-wrapper';
+
+		// We need to assign the block styles to the wrapper, too.
+		if ( attributes.className && attributes.className.length ) {
+			const classNames = attributes.className.split( ' ' );
+			classNames.forEach( ( value ) => {
+				if ( value.includes( 'is-style' ) ) {
+					styleClasses.push( value );
+				}
+			} );
+		}
+
+		if ( styleClasses.length ) {
+			wrapperClass += ' ' + styleClasses.join( ' ' );
+		}
 
 		return (
 			<>
@@ -116,7 +136,7 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<div className={ classnames( 'wp-block-amp-story-text-wrapper', {
+				<div className={ classnames( wrapperClass, {
 					'with-line-height': ampFitText,
 				} ) } style={ wrapperStyle } >
 					<RichText
@@ -129,7 +149,6 @@ class TextBlockEdit extends Component {
 						onReplace={ this.onReplace }
 						onSplit={ () => {} }
 						style={ {
-							backgroundColor: appliedBackgroundColor,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 							textAlign: align,
@@ -137,8 +156,6 @@ class TextBlockEdit extends Component {
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
-							'has-background': backgroundColor.color,
-							[ backgroundColor.class ]: backgroundColor.class,
 							[ textColor.class ]: textColor.class,
 							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
 							'is-amp-fit-text': ampFitText,

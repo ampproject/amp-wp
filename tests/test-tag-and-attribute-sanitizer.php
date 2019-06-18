@@ -284,6 +284,8 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								<amp-story-grid-layer template="fill">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
+									<!-- Note: The viewbox attribute must currently be lower-case due to https://github.com/ampproject/amp-wp/issues/2045 -->
+									<svg viewbox="0 0 100 100"><circle cx="50" cy="50" r="50"></circle></svg>
 								</amp-story-grid-layer>
 								<amp-story-grid-layer template="vertical">
 									<h1 animate-in="fly-in-left" animate-in-duration="0.5s" animate-in-delay="0.4s" animate-in-after="object1">Hello, amp-story!</h1>
@@ -316,6 +318,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<i>bad</i>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
 							<i>bad</i>
+							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
 						'
 					);
@@ -1291,7 +1294,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'amp-input-mask' => array(
-				'<form method="post" class="p2" action-xhr="/components/amp-inputmask/postal" target="_top"><label>Postal code: <input name="code" mask="L0L_0L0" placeholder="A1A 1A1"></label><input type="submit"><div submit-success><template type="amp-mustache"><p>You submitted: {{code}}</p></template></div></form>',
+				'<form method="post" class="p2" action-xhr="/components/amp-inputmask/postal" target="_top"><label>Postal code: <input name="code" mask="L0L_0L0" mask-trim-zeros="3" placeholder="A1A 1A1"></label><input type="submit"><div submit-success><template type="amp-mustache"><p>You submitted: {{code}}</p></template></div></form>',
 				null,
 				array( 'amp-form', 'amp-inputmask', 'amp-mustache' ),
 			),
@@ -1302,10 +1305,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array(),
 			),
 
-			'amp_textarea_with_autoexpand' => array(
-				'<textarea name="with-autoexpand" autoexpand></textarea>',
+			'amp_textarea_with_autoexpand_and_defaulttext' => array(
+				'<textarea name="with-autoexpand" autoexpand [defaulttext]="hello" [text]="goodbye">hello</textarea>',
 				null,
-				array( 'amp-form' ),
+				array( 'amp-form', 'amp-bind' ),
 			),
 
 			'amp-viqeo-player' => array(
@@ -1436,10 +1439,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<button id="img">Insert &lt;img&gt;</button>
 						</div>
 					</amp-script>
-					
-					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
-						<div class="root">should be empty</div>
-					</amp-script>
 				',
 				null,
 				array( 'amp-script' ),
@@ -1448,6 +1447,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'
 					<amp-script src="https://example.com/examples/amp-script/todomvc.ssr.js" layout="container">
 						<div><header class="header"><h1>todos</h1><input class="new-todo" placeholder="What needs to be done?" autofocus="true"></header></div>
+					</amp-script>
+				',
+				null,
+				array( 'amp-script' ),
+			),
+
+			'amp-script-4' => array(
+				'
+					<amp-script layout="container" src="https://example.com/examples/amp-script/empty.js">
+						<div class="root">should be empty</div>
 					</amp-script>
 				',
 				null,
@@ -1472,6 +1481,50 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				array( 'amp-geo' ),
 				array( 'duplicate_element' ),
 			),
+
+			'amp-autocomplete' => array(
+				'
+					<form method="post" action-xhr="/form/echo-json/post" target="_blank" on="submit-success:AMP.setState({result: event.response})">
+						<amp-autocomplete id="autocomplete" filter="substring" min-characters="0">
+							<input type="text" id="input">
+							<script type="application/json" id="script">
+							{ "items" : ["apple", "banana", "orange"] }
+							</script>
+						</amp-autocomplete>
+					</form>
+				',
+				null,
+				array( 'amp-form', 'amp-autocomplete' ),
+			),
+
+			'amp-connatix-player' => array(
+				'<amp-connatix-player data-player-id="03ef71d8-0941-4bff-94f2-74ca3580b497" layout="responsive" width="16" height="9"></amp-connatix-player>',
+				null,
+				array( 'amp-connatix-player' ),
+			),
+
+			'amp-truncate-text' => array(
+				'
+					<amp-truncate-text layout="fixed" height="3em" width="20em">
+						Some text that may get truncated.
+						<button slot="expand">See more</button>
+						<button slot="collapse">See less</button>
+					</amp-truncate-text>
+				',
+				null,
+				array( 'amp-truncate-text' ),
+			),
+
+			'amp-user-location' => array(
+				'
+					<button on="tap: location.request()">Use my location</button>
+					<amp-user-location id="location" on="approve:AMP.setState({located: true})" layout="nodisplay">
+					</amp-user-location>
+				',
+				null,
+				array( 'amp-user-location' ),
+			),
+
 		);
 	}
 

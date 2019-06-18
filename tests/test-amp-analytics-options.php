@@ -277,10 +277,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics_when_empty() {
-
-		ob_start();
-		amp_print_analytics( '' );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( 'amp_print_analytics', array( '' ) );
+		$this->assertEmpty( $output );
 
 		$this->insert_one_option(
 			$this->vendor,

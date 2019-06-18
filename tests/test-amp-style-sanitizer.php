@@ -20,6 +20,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		global $wp_styles, $wp_scripts;
 		$wp_styles  = null;
 		$wp_scripts = null;
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 	}
 
 	/**

@@ -173,38 +173,40 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
-
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
-
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
-		// Actions and filters involved in validation.
-		add_action(
-			'activate_plugin',
-			static function() {
-				if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
-					add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			// Actions and filters involved in validation.
+			add_action(
+				'activate_plugin',
+				function() {
+					if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
+						add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+					}
 				}
-			}
-		);
+			);
 
-		// Prevent query vars from persisting after redirect.
-		add_filter(
-			'removable_query_args',
-			static function( $query_vars ) {
-				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-				return $query_vars;
-			}
-		);
+			// Prevent query vars from persisting after redirect.
+			add_filter(
+				'removable_query_args',
+				function( $query_vars ) {
+					$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+					return $query_vars;
+				}
+			);
 
-		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
+			add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
+
+			add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
+		}
 
 		if ( self::$should_locate_sources ) {
 			/*
@@ -218,6 +220,49 @@ class AMP_Validation_Manager {
 
 			self::add_validation_error_sourcing();
 		}
+	}
+
+	/**
+	 * Determine if a post supports AMP validation.
+	 *
+	 * @since 1.2
+	 *
+	 * @param WP_Post|int $post Post.
+	 * @return bool Whether post supports AMP validation.
+	 */
+	public static function post_supports_validation( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$supports_validation = (
+			// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
+			is_post_type_viewable( $post->post_type )
+			&&
+			! wp_is_post_autosave( $post )
+			&&
+			! wp_is_post_revision( $post )
+			&&
+			'auto-draft' !== $post->post_status
+			&&
+			'trash' !== $post->post_status
+		);
+		if ( ! $supports_validation ) {
+			return false;
+		}
+
+		// Story post type always supports validation.
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+			return AMP_Options_Manager::is_stories_experience_enabled();
+		}
+
+		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+			return false;
+		}
+
+		return post_supports_amp( $post );
 	}
 
 	/**
@@ -236,7 +281,7 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
+	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
@@ -258,7 +303,7 @@ class AMP_Validation_Manager {
 	 * - Parent admin item and first submenu item: link to non-AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
-	 * When on native AMP response:
+	 * When on AMP-first response:
 	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors.
 	 * - Parent admin and first submenu item: link to validate the URL.
 	 *
@@ -411,7 +456,7 @@ class AMP_Validation_Manager {
 		if ( ! is_amp_endpoint() && isset( $_GET[ self::VALIDATION_ERRORS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			add_action(
 				'wp_before_admin_bar_render',
-				static function() {
+				function() {
 					?>
 				<script>
 				(function( queryVar ) {
@@ -440,9 +485,11 @@ class AMP_Validation_Manager {
 
 		// Capture overrides validation error status overrides from query var.
 		$can_override_validation_error_statuses = (
-			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ], $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			isset( $_REQUEST[ self::VALIDATE_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
 			self::get_amp_validate_nonce() === $_REQUEST[ self::VALIDATE_QUERY_VAR ] // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&&
+			isset( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			&&
 			is_array( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		);
@@ -453,7 +500,7 @@ class AMP_Validation_Manager {
 			 */
 			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$slug   = sanitize_key( $slug );
-				$status = (int) $status;
+				$status = intval( $status );
 				self::$validation_error_status_overrides[ $slug ] = $status;
 				ksort( self::$validation_error_status_overrides );
 			}
@@ -499,11 +546,13 @@ class AMP_Validation_Manager {
 		$post = get_post( $post_id );
 
 		$is_classic_editor_post_save = (
-			isset( $_SERVER['REQUEST_METHOD'], $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			isset( $_SERVER['REQUEST_METHOD'] )
 			&&
 			'POST' === $_SERVER['REQUEST_METHOD']
 			&&
 			'post.php' === $pagenow
+			&&
+			isset( $_POST['post_ID'] ) // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			&&
 			(int) $_POST['post_ID'] === (int) $post_id // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		);
@@ -511,13 +560,7 @@ class AMP_Validation_Manager {
 		$should_validate_post = (
 			$is_classic_editor_post_save
 			&&
-			is_post_type_viewable( $post->post_type )
-			&&
-			! wp_is_post_autosave( $post )
-			&&
-			! wp_is_post_revision( $post )
-			&&
-			'auto-draft' !== $post->post_status
+			self::post_supports_validation( $post )
 			&&
 			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
@@ -541,8 +584,8 @@ class AMP_Validation_Manager {
 	public static function validate_queued_posts_on_frontend() {
 		$posts = array_filter(
 			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
-			static function( $post ) {
-				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
+			function( $post ) {
+				return self::post_supports_validation( $post );
 			}
 		);
 
@@ -566,7 +609,7 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
+				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
 
 				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
@@ -595,8 +638,10 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( amp_is_canonical() ) {
-			$object_types = get_post_types_by_support( 'editor' );
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$object_types = array( AMP_Story_Post_Type::POST_TYPE_SLUG ); // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
+		} elseif ( amp_is_canonical() ) {
+			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
 		} else {
 			$object_types = array_intersect(
 				get_post_types_by_support( 'amp' ),
@@ -633,7 +678,8 @@ class AMP_Validation_Manager {
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
-		if ( ! current_user_can( 'edit_post', $post_data['id'] ) ) {
+		unset( $field_name );
+		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
 		$post = get_post( $post_data['id'] );
@@ -789,12 +835,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status( $post ) {
-		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
-			return;
-		}
-
-		// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! self::post_supports_validation( $post ) || ! self::has_cap() ) {
 			return;
 		}
 
@@ -836,16 +877,16 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP-first.
 		if ( self::is_sanitization_auto_accepted() ) {
 			if ( ! $has_rejected_error ) {
 				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			} else {
 				/*
-				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
+				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
 				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
 				 * In that case, this will block serving AMP.
-				 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
+				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
 				 */
 				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			}
@@ -879,7 +920,7 @@ class AMP_Validation_Manager {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
 			$items = array();
 			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === (int) $count ) {
+				if ( 1 === intval( $count ) ) {
 					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 				} else {
 					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
@@ -1208,7 +1249,7 @@ class AMP_Validation_Manager {
 					)
 				);
 
-				$callback['function'] = static function() use ( &$callback, $wrapped_callback, $original_function ) {
+				$callback['function'] = function() use ( &$callback, $wrapped_callback, $original_function ) {
 					$callback['function'] = $original_function; // Restore original.
 					return call_user_func_array( $wrapped_callback, func_get_args() );
 				};
@@ -1476,7 +1517,7 @@ class AMP_Validation_Manager {
 	 * @return closure $wrapped_callback The callback, wrapped in comments.
 	 */
 	public static function wrapped_callback( $callback ) {
-		return static function() use ( $callback ) {
+		return function() use ( $callback ) {
 			global $wp_styles, $wp_scripts;
 
 			$function      = $callback['function'];
@@ -1484,11 +1525,11 @@ class AMP_Validation_Manager {
 			$args          = func_get_args();
 
 			$before_styles_enqueued = array();
-			if ( isset( $wp_styles, $wp_styles->queue ) ) {
+			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
 				$before_styles_enqueued = $wp_styles->queue;
 			}
 			$before_scripts_enqueued = array();
-			if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
+			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
@@ -1500,21 +1541,21 @@ class AMP_Validation_Manager {
 			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
-			$result = call_user_func_array( $function, array_slice( $args, 0, (int) $accepted_args ) );
+			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
 			if ( $has_buffer_started ) {
 				ob_end_flush();
 			}
 			array_pop( AMP_Validation_Manager::$hook_source_stack );
 
 			// Keep track of which source enqueued the styles.
-			if ( isset( $wp_styles, $wp_styles->queue ) ) {
+			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
 				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
 					AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
 				}
 			}
 
 			// Keep track of which source enqueued the scripts, and immediately report validity.
-			if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
+			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
 				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
 					$handles = array( $queued_handle );
 
@@ -1574,7 +1615,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return substr( wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' ), -12, 10 );
+		return substr( wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' ), -12, 10 );
 	}
 
 	/**
@@ -1701,8 +1742,6 @@ class AMP_Validation_Manager {
 		foreach ( $sanitizers as $sanitizer => &$args ) {
 			$args['validation_error_callback'] = __CLASS__ . '::add_validation_error';
 		}
-
-		unset( $args );
 
 		if ( isset( $sanitizers['AMP_Style_Sanitizer'] ) ) {
 			$sanitizers['AMP_Style_Sanitizer']['should_locate_sources'] = self::$should_locate_sources;
@@ -1848,7 +1887,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( trim( $response ) === '' ) {
+		if ( strlen( trim( $response ) ) === 0 ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
@@ -1899,7 +1938,7 @@ class AMP_Validation_Manager {
 			default:
 				/* translators: %s is error code */
 				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-		}
+		};
 	}
 
 	/**
@@ -1952,6 +1991,25 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function enqueue_block_validation() {
+		/*
+		 * The AMP_Validation_Manager::post_supports_validation() method is not being used here because
+		 * a post's status for validation checking can change during the life of the editor, such as when
+		 * the user toggles AMP back on after having turned it off, and then gets the validation
+		 * warnings appearing due to the amp-block-validation having been enqueued already.
+		 */
+		$should_enqueue_block_validation = (
+			self::has_cap()
+			&&
+			(
+				( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) )
+				||
+				( AMP_Options_Manager::is_stories_experience_enabled() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() )
+			)
+		);
+		if ( ! $should_enqueue_block_validation ) {
+			return;
+		}
+
 		$slug = 'amp-block-validation';
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
@@ -1971,7 +2029,7 @@ class AMP_Validation_Manager {
 		$enabled_status    = $status_and_errors['status'];
 
 		$data = array(
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted() || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type(),
 			'possibleStatuses'           => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
 			'defaultStatus'              => $enabled_status,
 		);

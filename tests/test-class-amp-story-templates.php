@@ -18,12 +18,17 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'The minimum requirements for running stories are not present, so skipping test.' );
+		}
+
 		foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
 			if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
 				WP_Block_Type_Registry::get_instance()->unregister( $block->name );
 			}
 		}
 
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
 		AMP_Story_Post_Type::register();
 	}
 
@@ -33,10 +38,6 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Templates::init()
 	 */
 	public function test_init() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
-
 		$amp_story_templates = new AMP_Story_Templates();
 		$amp_story_templates->init();
 
@@ -53,10 +54,6 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Templates::filter_user_has_cap()
 	 */
 	public function test_filter_user_has_cap() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
-
 		$story_id = self::factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		wp_set_object_terms( $story_id, AMP_Story_Templates::TEMPLATES_TERM, AMP_Story_Templates::TEMPLATES_TAXONOMY );
 

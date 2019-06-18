@@ -55,6 +55,38 @@ class AMP_Theme_Support {
 	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
 
 	/**
+	 * Slug identifying standard website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const STANDARD_MODE_SLUG = 'standard';
+
+	/**
+	 * Slug identifying transitional website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const TRANSITIONAL_MODE_SLUG = 'transitional';
+
+	/**
+	 * Slug identifying reader website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const READER_MODE_SLUG = 'reader';
+
+	/**
+	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const PAIRED_FLAG = 'paired';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -110,12 +142,23 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
-	 * Theme support options that were added via option.
+	 * Theme support mode that was added via option.
+	 *
+	 * This should be either null (reader), 'standard', or 'transitional'.
 	 *
 	 * @since 1.0
-	 * @var bool
+	 * @var null|string
 	 */
-	protected static $support_added_via_option = false;
+	protected static $support_added_via_option = null;
+
+	/**
+	 * Theme support mode which was added via the theme.
+	 *
+	 * This should be either null (reader), 'standard', or 'transitional'.
+	 *
+	 * @var null|string
+	 */
+	protected static $support_added_via_theme = null;
 
 	/**
 	 * Initialize.
@@ -127,7 +170,7 @@ class AMP_Theme_Support {
 
 		self::$init_start_time = microtime( true );
 
-		if ( current_theme_supports( self::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( self::SLUG ) ) {
 			// Ensure extra theme support for core themes is in place.
 			AMP_Core_Theme_Sanitizer::extend_theme_support();
 
@@ -141,7 +184,7 @@ class AMP_Theme_Support {
 			 * action to template_redirect--the wp action--is used instead.
 			 */
 			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
-		} elseif ( AMP_Options_Manager::get_option( 'enable_amp_stories' ) ) {
+		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 			add_action(
 				'wp',
 				static function () {
@@ -159,11 +202,63 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::get_support_mode()
+	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
 	 *
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
+		_deprecated_function( __METHOD__, '1.2', 'AMP_Theme_Support::get_support_mode_added_via_option' );
+		return null !== self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode_added_via_option() {
 		return self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode_added_via_theme() {
+		return self::$support_added_via_theme;
+	}
+
+	/**
+	 * Get theme support mode.
+	 *
+	 * @return string Theme support mode.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode() {
+		$theme_support = self::get_support_mode_added_via_option();
+		if ( ! $theme_support ) {
+			$theme_support = self::get_support_mode_added_via_theme();
+		}
+		if ( ! $theme_support ) {
+			$theme_support = self::READER_MODE_SLUG;
+		}
+		return $theme_support;
 	}
 
 	/**
@@ -171,16 +266,20 @@ class AMP_Theme_Support {
 	 *
 	 * The DB option is only considered if the theme does not already explicitly support AMP.
 	 *
-	 * @see AMP_Theme_Support::is_support_added_via_option()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_theme()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_option()
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 */
 	public static function read_theme_support() {
+		self::$support_added_via_theme  = null;
+		self::$support_added_via_option = null;
+
 		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
+			$keys = array( 'template_dir', 'comments_live_list', self::PAIRED_FLAG, 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong(
@@ -209,16 +308,33 @@ class AMP_Theme_Support {
 					'1.0'
 				);
 			}
-			self::$support_added_via_option = false;
-		} elseif ( 'disabled' !== $theme_support_option ) {
+
+			$is_paired = ! empty( $args[ self::PAIRED_FLAG ] );
+
+			self::$support_added_via_theme  = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
+			self::$support_added_via_option = $theme_support_option;
+
+			// Make sure the user option can override what the theme has specified.
+			if ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) {
+				$args[ self::PAIRED_FLAG ] = false;
+				add_theme_support( self::SLUG, $args );
+			} elseif ( ! $is_paired && self::TRANSITIONAL_MODE_SLUG === $theme_support_option ) {
+				$args[ self::PAIRED_FLAG ] = true;
+				add_theme_support( self::SLUG, $args );
+			} elseif ( self::READER_MODE_SLUG === $theme_support_option ) {
+				remove_theme_support( self::SLUG );
+			}
+		} elseif ( self::READER_MODE_SLUG !== $theme_support_option ) {
+			$is_paired = ( self::TRANSITIONAL_MODE_SLUG === $theme_support_option );
 			add_theme_support(
 				self::SLUG,
 				array(
-					'paired' => 'paired' === $theme_support_option,
+					self::PAIRED_FLAG => $is_paired,
 				)
 			);
-			self::$support_added_via_option = true;
+			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
 	}
@@ -239,7 +355,7 @@ class AMP_Theme_Support {
 		$support = get_theme_support( self::SLUG );
 		if ( true === $support ) {
 			return array(
-				'paired' => false,
+				self::PAIRED_FLAG => false,
 			);
 		}
 		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {
@@ -303,7 +419,7 @@ class AMP_Theme_Support {
 
 		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
-			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
 			 * Permanent redirect is used for unauthenticated users since switching between modes
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
@@ -2010,7 +2126,7 @@ class AMP_Theme_Support {
 
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
-			 * In native AMP, strip html@amp attribute to prevent GSC from complaining about a validation error
+			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */

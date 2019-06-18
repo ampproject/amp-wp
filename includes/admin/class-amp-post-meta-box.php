@@ -230,8 +230,10 @@ class AMP_Post_Meta_Box {
 			'possibleStatuses' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
 			'defaultStatus'    => $enabled_status,
 			'errorMessages'    => $error_messages,
+			'isWebsiteEnabled' => AMP_Options_Manager::is_website_experience_enabled(),
+			'isStoriesEnabled' => AMP_Options_Manager::is_stories_experience_enabled(),
 			'hasThemeSupport'  => current_theme_supports( AMP_Theme_Support::SLUG ),
-			'isNativeAMP'      => amp_is_canonical(),
+			'isStandardMode'   => amp_is_canonical(),
 		);
 
 		wp_localize_script(

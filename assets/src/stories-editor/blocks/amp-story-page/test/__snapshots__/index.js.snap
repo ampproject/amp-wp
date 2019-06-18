@@ -6,6 +6,14 @@ exports[`amp/amp-story-page block edit matches snapshot 1`] = `
 >
   <div
     class="editor-inner-blocks block-editor-inner-blocks"
-  />
+  >
+    <div
+      class="editor-block-list__layout block-editor-block-list__layout"
+    >
+      <div
+        class="block-list-appender"
+      />
+    </div>
+  </div>
 </div>
 `;

@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, isEqual, has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -12,7 +12,7 @@ import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
-import { createBlock } from '@wordpress/blocks';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
 
 /**
@@ -35,7 +35,11 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	TEXT_BLOCK_BORDER,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -152,7 +156,10 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 200;
 
 		case 'core/pullquote':
-			return 215;
+			return 250;
+
+		case 'core/table':
+			return 100;
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
@@ -183,8 +190,11 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+	// Image block already has width and heigh.
+	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
 		anchor: {
@@ -243,16 +253,16 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	if ( isMovableBlock ) {
 		addedAttributes.positionTop = {
-			type: 'number',
 			default: 0,
+			type: 'number',
 		};
 
 		addedAttributes.positionLeft = {
-			type: 'number',
 			default: 5,
+			type: 'number',
 		};
 
-		if ( ! isImageBlock ) {
+		if ( needsWidthHeight ) {
 			addedAttributes.height = {
 				type: 'number',
 				default: getDefaultMinimumBlockHeight( name ),
@@ -347,8 +357,13 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 /**
- * Filters blocks' transformations.
+ * Filters block transformations.
+ *
  * Removes prefixed list transformations to prevent automatic transformation.
+ *
+ * Adds a custom transform for blocks within <amp-story-grid-layer>.
+ *
+ * @see https://github.com/ampproject/amp-wp/issues/2370
  *
  * @param {Object} settings Settings.
  * @param {string} name     Block name.
@@ -356,24 +371,51 @@ export const addAMPAttributes = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
-	if ( ! isChildBlock ) {
+	if ( ! isMovableBlock ) {
 		return settings;
 	}
 
-	if ( 'core/list' !== name || ! settings.transforms ) {
-		return settings;
-	}
+	const gridWrapperTransform = {
+		type: 'raw',
+		priority: 20,
+		selector: `amp-story-grid-layer[data-block-name="${ name }"]`,
+		transform: ( node ) => {
+			const innerHTML = node.outerHTML;
+			const blockAttributes = getBlockAttributes( name, innerHTML );
 
-	const transforms = {
-		...settings.transforms,
-		from: settings.transforms.from.filter( ( { type } ) => 'prefix' !== type ),
+			if ( 'amp/amp-story-text' === name ) {
+				/*
+				 * When there is nothing that matches the content selector (.amp-text-content),
+				 * the pasted content lacks the amp-fit-text wrapper and thus ampFitText is false.
+				 */
+				if ( ! blockAttributes.content ) {
+					blockAttributes.content = node.textContent;
+					blockAttributes.tagName = node.nodeName;
+					blockAttributes.ampFitText = false;
+				}
+			}
+
+			return createBlock( name, blockAttributes );
+		},
 	};
+
+	const transforms = settings.transforms ? { ...settings.transforms } : {};
+	let fromTransforms = transforms.from ? [ ...transforms.from ] : [];
+
+	if ( 'core/list' === name ) {
+		fromTransforms = fromTransforms.filter( ( { type } ) => 'prefix' !== type );
+	}
+
+	fromTransforms.push( gridWrapperTransform );
 
 	return {
 		...settings,
-		transforms,
+		transforms: {
+			...transforms,
+			from: fromTransforms,
+		},
 	};
 };
 
@@ -397,7 +439,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const newProps = { ...props };
 
 	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || getUniqueId();
 
 	if ( attributes.rotationAngle ) {
 		let style = ! newProps.style ? {} : newProps.style;
@@ -449,14 +491,14 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {Object} element                  Block element.
- * @param {Object} blockType                Block type object.
- * @param {Object} attributes               Block attributes.
- * @param {number} attributes.positionTop   Top offset in pixel.
- * @param {number} attributes.positionLeft  Left offset in pixel.
- * @param {number} attributes.rotationAngle Rotation angle in degrees.
- * @param {number} attributes.width         Block width in pixels.
- * @param {number} attributes.height        Block height in pixels.
+ * @param {WPElement} element                  Block element.
+ * @param {Object}    blockType                Block type object.
+ * @param {Object}    attributes               Block attributes.
+ * @param {number}    attributes.positionTop   Top offset in pixel.
+ * @param {number}    attributes.positionLeft  Left offset in pixel.
+ * @param {number}    attributes.rotationAngle Rotation angle in degrees.
+ * @param {number}    attributes.width         Block width in pixels.
+ * @param {number}    attributes.height        Block height in pixels.
  *
  * @return {Object} The wrapped element.
  */
@@ -476,31 +518,23 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		height,
 	} = attributes;
 
-	const style = {
-		style: {},
-	};
+	let style = {};
 
 	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		const positionStyle = {
+		style = {
+			...style,
 			position: 'absolute',
-			top: `${ positionTop }%`,
-			left: `${ positionLeft }%`,
-		};
-		style.style = {
-			...style.style,
-			...positionStyle,
+			top: `${ positionTop || 0 }%`,
+			left: `${ positionLeft || 0 }%`,
 		};
 	}
 
 	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( width && height ) {
-		const resizeStyle = {
-			width: `${ getPercentageFromPixels( 'x', width ) }%`,
-			height: `${ getPercentageFromPixels( 'y', height ) }%`,
-		};
-		style.style = {
-			...style.style,
-			...resizeStyle,
+	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
+		style = {
+			...style,
+			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
+			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
 		};
 	}
 
@@ -524,8 +558,8 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	}
 
 	return (
-		<amp-story-grid-layer template="vertical">
-			<div className="amp-story-block-wrapper" { ...style } { ...animationAtts }>
+		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
+			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
@@ -1139,8 +1173,8 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-text':
 			const element = getBlockInnerTextElement( block );
 
-			if ( element && ampFitText && content.length ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+			if ( element && content.length ) {
+				const fitFontSize = calculateFontSize( element, height + TEXT_BLOCK_BORDER, width + TEXT_BLOCK_BORDER, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1154,7 +1188,7 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
-			if ( metaBlockElement && ampFitText ) {
+			if ( metaBlockElement ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1390,4 +1424,42 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+};
+
+/**
+ * Gets the number of megabytes per second for the video.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {number|null} Number of megabytes per second, or null if media details unavailable.
+ */
+export const getVideoBytesPerSecond = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return null;
+	}
+	return media.media_details.filesize / media.media_details.length;
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of MB per second.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Returns a unique ID that is guaranteed to not start with a number.
+ *
+ * Useful for using in HTML attributes.
+ *
+ * @return {string} Unique ID.
+ */
+export const getUniqueId = () => {
+	return uuid().replace( /^\d/, 'a' );
 };

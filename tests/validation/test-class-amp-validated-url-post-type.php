@@ -172,7 +172,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_get_invalid_url_validation_errors() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create();
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
@@ -235,7 +235,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::get_invalid_url_post()
 	 */
 	public function test_get_invalid_url_post() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create_and_get();
 		$this->assertEquals( null, AMP_Validated_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) ) );
@@ -282,7 +282,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::get_url_from_post()
 	 */
 	public function test_get_url_from_post() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create_and_get();
 
@@ -302,7 +302,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id )
 		);
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$this->assertEquals(
 			get_permalink( $post ),
 			AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id )
@@ -334,7 +334,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_store_validation_errors() {
 		global $post;
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = self::factory()->post->create_and_get();
 
@@ -730,7 +730,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_handle_bulk_action() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 
 		$invalid_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
@@ -854,7 +854,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_handle_validate_request() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::init();
 

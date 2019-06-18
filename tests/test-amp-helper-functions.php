@@ -68,7 +68,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				unset( $_SERVER['REQUEST_URI'] );
 			}
 			$this->assertEquals(
-				home_url( $request_uri ? $request_uri : '/' ),
+				home_url( $request_uri ?: '/' ),
 				amp_get_current_url(),
 				sprintf( 'Unexpected for URI: %s', wp_json_encode( $request_uri, 64 /* JSON_UNESCAPED_SLASHES */ ) )
 			);
@@ -312,6 +312,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				'template_dir' => './',
 			)
 		);
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
@@ -350,7 +352,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
-		// Native theme support.
+		// Standard theme support.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 
@@ -476,20 +478,35 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		$output = get_echo( 'amp_add_generator_metadata' );
+
+		$get_generator_tag = static function() {
+			return get_echo( 'amp_add_generator_metadata' );
+		};
+
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=reader', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertContains( 'experiences=website', $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
-		$output = get_echo( 'amp_add_generator_metadata' );
-
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
+		$output = $get_generator_tag();
 		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
-		$output = get_echo( 'amp_add_generator_metadata' );
-		$this->assertContains( 'mode=native', $output );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=none', $output );
+		$this->assertContains( 'experiences=stories', $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
+		$this->assertContains( 'experiences=website,stories', $output );
 	}
 
 	/**
@@ -708,9 +725,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$attachment_height       = 45;
 		$attachment_width        = 600;
 		$attachment_id           = self::factory()->attachment->create_object(
-			$attachment_src,
-			0,
 			array(
+				'file'           => $attachment_src,
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
@@ -739,9 +755,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Test a video as an 'attachment' post type, which shouldn't have a schema.org image.
 		$attachment_src = 'example/test-video.mpeg';
 		$attachment_id  = self::factory()->attachment->create_object(
-			$attachment_src,
-			0,
 			array(
+				'file'           => $attachment_src,
 				'post_mime_type' => 'video/mpeg',
 			)
 		);
@@ -797,9 +812,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$custom_logo_height = 45;
 		$custom_logo_width  = 600;
 		$custom_logo_id     = self::factory()->attachment->create_object(
-			$custom_logo_src,
-			0,
 			array(
+				'file'           => $custom_logo_src,
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
@@ -829,9 +843,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		// Test the site icon as the publisher logo.
 		$site_icon_src          = 'foo/site-icon.jpeg';
 		$site_icon_id           = self::factory()->attachment->create_object(
-			$site_icon_src,
-			0,
 			array(
+				'file'           => $site_icon_src,
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
@@ -981,7 +994,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertNull( $admin_bar->get_node( 'amp' ) );
 
 		// Check that paired mode does add link.
-		add_theme_support( 'amp', array( 'paired' => true ) );
+		add_theme_support( 'amp', array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		$admin_bar = new WP_Admin_Bar();
 		amp_add_admin_bar_view_link( $admin_bar );
 		$item = $admin_bar->get_node( 'amp' );
@@ -1022,6 +1035,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * @return string $site_icon The filtered publisher logo in the schema.org data.
 	 */
 	public static function mock_site_icon( $site_icon ) {
+		unset( $site_icon );
 		return self::MOCK_SITE_ICON;
 	}
 }
