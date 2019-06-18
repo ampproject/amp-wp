@@ -12,20 +12,30 @@
 }
 
 @media (max-width: 1200px) {
+
 	.is-sidebar-opened #amp-story-block-navigation {
 		left: 0;
 	}
 }
 
-@media (max-width: 1100px) and (min-width: 961px) {
+@media (max-width: 1100px) and (min-width: 1001px) {
+
 	.is-sidebar-opened .editor-block-list__layout {
 		margin-right: -100px;
 	}
 }
 
 @media (min-width: 961px) {
+
 	#amp-story-block-navigation {
 		display: block;
+	}
+}
+
+@media (min-width: 961px) and (max-width: 1000px) {
+
+	.is-sidebar-opened #amp-story-block-navigation {
+		display: none;
 	}
 }
 
