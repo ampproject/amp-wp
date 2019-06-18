@@ -1,6 +1,6 @@
 === AMP ===
-Contributors: automattic, xwp, google, westonruter, ryankienstra, batmoo, stubgo, albertomedina, tweetythierry, joshuawold, postphotos
-Tags: amp, mobile
+Contributors: google, xwp, automattic, westonruter, swissspidy, stubgo, ryankienstra, albertomedina, tweetythierry
+Tags: amp, framework, components, performance, mobile, stories
 Requires at least: 4.9
 Tested up to: 5.2
 Stable tag: 1.1.3
