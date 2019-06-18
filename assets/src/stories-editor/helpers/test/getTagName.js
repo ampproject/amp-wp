@@ -28,4 +28,8 @@ describe( 'getTagName', () => {
 		expect( getTagName( { content: 'This heading is a bit longer' }, true ) ).toBe( 'h2' );
 		expect( getTagName( { content: 'This heading is a bit longer' }, false ) ).toBe( 'h2' );
 	} );
+
+	it( 'should return paragraph if text is long enough', () => {
+		expect( getTagName( { content: 'This content is way longer than what is normal for a heading' }, false ) ).toBe( 'p' );
+	} );
 } );

@@ -193,7 +193,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
-	// Image block already has width and heigh.
+	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
