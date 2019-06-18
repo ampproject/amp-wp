@@ -28,6 +28,7 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 			}
 		}
 
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
 		AMP_Story_Post_Type::register();
 	}
 

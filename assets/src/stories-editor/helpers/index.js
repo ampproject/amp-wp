@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, isEqual, has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -35,8 +35,11 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
-	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_RESIZING,
+	BLOCKS_WITH_TEXT_SETTINGS,
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	TEXT_BLOCK_BORDER,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -436,7 +439,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const newProps = { ...props };
 
 	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || getUniqueId();
 
 	if ( attributes.rotationAngle ) {
 		let style = ! newProps.style ? {} : newProps.style;
@@ -1170,8 +1173,8 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-text':
 			const element = getBlockInnerTextElement( block );
 
-			if ( element && ampFitText && content.length ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+			if ( element && content.length ) {
+				const fitFontSize = calculateFontSize( element, height + TEXT_BLOCK_BORDER, width + TEXT_BLOCK_BORDER, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1185,7 +1188,7 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
-			if ( metaBlockElement && ampFitText ) {
+			if ( metaBlockElement ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1421,4 +1424,42 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+};
+
+/**
+ * Gets the number of megabytes per second for the video.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {number|null} Number of megabytes per second, or null if media details unavailable.
+ */
+export const getVideoBytesPerSecond = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return null;
+	}
+	return media.media_details.filesize / media.media_details.length;
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of MB per second.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Returns a unique ID that is guaranteed to not start with a number.
+ *
+ * Useful for using in HTML attributes.
+ *
+ * @return {string} Unique ID.
+ */
+export const getUniqueId = () => {
+	return uuid().replace( /^\d/, 'a' );
 };

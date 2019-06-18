@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.2';
+	const STORY_TEMPLATES_VERSION = '0.3.3';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -32,7 +32,7 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		if ( ! post_type_exists( 'amp_story' ) ) {
+		if ( ! post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			return;
 		}
 

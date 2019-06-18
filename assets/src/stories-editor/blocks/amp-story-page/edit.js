@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -16,7 +16,7 @@ import {
 	MediaUpload,
 	MediaUploadCheck,
 } from '@wordpress/block-editor';
-import { Component } from '@wordpress/element';
+import { Component, createRef } from '@wordpress/element';
 import {
 	PanelBody,
 	Button,
@@ -37,7 +37,14 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { getTotalAnimationDuration, addBackgroundColorToOverlay, getCallToActionBlock } from '../../helpers';
+import {
+	getTotalAnimationDuration,
+	addBackgroundColorToOverlay,
+	getCallToActionBlock,
+	isVideoSizeExcessive,
+	getVideoBytesPerSecond,
+	getUniqueId,
+} from '../../helpers';
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -45,12 +52,11 @@ import {
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
+	MAX_IMAGE_SIZE_SLUG,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	MEGABYTE_IN_BYTES,
 } from '../../constants';
 import './edit.css';
-
-const TEMPLATE = [
-	[ 'amp/amp-story-text' ],
-];
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -62,9 +68,10 @@ class PageEdit extends Component {
 		super( ...arguments );
 
 		if ( ! props.attributes.anchor ) {
-			this.props.setAttributes( { anchor: uuid() } );
+			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
+		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
 
@@ -82,7 +89,14 @@ class PageEdit extends Component {
 	 */
 	onSelectMedia( media ) {
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined, poster: undefined } );
+			this.props.setAttributes(
+				{
+					mediaUrl: undefined,
+					mediaId: undefined,
+					mediaType: undefined,
+					poster: undefined,
+				}
+			);
 			return;
 		}
 
@@ -107,12 +121,24 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 
+		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+
 		this.props.setAttributes( {
-			mediaUrl: media.url,
+			mediaUrl,
 			mediaId: media.id,
 			mediaType,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
+	}
+
+	componentDidUpdate( prevProps ) {
+		if (
+			VIDEO_BACKGROUND_TYPE === this.props.attributes.mediaType &&
+			this.props.attributes.mediaUrl !== prevProps.attributes.mediaUrl &&
+			this.videoPlayer.current
+		) {
+			this.videoPlayer.current.load();
+		}
 	}
 
 	removeBackgroundColor( index ) {
@@ -237,6 +263,8 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
 			<>
@@ -275,6 +303,25 @@ class PageEdit extends Component {
 					</PanelColorSettings>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<>
+							{
+								isExcessiveVideoSize &&
+								<Notice status="warning" isDismissible={ false } >
+									{
+										sprintf(
+											/* translators: %d: the number of recommended megabytes per second */
+											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
+											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+										)
+									}
+									{
+										videoBytesPerSecond && ' ' + sprintf(
+											/* translators: %d: the number of actual megabytes per second */
+											__( 'The selected video is %d MB per second.', 'amp' ),
+											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+										)
+									}
+								</Notice>
+							}
 							<BaseControl>
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
@@ -283,7 +330,7 @@ class PageEdit extends Component {
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Edit Media', 'amp' ) : __( 'Select Media', 'amp' ) }
+												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
 									/>
@@ -317,7 +364,10 @@ class PageEdit extends Component {
 										}
 										<MediaUpload
 											title={ __( 'Select Poster Image', 'amp' ) }
-											onSelect={ ( image ) => setAttributes( { poster: image.url } ) }
+											onSelect={ ( image ) => {
+												const imageUrl = has( image, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? image.sizes[ MAX_IMAGE_SIZE_SLUG ].url : image.url;
+												setAttributes( { poster: imageUrl } );
+											} }
 											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
@@ -398,7 +448,7 @@ class PageEdit extends Component {
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster }>
+							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
 								<source src={ mediaUrl } type={ media.mime_type } />
 							</video>
 						</div>
@@ -406,7 +456,7 @@ class PageEdit extends Component {
 					{ backgroundColors.length > 0 && (
 						<div style={ overlayStyle } />
 					) }
-					<InnerBlocks template={ TEMPLATE } allowedBlocks={ allowedBlocks } />
+					<InnerBlocks allowedBlocks={ allowedBlocks } />
 				</div>
 			</>
 		);

@@ -16,6 +16,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
+		}
+
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
 				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
@@ -38,6 +42,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		global $wp_rewrite;
 
 		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 
 		$wp_rewrite->set_permalink_structure( false );
 		unset( $_SERVER['HTTPS'] );
@@ -51,11 +56,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Story_Post_Type::register()
 	 */
 	public function test_requires_opt_in() {
+		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
+
 		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE ) );
-
 		AMP_Story_Post_Type::register();
-
 		$this->assertFalse( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		AMP_Story_Post_Type::register();
+		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 	}
 
 	/**
@@ -124,10 +133,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::enqueue_embed_styling()
 	 */
 	public function test_enqueue_embed_styling() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
-
 		AMP_Story_Post_Type::register();
 
 		// None of the conditional is satisfied, so this should not enqueue the stylesheet.
@@ -153,9 +158,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function test_override_story_embed_callback() {
 		global $wp_rewrite;
 
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
+		AMP_Story_Post_Type::register();
 
 		/*
 		 * It looks like embedding custom post types does not work with the plain permalink structure.
@@ -216,10 +219,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::register_block_latest_stories()
 	 */
 	public function test_register_block_latest_stories() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the block was not registered.' );
-		}
-
 		AMP_Story_Post_Type::register_block_latest_stories();
 
 		set_current_screen( 'edit.php' );
@@ -265,9 +264,6 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers \AMP_Story_Post_Type::render_block_latest_stories()
 	 */
 	public function test_render_block_latest_stories() {
-		if ( ! function_exists( 'register_block_type' ) ) {
-			$this->markTestSkipped( 'The function register_block_type() is not present, so the AMP Story post type was not registered.' );
-		}
 		AMP_Story_Post_Type::register();
 
 		$attributes = array(

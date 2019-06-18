@@ -46,6 +46,13 @@ class AMP_Story_Post_Type {
 	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
 
 	/**
+	 * The slug of the largest image size allowed in an AMP Story page.
+	 *
+	 * @var string
+	 */
+	const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
+
+	/**
 	 * The large dimension of the AMP Story poster images.
 	 *
 	 * @var int
@@ -224,6 +231,9 @@ class AMP_Story_Post_Type {
 		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
+		// The default image size for AMP Story image block and background media image.
+		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
+
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
 
@@ -260,6 +270,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'use_block_editor_for_story_post_type' ), PHP_INT_MAX, 2 );
 		add_filter( 'classic_editor_enabled_editors_for_post_type', array( __CLASS__, 'filter_enabled_editors_for_story_post_type' ), PHP_INT_MAX, 2 );
+
+		add_filter( 'image_size_names_choose', array( __CLASS__, 'add_new_max_image_size' ) );
 
 		self::register_block_latest_stories();
 
@@ -311,7 +323,7 @@ class AMP_Story_Post_Type {
 			}
 		);
 
-		self::maybe_flush_rewrite_rules();
+		add_action( 'wp_head', array( __CLASS__, 'print_feed_link' ) );
 	}
 
 	/**
@@ -1350,26 +1362,23 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Flushes rewrite rules if it hasn't been done yet after having AMP Stories Post type.
+	 * Add RSS feed link for stories.
+	 *
+	 * @since 1.2
 	 */
-	public static function maybe_flush_rewrite_rules() {
-		$current_rules = get_option( 'rewrite_rules' );
-
-		// If we're not using permalinks.
-		if ( empty( $current_rules ) ) {
-			return;
-		}
-
-		// Check if the rewrite rule for showing preview exists for different permalink settings.
-		$story_rules = array_filter(
-			array_keys( $current_rules ),
-			function( $rule ) {
-				return 0 === strpos( $rule, self::REWRITE_SLUG ) || false !== strpos( $rule, '/' . self::REWRITE_SLUG . '/' );
-			}
+	public static function print_feed_link() {
+		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
+		$feed_url         = add_query_arg(
+			'post_type',
+			self::POST_TYPE_SLUG,
+			get_feed_link()
 		);
-		if ( empty( $story_rules ) ) {
-			flush_rewrite_rules( false );
-		}
+		printf(
+			'<link rel="alternate" type="%s" title="%s" href="%s">',
+			esc_attr( feed_content_type() ),
+			esc_attr( $post_type_object->labels->name ),
+			esc_url( $feed_url )
+		);
 	}
 
 	/**
@@ -1515,5 +1524,33 @@ class AMP_Story_Post_Type {
 			sprintf( '${1}%s${3}', $new_height ),
 			$output
 		);
+	}
+
+	/**
+	 * Adds a new max image size to the images sizes available.
+	 *
+	 * In the AMP story editor, when selecting Background Media,
+	 * it will use this custom image size.
+	 * This filter will also make it available in the Image block's 'Image Size' <select> element.
+	 *
+	 * @param array $image_sizes {
+	 *     An associative array of image sizes.
+	 *
+	 *     @type string $slug Image size slug, like 'medium'.
+	 *     @type string $name Image size name, like 'Medium'.
+	 * }
+	 * @return array $image_sizes The filtered image sizes.
+	 */
+	public static function add_new_max_image_size( $image_sizes ) {
+		$full_size_name = __( 'AMP Story Max Size', 'amp' );
+
+		if ( isset( $_POST['action'] ) && 'query-attachments' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
+		} elseif ( get_post_type() && self::POST_TYPE_SLUG === get_post_type() ) {
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
+			unset( $image_sizes['full'] );
+		}
+
+		return $image_sizes;
 	}
 }
