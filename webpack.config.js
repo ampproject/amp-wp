@@ -140,6 +140,16 @@ const admin = {
 	},
 };
 
+const customizer = {
+	...defaultConfig,
+	...sharedConfig,
+	entry: {
+		'amp-customize-controls': './assets/src/customizer/amp-customize-controls.js',
+		'amp-customize-preview': './assets/src/customizer/amp-customize-preview.js',
+		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
+	},
+};
+
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
@@ -156,5 +166,6 @@ module.exports = [
 	blockEditor,
 	classicEditor,
 	admin,
+	customizer,
 	wpPolyfills,
 ];
