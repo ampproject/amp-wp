@@ -172,7 +172,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_get_invalid_url_validation_errors() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create();
 		$this->assertEmpty( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( get_permalink( $post ) ) );
@@ -237,7 +237,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::get_invalid_url_post()
 	 */
 	public function test_get_invalid_url_post() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create_and_get();
 		$this->assertEquals( null, AMP_Validated_URL_Post_Type::get_invalid_url_post( get_permalink( $post ) ) );
@@ -284,7 +284,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 * @covers \AMP_Validated_URL_Post_Type::get_url_from_post()
 	 */
 	public function test_get_url_from_post() {
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create_and_get();
 
@@ -304,7 +304,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 			AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id )
 		);
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
 		$this->assertEquals(
 			get_permalink( $post ),
 			AMP_Validated_URL_Post_Type::get_url_from_post( $invalid_post_id )
@@ -336,7 +336,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_store_validation_errors() {
 		global $post;
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 		$post = $this->factory()->post->create_and_get();
 
@@ -495,22 +495,15 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_get_validated_environment() {
 		switch_theme( 'twentysixteen' );
 		update_option( 'active_plugins', array( 'foo/foo.php', 'bar.php' ) );
-		AMP_Options_Manager::update_option( 'accept_tree_shaking', true );
-		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		$old_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertArrayHasKey( 'theme', $old_env );
 		$this->assertArrayHasKey( 'plugins', $old_env );
-		$this->assertArrayHasKey( 'options', $old_env );
-		$this->assertArrayHasKey( 'accept_tree_shaking', $old_env['options'] );
-		$this->assertTrue( $old_env['options']['accept_tree_shaking'] );
 		$this->assertEquals( 'twentysixteen', $old_env['theme'] );
 
 		switch_theme( 'twentyseventeen' );
 		update_option( 'active_plugins', array( 'foo/foo.php', 'baz.php' ) );
-		AMP_Options_Manager::update_option( 'accept_tree_shaking', false );
 		$new_env = AMP_Validated_URL_Post_Type::get_validated_environment();
 		$this->assertNotEquals( $old_env, $new_env );
-		$this->assertFalse( $new_env['options']['accept_tree_shaking'] );
 		$this->assertEquals( 'twentyseventeen', $new_env['theme'] );
 	}
 
@@ -751,7 +744,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	public function test_handle_bulk_action() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validation_Manager::init();
 
 		$invalid_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
@@ -882,7 +875,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	 */
 	public function test_handle_validate_request() {
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
 		AMP_Validation_Manager::init();
 
@@ -1188,58 +1181,6 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test for add_edit_post_inline_script()
-	 *
-	 * @covers \AMP_Validated_URL_Post_Type::add_edit_post_inline_script()
-	 */
-	public function test_add_edit_post_inline_script() {
-		global $pagenow, $post;
-
-		$pagenow                = 'post.php';
-		$amp_validated_url_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ) );
-		$test_post              = $this->factory()->post->create_and_get();
-
-		$post         = $amp_validated_url_post;
-		$_GET['post'] = $amp_validated_url_post->ID;
-		set_current_screen( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
-		AMP_Validated_URL_Post_Type::enqueue_edit_post_screen_scripts();
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains( 'document.addEventListener(', $inline_script );
-		$this->assertContains( 'You have unsaved changes. Are you sure you want to leave?', $inline_script );
-
-		// Now that the total errors are set, they should appear in the inline script.
-		$total_errors                                      = 22;
-		AMP_Validated_URL_Post_Type::$total_errors_for_url = $total_errors;
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains( 'showing_number_errors', $inline_script );
-		$this->assertContains( strval( $total_errors ), $inline_script );
-
-		// The 'page_heading' value should be present in the inline script.
-		$_GET['action'] = 'edit';
-		update_post_meta(
-			$amp_validated_url_post->ID,
-			'_amp_queried_object',
-			array(
-				'type' => 'post',
-				'id'   => $test_post->ID,
-			)
-		);
-		AMP_Validated_URL_Post_Type::add_edit_post_inline_script();
-		$after_script  = wp_scripts()->registered[ AMP_Validated_URL_Post_Type::EDIT_POST_SCRIPT_HANDLE ]->extra['after'];
-		$inline_script = end( $after_script );
-		$this->assertContains(
-			sprintf( 'Errors for: %s', $test_post->post_title ),
-			$inline_script
-		);
-		$this->assertContains( 'Show all', $inline_script );
-	}
-
-	/**
 	 * Test for add_meta_boxes()
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::add_meta_boxes()
@@ -1453,7 +1394,7 @@ class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
 	/**
 	 * Test render_post_filters.
 	 *
-	 * @covers \AMP_Validation_Error_Taxonomy::render_post_filters()
+	 * @covers \AMP_Validated_URL_Post_Type::render_post_filters()
 	 */
 	public function test_render_post_filters() {
 		set_current_screen( 'edit.php' );

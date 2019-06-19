@@ -154,25 +154,55 @@ $ phpunit --coverage-html /tmp/report
 
 When you push a commit to your PR, Travis CI will run the PHPUnit tests and sniffs against the WordPress Coding Standards.
 
-## Creating a Release
+## Creating a Prerelease
+
+1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
+1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
+1. Do `npm install && composer selfupdate && composer install`.
+1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
+1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
+    1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
+    1. USe new version as the title, followed by some highlight tagline of the release.
+    1. Attach the `amp.zip` build to the release.
+    1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
+    1. Make sure “Pre-release” is checked.
+1. Publish GitHub release.
+1. Create built release tag (from the just-created `build` directory):
+    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Add link from release notes.
+1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
+1. Bump version in release branch, e.g. `…-alpha` to `…-beta1` and `…-beta2` to `…-RC1`
+
+## Creating a Stable Release
 
 Contributors who want to make a new release, follow these steps:
 
-0. Do `npm install && composer selfupdate && composer install`.
-1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
-3. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-4. Do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
-5. Draft blog post about the new release.
-6. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the release branch, with the new plugin version as the tag and release title.
+1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
+    1. Gather props list of the entire release, including contributors of code, design, testing, project management, etc.
+1. Update readme including the description, contributors, and screenshots.
+1. Draft release post.
+1. For major release, draft blog post about the new release.
+1. For minor releases, make sure all merged commits in `develop` have been also merged onto release branch.
+1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
+1. Do `npm install && composer selfupdate && composer install`.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`. Ensure patch version number is supplied for major releases, so `1.2-RC1` should bump to `1.2.0`.
+1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+1. Optionally do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
+1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor):
+    1. Use the new plugin version as the tag (e.g. `1.2.0` or `1.2.1`)
     1. Attach the `amp.zip` build to the release.
-    2. Add changelog entry to the release.
-7. Run `npm run deploy` to commit the plugin to WordPress.org.
-8. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
-9. Publish GitHub release.
-10. Create built release tag (from the just-created `build` directory): `git fetch --tags && ./bin/tag-built.sh` (then add link from release)
-11. For new major/minor releases, create a release branch from the tag. Patch versions are made from the release branch.
-12. Bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
-13. Merge release tag into `master`.
-14. Publish release blog post, including link to GitHub release.
-15. Close the GitHub milestone and project.
-16. Make announcements.
+    1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
+1. Run `npm run deploy` to commit the plugin to WordPress.org.
+1. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
+1. Publish GitHub release.
+1. Create built release tag (from the just-created `build` directory):
+    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Add link from release notes.
+1. For new major releases, create a release branch from the tag. Patch versions are made from the release branch.
+1. For minor releases, bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
+1. Merge release tag into `master`.
+1. Close the GitHub milestone (and project).
+1. Publish release blog post (if applicable), including link to GitHub release.
+1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
+1. Bump version in release branch. After major release (e.g. `1.2.0`), bump to `1.3.0-alpha` on `develop`; after minor release (e.g. `1.2.1`) bump version to `1.2.2-alpha` on the release branch.

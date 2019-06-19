@@ -1,0 +1,29 @@
+.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author {
+	margin: 0;
+	padding: 7px !important;
+	height: 100%;
+}
+
+.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text {
+	line-height: 1.15;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
+}
+
+.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author:not(.is-amp-fit-text) {
+	display: block;
+}
+
+.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text.is-measuring-fontsize {
+	height: initial !important;
+	width: initial !important;
+	position: absolute !important;
+}
+
+.wp-block[data-type="amp/amp-story-post-author"] .amp-story-editor__rotate-container,
+.wp-block[data-type="amp/amp-story-post-author"] .block-mover,
+.wp-block[data-type="amp/amp-story-post-author"] .block-mover div {
+	height: 100%;
+}

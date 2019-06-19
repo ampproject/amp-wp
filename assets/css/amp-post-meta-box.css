@@ -23,7 +23,7 @@
 
 .wp-core-ui #amp-post-preview.preview::after {
 	content: "icon";
-	background: no-repeat center url( '../images/amp-icon.svg' );
+	background: no-repeat center url("../images/amp-icon.svg");
 	background-size: 14px !important;
 	top: 0;
 	right: 0;
@@ -40,7 +40,7 @@
 /* AMP status */
 .misc-amp-status .amp-icon {
 	float: left;
-	background: transparent url( '../images/amp-icon.svg' ) no-repeat left;
+	background: transparent url("../images/amp-icon.svg") no-repeat left;
 	background-size: 17px;
 	width: 17px;
 	height: 17px;
@@ -60,8 +60,9 @@
 }
 
 @media screen and ( max-width: 782px ) {
+
 	#amp-status-select {
-		line-height: 280%;
+		line-height: 2.8;
 	}
 }
 
@@ -70,10 +71,12 @@
 	font-size: 13px;
 	line-height: 1.5;
 }
+
 .amp-block-validation-errors .amp-block-validation-errors__summary {
 	margin: 0.5em 0;
 	padding: 2px;
 }
+
 .amp-block-validation-errors .amp-block-validation-errors__list {
 	padding-left: 2.5em;
 }

@@ -136,6 +136,20 @@ class AMP_Validation_Manager {
 	protected static $amp_admin_bar_item_added = false;
 
 	/**
+	 * Cached template directory to prevent infinite recursion.
+	 *
+	 * @var string
+	 */
+	protected static $template_directory;
+
+	/**
+	 * Cached stylesheet directory to prevent infinite recursion.
+	 *
+	 * @var string
+	 */
+	protected static $stylesheet_directory;
+
+	/**
 	 * Add the actions.
 	 *
 	 * @param array $args {
@@ -159,47 +173,96 @@ class AMP_Validation_Manager {
 		AMP_Validation_Error_Taxonomy::register();
 
 		// Short-circuit if AMP is not supported as only the post types should be available.
-		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
 		add_action( 'save_post', array( __CLASS__, 'handle_save_post_prompting_validation' ) );
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_validation' ) );
-
 		add_action( 'edit_form_top', array( __CLASS__, 'print_edit_form_validation_status' ), 10, 2 );
-		add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
-
 		add_action( 'rest_api_init', array( __CLASS__, 'add_rest_api_fields' ) );
 
-		// Actions and filters involved in validation.
-		add_action(
-			'activate_plugin',
-			function() {
-				if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
-					add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+		// Add actions for checking theme support is present to determine plugin compatibility and show validation links in the admin bar.
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			// Actions and filters involved in validation.
+			add_action(
+				'activate_plugin',
+				function() {
+					if ( ! has_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ) ) {
+						add_action( 'shutdown', array( __CLASS__, 'validate_after_plugin_activation' ) ); // Shutdown so all plugins will have been activated.
+					}
 				}
-			}
-		);
+			);
 
-		// Prevent query vars from persisting after redirect.
-		add_filter(
-			'removable_query_args',
-			function( $query_vars ) {
-				$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
-				return $query_vars;
-			}
-		);
+			// Prevent query vars from persisting after redirect.
+			add_filter(
+				'removable_query_args',
+				function( $query_vars ) {
+					$query_vars[] = AMP_Validation_Manager::VALIDATION_ERRORS_QUERY_VAR;
+					return $query_vars;
+				}
+			);
 
-		add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
+			add_action( 'all_admin_notices', array( __CLASS__, 'print_plugin_notice' ) );
 
-		// Add filter to auto-accept tree shaking validation error.
-		if ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ) {
-			add_filter( 'amp_validation_error_sanitized', array( __CLASS__, 'filter_tree_shaking_validation_error_as_accepted' ), 10, 2 );
+			add_action( 'admin_bar_menu', array( __CLASS__, 'add_admin_bar_menu_items' ), 101 );
 		}
 
 		if ( self::$should_locate_sources ) {
+			/*
+			 * Always suppress the admin bar from being shown when performing a validation request. This ensures that
+			 * user-initiated validation requests perform the same as validation requests initiated by the WP-CLI
+			 * command `wp amp validate-site`, which does so as an unauthenticated user. Unauthenticated users should
+			 * not be shown the admin bar, and normal site visitors who read AMP content (such as via an AMP Cache) are
+			 * not authenticated, so it doesn't make sense to include the admin bar when doing validation.
+			 */
+			add_filter( 'show_admin_bar', '__return_false', PHP_INT_MAX );
+
 			self::add_validation_error_sourcing();
 		}
+	}
+
+	/**
+	 * Determine if a post supports AMP validation.
+	 *
+	 * @since 1.2
+	 *
+	 * @param WP_Post|int $post Post.
+	 * @return bool Whether post supports AMP validation.
+	 */
+	public static function post_supports_validation( $post ) {
+		$post = get_post( $post );
+		if ( ! $post ) {
+			return false;
+		}
+
+		$supports_validation = (
+			// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
+			is_post_type_viewable( $post->post_type )
+			&&
+			! wp_is_post_autosave( $post )
+			&&
+			! wp_is_post_revision( $post )
+			&&
+			'auto-draft' !== $post->post_status
+			&&
+			'trash' !== $post->post_status
+		);
+		if ( ! $supports_validation ) {
+			return false;
+		}
+
+		// Story post type always supports validation.
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === $post->post_type ) {
+			return AMP_Options_Manager::is_stories_experience_enabled();
+		}
+
+		// Prevent doing post validation in Reader mode or if the Website experience is not enabled.
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+			return false;
+		}
+
+		return post_supports_amp( $post );
 	}
 
 	/**
@@ -218,26 +281,12 @@ class AMP_Validation_Manager {
 	}
 
 	/**
-	 * Return whether sanitization is forcibly accepted, whether because in native mode or via user option.
+	 * Return whether sanitization is forcibly accepted, whether because in AMP-first mode or via user option.
 	 *
 	 * @return bool Whether sanitization is forcibly accepted.
 	 */
 	public static function is_sanitization_auto_accepted() {
 		return amp_is_canonical() || AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
-	}
-
-	/**
-	 * Filter a tree-shaking validation error as accepted for sanitization.
-	 *
-	 * @param bool  $sanitized Sanitized.
-	 * @param array $error     Error.
-	 * @return bool Sanitized.
-	 */
-	public static function filter_tree_shaking_validation_error_as_accepted( $sanitized, $error ) {
-		if ( AMP_Style_Sanitizer::TREE_SHAKING_ERROR_CODE === $error['code'] ) {
-			$sanitized = true;
-		}
-		return $sanitized;
 	}
 
 	/**
@@ -254,7 +303,7 @@ class AMP_Validation_Manager {
 	 * - Parent admin item and first submenu item: link to non-AMP version.
 	 * - Second submenu item: link to validate the URL.
 	 *
-	 * When on native AMP response:
+	 * When on AMP-first response:
 	 * - Icon: CHECK MARK if no unaccepted validation errors on page, or WARNING SIGN if there are unaccepted validation errors.
 	 * - Parent admin and first submenu item: link to validate the URL.
 	 *
@@ -457,6 +506,9 @@ class AMP_Validation_Manager {
 			}
 		}
 
+		self::$template_directory   = get_template_directory();
+		self::$stylesheet_directory = get_stylesheet_directory();
+
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
 		add_action( 'all', array( __CLASS__, 'wrap_hook_callbacks' ) );
@@ -508,13 +560,7 @@ class AMP_Validation_Manager {
 		$should_validate_post = (
 			$is_classic_editor_post_save
 			&&
-			is_post_type_viewable( $post->post_type )
-			&&
-			! wp_is_post_autosave( $post )
-			&&
-			! wp_is_post_revision( $post )
-			&&
-			'auto-draft' !== $post->post_status
+			self::post_supports_validation( $post )
 			&&
 			! isset( self::$posts_pending_frontend_validation[ $post_id ] )
 		);
@@ -539,7 +585,7 @@ class AMP_Validation_Manager {
 		$posts = array_filter(
 			array_map( 'get_post', array_keys( array_filter( self::$posts_pending_frontend_validation ) ) ),
 			function( $post ) {
-				return $post && post_supports_amp( $post ) && 'trash' !== $post->post_status;
+				return self::post_supports_validation( $post );
 			}
 		);
 
@@ -592,8 +638,10 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function add_rest_api_fields() {
-		if ( amp_is_canonical() ) {
-			$object_types = get_post_types_by_support( 'editor' );
+		if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+			$object_types = array( AMP_Story_Post_Type::POST_TYPE_SLUG ); // Eventually validation should be done in Reader mode as well, but for now, limit to stories.
+		} elseif ( amp_is_canonical() ) {
+			$object_types = get_post_types_by_support( 'editor' ); // @todo Shouldn't this actually only be those with 'amp' support, or if if all_templates_supported?
 		} else {
 			$object_types = array_intersect(
 				get_post_types_by_support( 'amp' ),
@@ -631,7 +679,7 @@ class AMP_Validation_Manager {
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
 		unset( $field_name );
-		if ( ! current_user_can( 'edit_post', $post_data['id'] ) ) {
+		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
 		$post = get_post( $post_data['id'] );
@@ -744,8 +792,8 @@ class AMP_Validation_Manager {
 		);
 
 		/*
-		 * Ignore validation errors which are forcibly sanitized by filter. This includes tree shaking error
-		 * accepted by options and via AMP_Validation_Error_Taxonomy::accept_validation_errors()).
+		 * Ignore validation errors which are forcibly sanitized by filter. This includes errors accepted via
+		 * AMP_Validation_Error_Taxonomy::accept_validation_errors(), such as the acceptable_errors in core themes.
 		 * This was introduced in <https://github.com/ampproject/amp-wp/pull/1413> to prevent forcibly-sanitized
 		 * validation errors from being reported, to avoid noise and wasted storage. It was inadvertently
 		 * reverted in de7b04b but then restored as part of <https://github.com/ampproject/amp-wp/pull/1413>.
@@ -787,12 +835,7 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function print_edit_form_validation_status( $post ) {
-		if ( ! post_supports_amp( $post ) || ! self::has_cap() ) {
-			return;
-		}
-
-		// Skip if the post type is not viewable on the frontend, since we need a permalink to validate.
-		if ( ! is_post_type_viewable( $post->post_type ) ) {
+		if ( ! self::post_supports_validation( $post ) || ! self::has_cap() ) {
 			return;
 		}
 
@@ -834,16 +877,16 @@ class AMP_Validation_Manager {
 		esc_html_e( 'There is content which fails AMP validation.', 'amp' );
 		echo ' ';
 
-		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in Native mode.
+		// Auto-acceptance is from either checking 'Automatically accept sanitization...' or from being in AMP-first.
 		if ( self::is_sanitization_auto_accepted() ) {
 			if ( ! $has_rejected_error ) {
 				esc_html_e( 'However, your site is configured to automatically accept sanitization of the offending markup. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			} else {
 				/*
-				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Native mode, it will redirect to a non-AMP page.
+				 * Even if the 'auto_accept_sanitization' option is true, if there are non-accepted errors in non-Standard mode, it will redirect to a non-AMP page.
 				 * For example, the errors could have been stored as 'New Rejected' when auto-accept was false, and now auto-accept is true.
 				 * In that case, this will block serving AMP.
-				 * This could also apply if this is in 'Native' mode and the user has rejected a validation error.
+				 * This could also apply if this is in 'Standard' mode and the user has rejected a validation error.
 				 */
 				esc_html_e( 'Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', 'amp' );
 			}
@@ -1391,6 +1434,12 @@ class AMP_Validation_Manager {
 			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
 				$source['name'] = $matches[1];
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$template_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['type'] = 'theme';
+				$source['name'] = get_template();
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$stylesheet_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['type'] = 'theme';
+				$source['name'] = get_stylesheet();
 			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'theme';
 				$source['name'] = $matches[1];
@@ -1719,7 +1768,6 @@ class AMP_Validation_Manager {
 			if ( ! empty( $css_validation_errors ) ) {
 				$sanitizers['AMP_Style_Sanitizer']['parsed_cache_variant'] = md5( wp_json_encode( $css_validation_errors ) );
 			}
-			$sanitizers['AMP_Style_Sanitizer']['accept_tree_shaking'] = AMP_Options_Manager::get_option( 'accept_tree_shaking' );
 		}
 
 		return $sanitizers;
@@ -1770,11 +1818,6 @@ class AMP_Validation_Manager {
 	 * }
 	 */
 	public static function validate_url( $url ) {
-		if ( amp_is_canonical() ) {
-			$url = remove_query_arg( amp_get_slug(), $url );
-		} else {
-			$url = add_query_arg( amp_get_slug(), '', $url );
-		}
 
 		$added_query_vars = array(
 			self::VALIDATE_QUERY_VAR   => self::get_amp_validate_nonce(),
@@ -1825,13 +1868,7 @@ class AMP_Validation_Manager {
 				break;
 			}
 
-			// Ensure the redirect URL is formatted for the AMP.
-			if ( amp_is_canonical() ) {
-				$location_header = remove_query_arg( amp_get_slug(), $location_header );
-			} else {
-				$location_header = add_query_arg( amp_get_slug(), '', $location_header );
-			}
-			$validation_url = add_query_arg( $added_query_vars, $location_header );
+			$validation_url = $location_header;
 		}
 
 		if ( is_wp_error( $r ) ) {
@@ -1954,27 +1991,66 @@ class AMP_Validation_Manager {
 	 * @return void
 	 */
 	public static function enqueue_block_validation() {
+		/*
+		 * The AMP_Validation_Manager::post_supports_validation() method is not being used here because
+		 * a post's status for validation checking can change during the life of the editor, such as when
+		 * the user toggles AMP back on after having turned it off, and then gets the validation
+		 * warnings appearing due to the amp-block-validation having been enqueued already.
+		 */
+		$should_enqueue_block_validation = (
+			self::has_cap()
+			&&
+			(
+				( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) )
+				||
+				( AMP_Options_Manager::is_stories_experience_enabled() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() )
+			)
+		);
+		if ( ! $should_enqueue_block_validation ) {
+			return;
+		}
+
 		$slug = 'amp-block-validation';
+
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . $slug . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
 
 		wp_enqueue_script(
 			$slug,
 			amp_get_asset_url( "js/{$slug}.js" ),
-			array( 'underscore', AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ),
+			$script_dependencies,
 			AMP__VERSION,
 			true
 		);
 
+		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
+		$enabled_status    = $status_and_errors['status'];
+
 		$data = array(
-			'ampValidityRestField'       => self::VALIDITY_REST_FIELD_NAME,
-			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted(),
+			'isSanitizationAutoAccepted' => self::is_sanitization_auto_accepted() || AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type(),
+			'possibleStatuses'           => array( AMP_Post_Meta_Box::ENABLED_STATUS, AMP_Post_Meta_Box::DISABLED_STATUS ),
+			'defaultStatus'              => $enabled_status,
+		);
+
+		wp_localize_script(
+			$slug,
+			'ampBlockValidation',
+			$data
 		);
 
 		if ( function_exists( 'wp_set_script_translations' ) ) {
 			wp_set_script_translations( $slug, 'amp' );
 		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
-			$data['i18n'] = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
-		}
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
 
-		wp_add_inline_script( $slug, sprintf( 'ampBlockValidation.boot( %s );', wp_json_encode( $data ) ) );
+			wp_add_inline_script(
+				$slug,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 }

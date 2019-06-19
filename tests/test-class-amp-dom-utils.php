@@ -309,4 +309,176 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$output = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $body, $output );
 	}
+
+	/**
+	 * Test that HEAD and BODY elements are always present.
+	 *
+	 * @covers \AMP_DOM_Utils::get_dom()
+	 */
+	public function test_ensuring_head_body() {
+		$html = '<html><body><p>Hello</p></body></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( $dom->documentElement->lastChild, $dom->getElementsByTagName( 'p' )->item( 0 )->parentNode );
+
+		$html = '<html><head><title>foo</title></head></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->lastChild->childNodes->length );
+
+		$html = '<html><head><title>foo</title></head><p>no body</p></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( $dom->documentElement->firstChild, $dom->getElementsByTagName( 'title' )->item( 0 )->parentNode );
+		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
+		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( 'no body', $p->textContent );
+
+		$html = 'Hello world';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 'head', $dom->documentElement->firstChild->nodeName );
+		$this->assertEquals( 0, $dom->documentElement->firstChild->childNodes->length );
+		$this->assertEquals( 'body', $dom->documentElement->lastChild->nodeName );
+		$p = $dom->getElementsByTagName( 'p' )->item( 0 );
+		$this->assertEquals( $dom->documentElement->lastChild, $p->parentNode );
+		$this->assertEquals( 'Hello world', $p->textContent );
+	}
+
+	/**
+	 * Get head node data.
+	 *
+	 * @return array Head node data.
+	 */
+	public function get_head_node_data() {
+		$dom = new DOMDocument();
+		return array(
+			array(
+				AMP_DOM_Utils::create_node( $dom, 'title', array() ),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'base',
+					array( 'href' => '/' )
+				),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'script',
+					array( 'src' => 'http://example.com/test.js' )
+				),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node( $dom, 'style', array( 'media' => 'print' ) ),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node( $dom, 'noscript', array() ),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'link',
+					array(
+						'rel'  => 'stylesheet',
+						'href' => 'https://example.com/foo.css',
+					)
+				),
+				true,
+			),
+			array(
+				AMP_DOM_Utils::create_node(
+					$dom,
+					'meta',
+					array(
+						'name'    => 'foo',
+						'content' => 'https://example.com/foo.css',
+					)
+				),
+				true,
+			),
+			array(
+				$dom->createTextNode( " \n\t" ),
+				true,
+			),
+			array(
+				$dom->createTextNode( 'no' ),
+				false,
+			),
+			array(
+				$dom->createComment( 'hello world' ),
+				true,
+			),
+			array(
+				$dom->createProcessingInstruction( 'test' ),
+				false,
+			),
+			array(
+				$dom->createCDATASection( 'nope' ),
+				false,
+			),
+			array(
+				$dom->createEntityReference( 'bad' ),
+				false,
+			),
+			array(
+				$dom->createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
+				false,
+			),
+			array(
+				AMP_DOM_Utils::create_node( $dom, 'span', array() ),
+				false,
+			),
+		);
+	}
+
+	/**
+	 * Test is_valid_head_node().
+	 *
+	 * @dataProvider get_head_node_data
+	 * @covers \AMP_DOM_Utils::is_valid_head_node()
+	 *
+	 * @param DOMNode $node  Node.
+	 * @param bool    $valid Expected valid.
+	 */
+	public function test_is_valid_head_node( $node, $valid ) {
+		$this->assertEquals( $valid, AMP_DOM_Utils::is_valid_head_node( $node ) );
+	}
+
+	/**
+	 * Test that invalid head nodes are moved to body.
+	 *
+	 * @covers \AMP_DOM_Utils::move_invalid_head_nodes_to_body()
+	 */
+	public function test_invalid_head_nodes() {
+
+		// Text node.
+		$html = '<html><head>text</head><body><span>end</span></body></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
+		$body_first_child = $dom->getElementsByTagName( 'body' )->item( 0 )->firstChild;
+		$this->assertInstanceOf( 'DOMElement', $body_first_child );
+		$this->assertEquals( 'text', $body_first_child->textContent );
+
+		// Valid nodes.
+		$html = '<html><head><!--foo--><title>a</title><base href="/"><meta name="foo" content="bar"><link rel="test" href="/"><style></style><noscript><img src="http://example.com/foo.png"></noscript><script></script></head><body></body></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertEquals( 8, $dom->getElementsByTagName( 'head' )->item( 0 )->childNodes->length );
+		$this->assertNull( $dom->getElementsByTagName( 'body' )->item( 0 )->firstChild );
+
+		// Invalid nodes.
+		$html = '<html><head><?pi ?><span></span><div></div><p>hi</p><img src="https://example.com"><iframe src="/"></iframe></head><body></body></html>';
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+		$this->assertNull( $dom->getElementsByTagName( 'head' )->item( 0 )->firstChild );
+		$this->assertEquals( 6, $dom->getElementsByTagName( 'body' )->item( 0 )->childNodes->length );
+	}
 }

@@ -2,7 +2,7 @@
 
 set -e
 
-tag=$(cat build/amp.php | grep 'Version:' | sed 's/.*: //')
+tag=$(cat build/amp.php | grep 'Version:' | sed 's/.*: //' | sed 's/-[0-9]\{8\}T[0-9]\{6\}Z-[a-f0-9]*$//')
 if [[ -z "$tag" ]]; then
     echo "Error: Unable to determine tag from build/amp.php."
     exit 1

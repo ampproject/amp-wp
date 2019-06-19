@@ -1,0 +1,11 @@
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+	<g id="AMP-1.0-Beta-V1" fill="none" fillRule="evenodd">
+		<g id="AMP-Beta---01" transform="translate(-1220 -154)" fill="#FFF">
+			<g id="Header" transform="translate(166 135)">
+				<g id="add-template-button" transform="translate(1038 3)">
+					<path d="M25,23 L32,23 L32,25 L25,25 L25,32 L23,32 L23,25 L16,25 L16,23 L23,23 L23,16 L25,16 L25,23 Z" id="add-template-icon" />
+				</g>
+			</g>
+		</g>
+	</g>
+</svg>

@@ -1,0 +1,84 @@
+.wp-block[data-type="amp/amp-story-text"] p {
+	margin: 0;
+}
+
+/**
+ * See https://github.com/ampproject/amp-wp/issues/2219.
+ */
+.wp-block-amp-story-text .block-editor-rich-text__editable {
+	padding: 7px !important;
+	width: 100%;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right {
+	right: -10px;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right::before {
+	margin: 0;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-bottom {
+	bottom: -8px;
+	width: 50px;
+	left: calc(50% - 25px);
+}
+
+.amp-story-text__resize-container .components-resizable-box__handle-bottom::before {
+	margin: 0 auto;
+}
+
+.editor-styles-wrapper #amp-story-editor .wp-block .wp-block[data-type="amp/amp-story-text"] {
+	width: initial;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle,
+.wp-block.is-typing[data-type="amp/amp-story-text"] .components-resizable-box__handle {
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block[data-type="amp/amp-story-text"]:hover .components-resizable-box__handle,
+.wp-block[data-type="amp/amp-story-text"] .components-resizable-box__handle:hover {
+	opacity: 100;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .block-editor-rich-text__editable,
+div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-block-list__block-edit {
+	display: inline-block;
+}
+
+.with-line-height .wp-block-amp-story-text {
+	position: relative;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text {
+	display: inline-block;
+	vertical-align: middle;
+	line-height: 1.15;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .wp-block-amp-story-text .is-amp-fit-text.is-measuring-fontsize {
+	height: initial !important;
+	width: initial !important;
+	position: absolute !important;
+}
+
+.editor-block-list__layout .wp-block[data-type="amp/amp-story-text"] .editor-block-list__block-edit::before {
+	position: absolute;
+	top: 2px;
+	left: 2px;
+	right: 2px;
+	bottom: 2px;
+}
+
+.wp-block[data-type="amp/amp-story-text"] div[draggable="true"] {
+	border: 5px solid transparent;
+}
+
+.wp-block[data-type="amp/amp-story-text"] .amp-story-editor__rotate-container,
+.wp-block[data-type="amp/amp-story-text"] .block-mover,
+.wp-block[data-type="amp/amp-story-text"] .block-mover div {
+	height: 100%;
+}

@@ -1,0 +1,52 @@
+.amp-story-resize-container .components-resizable-box__handle-right {
+	right: -14px;
+	height: 50px;
+	top: calc(50% - 25px);
+}
+
+.amp-story-resize-container .components-resizable-box__handle-right::before {
+	margin: 0;
+}
+
+.amp-story-resize-container .components-resizable-box__handle-bottom {
+	bottom: -14px;
+	width: 50px;
+	left: calc(50% - 25px);
+}
+
+.amp-story-editor__rotate-container .components-resizable-box__handle {
+	display: none !important;
+}
+
+.wp-block-image .components-resizable-box__container img {
+	height: 100%;
+	object-fit: cover;
+
+	/* Prevents dragging the image itself, as its container is draggable. */
+	-webkit-user-drag: none;
+}
+
+/* Dragging the preview image in the image block engaged the drop zone for an image, so make this non-draggable in webkit. */
+.block-editor-block-list__block[data-type="core/image"] img {
+	-webkit-user-drag: none;
+}
+
+.amp-story-resize-container .components-resizable-box__handle-bottom::before {
+	margin: 0 auto;
+}
+
+.amp-story-resize-container .amp-story-editor__rotate-container {
+	height: 100%;
+}
+
+.wp-block .components-resizable-box__handle,
+.wp-block.is-typing .components-resizable-box__handle {
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block.amp-page-active .wp-block:hover .components-resizable-box__handle,
+.wp-block.amp-page-active .wp-block .components-resizable-box__handle:hover {
+	opacity: 1;
+}

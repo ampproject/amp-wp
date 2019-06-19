@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.1.3
+ * Version: 1.2.0
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -145,13 +145,13 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor-toggle-compiled.js' ) ) {
+if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor.js' ) ) {
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
 			/* translators: %s: composer install && npm install && npm run build */
 			__( 'You appear to be running the AMP plugin from source. Please do %s to finish installation.', 'amp' ), // phpcs:ignore WordPress.Security.EscapeOutput
-			'<code>composer install && npm install && npm run build</code>'
+			'<code>composer install &amp;&amp; npm install &amp;&amp; npm run build</code>'
 		)
 	);
 }
@@ -185,21 +185,31 @@ function _amp_show_load_errors_admin_notice() {
 // Abort if dependencies are not satisfied.
 if ( ! empty( $_amp_load_errors->errors ) ) {
 	add_action( 'admin_notices', '_amp_show_load_errors_admin_notice' );
-	if ( defined( 'WP_CLI' ) && WP_CLI ) {
+
+	if ( ( defined( 'WP_CLI' ) && WP_CLI ) || 'true' === getenv( 'CI' ) || 'cli' === PHP_SAPI ) {
 		$messages = array( __( 'AMP plugin unable to initialize.', 'amp' ) );
 		foreach ( array_keys( $_amp_load_errors->errors ) as $error_code ) {
 			$messages = array_merge( $messages, $_amp_load_errors->get_error_messages( $error_code ) );
 		}
 		$message = implode( "\n * ", $messages );
 		$message = str_replace( array( '<code>', '</code>' ), '`', $message );
+		$message = html_entity_decode( $message, ENT_QUOTES );
+
+		if ( ! class_exists( 'WP_CLI' ) ) {
+			echo "$message\n"; // phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+
+			exit( 1 );
+		}
+
 		WP_CLI::warning( $message );
 	}
+
 	return;
 }
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.1.3' );
+define( 'AMP__VERSION', '1.2.0' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
@@ -268,7 +278,7 @@ function amp_deactivate() {
 		}
 	}
 
-	flush_rewrite_rules();
+	flush_rewrite_rules( false );
 }
 
 /*
@@ -323,8 +333,6 @@ function amp_init() {
 	 */
 	do_action( 'amp_init' );
 
-	add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
-
 	add_filter( 'allowed_redirect_hosts', array( 'AMP_HTTP', 'filter_allowed_redirect_hosts' ) );
 	AMP_HTTP::purge_amp_query_vars();
 	AMP_HTTP::send_cors_headers();
@@ -332,31 +340,35 @@ function amp_init() {
 	AMP_Theme_Support::init();
 	AMP_Validation_Manager::init();
 	AMP_Service_Worker::init();
-	add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
+	add_action( 'wp_loaded', 'amp_add_options_menu' );
+	add_action( 'wp_loaded', 'amp_admin_pointer' );
+	add_action( 'wp_loaded', 'amp_post_meta_box' ); // Used in both Website and Stories experiences.
+
+	if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		add_rewrite_endpoint( amp_get_slug(), EP_PERMALINK );
+		AMP_Post_Type_Support::add_post_type_support();
+		add_action( 'init', array( 'AMP_Post_Type_Support', 'add_post_type_support' ), 1000 ); // After post types have been defined.
+		add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
+		add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
+		add_action( 'wp_loaded', 'amp_editor_core_blocks' );
+		add_filter( 'request', 'amp_force_query_var_value' );
+
+		// Add actions for reader mode templates.
+		add_action( 'wp', 'amp_maybe_add_actions' );
+
+		// Redirect the old url of amp page to the updated url.
+		add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
+	}
+
+	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+		AMP_Story_Post_Type::register();
+		add_action( 'wp_loaded', 'amp_story_templates' );
+	}
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );
 	}
-
-	add_filter( 'request', 'amp_force_query_var_value' );
-	add_action( 'admin_init', 'AMP_Options_Manager::register_settings' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-	add_action( 'wp_loaded', 'amp_post_meta_box' );
-	add_action( 'wp_loaded', 'amp_editor_core_blocks' );
-	add_action( 'wp_loaded', 'amp_add_options_menu' );
-	add_action( 'wp_loaded', 'amp_admin_pointer' );
-	add_action( 'parse_query', 'amp_correct_query_when_is_front_page' );
-	add_action( 'admin_bar_menu', 'amp_add_admin_bar_view_link', 100 );
-
-	// Redirect the old url of amp page to the updated url.
-	add_filter( 'old_slug_redirect_url', 'amp_redirect_old_slug_to_new_url' );
-
-	if ( class_exists( 'Jetpack' ) && ! ( defined( 'IS_WPCOM' ) && IS_WPCOM ) && version_compare( JETPACK__VERSION, '6.2-alpha', '<' ) ) {
-		require_once AMP__DIR__ . '/jetpack-helper.php';
-	}
-
-	// Add actions for legacy post templates.
-	add_action( 'wp', 'amp_maybe_add_actions' );
 
 	/*
 	 * Broadcast plugin updates.
@@ -415,6 +427,10 @@ function amp_maybe_add_actions() {
 	// The remaining logic here is for transitional mode running in themes that don't support AMP, the template system in AMP<=0.6.
 	global $wp_query;
 	if ( ! ( is_singular() || $wp_query->is_posts_page ) || is_feed() ) {
+		return;
+	}
+
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 		return;
 	}
 
@@ -501,7 +517,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *
  *      add_theme_support( AMP_Theme_Support::SLUG );
  *
- * This will serve templates in native AMP, allowing you to use AMP components in your theme templates.
+ * This will serve templates in AMP-first, allowing you to use AMP components in your theme templates.
  * If you want to make available in transitional mode, where templates are served in AMP or non-AMP documents, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
@@ -514,7 +530,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *          'template_dir' => 'amp',
  *      ) );
  *
- * If you want to have AMP-specific templates in addition to serving native AMP, do:
+ * If you want to have AMP-specific templates in addition to serving AMP-first, do:
  *
  *      add_theme_support( AMP_Theme_Support::SLUG, array(
  *          'paired'       => false,
@@ -537,7 +553,7 @@ function amp_correct_query_when_is_front_page( WP_Query $query ) {
  *      ) );
  *
  * @see AMP_Theme_Support::read_theme_support()
- * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is native and there is not separate AMP URL current URL.
+ * @return boolean Whether this is in AMP 'canonical' mode, that is whether it is AMP-first and there is not a separate (paired) AMP URL.
  */
 function amp_is_canonical() {
 	if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
@@ -545,8 +561,8 @@ function amp_is_canonical() {
 	}
 
 	$args = AMP_Theme_Support::get_theme_support_args();
-	if ( isset( $args['paired'] ) ) {
-		return empty( $args['paired'] );
+	if ( isset( $args[ AMP_Theme_Support::PAIRED_FLAG ] ) ) {
+		return empty( $args[ AMP_Theme_Support::PAIRED_FLAG ] );
 	}
 
 	// If there is a template_dir, then transitional mode is implied.

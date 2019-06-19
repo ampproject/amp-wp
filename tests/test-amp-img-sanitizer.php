@@ -308,6 +308,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 					'add_noscript_fallback' => false,
 				),
 			),
+
+			'img_static_emoji'                         => array(
+				'<img src="https://s.w.org/images/core/emoji/12.0.0-1/72x72/1f468-1f3fb-200d-1f4bb.png" alt="👨🏻‍💻" class="wp-smiley" style="height: 1em; max-height: 1em;">',
+				'<amp-img src="https://s.w.org/images/core/emoji/12.0.0-1/72x72/1f468-1f3fb-200d-1f4bb.png" alt="👨🏻‍💻" class="wp-smiley amp-wp-enforced-sizes" style="height: 1em; max-height: 1em;" width="72" height="72" noloading="" layout="intrinsic"></amp-img>',
+				array(
+					'add_noscript_fallback' => false,
+				),
+			),
 		);
 	}
 

@@ -61,6 +61,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $rev_alternate_attr_name_lookup = array();
 
 	/**
+	 * Mapping of JSON-serialized tag spec to the number of instances encountered in the document.
+	 *
+	 * @var array
+	 */
+	protected $visited_unique_tag_specs = array();
+
+	/**
 	 * Stack.
 	 *
 	 * @since 0.5
@@ -508,6 +515,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$layouts = wp_array_slice_assoc( AMP_Rule_Spec::$layout_enum, $tag_spec['amp_layout']['supported_layouts'] );
 
 				$merged_attr_spec_list['layout'][ AMP_Rule_Spec::VALUE_REGEX_CASEI ] = '(' . implode( '|', $layouts ) . ')';
+			}
+		}
+
+		// Enforce unique constraint.
+		if ( ! empty( $tag_spec['unique'] ) ) {
+			$removed      = false;
+			$tag_spec_key = wp_json_encode( $tag_spec );
+			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
+				$removed = $this->remove_invalid_child(
+					$node,
+					array( 'code' => 'duplicate_element' )
+				);
+			}
+			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
+			if ( $removed ) {
+				return;
 			}
 		}
 
@@ -1652,21 +1675,26 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		/*
-		 * Handle special case for amp-selector where its reference points do not have to be direct children.
+		 * Handle special case for reference points which do not have to be direct children.
 		 * This is noted as a special case in the AMP validator spec for amp-selector, so that is why it is
 		 * a special case here in this method. It is also implemented in this way for the sake of efficiency
 		 * to prevent having to waste time in process_node() merging attribute lists. For more on amp-selector's
 		 * unique reference point, see:
 		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
 		 */
-		$reference_point_spec = AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' );
-		if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
-			$parent = $attr_node->parentNode;
-			while ( $parent ) {
-				if ( 'amp-selector' === $parent->nodeName ) {
-					return true;
+		$descendant_reference_points = array(
+			'amp-selector'         => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' ),
+			'amp-story-grid-layer' => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-STORY-GRID-LAYER default' ), // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
+		);
+		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec ) {
+			if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
+				$parent = $attr_node->parentNode;
+				while ( $parent ) {
+					if ( $ancestor_name === $parent->nodeName ) {
+						return true;
+					}
+					$parent = $parent->parentNode;
 				}
-				$parent = $parent->parentNode;
 			}
 		}
 
@@ -1812,7 +1840,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! in_array( $child_element->nodeName, $allowed_descendants, true ) ) {
 				$this->remove_invalid_child( $child_element );
 			} else {
-				$this->remove_disallowed_descendants( $child, $allowed_descendants );
+				$this->remove_disallowed_descendants( $child_element, $allowed_descendants );
 			}
 		}
 	}

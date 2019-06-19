@@ -32,6 +32,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	public function tearDown() {
 		$_REQUEST = array();
 		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
 		remove_filter( 'amp_validation_error_sanitized', '__return_true' );
 		remove_all_filters( 'amp_validation_error_sanitized' );
 		remove_all_filters( 'terms_clauses' );
@@ -296,7 +297,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => false,
+				AMP_Theme_Support::PAIRED_FLAG => false,
 			)
 		);
 		$this->assertTrue( amp_is_canonical() );
@@ -513,7 +514,7 @@ class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
 	/**
 	 * Test summarize_validation_errors.
 	 *
-	 * @covers AMP_Validation_Manager::summarize_validation_errors()
+	 * @covers AMP_Validation_Error_Taxonomy::summarize_validation_errors()
 	 */
 	public function test_summarize_validation_errors() {
 		$attribute_node_name = 'button';

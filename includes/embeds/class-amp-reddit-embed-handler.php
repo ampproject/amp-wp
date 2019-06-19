@@ -61,15 +61,13 @@ class AMP_Reddit_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		// @todo Sizing is not yet correct. See <https://github.com/ampproject/amphtml/issues/11869>.
 		return AMP_HTML_Utils::build_tag(
-			'amp-reddit',
+			'amp-embedly-card',
 			array(
-				'layout'         => 'responsive',
-				'data-embedtype' => 'post',
-				'width'          => '100',
-				'height'         => '100',
-				'data-src'       => $args['url'],
+				'layout'   => 'responsive',
+				'width'    => '100',
+				'height'   => '100',
+				'data-url' => $args['url'],
 			)
 		);
 	}

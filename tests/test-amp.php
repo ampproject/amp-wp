@@ -41,8 +41,8 @@ class Test_AMP extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired'       => false,
-				'template_dir' => 'amp-templates',
+				AMP_Theme_Support::PAIRED_FLAG => false,
+				'template_dir'                 => 'amp-templates',
 			)
 		);
 		$this->assertTrue( amp_is_canonical() );
@@ -50,7 +50,7 @@ class Test_AMP extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => true,
+				AMP_Theme_Support::PAIRED_FLAG => true,
 			)
 		);
 		$this->assertFalse( amp_is_canonical() );

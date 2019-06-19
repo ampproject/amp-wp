@@ -21,7 +21,7 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( amp_is_canonical() ) {
+	if ( amp_is_canonical() || ! AMP_Options_Manager::is_website_experience_enabled() ) {
 		return;
 	}
 
@@ -196,6 +196,16 @@ function amp_editor_core_blocks() {
  * @since 1.0
  */
 function amp_admin_pointer() {
-	$admin_pointer = new AMP_Admin_Pointer();
-	$admin_pointer->init();
+	$admin_pointers = new AMP_Admin_Pointers();
+	$admin_pointers->init();
+}
+
+/**
+ * Bootstrap the Story Templates needed in editor.
+ *
+ * @since 1.?
+ */
+function amp_story_templates() {
+	$story_templates = new AMP_Story_Templates();
+	$story_templates->init();
 }

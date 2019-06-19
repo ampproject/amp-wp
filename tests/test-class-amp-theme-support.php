@@ -35,7 +35,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		parent::setUp();
 		AMP_Validation_Manager::reset_validation_results();
 		unset( $GLOBALS['current_screen'] );
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
 		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
 	}
 
 	/**
@@ -88,8 +90,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 */
 	public function test_read_theme_support_bad_args_array() {
 		$args = array(
-			'paired'            => false,
-			'invalid_param_key' => array(),
+			AMP_Theme_Support::PAIRED_FLAG => false,
+			'invalid_param_key'            => array(),
 		);
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
 		AMP_Theme_Support::read_theme_support();
@@ -120,40 +122,104 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * Test read_theme_support, get_theme_support_args, and is_support_added_via_option.
 	 *
 	 * @covers \AMP_Theme_Support::read_theme_support()
-	 * @covers \AMP_Theme_Support::is_support_added_via_option()
+	 * @covers \AMP_Theme_Support::get_support_mode_added_via_option()
+	 * @covers \AMP_Theme_Support::get_support_mode_added_via_theme()
+	 * @covers \AMP_Theme_Support::get_support_mode()
 	 * @covers \AMP_Theme_Support::get_theme_support_args()
 	 */
 	public function test_read_theme_support_and_support_args() {
 
-		// Test with option set, but some configs supplied via theme support.
-		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
+		// Test default is reader mode.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertFalse( current_theme_supports( AMP_Theme_Support::SLUG ) );
+
+		// Test that when default options are used, the theme support flag is the default.
+		delete_option( AMP_Options_Manager::OPTION_NAME );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array( AMP_Theme_Support::PAIRED_FLAG => false )
+		);
+		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Options_Manager::get_option( 'theme_support' ) );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		add_theme_support(
+			AMP_Theme_Support::SLUG,
+			array( AMP_Theme_Support::PAIRED_FLAG => true )
+		);
+		AMP_Theme_Support::read_theme_support();
+		$this->assertEquals( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
+		// Test that reader mode being set via option overrides theme support flag.
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::READER_MODE_SLUG ); // Will override the theme support flag.
+		AMP_Theme_Support::read_theme_support();
+		$this->assertSame( AMP_Theme_Support::READER_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
+		// Test that Standard mode in theme does not override Transitional mode set via option (user option prevails).
+		add_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+
+		// Test that standard via option trumps transitional in theme.
 		$args = array(
-			'templates_supported' => 'all',
-			'paired'              => true,
-			'comments_live_list'  => true,
+			'templates_supported'          => 'all',
+			AMP_Theme_Support::PAIRED_FLAG => true,
+			'comments_live_list'           => true,
 		);
 		add_theme_support( AMP_Theme_Support::SLUG, $args );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG ); // Will override the theme support flag.
 		AMP_Theme_Support::read_theme_support();
-		$this->assertEquals( $args, AMP_Theme_Support::get_theme_support_args() );
-		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertEquals(
+			array_merge(
+				$args,
+				array(
+					AMP_Theme_Support::PAIRED_FLAG => false, // The Standard user option overrides the theme flag.
+				)
+			),
+			AMP_Theme_Support::get_theme_support_args()
+		);
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 
+		// Test that standard via theme does not trump transitional option.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
-		$this->assertFalse( AMP_Theme_Support::is_support_added_via_option() );
-		$this->assertEquals( array( 'paired' => false ), AMP_Theme_Support::get_theme_support_args() );
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', 'native' ); // Will be ignored since theme support flag set.
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); // Will be ignored since standard in theme overrides transitional option.
 		AMP_Theme_Support::read_theme_support();
-		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_theme() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode() );
+		$this->assertEquals( array( AMP_Theme_Support::PAIRED_FLAG => true ), AMP_Theme_Support::get_theme_support_args() );
+
+		// Test that no support via theme can be overridden with option.
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
 
+		// Test that no support via theme can be overridden with option.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		AMP_Options_Manager::update_option( 'theme_support', 'disabled' );
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::TRANSITIONAL_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
+		$this->assertSame( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertTrue( current_theme_supports( AMP_Theme_Support::SLUG ) );
+
+		// Test that forced validation works.
+		remove_theme_support( AMP_Theme_Support::SLUG );
+		delete_option( AMP_Options_Manager::OPTION_NAME );
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = AMP_Validation_Manager::get_amp_validate_nonce();
 		AMP_Theme_Support::read_theme_support();
-		$this->assertTrue( AMP_Theme_Support::is_support_added_via_option() );
+		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
+		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
 	}
 
@@ -167,8 +233,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired'       => true,
-				'template_dir' => 'amp',
+				AMP_Theme_Support::PAIRED_FLAG => true,
+				'template_dir'                 => 'amp',
 			)
 		);
 
@@ -191,8 +257,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired'       => false,
-				'template_dir' => 'amp',
+				AMP_Theme_Support::PAIRED_FLAG => false,
+				'template_dir'                 => 'amp',
 			)
 		);
 		$this->go_to( get_permalink( $post_id ) );
@@ -361,7 +427,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => true,
+				AMP_Theme_Support::PAIRED_FLAG => true,
 			)
 		);
 		add_filter(
@@ -803,11 +869,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 				'templates_supported' => 'all',
 			)
 		);
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
+
 		AMP_Theme_Support::init();
 		$supportable_templates = AMP_Theme_Support::get_supportable_templates();
-		foreach ( $supportable_templates as $supportable_template ) {
-			$this->assertTrue( $supportable_template['supported'] );
-			$this->assertTrue( $supportable_template['immutable'] );
+		foreach ( $supportable_templates as $key => $supportable_template ) {
+			$this->assertTrue( $supportable_template['supported'], "Expected $key to be supported" );
+			$this->assertTrue( $supportable_template['immutable'], "Expected $key to be immutable" );
 		}
 
 		// Test supporting templates by theme support args: selective templates.
@@ -841,9 +910,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	public function test_add_hooks() {
 		AMP_Theme_Support::add_hooks();
 		$this->assertFalse( has_action( 'wp_head', 'wp_post_preview_js' ) );
+		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+
 		$this->assertFalse( has_action( 'wp_head', 'print_emoji_detection_script' ) );
 		$this->assertFalse( has_action( 'wp_print_styles', 'print_emoji_styles' ) );
-		$this->assertFalse( has_action( 'wp_head', 'wp_oembed_add_host_js' ) );
+		$this->assertEquals( 10, has_action( 'wp_print_styles', array( 'AMP_Theme_Support', 'print_emoji_styles' ) ) );
+		$this->assertEquals( 10, has_filter( 'the_title', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'the_excerpt', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'the_content', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'comment_text', 'wp_staticize_emoji' ) );
+		$this->assertEquals( 10, has_filter( 'widget_text', 'wp_staticize_emoji' ) );
 
 		$this->assertEquals( 20, has_action( 'wp_head', 'amp_add_generator_metadata' ) );
 		$this->assertEquals( 0, has_action( 'wp_enqueue_scripts', array( self::TESTED_CLASS, 'enqueue_assets' ) ) );
@@ -861,15 +937,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 100, has_action( 'comment_form', array( self::TESTED_CLASS, 'amend_comment_form' ) ) );
 		$this->assertFalse( has_action( 'comment_form', 'wp_comment_form_unfiltered_html_nonce' ) );
 		$this->assertEquals( PHP_INT_MAX, has_filter( 'get_header_image_tag', array( self::TESTED_CLASS, 'amend_header_image_with_video_header' ) ) );
-	}
-
-	/**
-	 * Test add_hooks() when admin bar is turned off.
-	 */
-	public function test_add_hooks_no_admin_bar() {
-		AMP_Options_Manager::update_option( 'disable_admin_bar', true );
-		AMP_Theme_Support::add_hooks();
-		$this->assertEquals( 100, has_filter( 'show_admin_bar', '__return_false' ) );
 	}
 
 	/**
@@ -919,15 +986,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 		$this->assertTrue( is_singular() );
 
-		// Test native AMP.
+		// Test AMP-first.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( amp_is_canonical() );
 		ob_start();
 		AMP_Theme_Support::amend_comment_form();
 		$output = ob_get_clean();
 		$this->assertNotContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 
 		// Test transitional AMP.
 		add_theme_support(
@@ -941,8 +1006,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		AMP_Theme_Support::amend_comment_form();
 		$output = ob_get_clean();
 		$this->assertContains( '<input type="hidden" name="redirect_to"', $output );
-		$this->assertContains( '<div submit-success>', $output );
-		$this->assertContains( '<div submit-error>', $output );
 	}
 
 	/**
@@ -1356,10 +1419,10 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">',
 			'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0.js">',
-			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-0.1.js">',
+			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-experiment-1.0.js">',
 			'<link rel="preload" as="script" href="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js">',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0.js" async></script>',
-			'<script src="https://cdn.ampproject.org/v0/amp-experiment-0.1.js" async="" custom-element="amp-experiment"></script>',
+			'<script src="https://cdn.ampproject.org/v0/amp-experiment-1.0.js" async="" custom-element="amp-experiment"></script>',
 			'<script async custom-element="amp-dynamic-css-classes" src="https://cdn.ampproject.org/v0/amp-dynamic-css-classes-0.1.js"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-list-0.1.js" async custom-element="amp-list"></script>',
 			'<script type="text/javascript" src="https://cdn.ampproject.org/v0/amp-mathml-0.1.js" async custom-element="amp-mathml"></script>',
@@ -1497,11 +1560,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response for native mode when some validation errors aren't auto-sanitized.
+	 * Test prepare_response for standard mode when some validation errors aren't auto-sanitized.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_native_mode_non_amp() {
+	public function test_prepare_response_standard_mode_non_amp() {
 		wp();
 		$original_html = $this->get_original_html();
 		add_filter( 'amp_validation_error_sanitized', '__return_false' ); // For testing purpose only. This should not normally be done.
@@ -1511,6 +1574,22 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertContains( '<html>', $sanitized_html, 'The AMP attribute is removed from the HTML element' );
 		$this->assertContains( '<button onclick="alert', $sanitized_html, 'Invalid AMP is present in the response.' );
 		$this->assertContains( 'document.write = function', $sanitized_html, 'Override of document.write() is present.' );
+	}
+
+	/**
+	 * Test prepare_response when submitting form.
+	 *
+	 * @covers AMP_Theme_Support::prepare_response()
+	 */
+	public function test_prepare_response_for_submitted_form() {
+		AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] = true;
+		$_SERVER['REQUEST_METHOD'] = 'POST';
+
+		$response = AMP_Theme_Support::prepare_response( '<p>¡Tienes éxito!</p>' );
+		$this->assertEquals( '{"status_code":200,"status_text":"OK"}', $response );
+
+		unset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] );
+		unset( $_SERVER['REQUEST_METHOD'] );
 	}
 
 	/**
@@ -1752,7 +1831,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
 			array(
-				'paired' => true,
+				AMP_Theme_Support::PAIRED_FLAG => true,
 			)
 		);
 		add_filter(

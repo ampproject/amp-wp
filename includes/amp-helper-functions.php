@@ -70,7 +70,7 @@ function amp_get_permalink( $post_id ) {
 	// When theme support is present, the plain query var should always be used.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$permalink = get_permalink( $post_id );
-		if ( ! amp_is_canonical() ) {
+		if ( ! amp_is_canonical() && AMP_Story_Post_Type::POST_TYPE_SLUG !== get_post_type( $post_id ) ) {
 			$permalink = add_query_arg( amp_get_slug(), '', $permalink );
 		}
 		return $permalink;
@@ -243,7 +243,7 @@ function post_supports_amp( $post ) {
  * to determine the queried object is able to be served as AMP. If 'amp' theme support is not
  * present, this function returns true just if the query var is present. If theme support is
  * present, then it returns true in transitional mode if an AMP template is available and the query
- * var is present, or else in native mode if just the template is available.
+ * var is present, or else in standard mode if just the template is available.
  *
  * @return bool Whether it is the AMP endpoint.
  * @global string $pagenow
@@ -289,6 +289,21 @@ function is_amp_endpoint() {
 		);
 	}
 
+	// AMP Stories are always an AMP endpoint.
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		return true;
+	}
+
+	/*
+	 * If this is a URL for validation, and validation is forced for all URLs, return true.
+	 * Normally, this would be false if the user has deselected a template,
+	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
+	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
+	 */
+	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
+		return true;
+	}
+
 	$has_amp_query_var = (
 		isset( $_GET[ amp_get_slug() ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		||
@@ -303,19 +318,9 @@ function is_amp_endpoint() {
 		return $has_amp_query_var;
 	}
 
-	// When there is no query var and AMP is not canonical/native, then this is definitely not an AMP endpoint.
+	// When there is no query var and AMP is not canonical (AMP-first), then this is definitely not an AMP endpoint.
 	if ( ! $has_amp_query_var && ! amp_is_canonical() ) {
 		return false;
-	}
-
-	/*
-	 * If this is a URL for validation, and validation is forced for all URLs, return true.
-	 * Normally, this would be false if the user has deselected a template,
-	 * like by unchecking 'Categories' in 'AMP Settings' > 'Supported Templates'.
-	 * But there's a flag for the WP-CLI command that sets this query var to validate all URLs.
-	 */
-	if ( AMP_Validation_Manager::is_theme_support_forced() ) {
-		return true;
 	}
 
 	if ( ! did_action( 'wp' ) ) {
@@ -369,14 +374,22 @@ function amp_get_boilerplate_code() {
  * @since 1.0 Add template mode.
  */
 function amp_add_generator_metadata() {
-	if ( amp_is_canonical() ) {
-		$mode = 'native';
+	$content = sprintf( 'AMP Plugin v%s', AMP__VERSION );
+
+	if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
+		$mode = 'none';
+	} elseif ( amp_is_canonical() ) {
+		$mode = 'standard';
 	} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 		$mode = 'transitional';
 	} else {
 		$mode = 'reader';
 	}
-	printf( '<meta name="generator" content="%s">', esc_attr( sprintf( 'AMP Plugin v%s; mode=%s', AMP__VERSION, $mode ) ) );
+	$content .= sprintf( '; mode=%s', $mode );
+
+	$content .= sprintf( '; experiences=%s', implode( ',', AMP_Options_Manager::get_option( 'experiences' ) ) );
+
+	printf( '<meta name="generator" content="%s">', esc_attr( $content ) );
 }
 
 /**
@@ -392,7 +405,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$handles = array( 'wp-i18n', 'wp-dom-ready' );
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s-compiled.js', $handle ) ) );
+			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ) );
 		}
 	}
 
@@ -735,6 +748,7 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Core_Block_Handler'        => array(),
 			'AMP_Twitter_Embed_Handler'     => array(),
 			'AMP_YouTube_Embed_Handler'     => array(),
+			'AMP_Crowdsignal_Embed_Handler' => array(),
 			'AMP_DailyMotion_Embed_Handler' => array(),
 			'AMP_Vimeo_Embed_Handler'       => array(),
 			'AMP_SoundCloud_Embed_Handler'  => array(),
@@ -751,7 +765,6 @@ function amp_get_content_embed_handlers( $post = null ) {
 			'AMP_Gfycat_Embed_Handler'      => array(),
 			'AMP_Hulu_Embed_Handler'        => array(),
 			'AMP_Imgur_Embed_Handler'       => array(),
-			'WPCOM_AMP_Polldaddy_Embed'     => array(),
 		),
 		$post
 	);
@@ -806,7 +819,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
 		),
-		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since it's logic is using the already sanitized content.
+		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
 		'AMP_Script_Sanitizer'            => array(),
 		'AMP_Style_Sanitizer'             => array(
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
@@ -1124,4 +1137,35 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	);
 
 	$wp_admin_bar->add_menu( $parent );
+}
+
+/**
+ * Prints AMP Stories auto ads.
+ *
+ * @since 1.2
+ */
+function amp_print_story_auto_ads() {
+	/**
+	 * Filters the configuration data for <amp-story-auto-ads>.
+	 *
+	 * This allows Dynamically inserting ads into a story.
+	 *
+	 * @param array   $data Story ads configuration data.
+	 * @param WP_Post $post The current story's post object.
+	 */
+	$data = apply_filters( 'amp_story_auto_ads_configuration', array(), get_post() );
+
+	if ( empty( $data ) ) {
+		return;
+	}
+
+	$script_element = AMP_HTML_Utils::build_tag(
+		'script',
+		array(
+			'type' => 'application/json',
+		),
+		wp_json_encode( $data )
+	);
+
+	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', array(), $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }

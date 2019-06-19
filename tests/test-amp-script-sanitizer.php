@@ -19,13 +19,21 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_noscript_data() {
 		return array(
-			'document_write'  => array(
-				'Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript>',
-				'Has script? <!--noscript-->Nope!<!--/noscript-->',
+			'document_write'      => array(
+				'<html><head></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
+				'<html><head></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
 			),
-			'nested_elements' => array(
-				'<noscript>before <em><strong>middle</strong> end</em></noscript>',
-				'<!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript-->',
+			'nested_elements'     => array(
+				'<html><head></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
+				'<html><head></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
+			),
+			'head_noscript_style' => array(
+				'<html><head><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
+				'<html><head><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
+			),
+			'head_noscript_span'  => array(
+				'<html><head><noscript><span>No script</span></noscript></head><body></body></html>',
+				'<html><head></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
 			),
 		);
 	}
@@ -39,13 +47,13 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
 	public function test_noscript_promotion( $source, $expected = null ) {
-		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom( $source );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );
 		$sanitizer->sanitize();
 		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$whitelist_sanitizer->sanitize();
-		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
+		$content = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$this->assertEquals( $expected, $content );
 	}
 

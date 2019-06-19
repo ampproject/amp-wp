@@ -20,7 +20,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		parent::setUp();
 		unset( $GLOBALS['current_screen'] );
 		if ( ! function_exists( 'wp_service_workers' ) ) {
-			$this->markTestIncomplete( 'PWA plugin not active.' );
+			$this->markTestSkipped( 'PWA plugin not active.' );
 		}
 	}
 
@@ -246,6 +246,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->assertEquals( 'exited', $exception->getMessage() );
 		$output = ob_get_clean();
 		$this->assertContains( '<script>navigator.serviceWorker.register', $output );
+
+		// Go back home to clean up 🤷!
+		$this->go_to( home_url() );
 	}
 
 }

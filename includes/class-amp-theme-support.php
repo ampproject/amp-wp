@@ -55,6 +55,38 @@ class AMP_Theme_Support {
 	const CACHE_MISS_URL_OPTION = 'amp_cache_miss_url';
 
 	/**
+	 * Slug identifying standard website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const STANDARD_MODE_SLUG = 'standard';
+
+	/**
+	 * Slug identifying transitional website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const TRANSITIONAL_MODE_SLUG = 'transitional';
+
+	/**
+	 * Slug identifying reader website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const READER_MODE_SLUG = 'reader';
+
+	/**
+	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const PAIRED_FLAG = 'paired';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -110,12 +142,23 @@ class AMP_Theme_Support {
 	protected static $is_output_buffering = false;
 
 	/**
-	 * Theme support options that were added via option.
+	 * Theme support mode that was added via option.
+	 *
+	 * This should be either null (reader), 'standard', or 'transitional'.
 	 *
 	 * @since 1.0
-	 * @var bool
+	 * @var null|string
 	 */
-	protected static $support_added_via_option = false;
+	protected static $support_added_via_option = null;
+
+	/**
+	 * Theme support mode which was added via the theme.
+	 *
+	 * This should be either null (reader), 'standard', or 'transitional'.
+	 *
+	 * @var null|string
+	 */
+	protected static $support_added_via_theme = null;
 
 	/**
 	 * Initialize.
@@ -124,25 +167,34 @@ class AMP_Theme_Support {
 	 */
 	public static function init() {
 		self::read_theme_support();
-		if ( ! current_theme_supports( self::SLUG ) ) {
-			return;
-		}
-
-		// Ensure extra theme support for core themes is in place.
-		AMP_Core_Theme_Sanitizer::extend_theme_support();
 
 		self::$init_start_time = microtime( true );
 
-		require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( self::SLUG ) ) {
+			// Ensure extra theme support for core themes is in place.
+			AMP_Core_Theme_Sanitizer::extend_theme_support();
 
-		add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+			require_once AMP__DIR__ . '/includes/amp-post-template-functions.php';
 
-		/*
-		 * Note that wp action is use instead of template_redirect because some themes/plugins output
-		 * the response at this action and then short-circuit with exit. So this is why the the preceding
-		 * action to template_redirect--the wp action--is used instead.
-		 */
-		add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+			add_action( 'widgets_init', array( __CLASS__, 'register_widgets' ) );
+
+			/*
+			 * Note that wp action is use instead of template_redirect because some themes/plugins output
+			 * the response at this action and then short-circuit with exit. So this is why the the preceding
+			 * action to template_redirect--the wp action--is used instead.
+			 */
+			add_action( 'wp', array( __CLASS__, 'finish_init' ), PHP_INT_MAX );
+		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
+			add_action(
+				'wp',
+				function () {
+					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+						self::finish_init();
+					}
+				},
+				PHP_INT_MAX
+			);
+		}
 	}
 
 	/**
@@ -150,11 +202,63 @@ class AMP_Theme_Support {
 	 *
 	 * @since 1.0
 	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::get_support_mode()
+	 * @deprecated Use AMP_Theme_Support::get_support_mode_added_via_option().
 	 *
 	 * @return bool Support added via option.
 	 */
 	public static function is_support_added_via_option() {
+		_deprecated_function( __METHOD__, '1.2', 'AMP_Theme_Support::get_support_mode_added_via_option' );
+		return null !== self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode_added_via_option() {
 		return self::$support_added_via_option;
+	}
+
+	/**
+	 * Get the theme support mode added via admin option.
+	 *
+	 * @return null|string Support added via option, with null meaning Reader, and otherwise being 'standard' or 'transitional'.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode_added_via_theme() {
+		return self::$support_added_via_theme;
+	}
+
+	/**
+	 * Get theme support mode.
+	 *
+	 * @return string Theme support mode.
+	 * @see AMP_Theme_Support::read_theme_support()
+	 * @see AMP_Theme_Support::TRANSITIONAL_MODE_SLUG
+	 * @see AMP_Theme_Support::STANDARD_MODE_SLUG
+	 *
+	 * @since 1.2
+	 */
+	public static function get_support_mode() {
+		$theme_support = self::get_support_mode_added_via_option();
+		if ( ! $theme_support ) {
+			$theme_support = self::get_support_mode_added_via_theme();
+		}
+		if ( ! $theme_support ) {
+			$theme_support = self::READER_MODE_SLUG;
+		}
+		return $theme_support;
 	}
 
 	/**
@@ -162,16 +266,20 @@ class AMP_Theme_Support {
 	 *
 	 * The DB option is only considered if the theme does not already explicitly support AMP.
 	 *
-	 * @see AMP_Theme_Support::is_support_added_via_option()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_theme()
+	 * @see AMP_Theme_Support::get_support_mode_added_via_option()
 	 * @see AMP_Post_Type_Support::add_post_type_support() For where post type support is added, since it is irrespective of theme support.
 	 */
 	public static function read_theme_support() {
+		self::$support_added_via_theme  = null;
+		self::$support_added_via_option = null;
+
 		$theme_support_option = AMP_Options_Manager::get_option( 'theme_support' );
 		if ( current_theme_supports( self::SLUG ) ) {
 			$args = self::get_theme_support_args();
 
 			// Validate theme support usage.
-			$keys = array( 'template_dir', 'comments_live_list', 'paired', 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
+			$keys = array( 'template_dir', 'comments_live_list', self::PAIRED_FLAG, 'templates_supported', 'available_callback', 'service_worker', 'nav_menu_toggle', 'nav_menu_dropdown' );
 
 			if ( count( array_diff( array_keys( $args ), $keys ) ) !== 0 ) {
 				_doing_it_wrong(
@@ -200,16 +308,33 @@ class AMP_Theme_Support {
 					'1.0'
 				);
 			}
-			self::$support_added_via_option = false;
-		} elseif ( 'disabled' !== $theme_support_option ) {
+
+			$is_paired = ! empty( $args[ self::PAIRED_FLAG ] );
+
+			self::$support_added_via_theme  = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
+			self::$support_added_via_option = $theme_support_option;
+
+			// Make sure the user option can override what the theme has specified.
+			if ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) {
+				$args[ self::PAIRED_FLAG ] = false;
+				add_theme_support( self::SLUG, $args );
+			} elseif ( ! $is_paired && self::TRANSITIONAL_MODE_SLUG === $theme_support_option ) {
+				$args[ self::PAIRED_FLAG ] = true;
+				add_theme_support( self::SLUG, $args );
+			} elseif ( self::READER_MODE_SLUG === $theme_support_option ) {
+				remove_theme_support( self::SLUG );
+			}
+		} elseif ( self::READER_MODE_SLUG !== $theme_support_option ) {
+			$is_paired = ( self::TRANSITIONAL_MODE_SLUG === $theme_support_option );
 			add_theme_support(
 				self::SLUG,
 				array(
-					'paired' => ( 'paired' === $theme_support_option ),
+					self::PAIRED_FLAG => $is_paired,
 				)
 			);
-			self::$support_added_via_option = true;
+			self::$support_added_via_option = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
 		} elseif ( AMP_Validation_Manager::is_theme_support_forced() ) {
+			self::$support_added_via_option = self::STANDARD_MODE_SLUG;
 			add_theme_support( self::SLUG );
 		}
 	}
@@ -230,7 +355,7 @@ class AMP_Theme_Support {
 		$support = get_theme_support( self::SLUG );
 		if ( true === $support ) {
 			return array(
-				'paired' => false,
+				self::PAIRED_FLAG => false,
 			);
 		}
 		if ( ! isset( $support[0] ) || ! is_array( $support[0] ) ) {
@@ -292,9 +417,9 @@ class AMP_Theme_Support {
 		$has_query_var = false !== get_query_var( amp_get_slug(), false ); // May come from URL param or endpoint slug.
 		$has_url_param = isset( $_GET[ amp_get_slug() ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( amp_is_canonical() ) {
+		if ( amp_is_canonical() || is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			/*
-			 * When AMP native/canonical, then when there is an /amp/ endpoint or ?amp URL param,
+			 * When AMP-first/canonical, then when there is an /amp/ endpoint or ?amp URL param,
 			 * then a redirect needs to be done to the URL without any AMP indicator in the URL.
 			 * Permanent redirect is used for unauthenticated users since switching between modes
 			 * should happen infrequently. For admin users, this is kept temporary to allow them
@@ -856,9 +981,19 @@ class AMP_Theme_Support {
 
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
-		remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
-		remove_action( 'wp_print_styles', 'print_emoji_styles' );
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+
+		// Replace JS-based emoji with PHP-based, if the JS-based emoji replacement was not already removed.
+		if ( has_action( 'wp_head', 'print_emoji_detection_script' ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+			add_action( 'wp_print_styles', array( __CLASS__, 'print_emoji_styles' ) );
+			add_filter( 'the_title', 'wp_staticize_emoji' );
+			add_filter( 'the_excerpt', 'wp_staticize_emoji' );
+			add_filter( 'the_content', 'wp_staticize_emoji' );
+			add_filter( 'comment_text', 'wp_staticize_emoji' );
+			add_filter( 'widget_text', 'wp_staticize_emoji' );
+		}
 
 		// @todo The wp_mediaelement_fallback() should still run to be injected inside of the audio/video generated by wp_audio_shortcode()/wp_video_shortcode() respectively.
 		// Prevent MediaElement.js scripts/styles from being enqueued.
@@ -912,22 +1047,13 @@ class AMP_Theme_Support {
 			PHP_INT_MAX
 		);
 
+		add_action( 'admin_bar_init', array( __CLASS__, 'init_admin_bar' ) );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_assets' ), 0 ); // Enqueue before theme's styles.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'dequeue_customize_preview_scripts' ), 1000 );
 		add_filter( 'customize_partial_render', array( __CLASS__, 'filter_customize_partial_render' ) );
 
 		add_action( 'wp_footer', 'amp_print_analytics' );
-
-		/*
-		 * Disable admin bar because admin-bar.css (28K) and Dashicons (48K) alone
-		 * combine to surpass the 50K limit imposed for the amp-custom style.
-		 */
-		if ( AMP_Options_Manager::get_option( 'disable_admin_bar' ) ) {
-			add_filter( 'show_admin_bar', '__return_false', 100 );
-		} else {
-			add_action( 'admin_bar_init', array( __CLASS__, 'init_admin_bar' ) );
-		}
 
 		/*
 		 * Start output buffering at very low priority for sake of plugins and themes that use template_redirect
@@ -1053,24 +1179,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Adds the form submit success and fail templates.
+	 * Amend the comment form with the redirect_to field to persist the AMP page after submission.
 	 */
 	public static function amend_comment_form() {
 		?>
 		<?php if ( is_singular() && ! amp_is_canonical() ) : ?>
 			<input type="hidden" name="redirect_to" value="<?php echo esc_url( amp_get_permalink( get_the_ID() ) ); ?>">
 		<?php endif; ?>
-
-		<div submit-success>
-			<template type="amp-mustache">
-				<p>{{{message}}}</p>
-			</template>
-		</div>
-		<div submit-error>
-			<template type="amp-mustache">
-				<p class="amp-comment-submit-error">{{{error}}}</p>
-			</template>
-		</div>
 		<?php
 	}
 
@@ -1279,6 +1394,22 @@ class AMP_Theme_Support {
 			},
 			41
 		);
+
+		// Convert admin bar bump callback into an inline style for admin-bar. See \WP_Admin_Bar::initialize().
+		if ( current_theme_supports( 'admin-bar' ) ) {
+			$admin_bar_args  = get_theme_support( 'admin-bar' );
+			$header_callback = $admin_bar_args[0]['callback'];
+		} else {
+			$header_callback = '_admin_bar_bump_cb';
+		}
+		remove_action( 'wp_head', $header_callback );
+		if ( '__return_false' !== $header_callback ) {
+			ob_start();
+			call_user_func( $header_callback );
+			$style = ob_get_clean();
+			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			wp_add_inline_style( 'admin-bar', $data );
+		}
 
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(
@@ -1679,12 +1810,39 @@ class AMP_Theme_Support {
 			unset( $args['validation_error_callback'] );
 		}
 
+		$status_code = http_response_code();
+
 		/*
-		 * Check if the response starts with HTML markup.
-		 * Without this check, JSON responses will be erroneously corrupted,
-		 * being wrapped in HTML documents.
+		 * Send a JSON response when the site is failing to handle AMP form submissions with a JSON response as required
+		 * or an AMP-Redirect-To response header was not sent. This is a common scenario for plugins that handle form
+		 * submissions and show the success page via the POST request's response body instead of invoking wp_redirect(),
+		 * in which case AMP_HTTP::intercept_post_request_redirect() will automatically send the AMP-Redirect-To header.
+		 * If the POST response is an HTML document then the form submission will appear to not have worked since there
+		 * is no success or failure message shown. By catching the case where HTML is sent in the response, we can
+		 * automatically send a generic success message when a 200 status is returned or a failure message when a 400+
+		 * response code is sent.
 		 */
-		if ( '<' !== substr( ltrim( $response ), 0, 1 ) ) {
+		$is_form_submission = (
+			isset( AMP_HTTP::$purged_amp_query_vars[ AMP_HTTP::ACTION_XHR_CONVERTED_QUERY_VAR ] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&&
+			isset( $_SERVER['REQUEST_METHOD'] )
+			&&
+			'POST' === $_SERVER['REQUEST_METHOD']
+		);
+		if ( $is_form_submission && null === json_decode( $response ) && json_last_error() && ( is_bool( $status_code ) || ( $status_code >= 200 && $status_code < 300 ) || $status_code >= 400 ) ) {
+			if ( is_bool( $status_code ) ) {
+				$status_code = 200; // Not a web server environment.
+			}
+			return wp_json_encode(
+				array(
+					'status_code' => $status_code,
+					'status_text' => get_status_header_desc( $status_code ),
+				)
+			);
+		}
+
+		// Abort if the response was not HTML.
+		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
 		}
 
@@ -1773,8 +1931,15 @@ class AMP_Theme_Support {
 		 * weak validator (prefixed by W/) then this will be ignored. The MD5 strings will be extracted from the
 		 * If-None-Match request header and if any of them match the $response_cache_key then a 304 Not Modified
 		 * response is returned.
+		 *
+		 * Such 304 Not Modified responses are only enabled when using a stable release. This is not enabled for
+		 * non-stable releases (like 1.2-beta2) because the plugin would be under active development and such caching
+		 * would make it more difficult to see changes applied to the sanitizers. (A browser's cache would have to be
+		 * disabled or the developer would have to always do hard reloads.)
 		 */
 		$has_matching_etag = (
+			false === strpos( AMP__VERSION, '-' )
+			&&
 			isset( $_SERVER['HTTP_IF_NONE_MATCH'] )
 			&&
 			preg_match_all( '#\b[0-9a-f]{32}\b#', wp_unslash( $_SERVER['HTTP_IF_NONE_MATCH'] ), $etag_match_candidates )
@@ -1962,7 +2127,7 @@ class AMP_Theme_Support {
 
 		if ( $blocking_error_count > 0 && ! AMP_Validation_Manager::should_validate_response() ) {
 			/*
-			 * In native AMP, strip html@amp attribute to prevent GSC from complaining about a validation error
+			 * In AMP-first, strip html@amp attribute to prevent GSC from complaining about a validation error
 			 * already surfaced inside of WordPress. This is intended to not serve dirty AMP, but rather a
 			 * non-AMP document (intentionally not valid AMP) that contains the AMP runtime and AMP components.
 			 */
@@ -2148,6 +2313,38 @@ class AMP_Theme_Support {
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), array(), AMP__VERSION );
+	}
+
+	/**
+	 * Print the important emoji-related styles.
+	 *
+	 * @see print_emoji_styles()
+	 * @staticvar bool $printed
+	 */
+	public static function print_emoji_styles() {
+		static $printed = false;
+
+		if ( $printed ) {
+			return;
+		}
+
+		$printed = true;
+		?>
+		<style type="text/css">
+			img.wp-smiley,
+			img.emoji {
+				display: inline-block !important; /* Patched from core, which had display:inline */
+				border: none !important;
+				box-shadow: none !important;
+				height: 1em !important;
+				width: 1em !important;
+				margin: 0 .07em !important;
+				vertical-align: -0.1em !important;
+				background: none !important;
+				padding: 0 !important;
+			}
+		</style>
+		<?php
 	}
 
 	/**
