@@ -93,10 +93,15 @@ export default compose(
 		const { getCurrentPage, isReordering } = select( 'amp/story' );
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
 
-		const blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
-
+		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
+		const callToActionBlock = blocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
+		// If CTA block was found, let's add it to the end.
+		if ( callToActionBlock ) {
+			blocks.push( callToActionBlock );
+		}
 		return {
-			blocks: blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse(),
+			blocks,
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};

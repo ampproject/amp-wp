@@ -84,8 +84,32 @@ class BlockNavigationItem extends Component {
 
 	render() {
 		const { block, getBlockIndex, isSelected, onClick } = this.props;
+		const isCallToActionBlock = 'amp/amp-story-cta' === block.name;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
+
+		if ( isCallToActionBlock ) {
+			return (
+				<div className="editor-block-navigation__item block-editor-block-navigation__item">
+					<Button
+						className={ classnames(
+							'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
+							{
+								'is-selected': isSelected,
+							}
+						) }
+						onClick={ onClick }
+						id={ blockElementId }
+					>
+						<BlockPreviewLabel
+							block={ block }
+							accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
+						/>
+					</Button>
+				</div>
+			);
+		}
+
 		const transferData = {
 			type: 'block',
 			srcIndex: getBlockIndex( clientId ),
