@@ -178,8 +178,8 @@ const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
 
 	const blockOrder = getBlockOrder( getBlockRootClientId( clientId ) );
 
-	// Need to reverse the list and exclude CTA blocks just like BlockNavigation does.
-	const blocks = getBlocksByClientId( blockOrder ).filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).map( ( { clientId: id } ) => id ).reverse();
+	// Need to reverse the list just like BlockNavigation does.
+	const blocks = getBlocksByClientId( blockOrder ).map( ( { clientId: id } ) => id ).reverse();
 
 	return {
 		getBlockIndex: ( blockClientId ) => {

@@ -54,7 +54,7 @@ BlockNavigationList.propTypes = {
 	selectBlock: PropTypes.func.isRequired,
 };
 
-function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
+function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBlockClientId } ) {
 	const hasBlocks = blocks.length > 0;
 
 	return (
@@ -70,7 +70,15 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 					selectBlock={ selectBlock }
 				/>
 			) }
-			{ ! hasBlocks && (
+			{ /* Add CTA block as a separate item to exclude it from DropZone. */ }
+			{ callToActionBlock && (
+				<BlockNavigationItem
+					block={ callToActionBlock }
+					isSelected={ callToActionBlock.clientId === selectedBlockClientId }
+					onClick={ () => selectBlock( callToActionBlock.clientId ) }
+				/>
+			) }
+			{ ! hasBlocks && ! callToActionBlock && (
 				<p className="block-editor-block-navigation__paragraph">
 					{ __( 'No elements added to this page yet.', 'amp' ) }
 				</p>
@@ -80,6 +88,9 @@ function BlockNavigation( { blocks, selectBlock, selectedBlockClientId } ) {
 }
 
 BlockNavigation.propTypes = {
+	callToActionBlock: PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ),
 	blocks: PropTypes.arrayOf( PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ) ).isRequired,
@@ -94,14 +105,12 @@ export default compose(
 		const { getBlockOrder, getBlocksByClientId, getSelectedBlockClientId } = select( 'core/block-editor' );
 
 		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
+		// Let's get the CTA block to handle it separately.
 		const callToActionBlock = blocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
 		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
-		// If CTA block was found, let's add it to the end.
-		if ( callToActionBlock ) {
-			blocks.push( callToActionBlock );
-		}
 		return {
 			blocks,
+			callToActionBlock,
 			selectedBlockClientId: getSelectedBlockClientId(),
 			isReordering: isReordering(),
 		};
