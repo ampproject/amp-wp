@@ -24,4 +24,4 @@
 </head>
 
 <body class="<?php echo esc_attr( $this->get( 'body_class' ) ); ?>">
-<?php do_action( 'wp_body_open', $this ); ?>
+<?php do_action( 'amp_wp_body_open', $this ); ?>
