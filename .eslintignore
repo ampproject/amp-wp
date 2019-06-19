@@ -1,4 +1,6 @@
 **/*.min.js
 **/node_modules/**
 **/vendor/**
-**/assets/js/*-compiled.js
+**/assets/js/*.js
+!assets/js/amp-service-worker-runtime-precaching.js
+build/*

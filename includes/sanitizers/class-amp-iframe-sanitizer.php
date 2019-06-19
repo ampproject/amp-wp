@@ -11,15 +11,7 @@
  * Converts <iframe> tags to <amp-iframe>
  */
 class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
-
-	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Default values for sandboxing IFrame.
@@ -45,7 +37,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = array(
-		'add_placeholder' => false,
+		'add_placeholder'       => false,
+		'add_noscript_fallback' => true,
 	);
 
 	/**
@@ -73,8 +66,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node                  = $nodes->item( $i );
+			$node = $nodes->item( $i );
+
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
+				continue;
+			}
+
 			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
 
 			/**
@@ -104,6 +107,13 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$node->parentNode->replaceChild( $new_node, $node );
+
+			if ( $this->args['add_noscript_fallback'] ) {
+				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// Preserve original node in noscript for no-JS environments.
+				$this->append_old_node_noscript( $new_node, $node, $this->dom );
+			}
 		}
 	}
 

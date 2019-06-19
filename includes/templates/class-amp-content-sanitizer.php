@@ -87,8 +87,18 @@ class AMP_Content_Sanitizer {
 			$sanitizer = new $sanitizer_class( $dom, array_merge( $args, $sanitizer_args ) );
 
 			if ( ! is_subclass_of( $sanitizer, 'AMP_Base_Sanitizer' ) ) {
-				/* translators: %s is sanitizer class */
-				_doing_it_wrong( __METHOD__, sprintf( esc_html__( 'Sanitizer (%s) must extend `AMP_Base_Sanitizer`', 'amp' ), esc_html( $sanitizer_class ) ), '0.1' );
+				_doing_it_wrong(
+					__METHOD__,
+					esc_html(
+						sprintf(
+							/* translators: 1: sanitizer class. 2: AMP_Base_Sanitizer */
+							__( 'Sanitizer (%1$s) must extend `%2$s`', 'amp' ),
+							esc_html( $sanitizer_class ),
+							'AMP_Base_Sanitizer'
+						)
+					),
+					'0.1'
+				);
 				continue;
 			}
 

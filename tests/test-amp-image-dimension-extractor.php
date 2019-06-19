@@ -37,19 +37,23 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test single url returns expected dimensions.
+	 * Test single url returns expected dimensions and that the normalization runs as expected.
 	 *
 	 * @covers \AMP_Image_Dimension_Extractor::extract()
 	 */
 	public function test__single_url() {
+		$source_url = 'https://example.com/image.png';
+		$cdn_url    = 'https://cdn.example.com/image.png';
+		$expected   = array( 100, 101 );
+
 		add_action(
 			'amp_extract_image_dimensions_batch_callbacks_registered',
-			function() {
+			function() use ( $cdn_url ) {
 				add_filter(
 					'amp_extract_image_dimensions_batch',
-					function() {
+					function() use ( $cdn_url ) {
 						return array(
-							'https://example.com/image.png' => array(
+							$cdn_url => array(
 								100,
 								101,
 							),
@@ -60,10 +64,21 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			9999 // Run after the `disable_downloads`.
 		);
 
-		$source_url = 'https://example.com/image.png';
-		$expected   = array( 100, 101 );
+		$ran_filter_count = 0;
+		add_filter(
+			'amp_normalized_dimension_extractor_image_url',
+			function ( $url, $original_url ) use ( $source_url, $cdn_url, &$ran_filter_count ) {
+				$this->assertSame( $source_url, $url );
+				$this->assertSame( $source_url, $original_url );
+				$ran_filter_count++;
+				return $cdn_url;
+			},
+			10,
+			2
+		);
 
 		$actual = AMP_Image_Dimension_Extractor::extract( $source_url );
+		$this->assertSame( 1, $ran_filter_count );
 
 		$this->assertEquals( $expected, $actual );
 	}
@@ -73,10 +88,12 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 */
 	public function test__should_return_both_urls() {
 		$source_urls = array(
+			home_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ),
 			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ),
 			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg',
 		);
 		$expected    = array(
+			home_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ) => false,
 			site_url( '/wp-content/uploads/2018/06/IMG_0183-300x300.jpg' ) => false,
 			'/wp-content/uploads/2018/06/IMG_0183-300x300.jpg'             => false,
 		);
@@ -114,7 +131,7 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
-		$site_url = site_url();
+		$home_url = home_url();
 
 		return array(
 			'empty_url'         => array(
@@ -131,15 +148,15 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 			),
 			'path_only'         => array(
 				'/path/to/file.png',
-				$site_url . '/path/to/file.png',
+				$home_url . '/path/to/file.png',
 			),
 			'query_only'        => array(
 				'?file=file.png',
-				$site_url . '/?file=file.png',
+				$home_url . '?file=file.png',
 			),
 			'path_and_query'    => array(
 				'/path/file.jpg?query=1',
-				$site_url . '/path/file.jpg?query=1',
+				$home_url . '/path/file.jpg?query=1',
 			),
 			'normal_url'        => array(
 				'https://example.com/path/to/file.jpg',

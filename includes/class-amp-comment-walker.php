@@ -2,13 +2,19 @@
 /**
  * Class AMP_Comment_Walker
  *
+ * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
  * @package AMP
  */
+
+/* translators: 1: AMP_Comment_Walker. 2: AMP_Comments_Sanitizer. */
+_deprecated_file( __FILE__, '1.1', null, sprintf( esc_html__( '%1$s functionality has been moved to %2$s.', 'amp' ), 'AMP_Comment_Walker', 'AMP_Comments_Sanitizer' ) );
 
 /**
  * Class AMP_Comment_Walker
  *
  * Walker to wrap comments in mustache tags for amp-template.
+ *
+ * @deprecated 1.1.0 This functionality was moved to AMP_Comments_Sanitizer
  */
 class AMP_Comment_Walker extends Walker_Comment {
 
@@ -21,7 +27,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	public $args;
 
 	/**
-	 * Holds the timestamp of the most reacent comment in a thread.
+	 * Holds the timestamp of the most recent comment in a thread.
 	 *
 	 * @since 0.7
 	 * @var array

@@ -122,7 +122,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_pre_get_permalink', array( $this, 'return_example_url' ) );
 
-		// Now check with theme support added (in paired mode).
+		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $published_post ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
@@ -187,7 +187,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertContains( 'current_filter=amp_get_permalink', $url );
 		remove_filter( 'amp_get_permalink', array( $this, 'return_example_url' ), 10 );
 
-		// Now check with theme support added (in paired mode).
+		// Now check with theme support added (in transitional mode).
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$this->assertStringEndsWith( '&amp', amp_get_permalink( $drafted_post ) );
 		$this->assertStringEndsWith( '?amp', amp_get_permalink( $published_post ) );
@@ -203,7 +203,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_get_permalink() with theme support paired mode.
+	 * Test amp_get_permalink() with theme support transitional mode.
 	 *
 	 * @covers \amp_get_permalink()
 	 */
@@ -314,6 +314,8 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				'template_dir' => './',
 			)
 		);
+		AMP_Options_Manager::update_option( 'theme_support', AMP_Theme_Support::STANDARD_MODE_SLUG );
+		AMP_Theme_Support::read_theme_support();
 		AMP_Theme_Support::init();
 		$invalid_url_post_id = AMP_Validated_URL_Post_Type::store_validation_errors(
 			array(
@@ -344,15 +346,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		unset( $GLOBALS['wp_query']->query_vars[ amp_get_slug() ] );
 		$this->assertFalse( is_amp_endpoint() );
 
-		// Paired theme support.
+		// Transitional theme support.
 		add_theme_support( AMP_Theme_Support::SLUG, array( 'template_dir' => './' ) );
 		$_GET['amp'] = '';
 		$this->assertTrue( is_amp_endpoint() );
-		unset( $_GET['amp'] );
+		unset( $_GET['amp'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->assertFalse( is_amp_endpoint() );
 		remove_theme_support( AMP_Theme_Support::SLUG );
 
-		// Native theme support.
+		// Standard theme support.
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertTrue( is_amp_endpoint() );
 
@@ -385,6 +387,72 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test is_amp_endpoint() function for post embeds and feeds.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * global WP_Query $wp_the_query
+	 */
+	public function test_is_amp_endpoint_for_post_embeds_and_feeds() {
+		add_theme_support( AMP_Theme_Support::SLUG );
+		$post_id = $this->factory()->post->create_and_get()->ID;
+
+		$this->go_to( home_url( "?p=$post_id" ) );
+		$this->assertTrue( is_amp_endpoint() );
+
+		$this->go_to( home_url( "?p=$post_id&embed=1" ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		$this->go_to( home_url( '?feed=rss' ) );
+		$this->assertFalse( is_amp_endpoint() );
+
+		if ( class_exists( 'WP_Service_Workers' ) && defined( 'WP_Service_Workers::QUERY_VAR' ) && function_exists( 'pwa_add_error_template_query_var' ) ) {
+			$this->go_to( home_url( "?p=$post_id" ) );
+			global $wp_query;
+			$wp_query->set( WP_Service_Workers::QUERY_VAR, WP_Service_Workers::SCOPE_FRONT );
+			$this->assertFalse( is_amp_endpoint() );
+		}
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the parse_query action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_parse_query_action() {
+		global $wp_actions;
+		unset( $wp_actions['parse_query'] );
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function when there is no WP_Query.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_feed
+	 * @expectedIncorrectUsage is_embed
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_when_no_wp_query() {
+		global $wp_query;
+		$wp_query = null;
+		$this->assertFalse( is_amp_endpoint() );
+	}
+
+	/**
+	 * Test is_amp_endpoint() function before the wp action happens.
+	 *
+	 * @covers \is_amp_endpoint()
+	 * @expectedIncorrectUsage is_amp_endpoint
+	 */
+	public function test_is_amp_endpoint_before_wp_action() {
+		add_theme_support( 'amp' );
+		global $wp_actions;
+		unset( $wp_actions['wp'] );
+		$this->assertTrue( is_amp_endpoint() );
+	}
+
+	/**
 	 * Filter calls.
 	 *
 	 * @var array
@@ -412,25 +480,37 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function test_amp_add_generator_metadata() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
-		$this->assertContains( 'mode=classic', $output );
+
+		$get_generator_tag = function() {
+			ob_start();
+			amp_add_generator_metadata();
+			return ob_get_clean();
+		};
+
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=reader', $output );
+		$this->assertContains( 'v' . AMP__VERSION, $output );
+		$this->assertContains( 'experiences=website', $output );
+
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=transitional', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => true ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
-		$this->assertContains( 'mode=paired', $output );
+		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => false ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
 		$this->assertContains( 'v' . AMP__VERSION, $output );
 
-		add_theme_support( AMP_Theme_Support::SLUG, array( 'paired' => false ) );
-		ob_start();
-		amp_add_generator_metadata();
-		$output = ob_get_clean();
-		$this->assertContains( 'mode=native', $output );
-		$this->assertContains( 'v' . AMP__VERSION, $output );
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=none', $output );
+		$this->assertContains( 'experiences=stories', $output );
+
+		AMP_Options_Manager::update_option( 'experiences', array( AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ) );
+		$output = $get_generator_tag();
+		$this->assertContains( 'mode=standard', $output );
+		$this->assertContains( 'experiences=website,stories', $output );
 	}
 
 	/**
@@ -464,7 +544,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		wp_print_scripts();
 		$output = ob_get_clean();
 
-		$this->assertStringStartsWith( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
+		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0.js\' async></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mathml-0.1.js\' async custom-element="amp-mathml"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 		$this->assertContains( '<script type=\'text/javascript\' src=\'https://cdn.ampproject.org/v0/amp-mustache-latest.js\' async custom-template="amp-mustache"></script>', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript
 
@@ -904,6 +984,60 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+	}
+
+	/**
+	 * Test amp_add_admin_bar_view_link()
+	 *
+	 * @covers \amp_add_admin_bar_view_link()
+	 * @global \WP_Query $wp_query
+	 */
+	public function test_amp_add_admin_bar_item() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		$post_id = $this->factory()->post->create();
+		$this->go_to( get_permalink( $post_id ) );
+		global $wp_query; // Must be here after the go_to() call.
+
+		// Check that canonical adds no link.
+		add_theme_support( 'amp' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp' ) );
+
+		// Check that paired mode does add link.
+		add_theme_support( 'amp', array( AMP_Theme_Support::PAIRED_FLAG => true ) );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
+
+		// Confirm that link is added to non-AMP version.
+		set_query_var( amp_get_slug(), '' );
+		$this->assertTrue( is_amp_endpoint() );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( get_permalink( $post_id ) ), $item->href );
+		unset( $wp_query->query_vars[ amp_get_slug() ] );
+		$this->assertFalse( is_amp_endpoint() );
+
+		// Confirm post opt-out works.
+		add_filter( 'amp_skip_post', '__return_true' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$this->assertNull( $admin_bar->get_node( 'amp' ) );
+		remove_filter( 'amp_skip_post', '__return_true' );
+
+		// Confirm Reader mode works.
+		remove_theme_support( 'amp' );
+		$admin_bar = new WP_Admin_Bar();
+		amp_add_admin_bar_view_link( $admin_bar );
+		$item = $admin_bar->get_node( 'amp' );
+		$this->assertInternalType( 'object', $item );
+		$this->assertEquals( esc_url( amp_get_permalink( $post_id ) ), $item->href );
 	}
 
 	/**

@@ -11,6 +11,7 @@
  * Converts <img> tags to <amp-img> or <amp-anim>
  */
 class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Value used for width attribute when $attributes['width'] is empty.
@@ -38,6 +39,15 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public static $tag = 'img';
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
 
 	/**
 	 * Animation extension.
@@ -81,9 +91,18 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 			$node = $nodes->item( $i );
 			if ( ! $node instanceof DOMElement ) {
+				continue;
+			}
+
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
 				continue;
 			}
 
@@ -92,8 +111,35 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Short-circuit emoji images from needing to make requests out to https://s.w.org/.
+			if ( 'wp-smiley' === $node->getAttribute( 'class' ) ) {
+				$node->setAttribute( 'width', '72' );
+				$node->setAttribute( 'height', '72' );
+				$node->setAttribute( 'noloading', '' );
+			}
+
+			if ( $node->hasAttribute( 'data-amp-layout' ) ) {
+				$layout = $node->getAttribute( 'data-amp-layout' );
+			} elseif ( $node->hasAttribute( 'layout' ) ) {
+				$layout = $node->getAttribute( 'layout' );
+			} else {
+				$layout = 'intrinsic';
+			}
+
+			$has_width  = is_numeric( $node->getAttribute( 'width' ) );
+			$has_height = is_numeric( $node->getAttribute( 'height' ) );
+
 			// Determine which images need their dimensions determined/extracted.
-			if ( ! is_numeric( $node->getAttribute( 'width' ) ) || ! is_numeric( $node->getAttribute( 'height' ) ) ) {
+			$missing_dimensions = (
+				( ! $has_height && 'fixed-height' === $layout )
+				||
+				(
+					( ! $has_width || ! $has_height )
+					&&
+					in_array( $layout, array( 'fixed', 'responsive', 'intrinsic' ), true )
+				)
+			);
+			if ( $missing_dimensions ) {
 				$need_dimensions[ $node->getAttribute( 'src' ) ][] = $node;
 			} else {
 				$this->adjust_and_replace_node( $node );
@@ -102,6 +148,21 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->determine_dimensions( $need_dimensions );
 		$this->adjust_and_replace_nodes_in_array_map( $need_dimensions );
+
+		/*
+		 * Opt-in to amp-img-auto-sizes experiment.
+		 * This is needed because the sizes attribute is removed from all img elements converted to amp-img
+		 * in order to prevent the undesirable setting of the width. This $meta tag can be removed once the
+		 * experiment ends (and the feature has been fully launched).
+		 * See <https://github.com/ampproject/amphtml/issues/21371> and <https://github.com/ampproject/amp-wp/pull/2036>.
+		 */
+		$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+		if ( $head ) {
+			$meta = $this->dom->createElement( 'meta' );
+			$meta->setAttribute( 'name', 'amp-experiments-opt-in' );
+			$meta->setAttribute( 'content', 'amp-img-auto-sizes' );
+			$head->insertBefore( $meta, $head->firstChild );
+		}
 	}
 
 	/**
@@ -229,7 +290,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Make final modifications to DOMNode
 	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
+	 * @param DOMElement $node The img element to adjust and replace.
 	 */
 	private function adjust_and_replace_node( $node ) {
 
@@ -244,8 +305,16 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->add_or_append_attribute( $new_attributes, 'class', 'amp-wp-enforced-sizes' );
 		if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['height'] ) && ! empty( $new_attributes['width'] ) ) {
-			$new_attributes['layout'] = 'intrinsic';
+			// Use responsive images when a theme supports wide and full-bleed images.
+			if ( ! empty( $this->args['align_wide_support'] ) && $node->parentNode && 'figure' === $node->parentNode->nodeName && preg_match( '/(^|\s)(alignwide|alignfull)(\s|$)/', $node->parentNode->getAttribute( 'class' ) ) ) {
+				$new_attributes['layout'] = 'responsive';
+			} else {
+				$new_attributes['layout'] = 'intrinsic';
+			}
 		}
+
+		// Remove sizes attribute since it causes headaches in AMP and because AMP will generate it for us. See <https://github.com/ampproject/amphtml/issues/21371>.
+		unset( $new_attributes['sizes'] );
 
 		if ( $this->is_gif_url( $new_attributes['src'] ) ) {
 			$this->did_convert_elements = true;
@@ -254,10 +323,48 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		} else {
 			$new_tag = 'amp-img';
 		}
-		$new_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
-		$new_node = $this->handle_centering( $new_node );
-		$node->parentNode->replaceChild( $new_node, $node );
-		$this->add_auto_width_to_figure( $new_node );
+
+		$img_node = AMP_DOM_Utils::create_node( $this->dom, $new_tag, $new_attributes );
+		$node->parentNode->replaceChild( $img_node, $node );
+
+		/*
+		 * Prevent inline style on an image from rendering the amp-img invisible or conflicting with the required display.
+		 * This could eventually be expanded to fixup inline styles for elements other than images, but the reality
+		 * is that this is not going to completely solve the problem for images as well, since it will not handle the
+		 * case where an image gets a display:inline style via a style rule.
+		 * See <https://github.com/ampproject/amp-wp/issues/1803>.
+		 */
+		if ( $img_node->hasAttribute( 'style' ) ) {
+			$layout = $img_node->getAttribute( 'layout' );
+			if ( in_array( $layout, array( 'fixed-height', 'responsive', 'fill', 'flex-item' ), true ) ) {
+				$required_display = 'block';
+			} elseif ( 'nodisplay' === $layout ) {
+				$required_display = 'none';
+			} else {
+				// This is also the default for any AMP element (.i-amphtml-element).
+				$required_display = 'inline-block';
+			}
+			$img_node->setAttribute(
+				'style',
+				preg_replace(
+					'/\bdisplay\s*:\s*[a-z\-]+\b/',
+					"display:$required_display",
+					$img_node->getAttribute( 'style' )
+				)
+			);
+		}
+
+		$can_include_noscript = (
+			$this->args['add_noscript_fallback']
+			&&
+			( $node->hasAttribute( 'src' ) && ! preg_match( '/^http:/', $node->getAttribute( 'src' ) ) )
+			&&
+			( ! $node->hasAttribute( 'srcset' ) || ! preg_match( '/http:/', $node->getAttribute( 'srcset' ) ) )
+		);
+		if ( $can_include_noscript ) {
+			// Preserve original node in noscript for no-JS environments.
+			$this->append_old_node_noscript( $img_node, $node, $this->dom );
+		}
 	}
 
 	/**
@@ -300,77 +407,5 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		$ext  = self::$anim_extension;
 		$path = wp_parse_url( $url, PHP_URL_PATH );
 		return substr( $path, -strlen( $ext ) ) === $ext;
-	}
-
-	/**
-	 * Handles an issue with the aligncenter class.
-	 *
-	 * If the <amp-img> has the class aligncenter, this strips the class and wraps it in a <figure> to center the image.
-	 * There was an issue where the aligncenter class overrode the "display: inline-block" rule of AMP's layout="intrinsic" attribute.
-	 * So this strips that class, and instead wraps the image in a <figure> to center it.
-	 *
-	 * @since 0.7
-	 * @see https://github.com/ampproject/amp-wp/issues/1104
-	 *
-	 * @param DOMElement $node The <amp-img> node.
-	 * @return DOMElement $node The <amp-img> node, possibly wrapped in a <figure>.
-	 */
-	public function handle_centering( $node ) {
-		$align_class = 'aligncenter';
-		$classes     = $node->getAttribute( 'class' );
-		$width       = $node->getAttribute( 'width' );
-
-		// If this doesn't have a width attribute, centering it in the <figure> wrapper won't work.
-		if ( empty( $width ) || ! in_array( $align_class, preg_split( '/\s+/', trim( $classes ) ), true ) ) {
-			return $node;
-		}
-
-		// Strip the class, and wrap the <amp-img> in a <figure>.
-		$classes = trim( str_replace( $align_class, '', $classes ) );
-		$node->setAttribute( 'class', $classes );
-		$figure = AMP_DOM_Utils::create_node(
-			$this->dom,
-			'figure',
-			array(
-				'class' => $align_class,
-				'style' => "max-width: {$width}px;",
-			)
-		);
-		$figure->appendChild( $node );
-
-		return $figure;
-	}
-
-	/**
-	 * Add an inline style to set the `<figure>` element's width to `auto` instead of `fit-content`.
-	 *
-	 * @since 1.0
-	 * @see https://github.com/ampproject/amp-wp/issues/1086
-	 *
-	 * @param DOMElement $node The DOMNode to adjust and replace.
-	 */
-	protected function add_auto_width_to_figure( $node ) {
-		$figure = $node->parentNode;
-		if ( ! ( $figure instanceof DOMElement ) || 'figure' !== $figure->tagName ) {
-			return;
-		}
-
-		$class = $figure->getAttribute( 'class' );
-		// Target only the <figure> with a 'wp-block-image' class attribute.
-		if ( false === strpos( $class, 'wp-block-image' ) ) {
-			return;
-		}
-
-		// Target only <figure> without a 'is-resized' class attribute.
-		if ( false !== strpos( $class, 'is-resized' ) ) {
-			return;
-		}
-
-		$new_style = 'width: auto;';
-		if ( $figure->hasAttribute( 'style' ) ) {
-			$figure->setAttribute( 'style', $new_style . $figure->getAttribute( 'style' ) );
-		} else {
-			$figure->setAttribute( 'style', $new_style );
-		}
 	}
 }

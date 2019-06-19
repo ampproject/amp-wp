@@ -28,16 +28,21 @@ class AMP_Autoloader {
 	 *
 	 * @var string[]
 	 */
-	private static $_classmap = array(
+	private static $classmap = array(
 		'AMP_Editor_Blocks'                  => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                  => 'includes/class-amp-theme-support',
+		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
+		'AMP_Service_Worker'                 => 'includes/class-amp-service-worker',
+		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
 		'AMP_HTTP'                           => 'includes/class-amp-http',
 		'AMP_Comment_Walker'                 => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'            => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                  => 'includes/admin/class-amp-post-meta-box',
 		'AMP_Admin_Pointer'                  => 'includes/admin/class-amp-admin-pointer',
+		'AMP_Admin_Pointers'                 => 'includes/admin/class-amp-admin-pointers',
 		'AMP_Post_Type_Support'              => 'includes/class-amp-post-type-support',
 		'AMP_Base_Embed_Handler'             => 'includes/embeds/class-amp-base-embed-handler',
+		'AMP_Crowdsignal_Embed_Handler'      => 'includes/embeds/class-amp-crowdsignal-embed-handler',
 		'AMP_DailyMotion_Embed_Handler'      => 'includes/embeds/class-amp-dailymotion-embed',
 		'AMP_Facebook_Embed_Handler'         => 'includes/embeds/class-amp-facebook-embed',
 		'AMP_Gallery_Embed_Handler'          => 'includes/embeds/class-amp-gallery-embed',
@@ -83,6 +88,8 @@ class AMP_Autoloader {
 		'AMP_Tag_And_Attribute_Sanitizer'    => 'includes/sanitizers/class-amp-tag-and-attribute-sanitizer',
 		'AMP_Video_Sanitizer'                => 'includes/sanitizers/class-amp-video-sanitizer',
 		'AMP_Core_Theme_Sanitizer'           => 'includes/sanitizers/class-amp-core-theme-sanitizer',
+		'AMP_Story_Sanitizer'                => 'includes/sanitizers/class-amp-story-sanitizer',
+		'AMP_Noscript_Fallback'              => 'includes/sanitizers/trait-amp-noscript-fallback',
 		'AMP_Customizer_Design_Settings'     => 'includes/settings/class-amp-customizer-design-settings',
 		'AMP_Customizer_Settings'            => 'includes/settings/class-amp-customizer-settings',
 		'AMP_Content'                        => 'includes/templates/class-amp-content',
@@ -100,7 +107,6 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'WPCOM_AMP_Polldaddy_Embed'          => 'wpcom/class-amp-polldaddy-embed',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/stubs',
 		'AMP_Test_World_Sanitizer'           => 'tests/stubs',
 	);
@@ -122,10 +128,10 @@ class AMP_Autoloader {
 	 * @param string $class_name Class name.
 	 */
 	protected static function autoload( $class_name ) {
-		if ( ! isset( self::$_classmap[ $class_name ] ) ) {
+		if ( ! isset( self::$classmap[ $class_name ] ) ) {
 			return;
 		}
-		$filepath = self::$_classmap[ $class_name ];
+		$filepath = self::$classmap[ $class_name ];
 		require AMP__DIR__ . "/{$filepath}.php";
 	}
 
@@ -156,6 +162,6 @@ class AMP_Autoloader {
 	 * @param string $filepath   Absolute filepath to class file, including .php extension.
 	 */
 	public static function register_autoload_class( $class_name, $filepath ) {
-		self::$_classmap[ $class_name ] = '!' . $filepath;
+		self::$classmap[ $class_name ] = '!' . $filepath;
 	}
 }

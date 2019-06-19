@@ -88,23 +88,40 @@ class AMP_Image_Dimension_Extractor {
 			return false;
 		}
 
+		$normalized_url = $url;
+
 		if ( 0 === strpos( $url, '//' ) ) {
-			return set_url_scheme( $url, 'http' );
+			$normalized_url = set_url_scheme( $url, 'http' );
+		} else {
+			$parsed = wp_parse_url( $url );
+			if ( ! isset( $parsed['host'] ) ) {
+				$path = '';
+				if ( isset( $parsed['path'] ) ) {
+					$path .= $parsed['path'];
+				}
+				if ( isset( $parsed['query'] ) ) {
+					$path .= '?' . $parsed['query'];
+				}
+				$home      = home_url();
+				$home_path = wp_parse_url( $home, PHP_URL_PATH );
+				if ( ! empty( $home_path ) ) {
+					$home = substr( $home, 0, - strlen( $home_path ) );
+				}
+				$normalized_url = $home . $path;
+			}
 		}
 
-		$parsed = wp_parse_url( $url );
-		if ( ! isset( $parsed['host'] ) ) {
-			$path = '';
-			if ( isset( $parsed['path'] ) ) {
-				$path .= $parsed['path'];
-			}
-			if ( isset( $parsed['query'] ) ) {
-				$path .= '?' . $parsed['query'];
-			}
-			$url = site_url( $path );
-		}
+		/**
+		 * Apply filters on the normalized image URL for dimension extraction.
+		 *
+		 * @since 1.1
+		 *
+		 * @param string $normalized_url Normalized image URL.
+		 * @param string $url            Original image URL.
+		 */
+		$normalized_url = apply_filters( 'amp_normalized_dimension_extractor_image_url', $normalized_url, $url );
 
-		return $url;
+		return $normalized_url;
 	}
 
 	/**
@@ -207,10 +224,20 @@ class AMP_Image_Dimension_Extractor {
 	 * @param array $images Array to populate with results of image/dimension inspection.
 	 */
 	private static function fetch_images( $urls_to_fetch, &$images ) {
-		$urls       = array_keys( $urls_to_fetch );
-		$user_agent = apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() );
-		$client     = new \FasterImage\FasterImage( $user_agent ); // @todo The $user_agent is not actually able to be passed in this way to FasterImage. Needs another patch?
-		$images     = $client->batch( $urls );
+		$urls   = array_keys( $urls_to_fetch );
+		$client = new \FasterImage\FasterImage();
+
+		/**
+		 * Filters the user agent for onbtaining the image dimensions.
+		 *
+		 * @param string $user_agent User agent.
+		 */
+		$client->setUserAgent( apply_filters( 'amp_extract_image_dimensions_get_user_agent', self::get_default_user_agent() ) );
+		$client->setBufferSize( 1024 );
+		$client->setSslVerifyHost( true );
+		$client->setSslVerifyPeer( true );
+
+		$images = $client->batch( $urls );
 	}
 
 	/**
@@ -253,6 +280,6 @@ class AMP_Image_Dimension_Extractor {
 	 * @return string
 	 */
 	public static function get_default_user_agent() {
-		return 'amp-wp, v' . AMP__VERSION . ', ' . get_site_url();
+		return 'amp-wp, v' . AMP__VERSION . ', ' . home_url();
 	}
 }

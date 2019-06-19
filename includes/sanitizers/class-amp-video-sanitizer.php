@@ -13,15 +13,7 @@
  * Converts <video> tags to <amp-video>
  */
 class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
-
-	/**
-	 * Value used for height attribute when $attributes['height'] is empty.
-	 *
-	 * @since 0.2
-	 *
-	 * @const int
-	 */
-	const FALLBACK_HEIGHT = 400;
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Tag.
@@ -31,6 +23,15 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public static $tag = 'video';
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -56,21 +57,43 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node           = $nodes->item( $i );
+			/**
+			 * Node.
+			 *
+			 * @var DOMElement $node
+			 */
+			$node = $nodes->item( $i );
+
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
+				continue;
+			}
+
 			$amp_data       = $this->get_data_amp_attributes( $node );
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
-			$sources_count  = 0;
+			$sources        = array();
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 			if ( isset( $new_attributes['src'] ) ) {
 				$new_attributes = $this->filter_video_dimensions( $new_attributes, $new_attributes['src'] );
 				if ( $new_attributes['src'] ) {
-					$sources_count++;
+					$sources[] = $new_attributes['src'];
 				}
 			}
+
+			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
 
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
@@ -83,7 +106,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 						// @todo $this->remove_invalid_child( $child_node ), but this will require refactoring the while loop since it uses firstChild.
 						continue; // Skip adding source.
 					}
-					$sources_count++;
+					$sources[] = $src;
 					$child_node->setAttribute( 'src', $src );
 					$new_attributes = $this->filter_video_dimensions( $new_attributes, $src );
 				}
@@ -96,6 +119,18 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 				$child_nodes[] = $child_node;
 			}
 
+			/*
+			 * Add fallback for audio shortcode which is not present by default since wp_mediaelement_fallback()
+			 * is not called when wp_audio_shortcode_library is filtered from mediaelement to amp.
+			 */
+			if ( ! $fallback && ! empty( $sources ) ) {
+				$fallback = $this->dom->createElement( 'a' );
+				$fallback->setAttribute( 'href', $sources[0] );
+				$fallback->setAttribute( 'fallback', '' );
+				$fallback->appendChild( $this->dom->createTextNode( $sources[0] ) );
+				$child_nodes[] = $fallback;
+			}
+
 			$new_attributes = $this->filter_attachment_layout_attributes( $node, $new_attributes, $layout );
 			if ( empty( $new_attributes['layout'] ) && ! empty( $new_attributes['width'] ) && ! empty( $new_attributes['height'] ) ) {
 				$new_attributes['layout'] = 'responsive';
@@ -106,19 +141,34 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-video', $new_attributes );
 			foreach ( $child_nodes as $child_node ) {
 				$new_node->appendChild( $child_node );
+				if ( ! ( $child_node instanceof DOMElement ) || ! $child_node->hasAttribute( 'fallback' ) ) {
+					$old_node->appendChild( $child_node->cloneNode( true ) );
+				}
+			}
+
+			// Make sure the updated src and poster are applied to the original.
+			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+				if ( $new_node->hasAttribute( $attr_name ) ) {
+					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
+				}
 			}
 
 			/*
 			 * If the node has at least one valid source, replace the old node with it.
 			 * Otherwise, just remove the node.
 			 *
-			 * TODO: Add a fallback handler.
+			 * @todo Add a fallback handler.
 			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( 0 === $sources_count ) {
+			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
 				$node->parentNode->replaceChild( $new_node, $node );
+
+				if ( $this->args['add_noscript_fallback'] ) {
+					// Preserve original node in noscript for no-JS environments.
+					$this->append_old_node_noscript( $new_node, $old_node, $this->dom );
+				}
 			}
 
 			$this->did_convert_elements = true;
@@ -128,6 +178,10 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
 	 * Filter video dimensions, try to get width and height from original file if missing.
+	 *
+	 * The video block will automatically have the width/height supplied for attachments.
+	 *
+	 * @see \AMP_Core_Block_Handler::ampify_video_block()
 	 *
 	 * @param array  $new_attributes Attributes.
 	 * @param string $src            Video URL.

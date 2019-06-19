@@ -132,12 +132,12 @@ function amp_get_test_data_entries() {
 			'content' => 'http://i1259.photobucket.com/albums/ii543/iamnotpeterpan/EditPostlsaquoDennisDoesCricketmdashWordPress_zpsf72cc13d.png',
 		),
 		array(
-			'heading' => 'Polldaddy Poll Embed',
-			'content' => 'https://polldaddy.com/poll/7012505/',
+			'heading' => 'Crowdsingal Poll Embed',
+			'content' => 'https://poll.fm/7012505',
 		),
 		array(
 			'heading' => 'Polldaddy Survey Embed',
-			'content' => 'https://rydk.polldaddy.com/s/test-survey',
+			'content' => 'https://rydk.survey.fm/test-survey',
 		),
 		array(
 			'heading' => 'Reddit Embed',
@@ -305,7 +305,7 @@ function amp_create_embed_test_post( $data_entries ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$post_id = amp_create_embed_test_post( amp_get_test_data_entries() ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );

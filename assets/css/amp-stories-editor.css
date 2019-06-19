@@ -1,0 +1,224 @@
+:root {
+	--preview-scale: 1;
+	--preview-translateX: 0%;
+	--preview-translateY: 0%;
+}
+
+/*
+ * 0. General editor layout styles.
+ */
+.edit-post-visual-editor {
+	padding-left: 50px;
+	padding-right: 50px;
+}
+
+#amp-story-editor,
+.amp-story-page-preview .editor-styles-wrapper,
+.block-editor-block-preview .block-editor-block-preview__content > div {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+@media screen and (min-width: 1280px) {
+
+	#amp-story-editor {
+		min-width: 820px;
+	}
+}
+
+#amp-story-editor,
+.amp-story-page-preview .editor-styles-wrapper {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/*
+ * Remove alpha channel from placeholder background color
+ *
+ * Makes editing blocks easier when their on top of another block.
+ */
+#amp-story-editor .components-placeholder {
+	background: #f3f3f3;
+}
+
+/* Completely hide default appenders/inserters */
+#amp-story-editor .block-editor-block-list__block .block-editor-block-list__empty-block-inserter,
+#amp-story-editor .block-editor-block-list__layout .block-editor-default-block-appender,
+#amp-story-editor .block-editor-block-list__block > .block-editor-block-list__insertion-point {
+	display: none !important;
+}
+
+/* Quote block adjustments */
+.wp-block-quote__citation {
+	font-size: 16px;
+	margin-top: 24px;
+	display: block;
+}
+
+.editor-styles-wrapper .wp-block-quote p {
+	line-height: 34px;
+	font-weight: bold;
+	font-size: 30px;
+	font-family: "Source Sans Pro", sans-serif;
+}
+
+.wp-block-quote,
+.wp-block-quote[style*="text-align: right"] {
+	border: none;
+	padding-top: 100px;
+}
+
+.block-editor-block-list__layout .block-editor-block-list__block [data-type="core/quote"] .block-editor-block-list__block-edit::before {
+	right: -5px;
+	left: -5px;
+	top: -5px;
+	bottom: -5px;
+}
+
+:not(.amp-story-page-preview) :not(.amp-stories__editor-inserter__results) .components-disabled .wp-block-quote.is-style-white {
+	background-color: #313131;
+}
+
+.amp-story-reorderer-item .amp-story-page-preview .components-disabled .wp-block-quote.is-style-white,
+.amp-stories__editor-inserter__menu .amp-stories__editor-inserter__results .components-disabled .wp-block-quote.is-style-white {
+	background-color: initial;
+}
+
+/*
+ * Fix issue where images wit large max-width/max-height visually break the editor.
+ *
+ * @see https://github.com/ampproject/amp-wp/pull/2119
+ * @see https://github.com/WordPress/gutenberg/issues/7180
+ */
+
+.wp-block-image .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
+	left: 0 !important;
+}
+
+.wp-block[data-type="core/list"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/list"] .block-mover,
+.wp-block[data-type="core/list"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/code"] .amp-story-editor__rotate-container,
+.wp-block[data-type="core/code"] .block-mover,
+.wp-block[data-type="core/code"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/video"] .block-mover,
+.wp-block[data-type="core/video"] .block-mover div {
+	height: 100%;
+}
+
+.wp-block[data-type="core/video"] .block-mover .editor-rich-text.block-editor-rich-text,
+.wp-block[data-type="core/video"] .block-mover .editor-rich-text.block-editor-rich-text div {
+	height: initial;
+}
+
+.wp-block[data-type="core/video"] .wp-block-video {
+	margin: 0;
+}
+
+.wp-block-code textarea {
+	white-space: nowrap;
+}
+
+.wp-block[data-type="core/preformatted"] div[draggable="true"],
+.wp-block[data-type="core/verse"] div[draggable="true"] {
+	border: 5px solid transparent;
+}
+
+.wp-block-preformatted .block-editor-rich-text__editable,
+.wp-block-verse .block-editor-rich-text__editable {
+	white-space: nowrap !important;
+	padding: 5px;
+}
+
+.wp-block[data-type="core/pullquote"] .block-mover,
+.wp-block[data-type="core/pullquote"] .block-mover div,
+.wp-block-pullquote {
+	height: 100%;
+}
+
+.wp-block[data-type="core/table"] .block-mover,
+.wp-block[data-type="core/table"] .block-mover div,
+.wp-block-table {
+	height: 100%;
+}
+
+.wp-block[data-type="core/table"] .block-mover .components-placeholder,
+.wp-block[data-type="core/table"] .block-mover .components-placeholder div {
+	height: initial;
+}
+
+.block-library-list ul li,
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	cursor: initial;
+}
+
+.block-library-list {
+	padding: 5px;
+}
+
+.block-library-list ul {
+	margin: 0;
+}
+
+.wp-block-verse pre,
+.wp-block-preformatted pre {
+	margin: 0;
+}
+
+/**
+ * Hide option to toggle fixed toolbar.
+ */
+.edit-post-more-menu__content .components-menu-group:first-of-type .components-button:first-of-type {
+	display: none;
+}
+
+/**
+ * Hide Block Manager option
+ */
+.edit-post-more-menu__content .components-menu-group:nth-last-of-type(2) div[role="menu"] > .components-button:first-child {
+	display: none;
+}
+
+/*
+ * 100. Shame
+ */
+
+/*
+ * 100.1 Gutenberg - Warning div not clickable
+ * Fixes Gutenberg bug where an extra wrapping div is causing no pointer events on the notice layer.
+ */
+
+.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > :not(.editor-warning) {
+	pointer-events: all;
+}
+
+.editor-block-list__layout .block-editor-block-list__block.has-warning .block-editor-block-list__block-edit > div > div:not(.editor-warning) {
+	pointer-events: none;
+}
+
+div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
+	display: none;
+}
+
+.wp-block .is-amp-fit-text {
+	overflow-wrap: normal;
+}
+
+.wp-block-video,
+.wp-block-video .components-disabled {
+	height: 100%;
+}
+
+.wp-block-video .components-disabled {
+	overflow: hidden;
+}
+
+.wp-block-video video {
+	height: 100%;
+	width: 100%;
+}

@@ -1,0 +1,118 @@
+/**
+ * Front-end styling for AMP Stories.
+ */
+
+/* Text sizes to match the editor styles. */
+body,
+p {
+	font-size: 16px;
+	line-height: 1.8;
+	font-weight: normal;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+amp-story-grid-layer {
+	padding: 0;
+	align-content: unset;
+}
+
+.wp-block-pullquote {
+	border-top: 4px solid #555d66;
+	border-bottom: 4px solid #555d66;
+	color: #40464d;
+}
+
+.wp-block-pullquote p {
+	font-size: 20px;
+	line-height: 1.6;
+}
+
+.wp-block-pullquote cite {
+	text-transform: uppercase;
+	font-size: 13px;
+	font-style: normal;
+}
+
+.wp-block-pullquote.alignleft {
+	text-align: left;
+	width: initial;
+}
+
+.wp-block-pullquote.alignright {
+	text-align: right;
+	width: initial;
+}
+
+.wp-block-code {
+	font-family: Menlo, Consolas, monaco, monospace;
+	font-size: 14px;
+	color: #23282d;
+	padding: 0.8em 1em;
+	border: 1px solid #e2e4e7;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.wp-block-table {
+	width: initial;
+	min-width: 240px;
+	border-collapse: collapse;
+}
+
+.wp-block-table td,
+.wp-block-table th {
+	padding: 0.5em;
+	border: 1px solid #000;
+	font-size: 16px;
+}
+
+/* Quote block */
+amp-story-grid-layer .wp-block-quote {
+	padding: 100px 10px 10px 10px;
+	width: initial;
+}
+
+.wp-block-quote cite {
+	font-size: 16px;
+	margin-top: 24px;
+	display: block;
+	color: #6c7781;
+}
+
+.wp-block-quote p {
+	line-height: 36px;
+	font-weight: bold;
+	font-size: 32px;
+	font-family: "Source Sans Pro", sans-serif;
+}
+
+.wp-block-image amp-img {
+	width: 100% !important;
+	height: 100% !important;
+}
+
+.wp-block-image amp-img > img {
+	object-fit: cover;
+}
+
+.wp-block-image figcaption {
+	color: #555d66;
+	font-size: 13px;
+	text-align: center;
+}
+
+.amp-story-block-wrapper > :first-child {
+	width: 100%;
+	height: 100%;
+}
+
+.wp-block-video amp-video {
+	width: 100%;
+	height: 100%;
+}
+
+.wp-block-video figcaption {
+	color: #555d66;
+	font-size: 14px;
+	text-align: center;
+}

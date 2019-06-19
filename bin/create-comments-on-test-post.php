@@ -113,7 +113,7 @@ function amp_get_test_random_content( $num_words = 55, $more = '.' ) {
 // Bootstrap.
 if ( defined( 'WP_CLI' ) ) {
 	try {
-		$post_id = amp_create_comments_test_post(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+		$post_id = amp_create_comments_test_post(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		WP_CLI::success( sprintf( 'Please take a look at: %s', amp_get_permalink( $post_id ) . '#development=1' ) );
 	} catch ( Exception $e ) {
 		WP_CLI::error( $e->getMessage() );

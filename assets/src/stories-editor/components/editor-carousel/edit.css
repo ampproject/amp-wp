@@ -1,0 +1,70 @@
+#amp-story-editor-carousel {
+	display: none;
+}
+
+@media (min-width: 961px) {
+
+	#amp-story-editor-carousel {
+		display: block;
+	}
+}
+
+#amp-story-editor {
+	position: relative;
+	overflow: hidden;
+}
+
+#amp-story-editor > .editor-block-list__layout {
+	padding-left: 0;
+	padding-right: 0;
+	display: flex;
+	align-items: center;
+	transform: none;
+	transition: transform 300ms ease-in-out;
+}
+
+#amp-story-editor > .editor-block-list__layout .block-list-appender {
+	display: none;
+}
+
+.amp-story-editor-carousel-navigation {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 5em;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list {
+	flex: 1;
+	display: flex;
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	justify-content: center;
+	max-width: 30%;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item {
+	flex: 1;
+	height: .5em;
+	max-width: 5em;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item + .amp-story-editor-carousel-item {
+	margin-left: 20px;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button {
+	background: #eff0f1;
+	width: 100%;
+	height: 100%;
+	display: block;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:hover,
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:focus {
+	background: #e0e0e0;
+}
+
+.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item--active button {
+	background: #666;
+}

@@ -17,7 +17,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var int
 	 */
-	protected $DEFAULT_HEIGHT = 200; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.MemberNotSnakeCase
+	protected $DEFAULT_HEIGHT = 200;
 
 	/**
 	 * Register embed.

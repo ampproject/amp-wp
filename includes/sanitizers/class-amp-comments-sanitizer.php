@@ -13,12 +13,22 @@
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Default args.
+	 *
+	 * @since 1.1
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'comment_live_list' => false,
+	);
+
+	/**
 	 * Pre-process the comment form and comment list for AMP.
 	 *
 	 * @since 0.7
 	 */
 	public function sanitize() {
-
 		foreach ( $this->dom->getElementsByTagName( 'form' ) as $comment_form ) {
 			/**
 			 * Comment form.
@@ -34,10 +44,21 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				$this->process_comment_form( $comment_form );
 			}
 		}
+
+		if ( ! empty( $this->args['comments_live_list'] ) ) {
+			$xpath    = new DOMXPath( $this->dom );
+			$comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
+
+			foreach ( $comments as $comment ) {
+				$this->add_amp_live_list_comment_attributes( $comment );
+			}
+		}
 	}
 
 	/**
 	 * Comment form.
+	 *
+	 * @since 0.7
 	 *
 	 * @param DOMElement $comment_form Comment form.
 	 */
@@ -126,7 +147,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$script = $this->dom->createElement( 'script' );
 		$script->setAttribute( 'type', 'application/json' );
 		$amp_state->appendChild( $script );
-		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state ) ) );
+		$script->appendChild( $this->dom->createTextNode( wp_json_encode( $form_state, JSON_UNESCAPED_UNICODE ) ) );
 		$comment_form->insertBefore( $amp_state, $comment_form->firstChild );
 
 		// Update state when submitting form.
@@ -151,9 +172,47 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			sprintf(
 				'submit-success:AMP.setState( { %s: %s } )',
 				$state_id,
-				wp_json_encode( $form_reset_state )
+				wp_json_encode( $form_reset_state, JSON_UNESCAPED_UNICODE )
 			),
 		);
 		$comment_form->setAttribute( 'on', implode( ';', $on ) );
+	}
+
+	/**
+	 * Add attributes to comment elements when comments are being presented in amp-live-list, when comments_live_list theme support flag is present.
+	 *
+	 * @since 1.1
+	 *
+	 * @param DOMElement $comment_element Comment element.
+	 */
+	protected function add_amp_live_list_comment_attributes( $comment_element ) {
+		$comment_id = (int) str_replace( 'comment-', '', $comment_element->getAttribute( 'id' ) );
+		if ( ! $comment_id ) {
+			return;
+		}
+		$comment_object = get_comment( $comment_id );
+
+		// Skip if the comment is not valid or the comment has a parent, since in that case it is not relevant for amp-live-list.
+		if ( ! ( $comment_object instanceof WP_Comment ) || $comment_object->comment_parent ) {
+			return;
+		}
+
+		$comment_element->setAttribute( 'data-sort-time', strtotime( $comment_object->comment_date ) );
+
+		$update_time = strtotime( $comment_object->comment_date );
+
+		// Ensure the top-level data-update-time reflects the max time of the comments in the thread.
+		$children = $comment_object->get_children(
+			array(
+				'format'       => 'flat',
+				'hierarchical' => 'flat',
+				'orderby'      => 'none',
+			)
+		);
+		foreach ( $children as $child_comment ) {
+			$update_time = max( strtotime( $child_comment->comment_date ), $update_time );
+		}
+
+		$comment_element->setAttribute( 'data-update-time', $update_time );
 	}
 }

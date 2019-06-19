@@ -1,0 +1,30 @@
+.wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title {
+	margin: 0;
+	padding: 7px !important;
+	height: 100%;
+}
+
+.wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title.is-amp-fit-text {
+	line-height: 1.15;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	justify-content: center;
+	font-weight: 700;
+}
+
+.wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title:not(.is-amp-fit-text) {
+	display: block;
+}
+
+.wp-block[data-type="amp/amp-story-post-title"] .wp-block-amp-amp-story-post-title.is-amp-fit-text.is-measuring-fontsize {
+	height: initial !important;
+	width: initial !important;
+	position: absolute !important;
+}
+
+.wp-block[data-type="amp/amp-story-post-title"] .amp-story-editor__rotate-container,
+.wp-block[data-type="amp/amp-story-post-title"] .block-mover,
+.wp-block[data-type="amp/amp-story-post-title"] .block-mover div {
+	height: 100%;
+}

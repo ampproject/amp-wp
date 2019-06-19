@@ -64,7 +64,6 @@ class AMP_Analytics_Options_Submenu_Page {
 								name="<?php echo esc_attr( $id_base . '[config]' ); ?>"
 								class="amp-analytics-input"
 								placeholder="{...}"
-								title="<?php esc_attr_e( 'A JSON object begins with a &#8220;{&#8221; and ends with a &#8220;}&#8221;. Do not include any HTML tags like "<amp-analytics>" or "<script>".', 'amp' ); ?>"
 								required
 								><?php echo esc_textarea( $config ); ?></textarea>
 						</label>
@@ -101,7 +100,24 @@ class AMP_Analytics_Options_Submenu_Page {
 					<?php esc_html_e( 'Learn about analytics for AMP.', 'amp' ); ?>
 				</summary>
 				<p>
-					<?php echo wp_kses_post( __( 'For Google Analytics, please see <a href="https://developers.google.com/analytics/devguides/collection/amp-analytics/" target="_blank">Adding Analytics to your AMP pages</a>; see also the <a href="https://github.com/ampproject/amp-wp/wiki/Analytics" target="_blank">Analytics wiki page</a> and the AMP project\'s <a href="https://www.ampproject.org/docs/reference/components/amp-analytics" target="_blank">amp-analytics documentation</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a &#8220;{&#8221; and end with a &#8220;}&#8221;. Do not include any HTML tags like &#8220;<code>&lt;amp-analytics&gt;</code>&#8221; or &#8220;<code>&lt;script&gt;</code>&#8221;. A common entry would have the type &#8220;<code>googleanalytics</code>&#8221; (see <a href="https://www.ampproject.org/docs/analytics/analytics-vendors" target="_blank">available vendors</a>) and a configuration that looks like the following (where <code>UA-XXXXX-Y</code> is replaced with your own site\'s account number):', 'amp' ) ); ?>
+					<?php
+						echo wp_kses_post(
+							sprintf(
+								/* translators: 1: AMP Analytics docs URL. 2: AMP for WordPress analytics docs URL. 3: AMP analytics code reference. 4: amp-analytics, 5: {. 6: }. 7: <script>, 8: googleanalytics. 9: AMP analytics vendor docs URL. 10: UA-XXXXX-Y. */
+								__( 'For Google Analytics, please see <a href="%1$s" target="_blank">Adding Analytics to your AMP pages</a>; see also the <a href="%2$s" target="_blank">Analytics wiki page</a> and the AMP project\'s <a href="%3$s" target="_blank">%4$s documentation</a>. The analytics configuration supplied below must take the form of JSON objects, which begin with a %5$s and end with a %6$s. Do not include any HTML tags like %4$s or %7$s. A common entry would have the type %8$s (see <a href="%9$s" target="_blank">available vendors</a>) and a configuration that looks like the following (where %10$s is replaced with your own site\'s account number):', 'amp' ),
+								__( 'https://developers.google.com/analytics/devguides/collection/amp-analytics/', 'amp' ),
+								__( 'https://amp-wp.org/documentation/playbooks/analytics/', 'amp' ),
+								__( 'https://www.ampproject.org/docs/reference/components/amp-analytics', 'amp' ),
+								'<code>amp-analytics</code>',
+								'<code>{</code>',
+								'<code>}</code>',
+								'<code>&lt;script&gt;</code>',
+								'<code>googleanalytics</code>',
+								__( 'https://www.ampproject.org/docs/analytics/analytics-vendors', 'amp' ),
+								'<code>UA-XXXXX-Y</code>'
+							)
+						);
+					?>
 
 					<pre>{
 	"vars": {

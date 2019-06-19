@@ -160,10 +160,10 @@ class AMP_Validated_URL_Post_Type {
 	 */
 	public static function should_show_in_menu() {
 		global $pagenow;
-		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			return true;
 		}
-		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -172,8 +172,10 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_post_list_screen_scripts' ) );
 
-		add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
-		add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+			add_filter( 'dashboard_glance_items', array( __CLASS__, 'filter_dashboard_glance_items' ) );
+			add_action( 'rightnow_end', array( __CLASS__, 'print_dashboard_glance_styles' ) );
+		}
 
 		// Edit post screen hooks.
 		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_edit_post_screen_scripts' ) );
@@ -200,7 +202,7 @@ class AMP_Validated_URL_Post_Type {
 					'admin_head-edit.php',
 					function() {
 						global $mode;
-						$mode = 'list'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.OverrideProhibited
+						$mode = 'list'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					}
 				);
 			}
@@ -221,6 +223,7 @@ class AMP_Validated_URL_Post_Type {
 		add_filter( 'post_row_actions', array( __CLASS__, 'filter_post_row_actions' ), 10, 2 );
 		add_filter( sprintf( 'views_edit-%s', self::POST_TYPE_SLUG ), array( __CLASS__, 'filter_table_views' ) );
 		add_filter( 'bulk_post_updated_messages', array( __CLASS__, 'filter_bulk_post_updated_messages' ), 10, 2 );
+		add_filter( 'admin_title', array( __CLASS__, 'filter_admin_title' ) );
 
 		// Hide irrelevant "published" label in the AMP Validated URLs post list.
 		add_filter(
@@ -257,17 +260,17 @@ class AMP_Validated_URL_Post_Type {
 		$screen = get_current_screen();
 
 		if ( 'edit-' . self::POST_TYPE_SLUG === $screen->id && self::POST_TYPE_SLUG === $screen->post_type ) {
+			$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validated-urls-index.deps.json';
+			$script_dependencies = file_exists( $script_deps_path )
+				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				: array();
+
 			wp_enqueue_script(
 				'amp-validated-urls-index',
 				amp_get_asset_url( 'js/amp-validated-urls-index.js' ),
-				array(),
+				$script_dependencies,
 				AMP__VERSION,
 				true
-			);
-			wp_add_inline_script(
-				'amp-validated-urls-index',
-				sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlsIndex.boot(); } );' ),
-				'after'
 			);
 		}
 
@@ -285,6 +288,26 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		wp_register_style(
+			'amp-validation-tooltips',
+			amp_get_asset_url( 'css/amp-validation-tooltips.css' ),
+			array( 'wp-pointer' ),
+			AMP__VERSION
+		);
+
+		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
+		wp_register_script(
+			'amp-validation-tooltips',
+			amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
+			array_merge( $script_dependencies, array( 'wp-pointer' ) ),
+			AMP__VERSION,
+			true
+		);
+
 		wp_enqueue_style(
 			'amp-validation-error-taxonomy',
 			amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
@@ -294,15 +317,10 @@ class AMP_Validated_URL_Post_Type {
 
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
-			amp_get_asset_url( 'js/amp-validation-detail-toggle-compiled.js' ),
-			array( 'wp-dom-ready', 'amp-validation-tooltips' ),
+			amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
+			array( 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ),
 			AMP__VERSION,
 			true
-		);
-		wp_localize_script(
-			'amp-validation-detail-toggle',
-			'ampValidationI18n',
-			array( 'btnAriaLabel' => esc_attr__( 'Toggle all', 'amp' ) )
 		);
 	}
 
@@ -457,7 +475,7 @@ class AMP_Validated_URL_Post_Type {
 		$result = array();
 		if ( $counts['new_rejected'] ) {
 			$result[] = sprintf(
-				/* translators: %1$s is the status, %2$s is the count */
+				/* translators: 1: status. 2: count. */
 				'<span class="status-text new new-rejected">%1$s: %2$s</span>',
 				esc_html__( 'New Rejected', 'amp' ),
 				number_format_i18n( $counts['new_rejected'] )
@@ -465,7 +483,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 		if ( $counts['new_accepted'] ) {
 			$result[] = sprintf(
-				/* translators: %1$s is the status, %2$s is the count */
+				/* translators: 1: status. 2: count. */
 				'<span class="status-text new new-accepted">%1$s: %2$s</span>',
 				esc_html__( 'New Accepted', 'amp' ),
 				number_format_i18n( $counts['new_accepted'] )
@@ -561,7 +579,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 		$url = $post->post_title;
 
-		// Add AMP query var if in paired mode.
+		// Add AMP query var if in transitional mode.
 		if ( ! amp_is_canonical() ) {
 			$url = add_query_arg( amp_get_slug(), '', $url );
 		}
@@ -576,7 +594,7 @@ class AMP_Validated_URL_Post_Type {
 	 * Normalize a URL for storage.
 	 *
 	 * This ensures that query vars like utm_* and the like will not cause duplicates.
-	 * The AMP query param is removed to facilitate switching between native and paired.
+	 * The AMP query param is removed to facilitate switching between standard and transitional.
 	 * The URL scheme is also normalized to HTTPS to help with transition from HTTP to HTTPS.
 	 *
 	 * @param string $url URL.
@@ -645,6 +663,14 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
+		$is_story = (
+			isset( $args['queried_object'], $args['queried_object']['type'], $args['queried_object']['id'] )
+			&&
+			'post' === $args['queried_object']['type']
+			&&
+			AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $args['queried_object']['id'] )
+		);
+
 		/*
 		 * The details for individual validation errors is stored in the amp_validation_error taxonomy terms.
 		 * The post content just contains the slugs for these terms and the sources for the given instance of
@@ -653,9 +679,14 @@ class AMP_Validated_URL_Post_Type {
 		$stored_validation_errors = array();
 
 		// Prevent Kses from corrupting JSON in description.
-		$has_pre_term_description_filter = has_filter( 'pre_term_description', 'wp_filter_kses' );
-		if ( false !== $has_pre_term_description_filter ) {
-			remove_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		$pre_term_description_filters = array(
+			'wp_filter_kses'       => has_filter( 'pre_term_description', 'wp_filter_kses' ),
+			'wp_targeted_link_rel' => has_filter( 'pre_term_description', 'wp_targeted_link_rel' ),
+		);
+		foreach ( $pre_term_description_filters as $callback => $priority ) {
+			if ( false !== $priority ) {
+				remove_filter( 'pre_term_description', $callback, $priority );
+			}
 		}
 
 		$terms = array();
@@ -693,7 +724,7 @@ class AMP_Validated_URL_Post_Type {
 								'term_group' => $sanitization['status'],
 							)
 						);
-					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() ) {
+					} elseif ( AMP_Validation_Manager::is_sanitization_auto_accepted() || $is_story ) {
 						$term_data['term_group'] = AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_NEW_ACCEPTED_STATUS;
 						wp_update_term(
 							$term_id,
@@ -713,8 +744,10 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		// Finish preventing Kses from corrupting JSON in description.
-		if ( false !== $has_pre_term_description_filter ) {
-			add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
+		foreach ( $pre_term_description_filters as $callback => $priority ) {
+			if ( false !== $priority ) {
+				add_filter( 'pre_term_description', $callback, $priority );
+			}
 		}
 
 		$post_content = wp_json_encode( $stored_validation_errors );
@@ -774,9 +807,6 @@ class AMP_Validated_URL_Post_Type {
 		return array(
 			'theme'   => get_stylesheet(),
 			'plugins' => get_option( 'active_plugins', array() ),
-			'options' => array(
-				'accept_tree_shaking' => ( AMP_Options_Manager::get_option( 'accept_tree_shaking' ) || AMP_Options_Manager::get_option( 'auto_accept_sanitization' ) ),
-			),
 		);
 	}
 
@@ -814,13 +844,6 @@ class AMP_Validated_URL_Post_Type {
 			$old_active_plugins = array_diff( $old_validated_environment['plugins'], $new_validated_environment['plugins'] );
 			if ( ! empty( $old_active_plugins ) ) {
 				$staleness['plugins']['old'] = array_values( $old_active_plugins );
-			}
-		}
-
-		if ( isset( $old_validated_environment['options'] ) ) {
-			$differing_options = array_diff_assoc( $new_validated_environment['options'], $old_validated_environment['options'] );
-			if ( $differing_options ) {
-				$staleness['options'] = $differing_options;
 			}
 		}
 
@@ -863,7 +886,7 @@ class AMP_Validated_URL_Post_Type {
 			$columns['date'] = esc_html__( 'Last Checked', 'amp' );
 		}
 
-		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			unset( $columns['error_status'], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ELEMENTS ], $columns[ AMP_Validation_Error_Taxonomy::REMOVED_ATTRIBUTES ] );
 			$columns[ AMP_Validation_Error_Taxonomy::SOURCES_INVALID_OUTPUT ] = esc_html__( 'Sources', 'amp' );
 			$columns['date']  = esc_html__( 'Last Checked', 'amp' );
@@ -1172,12 +1195,12 @@ class AMP_Validated_URL_Post_Type {
 	 * @return void
 	 */
 	public static function print_admin_notice() {
-		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! get_current_screen() || self::POST_TYPE_SLUG !== get_current_screen()->post_type ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		if ( isset( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_GET['amp_validate_error'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$error_codes = array_unique( array_map( 'sanitize_key', (array) $_GET['amp_validate_error'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			foreach ( $error_codes as $error_code ) {
 				printf(
 					'<div class="notice is-dismissible error"><p>%s</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">%s</span></button></div>',
@@ -1187,9 +1210,9 @@ class AMP_Validated_URL_Post_Type {
 			}
 		}
 
-		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( isset( $_GET[ self::REMAINING_ERRORS ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$count_urls_tested = isset( $_GET[ self::URLS_TESTED ] ) ? intval( $_GET[ self::URLS_TESTED ] ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$errors_remain     = ! empty( $_GET[ self::REMAINING_ERRORS ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			if ( $errors_remain ) {
 				$message = _n( 'The rechecked URL still has unaccepted validation errors.', 'The rechecked URLs still have unaccepted validation errors.', $count_urls_tested, 'amp' );
 				$class   = 'notice-warning';
@@ -1206,7 +1229,7 @@ class AMP_Validated_URL_Post_Type {
 			);
 		}
 
-		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$count = isset( $_GET['amp_taxonomy_terms_updated'] ) ? intval( $_GET['amp_taxonomy_terms_updated'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( $count > 0 ) {
 			$class = 'updated';
 			printf(
@@ -1231,26 +1254,26 @@ class AMP_Validated_URL_Post_Type {
 		if ( 'post' !== get_current_screen()->base ) {
 			// Display admin notice according to the AMP mode.
 			if ( amp_is_canonical() ) {
-				$template_mode = 'native';
+				$template_mode = AMP_Theme_Support::STANDARD_MODE_SLUG;
 			} elseif ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-				$template_mode = 'paired';
+				$template_mode = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG;
 			} else {
-				$template_mode = 'classic';
+				$template_mode = 'reader';
 			}
 			$auto_sanitization = AMP_Options_Manager::get_option( 'auto_accept_sanitization' );
 
-			if ( 'native' === $template_mode ) {
-				$message = __( 'The site is using native AMP mode, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode && $auto_sanitization ) {
-				$message = __( 'The site is using paired AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
-			} elseif ( 'paired' === $template_mode ) {
+			if ( AMP_Theme_Support::STANDARD_MODE_SLUG === $template_mode ) {
+				$message = __( 'The site is using standard AMP mode, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode && $auto_sanitization ) {
+				$message = __( 'The site is using transitional AMP mode with auto-sanitization turned on, the validation errors found are already automatically handled.', 'amp' );
+			} elseif ( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode ) {
 				$message = sprintf(
 					/* translators: %s is a link to the AMP settings screen */
-					__( 'The site is using paired AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
+					__( 'The site is using transitional AMP mode without auto-sanitization, the validation errors found require action and influence which pages are shown in AMP. For automatically handling the errors turn on auto-sanitization from <a href="%s">Validation Handling settings</a>.', 'amp' ),
 					esc_url( admin_url( 'admin.php?page=' . AMP_Options_Manager::OPTION_NAME ) )
 				);
 			} else {
-				$message = __( 'The site is using classic AMP mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
+				$message = __( 'The site is using AMP reader mode, your theme templates are not used and the errors below are irrelevant.', 'amp' );
 			}
 
 			$class = 'info';
@@ -1267,8 +1290,8 @@ class AMP_Validated_URL_Post_Type {
 		 * 1. Notice with detailed error information in an expanding box.
 		 * 2. Notice with accept and reject buttons.
 		 */
-		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
-			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( ! empty( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) && isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$error_id = sanitize_key( wp_unslash( $_GET[ \AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			$error = AMP_Validation_Error_Taxonomy::get_term( $error_id );
 			if ( ! $error ) {
@@ -1602,44 +1625,47 @@ class AMP_Validated_URL_Post_Type {
 
 		// Eliminate autosave since it is only relevant for the content editor.
 		wp_dequeue_script( 'autosave' );
-		wp_enqueue_script( self::EDIT_POST_SCRIPT_HANDLE, amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ), array(), AMP__VERSION, true );
-	}
 
-	/**
-	 * Enqueues scripts for the edit post screen.
-	 *
-	 * This is called in render_single_url_list_table() instead of enqueue_edit_post_screen_scripts(),
-	 * as it depends on data from the WP_Terms_List_Table in that method.
-	 * So this has to run after the 'admin_enqueue_scripts' hook.
-	 */
-	public static function add_edit_post_inline_script() {
+		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::EDIT_POST_SCRIPT_HANDLE . '.deps.json';
+		$script_dependencies = file_exists( $script_deps_path )
+			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+			: array();
+
+		wp_enqueue_script(
+			self::EDIT_POST_SCRIPT_HANDLE,
+			amp_get_asset_url( 'js/' . self::EDIT_POST_SCRIPT_HANDLE . '.js' ),
+			$script_dependencies,
+			AMP__VERSION,
+			true
+		);
+
 		$current_screen = get_current_screen();
-		if ( 'post' !== $current_screen->base || self::POST_TYPE_SLUG !== $current_screen->post_type ) {
-			return;
+		if ( $current_screen && 'post' === $current_screen->base && self::POST_TYPE_SLUG === $current_screen->post_type ) {
+			$post = get_post();
+			$data = array(
+				'page_heading' => self::get_single_url_page_heading(),
+				'amp_enabled'  => self::is_amp_enabled_on_post( $post ),
+			);
+
+			wp_localize_script(
+				self::EDIT_POST_SCRIPT_HANDLE,
+				'ampValidation',
+				$data
+			);
 		}
 
-		$post = get_post();
-		$data = array(
-			'l10n' => array(
-				'unsaved_changes' => __( 'You have unsaved changes. Are you sure you want to leave?', 'amp' ),
-				'page_heading'    => self::get_single_url_page_heading(),
-				'show_all'        => __( 'Show all', 'amp' ),
-				'amp_enabled'     => self::is_amp_enabled_on_post( $post ),
-			),
-		);
+		if ( function_exists( 'wp_set_script_translations' ) ) {
+			wp_set_script_translations( self::EDIT_POST_SCRIPT_HANDLE, 'amp' );
+		} elseif ( function_exists( 'wp_get_jed_locale_data' ) || function_exists( 'gutenberg_get_jed_locale_data' ) ) {
+			$locale_data  = function_exists( 'wp_get_jed_locale_data' ) ? wp_get_jed_locale_data( 'amp' ) : gutenberg_get_jed_locale_data( 'amp' );
+			$translations = wp_json_encode( $locale_data );
 
-		// Only the %d is interpolated by PHP, as the JS file will replace %% with the errors that are displaying, based on filtering.
-		$data['l10n']['showing_number_errors'] = sprintf(
-			/* translators: %% is the errors that are displaying, %d is the total number of errors found */
-			__( 'Showing %% of %d validation errors', 'amp' ),
-			self::$total_errors_for_url
-		);
-
-		wp_add_inline_script(
-			self::EDIT_POST_SCRIPT_HANDLE,
-			sprintf( 'document.addEventListener( "DOMContentLoaded", function() { ampValidatedUrlPostEditScreen.boot( %s ); } );', wp_json_encode( $data ) ),
-			'after'
-		);
+			wp_add_inline_script(
+				self::EDIT_POST_SCRIPT_HANDLE,
+				'wp.i18n.setLocaleData( ' . $translations . ', "amp" );',
+				'after'
+			);
+		}
 	}
 
 	/**
@@ -1691,7 +1717,7 @@ class AMP_Validated_URL_Post_Type {
 						/* translators: %s: The date this was published */
 						wp_kses_post( __( 'Last checked: <b>%s</b>', 'amp' ) ),
 						/* translators: Meta box date format */
-						esc_html( date_i18n( __( 'M j, Y @ H:i', 'default' ), strtotime( $post->post_date ) ) )
+						esc_html( date_i18n( __( 'M j, Y @ H:i', 'amp' ), strtotime( $post->post_date ) ) )
 					);
 					?>
 					</span>
@@ -1703,7 +1729,7 @@ class AMP_Validated_URL_Post_Type {
 						</a>
 					</div>
 					<div id="preview-action">
-						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'default' ); ?></button>
+						<button type="button" name="action" class="preview button" id="preview_validation_errors"><?php esc_html_e( 'Preview Changes', 'amp' ); ?></button>
 					</div>
 					<div class="clear"></div>
 				</div>
@@ -1726,10 +1752,6 @@ class AMP_Validated_URL_Post_Type {
 								echo ' ';
 							} elseif ( ! empty( $staleness['plugins'] ) ) {
 								esc_html_e( 'Different plugins were active when these results were obtained.', 'amp' );
-								echo ' ';
-							}
-							if ( ! empty( $staleness['options'] ) ) {
-								esc_html_e( 'Options have changed.', 'amp' );
 								echo ' ';
 							}
 							esc_html_e( 'Please recheck.', 'amp' );
@@ -1773,7 +1795,7 @@ class AMP_Validated_URL_Post_Type {
 					</a>
 				</div>
 				<div id="publishing-action">
-					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'default' ); ?></button>
+					<button type="submit" name="action" class="button button-primary" value="<?php echo esc_attr( self::UPDATE_POST_TERM_STATUS_ACTION ); ?>"><?php esc_html_e( 'Update', 'amp' ); ?></button>
 				</div>
 				<div class="clear"></div>
 			</div>
@@ -1821,7 +1843,7 @@ class AMP_Validated_URL_Post_Type {
 		$taxonomy        = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		$taxonomy_object = get_taxonomy( $taxonomy );
 		if ( ! $taxonomy_object ) {
-			wp_die( esc_html__( 'Invalid taxonomy.', 'default' ) );
+			wp_die( esc_html__( 'Invalid taxonomy.', 'amp' ) );
 		}
 
 		/**
@@ -1851,7 +1873,6 @@ class AMP_Validated_URL_Post_Type {
 
 		// The inline script depends on data from the list table.
 		self::$total_errors_for_url = $wp_list_table->get_pagination_arg( 'total_items' );
-		self::add_edit_post_inline_script();
 
 		?>
 		<form class="search-form wp-clearfix" method="get">
@@ -1897,12 +1918,12 @@ class AMP_Validated_URL_Post_Type {
 	public static function add_taxonomy() {
 		global $pagenow;
 
-		if ( 'post.php' !== $pagenow || ! isset( $_REQUEST['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		if ( 'post.php' !== $pagenow || ! isset( $_REQUEST['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
-		$post_id = intval( $_REQUEST['post'] );
-		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) { // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+		$post_id = (int) $_REQUEST['post']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! empty( $post_id ) && self::POST_TYPE_SLUG === get_post_type( $post_id ) ) {
 			$_REQUEST['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
 		}
 	}
@@ -2038,7 +2059,7 @@ class AMP_Validated_URL_Post_Type {
 							$query->found_posts,
 							'amp'
 						),
-						$query->found_posts
+						number_format_i18n( $query->found_posts )
 					)
 				)
 			);
@@ -2067,6 +2088,24 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
+	 * Filters the document title on the single URL page at /wp-admin/post.php.
+	 *
+	 * @param string $title Document title.
+	 *
+	 * @return string Filtered document title.
+	 */
+	public static function filter_admin_title( $title ) {
+		$page_title = self::get_single_url_page_heading();
+
+		if ( $page_title ) {
+			/* translators: Admin screen title. %s: Admin screen name */
+			return sprintf( __( '%s &#8212; WordPress' ), $page_title );
+		}
+
+		return $title;
+	}
+
+	/**
 	 * Gets the heading for the single URL page at /wp-admin/post.php.
 	 * This will be in the format of 'Errors for: <page title>'.
 	 *
@@ -2078,9 +2117,9 @@ class AMP_Validated_URL_Post_Type {
 		if (
 			'post.php' !== $pagenow
 			||
-			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			! isset( $_GET['post'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			||
-			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.NoNonceVerification
+			self::POST_TYPE_SLUG !== get_post_type( $_GET['post'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		) {
 			return null;
 		}
@@ -2089,9 +2128,9 @@ class AMP_Validated_URL_Post_Type {
 		$post           = get_post();
 		$queried_object = get_post_meta( $post->ID, '_amp_queried_object', true );
 		$name           = __( 'Single URL', 'amp' ); // Default.
-		if ( isset( $queried_object['type'] ) && isset( $queried_object['id'] ) ) {
+		if ( isset( $queried_object['type'], $queried_object['id'] ) ) {
 			if ( 'post' === $queried_object['type'] && get_post( $queried_object['id'] ) ) {
-				$name = html_entity_decode( get_the_title( $queried_object['id'], ENT_QUOTES ) );
+				$name = html_entity_decode( get_the_title( $queried_object['id'] ), ENT_QUOTES );
 			} elseif ( 'term' === $queried_object['type'] && get_term( $queried_object['id'] ) ) {
 				$name = get_term( $queried_object['id'] )->name;
 			} elseif ( 'user' === $queried_object['type'] && get_user_by( 'ID', $queried_object['id'] ) ) {

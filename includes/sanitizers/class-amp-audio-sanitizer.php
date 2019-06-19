@@ -11,6 +11,7 @@
  * Converts <audio> tags to <amp-audio>
  */
 class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
+	use AMP_Noscript_Fallback;
 
 	/**
 	 * Tag.
@@ -19,6 +20,15 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.2
 	 */
 	public static $tag = 'audio';
+
+	/**
+	 * Default args.
+	 *
+	 * @var array
+	 */
+	protected $DEFAULT_ARGS = array(
+		'add_noscript_fallback' => true,
+	);
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -43,68 +53,108 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
+		if ( $this->args['add_noscript_fallback'] ) {
+			$this->initialize_noscript_allowed_attributes( self::$tag );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-			$node           = $nodes->item( $i );
-			$amp_data       = $this->get_data_amp_attributes( $node );
+			$node = $nodes->item( $i );
+
+			// Skip element if already inside of an AMP element as a noscript fallback.
+			if ( $this->is_inside_amp_noscript( $node ) ) {
+				continue;
+			}
+
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
-			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
+			// For amp-audio, the default width and height are inferred from browser.
+			$sources        = array();
 			$new_attributes = $this->filter_attributes( $old_attributes );
-
-			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
-
-			foreach ( $node->childNodes as $child_node ) {
-
-				/**
-				 * Child node.
-				 *
-				 * @todo: Fix when `source` has no closing tag as DOMDocument does not handle well.
-				 *
-				 * @var DOMNode $child_node
-				 */
-
-				$new_child_node = $child_node->cloneNode( true );
-				if ( ! $new_child_node instanceof DOMElement ) {
-					continue;
-				}
-
-				$old_child_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $new_child_node );
-				$new_child_attributes = $this->filter_attributes( $old_child_attributes );
-
-				if ( empty( $new_child_attributes['src'] ) ) {
-					continue;
-				}
-				if ( 'source' !== $new_child_node->tagName ) {
-					continue;
-				}
-
-				// The textContent is invalid for `source` nodes.
-				$new_child_node->textContent = null;
-
-				// Only append source tags with a valid src attribute.
-				$new_node->appendChild( $new_child_node );
-
+			if ( ! empty( $new_attributes['src'] ) ) {
+				$sources[] = $new_attributes['src'];
 			}
 
 			/**
+			 * Original node.
+			 *
+			 * @var DOMElement $old_node
+			 */
+			$old_node = $node->cloneNode( false );
+
+			// Gather all child nodes and supply empty video dimensions from sources.
+			$fallback    = null;
+			$child_nodes = array();
+			while ( $node->firstChild ) {
+				$child_node = $node->removeChild( $node->firstChild );
+				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
+					$src = $this->maybe_enforce_https_src( $child_node->getAttribute( 'src' ), true );
+					if ( ! $src ) {
+						// @todo $this->remove_invalid_child( $child_node ), but this will require refactoring the while loop since it uses firstChild.
+						continue; // Skip adding source.
+					}
+					$sources[] = $src;
+					$child_node->setAttribute( 'src', $src );
+					$new_attributes = $this->filter_attributes( $new_attributes );
+				}
+
+				if ( ! $fallback && $child_node instanceof DOMElement && ! ( 'source' === $child_node->nodeName || 'track' === $child_node->nodeName ) ) {
+					$fallback = $child_node;
+					$fallback->setAttribute( 'fallback', '' );
+				}
+
+				$child_nodes[] = $child_node;
+			}
+
+			/*
+			 * Add fallback for audio shortcode which is not present by default since wp_mediaelement_fallback()
+			 * is not called when wp_audio_shortcode_library is filtered from mediaelement to amp.
+			 */
+			if ( ! $fallback && ! empty( $sources ) ) {
+				$fallback = $this->dom->createElement( 'a' );
+				$fallback->setAttribute( 'href', $sources[0] );
+				$fallback->setAttribute( 'fallback', '' );
+				$fallback->appendChild( $this->dom->createTextNode( $sources[0] ) );
+				$child_nodes[] = $fallback;
+			}
+
+			/*
+			 * Audio in WordPress is responsive with 100% width, so this infers fixed-layout.
+			 * In AMP, the amp-audio's default height is inferred from the browser.
+			 */
+			$new_attributes['width'] = 'auto';
+
+			// @todo Make sure poster and artwork attributes are HTTPS.
+			$new_node = AMP_DOM_Utils::create_node( $this->dom, 'amp-audio', $new_attributes );
+			foreach ( $child_nodes as $child_node ) {
+				$new_node->appendChild( $child_node );
+				if ( ! ( $child_node instanceof DOMElement ) || ! $child_node->hasAttribute( 'fallback' ) ) {
+					$old_node->appendChild( $child_node->cloneNode( true ) );
+				}
+			}
+
+			// Make sure the updated src and poster are applied to the original.
+			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+				if ( $new_node->hasAttribute( $attr_name ) ) {
+					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
+				}
+			}
+
+			/*
 			 * If the node has at least one valid source, replace the old node with it.
 			 * Otherwise, just remove the node.
 			 *
-			 * @todo: Add a fallback handler.
-			 * @see: https://github.com/ampproject/amphtml/issues/2261
+			 * @todo Add a fallback handler.
+			 * See: https://github.com/ampproject/amphtml/issues/2261
 			 */
-			if ( 0 === $new_node->childNodes->length && empty( $new_attributes['src'] ) ) {
+			if ( empty( $sources ) ) {
 				$this->remove_invalid_child( $node );
 			} else {
-
-				$layout = isset( $new_attributes['layout'] ) ? $new_attributes['layout'] : false;
-
-				// The width has to be unset / auto in case of fixed-height.
-				if ( 'fixed-height' === $layout ) {
-					$new_node->setAttribute( 'width', 'auto' );
-				}
-
 				$node->parentNode->replaceChild( $new_node, $node );
+
+				if ( $this->args['add_noscript_fallback'] ) {
+					// Preserve original node in noscript for no-JS environments.
+					$this->append_old_node_noscript( $new_node, $old_node, $this->dom );
+				}
 			}
 
 			$this->did_convert_elements = true;
@@ -163,7 +213,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				default:
-					break;
+					$out[ $name ] = $value;
 			}
 		}
 

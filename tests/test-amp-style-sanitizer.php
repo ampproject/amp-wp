@@ -13,6 +13,27 @@
 class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 	/**
+	 * Set up.
+	 */
+	public function setUp() {
+		parent::setUp();
+		global $wp_styles, $wp_scripts;
+		$wp_styles  = null;
+		$wp_scripts = null;
+		delete_option( AMP_Options_Manager::OPTION_NAME ); // Make sure default reader mode option does not override theme support being added.
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown() {
+		parent::tearDown();
+		global $wp_styles, $wp_scripts;
+		$wp_styles  = null;
+		$wp_scripts = null;
+	}
+
+	/**
 	 * Get data for tests.
 	 *
 	 * @return array
@@ -144,16 +165,16 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'allowed_at_rules_retained' => array(
-				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style>',
-				'',
+				'<style>@media screen and ( max-width: 640px ) { body { font-size: small; } } @font-face { font-family: "Open Sans"; src: url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2"); } @supports (display: grid) { div { display: grid; } } @-moz-keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } } @keyframes appear { from { opacity: 0.0; } to { opacity: 1.0; } }</style><div></div>',
+				'<div></div>',
 				array(
 					'@media screen and ( max-width: 640px ){body{font-size:small}}@font-face{font-family:"Open Sans";src:url("/fonts/OpenSans-Regular-webfont.woff2") format("woff2")}@supports (display: grid){div{display:grid}}@-moz-keyframes appear{from{opacity:0}to{opacity:1}}@keyframes appear{from{opacity:0}to{opacity:1}}',
 				),
 			),
 
 			'selector_specificity' => array(
-				'<style>#child {color:red !important} #parent #child {color:pink !important} .foo { color:blue !important; } #me .foo { color: green !important; }</style><div id="parent"><span id="child" class="foo bar baz">one</span><span style="color: yellow;">two</span><span style="color: purple !important;">three</span></div>',
-				'<div id="parent"><span id="child" class="foo bar baz">one</span><span class="amp-wp-64b4fd4">two</span><span class="amp-wp-ab79d9e">three</span></div>',
+				'<style>#child {color:red !important} #parent #child {color:pink !important} .foo { color:blue !important; } #me .foo { color: green !important; }</style><div id="parent"><span id="child" class="foo bar baz">one</span><span style="color: yellow;">two</span><span style="color: purple !important;">three</span></div><div id="me"><span class="foo"></span></div>',
+				'<div id="parent"><span id="child" class="foo bar baz">one</span><span class="amp-wp-64b4fd4">two</span><span class="amp-wp-ab79d9e">three</span></div><div id="me"><span class="foo"></span></div>',
 				array(
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #child{color:red}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #parent #child{color:pink}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) .foo{color:blue}:root:not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) #me .foo{color:green}',
 					':root:not(#_):not(#_):not(#_):not(#_):not(#_) .amp-wp-64b4fd4{color:yellow}',
@@ -200,10 +221,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'multi_selector_in_not_pseudo_class'         => array(
-				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"></div>',
-				'<div class="widget"></div>',
+				'<style>.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul { color:red; }</style><div class="widget"><ul></ul></div>',
+				'<div class="widget"><ul></ul></div>',
 				array(
 					'.widget:not(.widget_text,.jetpack_widget_social_icons[title="a,b"]) ul{color:red}',
+				),
+			),
+
+			'selector_with_escaped_char_class_name'      => array(
+				'<style>.lg\:w-full { width: 100%; }</style><div class="bg-black w-16 lg:w-full hover:bg-blue"></div>',
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue"></div>',
+				array(
+					'.lg\:w-full{width:100%}',
 				),
 			),
 		);
@@ -318,7 +347,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					)
 				),
 				array(
-					'form [submit-success] b,div[submit-failure] b{color:green}',
+					'form [submit-success] b{color:green}', // The [submit-failure] selector is removed because there is no div[submit-failure].
 					'amp-live-list li .highlighted{background:yellow}',
 					'',
 					'body amp-list .portland{color:blue}',
@@ -357,10 +386,31 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				array(),
 			),
-			'unamerican_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
-				'<html amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
+			'unamerican_lang_attribute_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
+				'<html lang="en-US" amp><head><meta charset="utf-8"><style>html[lang=en-US] {color:red} html[lang="en-US"] {color:white} html[lang^=en] {color:blue} html[lang="en-CA"] {color:red}  html[lang^=ar] { color:green; } html[lang="es-MX"] { color:green; }</style></head><body><span>Test</span></body></html>',
 				array(
 					'html[lang=en-US]{color:red}html[lang="en-US"]{color:white}html[lang^=en]{color:blue}',
+				),
+				array(),
+			),
+			'unamerican_lang_selector_selectors_removed' => array( // USA is used for convenience here. No political statement intended.
+				'
+					<html amp><head><meta charset="utf-8">
+					<style>
+						html:lang(en-US) { color:red; }
+						body span:lang(en-US) { color:red; }
+						html:lang(en) {color:white; }
+						.test:lang(en-us, en-CA) {color:white; }
+						html span.test:lang(en-US) { color: blue;}
+						html:lang("en-US") span.test { color: blue;}
+						html:lang(en-CA) {color:red; }
+						html:lang(ar) { color:green; }
+						html:lang(es-MX) { color:green; }
+						</style>
+					</head><body><span class="test">Test</span></body></html>
+				',
+				array(
+					'html:lang(en-US){color:red}body span:lang(en-US){color:red}html:lang(en){color:white}.test:lang(en-us, en-CA){color:white}html span.test:lang(en-US){color:blue}html:lang("en-US") span.test{color:blue}',
 				),
 				array(),
 			),
@@ -375,6 +425,88 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><body><style>@charset "utf-8"; body { color:limegreen; }</style></body></html>',
 				array(
 					'body{color:limegreen}',
+				),
+				array(),
+			),
+			'dynamic_classes_preserved_always' => array(
+				'
+					<html amp><head>
+					<style> .amp-viewer { color: blue; } </style>
+					<style> .amp-referrer-www-google-com { color: red; } </style>
+					<style> .amp-active { color: green } </style>
+					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-form-submit-success { color: green; } </style>
+					<style> .amp-access-laterpay-container { color: purple} </style>
+					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .amp-live-list-item-new { color: lime} </style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
+					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .non-existent { color: black; } </style>
+					</head><body><p>Hello!</p></body></html>
+				',
+				array(
+					'.amp-viewer{color:blue}',
+					'.amp-referrer-www-google-com{color:red}',
+					'', // Because there is no <form>, <amp-carousel>, and no non-existent.
+				),
+				array(),
+			),
+			'dynamic_classes_preserved_conditionally' => array(
+				'
+					<html amp><head>
+					<style> .amp-viewer { color: blue; } </style>
+					<style> .amp-referrer-www-google-com { color: red; } </style>
+					<style> .amp-active { color: green } </style>
+					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-form-submit-success { color: green; } </style>
+					<style> .amp-access-laterpay-container { color: purple} </style>
+					<style> .amp-image-lightbox-caption { color: brown} </style>
+					<style> .amp-live-list-item-new { color: lime} </style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
+					<style> .amp-docked-video-shadow { color: azure} </style>
+					<style> .amp-geo-pending { color: saddlebrown; } </style>
+					<style> .amp-geo-no-group { color: ghostwhite; } </style>
+					<style> .amp-geo-group-foo { color: peru; } </style>
+					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .non-existent { color: black; } </style>
+					</head>
+					<body>
+						<amp-user-notification  layout="nodisplay"  id="amp-user-notification1"  data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"  data-dismiss-href="https://foo.com/api/dismissed">  This  site  uses  cookies  to  personalize  content.  <a  href="">Learn  more.</a>  <button  on="tap:amp-user-notification1.dismiss">I  accept</button>  </amp-user-notification>
+						<amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img></amp-carousel>
+						<form action="https://example.com/" target="_top" method="get"><input name="search" type="search" required></form>
+						<section amp-access="NOT error AND NOT access" amp-access-hide><div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div></section>
+						<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
+						<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"> <div update class="outer-container"> <div class="inner-container"> <button class="btn" on="tap:my-live-list.update">Click me!</button> </div> </div> <div items></div> </amp-live-list>
+						<amp-sidebar id="sidebar1" layout="nodisplay" side="right"><nav toolbar="(max-width: 767px)" toolbar-target="target-element"><ul><li></li></ul></nav></amp-sidebar>
+						<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>
+						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
+						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
+					</body>
+					</html>
+				',
+				array(
+					'.amp-viewer{color:blue}',
+					'.amp-referrer-www-google-com{color:red}',
+					'.amp-active{color:green}',
+					'.amp-carousel-slide{outline:solid 1px red}',
+					'.amp-form-submit-success{color:green}',
+					'.amp-access-laterpay-container{color:purple}',
+					'.amp-image-lightbox-caption{color:brown}',
+					'.amp-live-list-item-new{color:lime}',
+					'.amp-sidebar-toolbar-target-hidden{color:lavender}',
+					'.amp-sticky-ad-close-button{color:aliceblue}',
+					'.amp-docked-video-shadow{color:azure}',
+					'.amp-geo-pending{color:saddlebrown}',
+					'.amp-geo-no-group{color:ghostwhite}',
+					'.amp-geo-group-foo{color:peru}',
+					'.amp-iso-country-us{color:oldlace}',
+					'', // Because no non-existent.
 				),
 				array(),
 			),
@@ -404,7 +536,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'response' => array(
 						'code' => 200,
 					),
-					'body' => sprintf( 'span:before { content: "Returned from: %s"; }', $url ),
+					'headers'  => array(
+						'content-type' => 'text/css',
+					),
+					'body'     => sprintf( 'span:before { content: "Returned from: %s"; }', $url ),
 				);
 				return $preempt;
 			},
@@ -416,7 +551,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$error_codes = array();
 		$args        = array(
 			'use_document_element'      => true,
-			'remove_unused_rules'       => 'always',
 			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
@@ -430,6 +564,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$sanitized_html     = AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
+		$this->assertEquals( $expected_errors, $error_codes );
 		$this->assertCount( count( $expected_stylesheets ), $actual_stylesheets );
 		foreach ( $expected_stylesheets as $i => $expected_stylesheet ) {
 			if ( empty( $expected_stylesheet ) ) {
@@ -446,7 +581,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		}
 
 		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
-		$this->assertEquals( $expected_errors, $error_codes );
 	}
 
 	/**
@@ -486,6 +620,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'div img.logo{border:solid 1px red}',
 				'', // The selector is removed because there is no div element.
 			),
+			'attribute_selectors' => array(
+				'<div id="content" tabindex="-1"></div><button type=button>Hello</button><a href="#">Top</a><span></span>',
+				'[type="button"], [type="reset"], [type^="submit"] {color:red} a[href^=http]:after, a[href^="#"]:after { color:blue } span[hidden] {display:none}#content[tabindex="-1"]:focus{ outline: solid 1px red; }',
+				'[type="button"],[type="reset"],[type^="submit"]{color:red}a[href^=http]:after,a[href^="#"]:after{color:blue}span[hidden]{display:none}#content[tabindex="-1"]:focus{outline:solid 1px red}', // Any selector mentioning [type] or [href] will persist since value is not used for tree shaking.
+			),
 			'playbuzz' => array(
 				'<p>hello</p><div class="pb_feed" data-item="226dd4c0-ef13-4fee-850b-7be32bf6d121"></div>',
 				'p + div.pb_feed{border:solid 1px blue}',
@@ -495,6 +634,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<article><video src="http://example.com" height="100" width="200"></video></article>',
 				'article>video{border:solid 1px green}',
 				'article>amp-video{border:solid 1px green}',
+			),
+			'form' => array(
+				sprintf( '<div id="search"><form method="get" action="https://example.com"><label id="s">Search</label><input type="search" name="s" id="s"></form></div>' ),
+				'#search form label{display:block}',
+				'#search form label{display:block}',
 			),
 			'video_with_amp_video' => array(
 				'<amp-video class="video"></amp-video>',
@@ -519,7 +663,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'type_class_names' => array(
 				'<audio src="https://example.org/foo.mp3" width="100" height="100" class="audio iframe video img form">',
 				'.video{color:blue;} audio.audio{color:purple;} .iframe{color:black;} .img{color:purple;} .form:not(form){color:green;}',
-				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(amp-form){color:green}',
+				'.video{color:blue}amp-audio.audio{color:purple}.iframe{color:black}.img{color:purple}.form:not(form){color:green}',
 			),
 		);
 	}
@@ -537,16 +681,166 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$dom  = AMP_DOM_Utils::get_dom( $html );
 
 		$sanitizer_classes = amp_get_content_sanitizers();
-		$sanitizer_classes['AMP_Style_Sanitizer']['remove_unused_rules'] = 'always';
-		$sanitized   = AMP_Content_Sanitizer::sanitize_document(
+		$sanitized         = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
 			$sanitizer_classes,
 			array(
 				'use_document_element' => true,
 			)
 		);
+
 		$stylesheets = array_values( $sanitized['stylesheets'] );
 		$this->assertEquals( $output, $stylesheets[0] );
+	}
+
+	/**
+	 * Provide data for attribute selector test.
+	 *
+	 * @return array Data.
+	 */
+	public function get_attribute_selector_data() {
+		return array(
+			'type_attribute' => array(
+				'<input type="color">',
+				// All selectors remain because only the existence of the attribute is examined.
+				array(
+					'[type="button"]' => true,
+					'[type*="reset"]' => true,
+					'[type^="submit"]' => true,
+					'[type$="button"]' => true,
+				),
+			),
+			'tabindex_attribute' => array(
+				'<span tabindex="-1"></span>',
+				// The div[tabindex] is removed because there is no div. The span[tabindex^=2] remains because value is not considered.
+				array(
+					'div[tabindex]' => false,
+					'span[tabindex]' => true,
+					'span[tabindex=-1]' => true,
+					'span[tabindex^=2]' => true,
+				),
+			),
+			'href_attribute' => array(
+				'<a href="foo">Foo</a>',
+				array(
+					'a[href^=http]:after' => true,
+					'a[href^="#"]:after' => true,
+				),
+			),
+			'hidden_attribute' => array(
+				'<span>not hidden</span>',
+				// Only div[hidden] should be removed because there is no div element; the other [hidden] selectors remain because it can be dynamically added.
+				array(
+					'span[hidden]' => true,
+					'[hidden]' => true,
+					'div[hidden]' => false,
+					'span:not([hidden])' => true,
+				),
+			),
+			'selected_readonly_disabled_multiple_autofocus_required' => array(
+				'<input><select><option></option></select>',
+				array(
+					'[autofocus]' => true,
+					'[checked]'   => true,
+					'[disabled]'  => true,
+					'[multiple]'  => true,
+					'[readonly]'  => true,
+					'[required]'  => true,
+					'[selected]'  => true,
+				),
+			),
+			'open_attribute' => array(
+				'<details><summary>More</summary>Details</details>',
+				array(
+					'[open]'             => true,
+					'amp-lightbox[open]' => false,
+					'details[open]'      => true,
+				),
+			),
+			'media_attributes' => array(
+				'<amp-video width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>',
+				array(
+					'[loop]'     => true,
+					'[controls]' => true,
+				),
+			),
+			'escaped_char_class_name' => array(
+				'<div class="bg-black w-16 lg:w-full hover:bg-blue @@@"></div>',
+				array(
+					'.lg'               => false,
+					'.hover'            => false,
+					'.hover\:bg-blue'   => true,
+					'.lg\:w-full'       => true,
+					'.lg\:w-full:hover' => true,
+					'.lg\:w-medium'     => false,
+					'.\@\@\@'           => true,
+					'.\@\@\@\@'         => false,
+				),
+			),
+			'toggle_class' => array(
+				implode(
+					'',
+					array(
+						'<div id=\"foo\"></div>',
+						'<button on="tap:foo . toggleClass ( class = \'expanded\' )">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=\'clicked\')">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=&quot;tapped&quot;)">Yes</button>',
+						'<button on="tap:foo.toggleClass(class=pressed);tap:foo.toggleClass(class = im-pressed)">Yes</button>',
+						'<button on="tap:foo.toggleClass(class = \'touch:ed\' )">Yes</button>',
+						'<button on="tap:AMP.setState({toggleClass:\'stateful\'})">No</button>',
+					)
+				),
+				array(
+					'.expanded'   => true,
+					'.clicked'    => true,
+					'.tapped'     => true,
+					'.pressed'    => true,
+					'.im-pressed' => true,
+					'.touch\:ed'  => true,
+					'.exploded'   => false,
+					'.stateful'   => false,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test attribute selector tree shaking.
+	 *
+	 * @dataProvider get_attribute_selector_data
+	 *
+	 * @param string $markup      Source HTML markup.
+	 * @param array  $selectors   Mapping of selectors to whether they are expected.
+	 */
+	public function test_attribute_selector( $markup, $selectors ) {
+		$style = implode(
+			'',
+			array_map(
+				function ( $selector ) {
+					return sprintf( '%s{ color: red; }', $selector );
+				},
+				array_keys( $selectors )
+			)
+		);
+
+		$html = "<html amp><head><meta charset=utf-8><style amp-custom>$style</style></head><body>$markup</body></html>";
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$sanitizer_classes = amp_get_content_sanitizers();
+
+		$sanitized = AMP_Content_Sanitizer::sanitize_document(
+			$dom,
+			$sanitizer_classes,
+			array(
+				'use_document_element' => true,
+			)
+		);
+
+		$stylesheets = array_values( $sanitized['stylesheets'] );
+
+		$actual_selectors   = array_values( array_filter( preg_split( '/{.+?}/s', $stylesheets[0] ) ) );
+		$expected_selectors = array_keys( array_filter( $selectors ) );
+		$this->assertEqualSets( $expected_selectors, $actual_selectors );
 	}
 
 	/**
@@ -730,7 +1024,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'remove_unused_rules'       => 'never',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
@@ -760,7 +1053,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
@@ -775,35 +1067,54 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$this->assertContains( '.dashicons{', $actual_stylesheets[0] );
 		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
 		$this->assertNotContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+	}
 
-		// Test with rule-removal not forced, since dashicons alone is not larger than 50KB.
+	/**
+	 * Test handling of stylesheets with @font-face that have data: url source.
+	 *
+	 * Also confirm that class-based tree-shaking is working.
+	 *
+	 * @link https://github.com/ampproject/amp-wp/pull/2079
+	 *
+	 * @covers AMP_Style_Sanitizer::process_font_face_at_rule()
+	 */
+	public function test_font_data_url_handling_without_file_sources() {
+		$theme = new WP_Theme( 'twentynineteen', ABSPATH . 'wp-content/themes' );
+		if ( $theme->errors() ) {
+			$this->markTestSkipped( 'Twenty Nineteen is not installed.' );
+		}
+
+		$html  = '<html amp><head><meta charset="utf-8">';
+		$html .= sprintf( '<link rel="stylesheet" href="%s">', esc_url( $theme->get_stylesheet_directory_uri() . '/style.css' ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$html .= '</head><body></body></html>';
+
 		$dom         = AMP_DOM_Utils::get_dom( $html );
 		$error_codes = array();
 		$sanitizer   = new AMP_Style_Sanitizer(
 			$dom,
 			array(
-				'use_document_element'      => true,
-				'remove_unused_rules'       => 'sometimes',
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
-					$error_codes[] = $error['code'];
-				},
+				'use_document_element' => true,
 			)
 		);
 		$sanitizer->sanitize();
 		$this->assertEquals( array(), $error_codes );
 		$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertContains( 'dashicons.woff") format("woff")', $actual_stylesheets[0] );
-		$this->assertNotContains( 'data:application/font-woff;', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons,.dashicons-before:before{', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons-admin-appearance:before{', $actual_stylesheets[0] );
-		$this->assertContains( '.dashicons-format-chat:before', $actual_stylesheets[0] );
+		$this->assertCount( 1, $actual_stylesheets );
+
+		$this->assertContains( '@font-face{font-family:"NonBreakingSpaceOverride";', $actual_stylesheets[0] );
+		$this->assertContains( 'format("woff2")', $actual_stylesheets[0] );
+		$this->assertContains( 'format("woff")', $actual_stylesheets[0] );
+		$this->assertNotContains( 'data:', $actual_stylesheets[0] );
+		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff2', $actual_stylesheets[0] );
+		$this->assertContains( 'fonts/NonBreakingSpaceOverride.woff', $actual_stylesheets[0] );
+		$this->assertContains( 'font-display:swap', $actual_stylesheets[0] );
 	}
 
 	/**
 	 * Test that auto-removal (tree shaking) does not remove rules for classes mentioned in class and [class] attributes.
 	 *
 	 * @covers AMP_Style_Sanitizer::get_used_class_names()
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_class_amp_bind_preservation() {
 		ob_start();
@@ -837,7 +1148,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'remove_unused_rules'       => 'always',
 				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
@@ -854,9 +1164,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that auto-removal is performed when remove_unused_rules=sometimes (the default), and that excessive CSS will be removed entirely.
+	 * Test that auto-removal is performed and that excessive CSS will be removed entirely.
 	 *
-	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_set()
+	 * @covers AMP_Style_Sanitizer::finalize_stylesheet_group()
 	 */
 	public function test_large_custom_css_and_rule_removal() {
 		$custom_max_size = null;
@@ -898,7 +1208,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			@media screen {}
 			</style>
 		';
-		$html .= '</head><body><span class="b">...</span><span id="exists"></span></body></html>';
+		$html .= '</head><body><span class="b" data-value="">...</span><span id="exists"></span></body></html>';
 		$dom   = AMP_DOM_Utils::get_dom( $html );
 
 		$error_codes = array();
@@ -926,28 +1236,132 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		);
 
 		$this->assertEquals(
-			array( 'removed_unused_css_rules', 'excessive_css' ),
-			$error_codes
-		);
-
-		// Make sure the accept_tree_shaking option results in no removed_unused_css_rules error being raised.
-		$error_codes = array();
-		$dom         = AMP_DOM_Utils::get_dom( $html );
-		$sanitizer   = new AMP_Style_Sanitizer(
-			$dom,
-			array(
-				'use_document_element'      => true,
-				'accept_tree_shaking'       => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
-					$error_codes[] = $error['code'];
-				},
-			)
-		);
-		$sanitizer->sanitize();
-		$this->assertEquals(
 			array( 'excessive_css' ),
 			$error_codes
 		);
+	}
+
+	/**
+	 * Make sure that the manifest contains the expected values.
+	 *
+	 * @covers AMP_Style_Sanitizer::finalize_styles()
+	 */
+	public function test_css_manifest() {
+		$get_sanitized_dom = function ( $sanitizer_args, $add_excessive_css = false ) {
+			ob_start();
+			?>
+			<html amp>
+			<head>
+				<meta charset="utf-8">
+				<style class="body">body{color:red}</style>
+				<style class="foo1">.foo{color:green}</style>
+				<style class="foo2">.foo{color:green}</style>
+				<style class="foo3">.foo{color:green}</style>
+				<style class="bard">.bard{color:blue}</style>
+				<?php
+				if ( $add_excessive_css ) {
+					$custom_max_size = null;
+					foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
+						if ( isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) && 'style amp-custom' === $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) {
+							$custom_max_size = $spec_rule[ AMP_Rule_Spec::CDATA ]['max_bytes'];
+							break;
+						}
+					}
+					if ( ! $custom_max_size ) {
+						throw new Exception( 'Could not find amp-custom max_bytes' );
+					}
+					echo '<style class="excessive">';
+					printf( 'body::after{content:"%s"}', str_repeat( 'a', $custom_max_size + 1 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo '</style>';
+				}
+				?>
+			</head>
+			<body><p class="foo">Hi</p></body>
+			</html>
+			<?php
+			$html = ob_get_clean();
+
+			$error_codes = array();
+			$dom         = AMP_DOM_Utils::get_dom( $html );
+			$sanitizer   = new AMP_Style_Sanitizer(
+				$dom,
+				array_merge(
+					array(
+						'use_document_element'      => true,
+						'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+							$error_codes[] = $error['code'];
+						},
+					),
+					$sanitizer_args
+				)
+			);
+			$sanitizer->sanitize();
+			$xpath = new DOMXPath( $dom );
+			$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+
+			return array( $style, $error_codes );
+		};
+
+		// Test that it contains the comment with duplicate styles removed without tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'never',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
+
+		// Test that it contains the comment with duplicate styles removed without tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'never',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertNotInstanceOf( 'DOMComment', $style->previousSibling );
+
+		// Test that it contains the comment with duplicate styles removed with tree shaking.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'always',
+			),
+			false
+		);
+		$this->assertEmpty( $error_codes );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
+		$comment = $style->previousSibling;
+		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
+		$this->assertNotContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
+		$this->assertContains( '15 B: style.body', $comment->nodeValue );
+		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
+		$this->assertContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+
+		// Test that it contains the comment with duplicate styles removed with excessive CSS.
+		list( $style, $error_codes ) = $get_sanitized_dom(
+			array(
+				'include_manifest_comment' => 'when_excessive',
+			),
+			true
+		);
+		$this->assertEquals( array( 'excessive_css' ), $error_codes );
+		$this->assertInstanceOf( 'DOMComment', $style->previousSibling, 'Expected manifest comment to be present because excessive.' );
+		$comment = $style->previousSibling;
+		$this->assertContains( 'The style[amp-custom] element is populated with', $comment->nodeValue );
+		$this->assertContains( 'The following stylesheets are too large to be included', $comment->nodeValue );
+		$this->assertContains( '15 B: style.body', $comment->nodeValue );
+		$this->assertNotContains( '17 B: style.foo1', $comment->nodeValue );
+		$this->assertContains( '0 B: style.bard', $comment->nodeValue );
+		$this->assertNotContains( 'style.foo2', $comment->nodeValue );
+		$this->assertContains( 'style.foo3', $comment->nodeValue );
+		$this->assertContains( 'Total included size: 32 bytes (72% of 44 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( '50024 B: style.excessive', $comment->nodeValue );
+		$this->assertContains( 'Total excluded size: 50,024 bytes (100% of 50,024 total after tree shaking)', $comment->nodeValue );
+		$this->assertContains( 'Total combined size: 50,056 bytes (99% of 50,068 total after tree shaking)', $comment->nodeValue );
 	}
 
 	/**
@@ -976,24 +1390,64 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Return stylesheets that are to be fetched over HTTP.
+	 */
+	public function get_http_stylesheets() {
+		return array(
+			'external_file' => array(
+				'https://stylesheets.example.com/style.css',
+				'text/css',
+				'html{background-color:lightblue}',
+				array(),
+			),
+			'dynamic_file' => array(
+				set_url_scheme( add_query_arg( 'action', 'kirki-styles', home_url() ), 'http' ),
+				'text/css',
+				'body{color:red}',
+				array(),
+			),
+			'local_css_file_outside_normal_dirs' => array(
+				home_url( '/style.css' ),
+				'text/css',
+				'body{color:green}',
+				array(),
+			),
+			'not_css_file' => array(
+				home_url( '/this.is.not.css' ),
+				'image/jpeg',
+				'JPEG...',
+				array( 'no_css_content_type' ),
+			),
+		);
+	}
+
+	/**
 	 * Test handling external stylesheet.
 	 *
+	 * @dataProvider get_http_stylesheets
 	 * @covers AMP_Style_Sanitizer::process_link_element()
+	 *
+	 * @param string $href                 Request URL.
+	 * @param string $content_type         Content type.
+	 * @param string $response_body        Response body.
+	 * @param array  $expected_error_codes Error codes when getting the stylesheet.
 	 */
-	public function test_external_stylesheet_handling() {
-		$href  = 'https://stylesheets.example.com/style.css';
-		$count = 0;
+	public function test_external_stylesheet_handling( $href, $content_type, $response_body, $expected_error_codes ) {
+		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$count ) {
+			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
 				unset( $request );
-				if ( $url === $href ) {
-					$count++;
+				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
+					$request_count++;
 					$preempt = array(
 						'response' => array(
-							'code' => 200,
+							'code'    => 200,
 						),
-						'body' => 'html { background-color:lightblue; }',
+						'headers' => array(
+							'content-type' => $content_type,
+						),
+						'body' => $response_body,
 					);
 				}
 				return $preempt;
@@ -1002,28 +1456,41 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheet = function() use ( $href ) {
+		$sanitize_and_get_stylesheets = function() use ( $href, $expected_error_codes ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = AMP_DOM_Utils::get_dom( $html );
+
+			$found_error_codes = array();
 
 			$sanitizer = new AMP_Style_Sanitizer(
 				$dom,
 				array(
-					'use_document_element' => true,
+					'use_document_element'      => true,
+					'validation_error_callback' => function( $error ) use ( &$found_error_codes ) {
+						$found_error_codes[] = $error['code'];
+					},
 				)
 			);
 			$sanitizer->sanitize();
 			AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-			$actual_stylesheets = array_values( $sanitizer->get_stylesheets() );
-			$this->assertCount( 1, $actual_stylesheets );
-			return $actual_stylesheets[0];
+			return array( $found_error_codes, array_values( $sanitizer->get_stylesheets() ) );
 		};
 
-		$this->assertEquals( 0, $count );
-		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
-		$this->assertEquals( 1, $count );
-		$this->assertContains( 'background-color:lightblue', $sanitize_and_get_stylesheet() );
-		$this->assertEquals( 1, $count );
+		$this->assertEquals( 0, $request_count );
+
+		list( $found_error_codes, $actual_stylesheets ) = $sanitize_and_get_stylesheets();
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request.' );
+
+		if ( empty( $expected_error_codes ) ) {
+			$this->assertCount( 1, $actual_stylesheets ); // @todo Change
+			$this->assertEquals( $response_body, $actual_stylesheets[0] );
+		} else {
+			$this->assertEquals( $expected_error_codes, $found_error_codes );
+			$this->assertCount( 0, $actual_stylesheets );
+		}
+
+		$sanitize_and_get_stylesheets();
+		$this->assertEquals( 1, $request_count, 'Expected HTTP request to be cached.' );
 	}
 
 	/**
@@ -1112,14 +1579,41 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @returns array Stylesheet URL data.
 	 */
 	public function get_stylesheet_urls() {
+
+		// Make sure core-bundled themes are registered.
+		if ( WP_CONTENT_DIR !== ABSPATH . 'wp-content/themes' ) {
+			register_theme_directory( ABSPATH . 'wp-content/themes' );
+		}
+
+		$theme = new WP_Theme( 'twentyseventeen', ABSPATH . 'wp-content/themes' );
+
 		return array(
+			'url_without_path' => array(
+				'https://example.com',
+				null,
+				'no_url_path',
+			),
+			'url_not_string' => array(
+				false,
+				null,
+				'url_not_string',
+			),
 			'theme_stylesheet_without_host' => array(
 				'/wp-content/themes/twentyseventeen/style.css',
-				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+				$theme->get_stylesheet_directory() . '/style.css',
 			),
 			'theme_stylesheet_with_host' => array(
-				WP_CONTENT_URL . '/themes/twentyseventeen/style.css',
-				WP_CONTENT_DIR . '/themes/twentyseventeen/style.css',
+				$theme->get_stylesheet_directory_uri() . '/style.css',
+				$theme->get_stylesheet_directory() . '/style.css',
+			),
+			'theme_stylesheet_with_relative_paths' => array(
+				$theme->get_stylesheet_directory_uri() . '/foo/./bar/baz/../../../style.css',
+				$theme->get_stylesheet_directory() . '/style.css',
+			),
+			'theme_stylesheet_with_trailing_dot' => array(
+				$theme->get_stylesheet_directory_uri() . '/foo./bar.css',
+				null,
+				'file_path_not_found',
 			),
 			'dashicons_without_host' => array(
 				'/wp-includes/css/dashicons.css',
@@ -1162,7 +1656,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			'amp_file_path_illegal_linux' => array(
 				content_url( '../../../../../../../../../../../../../../../bad.css' ),
 				null,
-				'file_path_not_allowed',
+				'remaining_relativity',
 			),
 			'amp_file_path_illegal_windows' => array(
 				content_url( '..\..\..\..\..\..\..\..\..\..\..\..\..\..\..\bad.css' ),
@@ -1201,6 +1695,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertInstanceOf( 'WP_Error', $actual );
 			$this->assertEquals( $error_code, $actual->get_error_code() );
 		} else {
+			$this->assertInternalType( 'string', $actual );
 			$this->assertEquals( $expected, $actual );
 		}
 	}
@@ -1278,14 +1773,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'https://maxcdn.bootstrapcdn.com/font-awesome/123/css/font-awesome.min.css',
 				array(),
 			),
-			'bad_ext'    => array(
-				home_url( '/bad.php' ),
-				array( 'disallowed_file_extension' ),
-			),
-			'bad_file'    => array(
-				home_url( '/bad.css' ),
-				array( 'file_path_not_allowed' ),
-			),
 		);
 	}
 
@@ -1360,42 +1847,226 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Data source for test_css_import.
+	 *
+	 * @return array
+	 */
+	public function get_import_test_data() {
+		return array(
+			'local_css_files' => array(
+				array(
+					admin_url( 'css/colors/../login.css' ),
+					includes_url( 'css/buttons.css' ),
+				),
+				'<style>div::after{content:"After login"}</style><div><input type="checkbox"><button class="wp-core-ui button"></button></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				0, // Zero HTTP requests.
+				null, // No preempting of request, as no external requests.
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_order = array(
+						preg_quote( 'input[type="checkbox"]:disabled', '/' ),
+						preg_quote( '.wp-core-ui .button', '/' ),
+						preg_quote( 'div::after{content:"After login"}', '/' ),
+					);
+					$test->assertRegExp(
+						'/.*' . implode( '.*', $expected_order ) . '/s',
+						$stylesheet
+					);
+				},
+			),
+
+			'local_css_with_import_failure_rejecting' => array(
+				array(
+					admin_url( 'css/local-does-not-exist.css' ),
+					'https://bogus.example.com/remote-does-not-exist.css',
+					admin_url( 'css/colors/../login.css' ),
+					'https://bogus.example.com/remote-also-does-not-exist.css',
+				),
+				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				function ( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
+						return new WP_Error( 'does_not_exist' );
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_order = array(
+						'local-does-not-exist.css',
+						'remote-does-not-exist.css',
+						'remote-also-does-not-exist.css',
+						'remote-finally-does-not-exist.css',
+						'.form-table td', // From imported forms.css.
+						'body.locale-he-il', // From imported l10n.css.
+						'.login .message', // From login.css.
+						'div::after{content:"End"}',
+					);
+
+					$previous = -1;
+					foreach ( $expected_order as $i => $expected ) {
+						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$position = strpos( $stylesheet, $expected );
+						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
+						$previous = $position;
+					}
+				},
+				array(
+					'auto_reject' => true,
+				),
+			),
+
+			'local_css_with_import_failure_accepting' => array(
+				array(
+					admin_url( 'css/local-does-not-exist.css' ),
+					'https://bogus.example.com/remote-does-not-exist.css',
+					admin_url( 'css/colors/../login.css' ),
+					'https://bogus.example.com/remote-also-does-not-exist.css',
+				),
+				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
+				function ( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
+						return new WP_Error( 'does_not_exist' );
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$expected_absent = array(
+						'local-does-not-exist.css',
+						'remote-does-not-exist.css',
+						'remote-also-does-not-exist.css',
+						'remote-finally-does-not-exist.css',
+					);
+					foreach ( $expected_absent as $expected ) {
+						$test->assertNotContains( $expected, $stylesheet, "Expected to not see $expected." );
+					}
+
+					$expected_order = array(
+						'.form-table td', // From imported forms.css.
+						'body.locale-he-il', // From imported l10n.css.
+						'.login .message', // From login.css.
+						'div::after{content:"End"}',
+					);
+
+					$previous = -1;
+					foreach ( $expected_order as $i => $expected ) {
+						$test->assertContains( $expected, $stylesheet, "Did not see $expected at position $i." );
+						$position = strpos( $stylesheet, $expected );
+						$test->assertGreaterThan( $previous, $position, "Expected $expected to be after previous (at position $i)." );
+						$previous = $position;
+					}
+				},
+				array(
+					'auto_reject' => false,
+				),
+			),
+
+			'dynamic_stylesheet_with_relative_import' => array(
+				includes_url( '/dynamic/import-buttons.php' ),
+				'<style>div::after{content:"After import-buttons"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				1,
+				function( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
+						return '@import url( "../css/./foo/../buttons.css" );body{color:#123456}';
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$test->assertRegExp(
+						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons"}', '/' ) . '/s',
+						$stylesheet
+					);
+				},
+			),
+
+			'dynamic_stylesheet_with_absolute_import' => array(
+				includes_url( '/dynamic/import-buttons.php' ),
+				'<style>div::after{content:"After import-buttons2"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				1,
+				function( $requested_url ) {
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
+						return sprintf( '@import "%s";body{color:#123456}', includes_url( '/css/buttons.css' ) );
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$test->assertRegExp(
+						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
+						$stylesheet
+					);
+				},
+			),
+
+			'dynamic_stylesheet_with_nested_dynamic_stylesheet' => array(
+				includes_url( '/dynamic/import-buttons.php' ),
+				'<style>div::after{content:"After import-buttons2"}</style><body><div></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				2,
+				function( $requested_url ) {
+					$self_call_url = includes_url( '/dynamic/nested.php' );
+					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
+						return sprintf( '@import "%s";body{color:#123456}', $self_call_url );
+					} elseif ( wp_parse_url( $self_call_url, PHP_URL_PATH ) === wp_parse_url( $requested_url, PHP_URL_PATH ) ) {
+						return 'div::before{ content:"HELLO NESTED"; }';
+					}
+					return null;
+				},
+				function ( WP_UnitTestCase $test, $stylesheet ) {
+					$test->assertRegExp(
+						'/.*' . preg_quote( 'div::before{content:"HELLO NESTED"}', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
+						$stylesheet
+					);
+				},
+			),
+		);
+	}
+
+	/**
 	 * Test CSS imports.
 	 *
-	 * @expectedIncorrectUsage wp_enqueue_style
+	 * @dataProvider get_import_test_data
 	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 *
+	 * @param array|string $stylesheet_urls             Stylesheet URLs.
+	 * @param string       $style_element               HTML markup for the stylesheet URL.
+	 * @param int          $expected_http_request_count Expected number of HTTP requests.
+	 * @param callable     $mock_response               Function that returns the mocked CSS data.
+	 * @param callable     $assert                      Function that runs the assertions.
+	 * @param array        $options                     Additional options.
 	 */
-	public function test_css_import() {
-		$local_css_url   = admin_url( 'css/login.css' );
-		$import_font_url = 'https://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';
-		$import_css_url  = 'https://stylesheets.example.com/style.css';
-		$import_css_url2 = 'https://stylesheets.example.com/dynamic-css/';
-		$markup          = sprintf(
-			'<html><head><link rel="stylesheet" href="%s"><style>@import url("%s"); body { color:red; }</style><style>@import "%s";</style><style>@import "%s";</style></head><body>hello</body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-			$local_css_url,
-			$import_css_url,
-			$import_font_url,
-			$import_css_url2
+	public function test_css_import( $stylesheet_urls, $style_element, $expected_http_request_count, $mock_response, $assert, $options = array() ) {
+		$stylesheet_urls = (array) $stylesheet_urls;
+
+		$markup  = '<html><head>';
+		$imports = implode(
+			'',
+			array_map(
+				function ( $stylesheet_url ) {
+					return sprintf( '@import url("%s");', $stylesheet_url );
+				},
+				$stylesheet_urls
+			)
 		);
+		$markup .= preg_replace( ':(?<=<style>):', $imports, $style_element );
+		$markup .= '</head><body>hello</body></html>';
+
+		$http_request_count = 0;
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $import_css_url, $import_css_url2 ) {
+			function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
+				$http_request_count++;
 				unset( $request );
-				if ( $url === $import_css_url ) {
-					$preempt = array(
-						'response' => array(
-							'code' => 200,
-						),
-						'body' => 'html { background-color:lightblue; }',
-					);
-				} elseif ( $url === $import_css_url2 ) {
-					$preempt = array(
-						'response' => array(
-							'code' => 200,
-						),
-						'body' => 'strong { background-color:red; }',
-					);
+				if ( $mock_response ) {
+					$body = call_user_func( $mock_response, $url, $stylesheet_urls );
+					if ( null !== $body ) {
+						$preempt = array(
+							'response' => array(
+								'code'    => is_wp_error( $body ) ? 404 : 200,
+								'message' => is_wp_error( $body ) ? 'Not Found' : 'OK',
+							),
+							'headers'  => array( 'content-type' => 'text/css' ),
+							'body'     => is_wp_error( $body ) ? '' : $body,
+						);
+					}
 				}
 				return $preempt;
 			},
@@ -1403,49 +2074,56 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
+		$dom = AMP_DOM_Utils::get_dom( $markup );
+
+		if ( ! empty( $options['auto_reject'] ) ) {
+			add_filter( 'amp_validation_error_sanitized', '__return_false' );
+		}
+
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			array(
+				'use_document_element'      => true,
+				'validation_error_callback' => 'AMP_Validation_Manager::add_validation_error',
+			)
+		);
+		$sanitizer->sanitize();
+
+		$stylesheet = $dom->getElementsByTagName( 'style' )->item( 0 )->textContent;
+
+		call_user_func( $assert, $this, $stylesheet, $dom );
+		$this->assertEquals( $expected_http_request_count, $http_request_count );
+	}
+
+	/**
+	 * Test that @import'ing a font URL gets converted into a link.
+	 *
+	 * @expectedIncorrectUsage wp_enqueue_style
+	 * @covers AMP_Style_Sanitizer::parse_import_stylesheet()
+	 */
+	public function test_css_import_font() {
+		$stylesheet_url = 'http://fonts.googleapis.com/css?family=Merriweather:300|PT+Serif:400i|Open+Sans:800|Zilla+Slab:300,400,500|Montserrat:800|Muli:400&subset=cyrillic-ext,latin-ext,cyrillic,greek,greek-ext,vietnamese';
+
+		$markup  = '<html><head>';
+		$markup .= sprintf( '<style>@import "%s"; body{color:red}</style>', $stylesheet_url );
+		$markup .= '</head><body>hello</body></html>';
+
 		$dom       = AMP_DOM_Utils::get_dom( $markup );
 		$sanitizer = new AMP_Style_Sanitizer(
 			$dom,
 			array(
 				'use_document_element' => true,
-				'remove_unused_rules'  => 'never',
 			)
 		);
 		$sanitizer->sanitize();
 		$stylesheets = array_values( $sanitizer->get_stylesheets() );
-		$this->assertCount( 4, $stylesheets );
-		$this->assertRegExp(
-			'/' . implode(
-				'.*',
-				array(
-					preg_quote( 'input[type="checkbox"]:disabled', '/' ),
-					preg_quote( 'body.rtl', '/' ),
-					preg_quote( '.login .message', '/' ),
-				)
-			) . '/s',
-			$stylesheets[0]
-		);
-		$this->assertRegExp(
-			'/' . implode(
-				'.*',
-				array(
-					preg_quote( 'html{background-color:lightblue}', '/' ),
-					preg_quote( 'body{color:red}', '/' ),
-				)
-			) . '/s',
-			$stylesheets[1]
-		);
 
-		$this->assertEmpty( $stylesheets[2] ); // Since it was importing a font CDN URL.
-		$this->assertEquals( 'strong{background-color:red}', $stylesheets[3] );
-
-		$this->assertNotContains( '@import', $dom->getElementsByTagName( 'style' )->item( 0 )->textContent );
-
-		$links = $dom->getElementsByTagName( 'link' );
-		$this->assertEquals( 1, $links->length );
-		$link = $links->item( 0 );
-		$this->assertEquals( $import_font_url, $link->getAttribute( 'href' ) );
-		$this->assertEquals( 'stylesheet', $link->getAttribute( 'rel' ) );
+		$this->assertCount( 1, $stylesheets );
+		$this->assertEquals( 'body{color:red}', $stylesheets[0] );
+		$xpath = new DOMXPath( $dom );
+		$link  = $xpath->query( '//link[ @rel = "stylesheet" ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( set_url_scheme( $stylesheet_url, 'https' ), $link->getAttribute( 'href' ) );
 	}
 
 	/**
@@ -1478,5 +2156,203 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$this->assertContains( ".dashicons-admin-customizer:before{content:\"\xEF\x95\x80\"}", $sanitized_html );
 		$this->assertContains( 'span::after{content:"⚡️"}', $sanitized_html );
+	}
+
+	/**
+	 * Test style element with old-school XHTML CDATA.
+	 *
+	 * @covers \AMP_Style_Sanitizer::prepare_stylesheet()
+	 */
+	public function test_style_element_cdata() {
+		$html  = '<!DOCTYPE html><html amp><head><meta charset="utf-8">';
+		$html .= '<style><![CDATA[ body { color:red } ]]></style>';
+		$html .= '<style>/*<![CDATA[*/ body { color:green } /*]]>*/</style>';
+		$html .= '<style><!--/*--><![CDATA[/*><!--*/ body { color:blue } /*]]>*/--></style>';
+		$html .= '</head><body><p>Hello World</p></body></html>';
+
+		$dom       = AMP_DOM_Utils::get_dom( $html );
+		$sanitizer = new AMP_Style_Sanitizer(
+			$dom,
+			array(
+				'use_document_element' => true,
+			)
+		);
+
+		$sanitizer->sanitize();
+
+		$xpath = new DOMXPath( $dom );
+		$style = $xpath->query( '//style[ @amp-custom ]' )->item( 0 );
+		$this->assertInstanceOf( 'DOMElement', $style );
+
+		$expected = "body{color:red}body{color:green}body{color:blue}\n\n/*# sourceURL=amp-custom.css */";
+		$this->assertEquals( $expected, $style->nodeValue );
+	}
+
+	/**
+	 * Test that a font stylesheet is moved to the head.
+	 *
+	 * @covers \AMP_Style_Sanitizer::sanitize()
+	 */
+	public function test_body_font_stylesheet_moved_to_head() {
+		$html = '<!DOCTYPE html><html amp><head><meta charset="utf-8"></head><body><link rel="stylesheet" id="the-font" href="https://fonts.googleapis.com/css?family=Merriweather%3A400%2C700" type="text/css" media="all"></body></html>'; // phpcs:ignore
+		$dom  = AMP_DOM_Utils::get_dom( $html );
+
+		$link = $dom->getElementById( 'the-font' );
+		$this->assertInstanceOf( 'DOMElement', $link );
+		$this->assertEquals( 'body', $link->parentNode->nodeName );
+
+		$sanitizer_args = array( 'use_document_element' => true );
+
+		$sanitizer = new AMP_Style_Sanitizer( $dom, $sanitizer_args );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom, $sanitizer_args );
+		$sanitizer->sanitize();
+
+		$this->assertInstanceOf( 'DOMElement', $link->parentNode );
+		$this->assertEquals( 'head', $link->parentNode->nodeName );
+	}
+
+	/**
+	 * Get prioritization test data.
+	 *
+	 * @todo Refactor to use custom theme or existing theme instead of requiring Twenty Ten.
+	 *
+	 * @return array
+	 */
+	public function get_prioritization_data() {
+		add_filter(
+			'theme_root',
+			function () {
+				return ABSPATH . 'wp-content/themes';
+			}
+		);
+		add_filter(
+			'theme_root_uri',
+			function () {
+				return site_url( 'wp-content/themes' );
+			}
+		);
+
+		$render_template = function () {
+			ob_start();
+			?>
+			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body <?php body_class(); ?>><?php wp_footer(); ?></body></html>
+			<?php
+			return ob_get_clean();
+		};
+
+		return array(
+			'admin_bar_included' => array(
+				function () use ( $render_template ) {
+					$this->go_to( home_url() );
+					show_admin_bar( true );
+					_wp_admin_bar_init();
+					switch_theme( 'twentyten' );
+					require_once get_template_directory() . '/functions.php';
+					add_action(
+						'wp_head',
+						function() {
+							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 49990 ) ) );
+						},
+						-1000
+					);
+					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
+					AMP_Theme_Support::add_hooks();
+					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
+					wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+					add_action(
+						'wp_footer',
+						function() {
+							?>
+							<div class="is-style-outline"><button class="wp-block-button__link"></button></div>
+							<div class="wp-block-foo"><figcaption></figcaption></div>
+							<img src="https://example.com/example.jpg" width="100" height="200">
+							<?php
+						}
+					);
+
+					return $render_template();
+				},
+				function( $original_dom, $original_source, $amphtml_dom, $amphtml_source ) {
+					/**
+					 * Vars.
+					 *
+					 * @var DOMDocument $original_dom
+					 * @var string      $original_source
+					 * @var DOMDocument $amphtml_dom
+					 * @var string      $amphtml_source
+					 */
+					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'wpadminbar' ), 'Expected admin bar element to be present originally.' );
+					$this->assertInstanceOf( 'DOMElement', $original_dom->getElementById( 'admin-bar-css' ), 'Expected admin bar CSS to be present originally.' );
+					$this->assertContains( 'admin-bar', $original_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
+					$this->assertContains( 'earlyprintstyle', $original_source, 'Expected early print style to not be present.' );
+
+					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
+					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
+					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
+					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
+					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
+					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
+					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
+					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
+				},
+			),
+			// @todo Add other scenarios in the future.
+		);
+	}
+
+	/**
+	 * Test stylesheet prioritization.
+	 *
+	 * @dataProvider get_prioritization_data
+	 * @covers \AMP_Style_Sanitizer::finalize_stylesheet_group()
+	 * @covers \AMP_Style_Sanitizer::get_stylesheet_priority()
+	 *
+	 * @param callable $html_generator Generator of HTML.
+	 * @param callable $assert         Function which runs assertions.
+	 */
+	public function test_prioritized_stylesheets( $html_generator, $assert ) {
+		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
+			$this->markTestSkipped( 'Requires WordPress 5.0.' );
+		}
+		global $wp_theme_directories; // Note that get_theme_roots() does not work, for some reason.
+		$theme_exists = false;
+		foreach ( $wp_theme_directories as $theme_root ) {
+			$theme_exists = wp_get_theme( 'twentyten', $theme_root )->exists();
+			if ( $theme_exists ) {
+				break;
+			}
+		}
+		if ( ! $theme_exists ) {
+			$this->markTestSkipped( 'Requires Twenty Ten to be installed.' );
+		}
+
+		add_theme_support( 'amp' );
+		$this->go_to( home_url() );
+		$html = $html_generator();
+
+		$original_dom = AMP_DOM_Utils::get_dom( $html );
+		$amphtml_dom  = clone $original_dom;
+
+		$error_codes = array();
+		$args        = array(
+			'use_document_element'      => true,
+			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				$error_codes[] = $error['code'];
+			},
+		);
+
+		$sanitizer = new AMP_Img_Sanitizer( $amphtml_dom, $args );
+		$sanitizer->sanitize();
+
+		$sanitizer = new AMP_Style_Sanitizer( $amphtml_dom, $args );
+		$sanitizer->sanitize();
+
+		$whitelist_sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $amphtml_dom, $args );
+		$whitelist_sanitizer->sanitize();
+
+		$assert( $original_dom, $html, $amphtml_dom, $amphtml_dom->saveHTML(), $sanitizer->get_stylesheets() );
 	}
 }
