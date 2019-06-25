@@ -17,7 +17,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BlockPreviewLabel } from '../';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 /**
  * Parses drag & drop events to ensure the event contains valid transfer data.
