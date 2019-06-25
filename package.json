@@ -62,7 +62,7 @@
     "css-loader": "3.0.0",
     "cssnano": "4.1.10",
     "enzyme": "3.10.0",
-    "eslint": "5.16.0",
+    "eslint": "6.0.1",
     "eslint-plugin-jest": "22.6.4",
     "eslint-plugin-react": "7.13.0",
     "grunt": "1.0.4",
