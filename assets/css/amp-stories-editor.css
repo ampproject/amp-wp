@@ -89,7 +89,7 @@
  * @see https://github.com/WordPress/gutenberg/issues/7180
  */
 
-.wp-block-image .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
+.wp-block .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
 	left: 0 !important;
 }
 
