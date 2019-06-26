@@ -206,6 +206,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
+		add_filter( 'safe_style_css', array( __CLASS__, 'filter_safe_style_css' ), 10, 1 );
+
 		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_styles' ) );
@@ -341,6 +343,28 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Filters allowed CSS attributes to include positioning, display, etc.
+	 *
+	 * @param string[] $attr Array of allowed CSS attributes.
+	 *
+	 * @return string[] Filtered array of allowed CSS attributes.
+	 */
+	public static function filter_safe_style_css( $attr ) {
+		$style_to_add = array(
+			'background-color',
+			'display',
+			'left',
+			'position',
+			'top',
+		);
+
+		foreach ( $style_to_add as $style ) {
+		    $attr[] = $style;
+        }
+		return $attr;
+	}
+
+	/**
 	 * Filter the allowed tags for Kses to allow for amp-story children.
 	 *
 	 * @param array $allowed_tags Allowed tags.
@@ -368,6 +392,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['animate-in-delay']    = true;
 			$allowed_tag['animate-in-after']    = true;
 			$allowed_tag['data-font-family']    = true;
+			$allowed_tag['data-block-name']     = true;
 		}
 
 		return $allowed_tags;
