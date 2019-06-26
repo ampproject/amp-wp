@@ -32,17 +32,17 @@ const BlockEdit = ( props ) => {
 			<InspectorControls>
 				<PanelBody title={ __( 'IMA Video Settings', 'amp' ) }>
 					<TextControl
-						label={ __( 'Https URL for your VAST ad document (required)', 'amp' ) }
+						label={ __( 'HTTPS URL for your VAST ad document (required)', 'amp' ) }
 						value={ dataTag }
 						onChange={ ( value ) => ( setAttributes( { dataTag: value } ) ) }
 					/>
 					<TextControl
-						label={ __( 'Https URL of your video content (required)', 'amp' ) }
+						label={ __( 'HTTPS URL of your video content (required)', 'amp' ) }
 						value={ dataSrc }
 						onChange={ ( value ) => ( setAttributes( { dataSrc: value } ) ) }
 					/>
 					<TextControl
-						label={ __( 'Https URL to preview image', 'amp' ) }
+						label={ __( 'HTTPS URL to preview image', 'amp' ) }
 						value={ dataPoster }
 						onChange={ ( value ) => ( setAttributes( { dataPoster: value } ) ) }
 					/>

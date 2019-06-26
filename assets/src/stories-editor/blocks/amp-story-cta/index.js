@@ -49,7 +49,10 @@ export const settings = {
 
 	category: 'layout',
 
-	keywords: [ __( 'call to action', 'amp' ), __( 'cta', 'amp' ), __( 'button', 'amp' ) ],
+	keywords: [
+		__( 'cta', 'amp' ),
+		__( 'button', 'amp' )
+	],
 
 	attributes: schema,
 

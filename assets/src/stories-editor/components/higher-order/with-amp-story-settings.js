@@ -513,7 +513,7 @@ export default createHigherOrderComponent(
 									} }
 								/>
 								<RangeControl
-									label={ __( 'Background Opacity', 'amp' ) }
+									label={ __( 'Opacity', 'amp' ) }
 									value={ opacity }
 									onChange={ ( value ) => setAttributes( { opacity: value } ) }
 									min={ 5 }

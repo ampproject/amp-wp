@@ -17,9 +17,8 @@ export const settings = {
 	category: 'common',
 	icon: 'clock',
 	keywords: [
-		__( 'post', 'amp' ),
+		__( 'story', 'amp' ),
 		__( 'publish date', 'amp' ),
-		__( 'published date', 'amp' ),
 		__( 'date', 'amp' ),
 	],
 	...getMetaBlockSettings( {

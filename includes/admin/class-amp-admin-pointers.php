@@ -96,7 +96,7 @@ class AMP_Admin_Pointers {
 				array(
 					'selector'        => '#menu-posts-' . AMP_Story_Post_Type::POST_TYPE_SLUG,
 					'heading'         => __( 'AMP', 'amp' ),
-					'description'     => __( 'Head over here to create your first AMP story.', 'amp' ),
+					'description'     => __( 'Head over here to create your first story.', 'amp' ),
 					'position'        => array(
 						'align' => 'middle',
 					),
