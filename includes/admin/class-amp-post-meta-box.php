@@ -263,10 +263,14 @@ class AMP_Post_Meta_Box {
 	 * @param WP_Post $post Post.
 	 */
 	public function render_status( $post ) {
+		$supported_post_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
+
 		$verify = (
 			isset( $post->ID )
 			&&
 			is_post_type_viewable( $post->post_type )
+			&&
+			in_array( $post->post_type, $supported_post_types, true )
 			&&
 			current_user_can( 'edit_post', $post->ID )
 		);
