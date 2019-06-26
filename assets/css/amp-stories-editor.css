@@ -201,7 +201,8 @@
 	pointer-events: none;
 }
 
-div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
+div[data-amp-caption="noCaption"] figure.wp-block-image figcaption,
+div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	display: none;
 }
 
