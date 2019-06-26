@@ -18,30 +18,44 @@ import BlockNavigationItem from './item';
 import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 import './edit.css';
 
-function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock } ) {
+function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock, callToActionBlock } ) {
 	return (
 		/*
 		 * Disable reason: The `list` ARIA role is redundant but
 		 * Safari+VoiceOver won't announce the list otherwise.
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
-		<DropZoneProvider>
-			<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
-				{ blocks.map( ( block ) => {
-					const isSelected = block.clientId === selectedBlockClientId;
+		<>
+			<DropZoneProvider>
+				<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+					{ blocks.map( ( block ) => {
+						const isSelected = block.clientId === selectedBlockClientId;
 
-					return (
-						<li key={ block.clientId }>
-							<BlockNavigationItem
-								block={ block }
-								isSelected={ isSelected }
-								onClick={ () => selectBlock( block.clientId ) }
-							/>
-						</li>
-					);
-				} ) }
-			</ul>
-		</DropZoneProvider>
+						return (
+							<li key={ block.clientId }>
+								<BlockNavigationItem
+									block={ block }
+									isSelected={ isSelected }
+									onClick={ () => selectBlock( block.clientId ) }
+								/>
+							</li>
+						);
+					} ) }
+				</ul>
+			</DropZoneProvider>
+			{ /* Add CTA block as a separate item to exclude it from DropZone. */ }
+			{ callToActionBlock && (
+				<ul className="editor-block-navigation__list block-editor-block-navigation__list editor-block-navigation__list__static" role="list">
+					<li key={ callToActionBlock.clientId }>
+						<BlockNavigationItem
+							block={ callToActionBlock }
+							isSelected={ callToActionBlock.clientId === selectedBlockClientId }
+							onClick={ () => selectBlock( callToActionBlock.clientId ) }
+						/>
+					</li>
+				</ul>
+			) }
+		</>
 		/* eslint-enable jsx-a11y/no-redundant-roles */
 	);
 }
@@ -52,6 +66,9 @@ BlockNavigationList.propTypes = {
 	} ) ).isRequired,
 	selectedBlockClientId: PropTypes.string,
 	selectBlock: PropTypes.func.isRequired,
+	callToActionBlock: PropTypes.shape( {
+		clientId: PropTypes.string.isRequired,
+	} ),
 };
 
 function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBlockClientId } ) {
@@ -68,14 +85,7 @@ function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBloc
 					blocks={ blocks }
 					selectedBlockClientId={ selectedBlockClientId }
 					selectBlock={ selectBlock }
-				/>
-			) }
-			{ /* Add CTA block as a separate item to exclude it from DropZone. */ }
-			{ callToActionBlock && (
-				<BlockNavigationItem
-					block={ callToActionBlock }
-					isSelected={ callToActionBlock.clientId === selectedBlockClientId }
-					onClick={ () => selectBlock( callToActionBlock.clientId ) }
+					callToActionBlock={ callToActionBlock }
 				/>
 			) }
 			{ ! hasBlocks && ! callToActionBlock && (
