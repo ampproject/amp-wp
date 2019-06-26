@@ -351,7 +351,6 @@ class AMP_Story_Post_Type {
 	 */
 	public static function filter_safe_style_css( $attr ) {
 		$style_to_add = array(
-			'background-color',
 			'display',
 			'left',
 			'position',
