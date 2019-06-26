@@ -142,6 +142,11 @@
 	}
 }
 
+/* Hide default block navigation icon in toolbar */
+.edit-post-header-toolbar .components-icon-button.block-editor-block-navigation {
+	display: none;
+}
+
 @media (min-width: 961px) {
 
 	.edit-post-header-toolbar #amp-story-shortcuts {
@@ -151,10 +156,6 @@
 	.edit-post-visual-editor .editor-post-title__block {
 		margin-left: 0;
 		margin-right: 0;
-	}
-
-	.components-icon-button.block-editor-block-navigation {
-		display: none;
 	}
 
 	.block-editor-block-navigation__container {
