@@ -548,7 +548,7 @@ export default createHigherOrderComponent(
 								title={ __( 'Story Settings', 'amp' ) }
 							>
 								<ToggleControl
-									label={ __( 'Show or hide the caption', 'amp' ) }
+									label={ __( 'Display Caption', 'amp' ) }
 									checked={ attributes[ captionAttribute ] }
 									onChange={
 										function() {
@@ -558,7 +558,7 @@ export default createHigherOrderComponent(
 											}
 										}
 									}
-									help={ __( 'Toggle on to show caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+									help={ __( 'Note: If you turn this off, the current caption text will be removed.', 'amp' ) }
 								/>
 							</PanelBody>
 						</InspectorControls>
