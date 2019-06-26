@@ -43,7 +43,7 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock, call
 					} ) }
 				</ul>
 			</DropZoneProvider>
-			{ /* Add CTA block as a separate item to exclude it from DropZone. */ }
+			{ /* Add CTA block separately to exclude it from DropZone. */ }
 			{ callToActionBlock && (
 				<ul className="editor-block-navigation__list block-editor-block-navigation__list editor-block-navigation__list__static" role="list">
 					<li key={ callToActionBlock.clientId }>
