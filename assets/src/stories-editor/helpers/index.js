@@ -1042,10 +1042,14 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 export const maybeRemoveMediaCaption = ( clientId ) => {
 	const block = getBlock( clientId );
 
+	if ( ! block ) {
+		return;
+	}
+
 	const isImage = 'core/image' === block.name;
 	const isVideo = 'core/video' === block.name;
 
-	if ( ! block || ( ! isImage && ! isVideo ) ) {
+	if ( ! isImage && ! isVideo ) {
 		return;
 	}
 
