@@ -19,21 +19,22 @@ class TemplatePreview extends Component {
 		super( ...arguments );
 
 		this.state = {
-			parentLoaded: false,
+			shouldLoad: false,
 		};
 	}
 
 	componentDidMount() {
-		if ( ! this.state.parentLoaded ) {
+		if ( ! this.state.shouldLoad ) {
+			// @todo Look into React Concurrent mode to replace this once it get available.
 			// Set timeout to cause a small latency between loading the templates, otherwise they all try to load instantly and cause a lag.
 			this.props.setTimeout( () => {
-				this.setState( { parentLoaded: true } );
+				this.setState( { shouldLoad: true } );
 			}, 100 );
 		}
 	}
 
 	render() {
-		if ( ! this.state.parentLoaded ) {
+		if ( ! this.state.shouldLoad ) {
 			return <Spinner />;
 		}
 		const { item } = this.props;
