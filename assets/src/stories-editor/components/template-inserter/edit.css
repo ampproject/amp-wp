@@ -38,7 +38,7 @@
 
 .amp-stories__editor-inserter__results .components-spinner {
 	margin-right: calc(50% - 9px);
-	margin-top: 50%;
+	margin-top: 128px;
 }
 
 .amp-stories__template-inserter__popover.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::before {
