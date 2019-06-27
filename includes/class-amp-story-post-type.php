@@ -350,6 +350,18 @@ class AMP_Story_Post_Type {
 	 * @return string[] Filtered array of allowed CSS attributes.
 	 */
 	public static function filter_safe_style_css( $attr ) {
+
+		// Only continue if it's a REST request for amp_story post type.
+		if ( ! isset( $_REQUEST['rest_route'] ) || empty( $_REQUEST['rest_route'] ) ) {
+			return $attr;
+		}
+
+		$route  = $_REQUEST['rest_route'];
+		$search = '\/' . self::POST_TYPE_SLUG . '\/';
+		if ( ! preg_match("/{$search}/i", $route ) ) {
+			return $attr;
+		}
+
 		$style_to_add = array(
 			'display',
 			'left',
@@ -358,8 +370,8 @@ class AMP_Story_Post_Type {
 		);
 
 		foreach ( $style_to_add as $style ) {
-		    $attr[] = $style;
-        }
+			$attr[] = $style;
+		}
 		return $attr;
 	}
 
