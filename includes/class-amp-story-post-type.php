@@ -358,7 +358,7 @@ class AMP_Story_Post_Type {
 
 		$route  = $GLOBALS['wp']->query_vars['rest_route'];
 		$search = '\/' . self::POST_TYPE_SLUG . '\/';
-		if ( ! preg_match("/{$search}/i", $route ) ) {
+		if ( ! preg_match( "/{$search}/i", $route ) ) {
 			return $attr;
 		}
 
