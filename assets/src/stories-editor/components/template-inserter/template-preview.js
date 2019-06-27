@@ -34,8 +34,10 @@ class TemplatePreview extends Component {
 	}
 
 	render() {
+		const { isFirst } = this.props;
 		if ( ! this.state.shouldLoad ) {
-			return <Spinner />;
+			// Display the spinner for the first template only to avoid overloading.
+			return isFirst ? <Spinner /> : null;
 		}
 		const { item } = this.props;
 		return (
@@ -52,6 +54,7 @@ TemplatePreview.propTypes = {
 		id: PropTypes.string.isRequired,
 	} ).isRequired,
 	setTimeout: PropTypes.func.isRequired,
+	isFirst: PropTypes.bool.isRequired,
 };
 
 export default withSafeTimeout( TemplatePreview );

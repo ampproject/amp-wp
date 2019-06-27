@@ -118,7 +118,7 @@ class TemplateInserter extends Component {
 											className="amp-stories__blank-page-inserter editor-block-preview__content block-editor-block-preview__content editor-styles-wrapper"
 										/>
 									</div>
-									{ this.state.storyTemplates.map( ( item ) => (
+									{ this.state.storyTemplates.map( ( item, index ) => (
 										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
 											key={ `template-preview-${ item.id }` }
 											role="button"
@@ -135,6 +135,7 @@ class TemplateInserter extends Component {
 										>
 											<TemplatePreview
 												item={ item }
+												isFirst={ 0 === index }
 											/>
 										</a>
 									) ) }
