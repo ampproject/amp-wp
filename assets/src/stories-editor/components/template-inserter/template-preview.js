@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+
 /**
  * WordPress dependencies
  */
@@ -25,7 +26,7 @@ class TemplatePreview extends Component {
 
 	componentDidMount() {
 		if ( ! this.state.shouldLoad ) {
-			// @todo Look into React Concurrent mode to replace this once it get available.
+			// @todo Look into React Concurrent mode to replace this once it gets available.
 			// Set timeout to cause a small latency between loading the templates, otherwise they all try to load instantly and cause a lag.
 			this.props.setTimeout( () => {
 				this.setState( { shouldLoad: true } );
