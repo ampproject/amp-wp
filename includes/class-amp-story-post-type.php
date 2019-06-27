@@ -208,6 +208,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'safe_style_css', array( __CLASS__, 'filter_safe_style_css' ), 10, 1 );
 
+		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_enabling_author_editing' ), 10, 3 );
+
 		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
 
 		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_styles' ) );
@@ -345,9 +347,9 @@ class AMP_Story_Post_Type {
 	/**
 	 * Filters allowed CSS attributes to include positioning, display, etc.
 	 *
-	 * @param string[] $attr Array of allowed CSS attributes.
+	 * @param array $attr Array of allowed CSS attributes.
 	 *
-	 * @return string[] Filtered array of allowed CSS attributes.
+	 * @return array Filtered array of allowed CSS attributes.
 	 */
 	public static function filter_safe_style_css( $attr ) {
 
@@ -373,6 +375,50 @@ class AMP_Story_Post_Type {
 			$attr[] = $style;
 		}
 		return $attr;
+	}
+
+	/**
+	 * Filter user caps to add more permissions for Author being able to use AMP Stories properly.
+	 *
+	 * This is not ideal and should be removed once https://core.trac.wordpress.org/ticket/37134 has been resolved.
+	 *
+	 * @param array $allcaps All caps.
+	 * @param array $caps    Requested caps.
+	 * @param array $args    Cap args.
+	 * @return array All caps.
+	 */
+	public static function filter_user_has_cap_for_enabling_author_editing( $allcaps, $caps, $args ) {
+		if ( ! isset( $args[0] ) || 'unfiltered_html' !== $args[0] ) {
+			return $allcaps;
+		}
+
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return $allcaps;
+		}
+
+		// Let's get the post's ID from the request and see if it's an AMP Story.
+		if ( ! isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+			return $allcaps;
+		}
+
+		$route              = $_REQUEST['rest_route']; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
+		$story_type_pattern = '\/' . self::POST_TYPE_SLUG . '\/';
+		if ( ! preg_match( "/{$story_type_pattern}/i", $route ) ) {
+			return $allcaps;
+		}
+
+		preg_match( "/{$story_type_pattern}(\d+)/i", $route, $matches );
+		if ( ! $matches || ! isset( $matches[1] ) ) {
+			return $allcaps;
+		}
+
+		$story_post = get_post( absint( $matches[1] ) );
+		if ( ! $story_post || self::POST_TYPE_SLUG !== $story_post->post_type ) {
+			return $allcaps;
+		}
+
+		$allcaps['unfiltered_html'] = true;
+		return $allcaps;
 	}
 
 	/**
