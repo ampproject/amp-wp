@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Dropdown, IconButton, Spinner } from '@wordpress/components';
+import { Dropdown, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withSelect, withDispatch } from '@wordpress/data';
 import { createBlock } from '@wordpress/blocks';
@@ -18,49 +18,11 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import { BlockPreview } from '../';
+import TemplatePreview from './template-preview';
 import pageIcon from '../../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../../images/add-template.svg';
 import './edit.css';
 import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../helpers';
-
-class TemplatePreview extends Component {
-	constructor() {
-		super( ...arguments );
-
-		this.state = {
-			parentLoaded: false,
-		};
-	}
-
-	componentDidMount() {
-		if ( ! this.state.parentLoaded ) {
-			// Set timeout to cause a small latency between loading the templates, otherwise they all try to load instantly and cause a lag.
-			setTimeout( () => {
-				this.setState( { parentLoaded: true } );
-			}, 100 );
-		}
-	}
-
-	render() {
-		if ( ! this.state.parentLoaded ) {
-			return <Spinner />;
-		}
-		const { item } = this.props;
-		return (
-			<BlockPreview
-				name="core/block"
-				attributes={ { ref: item.id } }
-			/>
-		);
-	}
-}
-
-TemplatePreview.propTypes = {
-	item: PropTypes.shape( {
-		id: PropTypes.string.isRequired,
-	} ).isRequired,
-};
 
 class TemplateInserter extends Component {
 	constructor() {
