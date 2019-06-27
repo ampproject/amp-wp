@@ -18,7 +18,7 @@
 	}
 }
 
-@media (max-width: 1100px) and (min-width: 1001px) {
+@media (min-width: 1001px) and (max-width: 1100px) {
 
 	.is-sidebar-opened .editor-block-list__layout {
 		margin-right: -100px;
