@@ -26,23 +26,25 @@ function BlockNavigationList( { blocks,	selectedBlockClientId, selectBlock, call
 		 */
 		/* eslint-disable jsx-a11y/no-redundant-roles */
 		<>
-			<DropZoneProvider>
-				<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
-					{ blocks.map( ( block ) => {
-						const isSelected = block.clientId === selectedBlockClientId;
+			{ blocks.length > 0 && (
+				<DropZoneProvider>
+					<ul className="editor-block-navigation__list block-editor-block-navigation__list" role="list">
+						{ blocks.map( ( block ) => {
+							const isSelected = block.clientId === selectedBlockClientId;
 
-						return (
-							<li key={ block.clientId }>
-								<BlockNavigationItem
-									block={ block }
-									isSelected={ isSelected }
-									onClick={ () => selectBlock( block.clientId ) }
-								/>
-							</li>
-						);
-					} ) }
-				</ul>
-			</DropZoneProvider>
+							return (
+								<li key={ block.clientId }>
+									<BlockNavigationItem
+										block={ block }
+										isSelected={ isSelected }
+										onClick={ () => selectBlock( block.clientId ) }
+									/>
+								</li>
+							);
+						} ) }
+					</ul>
+				</DropZoneProvider>
+			) }
 			{ /* Add CTA block separately to exclude it from DropZone. */ }
 			{ callToActionBlock && (
 				<ul className="editor-block-navigation__list block-editor-block-navigation__list editor-block-navigation__list__static" role="list">
@@ -72,7 +74,7 @@ BlockNavigationList.propTypes = {
 };
 
 function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBlockClientId } ) {
-	const hasBlocks = blocks.length > 0;
+	const hasBlocks = blocks.length > 0 || callToActionBlock;
 
 	return (
 		<NavigableMenu
@@ -88,7 +90,7 @@ function BlockNavigation( { callToActionBlock, blocks, selectBlock, selectedBloc
 					callToActionBlock={ callToActionBlock }
 				/>
 			) }
-			{ ! hasBlocks && ! callToActionBlock && (
+			{ ! hasBlocks && (
 				<p className="block-editor-block-navigation__paragraph">
 					{ __( 'No elements added to this page yet.', 'amp' ) }
 				</p>
