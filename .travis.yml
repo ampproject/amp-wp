@@ -72,7 +72,7 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - npm run test:js -- --ci
+        - npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
 
     - name: E2E tests
       php: "7.3"
