@@ -79,6 +79,7 @@ jobs:
       install:
         - composer install # npm is handled by `npm run env:start`
       script:
+        - npm run build:js
         - npm run env:start
         - npm run env:reset-site
         - npm run test:e2e
