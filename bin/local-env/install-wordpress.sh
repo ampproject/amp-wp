@@ -49,6 +49,11 @@ if [ "$E2E_ROLE" = "author" ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI post update 1 --post_author=2 --quiet
 fi
 
+# Make sure the uploads and upgrade folders exist and we have permissions to add files.
+echo -e $(status_message "Ensuring that files can be uploaded...")
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER mkdir -p /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-content/plugins /var/www/html/wp-config.php /var/www/html/wp-settings.php /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
+
 CURRENT_WP_VERSION=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm $CLI core version)
 echo -e $(status_message "Current WordPress version: $CURRENT_WP_VERSION...")
 
