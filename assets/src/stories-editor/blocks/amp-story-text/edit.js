@@ -179,6 +179,7 @@ TextBlockEdit.propTypes = {
 		autoFontSize: PropTypes.number,
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
+		className: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
@@ -190,6 +191,7 @@ TextBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,

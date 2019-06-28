@@ -114,6 +114,9 @@ MetaBlockEdit.propTypes = {
 		ampFitText: PropTypes.bool,
 		width: PropTypes.number,
 		height: PropTypes.number,
+		align: PropTypes.string,
+		opacity: PropTypes.number,
+		autoFontSize: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	blockContent: PropTypes.string,
@@ -127,6 +130,7 @@ MetaBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,

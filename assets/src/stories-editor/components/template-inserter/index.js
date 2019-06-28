@@ -119,7 +119,8 @@ class TemplateInserter extends Component {
 										/>
 									</div>
 									{ this.state.storyTemplates.map( ( item ) => (
-										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
+										// see https://github.com/ampproject/amp-wp/issues/2165
+										<a // eslint-disable-line jsx-a11y/anchor-is-valid
 											key={ `template-preview-${ item.id }` }
 											role="button"
 											tabIndex="0"
