@@ -73,6 +73,14 @@ jobs:
         - source "$DEV_LIB_PATH/travis.script.sh"
         - npm run test:js -- --ci
 
+    - name: E2E tests
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
+      script:
+        - npm run env:start
+        - npm run env:reset-site
+        - npm run test:e2e
+
     - name: PHP unit tests (7.3, WordPress latest)
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1

@@ -3,6 +3,11 @@
 # Exit if any command fails.
 set -e
 
+# Common variables.
+DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
+WP_DEBUG=${WP_DEBUG-true}
+SCRIPT_DEBUG=${SCRIPT_DEBUG-true}
+
 # Include useful functions
 . "$(dirname "$0")/includes.sh"
 
@@ -25,7 +30,7 @@ echo ''
 
 # If this is the test site, we reset the database so no posts/comments/etc.
 # dirty up the tests.
-if [ "$1" == '--e2e_tests' ]; then
+if [ "$1" == '--reset-site' ]; then
 	echo -e $(status_message "Resetting test database...")
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI db reset --yes --quiet
 fi
@@ -71,16 +76,21 @@ docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER touch /var/www/h
 echo -e $(status_message "Activating AMP plugin...")
 docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
 
+
+# Install & activate Gutenberg plugin.
+echo -e $(status_message "Installing and activating Gutenberg plugin...")
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install gutenberg --activate --quiet
+
 # Configure site constants.
 echo -e $(status_message "Configuring site constants...")
 WP_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
-if [ $WP_DEBUG != $WP_DEBUG_CURRENT ]; then
+if [ "$WP_DEBUG" != $WP_DEBUG_CURRENT ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set WP_DEBUG $WP_DEBUG --raw --type=constant --quiet
 	WP_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
 	echo -e $(status_message "WP_DEBUG: $WP_DEBUG_RESULT...")
 fi
 SCRIPT_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
-if [ $SCRIPT_DEBUG != $SCRIPT_DEBUG_CURRENT ]; then
+if [ "$SCRIPT_DEBUG" != $SCRIPT_DEBUG_CURRENT ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set SCRIPT_DEBUG $SCRIPT_DEBUG --raw --type=constant --quiet
 	SCRIPT_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
 	echo -e $(status_message "SCRIPT_DEBUG: $SCRIPT_DEBUG_RESULT...")
