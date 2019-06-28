@@ -35,12 +35,12 @@ class TemplatePreview extends Component {
 	}
 
 	render() {
-		const { isFirst } = this.props;
 		if ( ! this.state.shouldLoad ) {
-			// Display the spinner for the first template only to avoid overloading.
-			return isFirst ? <Spinner /> : null;
+			return <Spinner />;
 		}
+
 		const { item } = this.props;
+
 		return (
 			<BlockPreview
 				name="core/block"

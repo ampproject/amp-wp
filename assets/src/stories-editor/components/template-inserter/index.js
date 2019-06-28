@@ -135,7 +135,6 @@ class TemplateInserter extends Component {
 										>
 											<TemplatePreview
 												item={ item }
-												isFirst={ 0 === index }
 											/>
 										</a>
 									) ) }
