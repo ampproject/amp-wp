@@ -55,7 +55,6 @@ TemplatePreview.propTypes = {
 		id: PropTypes.string.isRequired,
 	} ).isRequired,
 	setTimeout: PropTypes.func.isRequired,
-	isFirst: PropTypes.bool.isRequired,
 };
 
 export default withSafeTimeout( TemplatePreview );
