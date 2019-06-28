@@ -78,7 +78,9 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
       install:
-        - composer install # npm is handled by `npm run env:start`
+        - nvm install
+        - composer install
+        # npm is handled by `npm run env:start`
       script:
         - npm run env:start
         - npm run build:js # after npm dependencies have been installed
