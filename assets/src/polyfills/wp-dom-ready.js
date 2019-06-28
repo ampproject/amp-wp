@@ -3,8 +3,6 @@
  */
 import domReady from '@wordpress/dom-ready';
 
-if ( ! window.wp ) {
-	window.wp = {};
-}
+window.wp = window.wp || {};
 
-wp.domReady = domReady;
+window.wp.domReady = domReady;

@@ -238,7 +238,6 @@ export default createHigherOrderComponent(
 				width,
 				opacity,
 				type: textBlockTextType,
-				ampShowImageCaption,
 				ampAnimationType,
 				ampAnimationDuration,
 				ampAnimationDelay,
@@ -267,6 +266,8 @@ export default createHigherOrderComponent(
 			} else {
 				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 			}
+
+			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 
 			return (
 				<>
@@ -541,23 +542,23 @@ export default createHigherOrderComponent(
 							</PanelBody>
 						</InspectorControls>
 					) }
-					{ isImageBlock && (
+					{ ( isImageBlock || isVideoBlock ) && (
 						<InspectorControls>
 							<PanelBody
 								title={ __( 'Story Settings', 'amp' ) }
 							>
 								<ToggleControl
-									label={ __( 'Show or hide the caption', 'amp' ) }
-									checked={ ampShowImageCaption }
+									label={ __( 'Display Caption', 'amp' ) }
+									checked={ attributes[ captionAttribute ] }
 									onChange={
 										function() {
-											props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
-											if ( ! attributes.ampShowImageCaption ) {
+											props.setAttributes( { [ captionAttribute ]: ! attributes[ captionAttribute ] } );
+											if ( ! attributes[ captionAttribute ] ) {
 												props.setAttributes( { caption: '' } );
 											}
 										}
 									}
-									help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+									help={ __( 'Note: If you turn this off, the current caption text will be removed.', 'amp' ) }
 								/>
 							</PanelBody>
 						</InspectorControls>
