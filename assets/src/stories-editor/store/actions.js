@@ -89,11 +89,14 @@ export function setCurrentPage( page ) {
 /**
  * Returns an action object in signalling that reorder mode should be initiated.
  *
+ * @param {string[]} order The current block order.
+ *
  * @return {Object} Action object.
  */
-export function startReordering() {
+export function startReordering( order ) {
 	return {
 		type: 'START_REORDERING',
+		order,
 	};
 }
 
@@ -127,10 +130,13 @@ export function saveOrder() {
 /**
  * Returns an action object in signalling that the customized order should be reverted.
  *
+ * @param {string[]} order The original block order.
+ *
  * @return {Object} Action object.
  */
-export function resetOrder() {
+export function resetOrder( order ) {
 	return {
 		type: 'RESET_ORDER',
+		order,
 	};
 }

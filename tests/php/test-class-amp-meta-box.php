@@ -134,6 +134,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-i18n',
 				'wp-plugins',
 				'wp-polyfill',
+				'wp-server-side-render',
 			),
 			$block_script->deps
 		);

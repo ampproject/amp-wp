@@ -13,7 +13,7 @@ module.exports = {
 		'<rootDir>/build',
 		'.*/e2e/.*',
 	],
-	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/', '<rootDir>/assets/src/test/helpers/' ],
+	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/' ],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',
 };
