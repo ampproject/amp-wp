@@ -18,7 +18,7 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import { BlockPreview } from '../';
+import TemplatePreview from './template-preview';
 import pageIcon from '../../../../images/add-page-inserter.svg';
 import addTemplateIcon from '../../../../images/add-template.svg';
 import './edit.css';
@@ -133,9 +133,8 @@ class TemplateInserter extends Component {
 											} }
 											className="components-button block-editor-block-preview"
 										>
-											<BlockPreview
-												name="core/block"
-												attributes={ { ref: item.id } }
+											<TemplatePreview
+												item={ item }
 											/>
 										</a>
 									) ) }
