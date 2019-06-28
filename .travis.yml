@@ -77,9 +77,7 @@ jobs:
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       install:
-        - nvm install
-        - npm install
-        - composer install
+        - composer install # npm is handled by `npm run env:start`
       script:
         - npm run env:start
         - npm run env:reset-site
