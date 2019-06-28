@@ -76,6 +76,10 @@ jobs:
     - name: E2E tests
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
+      install:
+        - nvm install
+        - npm install
+        - composer install
       script:
         - npm run env:start
         - npm run env:reset-site
