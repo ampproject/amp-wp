@@ -435,6 +435,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-referrer-www-google-com { color: red; } </style>
 					<style> .amp-active { color: green } </style>
 					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-date-picker-selecting { outline: solid 2px red; } </style>
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
@@ -463,6 +464,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-referrer-www-google-com { color: red; } </style>
 					<style> .amp-active { color: green } </style>
 					<style> .amp-carousel-slide { outline: solid 1px red; } </style>
+					<style> .amp-date-picker-selecting { outline: solid 2px red; } </style>
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
@@ -479,6 +481,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<body>
 						<amp-user-notification  layout="nodisplay"  id="amp-user-notification1"  data-show-if-href="https://foo.com/api/show-api?timestamp=TIMESTAMP"  data-dismiss-href="https://foo.com/api/dismissed">  This  site  uses  cookies  to  personalize  content.  <a  href="">Learn  more.</a>  <button  on="tap:amp-user-notification1.dismiss">I  accept</button>  </amp-user-notification>
 						<amp-carousel type="slides" width="450" height="300" controls loop autoplay delay="3000" data-next-button-aria-label="Go to next slide" data-previous-button-aria-label="Go to previous slide"> <amp-img src="images/image1.jpg" width="450" height="300"></amp-img> <amp-img src="images/image2.jpg" width="450" height="300"></amp-img> <amp-img src="images/image3.jpg" width="450" height="300"></amp-img></amp-carousel>
+						<amp-date-picker layout="fixed-height" height="360"></amp-date-picker>
 						<form action="https://example.com/" target="_top" method="get"><input name="search" type="search" required></form>
 						<section amp-access="NOT error AND NOT access" amp-access-hide><div id="amp-access-laterpay-dialog" class="amp-access-laterpay"></div></section>
 						<amp-image-lightbox id="lightbox1" layout="nodisplay"></amp-image-lightbox>
@@ -495,6 +498,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-referrer-www-google-com{color:red}',
 					'.amp-active{color:green}',
 					'.amp-carousel-slide{outline:solid 1px red}',
+					'.amp-date-picker-selecting{outline:solid 2px red}',
 					'.amp-form-submit-success{color:green}',
 					'.amp-access-laterpay-container{color:purple}',
 					'.amp-image-lightbox-caption{color:brown}',
