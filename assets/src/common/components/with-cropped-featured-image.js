@@ -24,9 +24,10 @@ const { wp } = window;
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
  * Mostly copied from customize-controls.js.
- * The optional alternateMinImageDimensions are used when they are the same aspect ratio type as the actual image dimensions.
+ * The optional alternateMinImageDimensions are used for the crop size when they are the same aspect ratio type as the actual image dimensions.
  * For example, if the selected image has a portrait aspect ratio, and the alternateMinImageDimensions are also portrait,
  * this will use the alternate dimensions.
+ * Otherwise, this will use the minImageDimensions.
  *
  * @param {Function} InitialMediaUpload          The MediaUpload component, passed from the filter.
  * @param {Object}   minImageDimensions          Minimum required image dimensions.
@@ -115,10 +116,19 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 */
 		calculateImageSelectOptions( attachment, controller ) {
 			const realWidth = attachment.get( 'width' ),
-				realHeight = attachment.get( 'height' ),
-				realAspectRatioType = getAspectRatioType( realWidth, realHeight ),
-				alternateAspectRatioType = getAspectRatioType( ALTERNATE_EXPECTED_WIDTH, ALTERNATE_EXPECTED_HEIGHT ),
-				shouldUseAlternateWidthAndHeight = ALTERNATE_EXPECTED_WIDTH && ( realAspectRatioType === alternateAspectRatioType );
+				realHeight = attachment.get( 'height' );
+
+			/*
+			 * Only use the alternate dimensions if the image is big enough, and if they have the same aspect ratio type.
+			 * For example, if they are portrait dimensions, the real image must also have portrait dimensions.
+			 * This allows having an alternative crop size, for example, a portrait crop in addition to a landscape crop.
+			 */
+			const shouldUseAlternateWidthAndHeight = (
+				ALTERNATE_EXPECTED_WIDTH &&
+				realWidth >= ALTERNATE_EXPECTED_WIDTH &&
+				realHeight >= ALTERNATE_EXPECTED_HEIGHT &&
+				getAspectRatioType( realWidth, realHeight ) === getAspectRatioType( ALTERNATE_EXPECTED_WIDTH, ALTERNATE_EXPECTED_HEIGHT )
+			);
 
 			let xInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_WIDTH, 10 ) : parseInt( EXPECTED_WIDTH, 10 ),
 				yInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_HEIGHT, 10 ) : parseInt( EXPECTED_HEIGHT, 10 );
