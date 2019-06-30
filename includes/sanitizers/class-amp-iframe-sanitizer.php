@@ -78,7 +78,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
+			$normalized_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$normalized_attributes = $this->set_layout( $normalized_attributes );
+			$normalized_attributes = $this->normalize_attributes( $normalized_attributes );
 
 			/**
 			 * If the src doesn't exist, remove the node. Either it never
@@ -93,7 +95,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->did_convert_elements = true;
-			$normalized_attributes      = $this->set_layout( $normalized_attributes );
 			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
 				$normalized_attributes['layout'] = 'intrinsic';
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
