@@ -66,7 +66,7 @@ export const getMinimumFeaturedImageDimensions = () => {
 export const getMinimumPortraitFeaturedImageDimensions = () => {
 	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
 
-	const height = width * ( 16 / 9 );
+	const height = Math.floor( width * ( 16 / 9 ) );
 
 	return { width, height };
 };
