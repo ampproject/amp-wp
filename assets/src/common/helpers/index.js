@@ -187,6 +187,10 @@ export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBa
  * @return {string|null} The aspect ratio type: 'landscape', 'portrait', or 'square'.
  */
 export const getAspectRatioType = ( width, height ) => {
+	if ( ! width || ! height ) {
+		return null;
+	}
+
 	if ( width > height ) {
 		return 'landscape';
 	} else if ( height > width ) {
