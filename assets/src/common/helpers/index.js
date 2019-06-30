@@ -5,6 +5,11 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
 
 /**
+ * Internal dependencies
+ */
+import { MINIMUM_FEATURED_IMAGE_WIDTH } from '../constants';
+
+/**
  * Determines whether whether the image has the minimum required dimensions.
  *
  * The image should have a width of at least 1200 pixels to satisfy the requirements of Google Search for Schema.org metadata.
@@ -46,9 +51,22 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
-	const width = 1200;
+	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
 
 	const height = width * ( 9 / 16 );
+
+	return { width, height };
+};
+
+/**
+ * Get minimum dimensions for a portrait featured image, but not for an AMP Story.
+ *
+ * @return {Object} Minimum dimensions including width and height.
+ */
+export const getMinimumPortraitFeaturedImageDimensions = () => {
+	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
+
+	const height = width * ( 16 / 9 );
 
 	return { width, height };
 };
@@ -159,4 +177,21 @@ export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBa
 	}
 
 	return undefined;
+};
+
+/**
+ * Gets The aspect ratio type, either 'landscape', 'portrait', or 'square'.
+ *
+ * @param {number} width  The image width.
+ * @param {number} height The image height.
+ * @return {string|null} The aspect ratio type: 'landscape', 'portrait', or 'square'.
+ */
+export const getAspectRatioType = ( width, height ) => {
+	if ( width > height ) {
+		return 'landscape';
+	} else if ( height > width ) {
+		return 'portrait';
+	} else if ( height === width ) {
+		return 'square';
+	}
 };
