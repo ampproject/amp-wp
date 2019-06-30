@@ -300,6 +300,38 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					'add_placeholder'       => true,
 				),
 			),
+
+			'iframe_relative_url'                       => array(
+				'<iframe src="/same-origin/" width="50" height="100"></iframe>',
+				'<amp-iframe src="https://example.com/same-origin/" width="50" height="100" sandbox="allow-scripts" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				array(
+					'add_noscript_fallback' => false,
+					'add_placeholder'       => false,
+					'current_origin'        => 'https://example.com',
+				),
+			),
+
+			'iframe_relative_url_with_alias_origin'     => array(
+				'<iframe src="/same-origin/" width="50" height="100"></iframe>',
+				'<amp-iframe src="https://alt.example.org/same-origin/" width="50" height="100" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				array(
+					'add_noscript_fallback' => false,
+					'add_placeholder'       => false,
+					'current_origin'        => 'https://example.com',
+					'alias_origin'          => 'https://alt.example.org',
+				),
+			),
+
+			'iframe_absolute_url_with_alias_origin'     => array(
+				'<iframe src="https://example.com/same-origin/" width="50" height="100"></iframe>',
+				'<amp-iframe src="https://alt.example.org/same-origin/" width="50" height="100" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes"></amp-iframe>',
+				array(
+					'add_noscript_fallback' => false,
+					'add_placeholder'       => false,
+					'current_origin'        => 'https://example.com',
+					'alias_origin'          => 'https://alt.example.org',
+				),
+			),
 		);
 	}
 
