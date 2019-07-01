@@ -26,7 +26,7 @@ const { wp } = window;
  * Mostly copied from customize-controls.js.
  * The optional alternateMinImageDimensions are used for the crop size when they are the same aspect ratio type as the actual image dimensions.
  * For example, if the selected image has a portrait aspect ratio, and the alternateMinImageDimensions are also portrait,
- * this will use the alternate dimensions.
+ * this will use the alternate dimensions as long as the selected image is big enough.
  * Otherwise, this will use the minImageDimensions.
  *
  * @param {Function} InitialMediaUpload          The MediaUpload component, passed from the filter.
