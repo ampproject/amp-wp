@@ -43,7 +43,11 @@ before_script:
 script:
   - npm run build:js
   - source "$DEV_LIB_PATH/travis.script.sh"
-  - if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"; phpunit --group $PHPUNIT_EXTRA_GROUP; fi
+  - |
+    if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
+      echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"
+      phpunit --group $PHPUNIT_EXTRA_GROUP
+    fi
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
