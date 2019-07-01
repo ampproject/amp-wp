@@ -7,11 +7,11 @@
 
 define( 'AMP_IMG_DIMENSION_TEST_INVALID_FILE', dirname( __FILE__ ) . '/assets/not-exists.png' );
 
-// Not ideal to use remote URLs (since the remote service can change); mocking would be better.
-define( 'IMG_350', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/350x150.png' );
-define( 'IMG_1024', 'http://i0.wp.com/amptest.files.wordpress.com/2017/03/1024x768.png' );
-define( 'IMG_SVG', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/amp.svg' ); // @todo For some reason, FasterImage times out on this if the XML PI is absent.
-define( 'IMG_SVG_VIEWPORT', 'https://gist.githubusercontent.com/westonruter/90fbaaced3851bf6ef762996c8c4375d/raw/fd58ec3fc426645885f6a3afa58ad64fbc70ea89/google.svg' );
+// Not ideal to use remote URLs; mocking would be better for performance, but FasterImage doesn't provide means to do this.
+define( 'IMG_350', 'http://amp-wp.org/wp-content/plugin-test-files/350x150.png' );
+define( 'IMG_1024', 'http://amp-wp.org/wp-content/plugin-test-files/1024x768.png' );
+define( 'IMG_SVG', 'https://amp-wp.org/wp-content/plugin-test-files/amp.svg' ); // @todo For some reason, FasterImage times out on this if the XML PI is absent.
+define( 'IMG_SVG_VIEWPORT', 'https://amp-wp.org/wp-content/plugin-test-files/google.svg' );
 
 /**
  * Tests for AMP_Image_Dimension_Extractor.

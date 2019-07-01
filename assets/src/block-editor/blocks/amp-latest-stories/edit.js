@@ -16,9 +16,9 @@ import {
 	PanelBody,
 	Placeholder,
 	QueryControls,
-	ServerSideRender,
 	Spinner,
 } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';

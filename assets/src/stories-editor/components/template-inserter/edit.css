@@ -36,6 +36,11 @@
 	margin-left: -15px;
 }
 
+.amp-stories__editor-inserter__results .components-spinner {
+	margin-right: calc(50% - 9px);
+	margin-top: 128px;
+}
+
 .amp-stories__template-inserter__popover.components-popover:not(.is-without-arrow):not(.is-mobile).is-top::before {
 	border-bottom: 8px solid rgb(226, 228, 231);
 }

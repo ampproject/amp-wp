@@ -193,7 +193,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
-	// Image block already has width and heigh.
+	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
@@ -1042,10 +1042,14 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 export const maybeRemoveMediaCaption = ( clientId ) => {
 	const block = getBlock( clientId );
 
+	if ( ! block ) {
+		return;
+	}
+
 	const isImage = 'core/image' === block.name;
 	const isVideo = 'core/video' === block.name;
 
-	if ( ! block || ( ! isImage && ! isVideo ) ) {
+	if ( ! isImage && ! isVideo ) {
 		return;
 	}
 

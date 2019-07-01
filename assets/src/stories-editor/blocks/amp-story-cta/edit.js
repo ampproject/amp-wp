@@ -112,6 +112,8 @@ CallToActionEdit.propTypes = {
 		text: PropTypes.string,
 		url: PropTypes.string,
 		anchor: PropTypes.string,
+		customBackgroundColor: PropTypes.string,
+		opacity: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool,

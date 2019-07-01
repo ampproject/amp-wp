@@ -154,6 +154,7 @@ const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
+	plugins: [], // Disable BundleAnalyzerPlugin for polyfills.
 	entry: {
 		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
 		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
