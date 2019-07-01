@@ -20,7 +20,11 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
 	if ( message ) {
-		return message;
+		return (
+			<>
+				{ message }
+			</>
+		);
 	}
 
 	if ( 'invalid_element' === code && nodeName ) {

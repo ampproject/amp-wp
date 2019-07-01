@@ -83,7 +83,7 @@ const BlockEdit = ( props ) => {
 BlockEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		autoPlay: PropTypes.bool,
-		dataPidL: PropTypes.string,
+		dataPid: PropTypes.string,
 		dataVid: PropTypes.string,
 		dataBcid: PropTypes.string,
 		dataBid: PropTypes.string,
