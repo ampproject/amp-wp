@@ -13,19 +13,34 @@
 class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 
 	/**
-	 * The oEmbed URL.
+	 * Track URL.
 	 *
 	 * @var string
 	 */
-	protected $oembed_url = 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor';
+	protected $track_url = 'https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor';
 
 	/**
-	 * Response for oEmbed request.
+	 * Playlist URL.
 	 *
-	 * @see AMP_SoundCloud_Embed_Test::$oembed_url
 	 * @var string
 	 */
-	protected $oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"http://soundcloud.com","height":400,"width":500,"title":"Mozart - Requiem in D minor Complete Full by Jack Villano Villano","description":"mass in D Minor ","thumbnail_url":"http://i1.sndcdn.com/artworks-000046826426-o7i9ki-t500x500.jpg","html":"\u003Ciframe width=\"500\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true\u0026url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F90097394\u0026show_artwork=true\u0026maxwidth=500\u0026maxheight=750\u0026dnt=1\"\u003E\u003C/iframe\u003E","author_name":"Jack Villano Villano","author_url":"https://soundcloud.com/jack-villano-villano"}';
+	protected $playlist_url = 'https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection';
+
+	/**
+	 * Response for track oEmbed request.
+	 *
+	 * @see AMP_SoundCloud_Embed_Test::$track_url
+	 * @var string
+	 */
+	protected $track_oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"http://soundcloud.com","height":400,"width":500,"title":"Mozart - Requiem in D minor Complete Full by Jack Villano Villano","description":"mass in D Minor ","thumbnail_url":"http://i1.sndcdn.com/artworks-000046826426-o7i9ki-t500x500.jpg","html":"\u003Ciframe width=\"500\" height=\"400\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true\u0026url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F90097394\u0026show_artwork=true\u0026maxwidth=500\u0026maxheight=750\u0026dnt=1\"\u003E\u003C/iframe\u003E","author_name":"Jack Villano Villano","author_url":"https://soundcloud.com/jack-villano-villano"}';
+
+	/**
+	 * Response for playlist oEmbed request.
+	 *
+	 * @see AMP_SoundCloud_Embed_Test::$playlist_url
+	 * @var string
+	 */
+	protected $playlist_oembed_response = '{"version":1.0,"type":"rich","provider_name":"SoundCloud","provider_url":"http://soundcloud.com","height":450,"width":500,"title":"Classical Music - The Essential Collection by Classical Music","description":"Classical Music - The Essential Collection features 50 of the finest Classical Masterpieces ever written. Definitely not to working to! ","thumbnail_url":"http://i1.sndcdn.com/artworks-000083473866-mno23j-t500x500.jpg","html":"\u003Ciframe width=\"500\" height=\"450\" scrolling=\"no\" frameborder=\"no\" src=\"https://w.soundcloud.com/player/?visual=true\u0026url=https%3A%2F%2Fapi.soundcloud.com%2Fplaylists%2F40936190\u0026show_artwork=true\u0026maxwidth=500\u0026maxheight=750\u0026dnt=1\"\u003E\u003C/iframe\u003E","author_name":"Classical Music","author_url":"https://soundcloud.com/classical-music-playlist"}';
 
 	/**
 	 * Set up.
@@ -46,6 +61,7 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			$post = $this->factory()->post->create_and_get();
 		}
 
+		// @todo This should be moved to Jetpack.
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			add_shortcode( 'soundcloud', 'soundcloud_shortcode' );
 		}
@@ -70,20 +86,27 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 * @return array Response data.
 	 */
 	public function mock_http_request( $preempt, $r, $url ) {
-		unset( $r );
-		if ( false !== strpos( $url, 'soundcloud.com' ) ) {
-			return array(
-				'body'          => $this->oembed_response,
-				'headers'       => array(),
-				'response'      => array(
-					'code'    => 200,
-					'message' => 'ok',
-				),
-				'cookies'       => array(),
-				'http_response' => null,
-			);
+		if ( false === strpos( $url, 'soundcloud.com' ) ) {
+			return $preempt;
 		}
-		return $preempt;
+		unset( $r );
+
+		if ( false !== strpos( $url, 'sets' ) ) {
+			$body = $this->playlist_oembed_response;
+		} else {
+			$body = $this->track_oembed_response;
+		}
+
+		return array(
+			'body'          => $body,
+			'headers'       => array(),
+			'response'      => array(
+				'code'    => 200,
+				'message' => 'ok',
+			),
+			'cookies'       => array(),
+			'http_response' => null,
+		);
 	}
 
 	/**
@@ -93,35 +116,59 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_conversion_data() {
 		$data = array(
-			'no_embed'   => array(
+			'no_embed'        => array(
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
 			),
 
-			'url_simple' => array(
-				$this->oembed_url . PHP_EOL,
-				'<p><amp-soundcloud data-trackid="90097394" layout="fixed-height" height="200"></amp-soundcloud></p>' . PHP_EOL,
+			'track_simple'    => array(
+				$this->track_url . PHP_EOL,
+				'<p><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height"><a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart &#8211; Requiem in D minor Complete Full by Jack Villano Villano</a></amp-soundcloud></p>' . PHP_EOL,
+			),
+
+			'playlist_simple' => array(
+				$this->playlist_url . PHP_EOL,
+				'<p><amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" layout="fixed-height"><a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music &#8211; The Essential Collection by Classical Music</a></amp-soundcloud></p>' . PHP_EOL,
 			),
 		);
 
+		// @todo All the following should be moved to Jetpack.
 		if ( defined( 'JETPACK__PLUGIN_DIR' ) ) {
 			require_once JETPACK__PLUGIN_DIR . 'modules/shortcodes/soundcloud.php';
 		}
-
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			$data = array_merge(
 				$data,
 				array(
-					// This is supported by Jetpack.
-					'shortcode_unnamed_attr_as_url' => array(
+					'shortcode_with_bare_track_api_url'   => array(
+						'[soundcloud https://api.soundcloud.com/tracks/89299804]' . PHP_EOL,
+						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
+					),
+
+					'shortcode_with_track_api_url'        => array(
 						'[soundcloud url=https://api.soundcloud.com/tracks/89299804]' . PHP_EOL,
-						'<amp-soundcloud data-trackid="89299804" layout="fixed-height" height="200"></amp-soundcloud>' . PHP_EOL,
+						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
+					),
+
+					'shortcode_with_track_permalink'      => array(
+						"[soundcloud url=$this->track_url]",
+						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height"><a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a></amp-soundcloud>' . PHP_EOL,
+					),
+
+					'shortcode_with_bare_track_permalink' => array(
+						"[soundcloud $this->track_url]",
+						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height"><a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a></amp-soundcloud>' . PHP_EOL,
+					),
+
+					'shortcode_with_playlist_permalink'   => array(
+						"[soundcloud url=$this->playlist_url]",
+						'<amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" layout="fixed-height"><a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music - The Essential Collection by Classical Music</a></amp-soundcloud>' . PHP_EOL,
 					),
 
 					// This apparently only works on WordPress.com.
-					'shortcode_with_id'             => array(
+					'shortcode_with_id'                   => array(
 						'[soundcloud id=89299804]' . PHP_EOL,
-						'<amp-soundcloud data-trackid="89299804" layout="fixed-height" height="200"></amp-soundcloud>' . PHP_EOL,
+						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
 					),
 				)
 			);
@@ -156,12 +203,16 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_scripts_data() {
 		return array(
-			'not_converted' => array(
+			'not_converted'      => array(
 				'<p>Hello World.</p>',
 				array(),
 			),
-			'converted'     => array(
-				$this->oembed_url . PHP_EOL,
+			'converted_track'    => array(
+				$this->track_url . PHP_EOL,
+				array( 'amp-soundcloud' => true ),
+			),
+			'converted_playlist' => array(
+				$this->playlist_url . PHP_EOL,
 				array( 'amp-soundcloud' => true ),
 			),
 		);
