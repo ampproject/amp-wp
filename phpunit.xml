@@ -10,7 +10,8 @@
 		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
-		<testsuite name="amp-wp">
+		<!-- Default test suite to run all tests -->
+		<testsuite name="default">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>
