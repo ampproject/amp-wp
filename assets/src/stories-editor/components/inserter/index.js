@@ -29,7 +29,7 @@ import InserterMenu from './menu';
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
 	<IconButton
 		icon="insert"
-		label={ __( 'Add block', 'amp' ) }
+		label={ __( 'Add element', 'amp' ) }
 		labelPosition="bottom"
 		onClick={ onToggle }
 		className="editor-inserter__toggle block-editor-inserter__toggle"
@@ -112,7 +112,7 @@ class Inserter extends Component {
 				position={ position }
 				onToggle={ this.onToggle }
 				expandOnMobile
-				headerTitle={ __( 'Add block', 'amp' ) }
+				headerTitle={ __( 'Add element', 'amp' ) }
 				renderToggle={ this.renderToggle }
 				renderContent={ this.renderContent }
 			/>

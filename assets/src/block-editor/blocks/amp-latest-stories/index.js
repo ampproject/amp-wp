@@ -12,7 +12,7 @@ export const name = 'amp/amp-latest-stories';
 
 export const settings = {
 	title: __( 'Latest Stories', 'amp' ),
-	description: __( 'Display a list of your most recent stories.', 'amp' ),
+	description: __( 'Display your most recent stories.', 'amp' ),
 	icon: 'list-view',
 	category: 'widgets',
 	keywords: [
