@@ -182,8 +182,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 	/**
 	 * Test a valid image file.
 	 *
-	 * TODO: tests for transients, errors, lock
-	 * TODO: mocked tests
+	 * @todo: tests for transients, errors, lock
+	 * @todo: mocked tests
+	 *
+	 * @group external-http
 	 */
 	public function test__valid_image_file() {
 		$sources  = array(
@@ -203,6 +205,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test multiple valid image files.
+	 *
+	 * @group external-http
 	 */
 	public function test__multiple_valid_image_files() {
 		$sources  = array(
@@ -237,6 +241,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test an invalid image file.
+	 *
+	 * @group external-http
 	 */
 	public function test__invalid_image_file() {
 		$sources  = array(
@@ -253,6 +259,8 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 	/**
 	 * Test a mix of valid and invalid image files.
+	 *
+	 * @group external-http
 	 */
 	public function test__mix_of_valid_and_invalid_image_file() {
 		$sources  = array(
