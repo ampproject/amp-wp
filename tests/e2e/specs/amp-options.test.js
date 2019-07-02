@@ -1,9 +1,9 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
 
-describe( 'AMP Options Screen', () => {
+describe( 'AMP Settings Screen', () => {
 	it( 'Should display a welcome notice', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 		const nodes = await page.$x(
@@ -52,5 +52,26 @@ describe( 'AMP Options Screen', () => {
 		await page.click( '#website_experience' );
 
 		expect( await page.$eval( '#amp-settings', ( el ) => el.matches( `:invalid` ) ) ).toBe( true );
+	} );
+
+	it( 'Should not allow AMP Stories to be enabled when Gutenberg is not active', async () => {
+		await deactivatePlugin( 'gutenberg' );
+
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		expect( await page.$eval( '#stories_experience', ( el ) => el.matches( `:disabled` ) ) ).toBe( true );
+
+		const nodes = await page.$x(
+			'//*[contains(@class,"notice-info")]//p[contains(text(), "To use stories, you currently must have the latest version")]'
+		);
+		expect( nodes.length ).not.toEqual( 0 );
+
+		await activatePlugin( 'gutenberg' );
+	} );
+
+	it( 'Should allow AMP Stories to be enabled when Gutenberg is active', async () => {
+		await visitAdminPage( 'admin.php', 'page=amp-options' );
+
+		expect( await page.$eval( '#stories_experience', ( el ) => el.matches( `:disabled` ) ) ).toBe( false );
 	} );
 } );
