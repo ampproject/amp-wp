@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, activatePlugin, switchUserToAdmin, switchUserToTest } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, switchUserToAdmin, switchUserToTest } from '@wordpress/e2e-test-utils';
 
 /**
  * Deactivates an active plugin.
@@ -17,12 +17,46 @@ async function deactivatePlugin( slug ) {
 	await visitAdminPage( 'plugins.php' );
 
 	await page.evaluate( ( plugin ) => {
-		const deactivationLink = document.querySelector( `tr[data-slug="${ plugin }"] .deactivate a` );
-		deactivationLink.scrollIntoView();
-		deactivationLink.click();
+		const disableLink = document.querySelector( `tr[data-slug="${ plugin }"] .deactivate a` );
+
+		if ( disableLink ) {
+			disableLink.scrollIntoView();
+			disableLink.click();
+		}
 	}, slug );
 
 	await page.waitForSelector( `tr[data-slug="${ slug }"] .delete a` );
+	await switchUserToTest();
+}
+
+/**
+ * Activates an installed plugin.
+ *
+ * Not using the provided activatePlugin() utility because it uses page.click(),
+ * which does not work if the element is not in the view or obscured by another element
+ * like an admin pointer.
+ *
+ * @param {string} slug Plugin slug.
+ */
+async function activatePlugin( slug ) {
+	await switchUserToAdmin();
+	await visitAdminPage( 'plugins.php' );
+
+	const disableLink = await page.$( `tr[data-slug="${ slug }"] .deactivate a` );
+	if ( disableLink ) {
+		return;
+	}
+
+	await page.evaluate( ( plugin ) => {
+		const enableLink = document.querySelector( `tr[data-slug="${ plugin }"] .activate a` );
+
+		if ( enableLink ) {
+			enableLink.scrollIntoView();
+			enableLink.click();
+		}
+	}, slug );
+
+	await page.waitForSelector( `tr[data-slug="${ slug }"] .deactivate a` );
 	await switchUserToTest();
 }
 
