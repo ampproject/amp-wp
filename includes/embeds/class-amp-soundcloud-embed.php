@@ -82,7 +82,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function parse_amp_component_from_iframe( $html, $url ) {
 		$embed = '';
 
-		if ( preg_match( '#<iframe[^>]*?src="(?P<url>.+?)"#', $html, $matches ) ) {
+		if ( preg_match( '#<iframe[^>]*?src="(?P<url>[^"]+)"#s', $html, $matches ) ) {
 			$src   = html_entity_decode( $matches['url'], ENT_QUOTES );
 			$query = array();
 			parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
@@ -92,7 +92,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 					$props['visual'] = $query['visual'];
 				}
 
-				if ( $url && preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#', $html, $matches ) ) {
+				if ( $url && preg_match( '#<iframe[^>]*?title="(?P<title>[^"]+)"#s', $html, $matches ) ) {
 					$props['fallback'] = sprintf(
 						'<a fallback href="%s">%s</a>',
 						esc_url( $url ),
@@ -100,11 +100,11 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 					);
 				}
 
-				if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#', $html, $matches ) ) {
+				if ( preg_match( '#<iframe[^>]*?height="(?P<height>\d+)"#s', $html, $matches ) ) {
 					$props['height'] = (int) $matches['height'];
 				}
 
-				if ( preg_match( '#<iframe[^>]*?width="(?P<width>\d+)"#', $html, $matches ) ) {
+				if ( preg_match( '#<iframe[^>]*?width="(?P<width>\d+)"#s', $html, $matches ) ) {
 					$props['width'] = (int) $matches['width'];
 				}
 
