@@ -245,9 +245,11 @@ class AMP_Service_Worker {
 			add_action( 'wp_footer', array( __CLASS__, 'install_service_worker' ) );
 
 			// Prevent validation error due to the script that installs the service worker on non-AMP pages.
-			$priority = has_action( 'wp_print_scripts', 'wp_print_service_workers' );
-			if ( false !== $priority ) {
-				remove_action( 'wp_print_scripts', 'wp_print_service_workers', $priority );
+			foreach ( array( 'wp_print_scripts', 'wp_print_footer_scripts' ) as $action ) {
+				$priority = has_action( $action, 'wp_print_service_workers' );
+				if ( false !== $priority ) {
+					remove_action( $action, 'wp_print_service_workers', $priority );
+				}
 			}
 		}
 
