@@ -51,7 +51,7 @@ export const settings = {
 
 	keywords: [
 		__( 'cta', 'amp' ),
-		__( 'button', 'amp' )
+		__( 'button', 'amp' ),
 	],
 
 	attributes: schema,
