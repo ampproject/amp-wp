@@ -208,7 +208,7 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'safe_style_css', array( __CLASS__, 'filter_safe_style_css' ), 10, 1 );
 
-		add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_enabling_author_editing' ), 10, 3 );
+		add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'filter_rest_request_for_kses' ), 100, 3 );
 
 		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
 
@@ -352,14 +352,17 @@ class AMP_Story_Post_Type {
 	 * @return array Filtered array of allowed CSS attributes.
 	 */
 	public static function filter_safe_style_css( $attr ) {
+		global $wp;
 
-		// Only continue if it's a REST request for amp_story post type.
-		if ( ! isset( $GLOBALS['wp']->query_vars['rest_route'] ) ) {
+		$route = $wp->query_vars['rest_route'];
+
+		if ( ! $route ) {
 			return $attr;
 		}
 
-		$route  = $GLOBALS['wp']->query_vars['rest_route'];
 		$search = '\/' . self::POST_TYPE_SLUG . '\/';
+
+		// Only continue if it's a REST request for amp_story post type.
 		if ( ! preg_match( "/{$search}/i", $route ) ) {
 			return $attr;
 		}
@@ -378,51 +381,48 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Filter user caps to add more permissions for Author being able to use AMP Stories properly.
+	 * Filters the response before executing any REST API callbacks.
 	 *
-	 * This is not ideal and should be removed once https://core.trac.wordpress.org/ticket/37134 has been resolved.
+	 * Temporarily removes KSES on post content for authors in order for them being able to use AMP Stories properly.
 	 *
-	 * @param array $allcaps All caps.
-	 * @param array $caps    Requested caps.
-	 * @param array $args    Cap args.
-	 * @return array All caps.
+	 * Otherwise KSES strips valid CSS from post content, making block content invalid.
+	 *
+	 * This is not ideal and should be removed once core has better CSS parsing.
+	 *
+	 * @link https://core.trac.wordpress.org/ticket/37134
+	 *
+	 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
+	 * @param array                     $handler  Route handler used for the request.
+	 * @param WP_REST_Request           $request  Request used to generate the response.
+	 *
+	 * @return WP_HTTP_Response|WP_Error The filtered response.
 	 */
-	public static function filter_user_has_cap_for_enabling_author_editing( $allcaps, $caps, $args ) {
-		if ( ! isset( $args[0] ) || 'unfiltered_html' !== $args[0] ) {
-			return $allcaps;
+	public static function filter_rest_request_for_kses( $response, $handler, $request ) {
+		if ( is_wp_error( $response ) ) {
+			return $response;
 		}
 
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			return $allcaps;
+		$search = '\/' . self::POST_TYPE_SLUG . '\/';
+
+		$editable_request_methods = array_map( 'trim', explode( ',', WP_REST_Server::EDITABLE ) );
+
+		if ( ! in_array( $request->get_method(), $editable_request_methods, true ) || ! preg_match( "/{$search}/i", $request->get_route() ) ) {
+			return $response;
 		}
 
-		// Let's get the post's ID from the request and see if it's an AMP Story.
-		if ( ! isset( $_REQUEST['rest_route'] ) ) { // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-			return $allcaps;
+		if ( ! current_user_can( 'edit_post', $request['id'] ) ) {
+			return $response;
 		}
 
-		$route              = $_REQUEST['rest_route']; // phpcs:ignore WordPress.CSRF.NonceVerification.NoNonceVerification
-		$story_type_pattern = '\/' . self::POST_TYPE_SLUG . '\/';
-		if ( ! preg_match( "/{$story_type_pattern}/i", $route ) ) {
-			return $allcaps;
-		}
+		remove_filter( 'content_save_pre', 'wp_filter_post_kses' );
+		remove_filter( 'excerpt_save_pre', 'wp_filter_post_kses' );
+		remove_filter( 'content_filtered_save_pre', 'wp_filter_post_kses' );
 
-		preg_match( "/{$story_type_pattern}(\d+)/i", $route, $matches );
-		if ( ! $matches || ! isset( $matches[1] ) ) {
-			return $allcaps;
-		}
-
-		$story_post = get_post( absint( $matches[1] ) );
-		if ( ! $story_post || self::POST_TYPE_SLUG !== $story_post->post_type ) {
-			return $allcaps;
-		}
-
-		$allcaps['unfiltered_html'] = true;
-		return $allcaps;
+		return $response;
 	}
 
 	/**
-	 * Filter the allowed tags for Kses to allow for amp-story children.
+	 * Filter the allowed tags for KSES to allow for amp-story children.
 	 *
 	 * @param array $allowed_tags Allowed tags.
 	 * @return array Allowed tags.
