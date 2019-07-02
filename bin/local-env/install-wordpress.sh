@@ -84,7 +84,9 @@ docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate 
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
+# todo: Use `wp plugin install --activate` once WP-CLI is updated, see https://github.com/wp-cli/extension-command/issues/176.
 docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install gutenberg --activate --quiet
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate gutenberg --quiet
 
 # Configure site constants.
 echo -e $(status_message "Configuring site constants...")
