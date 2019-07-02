@@ -25,7 +25,7 @@ const BlockEdit = ( props ) => {
 	const { autoPlay, dataPid, dataVid, dataBcid, dataBid } = attributes;
 	const ampLayoutOptions = [
 		{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-		{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+		{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
 		{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 		{ value: 'fill', label: __( 'Fill', 'amp' ) },
 		{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
