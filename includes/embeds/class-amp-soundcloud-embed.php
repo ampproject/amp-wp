@@ -82,8 +82,8 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function parse_amp_component_from_iframe( $html, $url ) {
 		$embed = '';
 
-		if ( preg_match( '#<iframe[^>]*?src="(?P<url>[^"]+)"#s', $html, $matches ) ) {
-			$src   = html_entity_decode( $matches['url'], ENT_QUOTES );
+		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+)"#s', $html, $matches ) ) {
+			$src   = html_entity_decode( $matches['src'], ENT_QUOTES );
 			$query = array();
 			parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 			if ( ! empty( $query['url'] ) ) {
