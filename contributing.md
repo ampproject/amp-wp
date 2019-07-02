@@ -236,6 +236,12 @@ You can also watch for any file changes and only run tests that failed or have b
 npm run test:e2e:watch
 ```
 
+Not using the built-in local environment? You can also pass any other URL to run the tests against. Example:
+
+```bash
+npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
+```
+
 ### Coding Standards
 
 All contributions to this project will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint.
