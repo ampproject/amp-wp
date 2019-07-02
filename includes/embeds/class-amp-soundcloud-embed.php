@@ -138,7 +138,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			$url = shortcode_new_to_old_params( $attr );
 		}
 
-		// Defer to oEmbed an oEmbeddable URL is provided.
+		// Defer to oEmbed if an oEmbeddable URL is provided.
 		if ( isset( $url ) && 'api.soundcloud.com' !== wp_parse_url( $url, PHP_URL_HOST ) ) {
 			global $wp_embed;
 			return $wp_embed->shortcode( $attr, $url );
