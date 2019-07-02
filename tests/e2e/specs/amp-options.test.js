@@ -44,7 +44,7 @@ describe( 'AMP Settings Screen', () => {
 		expect( await websiteModeSection.isIntersectingViewport() ).toBe( false );
 	} );
 
-	it( 'Requires at least on AMP experience to be selected', async () => {
+	it( 'Requires at least one AMP experience to be selected', async () => {
 		await visitAdminPage( 'admin.php', 'page=amp-options' );
 
 		expect( await page.$eval( '#amp-settings', ( el ) => el.matches( `:invalid` ) ) ).toBe( false );
