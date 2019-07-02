@@ -1,7 +1,30 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, activatePlugin, deactivatePlugin } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, activatePlugin, switchUserToAdmin, switchUserToTest } from '@wordpress/e2e-test-utils';
+
+/**
+ * Deactivates an active plugin.
+ *
+ * Not using the provided deactivatePlugin() utility because it uses page.click(),
+ * which does not work if the element is not in the view or obscured by another element
+ * like an admin pointer.
+ *
+ * @param {string} slug Plugin slug.
+ */
+async function deactivatePlugin( slug ) {
+	await switchUserToAdmin();
+	await visitAdminPage( 'plugins.php' );
+
+	await page.evaluate( ( plugin ) => {
+		const deactivationLink = document.querySelector( `tr[data-slug="${ plugin }"] .deactivate a` );
+		deactivationLink.scrollIntoView();
+		deactivationLink.click();
+	}, slug );
+
+	await page.waitForSelector( `tr[data-slug="${ slug }"] .delete a` );
+	await switchUserToTest();
+}
 
 describe( 'AMP Settings Screen', () => {
 	it( 'Should display a welcome notice', async () => {
