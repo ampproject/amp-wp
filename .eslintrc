@@ -9,11 +9,23 @@
   },
   "globals": {
     "browser": true,
-    "page": true,
     "wp": true,
     "Set": true
   },
   "rules": {
     "react/prop-types": 2
-  }
+  },
+  "overrides": [
+    {
+      "files": [ "tests/e2e/**/*.js" ],
+      "env": {
+        "browser": true
+      },
+      "globals": {
+        "browser": true,
+        "page": true,
+        "wp": true
+      }
+    }
+  ]
 }
