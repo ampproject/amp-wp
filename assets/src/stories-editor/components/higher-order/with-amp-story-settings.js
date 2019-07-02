@@ -271,7 +271,7 @@ export default createHigherOrderComponent(
 
 			return (
 				<>
-					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
+					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
 							isSelected={ isSelected }
@@ -318,7 +318,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBlock && ! needsResizing && (
+					{ isMovableBlock && ( ! needsResizing || isEmptyImageBlock ) && (
 						<RotatableBox
 							blockElementId={ `block-${ clientId }` }
 							initialAngle={ rotationAngle }
