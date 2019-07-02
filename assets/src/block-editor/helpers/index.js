@@ -48,7 +48,7 @@ const ampLayoutOptions = [
 	},
 	{
 		value: 'fixed-height',
-		label: __( 'Fixed height', 'amp' ),
+		label: __( 'Fixed Height', 'amp' ),
 		notAvailable: [],
 	},
 	{

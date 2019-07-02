@@ -39,12 +39,12 @@ const BlockEdit = ( props ) => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Springboard Player Settings', 'amp' ) }>
 					<TextControl
-						label={ __( 'SprintBoard site ID (required)', 'amp' ) }
+						label={ __( 'Site ID (required)', 'amp' ) }
 						value={ dataSiteId }
 						onChange={ ( value ) => ( setAttributes( { dataSiteId: value } ) ) }
 					/>
 					<TextControl
-						label={ __( 'Player content ID (required)', 'amp' ) }
+						label={ __( 'Content ID (required)', 'amp' ) }
 						value={ dataContentId }
 						onChange={ ( value ) => ( setAttributes( { dataContentId: value } ) ) }
 					/>

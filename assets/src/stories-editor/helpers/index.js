@@ -39,6 +39,7 @@ import {
 	BLOCKS_WITH_TEXT_SETTINGS,
 	MEGABYTE_IN_BYTES,
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	TEXT_BLOCK_BORDER,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -192,7 +193,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
-	// Image block already has width and heigh.
+	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
@@ -310,6 +311,11 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	if ( isVideoBlock ) {
+		addedAttributes.ampShowCaption = {
+			type: 'boolean',
+			default: false,
+		};
+
 		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
 			...settings.attributes.autoplay,
@@ -438,7 +444,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const newProps = { ...props };
 
 	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || getUniqueId();
 
 	if ( attributes.rotationAngle ) {
 		let style = ! newProps.style ? {} : newProps.style;
@@ -1029,21 +1035,32 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 };
 
 /**
- * Removes a pre-set caption from image block.
+ * Removes a pre-set caption from image and video block.
  *
  * @param {string} clientId Block ID.
  */
-export const maybeRemoveImageCaption = ( clientId ) => {
+export const maybeRemoveMediaCaption = ( clientId ) => {
 	const block = getBlock( clientId );
 
-	if ( ! block || 'core/image' !== block.name ) {
+	if ( ! block ) {
+		return;
+	}
+
+	const isImage = 'core/image' === block.name;
+	const isVideo = 'core/video' === block.name;
+
+	if ( ! isImage && ! isVideo ) {
 		return;
 	}
 
 	const { attributes } = block;
 
-	// If we have an image with pre-set caption we should remove the caption.
-	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+	// If we have an image or video with pre-set caption we should remove the caption.
+	if (
+		( ( ! attributes.ampShowImageCaption && isImage ) || ( ! attributes.ampShowCaption && isVideo ) ) &&
+			attributes.caption &&
+			0 !== attributes.caption.length
+	) {
 		updateBlockAttributes( clientId, { caption: '' } );
 	}
 };
@@ -1172,8 +1189,8 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-text':
 			const element = getBlockInnerTextElement( block );
 
-			if ( element && ampFitText && content.length ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+			if ( element && content.length ) {
+				const fitFontSize = calculateFontSize( element, height + TEXT_BLOCK_BORDER, width + TEXT_BLOCK_BORDER, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1187,7 +1204,7 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
-			if ( metaBlockElement && ampFitText ) {
+			if ( metaBlockElement ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1450,4 +1467,15 @@ export const isVideoSizeExcessive = ( media ) => {
 	}
 
 	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Returns a unique ID that is guaranteed to not start with a number.
+ *
+ * Useful for using in HTML attributes.
+ *
+ * @return {string} Unique ID.
+ */
+export const getUniqueId = () => {
+	return uuid().replace( /^\d/, 'a' );
 };

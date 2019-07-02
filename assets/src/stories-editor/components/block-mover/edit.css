@@ -21,6 +21,10 @@
 	margin: 0 auto;
 }
 
+.wp-block [draggable="true"] {
+	-webkit-user-select: auto;
+}
+
 .wp-block [draggable="true"]:hover {
 	cursor: grab;
 }

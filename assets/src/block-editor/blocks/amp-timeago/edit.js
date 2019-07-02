@@ -39,7 +39,7 @@ const BlockEdit = ( props ) => {
 	const ampLayoutOptions = [
 		{ value: '', label: __( 'Responsive', 'amp' ) },
 		{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-		{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+		{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
 	];
 
 	return (

@@ -313,9 +313,6 @@ def ParseRules(out_dir):
 
 	specfile='%s/validator.protoascii' % out_dir
 
-	validator_pb2=validator_pb2
-	text_format=text_format
-
 	# Merge specfile with message buffers.
 	rules = validator_pb2.ValidatorRules()
 	text_format.Merge(open(specfile).read(), rules)

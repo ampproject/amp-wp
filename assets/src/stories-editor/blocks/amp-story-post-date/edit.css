@@ -12,6 +12,10 @@
 	justify-content: center;
 }
 
+.wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date:not(.is-amp-fit-text) {
+	display: block;
+}
+
 .wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date.is-amp-fit-text.is-measuring-fontsize {
 	height: initial !important;
 	width: initial !important;

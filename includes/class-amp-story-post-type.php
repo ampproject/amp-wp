@@ -159,7 +159,7 @@ class AMP_Story_Post_Type {
 					'items_list_navigation'    => __( 'Stories list navigation', 'amp' ),
 					'items_list'               => __( 'Stories list', 'amp' ),
 					'item_published'           => __( 'Story published.', 'amp' ),
-					'item_published_privately' => __( 'SStory published privately.', 'amp' ),
+					'item_published_privately' => __( 'Story published privately.', 'amp' ),
 					'item_reverted_to_draft'   => __( 'Story reverted to draft.', 'amp' ),
 					'item_scheduled'           => __( 'Story scheduled', 'amp' ),
 					'item_updated'             => __( 'Story updated.', 'amp' ),
@@ -343,7 +343,7 @@ class AMP_Story_Post_Type {
 			100 // Run sanitizer after the others (but before style sanitizer and validating sanitizer).
 		);
 
-		self::maybe_flush_rewrite_rules();
+		add_action( 'wp_head', array( __CLASS__, 'print_feed_link' ) );
 	}
 
 	/**
@@ -1394,26 +1394,23 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Flushes rewrite rules if it hasn't been done yet after having AMP Stories Post type.
+	 * Add RSS feed link for stories.
+	 *
+	 * @since 1.2
 	 */
-	public static function maybe_flush_rewrite_rules() {
-		$current_rules = get_option( 'rewrite_rules' );
-
-		// If we're not using permalinks.
-		if ( empty( $current_rules ) ) {
-			return;
-		}
-
-		// Check if the rewrite rule for showing preview exists for different permalink settings.
-		$story_rules = array_filter(
-			array_keys( $current_rules ),
-			function( $rule ) {
-				return 0 === strpos( $rule, self::REWRITE_SLUG ) || false !== strpos( $rule, '/' . self::REWRITE_SLUG . '/' );
-			}
+	public static function print_feed_link() {
+		$post_type_object = get_post_type_object( self::POST_TYPE_SLUG );
+		$feed_url         = add_query_arg(
+			'post_type',
+			self::POST_TYPE_SLUG,
+			get_feed_link()
 		);
-		if ( empty( $story_rules ) ) {
-			flush_rewrite_rules( false );
-		}
+		printf(
+			'<link rel="alternate" type="%s" title="%s" href="%s">',
+			esc_attr( feed_content_type() ),
+			esc_attr( $post_type_object->labels->name ),
+			esc_url( $feed_url )
+		);
 	}
 
 	/**
@@ -1788,7 +1785,7 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Adds a new max image size to the images sizes available.
+	 * Adds a new max image size to the image sizes available.
 	 *
 	 * In the AMP story editor, when selecting Background Media,
 	 * it will use this custom image size.
@@ -1805,7 +1802,7 @@ class AMP_Story_Post_Type {
 	public static function add_new_max_image_size( $image_sizes ) {
 		$full_size_name = __( 'AMP Story Max Size', 'amp' );
 
-		if ( isset( $_POST['action'] ) && 'query-attachments' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['action'] ) && ( 'query-attachments' === $_POST['action'] || 'upload-attachment' === $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
 		} elseif ( get_post_type() && self::POST_TYPE_SLUG === get_post_type() ) {
 			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;

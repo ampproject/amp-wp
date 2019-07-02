@@ -94,7 +94,7 @@
 	height: 553px;
 }
 
-[data-block] {
+.editor-styles-wrapper [data-block] {
 	margin-top: 0;
 	margin-bottom: 0;
 }

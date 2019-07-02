@@ -71,6 +71,14 @@ class AMP_Theme_Support {
 	const TRANSITIONAL_MODE_SLUG = 'transitional';
 
 	/**
+	 * Slug identifying reader website mode.
+	 *
+	 * @since 1.2
+	 * @var string
+	 */
+	const READER_MODE_SLUG = 'reader';
+
+	/**
 	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
 	 *
 	 * @since 1.2
@@ -248,7 +256,7 @@ class AMP_Theme_Support {
 			$theme_support = self::get_support_mode_added_via_theme();
 		}
 		if ( ! $theme_support ) {
-			$theme_support = 'disabled';
+			$theme_support = self::READER_MODE_SLUG;
 		}
 		return $theme_support;
 	}
@@ -303,20 +311,20 @@ class AMP_Theme_Support {
 
 			$is_paired = ! empty( $args[ self::PAIRED_FLAG ] );
 
-			self::$support_added_via_theme = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
+			self::$support_added_via_theme  = $is_paired ? self::TRANSITIONAL_MODE_SLUG : self::STANDARD_MODE_SLUG;
+			self::$support_added_via_option = $theme_support_option;
 
-			/*
-			 * If the theme has transitional support, allow the user to opt for AMP-first mode via an option, since a theme
-			 * in transitional mode entails that it supports serving templates as both AMP and non-AMP, and this it is
-			 * able to serve AMP-first pages just as well as paired pages. Otherwise, consider that the the mode was
-			 * not set at all via option.
-			 */
-			self::$support_added_via_option = ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) ? self::STANDARD_MODE_SLUG : null;
-			if ( self::STANDARD_MODE_SLUG === self::$support_added_via_option ) {
+			// Make sure the user option can override what the theme has specified.
+			if ( $is_paired && self::STANDARD_MODE_SLUG === $theme_support_option ) {
 				$args[ self::PAIRED_FLAG ] = false;
-				add_theme_support( 'amp', $args );
+				add_theme_support( self::SLUG, $args );
+			} elseif ( ! $is_paired && self::TRANSITIONAL_MODE_SLUG === $theme_support_option ) {
+				$args[ self::PAIRED_FLAG ] = true;
+				add_theme_support( self::SLUG, $args );
+			} elseif ( self::READER_MODE_SLUG === $theme_support_option ) {
+				remove_theme_support( self::SLUG );
 			}
-		} elseif ( 'disabled' !== $theme_support_option ) {
+		} elseif ( self::READER_MODE_SLUG !== $theme_support_option ) {
 			$is_paired = ( self::TRANSITIONAL_MODE_SLUG === $theme_support_option );
 			add_theme_support(
 				self::SLUG,

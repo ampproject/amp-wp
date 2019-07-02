@@ -35,17 +35,17 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes } = this.props;
 		const {
 			height,
 			width,
+			content,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
 		if (
-			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			prevProps.attributes.content === content
 		) {
 			return;
 		}
@@ -106,13 +106,16 @@ class TextBlockEdit extends Component {
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const wrapperStyle = ampFitText && content.length ? { lineHeight: height + 'px', backgroundColor: appliedBackgroundColor } : null;
+		const wrapperStyle = { backgroundColor: appliedBackgroundColor };
+		if ( ampFitText && content.length ) {
+			wrapperStyle.lineHeight = height + 'px';
+		}
 
 		const styleClasses = [];
 		let wrapperClass = 'wp-block-amp-story-text-wrapper';
 
 		// We need to assign the block styles to the wrapper, too.
-		if ( ampFitText && attributes.className && attributes.className.length ) {
+		if ( attributes.className && attributes.className.length ) {
 			const classNames = attributes.className.split( ' ' );
 			classNames.forEach( ( value ) => {
 				if ( value.includes( 'is-style' ) ) {
@@ -146,7 +149,6 @@ class TextBlockEdit extends Component {
 						onReplace={ this.onReplace }
 						onSplit={ () => {} }
 						style={ {
-							backgroundColor: ampFitText ? undefined : appliedBackgroundColor,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 							textAlign: align,
@@ -154,8 +156,6 @@ class TextBlockEdit extends Component {
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
-							'has-background': ampFitText ? undefined : backgroundColor.color,
-							[ backgroundColor.class ]: ampFitText ? undefined : backgroundColor.class,
 							[ textColor.class ]: textColor.class,
 							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
 							'is-amp-fit-text': ampFitText,
@@ -179,6 +179,7 @@ TextBlockEdit.propTypes = {
 		autoFontSize: PropTypes.number,
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
+		className: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
@@ -190,6 +191,7 @@ TextBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,
