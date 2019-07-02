@@ -166,6 +166,7 @@ BlockNavigationItem.propTypes = {
 	getBlockIndex: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
 	block: PropTypes.shape( {
+		name: PropTypes.string.isRequired,
 		clientId: PropTypes.string.isRequired,
 	} ),
 	isSelected: PropTypes.bool,
