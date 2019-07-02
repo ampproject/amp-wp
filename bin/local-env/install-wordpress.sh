@@ -3,31 +3,18 @@
 # Exit if any command fails.
 set -e
 
-# Gutenberg script includes.
-. "$(dirname "$0")/includes.sh"
+# Common variables.
+DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
+WP_DEBUG=${WP_DEBUG-true}
+SCRIPT_DEBUG=${SCRIPT_DEBUG-true}
 
-# Set up environment variables
-. "$(dirname "$0")/bootstrap-env.sh"
+# Include useful functions
+. "$(dirname "$0")/includes.sh"
 
 # These are the containers and values for the development site.
 CLI='cli'
 CONTAINER='wordpress'
 SITE_TITLE='AMP Dev'
-
-# If we're installing/re-installing the test site, change the containers used.
-if [ "$1" == '--e2e_tests' ]; then
-	CLI="${CLI}_e2e_tests"
-	CONTAINER="${CONTAINER}_e2e_tests"
-	SITE_TITLE='AMP Testing'
-
-	if ! docker ps | grep -q $CONTAINER; then
-		echo -e $(error_message "WordPress e2e tests run in their own Docker container, but that container wasn't found.")
-		echo "Please restart your Docker containers by running 'docker-compose $DOCKER_COMPOSE_FILE_OPTIONS down && docker-compose $DOCKER_COMPOSE_FILE_OPTIONS up -d' or"
-		echo "by running './bin/setup-local-env.sh' again."
-		echo ""
-		exit 1
-	fi
-fi
 
 # Get the host port for the WordPress container.
 HOST_PORT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS port $CONTAINER 80 | awk -F : '{printf $2}')
@@ -43,7 +30,7 @@ echo ''
 
 # If this is the test site, we reset the database so no posts/comments/etc.
 # dirty up the tests.
-if [ "$1" == '--e2e_tests' ]; then
+if [ "$1" == '--reset-site' ]; then
 	echo -e $(status_message "Resetting test database...")
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI db reset --yes --quiet
 fi
@@ -64,13 +51,8 @@ fi
 
 # Make sure the uploads and upgrade folders exist and we have permissions to add files.
 echo -e $(status_message "Ensuring that files can be uploaded...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-content/plugins
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-config.php
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-settings.php
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER mkdir -p /var/www/html/wp-content/uploads
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod -v 767 /var/www/html/wp-content/uploads
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER mkdir -p /var/www/html/wp-content/upgrade
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-content/upgrade
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER mkdir -p /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-content/plugins /var/www/html/wp-config.php /var/www/html/wp-settings.php /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
 
 CURRENT_WP_VERSION=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm $CLI core version)
 echo -e $(status_message "Current WordPress version: $CURRENT_WP_VERSION...")
@@ -91,31 +73,31 @@ if [ "$CURRENT_URL" != "http://localhost:$HOST_PORT" ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI option update siteurl "http://localhost:$HOST_PORT" --quiet
 fi
 
-# Activate AMP plugin.
-echo -e $(status_message "Activating AMP plugin...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
-
-if [ "$POPULAR_PLUGINS" == "true" ]; then
-	echo -e $(status_message "Activating popular plugins...")
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install advanced-custom-fields --activate --quiet
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install jetpack --activate --quiet
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install wpforms-lite --activate --quiet
-fi
-
 # Install a dummy favicon to avoid 404 errors.
 echo -e $(status_message "Installing a dummy favicon...")
 docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER touch /var/www/html/favicon.ico
 
+# Activate AMP plugin.
+echo -e $(status_message "Activating AMP plugin...")
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
+
+
+# Install & activate Gutenberg plugin.
+echo -e $(status_message "Installing and activating Gutenberg plugin...")
+# todo: Use `wp plugin install --activate` once WP-CLI is updated, see https://github.com/wp-cli/extension-command/issues/176.
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install gutenberg --activate --quiet
+docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate gutenberg --quiet
+
 # Configure site constants.
 echo -e $(status_message "Configuring site constants...")
 WP_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
-if [ $WP_DEBUG != $WP_DEBUG_CURRENT ]; then
+if [ "$WP_DEBUG" != $WP_DEBUG_CURRENT ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set WP_DEBUG $WP_DEBUG --raw --type=constant --quiet
 	WP_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
 	echo -e $(status_message "WP_DEBUG: $WP_DEBUG_RESULT...")
 fi
 SCRIPT_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
-if [ $SCRIPT_DEBUG != $SCRIPT_DEBUG_CURRENT ]; then
+if [ "$SCRIPT_DEBUG" != $SCRIPT_DEBUG_CURRENT ]; then
 	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set SCRIPT_DEBUG $SCRIPT_DEBUG --raw --type=constant --quiet
 	SCRIPT_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
 	echo -e $(status_message "SCRIPT_DEBUG: $SCRIPT_DEBUG_RESULT...")
