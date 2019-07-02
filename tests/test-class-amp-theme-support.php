@@ -1379,7 +1379,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \amp_render_scripts()
 	 */
 	public function test_prepare_response() {
-		remove_action( 'wp_print_scripts', 'wp_print_service_workers', 9 );
+		add_theme_support( 'amp' );
 
 		add_filter(
 			'home_url',
