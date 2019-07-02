@@ -44,7 +44,7 @@ class AMP_Video_Converter_Test extends WP_UnitTestCase {
 
 			'video_without_dimensions' => array(
 				'<video src="https://example.com/file.mp4"></video>',
-				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
+				'<amp-video src="https://example.com/file.mp4" height="400" layout="fixed-height" width="auto"><a href="https://example.com/file.mp4" fallback="">https://example.com/file.mp4</a><noscript><video src="https://example.com/file.mp4"></video></noscript></amp-video>',
 			),
 
 			'autoplay_attribute' => array(

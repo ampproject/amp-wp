@@ -54,6 +54,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'height' => 400,
 					'layout' => 'fixed-height',
+					'width'  => 'auto',
 				),
 			),
 
@@ -65,6 +66,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'height' => 400,
 					'layout' => 'fixed-height',
+					'width'  => 'auto',
 				),
 			),
 
@@ -75,6 +77,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'height' => 100,
 					'layout' => 'fixed-height',
+					'width'  => 'auto',
 				),
 			),
 
@@ -85,6 +88,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				array(
 					'height' => 400,
 					'layout' => 'fixed-height',
+					'width'  => 'auto',
 				),
 			),
 
