@@ -242,6 +242,12 @@ Not using the built-in local environment? You can also pass any other URL to run
 npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
 ```
 
+For debugging purposes, you can also run the E2E tests in non-headless mode:
+
+```bash
+HEADLESS=false npm run test:e2e
+```
+
 ### Coding Standards
 
 All contributions to this project will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint.
