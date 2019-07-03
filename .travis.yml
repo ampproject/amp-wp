@@ -18,6 +18,7 @@ notifications:
 cache:
   directories:
     - $HOME/.composer/cache
+    - $HOME/.jest-cache
     - $HOME/.npm
     - $HOME/.nvm/.cache
     - $HOME/phpunit-bin
@@ -76,7 +77,20 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - npm run test:js -- --ci
+        - npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
+
+    - name: E2E tests
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
+      install:
+        - nvm install
+        - composer install
+        # npm is handled by `npm run env:start`
+      script:
+        - npm run env:start
+        - npm run build:js # after npm dependencies have been installed
+        - npm run env:reset-site
+        - npm run test:e2e
 
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"

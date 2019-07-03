@@ -796,6 +796,12 @@ function amp_get_content_sanitizers( $post = null ) {
 		$post = null;
 	}
 
+	$parsed_home_url = wp_parse_url( get_home_url() );
+	$current_origin  = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
+	if ( isset( $parsed_home_url['port'] ) ) {
+		$current_origin .= ':' . $parsed_home_url['port'];
+	}
+
 	$sanitizers = array(
 		'AMP_Core_Theme_Sanitizer'        => array(
 			'template'   => get_template(),
@@ -815,6 +821,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Embed_Sanitizer'             => array(),
 		'AMP_Iframe_Sanitizer'            => array(
 			'add_placeholder' => true,
+			'current_origin'  => $current_origin,
 		),
 		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.

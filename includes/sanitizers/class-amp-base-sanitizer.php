@@ -278,8 +278,10 @@ abstract class AMP_Base_Sanitizer {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-		if ( empty( $attributes['width'] ) ) {
+
+		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
 			$attributes['layout'] = 'fixed-height';
+			$attributes['width']  = 'auto';
 		}
 
 		return $attributes;

@@ -159,7 +159,7 @@ class AMP_Story_Post_Type {
 					'items_list_navigation'    => __( 'Stories list navigation', 'amp' ),
 					'items_list'               => __( 'Stories list', 'amp' ),
 					'item_published'           => __( 'Story published.', 'amp' ),
-					'item_published_privately' => __( 'SStory published privately.', 'amp' ),
+					'item_published_privately' => __( 'Story published privately.', 'amp' ),
 					'item_reverted_to_draft'   => __( 'Story reverted to draft.', 'amp' ),
 					'item_scheduled'           => __( 'Story scheduled', 'amp' ),
 					'item_updated'             => __( 'Story updated.', 'amp' ),
