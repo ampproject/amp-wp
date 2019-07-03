@@ -383,11 +383,10 @@ class AMP_Story_Post_Type {
 	/**
 	 * Filters the response before executing any REST API callbacks.
 	 *
-	 * Temporarily removes KSES on post content for authors in order for them being able to use AMP Stories properly.
+	 * Temporarily modifies post content during saving in a way that KSES
+	 * does not strip actually valid CSS from post content, making block content invalid.
 	 *
-	 * Otherwise KSES strips valid CSS from post content, making block content invalid.
-	 *
-	 * This is not ideal and should be removed once core has better CSS parsing.
+	 * @todo Remove once core has better CSS parsing.
 	 *
 	 * @link https://core.trac.wordpress.org/ticket/37134
 	 *
@@ -414,9 +413,35 @@ class AMP_Story_Post_Type {
 			return $response;
 		}
 
-		remove_filter( 'content_save_pre', 'wp_filter_post_kses' );
-		remove_filter( 'excerpt_save_pre', 'wp_filter_post_kses' );
-		remove_filter( 'content_filtered_save_pre', 'wp_filter_post_kses' );
+		$style_attr_values = [];
+
+		// Replace inline styles before KSES...
+		add_filter(
+			'pre_post_content',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				$post_content = preg_replace_callback(
+					'|style=\\\"([^"]*)\\\"|', // Because the post data is slashed.
+					static function ( $matches ) use ( &$style_attr_values ) {
+						$hash                       = md5( $matches[1] );
+						$style_attr_values[ $hash ] = $matches[1];
+
+						return str_replace( $matches[1], $hash, $matches[0] );
+					},
+					$post_content
+				);
+
+				return $post_content;
+			}
+		);
+
+		// ...And bring it back afterwards.
+		add_filter(
+			'content_save_pre',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				return str_replace( array_keys( $style_attr_values ), array_values( $style_attr_values ), $post_content );
+			},
+			20
+		);
 
 		return $response;
 	}
