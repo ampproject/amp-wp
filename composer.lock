@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d174f1cc6d571242a2432fb14075890a",
+    "content-hash": "ed11a72c7928c1e14b4a2898a12d1b93",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -1407,12 +1407,12 @@
             "version": "2.1.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards.git",
+                "url": "https://github.com/WordPress/WordPress-Coding-Standards.git",
                 "reference": "bd9c33152115e6741e3510ff7189605b35167908"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress-Coding-Standards/WordPress-Coding-Standards/zipball/bd9c33152115e6741e3510ff7189605b35167908",
+                "url": "https://api.github.com/repos/WordPress/WordPress-Coding-Standards/zipball/bd9c33152115e6741e3510ff7189605b35167908",
                 "reference": "bd9c33152115e6741e3510ff7189605b35167908",
                 "shasum": ""
             },
@@ -1449,16 +1449,16 @@
         },
         {
             "name": "xwp/wp-dev-lib",
-            "version": "1.1.2",
+            "version": "1.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/xwp/wp-dev-lib.git",
-                "reference": "d8207e7cf749eaba5de5fb45c49cf7408ba741b6"
+                "reference": "2a12c1c62494c50b5383633dfdc54c7bb19d8598"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/d8207e7cf749eaba5de5fb45c49cf7408ba741b6",
-                "reference": "d8207e7cf749eaba5de5fb45c49cf7408ba741b6",
+                "url": "https://api.github.com/repos/xwp/wp-dev-lib/zipball/2a12c1c62494c50b5383633dfdc54c7bb19d8598",
+                "reference": "2a12c1c62494c50b5383633dfdc54c7bb19d8598",
                 "shasum": ""
             },
             "type": "library",
@@ -1483,7 +1483,7 @@
             "keywords": [
                 "wordpress"
             ],
-            "time": "2019-06-05T20:06:16+00:00"
+            "time": "2019-07-02T17:46:47+00:00"
         }
     ],
     "aliases": [],

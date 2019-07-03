@@ -21,7 +21,7 @@
     "phpcompatibility/php-compatibility": "9.2.0",
     "phpunit/phpunit": "4.8.36 || 5.7.27 || 6.5.14 || 7.5.13",
     "wp-coding-standards/wpcs": "2.1.1",
-    "xwp/wp-dev-lib": "1.1.2"
+    "xwp/wp-dev-lib": "1.2.1"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
