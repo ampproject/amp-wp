@@ -122,16 +122,24 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 			);
 		}
 
-		// Check if the file type is allowed.
 		const fileType = attachment ? attachment.get( 'type' ) : null;
 		const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
+		const select = this.get( 'select' );
+
+		// If the file type isn't allowed, display a notice and disable the 'Select' button.
 		if ( ! fileType || ! allowedTypes || allowedTypes.indexOf( fileType ) > -1 ) {
 			this.secondary.unset( fileTypeError );
+			if ( select && select.model ) {
+				select.model.set( 'disabled', false ); // Enable the button to select the file.
+			}
 		} else {
 			this.secondary.set(
 				fileTypeError,
 				new FeaturedImageSelectionFileTypeError( { fileType } )
 			);
+			if ( select && select.model ) {
+				select.model.set( 'disabled', true ); // Disable the button to select the file.
+			}
 		}
 	},
 } );
