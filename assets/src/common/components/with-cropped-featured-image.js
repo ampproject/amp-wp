@@ -70,6 +70,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 */
 		init() {
 			this.frame = new FeaturedImageSelectMediaFrame( {
+				allowedTypes: this.props.allowedTypes,
 				button: {
 					text: __( 'Select', 'amp' ),
 					close: false,

@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { template } from 'lodash';
+import { get, template } from 'lodash';
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
+
 
 const { wp } = window;
 
@@ -28,6 +29,40 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
 			'{{height}}',
 			'{{minWidth}}',
 			'{{minHeight}}',
+		);
+
+		const errorTemplate = template(
+			`<p>${ message }</p>`,
+			{
+				evaluate: /<#([\s\S]+?)#>/g,
+				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+				escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+			}
+		);
+		return ( data ) => {
+			return errorTemplate( data );
+		};
+	} )(),
+} );
+
+/**
+ * FeaturedImageSelectionFileTypeError
+ *
+ * Applies if the selected attachment has the wrong file type, like .mov or .txt.
+ * Very similar to the FeaturedImageSelectionError class.
+ *
+ * @class
+ * @augments wp.media.View
+ * @augments wp.Backbone.View
+ * @augments Backbone.View
+ */
+const FeaturedImageSelectionFileTypeError = wp.media.View.extend( {
+	className: 'notice notice-warning notice-alt inline',
+	template: ( () => {
+		const message = sprintf(
+			/* translators: 1: the selected file type. */
+			__( 'The selected file type, %1$s, is not allowed.', 'amp' ),
+			'{{fileType}}',
 		);
 
 		const errorTemplate = template(
@@ -71,6 +106,7 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const attachment = selection.models[ 0 ];
 		const minWidth = state.collection.get( 'library' ).get( 'suggestedWidth' );
 		const minHeight = state.collection.get( 'library' ).get( 'suggestedHeight' );
+		const fileTypeError = 'select-file-type-error';
 
 		if ( ! attachment || ! attachment.get( 'width' ) || ( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight ) ) {
 			this.secondary.unset( 'select-error' );
@@ -83,6 +119,18 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 					width: attachment.get( 'width' ),
 					height: attachment.get( 'height' ),
 				} )
+			);
+		}
+
+		// Check if the file type is allowed.
+		const fileType = attachment ? attachment.get( 'type' ) : null;
+		const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
+		if ( ! fileType || ! allowedTypes || allowedTypes.indexOf( fileType ) > -1 ) {
+			this.secondary.unset( fileTypeError );
+		} else {
+			this.secondary.set(
+				fileTypeError,
+				new FeaturedImageSelectionFileTypeError( { fileType } )
 			);
 		}
 	},
@@ -117,6 +165,7 @@ const FeaturedImageSelectMediaFrame = wp.media.view.MediaFrame.Select.extend( {
 	createSelectToolbar( toolbar, options ) {
 		options = options || this.options.button || {};
 		options.controller = this;
+		options = Object.assign( {}, options, { allowedTypes: get( this, [ 'options', 'allowedTypes' ], null ) } );
 
 		toolbar.view = new FeaturedImageToolbarSelect( options );
 	},
