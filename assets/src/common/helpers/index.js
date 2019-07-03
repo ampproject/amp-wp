@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { template } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -198,4 +203,25 @@ export const getAspectRatioType = ( width, height ) => {
 	} else if ( height === width ) {
 		return 'square';
 	}
+};
+
+/**
+ * Gets the compiled template for a given notice message.
+ *
+ * @param {string} message The message to display in the template.
+ * @return {Function} compiledTemplate A function accepting the data, which creates a compiled template.
+ */
+export const getNoticeTemplate = ( message ) => {
+	const errorTemplate = template(
+		`<p>${ message }</p>`,
+		{
+			evaluate: /<#([\s\S]+?)#>/g,
+			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+			escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+		}
+	);
+
+	return ( data ) => {
+		return errorTemplate( data );
+	};
 };

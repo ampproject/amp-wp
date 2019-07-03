@@ -1,13 +1,17 @@
 /**
  * External dependencies
  */
-import { get, template } from 'lodash';
+import { get } from 'lodash';
 
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import { getNoticeTemplate } from '../helpers';
 
 const { wp } = window;
 
@@ -31,24 +35,14 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
 			'{{minHeight}}',
 		);
 
-		const errorTemplate = template(
-			`<p>${ message }</p>`,
-			{
-				evaluate: /<#([\s\S]+?)#>/g,
-				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
-				escape: /\{\{([^\}]+?)\}\}(?!\})/g,
-			}
-		);
-		return ( data ) => {
-			return errorTemplate( data );
-		};
+		return getNoticeTemplate( message );
 	} )(),
 } );
 
 /**
  * FeaturedImageSelectionFileTypeError
  *
- * Applies if the selected attachment has the wrong file type, like .mov or .txt.
+ * Applies if the featured image has the wrong file type, like .mov or .txt.
  * Very similar to the FeaturedImageSelectionError class.
  *
  * @class
@@ -65,17 +59,7 @@ const FeaturedImageSelectionFileTypeError = wp.media.View.extend( {
 			'{{fileType}}',
 		);
 
-		const errorTemplate = template(
-			`<p>${ message }</p>`,
-			{
-				evaluate: /<#([\s\S]+?)#>/g,
-				interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
-				escape: /\{\{([^\}]+?)\}\}(?!\})/g,
-			}
-		);
-		return ( data ) => {
-			return errorTemplate( data );
-		};
+		return getNoticeTemplate( message );
 	} )(),
 } );
 
