@@ -664,7 +664,7 @@ class AMP_Validated_URL_Post_Type {
 		}
 
 		$is_story = (
-			isset( $args['queried_object'], $args['queried_object']['type'], $args['queried_object']['id'] )
+			isset( $args['queried_object']['type'], $args['queried_object']['id'] )
 			&&
 			'post' === $args['queried_object']['type']
 			&&

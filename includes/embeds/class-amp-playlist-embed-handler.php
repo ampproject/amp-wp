@@ -201,7 +201,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function video_playlist( $data ) {
 		global $content_width;
-		if ( ! isset( $data['tracks'], $data['tracks'][0]['src'] ) ) {
+		if ( ! isset( $data['tracks'][0]['src'] ) ) {
 			return '';
 		}
 		self::$playlist_id++;
