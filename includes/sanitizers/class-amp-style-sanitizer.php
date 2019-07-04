@@ -2406,17 +2406,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each (before tree shaking).
 		foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
-			$size = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
-				if ( is_string( $part ) ) {
-					$size += strlen( $part );
-					if ( '@import' === substr( $part, 0, 7 ) ) {
-						$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
-						unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
-					}
-				} elseif ( is_array( $part ) ) {
-					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
-					$size += strlen( $part[1] ); // Declaration block.
+				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
+					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
+					unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
 				}
 			}
 
