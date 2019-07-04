@@ -1524,11 +1524,11 @@ class AMP_Validation_Manager {
 			$args          = func_get_args();
 
 			$before_styles_enqueued = array();
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
+			if ( isset( $wp_styles, $wp_styles->queue ) ) {
 				$before_styles_enqueued = $wp_styles->queue;
 			}
 			$before_scripts_enqueued = array();
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
+			if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
 				$before_scripts_enqueued = $wp_scripts->queue;
 			}
 
@@ -1547,14 +1547,14 @@ class AMP_Validation_Manager {
 			array_pop( AMP_Validation_Manager::$hook_source_stack );
 
 			// Keep track of which source enqueued the styles.
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
+			if ( isset( $wp_styles, $wp_styles->queue ) ) {
 				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
 					AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
 				}
 			}
 
 			// Keep track of which source enqueued the scripts, and immediately report validity.
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
+			if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
 				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
 					$handles = array( $queued_handle );
 
