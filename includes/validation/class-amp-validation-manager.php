@@ -138,16 +138,34 @@ class AMP_Validation_Manager {
 	/**
 	 * Cached template directory to prevent infinite recursion.
 	 *
+	 * @see get_template_directory()
 	 * @var string
 	 */
 	protected static $template_directory;
 
 	/**
+	 * Cached template slug to prevent infinite recursion.
+	 *
+	 * @see get_template()
+	 * @var string
+	 */
+	protected static $template_slug;
+
+	/**
 	 * Cached stylesheet directory to prevent infinite recursion.
 	 *
+	 * @see get_stylesheet_directory()
 	 * @var string
 	 */
 	protected static $stylesheet_directory;
+
+	/**
+	 * Cached stylesheet slug to prevent infinite recursion.
+	 *
+	 * @see get_stylesheet()
+	 * @var string
+	 */
+	protected static $stylesheet_slug;
 
 	/**
 	 * Add the actions.
@@ -506,8 +524,10 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		self::$template_directory   = get_template_directory();
-		self::$stylesheet_directory = get_stylesheet_directory();
+		self::$template_directory   = wp_normalize_path( get_template_directory() );
+		self::$template_slug        = get_template();
+		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
+		self::$stylesheet_slug      = get_stylesheet();
 
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
@@ -1434,15 +1454,12 @@ class AMP_Validation_Manager {
 			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
 				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$template_directory ) ), ':' ) . ':s', $file ) ) {
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_template();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$stylesheet_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['name'] = self::$template_slug;
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_stylesheet();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = $matches[1];
+				$source['name'] = self::$stylesheet_slug;
 			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'mu-plugin';
 				$source['name'] = $matches[1];
