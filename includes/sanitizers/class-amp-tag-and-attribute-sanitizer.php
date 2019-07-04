@@ -235,7 +235,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function process_alternate_names( $attr_spec_list ) {
 		foreach ( $attr_spec_list as $attr_name => &$attr_spec ) {
-			if ( '[' === $attr_name[0] ) {
+			if ( 0 === strpos( $attr_name, '[' ) ) {
 				$placeholder_attr_name = $this->args['amp_bind_placeholder_prefix'] . trim( $attr_name, '[]' );
 				if ( ! isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 					$attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] = array();
@@ -595,7 +595,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
 				foreach ( $node->attributes as $name => $value ) {
 					$is_bind_attribute = (
-						'[' === $name[0]
+						0 === strpos( $name, '[' )
 						||
 						( isset( $this->rev_alternate_attr_name_lookup[ $name ] ) && '[' === $this->rev_alternate_attr_name_lookup[ $name ][0] )
 					);
@@ -620,7 +620,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return false;
 		}
 		foreach ( $attr_spec as $attr_name => $attr_spec_rule_value ) {
-			if ( '\u' === substr( $attr_name, 0, 2 ) ) {
+			if ( 0 === strpos( $attr_name, '\u' ) ) {
 				$attr_name = html_entity_decode( '&#x' . substr( $attr_name, 2 ) . ';' ); // Probably ⚡.
 			}
 			$is_mandatory     = isset( $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) ? ( true === $attr_spec_rule_value[ AMP_Rule_Spec::MANDATORY ] ) : false;
@@ -1665,7 +1665,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			'data-' === substr( $attr_name, 0, 5 )
+			0 === strpos( $attr_name, 'data-' )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
 			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )

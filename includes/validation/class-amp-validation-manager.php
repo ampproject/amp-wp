@@ -1614,7 +1614,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return substr( wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' ), -12, 10 );
+		return substr( wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' ), -12, 10 );
 	}
 
 	/**
@@ -1857,7 +1857,7 @@ class AMP_Validation_Manager {
 			}
 
 			// Ensure absolute URL.
-			if ( '/' === substr( $location_header, 0, 1 ) ) {
+			if ( 0 === strpos( $location_header, '/' ) ) {
 				$location_header = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) ) . $location_header;
 			}
 
@@ -1886,7 +1886,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( strlen( trim( $response ) ) === 0 ) {
+		if ( '' === trim( $response ) ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
@@ -1937,7 +1937,7 @@ class AMP_Validation_Manager {
 			default:
 				/* translators: %s is error code */
 				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-		};
+		}
 	}
 
 	/**

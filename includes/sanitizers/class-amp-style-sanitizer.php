@@ -470,7 +470,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		foreach ( $class_names as $class_name ) {
 			// Class names for amp-dynamic-css-classes, see <https://www.ampproject.org/docs/reference/components/amp-dynamic-css-classes>.
-			if ( 'amp-referrer-' === substr( $class_name, 0, 13 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-referrer-' ) ) {
 				continue;
 			}
 
@@ -487,7 +487,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
-			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-carousel-' ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-carousel' ) ) ) {
 					return false;
 				}
@@ -495,7 +495,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
-			if ( 'amp-date-picker-' === substr( $class_name, 0, 16 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-date-picker-' ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-date-picker' ) ) ) {
 					return false;
 				}
@@ -503,7 +503,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
-			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
+			if ( 0 === strpos( $class_name, 'amp-form-' ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
 				if ( ! $this->has_used_tag_names( array( 'form' ) ) ) {
 					return false;
 				}
@@ -515,7 +515,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * See <https://www.ampproject.org/docs/reference/components/amp-access>.
 			 * See <https://www.ampproject.org/docs/reference/components/amp-access-laterpay#styling>
 			 */
-			if ( 'amp-access-' === substr( $class_name, 0, 11 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-access-' ) ) {
 				if ( ! $this->has_used_attributes( array( 'amp-access' ) ) ) {
 					return false;
 				}
@@ -523,7 +523,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-geo, see <https://www.ampproject.org/docs/reference/components/amp-geo#generated-css-classes>.
-			if ( 'amp-geo-' === substr( $class_name, 0, 8 ) || 'amp-iso-country-' === substr( $class_name, 0, 16 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-geo-' ) || 'amp-iso-country-' === substr( $class_name, 0, 16 ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-geo' ) ) ) {
 					return false;
 				}
@@ -539,7 +539,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-live-list, see <https://www.ampproject.org/docs/reference/components/amp-live-list#styling>.
-			if ( 'amp-live-list-' === substr( $class_name, 0, 14 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-live-list-' ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-live-list' ) ) ) {
 					return false;
 				}
@@ -547,7 +547,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-sidebar, see <https://www.ampproject.org/docs/reference/components/amp-sidebar#styling-toolbar>.
-			if ( 'amp-sidebar-' === substr( $class_name, 0, 12 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-sidebar-' ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-sidebar' ) ) ) {
 					return false;
 				}
@@ -555,7 +555,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-sticky-ad, see <https://www.ampproject.org/docs/reference/components/amp-sticky-ad#styling>.
-			if ( 'amp-sticky-ad-' === substr( $class_name, 0, 14 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-sticky-ad-' ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-sticky-ad' ) ) ) {
 					return false;
 				}
@@ -563,7 +563,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Class names for amp-video-docking, see <https://github.com/ampproject/amphtml/blob/master/extensions/amp-video-docking/amp-video-docking.md#styling>.
-			if ( 'amp-docked-' === substr( $class_name, 0, 11 ) ) {
+			if ( 0 === strpos( $class_name, 'amp-docked-' ) ) {
 				if ( ! $this->has_used_attributes( array( 'dock' ) ) ) {
 					return false;
 				}
@@ -1122,7 +1122,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			 * they don't implement the resource hint.
 			 */
 			$needs_preconnect_link = (
-				'https://fonts.googleapis.com/' === substr( $normalized_url, 0, 29 )
+				0 === strpos( $normalized_url, 'https://fonts.googleapis.com/' )
 				&&
 				0 === $this->xpath->query( '//link[ @rel = "preconnect" and @crossorigin and starts-with( @href, "https://fonts.gstatic.com" ) ]', $this->head )->length
 			);
@@ -1903,13 +1903,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$url_string = $url->getURL()->getString();
 
 			// For data: URLs, all that is needed is to remove spaces so set and continue.
-			if ( 'data:' === substr( $url_string, 0, 5 ) ) {
+			if ( 0 === strpos( $url_string, 'data:' ) ) {
 				continue;
 			}
 
 			// If the URL is already absolute, continue since there there is nothing left to do.
 			$parsed_url = wp_parse_url( $url_string );
-			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || '/' === substr( $parsed_url['path'], 0, 1 ) ) {
+			if ( ! empty( $parsed_url['host'] ) || empty( $parsed_url['path'] ) || 0 === strpos( $parsed_url['path'], '/' ) ) {
 				continue;
 			}
 
@@ -2104,7 +2104,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $sources as $i => $source ) {
 				if ( $source[0] instanceof URL ) {
 					$value = $source[0]->getURL()->getString();
-					if ( 'data:' === substr( $value, 0, 5 ) ) {
+					if ( 0 === strpos( $value, 'data:' ) ) {
 						$source_data_url_objects[ $i ] = $source[0];
 					} else {
 						$source_file_urls[ $i ] = $value;
@@ -2713,7 +2713,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					?
 					$language !== $matches['lang']
 					:
-					substr( $language, 0, strlen( $matches['lang'] ) ) !== $matches['lang']
+						0 !== strpos( $language, $matches['lang'] )
 				)
 			);
 			if ( $is_other_language_root ) {
@@ -2741,9 +2741,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					 * N: en-US && en-UK
 					 */
 					if (
-						substr( $language, 0, strlen( $selector_language ) ) === $selector_language
+						0 === strpos( $language, $selector_language )
 						||
-						substr( $selector_language, 0, strlen( $language ) ) === $language
+						0 === strpos( $selector_language, $language )
 					) {
 						$has_matching_language = true;
 						break;
@@ -2830,41 +2830,39 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$selectors = array();
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 					$should_include = (
+						// If all class names are used in the doc.
 						(
-							// If all class names are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-								||
-								$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-							)
-							&&
-							// If all IDs are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
-								||
-								0 === count(
-									array_filter(
-										$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-										function( $id ) {
-											return ! $this->dom->getElementById( $id );
-										}
-									)
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+							||
+							$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+						)
+						&&
+						// If all IDs are used in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
+							||
+							0 === count(
+								array_filter(
+									$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
+									function( $id ) {
+										return ! $this->dom->getElementById( $id );
+									}
 								)
 							)
-							&&
-							// If tag names are present in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-								||
-								$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-							)
-							&&
-							// If all attribute names are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-								||
-								$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-							)
+						)
+						&&
+						// If tag names are present in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+							||
+							$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+						)
+						&&
+						// If all attribute names are used in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+							||
+							$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 						)
 					);
 					if ( $should_include ) {
@@ -2882,7 +2880,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$stylesheet_part_count = count( $stylesheet_parts );
 			for ( $i = 0; $i < $stylesheet_part_count; $i++ ) {
 				$stylesheet_part = $stylesheet_parts[ $i ];
-				if ( '@' !== substr( $stylesheet_part, 0, 1 ) ) {
+				if ( 0 !== strpos( $stylesheet_part, '@' ) ) {
 					continue;
 				}
 
@@ -2899,7 +2897,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					$open_braces = 1;
 					for ( $j = $i + 1; $j < $stylesheet_part_count; $j++ ) {
 						$stylesheet_part = $stylesheet_parts[ $j ];
-						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
+						$is_at_rule      = 0 === strpos( $stylesheet_part, '@' );
 						if ( empty( $stylesheet_part ) ) {
 							continue; // There was a shaken rule.
 						}
