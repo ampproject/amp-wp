@@ -26,6 +26,7 @@ import {
  */
 import {
 	withCroppedFeaturedImage,
+	withEnforcedFileType,
 } from '../common/components';
 import {
 	withAmpStorySettings,
@@ -316,6 +317,7 @@ addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNot
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileSize', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );

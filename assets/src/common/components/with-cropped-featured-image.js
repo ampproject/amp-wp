@@ -12,7 +12,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
+import { FeaturedImageToolbarSelect, getSelectMediaFrame } from './select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 import { getAspectRatioType } from '../helpers';
 
@@ -69,6 +69,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		init() {
+			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
 			this.frame = new FeaturedImageSelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
 				button: {

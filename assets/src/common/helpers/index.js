@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { template } from 'lodash';
+import { includes, template } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -224,4 +224,29 @@ export const getNoticeTemplate = ( message ) => {
 	return ( data ) => {
 		return errorTemplate( data );
 	};
+};
+
+/**
+ * Gets whether the file type is allowed.
+ *
+ * For videos, only 'video/mp4' mime types should be allowed.
+ * But the allowedTypes property only has 'video', and it can accidentally allow mime types like 'video/quicktime'.
+ * So this returns false for videos with mime types other than 'video/mp4'.
+ *
+ * @param {Object} attachment   The file to evaluate.
+ * @param {Array}  allowedTypes The allowed file types.
+ * @return {boolean} Whether the file type is allowed.
+ */
+export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
+	const fileType = attachment.get( 'type' );
+
+	if ( ! includes( allowedTypes, fileType ) ) {
+		return false;
+	}
+
+	if ( 'video' === fileType && 'video/mp4' !== attachment.get( 'mime' ) ) {
+		return false;
+	}
+
+	return true;
 };

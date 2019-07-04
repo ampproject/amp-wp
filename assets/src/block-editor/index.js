@@ -9,7 +9,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withCroppedFeaturedImage, withFeaturedImageNotice } from '../common/components';
+import { withCroppedFeaturedImage, withEnforcedFileType, withFeaturedImageNotice } from '../common/components';
 import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
 import { getMinimumFeaturedImageDimensions, getMinimumPortraitFeaturedImageDimensions } from '../common/helpers';
 import './store';
@@ -38,6 +38,7 @@ if ( isWebsiteEnabled() ) {
 	addFilter( 'blocks.getSaveContent.extraProps', 'ampEditorBlocks/addExtraAttributes', addAMPExtraProps );
 	addFilter( 'editor.PostFeaturedImage', 'ampEditorBlocks/withFeaturedImageNotice', withFeaturedImageNotice );
 	addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumFeaturedImageDimensions(), getMinimumPortraitFeaturedImageDimensions() ) );
+	addFilter( 'editor.MediaUpload', 'ampEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 }
 
 /*
