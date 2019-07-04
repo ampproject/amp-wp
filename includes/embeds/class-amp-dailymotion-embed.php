@@ -157,8 +157,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 		parse_str( $parsed_url['path'], $path );
 		$tok      = explode( '/', $parsed_url['path'] );
 		$tok      = explode( '_', $tok[2] );
-		$video_id = $tok[0];
 
-		return $video_id;
+		return $tok[0];
 	}
 }
