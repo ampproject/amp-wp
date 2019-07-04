@@ -500,7 +500,7 @@ class AMP_Validation_Manager {
 			 */
 			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$slug   = sanitize_key( $slug );
-				$status = intval( $status );
+				$status = (int) $status;
 				self::$validation_error_status_overrides[ $slug ] = $status;
 				ksort( self::$validation_error_status_overrides );
 			}
@@ -609,7 +609,7 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
+				$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
 
 				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
@@ -919,7 +919,7 @@ class AMP_Validation_Manager {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
 			$items = array();
 			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === intval( $count ) ) {
+				if ( 1 === (int) $count ) {
 					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 				} else {
 					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
@@ -1540,7 +1540,7 @@ class AMP_Validation_Manager {
 			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
 				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
 			}
-			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
+			$result = call_user_func_array( $function, array_slice( $args, 0, (int) $accepted_args ) );
 			if ( $has_buffer_started ) {
 				ob_end_flush();
 			}
