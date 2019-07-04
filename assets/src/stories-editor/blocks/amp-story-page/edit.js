@@ -8,7 +8,7 @@ import { has } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	PanelColorSettings,
@@ -338,7 +338,7 @@ class PageEdit extends Component {
 								{ !! mediaId &&
 								<MediaUploadCheck>
 									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
+										{ _x( 'Remove', 'background media', 'amp' ) }
 									</Button>
 								</MediaUploadCheck>
 								}
@@ -399,7 +399,7 @@ class PageEdit extends Component {
 										{
 											poster && (
 												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
-													{ __( 'Remove Poster Image', 'amp' ) }
+													{ __( 'Remove Image', 'amp' ) }
 												</Button>
 											)
 										}
@@ -439,7 +439,7 @@ class PageEdit extends Component {
 								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
 								min={ Math.max( totalAnimationDuration, 1 ) }
 								initialPosition={ totalAnimationDuration }
-								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page', 'amp' ) : undefined }
+								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page.', 'amp' ) : undefined }
 							/>
 						) }
 					</PanelBody>

@@ -38,7 +38,7 @@ export default createHigherOrderComponent(
 
 			const actions = [
 				{
-					label: __( 'Remove Block', 'amp' ),
+					label: __( 'Remove Element', 'amp' ),
 					onClick: () => onReplace( [] ),
 				},
 			];

@@ -1,14 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { select, combineReducers } from '@wordpress/data';
+import { combineReducers } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
-
-const { getBlock, getBlockOrder } = select( 'core/block-editor' );
 
 /**
  * Reducer handling animation state changes.
@@ -101,7 +99,7 @@ export function currentPage( state = undefined, action ) {
 
 	switch ( action.type ) {
 		case 'SET_CURRENT_PAGE':
-			return getBlock( page ) ? page : state;
+			return page;
 	}
 
 	return state;
@@ -116,11 +114,13 @@ export function currentPage( state = undefined, action ) {
  * @return {Object} Updated state.
  */
 export function blocks( state = {}, action ) {
+	const { order } = action;
+
 	switch ( action.type ) {
 		case 'START_REORDERING':
 			return {
 				...state,
-				order: getBlockOrder(),
+				order,
 				isReordering: true,
 			};
 
@@ -145,7 +145,7 @@ export function blocks( state = {}, action ) {
 		case 'RESET_ORDER':
 			return {
 				...state,
-				order: getBlockOrder(),
+				order,
 				isReordering: false,
 			};
 	}

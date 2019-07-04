@@ -1881,7 +1881,7 @@ class AMP_Validation_Error_Taxonomy {
 								__( 'F j, Y g:i a', 'amp' )
 							)
 						),
-						/* translators: %s: human readable timestamp */
+						/* translators: %s: the human-readable time difference. */
 						esc_html( sprintf( __( '%s ago', 'amp' ), human_time_diff( $created_datetime->getTimestamp() ) ) )
 					);
 				}

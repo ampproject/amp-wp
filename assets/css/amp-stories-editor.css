@@ -89,7 +89,7 @@
  * @see https://github.com/WordPress/gutenberg/issues/7180
  */
 
-.wp-block-image .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
+.wp-block .components-resizable-box__container + .__resizable_base__ { /* stylelint-disable-line selector-class-pattern */
 	left: 0 !important;
 }
 
@@ -201,7 +201,8 @@
 	pointer-events: none;
 }
 
-div[data-amp-image-caption="noCaption"] figure.wp-block-image figcaption {
+div[data-amp-caption="noCaption"] figure.wp-block-image figcaption,
+div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	display: none;
 }
 

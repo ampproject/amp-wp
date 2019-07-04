@@ -494,6 +494,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
+			if ( 'amp-date-picker-' === substr( $class_name, 0, 16 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-date-picker' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
 			// Class names for amp-form, see <https://www.ampproject.org/docs/reference/components/amp-form#classes-and-css-hooks>.
 			if ( 'amp-form-' === substr( $class_name, 0, 9 ) || 'user-valid' === $class_name || 'user-invalid' === $class_name ) {
 				if ( ! $this->has_used_tag_names( array( 'form' ) ) ) {

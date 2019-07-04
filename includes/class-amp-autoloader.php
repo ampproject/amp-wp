@@ -107,8 +107,8 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'AMP_Test_Stub_Sanitizer'            => 'tests/stubs',
-		'AMP_Test_World_Sanitizer'           => 'tests/stubs',
+		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
+		'AMP_Test_World_Sanitizer'           => 'tests/php/stubs',
 	);
 
 	/**

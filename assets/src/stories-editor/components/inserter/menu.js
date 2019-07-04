@@ -280,12 +280,12 @@ export class InserterMenu extends Component {
 				onKeyDown={ this.onKeyDown }
 			>
 				<label htmlFor={ `block-editor-inserter__search-${ instanceId }` } className="screen-reader-text">
-					{ __( 'Search for a block', 'amp' ) }
+					{ __( 'Search for an element', 'amp' ) }
 				</label>
 				<input
 					id={ `block-editor-inserter__search-${ instanceId }` }
 					type="search"
-					placeholder={ __( 'Search for a block', 'amp' ) }
+					placeholder={ __( 'Search for an element', 'amp' ) }
 					className="editor-inserter__search block-editor-inserter__search"
 					autoFocus
 					onChange={ this.onChangeSearchInput }

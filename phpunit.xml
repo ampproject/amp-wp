@@ -10,17 +10,23 @@
 		<const name="WP_TEST_ACTIVATED_PLUGINS" value="jetpack/jetpack.php,gutenberg/gutenberg.php,pwa/pwa.php" />
 	</php>
 	<testsuites>
-		<testsuite name="amp-wp">
+		<!-- Default test suite to run all tests -->
+		<testsuite name="default">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
 		</testsuite>
 	</testsuites>
+	<groups>
+		<exclude>
+			<group>external-http</group>
+		</exclude>
+	</groups>
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="false">
 			<directory suffix=".php">./</directory>
 			<exclude>
-				<directory suffix=".php">dev-lib</directory>
 				<directory suffix=".php">svn</directory>
 				<directory suffix=".php">node_modules</directory>
+				<directory suffix=".php">bin</directory>
 				<directory suffix=".php">tests</directory>
 				<directory suffix=".php">vendor</directory>
 				<directory suffix=".php">build</directory>
