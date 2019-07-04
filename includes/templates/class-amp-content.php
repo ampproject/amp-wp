@@ -44,21 +44,21 @@ class AMP_Content {
 	 *
 	 * @var array
 	 */
-	private $args = array();
+	private $args;
 
 	/**
 	 * Embed handlers.
 	 *
 	 * @var AMP_Base_Embed_Handler[] AMP_Base_Embed_Handler[]
 	 */
-	private $embed_handlers = array();
+	private $embed_handlers;
 
 	/**
 	 * Sanitizer class names.
 	 *
 	 * @var string[]
 	 */
-	private $sanitizer_classes = array();
+	private $sanitizer_classes;
 
 	/**
 	 * AMP_Content constructor.

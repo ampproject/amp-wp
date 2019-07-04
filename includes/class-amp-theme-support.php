@@ -149,7 +149,7 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 * @var null|string
 	 */
-	protected static $support_added_via_option = null;
+	protected static $support_added_via_option;
 
 	/**
 	 * Theme support mode which was added via the theme.
@@ -158,7 +158,7 @@ class AMP_Theme_Support {
 	 *
 	 * @var null|string
 	 */
-	protected static $support_added_via_theme = null;
+	protected static $support_added_via_theme;
 
 	/**
 	 * Initialize.
