@@ -11,7 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getNoticeTemplate, isFileTypeAllowed } from '../helpers';
+import { enforceFileType, getNoticeTemplate } from '../helpers';
 
 const { wp } = window;
 
@@ -38,39 +38,6 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
 		return getNoticeTemplate( message );
 	} )(),
 } );
-
-/**
- * If the attachment has the wrong file type, this displays a notice in the Media Library and disabled the 'Select' button.
- *
- * This is not an arrow function so that it can be called with enforceFileType.call( this, foo ).
- *
- * @param {Object} attachment The selected attachment.
- */
-const enforceFileType = function( attachment ) {
-	if ( ! attachment ) {
-		return;
-	}
-
-	const fileTypeError = 'select-file-type-error',
-		allowedTypes = get( this, [ 'options', 'allowedTypes' ], null ),
-		selectButton = this.get( 'select' );
-
-	// If the file type isn't allowed, display a notice and disable the 'Select' button.
-	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
-		this.secondary.set(
-			fileTypeError,
-			new SelectionFileTypeError( { mimeType: attachment.get( 'mime' ) } )
-		);
-		if ( selectButton && selectButton.model ) {
-			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
-		}
-	} else {
-		this.secondary.unset( fileTypeError );
-		if ( selectButton && selectButton.model ) {
-			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
-		}
-	}
-};
 
 /**
  * SelectionFileTypeError
@@ -138,7 +105,7 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 			);
 		}
 
-		enforceFileType.call( this, attachment );
+		enforceFileType.call( this, attachment, SelectionFileTypeError );
 	},
 } );
 

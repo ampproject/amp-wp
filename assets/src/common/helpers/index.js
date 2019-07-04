@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { includes, template } from 'lodash';
+import { get, includes, template } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -249,4 +249,38 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 	}
 
 	return true;
+};
+
+/**
+ * If the attachment has the wrong file type, this displays a notice in the Media Library and disabled the 'Select' button.
+ *
+ * This is not an arrow function so that it can be called with enforceFileType.call( this, foo ).
+ *
+ * @param {Object} attachment The selected attachment.
+ * @param {Object} SelectionError The error to display.
+ */
+export const enforceFileType = function( attachment, SelectionError ) {
+	if ( ! attachment ) {
+		return;
+	}
+
+	const fileTypeError = 'select-file-type-error',
+		allowedTypes = get( this, [ 'options', 'allowedTypes' ], null ),
+		selectButton = this.get( 'select' );
+
+	// If the file type isn't allowed, display a notice and disable the 'Select' button.
+	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
+		this.secondary.set(
+			fileTypeError,
+			new SelectionError( { mimeType: attachment.get( 'mime' ) } )
+		);
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
+		}
+	} else {
+		this.secondary.unset( fileTypeError );
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
+		}
+	}
 };

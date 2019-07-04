@@ -11,7 +11,8 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { getNoticeTemplate } from '../helpers';
+import { enforceFileType, getNoticeTemplate } from '../helpers';
+import { SelectionFileTypeError } from './select-media-frame';
 
 const { wp } = window;
 
@@ -33,30 +34,6 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
 			'{{height}}',
 			'{{minWidth}}',
 			'{{minHeight}}',
-		);
-
-		return getNoticeTemplate( message );
-	} )(),
-} );
-
-/**
- * FeaturedImageSelectionFileTypeError
- *
- * Applies if the featured image has the wrong file type, like .mov or .txt.
- * Very similar to the FeaturedImageSelectionError class.
- *
- * @class
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
-const FeaturedImageSelectionFileTypeError = wp.media.View.extend( {
-	className: 'notice notice-warning notice-alt inline',
-	template: ( () => {
-		const message = sprintf(
-			/* translators: 1: the selected file type. */
-			__( 'The selected file type, %1$s, is not allowed.', 'amp' ),
-			'{{fileType}}',
 		);
 
 		return getNoticeTemplate( message );
@@ -90,7 +67,6 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const attachment = selection.models[ 0 ];
 		const minWidth = state.collection.get( 'library' ).get( 'suggestedWidth' );
 		const minHeight = state.collection.get( 'library' ).get( 'suggestedHeight' );
-		const fileTypeError = 'select-file-type-error';
 
 		if ( ! attachment || ! attachment.get( 'width' ) || ( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight ) ) {
 			this.secondary.unset( 'select-error' );
@@ -106,25 +82,7 @@ const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 			);
 		}
 
-		const fileType = attachment ? attachment.get( 'type' ) : null;
-		const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
-		const select = this.get( 'select' );
-
-		// If the file type isn't allowed, display a notice and disable the 'Select' button.
-		if ( ! fileType || ! allowedTypes || allowedTypes.indexOf( fileType ) > -1 ) {
-			this.secondary.unset( fileTypeError );
-			if ( select && select.model ) {
-				select.model.set( 'disabled', false ); // Enable the button to select the file.
-			}
-		} else {
-			this.secondary.set(
-				fileTypeError,
-				new FeaturedImageSelectionFileTypeError( { fileType } )
-			);
-			if ( select && select.model ) {
-				select.model.set( 'disabled', true ); // Disable the button to select the file.
-			}
-		}
+		enforceFileType.call( this, attachment, SelectionFileTypeError );
 	},
 } );
 
