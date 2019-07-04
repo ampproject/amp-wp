@@ -77,7 +77,6 @@ export const SelectionFileTypeError = wp.media.View.extend( {
  * @inheritDoc
  */
 export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
-
 	/**
 	 * Refresh the view.
 	 */
@@ -91,7 +90,12 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const minWidth = state.collection.get( 'library' ).get( 'suggestedWidth' );
 		const minHeight = state.collection.get( 'library' ).get( 'suggestedHeight' );
 
-		if ( ! attachment || ! attachment.get( 'width' ) || ( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight ) ) {
+		if (
+			! attachment ||
+			'image' !== attachment.get( 'type' ) ||
+			! attachment.get( 'width' ) ||
+			( attachment.get( 'width' ) >= minWidth && attachment.get( 'height' ) >= minHeight )
+		) {
 			this.secondary.unset( 'select-error' );
 		} else {
 			this.secondary.set(
@@ -123,7 +127,6 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
  * @inheritDoc
  */
 export const EnforcedFileTypeToolbarSelect = wp.media.view.Toolbar.Select.extend( {
-
 	/**
 	 * Refresh the view.
 	 */

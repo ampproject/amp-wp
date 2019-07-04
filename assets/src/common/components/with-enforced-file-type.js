@@ -31,7 +31,7 @@ export default ( InitialMediaUpload ) => {
 	 *
 	 * @see wp.media.HeaderControl
 	 */
-	return class FeaturedImageMediaUpload extends InitialMediaUpload {
+	return class EnforcedFileTypeMediaUpload extends InitialMediaUpload {
 		/**
 		 * Constructs the class.
 		 */
@@ -40,8 +40,8 @@ export default ( InitialMediaUpload ) => {
 
 			// This class should only be present in the MediaUpload for the AMP Story 'Background Media' or when only 'video' types are allowed, like in the Core Video block.
 			if ( 'story-background-media' === this.props.id || isEqual( [ 'video' ], this.props.allowedTypes ) ) {
-				this.init = this.init.bind( this );
-				this.init();
+				this.initFileTypeMedia = this.initFileTypeMedia.bind( this );
+				this.initFileTypeMedia();
 			}
 		}
 
@@ -54,8 +54,9 @@ export default ( InitialMediaUpload ) => {
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
-		init() {
+		initFileTypeMedia() {
 			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileTypeToolbarSelect );
+			const previousOnSelect = this.onSelect;
 			this.frame = new SelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
 				button: {
@@ -77,7 +78,14 @@ export default ( InitialMediaUpload ) => {
 			wp.media.frame = this.frame;
 
 			this.frame.on( 'close', () => {
-				this.init();
+				this.initFileTypeMedia();
+			}, this );
+
+			this.frame.on( 'select', () => {
+				if ( previousOnSelect ) {
+					previousOnSelect();
+				}
+				this.frame.close();
 			}, this );
 		}
 	};
