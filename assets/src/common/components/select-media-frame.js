@@ -50,7 +50,7 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
  * @augments wp.Backbone.View
  * @augments Backbone.View
  */
-const SelectionFileTypeError = wp.media.View.extend( {
+export const SelectionFileTypeError = wp.media.View.extend( {
 	className: 'notice notice-warning notice-alt inline',
 	template: ( () => {
 		const message = sprintf(
@@ -134,7 +134,7 @@ export const EnforcedFileTypeToolbarSelect = wp.media.view.Toolbar.Select.extend
 		const selection = state.get( 'selection' );
 		const attachment = selection.models[ 0 ];
 
-		enforceFileType.call( this, attachment );
+		enforceFileType.call( this, attachment, SelectionFileTypeError );
 	},
 } );
 
