@@ -74,9 +74,7 @@ export default ( InitialMediaUpload ) => {
 				],
 			} );
 
-			// See wp.media() for this.
 			wp.media.frame = this.frame;
-
 			this.frame.on( 'close', () => {
 				this.initFileTypeMedia();
 			}, this );

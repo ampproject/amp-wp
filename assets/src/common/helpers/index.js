@@ -252,7 +252,7 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 };
 
 /**
- * If the attachment has the wrong file type, this displays a notice in the Media Library and disabled the 'Select' button.
+ * If the attachment has the wrong file type, this displays a notice in the Media Library and disables the 'Select' button.
  *
  * This is not an arrow function so that it can be called with enforceFileType.call( this, foo ).
  *

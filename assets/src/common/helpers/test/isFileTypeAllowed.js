@@ -2,23 +2,10 @@
  * Internal dependencies
  */
 import { isFileTypeAllowed } from '../';
-
-class MockAttachment {
-	get( key ) {
-		return this[ key ];
-	}
-
-	set( values ) {
-		for ( const property in values ) {
-			if ( values.hasOwnProperty( property ) ) {
-				this[ property ] = values[ property ];
-			}
-		}
-	}
-}
+import { Mock } from './fixtures/mockClasses';
 
 describe( 'isFileTypeAllowed', () => {
-	const attachment = new MockAttachment();
+	const attachment = new Mock();
 	const videoAllowedTypes = [ 'video' ];
 
 	it( 'should return false when the file type is text', () => {
@@ -37,8 +24,8 @@ describe( 'isFileTypeAllowed', () => {
 	} );
 
 	it( 'should return true when the file type is image and that is in the allowedTypes', () => {
-		attachment.set( { type: 'image' } );
 		const imageAllowedTypes = [ 'image' ];
+		attachment.set( { type: 'image' } );
 		expect( isFileTypeAllowed( attachment, imageAllowedTypes ) ).toBe( true );
 	} );
 } );
