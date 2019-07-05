@@ -16,7 +16,7 @@
 	display: block;
 }
 
-.wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date.is-amp-fit-text.is-measuring-fontsize {
+.wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date.is-measuring {
 	height: initial !important;
 	width: initial !important;
 	position: absolute !important;
