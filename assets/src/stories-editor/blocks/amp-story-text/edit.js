@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -19,7 +20,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { maybeUpdateFontSize } from '../../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
 
@@ -35,7 +36,7 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes } = this.props;
+		const { attributes, fontSize } = this.props;
 		const {
 			height,
 			width,
@@ -45,12 +46,14 @@ class TextBlockEdit extends Component {
 		if (
 			prevProps.attributes.height === height &&
 			prevProps.attributes.width === width &&
-			prevProps.attributes.content === content
+			prevProps.attributes.content === content &&
+			isEqual( prevProps.fontSize, fontSize )
 		) {
 			return;
 		}
 
 		maybeUpdateFontSize( this.props );
+		maybeUpdateBlockDimensions( this.props );
 	}
 
 	onReplace( blocks ) {
