@@ -93,18 +93,10 @@ class TextBlockEdit extends Component {
 			ampFitText,
 			autoFontSize,
 			height,
-			tagName,
 			opacity,
 		} = attributes;
 
-		let userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
-		if ( undefined === userFontSize ) {
-			if ( 'h1' === tagName ) {
-				userFontSize = 2 + 'rem';
-			} else if ( 'h2' === tagName ) {
-				userFontSize = 1.5 + 'rem';
-			}
-		}
+		const userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
 
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );

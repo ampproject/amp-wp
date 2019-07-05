@@ -138,16 +138,34 @@ class AMP_Validation_Manager {
 	/**
 	 * Cached template directory to prevent infinite recursion.
 	 *
+	 * @see get_template_directory()
 	 * @var string
 	 */
 	protected static $template_directory;
 
 	/**
+	 * Cached template slug to prevent infinite recursion.
+	 *
+	 * @see get_template()
+	 * @var string
+	 */
+	protected static $template_slug;
+
+	/**
 	 * Cached stylesheet directory to prevent infinite recursion.
 	 *
+	 * @see get_stylesheet_directory()
 	 * @var string
 	 */
 	protected static $stylesheet_directory;
+
+	/**
+	 * Cached stylesheet slug to prevent infinite recursion.
+	 *
+	 * @see get_stylesheet()
+	 * @var string
+	 */
+	protected static $stylesheet_slug;
 
 	/**
 	 * Add the actions.
@@ -506,8 +524,10 @@ class AMP_Validation_Manager {
 			}
 		}
 
-		self::$template_directory   = get_template_directory();
-		self::$stylesheet_directory = get_stylesheet_directory();
+		self::$template_directory   = wp_normalize_path( get_template_directory() );
+		self::$template_slug        = get_template();
+		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
+		self::$stylesheet_slug      = get_stylesheet();
 
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
@@ -1434,15 +1454,12 @@ class AMP_Validation_Manager {
 			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
 				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$template_directory ) ), ':' ) . ':s', $file ) ) {
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_template();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$stylesheet_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['name'] = self::$template_slug;
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_stylesheet();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = $matches[1];
+				$source['name'] = self::$stylesheet_slug;
 			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'mu-plugin';
 				$source['name'] = $matches[1];
@@ -1514,64 +1531,10 @@ class AMP_Validation_Manager {
 	 *     @type int      $accepted_args
 	 *     @type array    $source
 	 * }
-	 * @return closure $wrapped_callback The callback, wrapped in comments.
+	 * @return AMP_Validation_Callback_Wrapper $wrapped_callback The callback, wrapped in comments.
 	 */
 	public static function wrapped_callback( $callback ) {
-		return function() use ( $callback ) {
-			global $wp_styles, $wp_scripts;
-
-			$function      = $callback['function'];
-			$accepted_args = $callback['accepted_args'];
-			$args          = func_get_args();
-
-			$before_styles_enqueued = array();
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
-				$before_styles_enqueued = $wp_styles->queue;
-			}
-			$before_scripts_enqueued = array();
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
-				$before_scripts_enqueued = $wp_scripts->queue;
-			}
-
-			$is_filter = isset( $callback['source']['hook'] ) && ! did_action( $callback['source']['hook'] );
-
-			// Wrap the markup output of (action) hooks in source comments.
-			AMP_Validation_Manager::$hook_source_stack[] = $callback['source'];
-			$has_buffer_started                          = false;
-			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
-				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
-			}
-			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
-			if ( $has_buffer_started ) {
-				ob_end_flush();
-			}
-			array_pop( AMP_Validation_Manager::$hook_source_stack );
-
-			// Keep track of which source enqueued the styles.
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
-				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
-					AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
-				}
-			}
-
-			// Keep track of which source enqueued the scripts, and immediately report validity.
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
-				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
-					$handles = array( $queued_handle );
-
-					// Account for case where registered script is a placeholder for a set of scripts (e.g. jquery).
-					if ( isset( $wp_scripts->registered[ $queued_handle ] ) && false === $wp_scripts->registered[ $queued_handle ]->src ) {
-						$handles = array_merge( $handles, $wp_scripts->registered[ $queued_handle ]->deps );
-					}
-
-					foreach ( $handles as $handle ) {
-						AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
-					}
-				}
-			}
-
-			return $result;
-		};
+		return new AMP_Validation_Callback_Wrapper( $callback );
 	}
 
 	/**
