@@ -768,7 +768,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;
 	}
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	maxFontSize++;
 
@@ -788,7 +788,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
 
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	return minFontSize;
 };
@@ -1240,9 +1240,34 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				if ( element.offsetHeight > height && element.offsetWidth > width ) {
-					updateBlockAttributes( clientId, { height: element.offsetHeight, width: element.offsetWidth } );
+				if ( element.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.offsetHeight } );
 				}
+
+				if ( element.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement ) {
+				metaBlockElement.classList.toggle( 'is-measuring' );
+
+				if ( metaBlockElement.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: metaBlockElement.offsetHeight } );
+				}
+
+				if ( metaBlockElement.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: metaBlockElement.offsetWidth } );
+				}
+
+				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
 
 			break;
