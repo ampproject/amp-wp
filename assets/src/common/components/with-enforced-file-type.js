@@ -58,7 +58,7 @@ export default ( InitialMediaUpload ) => {
 			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileTypeToolbarSelect );
 			const previousOnSelect = this.onSelect;
 			const isVideo = isEqual( [ 'video' ], this.props.allowedTypes );
-			const queryType = isVideo ? 'video/mp4' : this.props.allowedTypes; // For the Video block. only display .mp4 files.
+			const queryType = isVideo ? 'video/mp4' : this.props.allowedTypes; // For the Video block, only display .mp4 files.
 			this.frame = new SelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
 				button: {
