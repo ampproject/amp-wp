@@ -57,6 +57,8 @@ export default ( InitialMediaUpload ) => {
 		initFileTypeMedia() {
 			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileTypeToolbarSelect );
 			const previousOnSelect = this.onSelect;
+			const isVideo = isEqual( [ 'video' ], this.props.allowedTypes );
+			const queryType = isVideo ? 'video/mp4' : this.props.allowedTypes; // For the Video block. only display .mp4 files.
 			this.frame = new SelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,
 				button: {
@@ -66,7 +68,7 @@ export default ( InitialMediaUpload ) => {
 				states: [
 					new wp.media.controller.Library( {
 						title: __( 'Select or Upload Media', 'amp' ),
-						library: wp.media.query( { type: this.props.allowedTypes } ),
+						library: wp.media.query( { type: queryType } ),
 						multiple: false,
 						date: false,
 						priority: 20,

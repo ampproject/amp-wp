@@ -67,6 +67,7 @@ export const SelectionFileTypeError = wp.media.View.extend( {
  * FeaturedImageToolbarSelect
  *
  * Prevent selection of an image that does not meet the minimum requirements.
+ * Also enforces the file type, ensuring that it was in the allowedTypes prop.
  *
  * @class
  * @augments wp.media.view.Toolbar.Select
