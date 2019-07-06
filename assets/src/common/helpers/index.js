@@ -239,12 +239,13 @@ export const getNoticeTemplate = ( message ) => {
  */
 export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 	const fileType = attachment.get( 'type' );
+	const mimeType = attachment.get( 'mime' );
 
-	if ( ! includes( allowedTypes, fileType ) ) {
+	if ( ! includes( allowedTypes, fileType ) && ! includes( allowedTypes, mimeType ) ) {
 		return false;
 	}
 
-	if ( 'video' === fileType && 'video/mp4' !== attachment.get( 'mime' ) ) {
+	if ( 'video' === fileType && 'video/mp4' !== mimeType ) {
 		return false;
 	}
 
@@ -254,7 +255,7 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 /**
  * If the attachment has the wrong file type, this displays a notice in the Media Library and disables the 'Select' button.
  *
- * This is not an arrow function so that it can be called with enforceFileType.call( this, foo ).
+ * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
  *
  * @param {Object} attachment The selected attachment.
  * @param {Object} SelectionError The error to display.

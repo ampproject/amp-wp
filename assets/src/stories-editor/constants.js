@@ -106,7 +106,7 @@ export const ALLOWED_BLOCKS = [
 
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
-export const ALLOWED_MEDIA_TYPES = [ 'image', 'video' ];
+export const ALLOWED_MEDIA_TYPES = [ 'image', 'video/mp4' ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
 export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
