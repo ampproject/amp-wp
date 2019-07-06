@@ -41,7 +41,7 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function is_amp_customizer_enabled() {
 
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 			return false;
 		}
 
