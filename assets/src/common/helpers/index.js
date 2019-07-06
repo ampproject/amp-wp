@@ -265,9 +265,9 @@ export const enforceFileType = function( attachment, SelectionError ) {
 		return;
 	}
 
-	const fileTypeError = 'select-file-type-error',
-		allowedTypes = get( this, [ 'options', 'allowedTypes' ], null ),
-		selectButton = this.get( 'select' );
+	const fileTypeError = 'select-file-type-error';
+	const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
+	const selectButton = this.get( 'select' );
 
 	// If the file type isn't allowed, display a notice and disable the 'Select' button.
 	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
