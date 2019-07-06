@@ -9,7 +9,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { withCroppedFeaturedImage, withEnforcedFileType, withFeaturedImageNotice } from '../common/components';
+import { withCroppedFeaturedImage, withFeaturedImageNotice } from '../common/components';
 import { addAMPAttributes, addAMPExtraProps, filterBlocksEdit, filterBlocksSave } from './helpers';
 import { getMinimumFeaturedImageDimensions, getMinimumPortraitFeaturedImageDimensions } from '../common/helpers';
 import './store';
