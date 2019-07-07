@@ -37,8 +37,6 @@ import {
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
-	MEGABYTE_IN_BYTES,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 	TEXT_BLOCK_BORDER,
 } from '../constants';
 import {
@@ -1499,33 +1497,6 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
-};
-
-/**
- * Gets the number of megabytes per second for the video.
- *
- * @param {Object} media The media object of the video.
- * @return {number|null} Number of megabytes per second, or null if media details unavailable.
- */
-export const getVideoBytesPerSecond = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return null;
-	}
-	return media.media_details.filesize / media.media_details.length;
-};
-
-/**
- * Gets whether the video file size is over a certain amount of MB per second.
- *
- * @param {Object} media The media object of the video.
- * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
- */
-export const isVideoSizeExcessive = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return false;
-	}
-
-	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };
 
 /**

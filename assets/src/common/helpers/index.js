@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { get, includes, template } from 'lodash';
+import { get, has, includes, template } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -12,7 +12,7 @@ import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wo
 /**
  * Internal dependencies
  */
-import { MINIMUM_FEATURED_IMAGE_WIDTH } from '../constants';
+import { MEGABYTE_IN_BYTES, MINIMUM_FEATURED_IMAGE_WIDTH, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../constants';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -284,4 +284,31 @@ export const enforceFileType = function( attachment, SelectionError ) {
 			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
 		}
 	}
+};
+
+/**
+ * Gets the number of megabytes per second for the video.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {number|null} Number of megabytes per second, or null if media details unavailable.
+ */
+export const getVideoBytesPerSecond = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return null;
+	}
+	return media.media_details.filesize / media.media_details.length;
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of MB per second.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };
