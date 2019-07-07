@@ -67,14 +67,15 @@ export class MockSelectionError extends Mock {
 	/**
 	 * Class constructor.
 	 *
-	 * @param {Object} file The file, including a mimeType.
+	 * @param {Object} errorData The data of the error.
 	 */
-	constructor( file = {} ) {
+	constructor( errorData ) {
 		super( ...arguments );
 
-		const { mimeType } = file;
-		if ( mimeType ) {
-			this.mimeType = mimeType;
+		for ( const name in errorData ) {
+			if ( errorData.hasOwnProperty( name ) ) {
+				this[ name ] = errorData[ name ];
+			}
 		}
 	}
 }

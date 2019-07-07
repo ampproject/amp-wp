@@ -13,6 +13,14 @@ describe( 'getVideoBytesPerSecond', () => {
 		expect( getVideoBytesPerSecond( attachment ) ).toBe( 2000000 );
 	} );
 
+	it( 'should return the proper bytes per second for a simple call where the values are stored in the media attributes', () => {
+		const attachment = new Mock();
+		const filesizeInBytes = 63000000;
+		const fileLength = '1:03';
+		attachment.set( { attributes: { filesizeInBytes, fileLength } } );
+		expect( getVideoBytesPerSecond( attachment ) ).toBe( 1000000 );
+	} );
+
 	it( 'should return null if the filesize is not defined', () => {
 		const attachment = new Mock();
 		const length = 5;

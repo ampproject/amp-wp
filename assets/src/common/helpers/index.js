@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { get, has, includes, template } from 'lodash';
+import { get, has, includes, reduce, template } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -286,6 +286,37 @@ export const enforceFileType = function( attachment, SelectionError ) {
 	}
 };
 
+
+/**
+ * If the attachment has the wrong file type, this displays a notice in the Media Library and disables the 'Select' button.
+ *
+ * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
+ *
+ * @param {Object} attachment The selected attachment.
+ * @param {Object} SelectionError The error to display.
+ */
+export const enforceFileSize = function( attachment, SelectionError ) {
+	if ( ! attachment ) {
+		return;
+	}
+
+	const fileSizeError = 'select-file-size-error';
+	const isVideo = 'video' === get( attachment, [ 'media_type' ], null ) || 'video' === get( attachment, [ 'attributes', 'type' ], null );
+
+	// If the file type is 'video' and its size is over the limit, display a notice in the Media Library.
+	if ( isVideo && isVideoSizeExcessive( attachment ) ) {
+		this.secondary.set(
+			fileSizeError,
+			new SelectionError( {
+				actualVideoMegabytesPerSecond: Math.round( getVideoBytesPerSecond( attachment ) / MEGABYTE_IN_BYTES ),
+				maxVideoMegabytesPerSecond: VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+			} )
+		);
+	} else {
+		this.secondary.unset( fileSizeError );
+	}
+};
+
 /**
  * Gets the number of megabytes per second for the video.
  *
@@ -293,10 +324,13 @@ export const enforceFileType = function( attachment, SelectionError ) {
  * @return {number|null} Number of megabytes per second, or null if media details unavailable.
  */
 export const getVideoBytesPerSecond = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return null;
+	if ( has( media, [ 'media_details', 'filesize' ] ) && has( media, [ 'media_details', 'length' ] ) ) {
+		return media.media_details.filesize / media.media_details.length;
+	} else if ( has( media, [ 'attributes', 'filesizeInBytes' ] ) && has( media, [ 'attributes', 'fileLength' ] ) ) {
+		return media.attributes.filesizeInBytes / getSecondsFromTime( media.attributes.fileLength );
 	}
-	return media.media_details.filesize / media.media_details.length;
+
+	return null;
 };
 
 /**
@@ -306,9 +340,27 @@ export const getVideoBytesPerSecond = ( media ) => {
  * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
  */
 export const isVideoSizeExcessive = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return false;
-	}
+	return getVideoBytesPerSecond( media ) > VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
 
-	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+/**
+ * Gets the number of seconds in a colon-separated time string, like '01:10'.
+ *
+ * @param {string} time A colon-separated time, like '0:12'.
+ * @return {number} seconds The number of seconds in the time, like 12.
+ */
+export const getSecondsFromTime = ( time ) => {
+	const minuteInSeconds = 60;
+	const splitTime = time.split( ':' );
+
+	return reduce(
+		splitTime,
+		( totalSeconds, timeSection, index ) => {
+			const parsedTimeSection = isNaN( parseInt( timeSection ) ) ? 0 : parseInt( timeSection );
+			const distanceFromRight = splitTime.length - 1 - index;
+			const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, 360 for hours...
+			return totalSeconds + ( multiple * parsedTimeSection );
+		},
+		0
+	);
 };
