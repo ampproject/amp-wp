@@ -432,7 +432,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function set_twentyseventeen_quotes_icon() {
 		add_filter(
 			'the_content',
-			function ( $content ) {
+			static function ( $content ) {
 
 				// Why isn't Twenty Seventeen doing this to begin with? Why is it using JS to add the quote icon?
 				if ( function_exists( 'twentyseventeen_get_svg' ) && 'quote' === get_post_format() ) {
@@ -461,7 +461,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'get_custom_logo',
-			function( $html ) {
+			static function( $html ) {
 				$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
 				if ( ! $src ) {
 					return $html;
@@ -497,7 +497,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$theme_features = self::get_theme_features( $this->args, false );
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( $this, $theme_feature ) ) {
-				call_user_func( array( $this, $theme_feature ), $feature_args );
+				$this->$theme_feature( $feature_args );
 			}
 		}
 	}
@@ -512,7 +512,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function dequeue_scripts( $handles = array() ) {
 		add_action(
 			'wp_enqueue_scripts',
-			function() use ( $handles ) {
+			static function() use ( $handles ) {
 				foreach ( $handles as $handle ) {
 					wp_dequeue_script( $handle );
 				}
@@ -613,7 +613,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		add_filter(
 			'body_class',
-			function( $body_classes ) use ( $args ) {
+			static function( $body_classes ) use ( $args ) {
 				if ( has_header_video() ) {
 					$body_classes[] = $args['class_name'];
 				}
@@ -647,7 +647,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentynineteen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>
@@ -701,7 +701,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
 				ob_start();
 				?>
@@ -800,7 +800,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyseventeen_image_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>
@@ -932,7 +932,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_nav_menu_styles( $args = array() ) {
 		add_action(
 			'wp_enqueue_scripts',
-			function() use ( $args ) {
+			static function() use ( $args ) {
 				ob_start();
 				?>
 				<style>
@@ -1225,7 +1225,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// Make sure the featured image gets responsive layout.
 		add_filter(
 			'wp_get_attachment_image_attributes',
-			function( $attributes ) {
+			static function( $attributes ) {
 				if ( preg_match( '/(^|\s)(attachment-post-thumbnail)(\s|$)/', $attributes['class'] ) ) {
 					$attributes['data-amp-layout'] = 'responsive';
 				}
@@ -1242,7 +1242,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyfourteen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>

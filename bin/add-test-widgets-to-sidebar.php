@@ -276,7 +276,7 @@ function amp_image_widget() {
  * @return array|WP_CLI::error The media IDs, or an error on failure.
  */
 function amp_media( $type, $count = 3 ) {
-	$query = new \WP_Query(
+	$query = new WP_Query(
 		array(
 			'post_type'      => 'attachment',
 			'post_mime_type' => $type,
@@ -381,8 +381,7 @@ function amp_create_widget( $widget ) {
 	$settings   = isset( $widget['settings'] ) ? $widget['settings'] : array();
 
 	if ( ! isset( $settings['title'] ) ) {
-		$title             = str_replace( '_', ' ', $id_base );
-		$title             = str_replace( '-', ' ', $title );
+		$title             = str_replace( array( '_', '-' ), ' ', $id_base );
 		$settings['title'] = sprintf( 'Test %s Widget', ucwords( $title ) );
 	}
 

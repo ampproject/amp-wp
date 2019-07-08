@@ -464,7 +464,7 @@ class AMP_Options_Manager {
 
 		$notice_id = 'amp-welcome-notice-1';
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
-		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
+		if ( in_array( $notice_id, explode( ',', (string) $dismissed ), true ) ) {
 			return;
 		}
 
@@ -755,13 +755,13 @@ class AMP_Options_Manager {
 			case AMP_Theme_Support::STANDARD_MODE_SLUG:
 				$message = esc_html__( 'Standard mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case AMP_Theme_Support::TRANSITIONAL_MODE_SLUG:
 				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case AMP_Theme_Support::READER_MODE_SLUG:

@@ -21,7 +21,7 @@ class Test_AMP extends WP_UnitTestCase {
 	/**
 	 * Test amp_is_canonical().
 	 *
-	 * @covers \amp_is_canonical()
+	 * @covers ::amp_is_canonical()
 	 */
 	public function test_amp_is_canonical() {
 		remove_theme_support( AMP_Theme_Support::SLUG );

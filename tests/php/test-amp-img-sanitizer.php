@@ -19,7 +19,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		parent::setUp();
 		add_filter(
 			'amp_extract_image_dimensions_batch',
-			function( $urls ) {
+			static function( $urls ) {
 				$dimensions = array();
 				foreach ( array_keys( $urls ) as $url ) {
 					if ( preg_match( '#/(?P<width>\d+)x(?P<height>\d+)$#', $url, $matches ) ) {
@@ -338,7 +338,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 		$args = array_merge(
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			),

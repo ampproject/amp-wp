@@ -13,7 +13,7 @@
  * @covers AMP_Validation_Manager
  * @since 0.7
  */
-class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
+class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 	/**
 	 * The name of the tested class.
@@ -267,7 +267,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// No admin bar item when no template available.
 		$this->go_to( home_url() );
 		add_theme_support( AMP_Theme_Support::SLUG );
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 		$this->assertTrue( AMP_Validation_Manager::has_cap() );
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
@@ -342,7 +342,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
 			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
 		}
 
@@ -364,32 +364,32 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$GLOBALS['pagenow']        = 'post.php';
 
 		register_post_type( 'secret', array( 'public' => false ) );
-		$secret           = $this->factory()->post->create_and_get( array( 'post_type' => 'secret' ) );
+		$secret           = self::factory()->post->create_and_get( array( 'post_type' => 'secret' ) );
 		$_POST['post_ID'] = $secret->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $secret->ID );
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
 
-		$auto_draft       = $this->factory()->post->create_and_get( array( 'post_status' => 'auto-draft' ) );
+		$auto_draft       = self::factory()->post->create_and_get( array( 'post_status' => 'auto-draft' ) );
 		$_POST['post_ID'] = $auto_draft->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $auto_draft->ID );
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 		$this->assertEmpty( AMP_Validation_Manager::validate_queued_posts_on_frontend() );
 
 		// Testing without $_POST context.
-		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
+		$post = self::factory()->post->create_and_get( array( 'post_type' => 'post' ) );
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertFalse( has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 
 		// Test success.
-		$post = $this->factory()->post->create_and_get( array( 'post_type' => 'post' ) );
+		$post = self::factory()->post->create_and_get( array( 'post_type' => 'post' ) );
 		$_POST['post_ID'] = $post->ID;
 		AMP_Validation_Manager::handle_save_post_prompting_validation( $post->ID );
 		$this->assertEquals( 10, has_action( 'shutdown', array( 'AMP_Validation_Manager', 'validate_queued_posts_on_frontend' ) ) );
 
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return new WP_Error( 'http_request_made' );
 			}
 		);
@@ -460,7 +460,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 
-		$id = $this->factory()->post->create();
+		$id = self::factory()->post->create();
 		$this->assertNull(
 			AMP_Validation_Manager::get_amp_validity_rest_field(
 				compact( 'id' ),
@@ -489,7 +489,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			)
 		);
 
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 		// GET request.
 		$field = AMP_Validation_Manager::get_amp_validity_rest_field(
@@ -502,7 +502,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertEquals(
 			$field['results'],
 			array_map(
-				function ( $error ) {
+				static function ( $error ) {
 					return array(
 						'sanitized'   => false,
 						'error'       => $error,
@@ -518,7 +518,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// PUT request.
 		add_filter(
 			'pre_http_request',
-			function() {
+			static function() {
 				return array(
 					'body'     => '<html><body></body><!--AMP_VALIDATION:{"results":[]}--></html>',
 					'response' => array(
@@ -545,7 +545,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_has_cap() {
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'subscriber',
 				)
@@ -570,7 +570,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$node = $this->node;
 		add_filter(
 			'amp_validation_error',
-			function( $error, $context ) use ( $node, $that ) {
+			static function( $error, $context ) use ( $node, $that ) {
 				$error['filtered'] = true;
 				$that->assertEquals( AMP_Validation_Error_Taxonomy::INVALID_ELEMENT_CODE, $error['code'] );
 				$that->assertSame( $node, $context['node'] );
@@ -646,10 +646,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validated_URL_Post_Type::register();
 		AMP_Validation_Error_Taxonomy::register();
 		$this->set_capability();
-		$post = $this->factory()->post->create_and_get();
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$post   = self::factory()->post->create_and_get();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 
 		$this->assertNotContains( 'notice notice-warning', $output );
 
@@ -669,9 +667,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 
 		// In 'Transitional' mode with 'auto_accept_sanitization' set to false.
 		$expected_notice_non_accepted_errors = 'There is content which fails AMP validation. Non-accepted validation errors prevent AMP from being served, and the user will be redirected to the non-AMP version.';
@@ -681,9 +677,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		// In 'Standard' mode, if there are unaccepted validation errors, there should be a notice because this will block serving an AMP document.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 		$this->assertContains( 'There is content which fails AMP validation. Though your site is configured to automatically accept sanitization errors, there are rejected error(s). This could be because auto-acceptance of errors was disabled earlier. You should review the issues to confirm whether or not sanitization should be accepted or rejected.', $output );
 
 		/*
@@ -695,9 +689,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG, array( AMP_Theme_Support::PAIRED_FLAG => true ) );
 		AMP_Validated_URL_Post_Type::store_validation_errors( $validation_errors, get_permalink( $post->ID ) );
 		AMP_Options_Manager::update_option( 'auto_accept_sanitization', false );
-		ob_start();
-		AMP_Validation_Manager::print_edit_form_validation_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_edit_form_validation_status' ), array( $post ) );
 		$this->assertContains( $expected_notice_non_accepted_errors, $output );
 	}
 
@@ -838,12 +830,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		if ( ! function_exists( 'do_blocks' ) ) {
 			$this->markTestSkipped( 'Gutenberg not active.' );
 		}
-		if ( ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) ) {
+		if ( version_compare( get_bloginfo( 'version' ), '4.9', '<' ) ) {
 			$this->markTestSkipped( 'The WP version is less than 4.9, so Gutenberg did not init.' );
 		}
 
 		global $post;
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->assertInstanceOf( 'WP_Post', get_post() );
 
 		$rendered_block = do_blocks( AMP_Validation_Manager::add_block_source_comments( $content ) );
@@ -933,7 +925,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_callback_wrappers() {
 		global $post;
 		$that = $this;
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->set_capability();
 		$action_no_tag_output     = 'foo_action';
 		$action_core_output       = 'core_action';
@@ -1016,13 +1008,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertNotContains( '<!--/amp-source-stack ', $output );
 
 		// Ensure that nested actions output the expected stack, and that has_action() works as expected in spite of the function wrapping.
-		$handle_outer_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+		$handle_outer_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
 			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			do_action( 'inner_action' );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 		};
-		$handle_inner_action = function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
+		$handle_inner_action = static function() use ( $that, &$handle_outer_action, &$handle_inner_action ) {
 			$that->assertEquals( 10, has_action( 'outer_action', $handle_outer_action ) );
 			$that->assertEquals( 10, has_action( 'inner_action', $handle_inner_action ) );
 			echo '<b>Hello</b>';
@@ -1073,7 +1065,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		AMP_Validation_Manager::add_validation_error_sourcing();
 		add_shortcode(
 			'test',
-			function() {
+			static function() {
 				return '<b>test</b>';
 			}
 		);
@@ -1139,7 +1131,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_filter_wrapped_callback() {
 		$test_string     = 'Filter-amended Value';
 		$filter_callback = array(
-			'function'      => function ( $value ) use ( $test_string ) {
+			'function'      => static function ( $value ) use ( $test_string ) {
 				return $value . $test_string;
 			},
 			'accepted_args' => 1,
@@ -1153,9 +1145,9 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$value = 'Some Value';
 		apply_filters( 'foo', $value );
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $filter_callback );
-		$this->assertTrue( $wrapped_callback instanceof AMP_Validation_Callback_Wrapper );
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		$filtered_value = call_user_func( $wrapped_callback, $value );
+		$filtered_value = $wrapped_callback( $value );
 		$output = ob_get_clean();
 		$this->assertEquals( $value . $test_string, $filtered_value );
 		$this->assertEmpty( $output, 'Expected no output since no action triggered.' );
@@ -1169,7 +1161,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	public function test_action_wrapped_callback() {
 		$test_string     = "<b class='\nfoo\nbar\n'>Cool!</b>";
 		$action_callback = array(
-			'function'      => function() use ( $test_string ) {
+			'function'      => static function() use ( $test_string ) {
 				echo $test_string; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			'accepted_args' => 1,
@@ -1182,12 +1174,12 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		do_action( 'bar' ); // So that output buffering will be done.
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertTrue( $wrapped_callback instanceof AMP_Validation_Callback_Wrapper );
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		call_user_func( $wrapped_callback );
+		$wrapped_callback();
 		$output = ob_get_clean();
 
-		$this->assertEquals( 'AMP_Validation_Callback_Wrapper', get_class( $wrapped_callback ) );
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		$this->assertContains( $test_string, $output );
 		$this->assertContains( '<!--amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
 		$this->assertContains( '<!--/amp-source-stack {"type":"plugin","name":"amp","hook":"bar"}', $output );
@@ -1203,13 +1195,13 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		$wrapped_callback = AMP_Validation_Manager::wrapped_callback( $action_callback );
-		$this->assertTrue( $wrapped_callback instanceof AMP_Validation_Callback_Wrapper );
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		AMP_Theme_Support::start_output_buffering();
-		$result = call_user_func( $wrapped_callback );
+		$result = $wrapped_callback();
 		$output = ob_get_clean();
-		$this->assertEquals( 'AMP_Validation_Callback_Wrapper', get_class( $wrapped_callback ) );
+		$this->assertInstanceOf( '\\AMP_Validation_Callback_Wrapper', $wrapped_callback );
 		$this->assertEquals( '', $output );
-		$this->assertEquals( call_user_func( array( $this, 'get_string' ) ), $result );
+		$this->assertEquals( $this->get_string(), $result );
 		unset( $post );
 	}
 
@@ -1244,7 +1236,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_get_amp_validate_nonce() {
 		$nonce = AMP_Validation_Manager::get_amp_validate_nonce();
-		$this->assertTrue( is_string( $nonce ) );
+		$this->assertInternalType( 'string', $nonce );
 		$this->assertEquals( 10, strlen( $nonce ) );
 	}
 
@@ -1255,7 +1247,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_should_validate_response() {
 		global $post;
-		$post = $this->factory()->post->create();
+		$post = self::factory()->post->create();
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->assertFalse( AMP_Validation_Manager::should_validate_response() );
@@ -1291,7 +1283,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		$this->assertNotContains( 'AMP_VALIDATION:{', $dom->documentElement->lastChild->nodeValue );
 
 		// Ensure that should_validate_response() is true, so finalize_validation() will append the AMP_VALIDATION comment.
-		$post = $this->factory()->post->create();
+		$post = self::factory()->post->create();
 		$_GET[ AMP_Validation_Manager::VALIDATE_QUERY_VAR ] = 1;
 		$this->set_capability();
 		AMP_Validation_Manager::finalize_validation( $dom );
@@ -1307,7 +1299,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_filter_sanitizer_args() {
 		global $post;
-		$post       = $this->factory()->post->create_and_get();
+		$post       = self::factory()->post->create_and_get();
 		$sanitizers = array(
 			'AMP_Img_Sanitizer'      => array(),
 			'AMP_Form_Sanitizer'     => array(),
@@ -1347,8 +1339,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 			),
 		);
 
-		$this->factory()->post->create();
-		$filter = function() use ( $validation ) {
+		self::factory()->post->create();
+		$filter = static function() use ( $validation ) {
 			return array(
 				'body' => sprintf(
 					'<html amp><head></head><body></body><!--%s--></html>',
@@ -1378,8 +1370,8 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		);
 
 		// Test headers absent.
-		$this->factory()->post->create();
-		$filter = function() use ( $validation_errors ) {
+		self::factory()->post->create();
+		$filter = static function() {
 			return array(
 				'body'    => '',
 				'headers' => array(),
@@ -1394,8 +1386,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 		// Test success.
 		$that          = $this;
 		$validated_url = home_url( '/foo/' );
-		$filter        = function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
-			unset( $pre, $r );
+		$filter        = static function( $pre, $r, $url ) use ( $validation_errors, $validated_url, $that ) {
 			$that->assertStringStartsWith(
 				add_query_arg(
 					AMP_Validation_Manager::VALIDATE_QUERY_VAR,
@@ -1432,9 +1423,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function test_print_plugin_notice() {
 		global $pagenow;
-		ob_start();
-		AMP_Validation_Manager::print_plugin_notice();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_plugin_notice' ) );
 		$this->assertEmpty( $output );
 		$pagenow          = 'plugins.php';
 		$_GET['activate'] = 'true';
@@ -1453,9 +1442,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 				),
 			)
 		);
-		ob_start();
-		AMP_Validation_Manager::print_plugin_notice();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Validation_Manager', 'print_plugin_notice' ) );
 		$this->assertContains( 'Warning: The following plugin may be incompatible with AMP', $output );
 		$this->assertContains( $this->plugin_name, $output );
 		$this->assertContains( 'More details', $output );
@@ -1474,7 +1461,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 
 		add_theme_support( AMP_Theme_Support::SLUG );
 		global $post;
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$slug = 'amp-block-validation';
 		$this->set_capability();
 		AMP_Validation_Manager::enqueue_block_validation();
@@ -1598,7 +1585,7 @@ class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
 	 */
 	public function set_capability() {
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)

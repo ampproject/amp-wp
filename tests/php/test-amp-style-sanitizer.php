@@ -252,7 +252,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$error_codes = array();
 		$args        = array(
-			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		);
@@ -528,14 +528,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function test_link_and_style_elements( $source, $expected_stylesheets, $expected_errors = array() ) {
 		add_filter(
 			'locale',
-			function() {
+			static function() {
 				return 'en_US';
 			}
 		);
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) {
-				unset( $request, $preempt );
+			static function( $preempt, $request, $url ) {
 				$preempt = array(
 					'response' => array(
 						'code' => 200,
@@ -555,7 +554,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$error_codes = array();
 		$args        = array(
 			'use_document_element'      => true,
-			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		);
@@ -820,7 +819,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$style = implode(
 			'',
 			array_map(
-				function ( $selector ) {
+				static function ( $selector ) {
 					return sprintf( '%s{ color: red; }', $selector );
 				},
 				array_keys( $selectors )
@@ -1028,7 +1027,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			)
@@ -1057,7 +1056,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			)
@@ -1152,7 +1151,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			)
@@ -1220,7 +1219,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			)
@@ -1251,7 +1250,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Style_Sanitizer::finalize_styles()
 	 */
 	public function test_css_manifest() {
-		$get_sanitized_dom = function ( $sanitizer_args, $add_excessive_css = false ) {
+		$get_sanitized_dom = static function ( $sanitizer_args, $add_excessive_css = false ) {
 			ob_start();
 			?>
 			<html amp>
@@ -1292,7 +1291,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				array_merge(
 					array(
 						'use_document_element'      => true,
-						'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+						'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 							$error_codes[] = $error['code'];
 						},
 					),
@@ -1440,8 +1439,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$request_count = 0;
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
-				unset( $request );
+			static function( $preempt, $request, $url ) use ( $href, &$request_count, $content_type, $response_body ) {
 				if ( set_url_scheme( $url, 'https' ) === set_url_scheme( $href, 'https' ) ) {
 					$request_count++;
 					$preempt = array(
@@ -1460,7 +1458,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			3
 		);
 
-		$sanitize_and_get_stylesheets = function() use ( $href, $expected_error_codes ) {
+		$sanitize_and_get_stylesheets = static function() use ( $href ) {
 			$html = sprintf( '<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="%s"></head><body></body></html>', esc_url( $href ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 			$dom  = AMP_DOM_Utils::get_dom( $html );
 
@@ -1470,7 +1468,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				$dom,
 				array(
 					'use_document_element'      => true,
-					'validation_error_callback' => function( $error ) use ( &$found_error_codes ) {
+					'validation_error_callback' => static function( $error ) use ( &$found_error_codes ) {
 						$found_error_codes[] = $error['code'];
 					},
 				)
@@ -1562,7 +1560,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element' => true,
-				'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 					$error_codes[] = $error['code'];
 				},
 			)
@@ -1783,7 +1781,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	/**
 	 * Tests that font URLs get validated.
 	 *
-	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
+	 * @covers ::amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 * @dataProvider get_font_urls
 	 * @param string $url         Font URL.
 	 * @param array  $error_codes Error codes.
@@ -1800,7 +1798,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$validation_errors ) {
+				'validation_error_callback' => static function( $error ) use ( &$validation_errors ) {
 					$validation_errors[] = $error;
 				},
 			)
@@ -1826,7 +1824,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * Test addition of crossorigin attribute to external stylesheet links.
 	 *
 	 * @covers AMP_Style_Sanitizer::process_link_element()
-	 * @covers \amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
+	 * @covers ::amp_filter_font_style_loader_tag_with_crossorigin_anonymous()
 	 */
 	public function test_cors_enabled_stylesheet_url() {
 
@@ -1865,7 +1863,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'<style>div::after{content:"After login"}</style><div><input type="checkbox"><button class="wp-core-ui button"></button></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				0, // Zero HTTP requests.
 				null, // No preempting of request, as no external requests.
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$expected_order = array(
 						preg_quote( 'input[type="checkbox"]:disabled', '/' ),
 						preg_quote( '.wp-core-ui .button', '/' ),
@@ -1887,13 +1885,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
-				function ( $requested_url ) {
+				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$expected_order = array(
 						'local-does-not-exist.css',
 						'remote-does-not-exist.css',
@@ -1927,13 +1925,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				),
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				3, // Three HTTP requests (to bogus.example.com). The local-does-not-exist.css checks filesystem directly.
-				function ( $requested_url ) {
+				static function ( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'does-not-exist' ) ) {
 						return new WP_Error( 'does_not_exist' );
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$expected_absent = array(
 						'local-does-not-exist.css',
 						'remote-does-not-exist.css',
@@ -1968,13 +1966,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				function( $requested_url ) {
+				static function( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return '@import url( "../css/./foo/../buttons.css" );body{color:#123456}';
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons"}', '/' ) . '/s',
 						$stylesheet
@@ -1986,13 +1984,13 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons2"}</style><body class="wp-core-ui"><div><button class="button"></button></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				1,
-				function( $requested_url ) {
+				static function( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', includes_url( '/css/buttons.css' ) );
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( '.wp-core-ui .button', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
 						$stylesheet
@@ -2004,7 +2002,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				includes_url( '/dynamic/import-buttons.php' ),
 				'<style>div::after{content:"After import-buttons2"}</style><body><div></div></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				2,
-				function( $requested_url ) {
+				static function( $requested_url ) {
 					$self_call_url = includes_url( '/dynamic/nested.php' );
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
 						return sprintf( '@import "%s";body{color:#123456}', $self_call_url );
@@ -2013,7 +2011,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					}
 					return null;
 				},
-				function ( WP_UnitTestCase $test, $stylesheet ) {
+				static function ( WP_UnitTestCase $test, $stylesheet ) {
 					$test->assertRegExp(
 						'/.*' . preg_quote( 'div::before{content:"HELLO NESTED"}', '/' ) . '.*' . preg_quote( 'body{color:#123456}', '/' ) . '.*' . preg_quote( 'div::after{content:"After import-buttons2"}', '/' ) . '/s',
 						$stylesheet
@@ -2043,7 +2041,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$imports = implode(
 			'',
 			array_map(
-				function ( $stylesheet_url ) {
+				static function ( $stylesheet_url ) {
 					return sprintf( '@import url("%s");', $stylesheet_url );
 				},
 				$stylesheet_urls
@@ -2056,11 +2054,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		add_filter(
 			'pre_http_request',
-			function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
+			static function( $preempt, $request, $url ) use ( $mock_response, $stylesheet_urls, &$http_request_count ) {
 				$http_request_count++;
-				unset( $request );
 				if ( $mock_response ) {
-					$body = call_user_func( $mock_response, $url, $stylesheet_urls );
+					$body = $mock_response( $url, $stylesheet_urls );
 					if ( null !== $body ) {
 						$preempt = array(
 							'response' => array(
@@ -2095,7 +2092,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 
 		$stylesheet = $dom->getElementsByTagName( 'style' )->item( 0 )->textContent;
 
-		call_user_func( $assert, $this, $stylesheet, $dom );
+		$assert( $this, $stylesheet, $dom );
 		$this->assertEquals( $expected_http_request_count, $http_request_count );
 	}
 
@@ -2227,18 +2224,18 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	public function get_prioritization_data() {
 		add_filter(
 			'theme_root',
-			function () {
+			static function () {
 				return ABSPATH . 'wp-content/themes';
 			}
 		);
 		add_filter(
 			'theme_root_uri',
-			function () {
+			static function () {
 				return site_url( 'wp-content/themes' );
 			}
 		);
 
-		$render_template = function () {
+		$render_template = static function () {
 			ob_start();
 			?>
 			<!DOCTYPE html><html><head><meta charset="utf-8"><?php wp_head(); ?></head><body <?php body_class(); ?>><?php wp_footer(); ?></body></html>
@@ -2256,7 +2253,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					require_once get_template_directory() . '/functions.php';
 					add_action(
 						'wp_head',
-						function() {
+						static function() {
 							printf( '<style media=print id="early-print-style">html:after { content:"earlyprintstyle %s"; }</style>', esc_html( str_repeat( 'a', 49990 ) ) );
 						},
 						-1000
@@ -2264,7 +2261,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
 					AMP_Theme_Support::add_hooks();
 					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
-					wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+					wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
 					add_action(
 						'wp_footer',
@@ -2343,7 +2340,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		$error_codes = array();
 		$args        = array(
 			'use_document_element'      => true,
-			'validation_error_callback' => function( $error ) use ( &$error_codes ) {
+			'validation_error_callback' => static function( $error ) use ( &$error_codes ) {
 				$error_codes[] = $error['code'];
 			},
 		);

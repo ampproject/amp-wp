@@ -105,7 +105,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		AMP_Service_Worker::add_image_caching( wp_service_workers()->get_registry() );
 		$after = wp_service_workers()->get_registry()->caching_routes()->get_all();
 
-		$this->assertSame( count( $before ) + 1, count( $after ) );
+		$this->assertCount( count( $before ) + 1, $after );
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$before = wp_service_workers()->get_registry()->caching_routes()->get_all();
 		AMP_Service_Worker::add_google_fonts_caching( wp_service_workers()->get_registry() );
 		$after = wp_service_workers()->get_registry()->caching_routes()->get_all();
-		$this->assertSame( count( $before ) + 2, count( $after ) );
+		$this->assertCount( count( $before ) + 2, $after );
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		);
 		add_filter(
 			'amp_analytics_entries',
-			function () {
+			static function () {
 				return array(
 					array(
 						'type'   => 'foo',
@@ -189,7 +189,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		remove_all_actions( 'wp_footer' );
 		remove_theme_support( 'amp' );
 
-		$post_id = $this->factory()->post->create();
+		$post_id = self::factory()->post->create();
 		$this->go_to( get_permalink( $post_id ) );
 
 		AMP_Service_Worker::add_install_hooks();
@@ -209,9 +209,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	 * @covers \AMP_Service_Worker::install_service_worker()
 	 */
 	public function test_install_service_worker() {
-		ob_start();
-		AMP_Service_Worker::install_service_worker();
-		$output = ob_get_clean();
+		$output = get_echo( array( 'AMP_Service_Worker', 'install_service_worker' ) );
 
 		$this->assertContains( '<amp-install-serviceworker', $output );
 	}
@@ -224,8 +222,8 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	public function test_handle_service_worker_iframe_install() {
 		add_filter(
 			'wp_die_handler',
-			function () {
-				return function() {
+			static function () {
+				return static function() {
 					throw new Exception( 'exited' );
 				};
 			}
@@ -238,7 +236,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		ob_start();
 		$exception = null;
 		try {
-			$this->go_to( add_query_arg( \AMP_Service_Worker::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR, '1', home_url() ) );
+			$this->go_to( add_query_arg( AMP_Service_Worker::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR, '1', home_url() ) );
 		} catch ( Exception $e ) {
 			$exception = $e;
 		}

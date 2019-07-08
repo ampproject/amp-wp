@@ -105,10 +105,10 @@ class AMP_DOM_Utils {
 			 */
 			$document = preg_replace_callback(
 				'#^.+?(?=<body)#is',
-				function( $head_matches ) {
+				static function( $head_matches ) {
 					return preg_replace_callback(
 						'#<noscript[^>]*>.*?</noscript>#si',
-						function( $noscript_matches ) {
+						static function( $noscript_matches ) {
 							$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
 							AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $noscript_matches[0];
 							return $placeholder;
@@ -206,9 +206,9 @@ class AMP_DOM_Utils {
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
 		return (
-			$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
+			( $node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true ) )
 			||
-			$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) // Whitespace text nodes are OK.
+			( $node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) ) // Whitespace text nodes are OK.
 			||
 			$node instanceof DOMComment
 		);
@@ -294,7 +294,7 @@ class AMP_DOM_Utils {
 		 * @param array $tag_matches Tag matches.
 		 * @return string Replacement.
 		 */
-		$replace_callback = function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
+		$replace_callback = static function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
 			$old_attrs = rtrim( $tag_matches['attrs'] );
 			$new_attrs = '';
 			$offset    = 0;
@@ -320,7 +320,7 @@ class AMP_DOM_Utils {
 		};
 
 		// Match all start tags that contain a binding attribute.
-		$pattern   = join(
+		$pattern   = implode(
 			'',
 			array(
 				'#<',
@@ -347,7 +347,7 @@ class AMP_DOM_Utils {
 		 * See https://github.com/ampproject/amp-wp/issues/993 for additional context on this issue.
 		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
 		 */
-		return ( ! is_null( $converted ) ) ? $converted : $html;
+		return ( null !== $converted ) ? $converted : $html;
 	}
 
 	/**
@@ -413,7 +413,7 @@ class AMP_DOM_Utils {
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
 		// The DOMDocument may contain no body. In which case return nothing.
-		if ( is_null( $body ) ) {
+		if ( null === $body ) {
 			return '';
 		}
 
@@ -504,7 +504,7 @@ class AMP_DOM_Utils {
 				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
 			}
 
-			$boundary       = 'fragment_boundary:' . (string) wp_rand();
+			$boundary       = 'fragment_boundary:' . wp_rand();
 			$start_boundary = $boundary . ':start';
 			$end_boundary   = $boundary . ':end';
 			$comment_start  = $dom->createComment( $start_boundary );
@@ -649,7 +649,7 @@ class AMP_DOM_Utils {
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
 		_deprecated_function( __METHOD__, '0.7' );
 
-		if ( is_null( $node ) ) {
+		if ( null === $node ) {
 			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
 		}
 

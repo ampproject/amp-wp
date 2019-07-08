@@ -54,7 +54,7 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Templates::filter_user_has_cap()
 	 */
 	public function test_filter_user_has_cap() {
-		$story_id = $this->factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$story_id = self::factory()->post->create( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		wp_set_object_terms( $story_id, AMP_Story_Templates::TEMPLATES_TERM, AMP_Story_Templates::TEMPLATES_TAXONOMY );
 
 		$amp_story_templates = new AMP_Story_Templates();

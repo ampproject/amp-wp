@@ -156,7 +156,7 @@ class AMP_Image_Dimension_Extractor {
 		try {
 			self::fetch_images( $urls_to_fetch, $images );
 			self::process_fetched_images( $urls_to_fetch, $images, $dimensions, $transient_expiration );
-		} catch ( \Exception $exception ) {
+		} catch ( Exception $exception ) {
 			trigger_error( esc_html( $exception->getMessage() ), E_USER_WARNING ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 		}
 

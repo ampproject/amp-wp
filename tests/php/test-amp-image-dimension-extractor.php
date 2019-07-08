@@ -48,10 +48,10 @@ class AMP_Image_Dimension_Extractor_Extract_Test extends WP_UnitTestCase {
 
 		add_action(
 			'amp_extract_image_dimensions_batch_callbacks_registered',
-			function() use ( $cdn_url ) {
+			static function() use ( $cdn_url ) {
 				add_filter(
 					'amp_extract_image_dimensions_batch',
-					function() use ( $cdn_url ) {
+					static function() use ( $cdn_url ) {
 						return array(
 							$cdn_url => array(
 								100,

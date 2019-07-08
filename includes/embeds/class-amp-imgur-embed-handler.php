@@ -144,8 +144,8 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 				return false;
 			}
 			return $matches[1];
-		} else {
-			return $pieces[1];
 		}
+
+		return $pieces[1];
 	}
 }

@@ -92,9 +92,9 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 	 * @covers \AMP_Core_Block_Handler::ampify_video_block()
 	 */
 	public function test_ampify_video_block() {
-		$attachment_id = $this->factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
+		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
 
-		$post_id = $this->factory()->post->create(
+		$post_id = self::factory()->post->create(
 			array(
 				'post_title'   => 'Video',
 				'post_content' => sprintf(

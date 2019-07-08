@@ -164,9 +164,9 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Settings::render_status()
 	 */
 	public function test_render_status() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)
@@ -178,25 +178,19 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// This is in AMP-first mode with a template that can be rendered.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( 'post type does not support it', $output );
 		$this->assertNotContains( $checkbox_enabled, $output );
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -204,25 +198,22 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
 		$this->assertContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
 		$this->assertNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		wp_set_current_user(
-			$this->factory()->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'subscriber',
 				)
 			)
 		);
 
-		ob_start();
-		$this->instance->render_status( $post );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( array( $this->instance, 'render_status' ), array( $post ) );
+		$this->assertEmpty( $output );
 	}
 
 	/**
@@ -237,7 +228,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		);
 
 		// A post of type post shouldn't have errors, and AMP should be enabled.
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->assertEquals(
 			$expected_status_and_errors,
 			$this->instance->get_status_and_errors( $post )
@@ -323,12 +314,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_save_amp_status() {
 		// Test failure.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Setup for success.
 		wp_set_current_user(
-			$this->factory->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)
@@ -338,13 +329,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'disabled';
 
 		// Test revision bail.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_save_post_revision( $post_id );
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Test post update success to disable.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_update_post(
 			array(

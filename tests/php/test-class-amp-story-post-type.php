@@ -77,14 +77,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$stories                   = $this->create_story_posts_with_featured_images( $featured_image_dimensions );
 
 		foreach ( $stories as $story ) {
-			ob_start();
-			AMP_Story_Post_Type::the_single_story_card(
+			$card_markup = get_echo(
+				array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
 				array(
-					'post' => $story,
-					'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					array(
+						'post' => $story,
+						'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					),
 				)
 			);
-			$card_markup = ob_get_clean();
 			$this->assertContains( get_the_permalink( $story->ID ), $card_markup );
 			$this->assertContains( ' class="latest_stories__link"', $card_markup );
 			// Because there's no 'disable_link' argument, this should have an <a> with an href.
@@ -92,20 +93,24 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		}
 
 		$first_story = reset( $stories );
-		ob_start();
-		AMP_Story_Post_Type::the_single_story_card(
+		$card_markup = get_echo(
+			array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
 			array(
-				'post'         => $first_story,
-				'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
-				'disable_link' => true,
+				array(
+					'post'         => $first_story,
+					'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					'disable_link' => true,
+				),
 			)
 		);
-		$this->assertNotContains( '<a', ob_get_clean() );
+		$this->assertNotContains( '<a', $card_markup );
 
 		// If the 'post' argument isn't either an int or a WP_Post, this shouldn't output anything.
-		ob_start();
-		AMP_Story_Post_Type::the_single_story_card( array( 'post' => 'foo post' ) );
-		$this->assertEmpty( ob_get_clean() );
+		$card_markup = get_echo(
+			array( 'AMP_Story_Post_Type', 'the_single_story_card' ),
+			array( array( 'post' => 'foo post' ) )
+		);
+		$this->assertEmpty( $card_markup );
 	}
 
 	/**
@@ -145,7 +150,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertFalse( wp_style_is( AMP_Story_Post_Type::STORY_CARD_CSS_SLUG ) );
 
 		// Now that the conditional is satisfied, this should enqueue the stylesheet.
-		$amp_story_post = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$amp_story_post = self::factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$this->go_to( add_query_arg( 'embed', '', get_post_permalink( $amp_story_post ) ) );
 		AMP_Story_Post_Type::enqueue_embed_styling();
 	}
@@ -294,19 +299,19 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_remove_title_from_embed() {
 		$initial_output = '<iframe src="https://example.com/baz"></iframe>';
-		$wrong_post     = $this->factory()->post->create_and_get();
+		$wrong_post     = self::factory()->post->create_and_get();
 
 		// The post type is not amp_story, so this should return the same $output it's passed.
 		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $initial_output, $wrong_post ) );
 
 		// The post type is correct, but the <blockquote> does not have the expected class, so this should again return the same $output.
-		$correct_post              = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$correct_post              = self::factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$block_quote_without_class = '<blockquote>Example Title</blockquote>';
 		$output_with_blockquote    = $block_quote_without_class . $initial_output;
 		$this->assertEquals( $output_with_blockquote, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
 
 		// All of the conditions are satisfied, so this should remove the <blockquote> and the elements it contains.
-		$correct_post           = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$correct_post           = self::factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$block_quote            = '<blockquote class="wp-embedded-content">Example Title</blockquote>';
 		$output_with_blockquote = $block_quote . $initial_output;
 		$this->assertEquals( $initial_output, AMP_Story_Post_Type::remove_title_from_embed( $output_with_blockquote, $correct_post ) );
@@ -320,13 +325,13 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function test_change_embed_iframe_attributes() {
 		remove_theme_support( 'amp' );
 		$original_embed_markup = '<iframe sandbox="allow-scripts" width="600" height="343" security="restricted" marginwidth="10" marginheight="10">';
-		$non_amp_story         = $this->factory()->post->create_and_get();
+		$non_amp_story         = self::factory()->post->create_and_get();
 
 		// This isn't an AMP story embed, so it shouldn't change the markup.
 		$this->assertEquals( $original_embed_markup, AMP_Story_Post_Type::change_embed_iframe_attributes( $original_embed_markup, $non_amp_story ) );
 
 		// This is an AMP story embed, but the markup doesn't have an <iframe>, so it shouldn't be changed.
-		$amp_story                   = $this->factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+		$amp_story                   = self::factory()->post->create_and_get( array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 		$embed_markup_without_iframe = '<div class="wp-embed"><img alt=baz src="https://example.com/baz.jpeg></div>';
 		$this->assertEquals( $embed_markup_without_iframe, AMP_Story_Post_Type::change_embed_iframe_attributes( $embed_markup_without_iframe, $amp_story ) );
 
@@ -351,10 +356,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	public function create_story_posts_with_featured_images( $featured_images ) {
 		$stories = array();
 		foreach ( $featured_images as $dimensions ) {
-			$new_story = $this->factory()->post->create_and_get(
+			$new_story = self::factory()->post->create_and_get(
 				array( 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG )
 			);
-			array_push( $stories, $new_story );
+			$stories[] = $new_story;
 
 			// Create the featured image.
 			$thumbnail_id = wp_insert_attachment(

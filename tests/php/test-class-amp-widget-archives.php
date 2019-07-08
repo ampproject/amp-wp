@@ -49,7 +49,7 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 	 * @see AMP_Widget_Archives::__construct().
 	 */
 	public function test_construct() {
-		$this->assertEquals( 'AMP_Widget_Archives', get_class( $this->widget ) );
+		$this->assertInstanceOf( '\\AMP_Widget_Archives', $this->widget );
 		$this->assertEquals( 'archives', $this->widget->id_base );
 		$this->assertEquals( 'Archives', $this->widget->name );
 		$this->assertEquals( 'widget_archive', $this->widget->widget_options['classname'] );
@@ -75,9 +75,7 @@ class Test_AMP_Widget_Archives extends WP_UnitTestCase {
 			'title'    => 'Test Archives Widget',
 			'dropdown' => 1,
 		);
-		ob_start();
-		$this->widget->widget( $arguments, $instance );
-		$output = ob_get_clean();
+		$output    = get_echo( array( $this->widget, 'widget' ), array( $arguments, $instance ) );
 
 		$this->assertContains( 'on="change:AMP.navigateTo(url=event.value)"', $output );
 		$this->assertNotContains( 'onchange=', $output );

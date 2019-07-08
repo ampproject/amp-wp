@@ -10,15 +10,12 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	}
 
 	public function test__valid_post() {
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create( array( 'post_author' => $user_id ) );
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create( array( 'post_author' => $user_id ) );
 
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
+		$output = get_echo( 'amp_render_post', array( $post_id ) );
 
-		$this->assertContains( '<html amp', $amp_rendered, 'Response does not include html tag with amp attribute.' );
+		$this->assertContains( '<html amp', $output, 'Response does not include html tag with amp attribute.' );
 		$this->assertEquals( 1, did_action( 'pre_amp_render_post', 'pre_amp_render_post action fire either did not fire or fired too many times.' ) );
 	}
 
@@ -32,11 +29,11 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 	/**
 	 * Test is_amp_endpoint.
 	 *
-	 * @covers \is_amp_endpoint()
+	 * @covers ::is_amp_endpoint()
 	 */
 	public function test__is_amp_endpoint() {
-		$user_id = $this->factory()->user->create();
-		$post_id = $this->factory()->post->create(
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create(
 			array(
 				'post_author' => $user_id,
 			)
@@ -47,11 +44,8 @@ class AMP_Render_Post_Test extends WP_UnitTestCase {
 		add_action( 'pre_amp_render_post', array( $this, 'check_is_amp_endpoint' ) );
 		$this->was_amp_endpoint = false;
 
-		// Need to use output buffering here since the method echos.
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
-		$this->assertContains( '<html amp', $amp_rendered );
+		$output = get_echo( 'amp_render_post', array( $post_id ) );
+		$this->assertContains( '<html amp', $output );
 
 		$after_is_amp_endpoint = is_amp_endpoint();
 
