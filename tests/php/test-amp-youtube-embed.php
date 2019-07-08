@@ -2,38 +2,38 @@
 
 class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
-		return array(
-			'no_embed'                         => array(
+		return [
+			'no_embed'                         => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
+			],
 
-			'url_simple'                       => array(
+			'url_simple'                       => [
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
-			),
+			],
 
-			'url_short'                        => array(
+			'url_short'                        => [
 				'https://youtu.be/kfVsfOSbJY0' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_querystring'             => array(
+			'url_with_querystring'             => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0&hl=en&fs=1&w=425&h=349' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
-			),
+			],
 
 			// Several reports of invalid URLs that have multiple `?` in the URL.
-			'url_with_querystring_and_extra_?' => array(
+			'url_with_querystring_and_extra_?' => [
 				'http://www.youtube.com/watch?v=kfVsfOSbJY0?hl=en&fs=1&w=425&h=349' . PHP_EOL,
 				'<p><amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube></p>' . PHP_EOL,
-			),
+			],
 
-			'shortcode_unnamed_attr_as_url'    => array(
+			'shortcode_unnamed_attr_as_url'    => [
 				'[youtube http://www.youtube.com/watch?v=kfVsfOSbJY0]' . PHP_EOL,
 				'<amp-youtube data-videoid="kfVsfOSbJY0" layout="responsive" width="600" height="338"></amp-youtube>' . PHP_EOL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -48,16 +48,16 @@ class AMP_YouTube_Embed_Test extends WP_UnitTestCase {
 	}
 
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://www.youtube.com/watch?v=kfVsfOSbJY0' . PHP_EOL,
-				array( 'amp-youtube' => true ),
-			),
-		);
+				[ 'amp-youtube' => true ],
+			],
+		];
 	}
 
 	/**

@@ -20,14 +20,14 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'sub_menu_button_class'        => '',
 		'sub_menu_button_toggle_class' => '',
 		'expand_text'                  => '',
 		'collapse_text'                => '',
 		'icon'                         => null, // Optional.
 		'sub_menu_item_state_id'       => 'navMenuItemExpanded',
-	);
+	];
 
 	/**
 	 * AMP_Nav_Menu_Dropdown_Sanitizer constructor.
@@ -37,7 +37,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
+	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		$this->args = self::ensure_defaults( $this->args );
@@ -50,7 +50,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_buffering_hooks( $args = array() ) {
+	public static function add_buffering_hooks( $args = [] ) {
 		if ( empty( $args['sub_menu_button_class'] ) || empty( $args['sub_menu_button_toggle_class'] ) ) {
 			return;
 		}

@@ -26,7 +26,7 @@ class AMP_Post_Type_Support {
 	 */
 	public static function get_builtin_supported_post_types() {
 		_deprecated_function( __METHOD__, '1.0' );
-		return array_filter( array( 'post' ), 'post_type_exists' );
+		return array_filter( [ 'post' ], 'post_type_exists' );
 	}
 
 	/**
@@ -39,15 +39,15 @@ class AMP_Post_Type_Support {
 		return array_diff(
 			array_values(
 				get_post_types(
-					array(
+					[
 						'public' => true,
-					),
+					],
 					'names'
 				)
 			),
-			array(
+			[
 				AMP_Story_Post_Type::POST_TYPE_SLUG,
-			)
+			]
 		);
 	}
 
@@ -63,7 +63,7 @@ class AMP_Post_Type_Support {
 		if ( current_theme_supports( AMP_Theme_Support::SLUG ) && AMP_Options_Manager::get_option( 'all_templates_supported' ) ) {
 			$post_types = self::get_eligible_post_types();
 		} else {
-			$post_types = AMP_Options_Manager::get_option( 'supported_post_types', array() );
+			$post_types = AMP_Options_Manager::get_option( 'supported_post_types', [] );
 		}
 		foreach ( $post_types as $post_type ) {
 			add_post_type_support( $post_type, self::SLUG );
@@ -82,7 +82,7 @@ class AMP_Post_Type_Support {
 		if ( ! ( $post instanceof WP_Post ) ) {
 			$post = get_post( $post );
 		}
-		$errors = array();
+		$errors = [];
 
 		if ( ! post_type_supports( $post->post_type, self::SLUG ) ) {
 			$errors[] = 'post-type-support';
@@ -128,10 +128,10 @@ class AMP_Post_Type_Support {
 						&&
 						in_array(
 							(int) $post->ID,
-							array(
+							[
 								(int) get_option( 'page_on_front' ),
 								(int) get_option( 'page_for_posts' ),
-							),
+							],
 							true
 						)
 					)

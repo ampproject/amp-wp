@@ -16,9 +16,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	}
 
 	public function get_attr_spec_rule_data() {
-		return array(
-			'test_attr_spec_rule_mandatory_pass' => array(
-				array(
+		return [
+			'test_attr_spec_rule_mandatory_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-img',
 					'attribute_name' => 'src',
@@ -26,11 +26,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_mandatory_alternate_attr_pass' => array(
-				array(
+			],
+			'test_attr_spec_rule_mandatory_alternate_attr_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-img',
 					'attribute_name' => 'src',
@@ -39,11 +39,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_mandatory_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_mandatory_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-img',
 					'attribute_name' => 'src',
@@ -51,11 +51,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_mandatory',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_mandatory_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_mandatory_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-img',
 					'attribute_name' => 'alt',
@@ -63,12 +63,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_mandatory',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
+			],
 
-			'test_attr_spec_rule_value_pass' => array(
-				array(
+			'test_attr_spec_rule_value_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'template',
 					'attribute_name' => 'type',
@@ -76,11 +76,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'template',
 					'attribute_name' => 'type',
@@ -88,11 +88,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_value_not_applicable' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_not_applicable' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'template',
 					'attribute_name' => 'type',
@@ -100,12 +100,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
+			],
 
-			'test_attr_spec_rule_value_casei_lower_pass' => array(
-				array(
+			'test_attr_spec_rule_value_casei_lower_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'type',
@@ -113,11 +113,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_casei_upper_pass' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_casei_upper_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'type',
@@ -125,11 +125,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_casei_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_casei_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'type',
@@ -137,11 +137,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_value_casei_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_casei_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'template',
 					'attribute_name' => 'type',
@@ -149,12 +149,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
+			],
 
-			'test_attr_spec_rule_value_regex_pass' => array(
-				array(
+			'test_attr_spec_rule_value_regex_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'target',
@@ -162,11 +162,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_regex_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_regex_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'target',
@@ -174,11 +174,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_value_regex_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_regex_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'target',
@@ -186,12 +186,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_regex',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
+			],
 
-			'test_attr_spec_rule_value_regex_casei_lower_pass' => array(
-				array(
+			'test_attr_spec_rule_value_regex_casei_lower_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-playbuzz',
 					'attribute_name' => 'data-comments',
@@ -199,11 +199,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_regex_casei_upper_pass' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_regex_casei_upper_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-playbuzz',
 					'attribute_name' => 'data-comments',
@@ -211,11 +211,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_value_regex_casei_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_regex_casei_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-playbuzz',
 					'attribute_name' => 'data-comments',
@@ -223,11 +223,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_value_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_value_regex_casei_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_value_regex_casei_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-playbuzz',
 					'attribute_name' => 'data-comments',
@@ -235,11 +235,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_value_regex_casei',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'test_attr_spec_rule_disallowed_relative_pass' => array(
-				array(
+			],
+			'test_attr_spec_rule_disallowed_relative_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'data-share-endpoint',
@@ -247,11 +247,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_disallowed_relative_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_disallowed_relative_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'data-share-endpoint',
@@ -259,11 +259,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_relative_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_disallowed_relative_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'data-share-endpoint',
@@ -271,12 +271,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_disallowed_relative',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
+			],
 
-			'test_attr_spec_rule_disallowed_empty_pass' => array(
-				array(
+			'test_attr_spec_rule_disallowed_empty_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-user-notification',
 					'attribute_name' => 'data-dismiss-href',
@@ -284,11 +284,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_disallowed_empty_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_disallowed_empty_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-user-notification',
 					'attribute_name' => 'data-dismiss-href',
@@ -296,11 +296,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_disallowed_empty_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_disallowed_empty_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-user-notification',
 					'attribute_name' => 'data-dismiss-href',
@@ -308,11 +308,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_disallowed_empty',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'test_attr_spec_rule_blacklisted_value_regex_pass' => array(
-				array(
+			],
+			'test_attr_spec_rule_blacklisted_value_regex_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'rel',
@@ -320,11 +320,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
-				),
+				],
 				'expected' => AMP_Rule_Spec::PASS,
-			),
-			'test_attr_spec_rule_blacklisted_value_regex_fail' => array(
-				array(
+			],
+			'test_attr_spec_rule_blacklisted_value_regex_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'rel',
@@ -332,11 +332,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_blacklisted_value_regex_fail_2' => array(
-				array(
+			],
+			'test_attr_spec_rule_blacklisted_value_regex_fail_2' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'rel',
@@ -344,11 +344,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
-				),
+				],
 				'expected' => AMP_Rule_Spec::FAIL,
-			),
-			'test_attr_spec_rule_blacklisted_value_regex_na' => array(
-				array(
+			],
+			'test_attr_spec_rule_blacklisted_value_regex_na' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'a',
 					'attribute_name' => 'rel',
@@ -356,10 +356,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => false,
 					'include_attr_value' => false,
 					'func_name' => 'check_attr_spec_rule_blacklisted_value_regex',
-				),
+				],
 				'expected' => AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -398,15 +398,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
-		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $node, $data['attribute_name'], $attr_spec_rule ) );
+		$got = $this->invoke_method( $sanitizer, $data['func_name'], [ $node, $data['attribute_name'], $attr_spec_rule ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_is_allowed_attribute_data() {
-		return array(
-			'test_is_amp_allowed_attribute_whitelisted_regex_pass' => array(
-				array(
+		return [
+			'test_is_amp_allowed_attribute_whitelisted_regex_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'data-whatever-else-you-want',
@@ -414,11 +414,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_global_attribute_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_global_attribute_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'itemid',
@@ -426,11 +426,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_tag_spec_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_tag_spec_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'media',
@@ -438,11 +438,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_disallowed_attr_fail' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_disallowed_attr_fail' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-social-share',
 					'attribute_name' => 'bad-attr',
@@ -450,12 +450,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => false,
-			),
+			],
 
-			'test_is_amp_allowed_attribute_layout_height_pass' => array(
-				array(
+			'test_is_amp_allowed_attribute_layout_height_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-ad',
 					'attribute_name' => 'height',
@@ -463,11 +463,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_layout_heights_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_layout_heights_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-ad',
 					'attribute_name' => 'heights',
@@ -475,11 +475,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_layout_width_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_layout_width_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-ad',
 					'attribute_name' => 'width',
@@ -487,11 +487,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_layout_sizes_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_layout_sizes_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-ad',
 					'attribute_name' => 'sizes',
@@ -499,11 +499,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-			'test_is_amp_allowed_attribute_layout_layout_pass' => array(
-				array(
+			],
+			'test_is_amp_allowed_attribute_layout_layout_pass' => [
+				[
 					'rule_spec_index' => 0,
 					'tag_name' => 'amp-ad',
 					'attribute_name' => 'layout',
@@ -511,10 +511,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 					'include_attr' => true,
 					'include_attr_value' => true,
 					'func_name' => 'is_amp_allowed_attribute',
-				),
+				],
 				'expected' => true,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -554,84 +554,84 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 		$attr      = $node->getAttributeNode( $data['attribute_name'] );
 
-		$got = $this->invoke_method( $sanitizer, $data['func_name'], array( $attr, $attr_spec_list ) );
+		$got = $this->invoke_method( $sanitizer, $data['func_name'], [ $attr, $attr_spec_list ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $source, wp_json_encode( $data ) ) );
 	}
 
 	public function get_remove_node_data() {
-		return array(
-			'remove_single_bad_tag' => array(
-				array(
+		return [
+			'remove_single_bad_tag' => [
+				[
 					'source' => '<bad-tag></bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'remove_bad_tag_with_single_empty_parent' => array(
-				array(
+			],
+			'remove_bad_tag_with_single_empty_parent' => [
+				[
 					'source' => '<div><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'remove_bad_tag_with_multiple_empty_parents' => array(
-				array(
+			],
+			'remove_bad_tag_with_multiple_empty_parents' => [
+				[
 					'source' => '<div><p><bad-tag></bad-tag></p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'remove_bad_tag_leave_siblings' => array(
-				array(
+			],
+			'remove_bad_tag_leave_siblings' => [
+				[
 					'source' => '<bad-tag></bad-tag><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'remove_bad_tag_and_empty_parent_leave_parent_siblings' => array(
-				array(
+			],
+			'remove_bad_tag_and_empty_parent_leave_parent_siblings' => [
+				[
 					'source' => '<div><bad-tag></bad-tag></div><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'remove_bad_tag_and_multiple_empty_parent_leave_parent_siblings' => array(
-				array(
+			],
+			'remove_bad_tag_and_multiple_empty_parent_leave_parent_siblings' => [
+				[
 					'source' => '<div><div><bad-tag></bad-tag></div></div><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'remove_bad_tag_leave_empty_siblings_and_parent' => array(
-				array(
+			],
+			'remove_bad_tag_leave_empty_siblings_and_parent' => [
+				[
 					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><br></div>',
-			),
-			'remove_single_bad_tag_with_non-empty_parent' => array(
-				array(
+			],
+			'remove_single_bad_tag_with_non-empty_parent' => [
+				[
 					'source' => '<div><bad-tag></bad-tag><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-			'remove_bad_tag_and_empty_parent_leave_non-empty_grandparent' => array(
-				array(
+			],
+			'remove_bad_tag_and_empty_parent_leave_non-empty_grandparent' => [
+				[
 					'source' => '<div><div><bad-tag></bad-tag></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-			'remove_bad_tag_and_empty_grandparent_leave_non-empty_greatgrandparent' => array(
-				array(
+			],
+			'remove_bad_tag_and_empty_grandparent_leave_non-empty_greatgrandparent' => [
+				[
 					'source' => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -643,7 +643,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
-		$this->invoke_method( $sanitizer, 'remove_node', array( $node ) );
+		$this->invoke_method( $sanitizer, 'remove_node', [ $node ] );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 
@@ -652,120 +652,120 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 
 
 	public function get_replace_node_with_children_data() {
-		return array(
-			'text_child' => array(
-				array(
+		return [
+			'text_child' => [
+				[
 					'source' => '<bad-tag>Good Data</bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'Good Data',
-			),
-			'comment_child' => array(
-				array(
+			],
+			'comment_child' => [
+				[
 					'source' => '<bad-tag><!-- Good Data --></bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<!-- Good Data -->',
-			),
-			'single_child' => array(
-				array(
+			],
+			'single_child' => [
+				[
 					'source' => '<bad-tag><p>Good Data</p></bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'multiple_children' => array(
-				array(
+			],
+			'multiple_children' => [
+				[
 					'source' => '<bad-tag><p>Good Data</p><p>More Good Data</p></bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p><p>More Good Data</p>',
-			),
-			'no_children' => array(
-				array(
+			],
+			'no_children' => [
+				[
 					'source' => '<bad-tag></bad-tag>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'children_with_empty_parent' => array(
-				array(
+			],
+			'children_with_empty_parent' => [
+				[
 					'source' => '<div><bad-tag>Good Data</bad-tag></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div>Good Data</div>',
-			),
-			'no_children_empty_parent' => array(
-				array(
+			],
+			'no_children_empty_parent' => [
+				[
 					'source' => '<div><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'children_multiple_empty_parents' => array(
-				array(
+			],
+			'children_multiple_empty_parents' => [
+				[
 					'source' => '<div><p><bad-tag>Good Data</bad-tag></p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-			'no_children_multiple_empty_parents' => array(
-				array(
+			],
+			'no_children_multiple_empty_parents' => [
+				[
 					'source' => '<div><p><bad-tag></bad-tag></p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'',
-			),
-			'no_children_leave_siblings' => array(
-				array(
+			],
+			'no_children_leave_siblings' => [
+				[
 					'source' => '<bad-tag></bad-tag><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'no_children_and_empty_parent_leave_parent_siblings' => array(
-				array(
+			],
+			'no_children_and_empty_parent_leave_parent_siblings' => [
+				[
 					'source' => '<div><bad-tag></bad-tag></div><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'no_children_and_multiple_empty_parent_leave_parent_siblings' => array(
-				array(
+			],
+			'no_children_and_multiple_empty_parent_leave_parent_siblings' => [
+				[
 					'source' => '<div><div><bad-tag></bad-tag></div></div><p>Good Data</p>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<p>Good Data</p>',
-			),
-			'no_children_leave_empty_siblings_and_parent' => array(
-				array(
+			],
+			'no_children_leave_empty_siblings_and_parent' => [
+				[
 					'source'   => '<div><br><bad-tag></bad-tag></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><br></div>',
-			),
-			'no_childreng_with_non-empty_parent' => array(
-				array(
+			],
+			'no_childreng_with_non-empty_parent' => [
+				[
 					'source' => '<div><bad-tag></bad-tag><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-			'no_children_and_empty_parent_leave_non-empty_grandparent' => array(
-				array(
+			],
+			'no_children_and_empty_parent_leave_non-empty_grandparent' => [
+				[
 					'source' => '<div><div><bad-tag></bad-tag></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-			'no_children_and_empty_grandparent_leave_non-empty_greatgrandparent' => array(
-				array(
+			],
+			'no_children_and_empty_grandparent_leave_non-empty_greatgrandparent' => [
+				[
 					'source'   => '<div><div><div><bad-tag></bad-tag></div></div><p>Good Data</p></div>',
 					'tag_name' => 'bad-tag',
-				),
+				],
 				'<div><p>Good Data</p></div>',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -777,7 +777,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node      = $dom->getElementsByTagName( $data['tag_name'] )->item( 0 );
 
-		$this->invoke_method( $sanitizer, 'replace_node_with_children', array( $node ) );
+		$this->invoke_method( $sanitizer, 'replace_node_with_children', [ $node ] );
 
 		$got = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$got = preg_replace( '/(?<=>)\s+(?=<)/', '', $got );
@@ -791,48 +791,48 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @return array Data.
 	 */
 	public function get_ancestor_with_matching_spec_name_data() {
-		return array(
-			'empty' => array(
-				array(
+		return [
+			'empty' => [
+				[
 					'source' => '',
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
-				),
+				],
 				null,
-			),
-			'ancestor_is_immediate_parent' => array(
-				array(
+			],
+			'ancestor_is_immediate_parent' => [
+				[
 					'source' => '<article><p>Good Data</p><article>',
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
-				),
+				],
 				'article',
-			),
-			'ancestor_is_distant_parent' => array(
-				array(
+			],
+			'ancestor_is_distant_parent' => [
+				[
 					'source' => '<article><div><div><div><p>Good Data</p></div></div></div><article>',
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
-				),
+				],
 				'article',
-			),
-			'ancestor_has_attributes' => array(
-				array(
+			],
+			'ancestor_has_attributes' => [
+				[
 					'source' => '<form method="post"><div><div><div><p>Good Data</p></div></div></div><article>',
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'form [method=post]',
-				),
+				],
 				'form',
-			),
-			'ancestor_does_not_exist' => array(
-				array(
+			],
+			'ancestor_does_not_exist' => [
+				[
 					'source' => '<div><div><div><p>Good Data</p></div></div></div>',
 					'node_tag_name' => 'p',
 					'ancestor_tag_name' => 'article',
-				),
+				],
 				null,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -855,196 +855,196 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 			$ancestor_node = null;
 		}
 
-		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_matching_spec_name', array( $node, $data['ancestor_tag_name'] ) );
+		$got = $this->invoke_method( $sanitizer, 'get_ancestor_with_matching_spec_name', [ $node, $data['ancestor_tag_name'] ] );
 
 		$this->assertEquals( $ancestor_node, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_validate_attr_spec_list_for_node_data() {
-		return array(
-			'no_attributes' => array(
-				array(
+		return [
+			'no_attributes' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(),
-				),
+					'attr_spec_list' => [],
+				],
 				0.5, // Because there are no mandatory attributes.
-			),
-			'attributes_no_spec' => array(
-				array(
+			],
+			'attributes_no_spec' => [
+				[
 					'source' => '<div attribute1 attribute2 attribute3></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(),
-				),
+					'attr_spec_list' => [],
+				],
 				0.5, // Because there are no mandatory attributes.
-			),
-			'attributes_alternative_names' => array(
-				array(
+			],
+			'attributes_alternative_names' => [
+				[
 					'source' => '<div attribute1 attribute2 attribute3></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'alternative_names' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
+							'alternative_names' => [
 								'attribute1_alternative1',
 								'attribute1_alternative2',
 								'attribute1_alternative3',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				0.5, // Because there are no mandatory attributes.
-			),
-			'attributes_mandatory' => array(
-				array(
+			],
+			'attributes_mandatory' => [
+				[
 					'source' => '<div attribute1 attribute2 attribute3></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'mandatory' => true,
-						),
-					),
-				),
+						],
+					],
+				],
 				1,
-			),
-			'attributes_mandatory_alternative_name' => array(
-				array(
+			],
+			'attributes_mandatory_alternative_name' => [
+				[
 					'source' => '<div attribute1_alternative1 attribute2 attribute3></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'mandatory' => true,
-							'alternative_names' => array(
+							'alternative_names' => [
 								'attribute1_alternative1',
 								'attribute1_alternative2',
 								'attribute1_alternative3',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				1,
-			),
-			'attributes_value' => array(
-				array(
+			],
+			'attributes_value' => [
+				[
 					'source' => '<div attribute1="required_value"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'value' => 'required_value',
-						),
-					),
-				),
+						],
+					],
+				],
 				1,
-			),
-			'attributes_value_regex' => array(
-				array(
+			],
+			'attributes_value_regex' => [
+				[
 					'source' => '<div attribute1="this"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'value_regex' => '(this|that)',
-						),
-					),
-				),
+						],
+					],
+				],
 				1,
-			),
-			'attributes_value_casei' => array(
-				array(
+			],
+			'attributes_value_casei' => [
+				[
 					'source' => '<div attribute1="VALUE"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'value_casei' => 'value',
-						),
-					),
-				),
+						],
+					],
+				],
 				1,
-			),
-			'attributes_value_regex_casei' => array(
-				array(
+			],
+			'attributes_value_regex_casei' => [
+				[
 					'source' => '<div attribute1="THIS"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'value_regex_casei' => '(this|that)',
-						),
-					),
-				),
+						],
+					],
+				],
 				1,
-			),
-			'attributes_allow_relative_false_pass' => array(
-				array(
+			],
+			'attributes_allow_relative_false_pass' => [
+				[
 					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'value_url' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
+							'value_url' => [
 								'allow_relative' => false,
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				2,
-			),
-			'attributes_allow_relative_false_fail' => array(
-				array(
+			],
+			'attributes_allow_relative_false_fail' => [
+				[
 					'source' => '<div attribute1="/relative/path/to/resource"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'value_url' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
+							'value_url' => [
 								'allow_relative' => false,
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				0,
-			),
-			'attributes_allow_empty_false_pass' => array(
-				array(
+			],
+			'attributes_allow_empty_false_pass' => [
+				[
 					'source' => '<div attribute1="http://example.com/relative/path/to/resource"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'value_url' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
+							'value_url' => [
 								'allow_empty' => false,
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				2,
-			),
-			'attributes_allow_empty_false_fail' => array(
-				array(
+			],
+			'attributes_allow_empty_false_fail' => [
+				[
 					'source' => '<div attribute1></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
-							'value_url' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
+							'value_url' => [
 								'allow_empty' => false,
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				0,
-			),
-			'attributes_blacklisted_regex' => array(
-				array(
+			],
+			'attributes_blacklisted_regex' => [
+				[
 					'source' => '<div attribute1="blacklisted_value"></div>',
 					'node_tag_name' => 'div',
-					'attr_spec_list' => array(
-						'attribute1' => array(
+					'attr_spec_list' => [
+						'attribute1' => [
 							'blacklisted_value_regex' => 'blacklisted_value',
-							'alternative_names' => array(
+							'alternative_names' => [
 								'attribute1_alternative1',
 								'attribute1_alternative2',
 								'attribute1_alternative3',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				0,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1056,117 +1056,117 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 
-		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', array( $node, $data['attr_spec_list'] ) );
+		$got = $this->invoke_method( $sanitizer, 'validate_attr_spec_list_for_node', [ $node, $data['attr_spec_list'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_data() {
-		return array(
-			'no_attributes' => array(
-				array(
+		return [
+			'no_attributes' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(),
-				),
+					'attr_spec_rule' => [],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_pass' => array(
-				array(
+			],
+			'value_pass' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => 'value1',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_fail' => array(
-				array(
+			],
+			'value_fail' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => 'valuex',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'value_no_attr' => array(
-				array(
+			],
+			'value_no_attr' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => 'value1',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_empty_pass1' => array(
-				array(
+			],
+			'value_empty_pass1' => [
+				[
 					'source' => '<div attribute1=""></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_empty_pass2' => array(
-				array(
+			],
+			'value_empty_pass2' => [
+				[
 					'source' => '<div attribute1></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_empty_fail' => array(
-				array(
+			],
+			'value_empty_fail' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'value_alternative_attr_name_pass' => array(
-				array(
+			],
+			'value_alternative_attr_name_pass' => [
+				[
 					'source' => '<div attribute1_alternative1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => 'value1',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_alternative_attr_name_fail' => array(
-				array(
+			],
+			'value_alternative_attr_name_fail' => [
+				[
 					'source' => '<div attribute1_alternative1="value2"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value' => 'value1',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1178,142 +1178,142 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_value_casei_data() {
-		return array(
-			'no_attributes' => array(
-				array(
+		return [
+			'no_attributes' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(),
-				),
+					'attr_spec_rule' => [],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_pass' => array(
-				array(
+			],
+			'value_pass' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_upper_pass' => array(
-				array(
+			],
+			'value_upper_pass' => [
+				[
 					'source' => '<div attribute1="VALUE1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_fail' => array(
-				array(
+			],
+			'value_fail' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'valuex',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'value_no_attr' => array(
-				array(
+			],
+			'value_no_attr' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_empty_pass1' => array(
-				array(
+			],
+			'value_empty_pass1' => [
+				[
 					'source' => '<div attribute1=""></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_empty_pass2' => array(
-				array(
+			],
+			'value_empty_pass2' => [
+				[
 					'source' => '<div attribute1></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_empty_fail' => array(
-				array(
+			],
+			'value_empty_fail' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => '',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'value_alternative_attr_name_pass' => array(
-				array(
+			],
+			'value_alternative_attr_name_pass' => [
+				[
 					'source' => '<div attribute1_alternative1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_alternative_attr_name__upper_pass' => array(
-				array(
+			],
+			'value_alternative_attr_name__upper_pass' => [
+				[
 					'source' => '<div attribute1_alternative1="VALUE1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_alternative_attr_name_fail' => array(
-				array(
+			],
+			'value_alternative_attr_name_fail' => [
+				[
 					'source' => '<div attribute1_alternative1="value2"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'value_casei' => 'value1',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1325,84 +1325,84 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_value_casei', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_blacklisted_value_regex() {
-		return array(
-			'no_attributes' => array(
-				array(
+		return [
+			'no_attributes' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(),
-				),
+					'attr_spec_rule' => [],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_pass' => array(
-				array(
+			],
+			'value_pass' => [
+				[
 					'source' => '<div attribute1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'blacklisted_value_regex' => '(not_this|or_this)',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_fail' => array(
-				array(
+			],
+			'value_fail' => [
+				[
 					'source' => '<div attribute1="not_this"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'blacklisted_value_regex' => '(not_this|or_this)',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'value_no_attr' => array(
-				array(
+			],
+			'value_no_attr' => [
+				[
 					'source' => '<div></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'blacklisted_value_regex' => '(not_this|or_this)',
-					),
-				),
+					],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'value_alternative_attr_name_pass' => array(
-				array(
+			],
+			'value_alternative_attr_name_pass' => [
+				[
 					'source' => '<div attribute1_alternative1="value1"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'blacklisted_value_regex' => '(not_this|or_this)',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'value_alternative_attr_name_fail' => array(
-				array(
+			],
+			'value_alternative_attr_name_fail' => [
+				[
 					'source' => '<div attribute1_alternative1="not_this"></div>',
 					'node_tag_name' => 'div',
 					'attr_name' => 'attribute1',
-					'attr_spec_rule' => array(
+					'attr_spec_rule' => [
 						'blacklisted_value_regex' => '(not_this|or_this)',
-						'alternative_names' => array(
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1414,125 +1414,125 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_blacklisted_value_regex', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_allowed_protocol() {
-		return array(
-			'no_attributes'             => array(
-				array(
+		return [
+			'no_attributes'             => [
+				[
 					'source'         => '<div></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(),
-				),
+					'attr_spec_rule' => [],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'protocol_pass'             => array(
-				array(
+			],
+			'protocol_pass'             => [
+				[
 					'source'         => '<div attribute1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
-							'protocol' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'protocol_multiple_pass'    => array(
-				array(
+			],
+			'protocol_multiple_pass'    => [
+				[
 					'source'         => '<div attribute1="http://example.com, https://domain.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
-							'protocol' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'protocol_fail'             => array(
-				array(
+			],
+			'protocol_fail'             => [
+				[
 					'source'         => '<div attribute1="data://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
-							'protocol' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'protocol_multiple_fail'    => array(
-				array(
+			],
+			'protocol_multiple_fail'    => [
+				[
 					'source'         => '<img srcset="http://example.com, data://domain.com">',
 					'node_tag_name'  => 'img',
 					'attr_name'      => 'srcset',
-					'attr_spec_rule' => array(
-						'value_url' => array(
-							'protocol' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'protocol_alternative_pass' => array(
-				array(
+			],
+			'protocol_alternative_pass' => [
+				[
 					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'alternative_names' => array(
+					'attr_spec_rule' => [
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-						'value_url'         => array(
-							'protocol' => array(
+						],
+						'value_url'         => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'protocol_alternative_fail' => array(
-				array(
+			],
+			'protocol_alternative_fail' => [
+				[
 					'source'         => '<div attribute1_alternative1="data://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'alternative_names' => array(
+					'attr_spec_rule' => [
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-						'value_url'         => array(
-							'protocol' => array(
+						],
+						'value_url'         => [
+							'protocol' => [
 								'http',
 								'https',
-							),
-						),
-					),
-				),
+							],
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1544,139 +1544,139 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_allowed_protocol', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
 	public function get_check_attr_spec_rule_disallowed_relative() {
-		return array(
-			'no_attributes'                                 => array(
-				array(
+		return [
+			'no_attributes'                                 => [
+				[
 					'source'         => '<div></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(),
-				),
+					'attr_spec_rule' => [],
+				],
 				AMP_Rule_Spec::NOT_APPLICABLE,
-			),
-			'disallowed_relative_pass'                      => array(
-				array(
+			],
+			'disallowed_relative_pass'                      => [
+				[
 					'source'         => '<div attribute1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
 							'allow_relative' => false,
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'disallowed_relative_multiple_pass'             => array(
-				array(
+			],
+			'disallowed_relative_multiple_pass'             => [
+				[
 					'source'         => '<img srcset="http://example.com, http://domain.com/path/to/resource">',
 					'node_tag_name'  => 'img',
 					'attr_name'      => 'srcset',
-					'attr_spec_rule' => array(
-						'value_url' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
 							'allow_relative' => false,
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'disallowed_relative_alternative_pass'          => array(
-				array(
+			],
+			'disallowed_relative_alternative_pass'          => [
+				[
 					'source'         => '<div attribute1_alternative1="http://example.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url'         => array(
+					'attr_spec_rule' => [
+						'value_url'         => [
 							'allow_relative' => false,
-						),
-						'alternative_names' => array(
+						],
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'disallowed_relative_alternative_multiple_pass' => array(
-				array(
+			],
+			'disallowed_relative_alternative_multiple_pass' => [
+				[
 					'source'         => '<div attribute1_alternative1="http://example.com, http://domain.com"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url'         => array(
+					'attr_spec_rule' => [
+						'value_url'         => [
 							'allow_relative' => false,
-						),
-						'alternative_names' => array(
+						],
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::PASS,
-			),
-			'disallowed_relative_fail'                      => array(
-				array(
+			],
+			'disallowed_relative_fail'                      => [
+				[
 					'source'         => '<div attribute1="/relative/path/to/resource"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
 							'allow_relative' => false,
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'disallowed_relative_multiple_fail'             => array(
-				array(
+			],
+			'disallowed_relative_multiple_fail'             => [
+				[
 					'source'         => '<div attribute1="//domain.com, /relative/path/to/resource"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url' => array(
+					'attr_spec_rule' => [
+						'value_url' => [
 							'allow_relative' => false,
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'disallowed_relative_alternative_fail'          => array(
-				array(
+			],
+			'disallowed_relative_alternative_fail'          => [
+				[
 					'source'         => '<div attribute1_alternative1="/relative/path/to/resource"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'attribute1',
-					'attr_spec_rule' => array(
-						'value_url'         => array(
+					'attr_spec_rule' => [
+						'value_url'         => [
 							'allow_relative' => false,
-						),
-						'alternative_names' => array(
+						],
+						'alternative_names' => [
 							'attribute1_alternative1',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-			'disallowed_relative_alternative_multiple_fail' => array(
-				array(
+			],
+			'disallowed_relative_alternative_multiple_fail' => [
+				[
 					'source'         => '<div source_set="http://domain.com,  /relative/path/to/resource"></div>',
 					'node_tag_name'  => 'div',
 					'attr_name'      => 'srcset',
-					'attr_spec_rule' => array(
-						'value_url'         => array(
+					'attr_spec_rule' => [
+						'value_url'         => [
 							'allow_relative' => false,
-						),
-						'alternative_names' => array(
+						],
+						'alternative_names' => [
 							'source_set',
-						),
-					),
-				),
+						],
+					],
+				],
 				AMP_Rule_Spec::FAIL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -1688,7 +1688,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
 		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
 
-		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', array( $node, $data['attr_name'], $data['attr_spec_rule'] ) );
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_disallowed_relative', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
 
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
@@ -1701,7 +1701,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 	 * @param array  $parameters  Parameters.
 	 * @return mixed Result.
 	 */
-	public function invoke_method( &$object, $method_name, array $parameters = array() ) {
+	public function invoke_method( &$object, $method_name, array $parameters = [] ) {
 		$reflection = new ReflectionClass( get_class( $object ) );
 
 		$method = $reflection->getMethod( $method_name );

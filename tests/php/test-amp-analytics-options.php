@@ -8,7 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
-		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 	}
 
 	private $vendor = 'googleanalytics';
@@ -51,18 +51,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}';
 
 	private function get_options() {
-		return AMP_Options_Manager::get_option( 'analytics', array() );
+		return AMP_Options_Manager::get_option( 'analytics', [] );
 	}
 
 	private function render_post() {
 		$user_id = self::factory()->user->create();
 		$post_id = self::factory()->post->create(
-			array(
+			[
 				'post_author' => $user_id,
-			)
+			]
 		);
 
-		return get_echo( 'amp_render_post', array( $post_id ) );
+		return get_echo( 'amp_render_post', [ $post_id ] );
 	}
 
 	/**
@@ -74,9 +74,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	private function insert_one_option( $type, $config ) {
 		AMP_Options_Manager::update_option(
 			'analytics',
-			array(
+			[
 				'__new__' => compact( 'type', 'config' ),
-			)
+			]
 		);
 	}
 
@@ -261,7 +261,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
-		$output = get_echo( 'amp_print_analytics', array( $analytics ) );
+		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
@@ -277,14 +277,14 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics_when_empty() {
-		$output = get_echo( 'amp_print_analytics', array( '' ) );
+		$output = get_echo( 'amp_print_analytics', [ '' ] );
 		$this->assertEmpty( $output );
 
 		$this->insert_one_option(
 			$this->vendor,
 			$this->config_one
 		);
-		$output = get_echo( 'amp_print_analytics', array( '' ) );
+		$output = get_echo( 'amp_print_analytics', [ '' ] );
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}

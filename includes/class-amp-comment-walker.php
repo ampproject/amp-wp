@@ -32,7 +32,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @since 0.7
 	 * @var array
 	 */
-	private $comment_thread_age = array();
+	private $comment_thread_age = [];
 
 	/**
 	 * Starts the element output.
@@ -50,7 +50,7 @@ class AMP_Comment_Walker extends Walker_Comment {
 	 * @param array      $args Optional. An array of arguments. Default empty array.
 	 * @param int        $id Optional. ID of the current comment. Default 0 (unused).
 	 */
-	public function start_el( &$output, $comment, $depth = 0, $args = array(), $id = 0 ) {
+	public function start_el( &$output, $comment, $depth = 0, $args = [], $id = 0 ) {
 
 		$new_out = '';
 		parent::start_el( $new_out, $comment, $depth, $args, $id );

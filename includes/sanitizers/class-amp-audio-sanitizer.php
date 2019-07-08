@@ -26,9 +26,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
-	);
+	];
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -36,9 +36,9 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'audio' => array( 'amp-audio' ),
-		);
+		return [
+			'audio' => [ 'amp-audio' ],
+		];
 	}
 
 	/**
@@ -68,7 +68,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 
 			// For amp-audio, the default width and height are inferred from browser.
-			$sources        = array();
+			$sources        = [];
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			if ( ! empty( $new_attributes['src'] ) ) {
 				$sources[] = $new_attributes['src'];
@@ -83,7 +83,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
-			$child_nodes = array();
+			$child_nodes = [];
 			while ( $node->firstChild ) {
 				$child_node = $node->removeChild( $node->firstChild );
 				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
@@ -133,7 +133,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Make sure the updated src and poster are applied to the original.
-			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+			foreach ( [ 'src', 'poster', 'artwork' ] as $attr_name ) {
 				if ( $new_node->hasAttribute( $attr_name ) ) {
 					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
 				}
@@ -180,7 +180,7 @@ class AMP_Audio_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

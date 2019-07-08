@@ -43,7 +43,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->instance->init();
-		$this->assertEquals( 9, has_action( 'admin_menu', array( $this->instance, 'add_menu_items' ) ) );
+		$this->assertEquals( 9, has_action( 'admin_menu', [ $this->instance, 'add_menu_items' ] ) );
 		$this->assertEquals( 10, has_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' ) );
 	}
 
@@ -57,9 +57,9 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 
 		wp_set_current_user(
 			self::factory()->user->create(
-				array(
+				[
 					'role' => 'administrator',
-				)
+				]
 			)
 		);
 
@@ -92,9 +92,9 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	public function test_render_screen_for_admin_user() {
 		wp_set_current_user(
 			self::factory()->user->create(
-				array(
+				[
 					'role' => 'administrator',
-				)
+				]
 			)
 		);
 

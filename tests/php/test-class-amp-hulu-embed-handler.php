@@ -26,13 +26,13 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 				if ( false === strpos( $url, '771496' ) ) {
 					return $pre;
 				}
-				return array(
+				return [
 					'body'     => '{"title":"Out of the Box / Run Down Race Car (Doc McStuffins)","author_name":"Disney Junior","type":"video","provider_name":"Hulu","air_date":"Fri Mar 23 00:00:00 UTC 2012","embed_url":"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw","thumbnail_url":"http://ib.huluim.com/video/60528019?size=240x180&caller=h1o&img=i","width":500,"thumbnail_width":500,"provider_url":"//www.hulu.com/","thumbnail_height":375,"cache_age":3600,"version":"1.0","large_thumbnail_url":"http://ib.huluim.com/video/60528019?size=512x288&caller=h1o&img=i","height":289,"large_thumbnail_width":512,"html":"<iframe width=\\"500\\" height=\\"289\\" src=\\"//www.hulu.com/embed.html?eid=_hHzwnAcj3RrXMJFDDvkuw\\" frameborder=\\"0\\" scrolling=\\"no\\" webkitAllowFullScreen mozallowfullscreen allowfullscreen> </iframe>","duration":1446.25,"large_thumbnail_height":288}',
-					'response' => array(
+					'response' => [
 						'code'    => 200,
 						'message' => 'OK',
-					),
-				);
+					],
+				];
 			},
 			10,
 			3
@@ -55,23 +55,23 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		return array(
-			'no_embed'        => array(
+		return [
+			'no_embed'        => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
+			],
 
-			'url_simple'      => array(
+			'url_simple'      => [
 				'https://www.hulu.com/watch/771496' . PHP_EOL,
 				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_params' => array(
+			'url_with_params' => [
 				'https://www.hulu.com/watch/771496?foo=bar' . PHP_EOL,
 				'<p><amp-hulu width="500" height="289" data-eid="771496"></amp-hulu></p>' . PHP_EOL,
-			),
+			],
 
-		);
+		];
 	}
 
 	/**
@@ -95,16 +95,16 @@ class AMP_Hulu_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://www.hulu.com/watch/771496' . PHP_EOL,
-				array( 'amp-hulu' => true ),
-			),
-		);
+				[ 'amp-hulu' => true ],
+			],
+		];
 	}
 
 	/**

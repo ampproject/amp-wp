@@ -2,16 +2,16 @@
 
 class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
-		return array(
-			'no_embed'   => array(
+		return [
+			'no_embed'   => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
-			'simple_url' => array(
+			],
+			'simple_url' => [
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
 				'<p><amp-vine data-vineid="MdKjXez002d" layout="responsive" width="400" height="400"></amp-vine></p>' . PHP_EOL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -26,16 +26,16 @@ class AMP_Vine_Embed_Test extends WP_UnitTestCase {
 	}
 
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://vine.co/v/MdKjXez002d' . PHP_EOL,
-				array( 'amp-vine' => true ),
-			),
-		);
+				[ 'amp-vine' => true ],
+			],
+		];
 	}
 
 	/**

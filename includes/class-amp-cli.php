@@ -100,7 +100,7 @@ class AMP_CLI {
 	 *
 	 * @var array
 	 */
-	public static $include_conditionals = array();
+	public static $include_conditionals = [];
 
 	/**
 	 * The maximum number of URLs to validate for each type.
@@ -123,7 +123,7 @@ class AMP_CLI {
 	 *     @type int $total The total number of URLs for this type, valid or invalid.
 	 * }
 	 */
-	public static $validity_by_type = array();
+	public static $validity_by_type = [];
 
 	/**
 	 * Crawl the entire site to get AMP validation results.
@@ -152,7 +152,7 @@ class AMP_CLI {
 	 * @throws Exception If an error happens.
 	 */
 	public function validate_site( $args, $assoc_args ) {
-		self::$include_conditionals      = array();
+		self::$include_conditionals      = [];
 		self::$force_crawl_urls          = false;
 		self::$limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
 
@@ -218,13 +218,13 @@ class AMP_CLI {
 		$key_url_count     = 'URL Count';
 		$key_validity_rate = 'Validity Rate';
 
-		$table_validation_by_type = array();
+		$table_validation_by_type = [];
 		foreach ( self::$validity_by_type as $type_name => $validity ) {
-			$table_validation_by_type[] = array(
+			$table_validation_by_type[] = [
 				$key_template_type => $type_name,
 				$key_url_count     => $validity['total'],
 				$key_validity_rate => sprintf( '%d%%', 100.0 * ( $validity['valid'] / $validity['total'] ) ),
-			);
+			];
 		}
 
 		if ( empty( $table_validation_by_type ) ) {
@@ -245,7 +245,7 @@ class AMP_CLI {
 		WP_CLI\Utils\format_items(
 			'table',
 			$table_validation_by_type,
-			array( $key_template_type, $key_url_count, $key_validity_rate )
+			[ $key_template_type, $key_url_count, $key_validity_rate ]
 		);
 
 		$url_more_details = add_query_arg(
@@ -334,18 +334,18 @@ class AMP_CLI {
 		$total_count = 'posts' === get_option( 'show_on_front' ) && self::is_template_supported( 'is_home' ) ? 1 : 0;
 
 		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
+			get_taxonomies( [ 'public' => true ] ),
+			[ 'AMP_CLI', 'does_taxonomy_support_amp' ]
 		);
 
 		// Count all public taxonomy terms.
 		foreach ( $amp_enabled_taxonomies as $taxonomy ) {
 			$term_query = new WP_Term_Query(
-				array(
+				[
 					'taxonomy' => $taxonomy,
 					'fields'   => 'ids',
 					'number'   => self::$limit_type_validate_count,
-				)
+				]
 			);
 
 			// If $term_query->terms is an empty array, passing it to count() will throw an error.
@@ -353,7 +353,7 @@ class AMP_CLI {
 		}
 
 		// Count posts by type, like post, page, attachment, etc.
-		$public_post_types = get_post_types( array( 'public' => true ), 'names' );
+		$public_post_types = get_post_types( [ 'public' => true ], 'names' );
 		foreach ( $public_post_types as $post_type ) {
 			$posts        = self::get_posts_that_support_amp( self::get_posts_by_type( $post_type ) );
 			$total_count += ! empty( $posts ) ? count( $posts ) : 0;
@@ -388,7 +388,7 @@ class AMP_CLI {
 	 */
 	public static function get_posts_that_support_amp( $ids ) {
 		if ( ! self::is_template_supported( 'is_singular' ) ) {
-			return array();
+			return [];
 		}
 
 		if ( self::$force_crawl_urls ) {
@@ -456,14 +456,14 @@ class AMP_CLI {
 	 * @return int[]   $post_ids The post IDs in an array.
 	 */
 	public static function get_posts_by_type( $post_type, $offset = null, $number = null ) {
-		$args = array(
+		$args = [
 			'post_type'      => $post_type,
 			'posts_per_page' => is_int( $number ) ? $number : self::$limit_type_validate_count,
 			'post_status'    => 'publish',
 			'orderby'        => 'ID',
 			'order'          => 'DESC',
 			'fields'         => 'ids',
-		);
+		];
 		if ( is_int( $offset ) ) {
 			$args['offset'] = $offset;
 		}
@@ -492,9 +492,9 @@ class AMP_CLI {
 			get_terms(
 				array_merge(
 					compact( 'taxonomy', 'offset', 'number' ),
-					array(
+					[
 						'orderby' => 'id',
-					)
+					]
 				)
 			)
 		);
@@ -511,7 +511,7 @@ class AMP_CLI {
 	 * @return array The author page URLs, or an empty array.
 	 */
 	public static function get_author_page_urls( $offset = '', $number = '' ) {
-		$author_page_urls = array();
+		$author_page_urls = [];
 		if ( ! self::is_template_supported( 'is_author' ) ) {
 			return $author_page_urls;
 		}
@@ -567,10 +567,10 @@ class AMP_CLI {
 		}
 
 		$amp_enabled_taxonomies = array_filter(
-			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
+			get_taxonomies( [ 'public' => true ] ),
+			[ 'AMP_CLI', 'does_taxonomy_support_amp' ]
 		);
-		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
+		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
 
 		// Validate one URL of each template/content type, then another URL of each type on the next iteration.
 		for ( $i = 0; $i < self::$limit_type_validate_count; $i++ ) {
@@ -632,7 +632,7 @@ class AMP_CLI {
 		AMP_Validated_URL_Post_Type::store_validation_errors(
 			$validation_errors,
 			$validity['url'],
-			wp_array_slice_assoc( $validity, array( 'queried_object' ) )
+			wp_array_slice_assoc( $validity, [ 'queried_object' ] )
 		);
 		$unaccepted_error_count = count(
 			array_filter(
@@ -658,10 +658,10 @@ class AMP_CLI {
 		self::$number_crawled++;
 
 		if ( ! isset( self::$validity_by_type[ $type ] ) ) {
-			self::$validity_by_type[ $type ] = array(
+			self::$validity_by_type[ $type ] = [
 				'valid' => 0,
 				'total' => 0,
-			);
+			];
 		}
 		self::$validity_by_type[ $type ]['total']++;
 		if ( 0 === $unaccepted_error_count ) {

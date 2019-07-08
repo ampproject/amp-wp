@@ -22,14 +22,14 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_add_attributes_to_node__no_attributes() {
 		$dom  = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node = $dom->createElement( 'b' );
-		AMP_DOM_Utils::add_attributes_to_node( $node, array() );
+		AMP_DOM_Utils::add_attributes_to_node( $node, [] );
 		$this->assertFalse( $node->hasAttributes() );
 	}
 
 	public function test_add_attributes_to_node__attribute_without_value() {
 		$dom        = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node       = $dom->createElement( 'div' );
-		$attributes = array( 'placeholder' => '' );
+		$attributes = [ 'placeholder' => '' ];
 		AMP_DOM_Utils::add_attributes_to_node( $node, $attributes );
 
 		$this->assertTrue( $node->hasAttributes() );
@@ -39,10 +39,10 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	public function test_add_attributes_to_node__attribute_with_value() {
 		$dom        = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node       = $dom->createElement( 'div' );
-		$attributes = array(
+		$attributes = [
 			'class' => 'myClass',
 			'id'    => 'myId',
-		);
+		];
 		AMP_DOM_Utils::add_attributes_to_node( $node, $attributes );
 
 		$this->assertTrue( $node->hasAttributes() );
@@ -111,11 +111,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( $original, $restored );
 
 		// Test malformed.
-		$malformed_html = array(
+		$malformed_html = [
 			'<amp-img width="123" [text]="..."</amp-img>',
 			'<amp-img width="123" [text="..."]></amp-img>',
 			'<amp-img width="123" [text]="..." *bad*></amp-img>',
-		);
+		];
 		foreach ( $malformed_html as $html ) {
 			$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $html );
 			$this->assertNotContains( AMP_DOM_Utils::get_amp_bind_placeholder_prefix(), $converted, "Source: $html" );
@@ -158,17 +158,17 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 */
 	public function test_mustache_replacements() {
 
-		$data = array(
-			'foo' => array(
-				'bar' => array(
-					'baz' => array(),
-				),
-			),
-		);
+		$data = [
+			'foo' => [
+				'bar' => [
+					'baz' => [],
+				],
+			],
+		];
 
 		$html = implode(
 			"\n",
-			array(
+			[
 				'<!--amp-source-stack {"block_name":"core\/columns"}-->',
 				'<div class="wp-block-columns has-2-columns">',
 				'<!--amp-source-stack {"block_name":"core\/quote","block_attrs":{"layout":"column-1"}}-->',
@@ -183,7 +183,7 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 				'<script type="application/json">' . wp_json_encode( $data ) . '</script>',
 				'<template type="amp-mustache">Hello {{world}}! <a href="{{href}}" title="Hello {{name}}"><img src="{{src}}"></a><blockquote cite="{{cite}}">{{quote}}</blockquote></template>',
 				'<!-- /wp:html -->',
-			)
+			]
 		);
 
 		$dom   = AMP_DOM_Utils::get_dom_from_content( $html );
@@ -243,14 +243,14 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 * @return array An array of arrays holding an integer representation of iterations.
 	 */
 	public function get_table_row_iterations() {
-		return array(
-			array( 1 ),
-			array( 10 ),
-			array( 100 ),
-			array( 1000 ),
-			array( 10000 ),
-			array( 100000 ),
-		);
+		return [
+			[ 1 ],
+			[ 10 ],
+			[ 100 ],
+			[ 1000 ],
+			[ 10000 ],
+			[ 100000 ],
+		];
 	}
 
 	/**
@@ -355,90 +355,90 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 	 */
 	public function get_head_node_data() {
 		$dom = new DOMDocument();
-		return array(
-			array(
-				AMP_DOM_Utils::create_node( $dom, 'title', array() ),
+		return [
+			[
+				AMP_DOM_Utils::create_node( $dom, 'title', [] ),
 				true,
-			),
-			array(
+			],
+			[
 				AMP_DOM_Utils::create_node(
 					$dom,
 					'base',
-					array( 'href' => '/' )
+					[ 'href' => '/' ]
 				),
 				true,
-			),
-			array(
+			],
+			[
 				AMP_DOM_Utils::create_node(
 					$dom,
 					'script',
-					array( 'src' => 'http://example.com/test.js' )
+					[ 'src' => 'http://example.com/test.js' ]
 				),
 				true,
-			),
-			array(
-				AMP_DOM_Utils::create_node( $dom, 'style', array( 'media' => 'print' ) ),
+			],
+			[
+				AMP_DOM_Utils::create_node( $dom, 'style', [ 'media' => 'print' ] ),
 				true,
-			),
-			array(
-				AMP_DOM_Utils::create_node( $dom, 'noscript', array() ),
+			],
+			[
+				AMP_DOM_Utils::create_node( $dom, 'noscript', [] ),
 				true,
-			),
-			array(
+			],
+			[
 				AMP_DOM_Utils::create_node(
 					$dom,
 					'link',
-					array(
+					[
 						'rel'  => 'stylesheet',
 						'href' => 'https://example.com/foo.css',
-					)
+					]
 				),
 				true,
-			),
-			array(
+			],
+			[
 				AMP_DOM_Utils::create_node(
 					$dom,
 					'meta',
-					array(
+					[
 						'name'    => 'foo',
 						'content' => 'https://example.com/foo.css',
-					)
+					]
 				),
 				true,
-			),
-			array(
+			],
+			[
 				$dom->createTextNode( " \n\t" ),
 				true,
-			),
-			array(
+			],
+			[
 				$dom->createTextNode( 'no' ),
 				false,
-			),
-			array(
+			],
+			[
 				$dom->createComment( 'hello world' ),
 				true,
-			),
-			array(
+			],
+			[
 				$dom->createProcessingInstruction( 'test' ),
 				false,
-			),
-			array(
+			],
+			[
 				$dom->createCDATASection( 'nope' ),
 				false,
-			),
-			array(
+			],
+			[
 				$dom->createEntityReference( 'bad' ),
 				false,
-			),
-			array(
+			],
+			[
 				$dom->createElementNS( 'http://www.w3.org/2000/svg', 'svg' ),
 				false,
-			),
-			array(
-				AMP_DOM_Utils::create_node( $dom, 'span', array() ),
+			],
+			[
+				AMP_DOM_Utils::create_node( $dom, 'span', [] ),
 				false,
-			),
-		);
+			],
+		];
 	}
 
 	/**

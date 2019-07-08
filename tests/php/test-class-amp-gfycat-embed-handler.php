@@ -49,28 +49,28 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		return array(
-			'no_embed'        => array(
+		return [
+			'no_embed'        => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
+			],
 
-			'url_simple'      => array(
+			'url_simple'      => [
 				'https://gfycat.com/tautwhoppingcougar' . PHP_EOL,
 				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_detail' => array(
+			'url_with_detail' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
 				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_params' => array(
+			'url_with_params' => [
 				'https://gfycat.com/gifs/detail/tautwhoppingcougar?foo=bar' . PHP_EOL,
 				'<p><amp-gfycat width="500" height="281" data-gfyid="tautwhoppingcougar"></amp-gfycat></p>' . PHP_EOL,
-			),
+			],
 
-		);
+		];
 	}
 
 	/**
@@ -94,16 +94,16 @@ class AMP_Gfycat_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://www.gfycat.com/gifs/detail/tautwhoppingcougar' . PHP_EOL,
-				array( 'amp-gfycat' => true ),
-			),
-		);
+				[ 'amp-gfycat' => true ],
+			],
+		];
 	}
 
 	/**

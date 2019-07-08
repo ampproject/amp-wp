@@ -18,52 +18,52 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$poll_response   = array(
+		$poll_response   = [
 			'type'          => 'rich',
 			'version'       => '1.0',
 			'provider_name' => 'Crowdsignal',
 			'provider_url'  => 'https://crowdsignal.com',
 			'title'         => 'Which design do you prefer?',
 			'html' => '<script type="text/javascript" charset="utf-8" src="https://secure.polldaddy.com/p/7012505.js"></script><noscript><a href="https://poll.fm/7012505">Which design do you prefer?</a></noscript>', // phpcs:ignore
-		);
-		$survey_response = array(
+		];
+		$survey_response = [
 			'type'          => 'rich',
 			'version'       => '1.0',
 			'provider_name' => 'Crowdsignal',
 			'provider_url'  => 'https://crowdsignal.com',
 			'html'          => '<div class="pd-embed" data-settings="{&quot;type&quot;:&quot;iframe&quot;,&quot;auto&quot;:true,&quot;domain&quot;:&quot;rydk.survey.fm&quot;,&quot;id&quot;:&quot;test-survey&quot;}"></div><script type="text/javascript">(function(d,c,j){if(!document.getElementById(j)){var pd=d.createElement(c),s;pd.id=j;pd.src=(\'https:\'==document.location.protocol)?\'https://polldaddy.com/survey.js\':\'http://i0.poll.fm/survey.js\';s=document.getElementsByTagName(c)[0];s.parentNode.insertBefore(pd,s);}}(document,\'script\',\'pd-embed\'));</script>',
-		);
+		];
 
-		$data = array(
-			'poll.fm'          => array(
+		$data = [
+			'poll.fm'          => [
 				'https://poll.fm/7012505',
 				'<p><a href="https://poll.fm/7012505">Which design do you prefer?</a></p>',
 				$poll_response,
-			),
+			],
 
-			'polldaddy_poll'   => array(
+			'polldaddy_poll'   => [
 				'https://polldaddy.com/poll/7012505/',
 				'<p><a href="https://poll.fm/7012505">Which design do you prefer?</a></p>',
 				$poll_response,
-			),
+			],
 
-			'polldaddy_survey' => array(
+			'polldaddy_survey' => [
 				'https://rydk.polldaddy.com/s/test-survey',
 				'<p><a href="https://rydk.polldaddy.com/s/test-survey" target="_blank">View Survey</a></p>',
 				$survey_response,
-			),
-		);
+			],
+		];
 
 		/*
 		 * There is a bug with WordPress's oEmbed handling for Crowdsignal surveys.
 		 * See <https://core.trac.wordpress.org/ticket/46467>.
 		 */
 		if ( version_compare( get_bloginfo( 'version' ), '5.2.0', '>=' ) ) {
-			$data['survey.fm'] = array(
+			$data['survey.fm'] = [
 				'https://rydk.survey.fm/test-survey',
 				'<p><a href="https://rydk.survey.fm/test-survey" target="_blank">View Survey</a></p>',
 				$survey_response,
-			);
+			];
 		}
 
 		return $data;
@@ -86,13 +86,13 @@ class AMP_Crowdsignal_Embed_Test extends WP_UnitTestCase {
 					return $pre;
 				}
 
-				return array(
+				return [
 					'body'     => wp_json_encode( $oembed_response ),
-					'response' => array(
+					'response' => [
 						'code'    => 200,
 						'message' => 'OK',
-					),
-				);
+					],
+				];
 			},
 			10,
 			3

@@ -46,11 +46,11 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		$accepted_args = $this->callback['accepted_args'];
 		$args          = func_get_args();
 
-		$before_styles_enqueued = array();
+		$before_styles_enqueued = [];
 		if ( isset( $wp_styles, $wp_styles->queue ) ) {
 			$before_styles_enqueued = $wp_styles->queue;
 		}
-		$before_scripts_enqueued = array();
+		$before_scripts_enqueued = [];
 		if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
 			$before_scripts_enqueued = $wp_scripts->queue;
 		}
@@ -61,7 +61,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		AMP_Validation_Manager::$hook_source_stack[] = $this->callback['source'];
 		$has_buffer_started                          = false;
 		if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
-			$has_buffer_started = ob_start( array( 'AMP_Validation_Manager', 'wrap_buffer_with_source_comments' ) );
+			$has_buffer_started = ob_start( [ 'AMP_Validation_Manager', 'wrap_buffer_with_source_comments' ] );
 		}
 		$result = call_user_func_array( $function, array_slice( $args, 0, (int) $accepted_args ) );
 		if ( $has_buffer_started ) {
@@ -79,7 +79,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 		// Keep track of which source enqueued the scripts, and immediately report validity.
 		if ( isset( $wp_scripts, $wp_scripts->queue ) ) {
 			foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
-				$handles = array( $queued_handle );
+				$handles = [ $queued_handle ];
 
 				// Account for case where registered script is a placeholder for a set of scripts (e.g. jquery).
 				if ( isset( $wp_scripts->registered[ $queued_handle ] ) && false === $wp_scripts->registered[ $queued_handle ]->src ) {

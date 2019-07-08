@@ -29,7 +29,7 @@ class AMP_Content {
 	 *
 	 * @var array
 	 */
-	private $amp_scripts = array();
+	private $amp_scripts = [];
 
 	/**
 	 * AMP stylesheets.
@@ -37,7 +37,7 @@ class AMP_Content {
 	 * @since 1.0
 	 * @var array
 	 */
-	private $amp_stylesheets = array();
+	private $amp_stylesheets = [];
 
 	/**
 	 * Args.
@@ -68,7 +68,7 @@ class AMP_Content {
 	 * @param string[] $sanitizer_classes     Sanitizer class names.
 	 * @param array    $args                  Args.
 	 */
-	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = array() ) {
+	public function __construct( $content, $embed_handler_classes, $sanitizer_classes, $args = [] ) {
 		$this->content           = $content;
 		$this->args              = $args;
 		$this->embed_handlers    = $this->register_embed_handlers( $embed_handler_classes );
@@ -105,7 +105,7 @@ class AMP_Content {
 	 */
 	public function get_amp_styles() {
 		_deprecated_function( __METHOD__, '1.0', __CLASS__ . '::get_amp_stylesheets' );
-		return array();
+		return [];
 	}
 
 	/**
@@ -160,7 +160,7 @@ class AMP_Content {
 	 * @return array
 	 */
 	private function register_embed_handlers( $embed_handler_classes ) {
-		$embed_handlers = array();
+		$embed_handlers = [];
 
 		foreach ( $embed_handler_classes as $embed_handler_class => $args ) {
 			$embed_handler = new $embed_handler_class( array_merge( $this->args, $args ) );
