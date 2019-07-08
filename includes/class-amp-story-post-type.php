@@ -206,8 +206,6 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
 
-		add_filter( 'safe_style_css', array( __CLASS__, 'filter_safe_style_css' ), 10, 1 );
-
 		add_filter( 'rest_request_before_callbacks', array( __CLASS__, 'filter_rest_request_for_kses' ), 100, 3 );
 
 		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
@@ -345,39 +343,198 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Filters allowed CSS attributes to include positioning, display, etc.
+	 * Filters an inline style attribute and removes disallowed rules.
 	 *
-	 * @param array $attr Array of allowed CSS attributes.
+	 * This is equivalent to the WordPress core function of the same name,
+	 * except that this does not remove CSS with parentheses in it.
 	 *
-	 * @return array Filtered array of allowed CSS attributes.
+	 * Also, it adds a few more allowed attributes.
+	 *
+	 * @see safecss_filter_attr()
+	 *
+	 * @param string $css A string of CSS rules.
+	 *
+	 * @return string Filtered string of CSS rules.
 	 */
-	public static function filter_safe_style_css( $attr ) {
-		global $wp;
+	private static function safecss_filter_attr( $css ) {
+		$css = wp_kses_no_null( $css );
+		$css = str_replace( array( "\n", "\r", "\t" ), '', $css );
 
-		$route = $wp->query_vars['rest_route'];
+		$allowed_protocols = wp_allowed_protocols();
 
-		if ( ! $route ) {
-			return $attr;
-		}
+		$css_array = explode( ';', trim( $css ) );
 
-		$search = '\/' . self::POST_TYPE_SLUG . '\/';
+		/** This filter is documented in wp-includes/kses.php */
+		$allowed_attr = apply_filters(
+			'safe_style_css',
+			array(
+				'background',
+				'background-color',
+				'background-image',
+				'background-position',
 
-		// Only continue if it's a REST request for amp_story post type.
-		if ( ! preg_match( "/{$search}/i", $route ) ) {
-			return $attr;
-		}
+				'border',
+				'border-width',
+				'border-color',
+				'border-style',
+				'border-right',
+				'border-right-color',
+				'border-right-style',
+				'border-right-width',
+				'border-bottom',
+				'border-bottom-color',
+				'border-bottom-style',
+				'border-bottom-width',
+				'border-left',
+				'border-left-color',
+				'border-left-style',
+				'border-left-width',
+				'border-top',
+				'border-top-color',
+				'border-top-style',
+				'border-top-width',
 
-		$style_to_add = array(
-			'display',
-			'left',
-			'position',
-			'top',
+				'border-spacing',
+				'border-collapse',
+				'caption-side',
+
+				'color',
+				'font',
+				'font-family',
+				'font-size',
+				'font-style',
+				'font-variant',
+				'font-weight',
+				'letter-spacing',
+				'line-height',
+				'text-align',
+				'text-decoration',
+				'text-indent',
+				'text-transform',
+
+				'height',
+				'min-height',
+				'max-height',
+
+				'width',
+				'min-width',
+				'max-width',
+
+				'margin',
+				'margin-right',
+				'margin-bottom',
+				'margin-left',
+				'margin-top',
+
+				'padding',
+				'padding-right',
+				'padding-bottom',
+				'padding-left',
+				'padding-top',
+
+				'flex',
+				'flex-grow',
+				'flex-shrink',
+				'flex-basis',
+
+				'clear',
+				'cursor',
+				'direction',
+				'float',
+				'overflow',
+				'vertical-align',
+				'list-style-type',
+				'grid-template-columns',
+			)
 		);
 
-		foreach ( $style_to_add as $style ) {
-			$attr[] = $style;
+		// Add some more allowed attributes.
+		$allowed_attr[] = 'display';
+		$allowed_attr[] = 'position';
+		$allowed_attr[] = 'top';
+		$allowed_attr[] = 'left';
+		$allowed_attr[] = 'transform';
+
+		/*
+		 * CSS attributes that accept URL data types.
+		 *
+		 * This is in accordance to the CSS spec and unrelated to
+		 * the sub-set of supported attributes above.
+		 *
+		 * See: https://developer.mozilla.org/en-US/docs/Web/CSS/url
+		 */
+		$css_url_data_types = array(
+			'background',
+			'background-image',
+
+			'cursor',
+
+			'list-style',
+			'list-style-image',
+		);
+
+		if ( empty( $allowed_attr ) ) {
+			return $css;
 		}
-		return $attr;
+
+		$css = '';
+		foreach ( $css_array as $css_item ) {
+			if ( $css_item === '' ) {
+				continue;
+			}
+
+			$css_item        = trim( $css_item );
+			$css_test_string = $css_item;
+			$found           = false;
+			$url_attr        = false;
+
+			if ( strpos( $css_item, ':' ) === false ) {
+				$found = true;
+			} else {
+				$parts        = explode( ':', $css_item, 2 );
+				$css_selector = trim( $parts[0] );
+
+				if ( in_array( $css_selector, $allowed_attr, true ) ) {
+					$found    = true;
+					$url_attr = in_array( $css_selector, $css_url_data_types, true );
+				}
+			}
+
+			if ( $found && $url_attr ) {
+				// Simplified: matches the sequence `url(*)`.
+				preg_match_all( '/url\([^)]+\)/', $parts[1], $url_matches );
+
+				foreach ( $url_matches[0] as $url_match ) {
+					// Clean up the URL from each of the matches above.
+					preg_match( '/^url\(\s*([\'\"]?)(.*)(\g1)\s*\)$/', $url_match, $url_pieces );
+
+					if ( empty( $url_pieces[2] ) ) {
+						$found = false;
+						break;
+					}
+
+					$url = trim( $url_pieces[2] );
+
+					if ( empty( $url ) || $url !== wp_kses_bad_protocol( $url, $allowed_protocols ) ) {
+						$found = false;
+						break;
+					} else {
+						// Remove the whole `url(*)` bit that was matched above from the CSS.
+						$css_test_string = str_replace( $url_match, '', $css_test_string );
+					}
+				}
+			}
+
+			if ( $found ) {
+				if ( $css !== '' ) {
+					$css .= ';';
+				}
+
+				$css .= $css_item;
+			}
+		}
+
+		return $css;
 	}
 
 	/**
@@ -417,27 +574,30 @@ class AMP_Story_Post_Type {
 
 		// Replace inline styles before KSES...
 		add_filter(
-			'pre_post_content',
+			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
 				$post_content = preg_replace_callback(
 					'|style=\\\"([^"]*)\\\"|', // Because the post data is slashed.
 					static function ( $matches ) use ( &$style_attr_values ) {
 						$hash                       = md5( $matches[1] );
-						$style_attr_values[ $hash ] = $matches[1];
+						$style_attr_values[ $hash ] = self::safecss_filter_attr( $matches[1] );
 
+						// Replaces the complete style attribute value with its hashed version.
 						return str_replace( $matches[1], $hash, $matches[0] );
 					},
 					$post_content
 				);
 
 				return $post_content;
-			}
+			},
+			0
 		);
 
 		// ...And bring it back afterwards.
 		add_filter(
 			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
+				// Replaces hashed style attribute value with the original value again.
 				return str_replace( array_keys( $style_attr_values ), array_values( $style_attr_values ), $post_content );
 			},
 			20
