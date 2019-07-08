@@ -479,7 +479,7 @@ class AMP_Story_Post_Type {
 
 		$css = '';
 		foreach ( $css_array as $css_item ) {
-			if ( $css_item === '' ) {
+			if ( '' === $css_item ) {
 				continue;
 			}
 
@@ -515,7 +515,7 @@ class AMP_Story_Post_Type {
 
 					$url = trim( $url_pieces[2] );
 
-					if ( empty( $url ) || $url !== wp_kses_bad_protocol( $url, $allowed_protocols ) ) {
+					if ( empty( $url ) || wp_kses_bad_protocol( $url, $allowed_protocols ) !== $url ) {
 						$found = false;
 						break;
 					} else {
@@ -526,7 +526,7 @@ class AMP_Story_Post_Type {
 			}
 
 			if ( $found ) {
-				if ( $css !== '' ) {
+				if ( '' !== $css ) {
 					$css .= ';';
 				}
 
