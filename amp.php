@@ -13,6 +13,10 @@
  * @package AMP
  */
 
+define( 'AMP__FILE__', __FILE__ );
+define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__VERSION', '1.2-beta2' );
+
 /**
  * Errors encountered while loading the plugin.
  *
@@ -206,10 +210,6 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 	return;
 }
-
-define( 'AMP__FILE__', __FILE__ );
-define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-beta2' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).
