@@ -1,4 +1,4 @@
-/* global fetch, alert */
+/* global fetch */
 
 /**
  * WordPress dependencies
