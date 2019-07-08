@@ -21,7 +21,6 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	protected $DEFAULT_ARGS = array(
 		'base_url' => '',
-		'slug'     => '',
 	);
 
 	/**
@@ -36,9 +35,6 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function sanitize() {
 
-		// Canonical link Node.
-		$this->sanitize_assets( 'link', array( 'href' ) );
-
 		// AMP Story Node.
 		$attrs = array(
 			'publisher-logo-src',
@@ -50,10 +46,10 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		$this->sanitize_assets( 'amp-story', $attrs );
 
 		// AMP Image Nodes.
-		$this->sanitize_assets( 'amp-img', array( 'src' ) );
+		$this->sanitize_assets( 'amp-img', array( 'src', 'srcset' ) );
 
 		// Send the raw HTTP header for the export assets.
-		if ( ! empty( $this->assets ) ) {
+		if ( ! empty( $this->assets ) && ! headers_sent() ) {
 			header( 'X-AMP-Export-Assets: ' . implode( ',', $this->assets ) );
 		}
 	}
@@ -61,10 +57,10 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add and sanitize the export assets for the AMP Story.
 	 *
-	 * @param string $name        The DOMElement name.
-	 * @param array  $attritbutes The DOMElement attributes.
+	 * @param string $name       The DOMElement name.
+	 * @param array  $attributes The DOMElement attributes.
 	 */
-	public function sanitize_assets( $name, $attritbutes ) {
+	public function sanitize_assets( $name, $attributes ) {
 		$nodes     = $this->dom->getElementsByTagName( $name );
 		$num_nodes = $nodes->length;
 
@@ -76,46 +72,40 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					continue;
 				}
 
-				if ( ! empty( $attritbutes ) ) {
-					foreach ( $attritbutes as $attritbute ) {
+				if ( ! empty( $attributes ) ) {
+					foreach ( $attributes as $attribute ) {
 
-						// Verify we have values to update the paths with.
-						$update_path = (
-							! empty( $this->args['base_url'] )
-							&&
-							! empty( $this->args['slug'] )
-						);
+						// Verify we have a value to update the paths with.
+						$update_path = ! empty( $this->args['base_url'] );
 
-						// Used to generate the path with implode.
-						$args = array(
-							$this->args['base_url'],
-							$this->args['slug'],
-						);
-
-						if ( 'link' === $name && 'href' === $attritbute ) { // @todo this is not working.
-							if ( $update_path ) {
-								$node->setAttribute( $attritbute, implode( '/', $args ) );
-							}
-						} elseif ( 'amp-story' === $name && 'publisher' === $attritbute ) {
+						if ( 'amp-story' === $name && 'publisher' === $attribute ) {
 							if ( $update_path ) {
 								$parse = wp_parse_url( $this->args['base_url'] );
 
 								if ( ! empty( $parse['host'] ) ) {
-									$node->setAttribute( $attritbute, $parse['host'] );
+									$node->setAttribute( $attribute, $parse['host'] );
 								}
 							}
 						} else {
-							$asset = $node->getAttribute( $attritbute );
+							$asset = $node->getAttribute( $attribute );
 
 							// Replace the asset.
-							if ( $asset && $update_path ) {
-								$args[] = 'assets';
-								$args[] = basename( $asset );
-								$node->setAttribute( $attritbute, implode( '/', $args ) );
-							}
+							if ( $asset ) {
+								if ( $update_path ) {
 
-							// Add to assets array.
-							$this->assets[] = $asset;
+									// Generates the path.
+									$args = array(
+										$this->args['base_url'],
+										'assets',
+										basename( $asset ),
+									);
+
+									$node->setAttribute( $attribute, implode( '/', $args ) );
+								}
+
+								// Add to assets array.
+								$this->assets[] = $asset;
+							}
 						}
 					}
 				}

@@ -4,7 +4,11 @@
  * WordPress dependencies
  */
 import { PluginMoreMenuItem } from '@wordpress/edit-post';
+import { select } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
+
 const { ampStoriesExport, FormData, URL } = window;
+const { getCurrentPostId } = select('core/editor');
 
 const handleExport = () => {
 	const fromData = new FormData();
@@ -12,7 +16,7 @@ const handleExport = () => {
 	// Add the form data.
 	fromData.append( 'action', ampStoriesExport.action );
 	fromData.append( '_wpnonce', ampStoriesExport.nonce );
-	fromData.append( 'post_ID', document.getElementById( 'post_ID' ).value );
+	fromData.append( 'post_ID', getCurrentPostId() );
 
 	// Request the export.
 	fetch( ampStoriesExport.ajaxUrl, {
@@ -49,9 +53,9 @@ export const name = 'amp-story-export';
 
 export const render = () => (
 	<PluginMoreMenuItem
-		icon={ ampStoriesExport.icon }
+		icon={ 'media-archive' }
 		onClick={ handleExport }
 	>
-		{ ampStoriesExport.label }
+		{ __( 'AMP Story Export', 'amp' ) }
 	</PluginMoreMenuItem>
 );
