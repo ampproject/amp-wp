@@ -138,16 +138,34 @@ class AMP_Validation_Manager {
 	/**
 	 * Cached template directory to prevent infinite recursion.
 	 *
+	 * @see get_template_directory()
 	 * @var string
 	 */
 	protected static $template_directory;
 
 	/**
+	 * Cached template slug to prevent infinite recursion.
+	 *
+	 * @see get_template()
+	 * @var string
+	 */
+	protected static $template_slug;
+
+	/**
 	 * Cached stylesheet directory to prevent infinite recursion.
 	 *
+	 * @see get_stylesheet_directory()
 	 * @var string
 	 */
 	protected static $stylesheet_directory;
+
+	/**
+	 * Cached stylesheet slug to prevent infinite recursion.
+	 *
+	 * @see get_stylesheet()
+	 * @var string
+	 */
+	protected static $stylesheet_slug;
 
 	/**
 	 * Add the actions.
@@ -374,7 +392,7 @@ class AMP_Validation_Manager {
 		}
 
 		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
+		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ?: $amp_url );
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
@@ -500,14 +518,16 @@ class AMP_Validation_Manager {
 			 */
 			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$slug   = sanitize_key( $slug );
-				$status = intval( $status );
+				$status = (int) $status;
 				self::$validation_error_status_overrides[ $slug ] = $status;
 				ksort( self::$validation_error_status_overrides );
 			}
 		}
 
-		self::$template_directory   = get_template_directory();
-		self::$stylesheet_directory = get_stylesheet_directory();
+		self::$template_directory   = wp_normalize_path( get_template_directory() );
+		self::$template_slug        = get_template();
+		self::$stylesheet_directory = wp_normalize_path( get_stylesheet_directory() );
+		self::$stylesheet_slug      = get_stylesheet();
 
 		add_action( 'wp', array( __CLASS__, 'wrap_widget_callbacks' ) );
 
@@ -609,7 +629,7 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
+				$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
 
 				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
@@ -678,7 +698,6 @@ class AMP_Validation_Manager {
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
-		unset( $field_name );
 		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
@@ -920,7 +939,7 @@ class AMP_Validation_Manager {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
 			$items = array();
 			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === intval( $count ) ) {
+				if ( 1 === (int) $count ) {
 					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 				} else {
 					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
@@ -1371,7 +1390,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
-	 * @param string|array $callback The callback for which to get the plugin.
+	 * @param string|array|callable $callback The callback for which to get the plugin.
 	 * @return array|null {
 	 *     The source data.
 	 *
@@ -1434,15 +1453,12 @@ class AMP_Validation_Manager {
 			if ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WP_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'plugin';
 				$source['name'] = $matches[1];
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$template_directory ) ), ':' ) . ':s', $file ) ) {
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$template_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_template();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( self::$stylesheet_directory ) ), ':' ) . ':s', $file ) ) {
+				$source['name'] = self::$template_slug;
+			} elseif ( preg_match( ':' . preg_quote( trailingslashit( self::$stylesheet_directory ), ':' ) . $slug_pattern . ':s', $file ) ) {
 				$source['type'] = 'theme';
-				$source['name'] = get_stylesheet();
-			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( get_theme_root() ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
-				$source['type'] = 'theme';
-				$source['name'] = $matches[1];
+				$source['name'] = self::$stylesheet_slug;
 			} elseif ( preg_match( ':' . preg_quote( trailingslashit( wp_normalize_path( WPMU_PLUGIN_DIR ) ), ':' ) . $slug_pattern . ':s', $file, $matches ) ) {
 				$source['type'] = 'mu-plugin';
 				$source['name'] = $matches[1];
@@ -1514,64 +1530,10 @@ class AMP_Validation_Manager {
 	 *     @type int      $accepted_args
 	 *     @type array    $source
 	 * }
-	 * @return closure $wrapped_callback The callback, wrapped in comments.
+	 * @return AMP_Validation_Callback_Wrapper $wrapped_callback The callback, wrapped in comments.
 	 */
 	public static function wrapped_callback( $callback ) {
-		return function() use ( $callback ) {
-			global $wp_styles, $wp_scripts;
-
-			$function      = $callback['function'];
-			$accepted_args = $callback['accepted_args'];
-			$args          = func_get_args();
-
-			$before_styles_enqueued = array();
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
-				$before_styles_enqueued = $wp_styles->queue;
-			}
-			$before_scripts_enqueued = array();
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
-				$before_scripts_enqueued = $wp_scripts->queue;
-			}
-
-			$is_filter = isset( $callback['source']['hook'] ) && ! did_action( $callback['source']['hook'] );
-
-			// Wrap the markup output of (action) hooks in source comments.
-			AMP_Validation_Manager::$hook_source_stack[] = $callback['source'];
-			$has_buffer_started                          = false;
-			if ( ! $is_filter && AMP_Validation_Manager::can_output_buffer() ) {
-				$has_buffer_started = ob_start( array( __CLASS__, 'wrap_buffer_with_source_comments' ) );
-			}
-			$result = call_user_func_array( $function, array_slice( $args, 0, intval( $accepted_args ) ) );
-			if ( $has_buffer_started ) {
-				ob_end_flush();
-			}
-			array_pop( AMP_Validation_Manager::$hook_source_stack );
-
-			// Keep track of which source enqueued the styles.
-			if ( isset( $wp_styles ) && isset( $wp_styles->queue ) ) {
-				foreach ( array_diff( $wp_styles->queue, $before_styles_enqueued ) as $handle ) {
-					AMP_Validation_Manager::$enqueued_style_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
-				}
-			}
-
-			// Keep track of which source enqueued the scripts, and immediately report validity.
-			if ( isset( $wp_scripts ) && isset( $wp_scripts->queue ) ) {
-				foreach ( array_diff( $wp_scripts->queue, $before_scripts_enqueued ) as $queued_handle ) {
-					$handles = array( $queued_handle );
-
-					// Account for case where registered script is a placeholder for a set of scripts (e.g. jquery).
-					if ( isset( $wp_scripts->registered[ $queued_handle ] ) && false === $wp_scripts->registered[ $queued_handle ]->src ) {
-						$handles = array_merge( $handles, $wp_scripts->registered[ $queued_handle ]->deps );
-					}
-
-					foreach ( $handles as $handle ) {
-						AMP_Validation_Manager::$enqueued_script_sources[ $handle ][] = array_merge( $callback['source'], compact( 'handle' ) );
-					}
-				}
-			}
-
-			return $result;
-		};
+		return new AMP_Validation_Callback_Wrapper( $callback );
 	}
 
 	/**
@@ -1615,7 +1577,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return substr( wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' ), -12, 10 );
+		return substr( wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' ), -12, 10 );
 	}
 
 	/**
@@ -1887,7 +1849,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( strlen( trim( $response ) ) === 0 ) {
+		if ( trim( $response ) === '' ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
@@ -1938,7 +1900,7 @@ class AMP_Validation_Manager {
 			default:
 				/* translators: %s is error code */
 				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-		};
+		}
 	}
 
 	/**

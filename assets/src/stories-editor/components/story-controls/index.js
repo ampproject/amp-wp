@@ -69,22 +69,24 @@ StoryControls.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isReordering } = select( 'amp/story' );
+		const { getBlockOrder } = select( 'core/block-editor' );
 
 		return {
 			isReordering: isReordering(),
+			blockOrder: getBlockOrder(),
 		};
 	} ),
-	withDispatch( ( dispatch ) => {
+	withDispatch( ( dispatch, { blockOrder } ) => {
 		const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 		const { startReordering, saveOrder, resetOrder } = dispatch( 'amp/story' );
 
 		return {
 			startReordering: () => {
 				clearSelectedBlock();
-				startReordering();
+				startReordering( blockOrder );
 			},
 			saveOrder,
-			resetOrder,
+			resetOrder: () => resetOrder( blockOrder ),
 		};
 	} )
 )( StoryControls );

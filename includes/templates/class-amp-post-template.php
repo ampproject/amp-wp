@@ -96,7 +96,7 @@ class AMP_Post_Template {
 		}
 
 		// Make sure we have a post, or bail if not.
-		if ( is_a( $this->post, 'WP_Post' ) ) {
+		if ( $this->post instanceof WP_Post ) {
 			$this->ID = $this->post->ID;
 		} else {
 			return;
@@ -166,10 +166,10 @@ class AMP_Post_Template {
 	public function get( $property, $default = null ) {
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
-		} else {
-			/* translators: %s is key name */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 		}
+
+		/* translators: %s is key name */
+		_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 
 		return $default;
 	}

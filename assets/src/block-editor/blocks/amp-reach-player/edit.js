@@ -33,9 +33,9 @@ const BlockEdit = ( props ) => {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Reach settings', 'amp' ) }>
+				<PanelBody title={ __( 'Reach Settings', 'amp' ) }>
 					<TextControl
-						label={ __( 'The Reach player embed id (required)', 'amp' ) }
+						label={ __( 'Embed ID (required)', 'amp' ) }
 						value={ dataEmbedId }
 						onChange={ ( value ) => ( setAttributes( { dataEmbedId: value } ) ) }
 					/>

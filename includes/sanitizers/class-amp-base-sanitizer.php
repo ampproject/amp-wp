@@ -193,13 +193,13 @@ abstract class AMP_Base_Sanitizer {
 	 * Get stylesheets.
 	 *
 	 * @since 0.7
-	 * @returns array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
+	 * @return array Values are the CSS stylesheets. Keys are MD5 hashes of the stylesheets.
 	 */
 	public function get_stylesheets() {
 		$stylesheets = array();
 
 		foreach ( $this->get_styles() as $selector => $properties ) {
-			$stylesheet = sprintf( '%s { %s }', $selector, join( '; ', $properties ) . ';' );
+			$stylesheet = sprintf( '%s { %s }', $selector, implode( '; ', $properties ) . ';' );
 
 			$stylesheets[ md5( $stylesheet ) ] = $stylesheet;
 		}
@@ -239,18 +239,16 @@ abstract class AMP_Base_Sanitizer {
 
 		// Accepts both integers and floats & prevents negative values.
 		if ( is_numeric( $value ) ) {
-			return max( 0, floatval( $value ) );
+			return max( 0, (float) $value );
 		}
 
 		if ( AMP_String_Utils::endswith( $value, 'px' ) ) {
 			return absint( $value );
 		}
 
-		if ( AMP_String_Utils::endswith( $value, '%' ) ) {
-			if ( 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
-				$percentage = absint( $value ) / 100;
-				return round( $percentage * $this->args['content_max_width'] );
-			}
+		if ( AMP_String_Utils::endswith( $value, '%' ) && 'width' === $dimension && isset( $this->args['content_max_width'] ) ) {
+			$percentage = absint( $value ) / 100;
+			return round( $percentage * $this->args['content_max_width'] );
 		}
 
 		return '';
@@ -278,8 +276,10 @@ abstract class AMP_Base_Sanitizer {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
 		}
-		if ( empty( $attributes['width'] ) ) {
+
+		if ( empty( $attributes['width'] ) || '100%' === $attributes['width'] ) {
 			$attributes['layout'] = 'fixed-height';
+			$attributes['width']  = 'auto';
 		}
 
 		return $attributes;
@@ -550,8 +550,7 @@ abstract class AMP_Base_Sanitizer {
 				$new_attributes['height'] = self::FALLBACK_HEIGHT;
 			}
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: ' . $new_attributes['height'] . 'px;' );
-			unset( $new_attributes['width'] );
-			unset( $new_attributes['height'] );
+			unset( $new_attributes['width'], $new_attributes['height'] );
 		} elseif ( 'responsive' === $layout ) {
 			$node->parentNode->setAttribute( 'style', 'position:relative; width: 100%; height: auto' );
 		} elseif ( 'fixed' === $layout ) {

@@ -32,14 +32,6 @@ class AMP_Content {
 	private $amp_scripts = array();
 
 	/**
-	 * AMP styles.
-	 *
-	 * @deprecated
-	 * @var array
-	 */
-	private $amp_styles = array();
-
-	/**
 	 * AMP stylesheets.
 	 *
 	 * @since 1.0
@@ -52,21 +44,21 @@ class AMP_Content {
 	 *
 	 * @var array
 	 */
-	private $args = array();
+	private $args;
 
 	/**
 	 * Embed handlers.
 	 *
 	 * @var AMP_Base_Embed_Handler[] AMP_Base_Embed_Handler[]
 	 */
-	private $embed_handlers = array();
+	private $embed_handlers;
 
 	/**
 	 * Sanitizer class names.
 	 *
 	 * @var string[]
 	 */
-	private $sanitizer_classes = array();
+	private $sanitizer_classes;
 
 	/**
 	 * AMP_Content constructor.
@@ -173,7 +165,7 @@ class AMP_Content {
 		foreach ( $embed_handler_classes as $embed_handler_class => $args ) {
 			$embed_handler = new $embed_handler_class( array_merge( $this->args, $args ) );
 
-			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+			if ( ! $embed_handler instanceof AMP_Base_Embed_Handler ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(

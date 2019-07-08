@@ -66,9 +66,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'walker_nav_menu_start_el',
-			function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
-				unset( $depth );
-
+			static function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
 				// Skip adding buttons to nav menu widgets for now.
 				if ( empty( $nav_menu_args->theme_location ) ) {
 					return $item_output;
@@ -112,7 +110,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 				if ( isset( $args['icon'] ) ) {
 					$dropdown_button .= $args['icon'];
 				}
-				if ( isset( $args['expand_text'] ) && isset( $args['collapse_text'] ) ) {
+				if ( isset( $args['expand_text'], $args['collapse_text'] ) ) {
 					$dropdown_button .= sprintf(
 						'<span class="screen-reader-text" [text]="%s">%s</span>',
 						esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( $args['collapse_text'] ), wp_json_encode( $args['expand_text'] ) ) ),

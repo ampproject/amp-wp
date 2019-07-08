@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.2';
+	const STORY_TEMPLATES_VERSION = '0.3.3';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -32,7 +32,7 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		if ( ! post_type_exists( 'amp_story' ) ) {
+		if ( ! post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 			return;
 		}
 
@@ -58,8 +58,7 @@ class AMP_Story_Templates {
 	public function filter_user_has_cap( $allcaps, $caps, $args ) {
 		if ( 'edit_post' === $args[0] && isset( $args[2] ) ) {
 			if ( has_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY, $args[2] ) ) {
-				unset( $allcaps['edit_others_posts'] );
-				unset( $allcaps['edit_published_posts'] );
+				unset( $allcaps['edit_others_posts'], $allcaps['edit_published_posts'] );
 			}
 		}
 		return $allcaps;
@@ -302,7 +301,7 @@ class AMP_Story_Templates {
 			return $args;
 		}
 		parse_str( $parts['query'], $params );
-		if ( ! isset( $params['post'] ) || ! isset( $params['action'] ) ) {
+		if ( ! isset( $params['post'], $params['action'] ) ) {
 			return $args;
 		}
 

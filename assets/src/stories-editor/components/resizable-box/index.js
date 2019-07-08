@@ -21,7 +21,7 @@ import {
 	getRadianFromDeg,
 } from '../../helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER } from '../../constants';
+import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -54,8 +54,13 @@ const EnhancedResizableBox = ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
+	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
 	const isText = 'amp/amp-story-text' === blockName;
-	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName );
+
+	if ( isText ) {
+		height += TEXT_BLOCK_PADDING * 2;
+		width += TEXT_BLOCK_PADDING * 2;
+	}
 
 	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
 	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
@@ -94,8 +99,8 @@ const EnhancedResizableBox = ( props ) => {
 				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
 
 				onResizeStop( {
-					width: parseInt( appliedWidth, 10 ),
-					height: parseInt( appliedHeight, 10 ),
+					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedWidth, 10 ),
+					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedHeight, 10 ),
 					positionTop,
 					positionLeft,
 				} );
@@ -125,12 +130,14 @@ const EnhancedResizableBox = ( props ) => {
 						case 'amp/amp-story-post-date':
 							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
 							break;
+						case 'core/code':
+							textElement = blockElement.querySelector( '.wp-block-code' );
 					}
 				} else {
 					textElement = null;
 				}
 
-				if ( ampFitText && 'amp/amp-story-text' === blockName ) {
+				if ( ampFitText && isText ) {
 					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
 				} else {
 					textBlockWrapper = null;
@@ -153,18 +160,30 @@ const EnhancedResizableBox = ( props ) => {
 				if ( textElement && isReducing ) {
 					// If we have a rotated block, let's assign the width and height for measuring.
 					// Without assigning the new measure, the calculation would be incorrect due to angle.
+					// Text block is handled differently since the text block's content shouldn't have full width while measuring.
 					if ( angle ) {
-						textElement.style.width = appliedWidth + 'px';
-						textElement.style.height = appliedHeight + 'px';
+						if ( ! isText ) {
+							textElement.style.width = appliedWidth + 'px';
+							textElement.style.height = appliedHeight + 'px';
+						} else if ( isText && ! ampFitText ) {
+							textElement.style.width = 'initial';
+						}
 					}
-					if ( appliedWidth < textElement.scrollWidth || appliedHeight < textElement.scrollHeight ) {
+
+					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
+					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
+					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;
 					}
 					// If we have rotated block, let's restore the correct measures.
 					if ( angle ) {
-						textElement.style.width = 'initial';
-						textElement.style.height = '100%';
+						if ( ! isText ) {
+							textElement.style.width = 'initial';
+							textElement.style.height = '100%';
+						} else if ( isText && ! ampFitText ) {
+							textElement.style.width = '100%';
+						}
 					}
 				}
 
@@ -172,8 +191,15 @@ const EnhancedResizableBox = ( props ) => {
 					const radianAngle = getRadianFromDeg( angle );
 
 					// Compare position between the initial and after resizing.
-					const initialPosition = getBlockPositioning( width, height, radianAngle );
-					const resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle );
+					let initialPosition, resizedPosition;
+					// If it's a text block, we shouldn't consider the added padding for measuring.
+					if ( isText ) {
+						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
+						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
+					} else {
+						initialPosition = getBlockPositioning( width, height, radianAngle );
+						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle );
+					}
 					const diff = {
 						left: resizedPosition.left - initialPosition.left,
 						top: resizedPosition.top - initialPosition.top,
@@ -207,7 +233,7 @@ const EnhancedResizableBox = ( props ) => {
 				lastHeight = appliedHeight;
 
 				if ( textBlockWrapper && ampFitText ) {
-					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+					textBlockWrapper.style.lineHeight = isText ? appliedHeight - ( TEXT_BLOCK_PADDING * 2 ) + 'px' : appliedHeight + 'px';
 				}
 
 				// If it's image, let's change the width and height of the image, too.

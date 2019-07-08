@@ -27,7 +27,7 @@ class AMP_Admin_Pointer {
 	 * @since 1.2
 	 * @var array
 	 */
-	private $args = array();
+	private $args;
 
 	/**
 	 * Internal storage for dismissed pointers, to prevent repeated parsing.
@@ -36,7 +36,7 @@ class AMP_Admin_Pointer {
 	 * @static
 	 * @var array|null
 	 */
-	private static $dismissed_pointers = null;
+	private static $dismissed_pointers;
 
 	/**
 	 * Constructor.
@@ -195,8 +195,7 @@ class AMP_Admin_Pointer {
 
 				function setup() {
 					$( '<?php echo esc_js( $this->args['selector'] ); ?>' ).first().pointer( options ).pointer( 'open' );
-				};
-
+				}
 				if ( options.position && options.position.defer_loading ) {
 					$( window ).bind( 'load.wp-pointers', setup );
 				} else {

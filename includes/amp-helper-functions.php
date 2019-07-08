@@ -181,12 +181,10 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
+	} elseif ( is_singular() ) {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	} else {
-		if ( is_singular() ) {
-			$amp_url = amp_get_permalink( get_queried_object_id() );
-		} else {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 
 	if ( ! $amp_url ) {
@@ -597,7 +595,6 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  */
 function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href ) {
 	static $allowed_font_src_regex = null;
-	unset( $handle );
 	if ( ! $allowed_font_src_regex ) {
 		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
@@ -796,6 +793,12 @@ function amp_get_content_sanitizers( $post = null ) {
 		$post = null;
 	}
 
+	$parsed_home_url = wp_parse_url( get_home_url() );
+	$current_origin  = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
+	if ( isset( $parsed_home_url['port'] ) ) {
+		$current_origin .= ':' . $parsed_home_url['port'];
+	}
+
 	$sanitizers = array(
 		'AMP_Core_Theme_Sanitizer'        => array(
 			'template'   => get_template(),
@@ -815,6 +818,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Embed_Sanitizer'             => array(),
 		'AMP_Iframe_Sanitizer'            => array(
 			'add_placeholder' => true,
+			'current_origin'  => $current_origin,
 		),
 		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
@@ -1116,12 +1120,10 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 
 	if ( is_amp_endpoint() ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
+	} elseif ( is_singular() ) {
+		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		if ( is_singular() ) {
-			$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
-		} else {
-			$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-		}
+		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
 	$icon = '&#x1F517;'; // LINK SYMBOL.

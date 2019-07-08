@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { shallow } from 'enzyme';
+import { render } from 'enzyme';
 
 /**
  * Internal dependencies
@@ -10,7 +10,7 @@ import StoryControls from '../';
 
 describe( 'StoryControls', () => {
 	it( 'should render story controls', () => {
-		const wrapper = shallow(
+		const wrapper = render(
 			<StoryControls />
 		);
 

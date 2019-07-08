@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -19,7 +20,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { maybeUpdateFontSize } from '../../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
 
@@ -35,22 +36,24 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes, fontSize } = this.props;
 		const {
 			height,
 			width,
+			content,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
 		if (
-			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			prevProps.attributes.content === content &&
+			isEqual( prevProps.fontSize, fontSize )
 		) {
 			return;
 		}
 
 		maybeUpdateFontSize( this.props );
+		maybeUpdateBlockDimensions( this.props );
 	}
 
 	onReplace( blocks ) {
@@ -90,23 +93,35 @@ class TextBlockEdit extends Component {
 			ampFitText,
 			autoFontSize,
 			height,
-			tagName,
 			opacity,
 		} = attributes;
 
-		let userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
-		if ( undefined === userFontSize ) {
-			if ( 'h1' === tagName ) {
-				userFontSize = 2 + 'rem';
-			} else if ( 'h2' === tagName ) {
-				userFontSize = 1.5 + 'rem';
-			}
-		}
+		const userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
 
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
-		const wrapperStyle = ampFitText && content.length ? { lineHeight: height + 'px' } : null;
+		const wrapperStyle = { backgroundColor: appliedBackgroundColor };
+		if ( ampFitText && content.length ) {
+			wrapperStyle.lineHeight = height + 'px';
+		}
+
+		const styleClasses = [];
+		let wrapperClass = 'wp-block-amp-story-text-wrapper';
+
+		// We need to assign the block styles to the wrapper, too.
+		if ( attributes.className && attributes.className.length ) {
+			const classNames = attributes.className.split( ' ' );
+			classNames.forEach( ( value ) => {
+				if ( value.includes( 'is-style' ) ) {
+					styleClasses.push( value );
+				}
+			} );
+		}
+
+		if ( styleClasses.length ) {
+			wrapperClass += ' ' + styleClasses.join( ' ' );
+		}
 
 		return (
 			<>
@@ -116,7 +131,7 @@ class TextBlockEdit extends Component {
 						onChange={ ( value ) => setAttributes( { align: value } ) }
 					/>
 				</BlockControls>
-				<div className={ classnames( 'wp-block-amp-story-text-wrapper', {
+				<div className={ classnames( wrapperClass, {
 					'with-line-height': ampFitText,
 				} ) } style={ wrapperStyle } >
 					<RichText
@@ -129,7 +144,6 @@ class TextBlockEdit extends Component {
 						onReplace={ this.onReplace }
 						onSplit={ () => {} }
 						style={ {
-							backgroundColor: appliedBackgroundColor,
 							color: textColor.color,
 							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 							textAlign: align,
@@ -137,8 +151,6 @@ class TextBlockEdit extends Component {
 						} }
 						className={ classnames( className, {
 							'has-text-color': textColor.color,
-							'has-background': backgroundColor.color,
-							[ backgroundColor.class ]: backgroundColor.class,
 							[ textColor.class ]: textColor.class,
 							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
 							'is-amp-fit-text': ampFitText,
@@ -162,6 +174,7 @@ TextBlockEdit.propTypes = {
 		autoFontSize: PropTypes.number,
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
+		className: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
@@ -173,6 +186,7 @@ TextBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,

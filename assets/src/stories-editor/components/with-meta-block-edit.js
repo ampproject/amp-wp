@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -21,7 +22,7 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
  * Internal dependencies
  */
 import { getBackgroundColorWithOpacity } from '../../common/helpers';
-import { maybeUpdateFontSize } from '../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
@@ -31,7 +32,7 @@ class MetaBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes, isSelected, fontSize } = this.props;
 		const {
 			height,
 			width,
@@ -41,12 +42,14 @@ class MetaBlockEdit extends Component {
 		if (
 			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			isEqual( prevProps.fontSize, fontSize )
 		) {
 			return;
 		}
 
 		maybeUpdateFontSize( this.props );
+		maybeUpdateBlockDimensions( this.props );
 	}
 
 	render() {
@@ -114,6 +117,9 @@ MetaBlockEdit.propTypes = {
 		ampFitText: PropTypes.bool,
 		width: PropTypes.number,
 		height: PropTypes.number,
+		align: PropTypes.string,
+		opacity: PropTypes.number,
+		autoFontSize: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	blockContent: PropTypes.string,
@@ -127,6 +133,7 @@ MetaBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,

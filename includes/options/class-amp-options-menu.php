@@ -168,6 +168,20 @@ class AMP_Options_Menu {
 
 		$has_required_block_capabilities = AMP_Story_Post_Type::has_required_block_capabilities();
 		?>
+		<style>
+			label[for="stories_experience"] span {
+				text-transform: uppercase;
+				font-size: 0.7em;
+				border: 1px solid;
+				border-radius: 2px;
+				padding: 2px;
+				margin: -15px 0  0 3px;
+				position: relative;
+				top: -2px;
+				font-weight: 400;
+				line-height: 1;
+			}
+		</style>
 		<fieldset>
 			<dl>
 				<dt>
@@ -190,7 +204,7 @@ class AMP_Options_Menu {
 				<dt>
 					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="stories_experience" value="<?php echo esc_attr( AMP_Options_Manager::STORIES_EXPERIENCE ); ?>" <?php disabled( ! $has_required_block_capabilities ); ?> <?php checked( in_array( AMP_Options_Manager::STORIES_EXPERIENCE, $experiences, true ) ); ?>>
 					<label for="stories_experience">
-						<strong><?php esc_html_e( 'Stories', 'amp' ); ?></strong>
+						<strong><?php echo wp_kses_post( __( 'Stories <span>Beta</span>', 'amp' ) ); ?></strong>
 					</label>
 				</dt>
 				<dd>
@@ -275,101 +289,95 @@ class AMP_Options_Menu {
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
-		<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-			<div class="notice notice-info notice-alt inline">
-				<p><?php esc_html_e( 'Your active theme has built-in AMP support.', 'amp' ); ?></p>
-			</div>
-			<p>
-				<?php echo wp_kses_post( $standard_description ); ?>
-			</p>
-			<p>
-				<?php echo wp_kses_post( $ecosystem_description ); ?>
-			</p>
-		<?php else : ?>
-			<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
-				<?php if ( $builtin_support ) : ?>
+
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
+				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+					<div class="notice notice-success notice-alt inline">
+						<p><?php esc_html_e( 'Your active theme is known to work well in standard mode.', 'amp' ); ?></p>
+					</div>
+				<?php elseif ( $builtin_support || AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
 					<div class="notice notice-success notice-alt inline">
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
+			<?php endif; ?>
 
-				<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<p>
-						<?php echo wp_kses_post( $ecosystem_description ); ?>
-					</p>
-				<?php endif; ?>
-				<dl>
-					<dt>
-						<input type="radio" id="theme_support_standard" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>>
-						<label for="theme_support_standard">
-							<strong><?php esc_html_e( 'Standard', 'amp' ); ?></strong>
-						</label>
-					</dt>
-					<dd>
-						<?php echo wp_kses_post( $standard_description ); ?>
-					</dd>
-					<dt>
-						<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
-						<label for="theme_support_transitional">
-							<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
-						</label>
-					</dt>
-					<dd>
-						<?php echo wp_kses_post( $transitional_description ); ?>
-					</dd>
-					<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-						<dt>
-							<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="disabled" <?php checked( $theme_support, 'disabled' ); ?>>
-							<label for="theme_support_disabled">
-								<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
-							</label>
-						</dt>
-						<dd>
-							<?php echo wp_kses_post( $reader_description ); ?>
+			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+				<p>
+					<?php echo wp_kses_post( $ecosystem_description ); ?>
+				</p>
+			<?php endif; ?>
 
-							<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
-								<div class="notice notice-info inline notice-alt">
-									<p>
-										<?php
-										echo wp_kses_post(
-											sprintf(
-												/* translators: %1: link to invalid URLs. 2: link to validation errors. */
-												__( 'View current site compatibility results for standard and transitional modes: %1$s and %2$s.', 'amp' ),
-												sprintf(
-													'<a href="%s">%s</a>',
-													esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
-													esc_html( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
-												),
-												sprintf(
-													'<a href="%s">%s</a>',
-													esc_url(
-														add_query_arg(
-															array(
-																'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
-																'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-															),
-															admin_url( 'edit-tags.php' )
-														)
+			<dl>
+				<dt>
+					<input type="radio" id="theme_support_standard" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>>
+					<label for="theme_support_standard">
+						<strong><?php esc_html_e( 'Standard', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php echo wp_kses_post( $standard_description ); ?>
+				</dd>
+				<dt>
+					<input type="radio" id="theme_support_transitional" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::TRANSITIONAL_MODE_SLUG ); ?>>
+					<label for="theme_support_transitional">
+						<strong><?php esc_html_e( 'Transitional', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php echo wp_kses_post( $transitional_description ); ?>
+				</dd>
+				<dt>
+					<input type="radio" id="theme_support_disabled" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[theme_support]' ); ?>" value="<?php echo esc_attr( AMP_Theme_Support::READER_MODE_SLUG ); ?>" <?php checked( $theme_support, AMP_Theme_Support::READER_MODE_SLUG ); ?>>
+					<label for="theme_support_disabled">
+						<strong><?php esc_html_e( 'Reader', 'amp' ); ?></strong>
+					</label>
+				</dt>
+				<dd>
+					<?php echo wp_kses_post( $reader_description ); ?>
+
+					<?php if ( ! current_theme_supports( AMP_Theme_Support::SLUG ) && wp_count_posts( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->publish > 0 ) : ?>
+						<div class="notice notice-info inline notice-alt">
+							<p>
+								<?php
+								echo wp_kses_post(
+									sprintf(
+										/* translators: %1: link to invalid URLs. 2: link to validation errors. */
+										__( 'View current site compatibility results for standard and transitional modes: %1$s and %2$s.', 'amp' ),
+										sprintf(
+											'<a href="%s">%s</a>',
+											esc_url( add_query_arg( 'post_type', AMP_Validated_URL_Post_Type::POST_TYPE_SLUG, admin_url( 'edit.php' ) ) ),
+											esc_html( get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG )->labels->name )
+										),
+										sprintf(
+											'<a href="%s">%s</a>',
+											esc_url(
+												add_query_arg(
+													array(
+														'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
+														'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 													),
-													esc_html( get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->labels->name )
+													admin_url( 'edit-tags.php' )
 												)
-											)
-										);
-										?>
-									</p>
-								</div>
-							<?php endif; ?>
-						</dd>
+											),
+											esc_html( get_taxonomy( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG )->labels->name )
+										)
+									)
+								);
+								?>
+							</p>
+						</div>
 					<?php endif; ?>
-				</dl>
+				</dd>
+			</dl>
 
-				<?php if ( AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
-					<p>
-						<?php echo wp_kses_post( $ecosystem_description ); ?>
-					</p>
-				<?php endif; ?>
-			</fieldset>
-		<?php endif; ?>
+			<?php if ( AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+				<p>
+					<?php echo wp_kses_post( $ecosystem_description ); ?>
+				</p>
+			<?php endif; ?>
+		</fieldset>
 		<?php
 	}
 
@@ -433,7 +441,7 @@ class AMP_Options_Menu {
 			<?php endif; ?>
 
 			<script>
-			(function( $, standardModeSlug ) {
+			(function( $, standardModeSlug, readerModeSlug ) {
 				const getThemeSupportMode = () => {
 					const checkedInput = $( 'input[type=radio][name="amp-options[theme_support]"]:checked' );
 					if ( 0 === checkedInput.length ) {
@@ -442,17 +450,21 @@ class AMP_Options_Menu {
 					return checkedInput.val();
 				};
 
-				var updateHiddenClasses = function() {
+				const updateHiddenClasses = function() {
 					const themeSupportMode = getThemeSupportMode();
 					$( '.amp-auto-accept-sanitize' ).toggleClass( 'hidden', standardModeSlug === themeSupportMode );
-					$( '.amp-validation-field' ).toggleClass( 'hidden', 'disabled' === themeSupportMode );
+					$( '.amp-validation-field' ).toggleClass( 'hidden', readerModeSlug === themeSupportMode );
 					$( '.amp-auto-accept-sanitize-canonical' ).toggleClass( 'hidden', standardModeSlug !== themeSupportMode );
 				};
 
 				$( 'input[type=radio][name="amp-options[theme_support]"]' ).change( updateHiddenClasses );
 
 				updateHiddenClasses();
-			})( jQuery, <?php echo wp_json_encode( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?> );
+			})(
+				jQuery,
+				<?php echo wp_json_encode( AMP_Theme_Support::STANDARD_MODE_SLUG ); ?>,
+				<?php echo wp_json_encode( AMP_Theme_Support::READER_MODE_SLUG ); ?>
+			);
 			</script>
 		</fieldset>
 		<?php
@@ -545,7 +557,7 @@ class AMP_Options_Menu {
 				</style>
 				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
 				<?php
-				self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 				?>
 				<script>
 					// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.

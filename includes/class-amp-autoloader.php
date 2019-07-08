@@ -99,6 +99,7 @@ class AMP_Autoloader {
 		'AMP_HTML_Utils'                     => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'      => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_Validation_Manager'             => 'includes/validation/class-amp-validation-manager',
+		'AMP_Validation_Callback_Wrapper'    => 'includes/validation/class-amp-validation-callback-wrapper',
 		'AMP_Validated_URL_Post_Type'        => 'includes/validation/class-amp-validated-url-post-type',
 		'AMP_Validation_Error_Taxonomy'      => 'includes/validation/class-amp-validation-error-taxonomy',
 		'AMP_CLI'                            => 'includes/class-amp-cli',
@@ -107,8 +108,8 @@ class AMP_Autoloader {
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
-		'AMP_Test_Stub_Sanitizer'            => 'tests/stubs',
-		'AMP_Test_World_Sanitizer'           => 'tests/stubs',
+		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
+		'AMP_Test_World_Sanitizer'           => 'tests/php/stubs',
 	);
 
 	/**

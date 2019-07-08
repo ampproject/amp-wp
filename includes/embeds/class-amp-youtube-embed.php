@@ -69,8 +69,8 @@ class AMP_YouTube_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string YouTube shortcode markup.
 	 */
 	public function shortcode( $attr ) {
-		$url      = false;
-		$video_id = false;
+		$url = false;
+
 		if ( isset( $attr[0] ) ) {
 			$url = ltrim( $attr[0], '=' );
 		} elseif ( function_exists( 'shortcode_new_to_old_params' ) ) {

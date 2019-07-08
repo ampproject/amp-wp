@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2-beta2
+ * Version: 1.2.1-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,14 +15,14 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2-beta2' );
+define( 'AMP__VERSION', '1.2.1-alpha' );
 
 /**
  * Errors encountered while loading the plugin.
  *
  * This has to be a global for the same of PHP 5.2.
  *
- * @var \WP_Error $_amp_load_errors
+ * @var WP_Error $_amp_load_errors
  */
 global $_amp_load_errors;
 
@@ -164,7 +164,7 @@ if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP_
  * Displays an admin notice about why the plugin is unable to load.
  *
  * @since 1.1.2
- * @global \WP_Error $_amp_load_errors
+ * @global WP_Error $_amp_load_errors
  */
 function _amp_show_load_errors_admin_notice() {
 	global $_amp_load_errors;
@@ -210,6 +210,7 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 
 	return;
 }
+
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).

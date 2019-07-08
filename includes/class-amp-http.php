@@ -156,8 +156,8 @@ class AMP_HTTP {
 		}
 
 		if ( isset( $scrubbed ) ) {
-			$build_query = function ( $query ) use ( $query_vars ) {
-				$pattern = '/^(' . join( '|', $query_vars ) . ')(?==|$)/';
+			$build_query = static function ( $query ) use ( $query_vars ) {
+				$pattern = '/^(' . implode( '|', $query_vars ) . ')(?==|$)/';
 				$pairs   = array();
 				foreach ( explode( '&', $query ) as $pair ) {
 					if ( ! preg_match( $pattern, $pair ) ) {
@@ -165,7 +165,7 @@ class AMP_HTTP {
 					}
 				}
 
-				return join( '&', $pairs );
+				return implode( '&', $pairs );
 			};
 
 			// Scrub QUERY_STRING.
@@ -232,8 +232,7 @@ class AMP_HTTP {
 				// phpcs:ignore PHPCompatibility.Constants.RemovedConstants.intl_idna_variant_2003Deprecated
 				$domain = idn_to_utf8( $domain, IDNA_DEFAULT, defined( 'INTL_IDNA_VARIANT_UTS46' ) ? INTL_IDNA_VARIANT_UTS46 : INTL_IDNA_VARIANT_2003 );
 			}
-			$subdomain = str_replace( '-', '--', $domain );
-			$subdomain = str_replace( '.', '-', $subdomain );
+			$subdomain = str_replace( array( '-', '.' ), array( '--', '-' ), $domain );
 
 			// Google AMP Cache subdomain.
 			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
@@ -327,7 +326,7 @@ class AMP_HTTP {
 		add_filter( 'comment_post_redirect', array( __CLASS__, 'filter_comment_post_redirect' ), PHP_INT_MAX, 2 );
 
 		// Add die handler for AMP error display, most likely due to problem with comment.
-		$handle_wp_die = function () {
+		$handle_wp_die = static function () {
 			return array( __CLASS__, 'handle_wp_die' );
 		};
 		add_filter( 'wp_die_json_handler', $handle_wp_die );

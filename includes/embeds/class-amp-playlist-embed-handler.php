@@ -127,11 +127,16 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function shortcode( $attr ) {
 		$data = $this->get_data( $attr );
+
 		if ( isset( $data['type'] ) && ( 'audio' === $data['type'] ) ) {
 			return $this->audio_playlist( $data );
-		} elseif ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
+		}
+
+		if ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
 			return $this->video_playlist( $data );
 		}
+
+		return '';
 	}
 
 	/**
@@ -196,7 +201,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function video_playlist( $data ) {
 		global $content_width;
-		if ( ! isset( $data['tracks'], $data['tracks'][0]['src'] ) ) {
+		if ( ! isset( $data['tracks'][0]['src'] ) ) {
 			return '';
 		}
 		self::$playlist_id++;
@@ -246,11 +251,11 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * }
 	 */
 	public function get_thumb_dimensions( $track ) {
-		$original_height = isset( $track['thumb']['height'] ) ? intval( $track['thumb']['height'] ) : self::DEFAULT_THUMB_HEIGHT;
-		$original_width  = isset( $track['thumb']['width'] ) ? intval( $track['thumb']['width'] ) : self::DEFAULT_THUMB_WIDTH;
+		$original_height = isset( $track['thumb']['height'] ) ? (int) $track['thumb']['height'] : self::DEFAULT_THUMB_HEIGHT;
+		$original_width  = isset( $track['thumb']['width'] ) ? (int) $track['thumb']['width'] : self::DEFAULT_THUMB_WIDTH;
 		if ( $original_width > self::THUMB_MAX_WIDTH ) {
 			$ratio  = $original_width / self::THUMB_MAX_WIDTH;
-			$height = intval( $original_height / $ratio );
+			$height = (int) ( $original_height / $ratio );
 		} else {
 			$height = $original_height;
 		}
@@ -279,7 +284,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 				?>
 				<div class="<?php echo esc_attr( $initial_class ); ?>" [class]="<?php echo esc_attr( $bound_class ); ?>" >
 					<a class="wp-playlist-caption" on="<?php echo esc_attr( $on ); ?>">
-						<?php echo esc_html( strval( $index + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo esc_html( $this->get_title( $track ) ); ?></span>
+						<?php echo esc_html( ( $index + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo esc_html( $this->get_title( $track ) ); ?></span>
 					</a>
 					<?php if ( isset( $track['meta']['length_formatted'] ) ) : ?>
 						<div class="wp-playlist-item-length"><?php echo esc_html( $track['meta']['length_formatted'] ); ?></div>
@@ -315,9 +320,12 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function get_title( $track ) {
 		if ( ! empty( $track['caption'] ) ) {
 			return $track['caption'];
-		} elseif ( ! empty( $track['title'] ) ) {
+		}
+
+		if ( ! empty( $track['title'] ) ) {
 			return $track['title'];
 		}
+
 		return '';
 	}
 

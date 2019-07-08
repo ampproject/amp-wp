@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, isEqual, has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -35,7 +35,11 @@ import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
 	MEDIA_INNER_BLOCKS,
+	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+	TEXT_BLOCK_BORDER,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -152,7 +156,10 @@ const getDefaultMinimumBlockHeight = ( name ) => {
 			return 200;
 
 		case 'core/pullquote':
-			return 215;
+			return 250;
+
+		case 'core/table':
+			return 100;
 
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
@@ -183,8 +190,11 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+	// Image block already has width and height.
+	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
 		anchor: {
@@ -252,7 +262,7 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'number',
 		};
 
-		if ( ! isImageBlock ) {
+		if ( needsWidthHeight ) {
 			addedAttributes.height = {
 				type: 'number',
 				default: getDefaultMinimumBlockHeight( name ),
@@ -301,6 +311,11 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	if ( isVideoBlock ) {
+		addedAttributes.ampShowCaption = {
+			type: 'boolean',
+			default: false,
+		};
+
 		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
 			...settings.attributes.autoplay,
@@ -429,7 +444,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	const newProps = { ...props };
 
 	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || uuid();
+	newProps.id = attributes.anchor || getUniqueId();
 
 	if ( attributes.rotationAngle ) {
 		let style = ! newProps.style ? {} : newProps.style;
@@ -753,7 +768,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;
 	}
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	maxFontSize++;
 
@@ -773,7 +788,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
 
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	return minFontSize;
 };
@@ -1020,21 +1035,32 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 };
 
 /**
- * Removes a pre-set caption from image block.
+ * Removes a pre-set caption from image and video block.
  *
  * @param {string} clientId Block ID.
  */
-export const maybeRemoveImageCaption = ( clientId ) => {
+export const maybeRemoveMediaCaption = ( clientId ) => {
 	const block = getBlock( clientId );
 
-	if ( ! block || 'core/image' !== block.name ) {
+	if ( ! block ) {
+		return;
+	}
+
+	const isImage = 'core/image' === block.name;
+	const isVideo = 'core/video' === block.name;
+
+	if ( ! isImage && ! isVideo ) {
 		return;
 	}
 
 	const { attributes } = block;
 
-	// If we have an image with pre-set caption we should remove the caption.
-	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+	// If we have an image or video with pre-set caption we should remove the caption.
+	if (
+		( ( ! attributes.ampShowImageCaption && isImage ) || ( ! attributes.ampShowCaption && isVideo ) ) &&
+			attributes.caption &&
+			0 !== attributes.caption.length
+	) {
 		updateBlockAttributes( clientId, { caption: '' } );
 	}
 };
@@ -1127,7 +1153,7 @@ const getBlockInnerTextElement = ( block ) => {
 
 	switch ( name ) {
 		case 'amp/amp-story-text':
-			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
 
 		case 'amp/amp-story-post-title':
 		case 'amp/amp-story-post-author':
@@ -1163,8 +1189,8 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-text':
 			const element = getBlockInnerTextElement( block );
 
-			if ( element && ampFitText && content.length ) {
-				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
+			if ( element && content.length ) {
+				const fitFontSize = calculateFontSize( element, height + TEXT_BLOCK_BORDER, width + TEXT_BLOCK_BORDER, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1178,11 +1204,70 @@ export const maybeUpdateFontSize = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const metaBlockElement = getBlockInnerTextElement( block );
 
-			if ( metaBlockElement && ampFitText ) {
+			if ( metaBlockElement ) {
 				const fitFontSize = calculateFontSize( metaBlockElement, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
+			}
+
+			break;
+	}
+};
+
+/**
+ * Updates a block's width and height in case it doesn't use amp-fit-text and the font size has changed.
+ *
+ * @param {Object}  block                         Block object.
+ * @param {string}  block.clientId                Block client ID.
+ * @param {Object}  block.attributes              Block attributes.
+ * @param {number}  block.attributes.width        Block width in pixels.
+ * @param {number}  block.attributes.height       Block height in pixels.
+ * @param {string}  block.attributes.content      Block inner content.
+ * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
+ * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
+ */
+export const maybeUpdateBlockDimensions = ( block ) => {
+	const { name, clientId, attributes } = block;
+	const { width, height, ampFitText, content } = attributes;
+
+	if ( ampFitText ) {
+		return;
+	}
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			const element = getBlockInnerTextElement( block );
+
+			if ( element && content.length ) {
+				if ( element.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.offsetHeight } );
+				}
+
+				if ( element.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement ) {
+				metaBlockElement.classList.toggle( 'is-measuring' );
+
+				if ( metaBlockElement.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: metaBlockElement.offsetHeight } );
+				}
+
+				if ( metaBlockElement.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: metaBlockElement.offsetWidth } );
+				}
+
+				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
 
 			break;
@@ -1414,4 +1499,42 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 export const getCallToActionBlock = ( pageClientId ) => {
 	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
 	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+};
+
+/**
+ * Gets the number of megabytes per second for the video.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {number|null} Number of megabytes per second, or null if media details unavailable.
+ */
+export const getVideoBytesPerSecond = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return null;
+	}
+	return media.media_details.filesize / media.media_details.length;
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of MB per second.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( media ) => {
+	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
+		return false;
+	}
+
+	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Returns a unique ID that is guaranteed to not start with a number.
+ *
+ * Useful for using in HTML attributes.
+ *
+ * @return {string} Unique ID.
+ */
+export const getUniqueId = () => {
+	return uuid().replace( /^\d/, 'a' );
 };

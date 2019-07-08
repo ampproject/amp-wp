@@ -44,9 +44,96 @@ The AMP Project accepts responsible security disclosures through the [Google App
 In addition to the Community Guidelines, this project follows
 an explicit [Code of Conduct](https://github.com/ampproject/amp-wp/blob/develop/code_of_conduct.md).
 
-## Dev Setup
+## Getting Started
 
-To start, clone this repository into your WordPress install being used for development:
+### Requirements
+
+To contribute to this plugin, you need the following tools installed on your computer:
+
+* [Composer](https://getcomposer.org/) - to install PHP dependencies.
+* [Node.js](https://nodejs.org/en/) - to install JavaScript dependencies.
+* [WordPress](https://wordpress.org/download/) - to run the actual plugin.
+
+You should be running a Node version matching the [current active LTS release](https://github.com/nodejs/Release#release-schedule) or newer for this plugin to work correctly. You can check your Node.js version by typing node -v in the Terminal prompt.
+
+If you have an incompatible version of Node in your development environment, you can use [nvm](https://github.com/creationix/nvm) to change node versions on the command line:
+
+```bash
+nvm install
+```
+
+## Local Environment
+
+Since you need a WordPress environment to run the plugin in, the quickest way to get up and running is to use the provided Docker setup. Install [Docker](https://www.docker.com/products/docker-desktop) and [Docker Compose](https://docs.docker.com/compose/install/) by following the instructions on their website.
+
+You can then clone this project somewhere on your computer:
+
+```bash
+git clone git@github.com:ampproject/amp-wp.git amp
+cd amp
+```
+
+After that, run a script to set up the local environment. It will automatically verify whether Docker, Composer and Node.js are configured properly and start the local WordPress instance. You may need to run this script multiple times if prompted.
+
+```bash
+./bin/local-env/start.sh
+```
+
+If everything was successful, you'll see this on your screen:
+
+```
+Welcome to...
+
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMWNXK0OOkkkkOO0KXNWMMMMMMMMMMMMMMMM
+MMMMMMMMMMMMWX0kdlc:::::::::::ccodk0NWMMMMMMMMMMMM
+MMMMMMMMMWXOdl::::::::::::::::::::::lx0NMMMMMMMMMM
+MMMMMMMWKxl::::::::::::::::::::::::::::oOXWMMMMMMM
+MMMMMMXkl:::::::::::::::::col::::::::::::oONMMMMMM
+MMMMW0o:::::::::::::::::ox0Xk:::::::::::::cxXWMMMM
+MMMW0l:::::::::::::::::dKWWXd:::::::::::::::dXMMMM
+MMW0l::::::::::::::::cxXWMM0l::::::::::::::::dXMMM
+MMXd::::::::::::::::ckNMMMWkc::::::::::::::::ckWMM
+MWOc:::::::::::::::lONMMMMNkooool:::::::::::::oXMM
+MWk:::::::::::::::l0WMMMMMMWNWNNOc::::::::::::l0MM
+MNx::::::::::::::oKWMMMMMMMMMMW0l:::::::::::::cOWM
+MNx:::::::::::::oKWWWMMMMMMMMNOl::::::::::::::c0MM
+MWOc::::::::::::cddddxKWMMMMNkc:::::::::::::::oKMM
+MMXd:::::::::::::::::l0MMMMXdc:::::::::::::::ckWMM
+MMW0l::::::::::::::::dXMWWKd:::::::::::::::::oXMMM
+MMMWOl:::::::::::::::kWW0xo:::::::::::::::::oKWMMM
+MMMMW0l:::::::::::::l0NOl::::::::::::::::::dKWMMMM
+MMMMMWKdc:::::::::::cooc:::::::::::::::::lkNMMMMMM
+MMMMMMMN0dc::::::::::::::::::::::::::::lxKWMMMMMMM
+MMMMMMMMMWKxoc::::::::::::::::::::::coOXWMMMMMMMMM
+MMMMMMMMMMMWNKkdoc:::::::::::::cloxOKWMMMMMMMMMMMM
+MMMMMMMMMMMMMMMWNX0OkkxxxxxxkO0KXWWMMMMMMMMMMMMMMM
+MMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMMM
+```
+
+The WordPress installation should be available at http://localhost:8890 (**Username**: admin, **Password**: password).
+
+To later turn off the local environment, you can run:
+
+```bash
+npm run env:stop
+```
+
+To bring it back later, run:
+
+```bash
+npm run env:start
+```
+
+Also, if you need to reset the local environment's database, you can run:
+
+```bash
+npm run env:reset-site
+```
+
+### Custom Environment
+
+Alternatively, you can use your own local WordPress environment and clone this repository right into your `wp-content/plugins` directory.
 
 ```bash
 cd wp-content/plugins && git clone git@github.com:ampproject/amp-wp.git amp
@@ -62,30 +149,112 @@ npm install
 And lastly, do a build of the JavaScript:
 
 ```bash
-npm run build
+npm run build:js
 ```
 
 Lastly, to get the plugin running in your WordPress install, run `composer install` and then activate the plugin via the WordPress dashboard or `wp plugin activate amp`.
 
-To install the `pre-commit` hook, do `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`.
+## Developing the Plugin
 
-Note that pull requests will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint and (for now) JSCS and JSHint.
+Whether you use the pre-existing local environment or a custom one, any PHP code changes will be directly visible during development.
 
-## Modifying JavaScript for Blocks
-
-To edit JavaScript code which is built/complied, run `npm run dev` to watch the files which Webpack will build. These complied files are excluded from version control but they are included in the release packages.
-
-## Creating a Plugin Build
-
-To create a build of the plugin for installing in WordPress as a ZIP package, do:
+However, for JavaScript this involves a build process. To watch for any JavaScript file changes and re-build it when needed, you can run the following command:
 
 ```bash
-composer install # (if you haven't done so yet)
-npm install # (if you haven't done so yet)
+npm run dev
+```
+
+This way you will get a development build of the JavaScript, which makes debugging easier.
+
+To get a production build, run:
+
+```bash
+npm run build:js
+```
+
+### Creating a Plugin Build
+
+To create a build of the plugin for installing in WordPress as a ZIP package, run:
+
+```bash
 npm run build
 ```
 
-This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well.
+This will create an `amp.zip` in the plugin directory which you can install. The contents of this ZIP are also located in the `build` directory which you can `rsync` somewhere as well if needed.
+
+### Writing Tests
+
+#### PHP Unit Tests
+
+The AMP plugin uses the [PHPUnit](https://phpunit.de/) testing framework to write unit and integration tests for the PHP part.
+
+To run the full test suite, you can use the following command:
+
+```bash
+npm run test:php
+```
+
+You can also just run test for a specific function or class by using something like this:
+
+```bash
+npm run test:php -- --filter=AMP_Theme_Support
+```
+
+See `npm run test:php:help` to see all the possible options.
+
+#### JavaScript Unit Tests
+
+[Jest](https://jestjs.io/) is used as the JavaScript unit testing framework.
+
+To run the full test suite, you can use the following command:
+
+```bash
+npm run test:js
+```
+
+You can also watch for any file changes and only run tests that failed or have been modified:
+
+```bash
+npm run test:js:watch
+```
+
+See `npm run test:js:help` to get a list of additional options that can be passed to the test runner. 
+
+#### End-to-End Tests
+
+This project leverages the local Docker-based environment to facilitate end-to-end (e2e) testing using Puppeteer.
+
+To run the full test suite, you can use the following command:
+
+```bash
+npm run test:e2e
+```
+
+You can also watch for any file changes and only run tests that failed or have been modified:
+
+```bash
+npm run test:e2e:watch
+```
+
+Not using the built-in local environment? You can also pass any other URL to run the tests against. Example:
+
+```bash
+npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
+```
+
+For debugging purposes, you can also run the E2E tests in non-headless mode:
+
+```bash
+HEADLESS=false npm run test:e2e
+```
+
+### Coding Standards
+
+All contributions to this project will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint.
+
+To verify your code meets the requirements, you can run `npm run lint`.
+
+You can also install a `pre-commit` hook by running `bash vendor/xwp/wp-dev-lib/scripts/install-pre-commit-hook.sh`. This way, your code will be checked automatically before committing any changes.
 
 ## Updating Allowed Tags And Attributes
 
@@ -136,45 +305,55 @@ The following script creates a post with all core Gutenberg blocks. To run it:
 3. run `bash bin/create-gutenberge-test-post.sh`
 4. go to the URL that is output in the command line
 
-## PHPUnit Testing
+## Creating a Prerelease
 
-Please run these tests in an environment with WordPress unit tests installed, like [VVV](https://github.com/Varying-Vagrant-Vagrants/VVV).
+1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
+1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
+1. Do `npm install && composer selfupdate && composer install`.
+1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
+1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
+    1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
+    1. USe new version as the title, followed by some highlight tagline of the release.
+    1. Attach the `amp.zip` build to the release.
+    1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
+    1. Make sure “Pre-release” is checked.
+1. Publish GitHub release.
+1. Create built release tag (from the just-created `build` directory):
+    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Add link from release notes.
+1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
+1. Bump version in release branch, e.g. `…-alpha` to `…-beta1` and `…-beta2` to `…-RC1`
 
-Run tests:
-
-``` bash
-$ phpunit
-```
-
-Run tests with an HTML coverage report:
-
-``` bash
-$ phpunit --coverage-html /tmp/report
-```
-
-When you push a commit to your PR, Travis CI will run the PHPUnit tests and sniffs against the WordPress Coding Standards.
-
-## Creating a Release
+## Creating a Stable Release
 
 Contributors who want to make a new release, follow these steps:
 
+1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
+    1. Gather props list of the entire release, including contributors of code, design, testing, project management, etc.
+1. Update readme including the description, contributors, and screenshots.
+1. Draft release post.
 1. For major release, draft blog post about the new release.
 1. For minor releases, make sure all merged commits in `develop` have been also merged onto release branch.
-1. Check out the branch intended for release (`develop` for major, `x.y` for minor). Make sure latest commits are pulled.
+1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
 1. Do `npm install && composer selfupdate && composer install`.
-1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant). Verify via `npx grunt shell:verify_matching_versions`. Ensure patch version number is supplied for major releases, so `1.2-RC1` should bump to `1.2.0`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
 1. Optionally do sanity check by comparing the `build` directory with the previously-deployed plugin on WordPress.org for example: `svn export https://plugins.svn.wordpress.org/amp/trunk /tmp/amp-trunk; diff /tmp/amp-trunk/ ./build/` (instead of straight `diff`, it's best to use a GUI like `idea diff`, `phpstorm diff`, or `opendiff`).
-1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor), with the new plugin version as the tag and release title.
+1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor):
+    1. Use the new plugin version as the tag (e.g. `1.2.0` or `1.2.1`)
     1. Attach the `amp.zip` build to the release.
-    2. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
+    1. Add changelog entry to the release, link to compare view comparing previous release, and link to milestone.
 1. Run `npm run deploy` to commit the plugin to WordPress.org.
 1. Confirm the release is available on WordPress.org; try installing it on a WordPress install and confirm it works.
 1. Publish GitHub release.
-1. Create built release tag (from the just-created `build` directory): `git fetch --tags && ./bin/tag-built.sh` (then add link from release notes)
+1. Create built release tag (from the just-created `build` directory):
+    1. do `git fetch --tags && ./bin/tag-built.sh`
+    1. Add link from release notes.
 1. For new major releases, create a release branch from the tag. Patch versions are made from the release branch.
-1. Bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
+1. For minor releases, bump `Stable tag` in the `readme.txt`/`readme.md` in `develop`. Cherry-pick other changes as necessary.
 1. Merge release tag into `master`.
-1. For major release, publish release blog post, including link to GitHub release.
 1. Close the GitHub milestone (and project).
-1. Make announcements.
+1. Publish release blog post (if applicable), including link to GitHub release.
+1. Make announcements on Twitter and the #amp-wp channel on AMP Slack, linking to release post or GitHub release.
+1. Bump version in release branch. After major release (e.g. `1.2.0`), bump to `1.3.0-alpha` on `develop`; after minor release (e.g. `1.2.1`) bump version to `1.2.2-alpha` on the release branch.

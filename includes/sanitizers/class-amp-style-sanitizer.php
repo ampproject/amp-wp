@@ -385,13 +385,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * Get stylesheets for amp-custom.
 	 *
 	 * @since 0.7
-	 * @returns array Values are the CSS stylesheets.
+	 * @return array Values are the CSS stylesheets.
 	 */
 	public function get_stylesheets() {
 		return wp_list_pluck(
 			array_filter(
 				$this->pending_stylesheets,
-				function( $pending_stylesheet ) {
+				static function( $pending_stylesheet ) {
 					return $pending_stylesheet['included'] && 'custom' === $pending_stylesheet['group'];
 				}
 			),
@@ -442,7 +442,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$class_names = array_merge(
 					$class_names,
 					array_map(
-						function ( $match ) {
+						static function ( $match ) {
 							return trim( $match, '"\'' );
 						},
 						$matches[1]
@@ -489,6 +489,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			// Class names for amp-carousel, see <https://www.ampproject.org/docs/reference/components/amp-carousel#styling>.
 			if ( 'amp-carousel-' === substr( $class_name, 0, 13 ) ) {
 				if ( ! $this->has_used_tag_names( array( 'amp-carousel' ) ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Class names for amp-date-picker, see <https://www.ampproject.org/docs/reference/components/amp-date-picker>.
+			if ( 'amp-date-picker-' === substr( $class_name, 0, 16 ) ) {
+				if ( ! $this->has_used_tag_names( array( 'amp-date-picker' ) ) ) {
 					return false;
 				}
 				continue;
@@ -771,7 +779,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$print_priority_base = 100;
 		$admin_bar_priority  = 200;
 
-		$remove_url_scheme = function( $url ) {
+		$remove_url_scheme = static function( $url ) {
 			return preg_replace( '/^https?:/', '', $url );
 		};
 
@@ -961,7 +969,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		$parsed_url['path'] = $path;
 
-		$remove_url_scheme = function( $schemed_url ) {
+		$remove_url_scheme = static function( $schemed_url ) {
 			return preg_replace( '#^\w+:(?=//)#', '', $schemed_url );
 		};
 
@@ -1080,12 +1088,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			wp_array_slice_assoc( $processed, array( 'stylesheet', 'imported_font_urls' ) )
 		);
 
-		if ( $element->hasAttribute( 'amp-custom' ) ) {
-			if ( ! $this->amp_custom_style_element ) {
-				$this->amp_custom_style_element = $element;
-			} else {
-				$element->parentNode->removeChild( $element ); // There can only be one. #highlander.
-			}
+		if ( $element->hasAttribute( 'amp-custom' ) && ! $this->amp_custom_style_element ) {
+			$this->amp_custom_style_element = $element;
 		} else {
 
 			// Remove from DOM since we'll be adding it to amp-custom.
@@ -1399,9 +1403,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				$results[] = compact( 'error', 'sanitized' );
 				return $results;
-			} else {
-				$stylesheet = $contents;
 			}
+
+			$stylesheet = $contents;
 		} elseif ( is_wp_error( $css_file_path ) ) {
 			$error     = array(
 				'code'    => $css_file_path->get_error_code(),
@@ -1483,7 +1487,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$this->real_path_urls(
 					array_filter(
 						$css_document->getAllValues(),
-						function ( $value ) {
+						static function ( $value ) {
 							return $value instanceof URL;
 						}
 					),
@@ -1606,7 +1610,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$dynamic_selector_pattern = implode(
 					'|',
 					array_map(
-						function( $selector ) {
+						static function( $selector ) {
 							return preg_quote( $selector, '#' );
 						},
 						$this->args['dynamic_element_selectors']
@@ -1647,7 +1651,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						 */
 						$reduced_selector = preg_replace_callback(
 							'/\[([A-Za-z0-9_:-]+)(\W?=[^\]]+)?\]/',
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_ATTRIBUTES ][] = $matches[1];
 								return '';
 							},
@@ -1657,7 +1661,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract class names.
 						$reduced_selector = preg_replace_callback(
 							'/\.((?:[a-zA-Z0-9_-]+|\\\\.)+)/', // The `\\\\.` will allow any char via escaping, like the colon in `.lg\:w-full`.
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_CLASSES ][] = stripslashes( $matches[1] );
 								return '';
 							},
@@ -1667,7 +1671,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract IDs.
 						$reduced_selector = preg_replace_callback(
 							'/#([a-zA-Z0-9_-]+)/',
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_IDS ][] = $matches[1];
 								return '';
 							},
@@ -1677,7 +1681,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						// Extract tag names.
 						$reduced_selector = preg_replace_callback(
 							'/[a-zA-Z0-9_-]+/',
-							function( $matches ) use ( $selector, &$selectors_parsed ) {
+							static function( $matches ) use ( $selector, &$selectors_parsed ) {
 								$selectors_parsed[ $selector ][ self::SELECTOR_EXTRACTED_TAGS ][] = $matches[0];
 								return '';
 							},
@@ -1766,7 +1770,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function remove_spaces_from_data_urls( $css ) {
 		return preg_replace_callback(
 			'/\burl\([^}]*?\)/',
-			function( $matches ) {
+			static function( $matches ) {
 				return preg_replace( '/\s+/', '', $matches[0] );
 			},
 			$css
@@ -2082,12 +2086,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					foreach ( $subcomponents as $subcomponent ) {
 						$sources[] = array( $subcomponent );
 					}
+				} elseif ( empty( $sources ) ) {
+					$sources[] = array( $component );
 				} else {
-					if ( empty( $sources ) ) {
-						$sources[] = array( $component );
-					} else {
-						$sources[ count( $sources ) - 1 ][] = $component;
-					}
+					$sources[ count( $sources ) - 1 ][] = $component;
 				}
 			}
 
@@ -2275,14 +2277,14 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$important_ruleset->setSelectors(
 			array_map(
 				/**
-				* Modify selectors to be more specific to roughly match the effect of !important.
-				*
-				* @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
-				*
-				* @param Selector $old_selector Original selector.
-				* @return Selector The new more-specific selector.
-				*/
-				function( Selector $old_selector ) {
+				 * Modify selectors to be more specific to roughly match the effect of !important.
+				 *
+				 * @link https://github.com/ampproject/ampstart/blob/4c21d69afdd07b4c60cd190937bda09901955829/tools/replace-important/lib/index.js#L88-L109
+				 *
+				 * @param Selector $old_selector Original selector.
+				 * @return Selector The new more-specific selector.
+				 */
+				static function( Selector $old_selector ) {
 					// Calculate the specificity multiplier for the placeholder.
 					$specificity_multiplier = AMP_Style_Sanitizer::INLINE_SPECIFICITY_MULTIPLIER + 1 + floor( $old_selector->getSpecificity() / 100 );
 					if ( $old_selector->getSpecificity() % 100 > 0 ) {
@@ -2404,17 +2406,10 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Divide pending stylesheet between custom and keyframes, and calculate size of each (before tree shaking).
 		foreach ( $this->pending_stylesheets as $i => $pending_stylesheet ) {
-			$size = 0;
 			foreach ( $pending_stylesheet['stylesheet'] as $j => $part ) {
-				if ( is_string( $part ) ) {
-					$size += strlen( $part );
-					if ( '@import' === substr( $part, 0, 7 ) ) {
-						$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
-						unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
-					}
-				} elseif ( is_array( $part ) ) {
-					$size += strlen( implode( ',', array_keys( $part[0] ) ) ); // Selectors.
-					$size += strlen( $part[1] ); // Declaration block.
+				if ( is_string( $part ) && 0 === strpos( $part, '@import' ) ) {
+					$stylesheet_groups[ $pending_stylesheet['group'] ]['import_front_matter'] .= $part;
+					unset( $this->pending_stylesheets['stylesheet'][ $j ][ $i ] );
 				}
 			}
 
@@ -2615,7 +2610,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					wp_list_pluck(
 						array_filter(
 							$this->pending_stylesheets,
-							function( $pending_stylesheet ) {
+							static function( $pending_stylesheet ) {
 								return $pending_stylesheet['included'] && 'keyframes' === $pending_stylesheet['group'];
 							}
 						),
@@ -2664,6 +2659,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				break;
 			}
 		}
+
+		unset( $pending_stylesheet );
 
 		if ( ! $included ) {
 			// Remove admin-bar class from body element.
@@ -2728,7 +2725,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( preg_match( '/:lang\((?P<languages>.+?)\)/', $selector, $matches ) ) {
 				$has_matching_language = 0;
 				$selector_languages    = array_map(
-					function ( $selector_language ) {
+					static function ( $selector_language ) {
 						return trim( $selector_language, '"\'' );
 					},
 					preg_split( '/\s*,\s*/', strtolower( trim( $matches['languages'] ) ) )
@@ -2783,6 +2780,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
 					}
 				}
+
+				unset( $edited_selector );
 			}
 			$selectors = array_merge( $selectors, $edited_selectors );
 		}
@@ -2831,41 +2830,39 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$selectors = array();
 				foreach ( $selectors_parsed as $selector => $parsed_selector ) {
 					$should_include = (
+						// If all class names are used in the doc.
 						(
-							// If all class names are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-								||
-								$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
-							)
-							&&
-							// If all IDs are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
-								||
-								0 === count(
-									array_filter(
-										$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-										function( $id ) {
-											return ! $this->dom->getElementById( $id );
-										}
-									)
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+							||
+							$this->has_used_class_name( $parsed_selector[ self::SELECTOR_EXTRACTED_CLASSES ] )
+						)
+						&&
+						// If all IDs are used in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
+							||
+							0 === count(
+								array_filter(
+									$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
+									function( $id ) {
+										return ! $this->dom->getElementById( $id );
+									}
 								)
 							)
-							&&
-							// If tag names are present in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-								||
-								$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
-							)
-							&&
-							// If all attribute names are used in the doc.
-							(
-								empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-								||
-								$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
-							)
+						)
+						&&
+						// If tag names are present in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+							||
+							$this->has_used_tag_names( $parsed_selector[ self::SELECTOR_EXTRACTED_TAGS ] )
+						)
+						&&
+						// If all attribute names are used in the doc.
+						(
+							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
+							||
+							$this->has_used_attributes( $parsed_selector[ self::SELECTOR_EXTRACTED_ATTRIBUTES ] )
 						)
 					);
 					if ( $should_include ) {
@@ -2903,9 +2900,13 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						$is_at_rule      = '@' === substr( $stylesheet_part, 0, 1 );
 						if ( empty( $stylesheet_part ) ) {
 							continue; // There was a shaken rule.
-						} elseif ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
+						}
+
+						if ( $is_at_rule && '{}' === substr( $stylesheet_part, -2 ) ) {
 							continue; // The rule opens is empty from the start.
-						} elseif ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
+						}
+
+						if ( $is_at_rule && '{' === substr( $stylesheet_part, -1 ) ) {
 							$open_braces++;
 						} elseif ( '}' === $stylesheet_part ) {
 							$open_braces--;
@@ -2938,6 +2939,8 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$previously_seen_stylesheet_index[ $pending_stylesheet['hash'] ] = $pending_stylesheet_index;
 			unset( $stylesheet_parts );
 		}
+
+		unset( $pending_stylesheet );
 
 		// Determine which stylesheets are included based on their priorities.
 		$pending_stylesheet_indices = array_keys( $this->pending_stylesheets );

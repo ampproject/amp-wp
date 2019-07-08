@@ -49,11 +49,8 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
-			$block_content = call_user_func(
-				array( $this, $this->block_ampify_methods[ $block['blockName'] ] ),
-				$block_content,
-				$block
-			);
+			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
+			$block_content = $this->{$method_name}( $block_content, $block );
 		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
 			/*
 			 * While the video block placeholder just outputs an empty video element, the placeholders for image and
@@ -148,7 +145,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		$meta_data = wp_get_attachment_metadata( $block['attrs']['id'] );
-		if ( isset( $meta_data['width'] ) && isset( $meta_data['height'] ) ) {
+		if ( isset( $meta_data['width'], $meta_data['height'] ) ) {
 			$block_content = preg_replace(
 				'/(?<=<video\s)/',
 				sprintf( 'width="%d" height="%d" ', $meta_data['width'], $meta_data['height'] ),

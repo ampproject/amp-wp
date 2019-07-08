@@ -68,7 +68,7 @@ class AMP_Admin_Pointers {
 					'position'        => array(
 						'align' => 'middle',
 					),
-					'active_callback' => function() {
+					'active_callback' => static function() {
 						return version_compare( strtok( AMP__VERSION, '-' ), '1.1', '<' );
 					},
 				)
@@ -83,7 +83,7 @@ class AMP_Admin_Pointers {
 					'position'        => array(
 						'align' => 'middle',
 					),
-					'active_callback' => function( $hook_suffix ) {
+					'active_callback' => static function( $hook_suffix ) {
 						if ( 'toplevel_page_amp-options' === $hook_suffix ) {
 							return false;
 						}
@@ -96,11 +96,11 @@ class AMP_Admin_Pointers {
 				array(
 					'selector'        => '#menu-posts-' . AMP_Story_Post_Type::POST_TYPE_SLUG,
 					'heading'         => __( 'AMP', 'amp' ),
-					'description'     => __( 'Head over here to create your first AMP story.', 'amp' ),
+					'description'     => __( 'Head over here to create your first story.', 'amp' ),
 					'position'        => array(
 						'align' => 'middle',
 					),
-					'active_callback' => function( $hook_suffix ) {
+					'active_callback' => static function( $hook_suffix ) {
 						if ( 'edit.php' === $hook_suffix && AMP_Story_Post_Type::POST_TYPE_SLUG === filter_input( INPUT_GET, 'post_type' ) ) {
 							return false;
 						}
