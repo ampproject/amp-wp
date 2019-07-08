@@ -1820,7 +1820,7 @@ class AMP_Validation_Manager {
 			}
 
 			// Ensure absolute URL.
-			if ( 0 === strpos( $location_header, '/' ) ) {
+			if ( '/' === substr( $location_header, 0, 1 ) ) {
 				$location_header = preg_replace( '#(^https?://[^/]+)/.*#', '$1', home_url( '/' ) ) . $location_header;
 			}
 
@@ -1849,7 +1849,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( '' === trim( $response ) ) {
+		if ( trim( $response ) === '' ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}

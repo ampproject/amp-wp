@@ -75,7 +75,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			$xhr_action = $node->getAttribute( 'action-xhr' );
 
 			// Make HTTP URLs protocol-less, since HTTPS is required for forms.
-			if ( 0 === stripos( $action_url, 'http://' ) ) {
+			if ( 'http://' === strtolower( substr( $action_url, 0, 7 ) ) ) {
 				$action_url = substr( $action_url, 5 );
 			}
 
@@ -100,7 +100,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$node->setAttribute( 'action-xhr', $action_url );
 					// Append success/error handlers if not found.
 					$this->ensure_response_message_elements( $node );
-				} elseif ( 0 === strpos( $xhr_action, 'http://' ) ) {
+				} elseif ( 'http://' === substr( $xhr_action, 0, 7 ) ) {
 					$node->setAttribute( 'action-xhr', substr( $xhr_action, 5 ) );
 				}
 			}

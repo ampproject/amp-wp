@@ -50,7 +50,7 @@ trait AMP_Noscript_Fallback {
 	 * @return bool True if in an AMP noscript element, false otherwise.
 	 */
 	protected function is_inside_amp_noscript( \DOMNode $node ) {
-		return 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 0 === strpos( $node->parentNode->parentNode->nodeName, 'amp-' );
+		return 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 );
 	}
 
 	/**

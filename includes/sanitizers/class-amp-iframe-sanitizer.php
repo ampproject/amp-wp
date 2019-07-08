@@ -165,7 +165,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			switch ( $name ) {
 				case 'src':
 					// Make the URL absolute since relative URLs are not allowed in amp-iframe.
-					if ( 0 === strpos( $value, '/' ) && '/' !== substr( $value, 1, 1 ) ) {
+					if ( '/' === substr( $value, 0, 1 ) && '/' !== substr( $value, 1, 1 ) ) {
 						$value = untrailingslashit( $this->args['current_origin'] ) . $value;
 					}
 

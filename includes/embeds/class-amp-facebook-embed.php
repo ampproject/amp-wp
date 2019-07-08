@@ -205,7 +205,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		$node->removeAttribute( 'data-height' );
 
 		foreach ( $node->attributes as $attribute ) {
-			if ( 0 === strpos( $attribute->nodeName, 'data-' ) ) {
+			if ( 'data-' === substr( $attribute->nodeName, 0, 5 ) ) {
 				$attributes[ $attribute->nodeName ] = $attribute->nodeValue;
 			}
 		}

@@ -642,7 +642,7 @@ class AMP_Theme_Support {
 			}
 
 			// If the callback is a method on the query, then call the method on the query itself.
-			if ( is_string( $callback ) && 0 === strpos( $callback, 'is_' ) && method_exists( $query, $callback ) ) {
+			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
 			} elseif ( is_callable( $callback ) ) {
 				$is_match = $callback( $query );
@@ -1571,7 +1571,7 @@ class AMP_Theme_Support {
 		}
 		foreach ( $head_scripts as $script ) {
 			$src = $script->getAttribute( 'src' );
-			if ( ! $src || 0 !== strpos( $src, 'https://cdn.ampproject.org/' ) ) {
+			if ( ! $src || 'https://cdn.ampproject.org/' !== substr( $src, 0, 27 ) ) {
 				continue;
 			}
 			if ( $runtime_src === $src ) {
@@ -1841,7 +1841,7 @@ class AMP_Theme_Support {
 		}
 
 		// Abort if the response was not HTML.
-		if ( 0 !== strpos( AMP_HTTP::get_response_content_type(), 'text/html' ) || 0 !== strpos( ltrim( $response ), '<' ) ) {
+		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || '<' !== substr( ltrim( $response ), 0, 1 ) ) {
 			return $response;
 		}
 
