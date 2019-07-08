@@ -22,7 +22,7 @@
  */
 global $_amp_load_errors;
 
-$_amp_load_errors = new \WP_Error();
+$_amp_load_errors = new WP_Error();
 
 if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	$_amp_load_errors->add(
