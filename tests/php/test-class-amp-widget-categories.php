@@ -65,17 +65,17 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	public function test_widget() {
 		wp();
 		$this->assertTrue( is_amp_endpoint() );
-		$arguments = array(
+		$arguments = [
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',
 			'before_title'  => '<h2>',
 			'after_title'   => '</h2>',
-		);
-		$instance  = array(
+		];
+		$instance  = [
 			'title'    => 'Test Categories Widget',
 			'dropdown' => 1,
-		);
-		$output    = get_echo( array( $this->widget, 'widget' ), array( $arguments, $instance ) );
+		];
+		$output    = get_echo( [ $this->widget, 'widget' ], [ $arguments, $instance ] );
 
 		$this->assertContains( 'on="change:', $output );
 		$this->assertNotContains( '<script type=', $output );

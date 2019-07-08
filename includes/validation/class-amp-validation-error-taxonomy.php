@@ -233,8 +233,8 @@ class AMP_Validation_Error_Taxonomy {
 		register_taxonomy(
 			self::TAXONOMY_SLUG,
 			AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-			array(
-				'labels'             => array(
+			[
+				'labels'             => [
 					'name'                  => _x( 'AMP Validation Error Index', 'taxonomy general name', 'amp' ),
 					'singular_name'         => _x( 'AMP Validation Error', 'taxonomy singular name', 'amp' ),
 					'search_items'          => __( 'Search AMP Validation Errors', 'amp' ),
@@ -253,7 +253,7 @@ class AMP_Validation_Error_Taxonomy {
 					'items_list'            => __( 'Validation errors list', 'amp' ),
 					/* translators: Tab heading when selecting from the most used terms */
 					'most_used'             => __( 'Most Used Validation Errors', 'amp' ),
-				),
+				],
 				'public'             => false,
 				'show_ui'            => true, // @todo False because we need a custom UI.
 				'show_tagcloud'      => false,
@@ -261,12 +261,12 @@ class AMP_Validation_Error_Taxonomy {
 				'hierarchical'       => false, // Or true? Code could be the parent term?
 				'show_in_menu'       => self::should_show_in_menu() || AMP_Validated_URL_Post_Type::should_show_in_menu(),
 				'meta_box_cb'        => false,
-				'capabilities'       => array(
+				'capabilities'       => [
 					// Note that delete_terms is needed so the checkbox (cb) table column will work.
 					'assign_terms' => 'do_not_allow',
 					'edit_terms'   => 'do_not_allow',
-				),
-			)
+				],
+			]
 		);
 
 		if ( is_admin() ) {
@@ -361,12 +361,12 @@ class AMP_Validation_Error_Taxonomy {
 	 * }
 	 * @return int|int[]|null Returns an integer unless the multiple option is passed. Null if invalid.
 	 */
-	public static function sanitize_term_status( $status, $options = array() ) {
+	public static function sanitize_term_status( $status, $options = [] ) {
 		$multiple = ! empty( $options['multiple'] );
 
 		// Catch case where an empty string is supplied. Prevent casting to 0.
 		if ( ! is_numeric( $status ) && empty( $status ) ) {
-			return $multiple ? array() : null;
+			return $multiple ? [] : null;
 		}
 
 		if ( is_string( $status ) ) {
@@ -376,12 +376,12 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$statuses = array_intersect(
-			array(
+			[
 				self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 				self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 				self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 				self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-			),
+			],
 			$statuses
 		);
 		$statuses = array_values( array_unique( $statuses ) );
@@ -418,11 +418,11 @@ class AMP_Validation_Error_Taxonomy {
 		ksort( $error );
 		$description = wp_json_encode( $error );
 		$term_slug   = md5( $description );
-		return array(
+		return [
 			'slug'        => $term_slug,
 			'name'        => $term_slug,
 			'description' => $description,
-		);
+		];
 	}
 
 	/**
@@ -457,12 +457,12 @@ class AMP_Validation_Error_Taxonomy {
 	public static function get_validation_error_sanitization( $error ) {
 		$term_data = self::prepare_validation_error_taxonomy_term( $error );
 		$term      = self::get_term( $term_data['slug'] );
-		$statuses  = array(
+		$statuses  = [
 			self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
 			self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 			self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS,
 			self::VALIDATION_ERROR_ACK_REJECTED_STATUS,
-		);
+		];
 		if ( ! empty( $term ) && in_array( $term->term_group, $statuses, true ) ) {
 			$term_status = $term->term_group;
 		} else {
@@ -576,17 +576,17 @@ class AMP_Validation_Error_Taxonomy {
 	 * }
 	 * @return int Term count.
 	 */
-	public static function get_validation_error_count( $args = array() ) {
+	public static function get_validation_error_count( $args = [] ) {
 		$args = array_merge(
-			array(
+			[
 				'group' => null,
-			),
+			],
 			$args
 		);
 
 		$groups = null;
 		if ( isset( $args['group'] ) ) {
-			$groups = self::sanitize_term_status( $args['group'], array( 'multiple' => true ) );
+			$groups = self::sanitize_term_status( $args['group'], [ 'multiple' => true ] );
 		}
 
 		$filter = static function( $clauses ) use ( $groups ) {
@@ -625,9 +625,9 @@ class AMP_Validation_Error_Taxonomy {
 			return $where;
 		}
 
-		$error_statuses = array();
+		$error_statuses = [];
 		if ( false !== $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR, false ) ) {
-			$error_statuses = self::sanitize_term_status( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ), array( 'multiple' => true ) );
+			$error_statuses = self::sanitize_term_status( $query->get( self::VALIDATION_ERROR_STATUS_QUERY_VAR ), [ 'multiple' => true ] );
 		}
 		$error_type = sanitize_key( $query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
 
@@ -683,10 +683,10 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array The AMP validity of the markup.
 	 */
 	public static function summarize_validation_errors( $validation_errors ) {
-		$results            = array();
-		$removed_elements   = array();
-		$removed_attributes = array();
-		$invalid_sources    = array();
+		$results            = [];
+		$removed_elements   = [];
+		$removed_attributes = [];
+		$invalid_sources    = [];
 		foreach ( $validation_errors as $validation_error ) {
 			$code = isset( $validation_error['code'] ) ? $validation_error['code'] : null;
 
@@ -723,9 +723,9 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		$results = array_merge(
-			array(
+			[
 				self::SOURCES_INVALID_OUTPUT => $invalid_sources,
-			),
+			],
 			compact(
 				'removed_elements',
 				'removed_attributes'
@@ -740,36 +740,36 @@ class AMP_Validation_Error_Taxonomy {
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
-		add_filter( 'redirect_term_location', array( __CLASS__, 'add_term_filter_query_var' ), 10, 2 );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_group_terms_clauses_filter' ) );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
-		add_action( 'load-post.php', array( __CLASS__, 'add_error_type_clauses_filter' ) );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
-		add_action( 'load-post.php', array( __CLASS__, 'add_order_clauses_from_description_json' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_taxonomy_filters' ) );
-		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), array( __CLASS__, 'render_link_to_invalid_urls_screen' ) );
+		add_filter( 'redirect_term_location', [ __CLASS__, 'add_term_filter_query_var' ], 10, 2 );
+		add_action( 'load-edit-tags.php', [ __CLASS__, 'add_group_terms_clauses_filter' ] );
+		add_action( 'load-edit-tags.php', [ __CLASS__, 'add_error_type_clauses_filter' ] );
+		add_action( 'load-post.php', [ __CLASS__, 'add_error_type_clauses_filter' ] );
+		add_action( 'load-edit-tags.php', [ __CLASS__, 'add_order_clauses_from_description_json' ] );
+		add_action( 'load-post.php', [ __CLASS__, 'add_order_clauses_from_description_json' ] );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), [ __CLASS__, 'render_taxonomy_filters' ] );
+		add_action( sprintf( 'after-%s-table', self::TAXONOMY_SLUG ), [ __CLASS__, 'render_link_to_invalid_urls_screen' ] );
 		add_action(
 			'load-edit-tags.php',
 			static function() {
-				add_filter( 'user_has_cap', array( __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ), 10, 3 );
+				add_filter( 'user_has_cap', [ __CLASS__, 'filter_user_has_cap_for_hiding_term_list_table_checkbox' ], 10, 3 );
 			}
 		);
-		add_filter( 'terms_clauses', array( __CLASS__, 'filter_terms_clauses_for_description_search' ), 10, 3 );
-		add_action( 'admin_notices', array( __CLASS__, 'add_admin_notices' ) );
-		add_filter( 'tag_row_actions', array( __CLASS__, 'filter_tag_row_actions' ), 10, 2 );
+		add_filter( 'terms_clauses', [ __CLASS__, 'filter_terms_clauses_for_description_search' ], 10, 3 );
+		add_action( 'admin_notices', [ __CLASS__, 'add_admin_notices' ] );
+		add_filter( 'tag_row_actions', [ __CLASS__, 'filter_tag_row_actions' ], 10, 2 );
 		if ( get_taxonomy( self::TAXONOMY_SLUG )->show_in_menu ) {
-			add_action( 'admin_menu', array( __CLASS__, 'add_admin_menu_validation_error_item' ) );
+			add_action( 'admin_menu', [ __CLASS__, 'add_admin_menu_validation_error_item' ] );
 		}
-		add_action( 'parse_term_query', array( __CLASS__, 'parse_post_php_term_query' ) );
-		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', array( __CLASS__, 'filter_manage_custom_columns' ), 10, 3 );
-		add_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', array( __CLASS__, 'add_single_post_sortable_columns' ) );
-		add_filter( 'posts_where', array( __CLASS__, 'filter_posts_where_for_validation_error_status' ), 10, 2 );
-		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
-		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, array( __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ) );
-		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, array( __CLASS__, 'handle_validation_error_update' ), 10, 3 );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_inline_edit_request' ) );
-		add_action( 'load-edit-tags.php', array( __CLASS__, 'handle_clear_empty_terms_request' ) );
-		add_action( 'load-edit.php', array( __CLASS__, 'handle_inline_edit_request' ) );
+		add_action( 'parse_term_query', [ __CLASS__, 'parse_post_php_term_query' ] );
+		add_filter( 'manage_' . self::TAXONOMY_SLUG . '_custom_column', [ __CLASS__, 'filter_manage_custom_columns' ], 10, 3 );
+		add_filter( 'manage_' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG . '_sortable_columns', [ __CLASS__, 'add_single_post_sortable_columns' ] );
+		add_filter( 'posts_where', [ __CLASS__, 'filter_posts_where_for_validation_error_status' ], 10, 2 );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_REJECT_ACTION, [ __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ] );
+		add_filter( 'post_action_' . self::VALIDATION_ERROR_ACCEPT_ACTION, [ __CLASS__, 'handle_single_url_page_bulk_and_inline_actions' ] );
+		add_filter( 'handle_bulk_actions-edit-' . self::TAXONOMY_SLUG, [ __CLASS__, 'handle_validation_error_update' ], 10, 3 );
+		add_action( 'load-edit-tags.php', [ __CLASS__, 'handle_inline_edit_request' ] );
+		add_action( 'load-edit-tags.php', [ __CLASS__, 'handle_clear_empty_terms_request' ] );
+		add_action( 'load-edit.php', [ __CLASS__, 'handle_inline_edit_request' ] );
 
 		// Prevent query vars from persisting after redirect.
 		add_filter(
@@ -797,7 +797,7 @@ class AMP_Validation_Error_Taxonomy {
 		add_filter(
 			'get_terms_defaults',
 			static function( $args, $taxonomies ) {
-				if ( array( AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ) === $taxonomies ) {
+				if ( [ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ] === $taxonomies ) {
 					$args['orderby'] = 'term_id';
 					$args['order']   = 'DESC';
 				}
@@ -823,7 +823,7 @@ class AMP_Validation_Error_Taxonomy {
 			'manage_edit-' . self::TAXONOMY_SLUG . '_columns',
 			static function( $old_columns ) {
 
-				return array(
+				return [
 					'cb'               => $old_columns['cb'],
 					'error'            => esc_html__( 'Error', 'amp' ),
 					'status'           => sprintf(
@@ -851,7 +851,7 @@ class AMP_Validation_Error_Taxonomy {
 					'error_type'       => esc_html__( 'Type', 'amp' ),
 					'created_date_gmt' => esc_html__( 'Last Seen', 'amp' ),
 					'posts'            => esc_html__( 'Found URLs', 'amp' ),
-				);
+				];
 			}
 		);
 
@@ -892,19 +892,19 @@ class AMP_Validation_Error_Taxonomy {
 					wp_register_style(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'css/amp-validation-tooltips.css' ),
-						array( 'wp-pointer' ),
+						[ 'wp-pointer' ],
 						AMP__VERSION
 					);
 
 					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
 					$script_dependencies = file_exists( $script_deps_path )
 						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						: array();
+						: [];
 
 					wp_register_script(
 						'amp-validation-tooltips',
 						amp_get_asset_url( 'js/amp-validation-tooltips.js' ),
-						array_merge( $script_dependencies, array( 'wp-pointer' ) ),
+						array_merge( $script_dependencies, [ 'wp-pointer' ] ),
 						AMP__VERSION,
 						true
 					);
@@ -912,14 +912,14 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-error-taxonomy',
 						amp_get_asset_url( 'css/amp-validation-error-taxonomy.css' ),
-						array( 'common', 'amp-validation-tooltips' ),
+						[ 'common', 'amp-validation-tooltips' ],
 						AMP__VERSION
 					);
 
 					wp_enqueue_script(
 						'amp-validation-detail-toggle',
 						amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
-						array( 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ),
+						[ 'wp-dom-ready', 'wp-i18n', 'amp-validation-tooltips' ],
 						AMP__VERSION,
 						true
 					);
@@ -929,14 +929,14 @@ class AMP_Validation_Error_Taxonomy {
 					wp_enqueue_style(
 						'amp-validation-single-error-url',
 						amp_get_asset_url( 'css/amp-validation-single-error-url.css' ),
-						array( 'common' ),
+						[ 'common' ],
 						AMP__VERSION
 					);
 
 					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
 					$script_dependencies = file_exists( $script_deps_path )
 						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						: array();
+						: [];
 
 					wp_enqueue_script(
 						'amp-validation-single-error-url-details',
@@ -1007,7 +1007,7 @@ class AMP_Validation_Error_Taxonomy {
 			&&
 			in_array(
 				$_POST[ self::VALIDATION_ERROR_TYPE_QUERY_VAR ], // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				array_merge( self::get_error_types(), array( (string) self::NO_FILTER_VALUE ) ),
+				array_merge( self::get_error_types(), [ (string) self::NO_FILTER_VALUE ] ),
 				true
 			)
 		) {
@@ -1019,13 +1019,13 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// If the error status query var is valid, pass it along in the redirect $url.
-		$groups = array();
+		$groups = [];
 		if ( isset( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$groups = self::sanitize_term_status( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( 'multiple' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$groups = self::sanitize_term_status( wp_unslash( $_POST[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		}
 		if ( ! empty( $groups ) ) {
 			$url = add_query_arg(
-				array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => $groups ),
+				[ self::VALIDATION_ERROR_STATUS_QUERY_VAR => $groups ],
 				$url
 			);
 		} else {
@@ -1043,7 +1043,7 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 		self::$should_filter_terms_clauses_for_error_validation_status = true;
-		$groups = self::sanitize_term_status( wp_unslash( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), array( 'multiple' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$groups = self::sanitize_term_status( wp_unslash( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ), [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( empty( $groups ) ) {
 			return;
 		}
@@ -1103,10 +1103,10 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$sortable_column_vars = array(
+		$sortable_column_vars = [
 			self::VALIDATION_ERROR_TYPE_QUERY_VAR,
 			self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
-		);
+		];
 
 		if ( ! isset( $_GET['orderby'] ) || ! in_array( $_GET['orderby'], $sortable_column_vars, true ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
@@ -1167,7 +1167,7 @@ class AMP_Validation_Error_Taxonomy {
 			<?php
 			self::render_error_status_filter();
 			self::render_error_type_filter();
-			submit_button( __( 'Apply Filter', 'amp' ), '', 'filter_action', false, array( 'id' => 'doaction' ) );
+			submit_button( __( 'Apply Filter', 'amp' ), '', 'filter_action', false, [ 'id' => 'doaction' ] );
 			self::render_clear_empty_button();
 			?>
 		</div>
@@ -1241,16 +1241,16 @@ class AMP_Validation_Error_Taxonomy {
 
 		if ( 'edit-tags' === $screen_base ) {
 			$total_term_count        = self::get_validation_error_count();
-			$ack_rejected_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_REJECTED_STATUS ) ) );
-			$ack_accepted_term_count = self::get_validation_error_count( array( 'group' => array( self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ) ) );
+			$ack_rejected_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_ACK_REJECTED_STATUS ] ] );
+			$ack_accepted_term_count = self::get_validation_error_count( [ 'group' => [ self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ] ] );
 			$new_term_count          = $total_term_count - $ack_rejected_term_count - $ack_accepted_term_count;
 
 		} elseif ( 'edit' === $screen_base ) {
-			$args = array(
+			$args = [
 				'post_type'              => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
-			);
+			];
 
 			$error_type = sanitize_key( $wp_query->get( self::VALIDATION_ERROR_TYPE_QUERY_VAR ) );
 			if ( $error_type && in_array( $error_type, self::get_error_types(), true ) ) {
@@ -1260,12 +1260,12 @@ class AMP_Validation_Error_Taxonomy {
 			$with_new_query = new WP_Query(
 				array_merge(
 					$args,
-					array(
-						self::VALIDATION_ERROR_STATUS_QUERY_VAR => array(
+					[
+						self::VALIDATION_ERROR_STATUS_QUERY_VAR => [
 							self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS,
 							self::VALIDATION_ERROR_NEW_REJECTED_STATUS,
-						),
-					)
+						],
+					]
 				)
 			);
 			$new_term_count = $with_new_query->found_posts;
@@ -1273,7 +1273,7 @@ class AMP_Validation_Error_Taxonomy {
 			$with_rejected_query     = new WP_Query(
 				array_merge(
 					$args,
-					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_REJECTED_STATUS )
+					[ self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_REJECTED_STATUS ]
 				)
 			);
 			$ack_rejected_term_count = $with_rejected_query->found_posts;
@@ -1281,7 +1281,7 @@ class AMP_Validation_Error_Taxonomy {
 			$with_accepted_query     = new WP_Query(
 				array_merge(
 					$args,
-					array( self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS )
+					[ self::VALIDATION_ERROR_STATUS_QUERY_VAR => self::VALIDATION_ERROR_ACK_ACCEPTED_STATUS ]
 				)
 			);
 			$ack_accepted_term_count = $with_accepted_query->found_posts;
@@ -1289,9 +1289,9 @@ class AMP_Validation_Error_Taxonomy {
 			return;
 		}
 
-		$selected_groups = array();
+		$selected_groups = [];
 		if ( isset( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], array( 'multiple' => true ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$selected_groups = self::sanitize_term_status( $_GET[ self::VALIDATION_ERROR_STATUS_QUERY_VAR ], [ 'multiple' => true ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}
 		if ( ! empty( $selected_groups ) ) {
 			sort( $selected_groups );
@@ -1401,7 +1401,7 @@ class AMP_Validation_Error_Taxonomy {
 	 * @return array Error types.
 	 */
 	public static function get_error_types() {
-		return array( self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE );
+		return [ self::HTML_ELEMENT_ERROR_TYPE, self::HTML_ATTRIBUTE_ERROR_TYPE, self::JS_ERROR_TYPE, self::CSS_ERROR_TYPE ];
 	}
 
 	/**
@@ -1608,10 +1608,10 @@ class AMP_Validation_Error_Taxonomy {
 					'<a href="%s">%s</a>',
 					admin_url(
 						add_query_arg(
-							array(
+							[
 								self::TAXONOMY_SLUG => $term->name,
 								'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-							),
+							],
 							'edit.php'
 						)
 					),
@@ -1626,7 +1626,7 @@ class AMP_Validation_Error_Taxonomy {
 				$actions[ self::VALIDATION_ERROR_REJECT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_REJECT_ACTION ), compact( 'term_id' ) ) ),
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_REJECT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_REJECT_ACTION
 					),
 					esc_html__( 'Reject', 'amp' )
@@ -1636,7 +1636,7 @@ class AMP_Validation_Error_Taxonomy {
 				$actions[ self::VALIDATION_ERROR_ACCEPT_ACTION ] = sprintf(
 					'<a href="%s">%s</a>',
 					wp_nonce_url(
-						add_query_arg( array_merge( array( 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ), compact( 'term_id' ) ) ),
+						add_query_arg( array_merge( [ 'action' => self::VALIDATION_ERROR_ACCEPT_ACTION ], compact( 'term_id' ) ) ),
 						self::VALIDATION_ERROR_ACCEPT_ACTION
 					),
 					esc_html__( 'Accept', 'amp' )
@@ -1652,9 +1652,9 @@ class AMP_Validation_Error_Taxonomy {
 	public static function add_admin_menu_validation_error_item() {
 		$menu_item_label = esc_html__( 'Error Index', 'amp' );
 		$new_error_count = self::get_validation_error_count(
-			array(
-				'group' => array( self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ),
-			)
+			[
+				'group' => [ self::VALIDATION_ERROR_NEW_REJECTED_STATUS, self::VALIDATION_ERROR_NEW_ACCEPTED_STATUS ],
+			]
 		);
 		if ( $new_error_count ) {
 			$menu_item_label .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $new_error_count ) ) . '</span></span>';
@@ -1768,10 +1768,10 @@ class AMP_Validation_Error_Taxonomy {
 						'<a href="%s" class="error-code">%s</a>',
 						admin_url(
 							add_query_arg(
-								array(
+								[
 									self::TAXONOMY_SLUG => $term->name,
 									'post_type'         => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-								),
+								],
 								'edit.php'
 							)
 						),
@@ -1906,7 +1906,7 @@ class AMP_Validation_Error_Taxonomy {
 
 					unset( $validation_error['error_type'], $validation_error['parent_name'] );
 
-					$attributes         = array();
+					$attributes         = [];
 					$attributes_heading = '';
 					if ( ! empty( $validation_error['node_attributes'] ) ) {
 						$attributes_heading = sprintf( '<div class="details-attributes__title"><code>%s</code></div>', esc_html__( 'Element attributes:', 'amp' ) );
@@ -1986,10 +1986,10 @@ class AMP_Validation_Error_Taxonomy {
 	public static function add_single_post_sortable_columns( $sortable_columns ) {
 		return array_merge(
 			$sortable_columns,
-			array(
+			[
 				'error'      => self::VALIDATION_DETAILS_ERROR_CODE_QUERY_VAR,
 				'error_type' => self::VALIDATION_ERROR_TYPE_QUERY_VAR,
-			)
+			]
 		);
 	}
 
@@ -2099,12 +2099,12 @@ class AMP_Validation_Error_Taxonomy {
 			return null;
 		}
 
-		$translated_names = array(
+		$translated_names = [
 			self::HTML_ELEMENT_ERROR_TYPE   => __( 'HTML Element', 'amp' ),
 			self::HTML_ATTRIBUTE_ERROR_TYPE => __( 'HTML Attribute', 'amp' ),
 			self::JS_ERROR_TYPE             => __( 'JavaScript', 'amp' ),
 			self::CSS_ERROR_TYPE            => __( 'CSS', 'amp' ),
-		);
+		];
 
 		if ( isset( $translated_names[ $validation_error['type'] ] ) ) {
 			return $translated_names[ $validation_error['type'] ];
@@ -2140,7 +2140,7 @@ class AMP_Validation_Error_Taxonomy {
 
 		$referer  = wp_get_referer();
 		$term_id  = (int) $_GET['term_id']; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$redirect = self::handle_validation_error_update( $referer, $action, array( $term_id ) );
+		$redirect = self::handle_validation_error_update( $referer, $action, [ $term_id ] );
 
 		if ( $redirect !== $referer ) {
 			wp_safe_redirect( $redirect );
@@ -2165,10 +2165,10 @@ class AMP_Validation_Error_Taxonomy {
 		$action              = sanitize_key( $_REQUEST['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$term_ids            = isset( $_POST['delete_tags'] ) ? array_map( 'sanitize_key', $_POST['delete_tags'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$single_term_id      = isset( $_GET['term_id'] ) ? sanitize_key( $_GET['term_id'] ) : null; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$redirect_query_args = array(
+		$redirect_query_args = [
 			'action'       => 'edit',
 			'amp_actioned' => $action,
-		);
+		];
 
 		if ( $term_ids ) {
 			// If this is a bulk action.
@@ -2176,7 +2176,7 @@ class AMP_Validation_Error_Taxonomy {
 			$redirect_query_args['amp_actioned_count'] = count( $term_ids );
 		} elseif ( $single_term_id ) {
 			// If this is an inline action, like 'Reject' or 'Accept'.
-			self::handle_validation_error_update( null, $action, array( $single_term_id ) );
+			self::handle_validation_error_update( null, $action, [ $single_term_id ] );
 			$redirect_query_args['amp_actioned_count'] = 1;
 		}
 
@@ -2219,10 +2219,10 @@ class AMP_Validation_Error_Taxonomy {
 				add_filter( 'pre_term_description', 'wp_filter_kses', $has_pre_term_description_filter );
 			}
 			$redirect_to = add_query_arg(
-				array(
+				[
 					'amp_actioned'       => $action,
 					'amp_actioned_count' => count( $term_ids ),
-				),
+				],
 				$redirect_to
 			);
 		}

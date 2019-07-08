@@ -85,7 +85,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( shortcode_exists( self::SHORTCODE ) ) {
 			$this->removed_shortcode_callback = $shortcode_tags[ self::SHORTCODE ];
 		}
-		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+		add_shortcode( self::SHORTCODE, [ $this, 'shortcode' ] );
 		remove_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
 	}
 
@@ -111,7 +111,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		wp_enqueue_style(
 			'amp-playlist-shortcode',
 			amp_get_asset_url( 'css/amp-playlist-shortcode.css' ),
-			array( 'wp-mediaelement' ),
+			[ 'wp-mediaelement' ],
 			AMP__VERSION
 		);
 	}
@@ -152,9 +152,9 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		self::$playlist_id++;
 		$container_id = 'wpPlaylist' . self::$playlist_id . 'Carousel';
 		$state_id     = 'wpPlaylist' . self::$playlist_id;
-		$amp_state    = array(
+		$amp_state    = [
 			'selectedIndex' => 0,
-		);
+		];
 
 		$this->enqueue_styles();
 		ob_start();
@@ -206,14 +206,14 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		self::$playlist_id++;
 		$state_id  = 'wpPlaylist' . self::$playlist_id;
-		$amp_state = array(
+		$amp_state = [
 			'selectedIndex' => 0,
-		);
+		];
 		foreach ( $data['tracks'] as $index => $track ) {
-			$amp_state[ $index ] = array(
+			$amp_state[ $index ] = [
 				'videoUrl' => $track['src'],
 				'thumb'    => isset( $track['thumb']['src'] ) ? $track['thumb']['src'] : '',
-			);
+			];
 		}
 
 		$dimensions = isset( $data['tracks'][0]['dimensions']['resized'] ) ? $data['tracks'][0]['dimensions']['resized'] : null;
@@ -278,7 +278,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		<div class="wp-playlist-tracks">
 			<?php foreach ( $tracks as $index => $track ) : ?>
 				<?php
-				$on            = 'tap:AMP.setState(' . wp_json_encode( array( $state_id => array( 'selectedIndex' => $index ) ) ) . ')';
+				$on            = 'tap:AMP.setState(' . wp_json_encode( [ $state_id => [ 'selectedIndex' => $index ] ] ) . ')';
 				$initial_class = 0 === $index ? 'wp-playlist-item wp-playlist-playing' : 'wp-playlist-item';
 				$bound_class   = sprintf( '%d == %s.selectedIndex ? "wp-playlist-item wp-playlist-playing" : "wp-playlist-item"', $index, $state_id );
 				?>
@@ -306,7 +306,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$markup = wp_playlist_shortcode( $attr );
 		preg_match( self::PLAYLIST_REGEX, $markup, $matches );
 		if ( empty( $matches[1] ) ) {
-			return array();
+			return [];
 		}
 		return json_decode( $matches[1], true );
 	}

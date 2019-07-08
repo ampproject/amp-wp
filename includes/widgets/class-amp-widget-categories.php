@@ -46,11 +46,11 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 		if ( $title ) {
 			echo wp_kses_post( $args['before_title'] . $title . $args['after_title'] );
 		}
-		$cat_args = array(
+		$cat_args = [
 			'orderby'      => 'name',
 			'show_count'   => $c,
 			'hierarchical' => $h,
-		);
+		];
 		if ( $d ) :
 			$form_id = sprintf( 'widget-categories-dropdown-%d', $this->number );
 			printf( '<form action="%s" method="get" target="_top" id="%s">', esc_url( home_url() ), esc_attr( $form_id ) );
@@ -64,7 +64,7 @@ class AMP_Widget_Categories extends WP_Widget_Categories {
 				array_merge(
 					/** This filter is documented in wp-includes/widgets/class-wp-widget-categories.php */
 					apply_filters( 'widget_categories_dropdown_args', $cat_args, $instance ),
-					array( 'echo' => false )
+					[ 'echo' => false ]
 				)
 			);
 			$dropdown = preg_replace(

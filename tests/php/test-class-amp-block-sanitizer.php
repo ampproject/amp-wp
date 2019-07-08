@@ -16,32 +16,32 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
-		return array(
-			'no_figures'           => array(
+		return [
+			'no_figures'           => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
-			),
+			],
 
-			'more_than_one_child'  => array(
+			'more_than_one_child'  => [
 				'<figure class="wp-block-embed wp-embed-aspect-16-9 wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
 				'<figure class="wp-block-embed  wp-has-aspect-ratio"><amp-facebook></amp-facebook><amp-facebook></amp-facebook></figure>',
-			),
+			],
 
-			'no_wp_block_embed'    => array(
+			'no_wp_block_embed'    => [
 				'<figure><amp-facebook></amp-facebook></figure>',
 				'<figure><amp-facebook></amp-facebook></figure>',
-			),
+			],
 
-			'data_amp_noloading'   => array(
+			'data_amp_noloading'   => [
 				'<figure class="wp-block-embed" data-amp-noloading="true"><amp-facebook></amp-facebook></figure>',
 				'<figure class="wp-block-embed" data-amp-noloading="true"><amp-facebook noloading="" layout="fixed-height"></amp-facebook></figure>',
-			),
+			],
 
-			'data_amp_layout_fill' => array(
+			'data_amp_layout_fill' => [
 				'<figure class="wp-block-embed" data-amp-layout="fill"><amp-facebook width="100"></amp-facebook></figure>',
 				'<figure class="wp-block-embed" data-amp-layout="fill" style="position:relative; width: 100%; height: 400px;"><amp-facebook layout="fill"></amp-facebook></figure>',
-			),
-		);
+			],
+		];
 	}
 
 	/**

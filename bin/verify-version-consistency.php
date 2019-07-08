@@ -12,7 +12,7 @@ if ( 'cli' !== php_sapi_name() ) {
 	exit( 1 );
 }
 
-$versions = array();
+$versions = [];
 
 $readme_txt = file_get_contents( dirname( __FILE__ ) . '/../readme.txt' );
 if ( ! preg_match( '/Stable tag:\s+(?P<version>\S+)/i', $readme_txt, $matches ) ) {

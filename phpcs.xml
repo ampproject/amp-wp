@@ -79,6 +79,10 @@
 		<exclude-pattern>bin/*</exclude-pattern>
 	</rule>
 
+	<rule ref="Generic.Arrays.DisallowLongArraySyntax.Found">
+		<exclude-pattern>amp.php</exclude-pattern>
+	</rule>
+
 	<arg value="s"/>
 	<arg name="extensions" value="php"/>
 	<file>.</file>

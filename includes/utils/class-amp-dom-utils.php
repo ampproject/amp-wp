@@ -21,7 +21,7 @@ class AMP_DOM_Utils {
 	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
 	 * @var array
 	 */
-	private static $self_closing_tags = array(
+	private static $self_closing_tags = [
 		'area',
 		'base',
 		'basefont',
@@ -40,7 +40,7 @@ class AMP_DOM_Utils {
 		'source',
 		'track',
 		'wbr',
-	);
+	];
 
 	/**
 	 * List of elements allowed in head.
@@ -49,7 +49,7 @@ class AMP_DOM_Utils {
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
 	 * @var array
 	 */
-	private static $elements_allowed_in_head = array(
+	private static $elements_allowed_in_head = [
 		'title',
 		'base',
 		'link',
@@ -57,7 +57,7 @@ class AMP_DOM_Utils {
 		'style',
 		'noscript',
 		'script',
-	);
+	];
 
 	/**
 	 * Stored noscript/comment replacements for libxml<2.8.
@@ -65,7 +65,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @var array
 	 */
-	public static $noscript_placeholder_comments = array();
+	public static $noscript_placeholder_comments = [];
 
 	/**
 	 * Return a valid DOMDocument representing HTML document passed as a parameter.
@@ -249,7 +249,7 @@ class AMP_DOM_Utils {
 			$salt = wp_rand();
 
 			// Note: The order of these tokens is important, as it determines the order of the order of the replacements.
-			$tokens       = array(
+			$tokens       = [
 				'{{{',
 				'}}}',
 				'{{#',
@@ -258,8 +258,8 @@ class AMP_DOM_Utils {
 				'{{/',
 				'{{',
 				'}}',
-			);
-			$placeholders = array();
+			];
+			$placeholders = [];
 			foreach ( $tokens as $token ) {
 				$placeholders[ $token ] = '_amp_mustache_' . md5( $salt . $token );
 			}
@@ -322,7 +322,7 @@ class AMP_DOM_Utils {
 		// Match all start tags that contain a binding attribute.
 		$pattern   = implode(
 			'',
-			array(
+			[
 				'#<',
 				'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
 				'(?P<attrs>\s',                            // Attributes.
@@ -330,7 +330,7 @@ class AMP_DOM_Utils {
 				'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
 				'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
 				')>#s',
-			)
+			]
 		);
 		$converted = preg_replace_callback(
 			$pattern,
@@ -596,7 +596,7 @@ class AMP_DOM_Utils {
 	 *                  empty array if it has no attributes.
 	 */
 	public static function get_node_attributes_as_assoc_array( $node ) {
-		$attributes = array();
+		$attributes = [];
 		if ( ! $node->hasAttributes() ) {
 			return $attributes;
 		}

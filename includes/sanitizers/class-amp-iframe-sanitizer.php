@@ -43,12 +43,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *     @type string $alias_origin          An alternative origin which can be supplied which is used when encountering same-origin iframes.
 	 * }
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'add_placeholder'       => false,
 		'add_noscript_fallback' => true,
 		'current_origin'        => null,
 		'alias_origin'          => null,
-	);
+	];
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -56,11 +56,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'iframe' => array(
+		return [
+			'iframe' => [
 				'amp-iframe',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -158,7 +158,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		$remove_allow_same_origin = false;
 		foreach ( $attributes as $name => $value ) {
@@ -262,10 +262,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		$placeholder_node = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
-			array(
+			[
 				'placeholder' => '',
 				'class'       => 'amp-wp-iframe-placeholder',
-			)
+			]
 		);
 
 		return $placeholder_node;

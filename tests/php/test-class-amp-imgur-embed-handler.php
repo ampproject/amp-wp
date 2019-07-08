@@ -26,13 +26,13 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 				if ( false === strpos( $url, 'f462IUj' ) ) {
 					return $pre;
 				}
-				return array(
+				return [
 					'body' => '{"version":"1.0","type":"rich","provider_name":"Imgur","provider_url":"https:\\/\\/imgur.com","width":500,"height":750,"html":"<blockquote class=\\"imgur-embed-pub\\" lang=\\"en\\" data-id=\\"f462IUj\\"><a href=\\"https:\\/\\/imgur.com\\/f462IUj\\">Getting that beach body ready<\\/a><\\/blockquote><script async src=\\"\\/\\/s.imgur.com\\/min\\/embed.js\\" charset=\\"utf-8\\"><\\/script>"}', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'response' => array(
+				'response' => [
 					'code'    => 200,
 					'message' => 'OK',
-				),
-				);
+				],
+				];
 			},
 			10,
 			3
@@ -62,28 +62,28 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 			$width  = 500;
 			$height = 750;
 		}
-		return array(
-			'no_embed'        => array(
+		return [
+			'no_embed'        => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
+			],
 
-			'url_simple'      => array(
+			'url_simple'      => [
 				'https://imgur.com/f462IUj' . PHP_EOL,
 				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_detail' => array(
+			'url_with_detail' => [
 				'https://imgur.com/gallery/f462IUj' . PHP_EOL,
 				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
-			),
+			],
 
-			'url_with_params' => array(
+			'url_with_params' => [
 				'https://imgur.com/gallery/f462IUj?foo=bar' . PHP_EOL,
 				'<p><amp-imgur width="' . $width . '" height="' . $height . '" data-imgur-id="f462IUj"></amp-imgur></p>' . PHP_EOL,
-			),
+			],
 
-		);
+		];
 	}
 
 	/**
@@ -107,16 +107,16 @@ class AMP_Imgur_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://www.imgur.com/gallery/f462IUj' . PHP_EOL,
-				array( 'amp-imgur' => true ),
-			),
-		);
+				[ 'amp-imgur' => true ],
+			],
+		];
 	}
 
 	/**

@@ -37,59 +37,59 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 			return ' on="tap:AMP.setState({ navMenuToggledOn: ! navMenuToggledOn })" aria-expanded="false" [aria-expanded]="navMenuToggledOn ? \'true\' : \'false\'"' . ( ! empty( $toggle_class ) ? ' [class]="&quot;' . $class . '&quot; + ( navMenuToggledOn ? &quot; ' . $toggle_class . '&quot; : \'\' )"' : '' );
 		};
 
-		return array(
-			'container_before_toggle' => array(
+		return [
+			'container_before_toggle' => [
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
 				'<html>' . $head . '<body>' . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . '</body></html>',
-				array(
+				[
 					'nav_container_id'           => $container_id,
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'toggled-on',
 					'menu_button_toggle_class'   => 'toggled-on',
-				),
-			),
-			'toggle_before_container' => array(
+				],
+			],
+			'toggle_before_container' => [
 				'<html>' . $head . '<body>' . $toggle . $container . '</body></html>',
 				'<html>' . $head . '<body>' . str_replace( '>Toggle', $amp_get_toggle_attrs() . '>Toggle', $toggle ) . $amp_state . str_replace( '></div>', $amp_get_container_attrs( 'nav-menu-wrapper' ) . '></div>', $container ) . '</body></html>',
-				array(
+				[
 					'nav_container_id'           => $container_id,
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'toggled-on',
 					'menu_button_toggle_class'   => 'toggled-on',
-				),
-			),
-			'container_is_body'       => array(
+				],
+			],
+			'container_is_body'       => [
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
 				'<html>' . $head . '<body' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
-				array(
+				[
 					'nav_container_xpath'        => '//body',
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'nav-menu-toggled-on',
-				),
-			),
-			'container_is_html'       => array(
+				],
+			],
+			'container_is_html'       => [
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
 				'<html' . $amp_get_container_attrs( '', 'nav-menu-toggled-on' ) . '>' . $head . '<body>' . $amp_state . $container . str_replace( '>Toggle', $amp_get_toggle_attrs( '', '' ) . '>Toggle', $toggle ) . '</body></html>',
-				array(
+				[
 					'nav_container_xpath'        => '//html',
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'nav-menu-toggled-on',
-				),
-			),
-			'no_container_provided'   => array(
+				],
+			],
+			'no_container_provided'   => [
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
 				'<html>' . $head . '<body>' . $container . '</body></html>',
-				array(
+				[
 					'menu_button_id'             => $toggle_id,
 					'nav_container_toggle_class' => 'toggled-on',
-				),
-			),
-			'no_arguments_provided'   => array(
+				],
+			],
+			'no_arguments_provided'   => [
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
 				'<html>' . $head . '<body>' . $container . $toggle . '</body></html>',
-				array(),
-			),
-		);
+				[],
+			],
+		];
 	}
 
 	/**
@@ -104,7 +104,7 @@ class Test_AMP_Nav_Menu_Toggle_Sanitizer extends WP_UnitTestCase {
 	 * @covers AMP_Nav_Menu_Toggle_Sanitizer::get_nav_container()
 	 * @covers AMP_Nav_Menu_Toggle_Sanitizer::get_menu_button()
 	 */
-	public function test_converter( $source, $expected, $args = array() ) {
+	public function test_converter( $source, $expected, $args = [] ) {
 		$dom       = AMP_DOM_Utils::get_dom( $source );
 		$sanitizer = new AMP_Nav_Menu_Toggle_Sanitizer( $dom, $args );
 

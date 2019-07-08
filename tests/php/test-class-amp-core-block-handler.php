@@ -95,14 +95,14 @@ class Test_AMP_Core_Block_Handler extends WP_UnitTestCase {
 		$attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/uploads/small-video.mp4' );
 
 		$post_id = self::factory()->post->create(
-			array(
+			[
 				'post_title'   => 'Video',
 				'post_content' => sprintf(
 					"<!-- wp:video {\"id\":%d} -->\n<figure class=\"wp-block-video\"><video controls src=\"%s\"></video></figure>\n<!-- /wp:video -->",
 					$attachment_id,
 					wp_get_attachment_url( $attachment_id )
 				),
-			)
+			]
 		);
 
 		$handler = new AMP_Core_Block_Handler();

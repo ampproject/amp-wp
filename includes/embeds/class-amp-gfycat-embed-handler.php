@@ -21,14 +21,14 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 3 );
+		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 	}
 
 	/**
@@ -53,7 +53,7 @@ class AMP_Gfycat_Embed_Handler extends AMP_Base_Embed_Handler {
 				return $return;
 			}
 
-			$attributes = wp_array_slice_assoc( $attr, array( 'width', 'height' ) );
+			$attributes = wp_array_slice_assoc( $attr, [ 'width', 'height' ] );
 
 			if ( empty( $attr['width'] ) ) {
 				$attributes['layout'] = 'fixed-height';

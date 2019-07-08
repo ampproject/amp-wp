@@ -23,7 +23,7 @@ trait AMP_Noscript_Fallback {
 	 *
 	 * @var array
 	 */
-	private $noscript_fallback_allowed_attributes = array();
+	private $noscript_fallback_allowed_attributes = [];
 
 	/**
 	 * Initializes the internal allowed attributes array.

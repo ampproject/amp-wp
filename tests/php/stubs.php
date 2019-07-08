@@ -17,10 +17,10 @@ class AMP_Test_World_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	public function get_scripts() {
-		return array( 'scripts' );
+		return [ 'scripts' ];
 	}
 
 	public function get_styles() {
-		return array( 'styles' );
+		return [ 'styles' ];
 	}
 }

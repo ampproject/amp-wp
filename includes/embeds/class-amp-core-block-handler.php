@@ -17,24 +17,24 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @var array
 	 */
-	protected $block_ampify_methods = array(
+	protected $block_ampify_methods = [
 		'core/categories' => 'ampify_categories_block',
 		'core/archives'   => 'ampify_archives_block',
 		'core/video'      => 'ampify_video_block',
-	);
+	];
 
 	/**
 	 * Register embed.
 	 */
 	public function register_embed() {
-		add_filter( 'render_block', array( $this, 'filter_rendered_block' ), 0, 2 );
+		add_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0, 2 );
 	}
 
 	/**
 	 * Unregister embed.
 	 */
 	public function unregister_embed() {
-		remove_filter( 'render_block', array( $this, 'filter_rendered_block' ), 0 );
+		remove_filter( 'render_block', [ $this, 'filter_rendered_block' ], 0 );
 	}
 
 	/**

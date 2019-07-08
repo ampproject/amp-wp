@@ -82,7 +82,7 @@ class AMP_WP_Utils {
 	 * @deprecated 0.7
 	 */
 	protected static function _wp_translate_php_url_constant_to_key( $constant ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore
-		$translation = array(
+		$translation = [
 			PHP_URL_SCHEME   => 'scheme',
 			PHP_URL_HOST     => 'host',
 			PHP_URL_PORT     => 'port',
@@ -91,7 +91,7 @@ class AMP_WP_Utils {
 			PHP_URL_PATH     => 'path',
 			PHP_URL_QUERY    => 'query',
 			PHP_URL_FRAGMENT => 'fragment',
-		);
+		];
 
 		if ( isset( $translation[ $constant ] ) ) {
 			return $translation[ $constant ];
