@@ -768,7 +768,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;
 	}
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	maxFontSize++;
 
@@ -788,7 +788,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
 
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	return minFontSize;
 };
@@ -1153,7 +1153,7 @@ const getBlockInnerTextElement = ( block ) => {
 
 	switch ( name ) {
 		case 'amp/amp-story-text':
-			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
 
 		case 'amp/amp-story-post-title':
 		case 'amp/amp-story-post-author':
@@ -1209,6 +1209,65 @@ export const maybeUpdateFontSize = ( block ) => {
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
 				}
+			}
+
+			break;
+	}
+};
+
+/**
+ * Updates a block's width and height in case it doesn't use amp-fit-text and the font size has changed.
+ *
+ * @param {Object}  block                         Block object.
+ * @param {string}  block.clientId                Block client ID.
+ * @param {Object}  block.attributes              Block attributes.
+ * @param {number}  block.attributes.width        Block width in pixels.
+ * @param {number}  block.attributes.height       Block height in pixels.
+ * @param {string}  block.attributes.content      Block inner content.
+ * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
+ * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
+ */
+export const maybeUpdateBlockDimensions = ( block ) => {
+	const { name, clientId, attributes } = block;
+	const { width, height, ampFitText, content } = attributes;
+
+	if ( ampFitText ) {
+		return;
+	}
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			const element = getBlockInnerTextElement( block );
+
+			if ( element && content.length ) {
+				if ( element.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.offsetHeight } );
+				}
+
+				if ( element.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement ) {
+				metaBlockElement.classList.toggle( 'is-measuring' );
+
+				if ( metaBlockElement.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: metaBlockElement.offsetHeight } );
+				}
+
+				if ( metaBlockElement.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: metaBlockElement.offsetWidth } );
+				}
+
+				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
 
 			break;
