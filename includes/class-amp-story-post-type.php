@@ -298,7 +298,7 @@ class AMP_Story_Post_Type {
 
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$sanitizers['AMP_Story_Sanitizer'] = array();
 
@@ -315,7 +315,7 @@ class AMP_Story_Post_Type {
 		// Omit the core theme sanitizer for the story template.
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
 				}
@@ -391,7 +391,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -424,7 +424,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -952,7 +952,7 @@ class AMP_Story_Post_Type {
 		}
 
 		$fonts = array_map(
-			function ( $font ) use ( $fonts_url, $subsets ) {
+			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
 				if ( isset( $font['gfont'] ) ) {
@@ -983,7 +983,7 @@ class AMP_Story_Post_Type {
 	public static function get_font( $name ) {
 		$fonts = array_filter(
 			self::get_fonts(),
-			function ( $font ) use ( $name ) {
+			static function ( $font ) use ( $name ) {
 				return $font['name'] === $name;
 			}
 		);
@@ -1404,12 +1404,12 @@ class AMP_Story_Post_Type {
 
 		$cropped = wp_crop_image(
 			$attachment_id,
-			intval( $crop_details['x1'] ),
-			intval( $crop_details['y1'] ),
-			intval( $crop_details['width'] ),
-			intval( $crop_details['height'] ),
-			intval( $dimensions['dst_width'] ),
-			intval( $dimensions['dst_height'] )
+			(int) $crop_details['x1'],
+			(int) $crop_details['y1'],
+			(int) $crop_details['width'],
+			(int) $crop_details['height'],
+			(int) $dimensions['dst_width'],
+			(int) $dimensions['dst_height']
 		);
 
 		if ( ! $cropped || is_wp_error( $cropped ) ) {
@@ -1449,7 +1449,7 @@ class AMP_Story_Post_Type {
 			unset( $error );
 		}
 
-		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
+		$image_type = $size ? $size['mime'] : 'image/jpeg';
 		$object     = array(
 			'ID'             => $parent_attachment_id,
 			'post_title'     => basename( $cropped ),
@@ -1518,7 +1518,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// Add 4px more height, as the <iframe> needs that to display the full image.
-		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		$new_height = (string) ( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
 		return preg_replace(
 			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
 			sprintf( '${1}%s${3}', $new_height ),

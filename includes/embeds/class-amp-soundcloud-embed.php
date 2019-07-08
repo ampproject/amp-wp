@@ -54,7 +54,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function oembed( $matches, $attr, $url ) {
 		_deprecated_function( __METHOD__, '0.6' );
-		unset( $matches, $attr );
 		return $this->render( $this->extract_params_from_iframe_src( $url ), $url );
 	}
 
@@ -191,7 +190,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		// @todo Set width to $args['width'] and layout to responsive once amp-soundcloud supports it: <https://github.com/ampproject/amphtml/issues/23144>.
-		$attributes['height'] = $args['height'] ? $args['height'] : $this->args['height'];
+		$attributes['height'] = $args['height'] ?: $this->args['height'];
 		$attributes['layout'] = 'fixed-height';
 
 		return AMP_HTML_Utils::build_tag(

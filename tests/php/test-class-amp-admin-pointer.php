@@ -11,7 +11,7 @@
  * @covers AMP_Admin_Pointers
  * @since 1.0
  */
-class Test_AMP_Admin_Pointers extends \WP_UnitTestCase {
+class Test_AMP_Admin_Pointers extends WP_UnitTestCase {
 
 	/**
 	 * The meta key of the dismissed pointers.

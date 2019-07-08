@@ -392,7 +392,7 @@ class AMP_Validation_Manager {
 		}
 
 		// @todo The amp_validated_url post should probably only be accessible to users who can manage_options, or limit access to a post if the user has the cap to edit the queried object?
-		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ? $amp_validated_url_post : $amp_url );
+		$validate_url = AMP_Validated_URL_Post_Type::get_recheck_url( $amp_validated_url_post ?: $amp_url );
 
 		// Construct the parent admin bar item.
 		if ( is_amp_endpoint() ) {
@@ -518,7 +518,7 @@ class AMP_Validation_Manager {
 			 */
 			foreach ( $_REQUEST[ self::VALIDATION_ERROR_TERM_STATUS_QUERY_VAR ] as $slug => $status ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 				$slug   = sanitize_key( $slug );
-				$status = intval( $status );
+				$status = (int) $status;
 				self::$validation_error_status_overrides[ $slug ] = $status;
 				ksort( self::$validation_error_status_overrides );
 			}
@@ -629,7 +629,7 @@ class AMP_Validation_Manager {
 			if ( is_wp_error( $validity ) ) {
 				$validation_posts[ $post->ID ] = $validity;
 			} else {
-				$invalid_url_post_id = intval( get_post_meta( $post->ID, '_amp_validated_url_post_id', true ) );
+				$invalid_url_post_id = (int) get_post_meta( $post->ID, '_amp_validated_url_post_id', true );
 
 				$validation_posts[ $post->ID ] = AMP_Validated_URL_Post_Type::store_validation_errors(
 					wp_list_pluck( $validity['results'], 'error' ),
@@ -698,7 +698,6 @@ class AMP_Validation_Manager {
 	 * @return array|null $validation_data Validation data if it's available, or null.
 	 */
 	public static function get_amp_validity_rest_field( $post_data, $field_name, $request ) {
-		unset( $field_name );
 		if ( ! current_user_can( 'edit_post', $post_data['id'] ) || ! self::has_cap() || ! self::post_supports_validation( $post_data['id'] ) ) {
 			return null;
 		}
@@ -940,7 +939,7 @@ class AMP_Validation_Manager {
 			printf( '<p>%s ', esc_html( $removed_set['label'] ) );
 			$items = array();
 			foreach ( $removed_set['names'] as $name => $count ) {
-				if ( 1 === intval( $count ) ) {
+				if ( 1 === (int) $count ) {
 					$items[] = sprintf( '<code>%s</code>', esc_html( $name ) );
 				} else {
 					$items[] = sprintf( '<code>%s</code> (%d)', esc_html( $name ), $count );
@@ -1391,7 +1390,7 @@ class AMP_Validation_Manager {
 	/**
 	 * Gets the plugin or theme of the callback, if one exists.
 	 *
-	 * @param string|array $callback The callback for which to get the plugin.
+	 * @param string|array|callable $callback The callback for which to get the plugin.
 	 * @return array|null {
 	 *     The source data.
 	 *
@@ -1578,7 +1577,7 @@ class AMP_Validation_Manager {
 	 * @return string Nonce.
 	 */
 	public static function get_amp_validate_nonce() {
-		return substr( wp_hash( self::VALIDATE_QUERY_VAR . (string) wp_nonce_tick(), 'nonce' ), -12, 10 );
+		return substr( wp_hash( self::VALIDATE_QUERY_VAR . wp_nonce_tick(), 'nonce' ), -12, 10 );
 	}
 
 	/**
@@ -1850,7 +1849,7 @@ class AMP_Validation_Manager {
 		);
 
 		$response = wp_remote_retrieve_body( $r );
-		if ( strlen( trim( $response ) ) === 0 ) {
+		if ( trim( $response ) === '' ) {
 			$error_code = 'white_screen_of_death';
 			return new WP_Error( $error_code, self::get_validate_url_error_message( $error_code ) );
 		}
@@ -1901,7 +1900,7 @@ class AMP_Validation_Manager {
 			default:
 				/* translators: %s is error code */
 				return sprintf( __( 'URL validation failed. Error code: %s.', 'amp' ), $error_code ); // Note that $error_code has been sanitized with sanitize_key(); will be escaped below as well.
-		};
+		}
 	}
 
 	/**

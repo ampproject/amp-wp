@@ -149,7 +149,7 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 * @var null|string
 	 */
-	protected static $support_added_via_option = null;
+	protected static $support_added_via_option;
 
 	/**
 	 * Theme support mode which was added via the theme.
@@ -158,7 +158,7 @@ class AMP_Theme_Support {
 	 *
 	 * @var null|string
 	 */
-	protected static $support_added_via_theme = null;
+	protected static $support_added_via_theme;
 
 	/**
 	 * Initialize.
@@ -187,7 +187,7 @@ class AMP_Theme_Support {
 		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 			add_action(
 				'wp',
-				function () {
+				static function () {
 					if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
 						self::finish_init();
 					}
@@ -288,8 +288,8 @@ class AMP_Theme_Support {
 						sprintf(  // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_trigger_error
 							/* translators: 1: comma-separated list of expected keys, 2: comma-separated list of actual keys */
 							__( 'Expected AMP theme support to keys (%1$s) but saw (%2$s)', 'amp' ),
-							join( ', ', $keys ),
-							join( ', ', array_keys( $args ) )
+							implode( ', ', $keys ),
+							implode( ', ', array_keys( $args ) )
 						)
 					),
 					'1.0'
@@ -645,7 +645,7 @@ class AMP_Theme_Support {
 			if ( is_string( $callback ) && 'is_' === substr( $callback, 0, 3 ) && method_exists( $query, $callback ) ) {
 				$is_match = call_user_func( array( $query, $callback ) );
 			} elseif ( is_callable( $callback ) ) {
-				$is_match = call_user_func( $callback, $query );
+				$is_match = $callback( $query );
 			} else {
 				/* translators: %s: the supportable template ID. */
 				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Supportable template "%s" does not have a callable callback.', 'amp' ), $id ) ), '1.0' );
@@ -785,12 +785,12 @@ class AMP_Theme_Support {
 						'supported' => true,
 					)
 				);
-			} else {
-				return array_merge(
-					$default_response,
-					array( 'errors' => array( 'no_matching_template' ) )
-				);
 			}
+
+			return array_merge(
+				$default_response,
+				array( 'errors' => array( 'no_matching_template' ) )
+			);
 		}
 		$matching_template = array_merge( $default_response, $matching_template );
 
@@ -899,7 +899,7 @@ class AMP_Theme_Support {
 			$templates[ sprintf( 'is_tax[%s]', $taxonomy->name ) ] = array(
 				'label'    => $taxonomy->labels->name,
 				'parent'   => 'is_archive',
-				'callback' => function ( WP_Query $query ) use ( $taxonomy ) {
+				'callback' => static function ( WP_Query $query ) use ( $taxonomy ) {
 					return $query->is_tax( $taxonomy->name );
 				},
 			);
@@ -913,7 +913,7 @@ class AMP_Theme_Support {
 			$templates[ sprintf( 'is_post_type_archive[%s]', $post_type->name ) ] = array(
 				'label'    => $post_type->labels->archives,
 				'parent'   => 'is_archive',
-				'callback' => function ( WP_Query $query ) use ( $post_type ) {
+				'callback' => static function ( WP_Query $query ) use ( $post_type ) {
 					return $query->is_post_type_archive( $post_type->name );
 				},
 			);
@@ -999,13 +999,13 @@ class AMP_Theme_Support {
 		// Prevent MediaElement.js scripts/styles from being enqueued.
 		add_filter(
 			'wp_video_shortcode_library',
-			function() {
+			static function() {
 				return 'amp';
 			}
 		);
 		add_filter(
 			'wp_audio_shortcode_library',
-			function() {
+			static function() {
 				return 'amp';
 			}
 		);
@@ -1013,7 +1013,7 @@ class AMP_Theme_Support {
 		// Don't show loading indicator on custom logo since it makes most sense for larger images.
 		add_filter(
 			'get_custom_logo',
-			function( $html ) {
+			static function( $html ) {
 				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
@@ -1034,14 +1034,14 @@ class AMP_Theme_Support {
 		 */
 		add_action(
 			'wp_head',
-			function() {
+			static function() {
 				echo '<style amp-custom></style>';
 			},
 			0
 		);
 		add_action(
 			'wp_head',
-			function() {
+			static function() {
 				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			},
 			PHP_INT_MAX
@@ -1072,14 +1072,14 @@ class AMP_Theme_Support {
 		add_filter( 'get_header_image_tag', array( __CLASS__, 'amend_header_image_with_video_header' ), PHP_INT_MAX );
 		add_action(
 			'wp_print_footer_scripts',
-			function() {
+			static function() {
 				wp_dequeue_script( 'wp-custom-header' );
 			},
 			0
 		);
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				wp_dequeue_script( 'comment-reply' ); // Handled largely by AMP_Comments_Sanitizer and *reply* methods in this class.
 			}
 		);
@@ -1140,7 +1140,7 @@ class AMP_Theme_Support {
 				)
 			);
 
-			if ( ! is_subclass_of( $embed_handler, 'AMP_Base_Embed_Handler' ) ) {
+			if ( ! $embed_handler instanceof AMP_Base_Embed_Handler ) {
 				_doing_it_wrong(
 					__METHOD__,
 					esc_html(
@@ -1346,7 +1346,6 @@ class AMP_Theme_Support {
 	 * @return string Cancel reply link.
 	 */
 	public static function filter_cancel_comment_reply_link( $formatted_link, $link, $text ) {
-		unset( $formatted_link, $link );
 		if ( empty( $text ) ) {
 			$text = __( 'Click here to cancel reply.', 'default' );
 		}
@@ -1389,7 +1388,7 @@ class AMP_Theme_Support {
 		// Remove customize support script since not valid AMP.
 		add_action(
 			'admin_bar_menu',
-			function() {
+			static function() {
 				remove_action( 'wp_before_admin_bar_render', 'wp_customize_support_script' );
 			},
 			41
@@ -1405,7 +1404,7 @@ class AMP_Theme_Support {
 		remove_action( 'wp_head', $header_callback );
 		if ( '__return_false' !== $header_callback ) {
 			ob_start();
-			call_user_func( $header_callback );
+			$header_callback();
 			$style = ob_get_clean();
 			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
 			wp_add_inline_style( 'admin-bar', $data );
@@ -1414,7 +1413,7 @@ class AMP_Theme_Support {
 		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(
 			'body_class',
-			function( $body_classes ) {
+			static function( $body_classes ) {
 				return array_merge(
 					array_diff(
 						$body_classes,
@@ -2001,7 +2000,7 @@ class AMP_Theme_Support {
 				return $response_cache['body'];
 			}
 
-			$cache_response = function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
+			$cache_response = static function( $body, $validation_results ) use ( $response_cache_key, $caches_for_url ) {
 				$caches_for_url[] = $response_cache_key;
 				wp_cache_set(
 					AMP_Theme_Support::POST_PROCESSOR_CACHE_EFFECTIVENESS_KEY,
@@ -2365,7 +2364,7 @@ class AMP_Theme_Support {
 		// If there is no video, just pass the image through.
 		if ( ! has_header_video() || ! is_header_video_active() ) {
 			return $image_markup;
-		};
+		}
 
 		$video_settings   = get_header_video_settings();
 		$parsed_url       = wp_parse_url( $video_settings['videoUrl'] );

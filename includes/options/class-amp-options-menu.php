@@ -557,7 +557,7 @@ class AMP_Options_Menu {
 				</style>
 				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
 				<?php
-				self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 				?>
 				<script>
 					// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.

@@ -65,7 +65,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$removed_shortcode = 'wp_playlist_shortcode';
 		add_shortcode( 'playlist', $removed_shortcode );
 		$this->instance->register_embed();
-		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] ) );
+		$this->assertInstanceOf( '\\AMP_Playlist_Embed_Handler', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] );
 		$this->assertEquals( 'shortcode', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][1] );
 		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode_callback );
 		$this->instance->unregister_embed();
@@ -93,10 +93,10 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertFalse( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
-		$this->assertFalse( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
+		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
 
-		$post               = $this->factory()->post->create_and_get();
+		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
@@ -225,16 +225,13 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * @covers AMP_Playlist_Embed_Handler::print_tracks()
 	 */
 	public function test_tracks() {
-		$type         = 'video';
-		$attr         = $this->get_attributes( $type );
-		$data         = $this->instance->get_data( $attr );
-		$container_id = 'fooContainerId1';
-		$state_id     = 'fooId1';
-		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
+		$type        = 'video';
+		$attr        = $this->get_attributes( $type );
+		$data        = $this->instance->get_data( $attr );
+		$state_id    = 'fooId1';
+		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( array( $this->instance, 'print_tracks' ), array( $state_id, $data['tracks'] ) );
 		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );
 		$this->assertContains( $state_id, $tracks );
 		$this->assertContains( $expected_on, $tracks );
@@ -243,9 +240,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$data        = $this->instance->get_data( $attr );
 		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( array( $this->instance, 'print_tracks' ), array( $state_id, $data['tracks'] ) );
 		$this->assertContains( $expected_on, $tracks );
 	}
 
@@ -329,7 +324,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	public function get_file_ids( $files, $mime_type ) {
 		$ids = array();
 		foreach ( $files as $file ) {
-			$ids[] = $this->factory()->attachment->create_object(
+			$ids[] = self::factory()->attachment->create_object(
 				$file,
 				0,
 				array(

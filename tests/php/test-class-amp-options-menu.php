@@ -56,7 +56,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 		global $_parent_pages, $submenu, $wp_settings_sections, $wp_settings_fields;
 
 		wp_set_current_user(
-			$this->factory->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)
@@ -91,7 +91,7 @@ class Test_AMP_Options_Menu extends WP_UnitTestCase {
 	 */
 	public function test_render_screen_for_admin_user() {
 		wp_set_current_user(
-			$this->factory->user->create(
+			self::factory()->user->create(
 				array(
 					'role' => 'administrator',
 				)

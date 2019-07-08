@@ -152,7 +152,6 @@ class AMP_CLI {
 	 * @throws Exception If an error happens.
 	 */
 	public function validate_site( $args, $assoc_args ) {
-		unset( $args );
 		self::$include_conditionals      = array();
 		self::$force_crawl_urls          = false;
 		self::$limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
@@ -277,7 +276,6 @@ class AMP_CLI {
 	 * @throws Exception If an error happens.
 	 */
 	public function reset_site_validation( $args, $assoc_args ) {
-		unset( $args );
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
@@ -399,9 +397,7 @@ class AMP_CLI {
 
 		return array_filter(
 			$ids,
-			function( $id ) {
-				return post_supports_amp( $id );
-			}
+			'post_supports_amp'
 		);
 	}
 
@@ -641,7 +637,7 @@ class AMP_CLI {
 		$unaccepted_error_count = count(
 			array_filter(
 				$validation_errors,
-				function( $error ) {
+				static function( $error ) {
 					$validation_status = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization( $error );
 					return (
 					AMP_Validation_Error_Taxonomy::VALIDATION_ERROR_ACK_ACCEPTED_STATUS !== $validation_status['term_status']

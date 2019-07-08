@@ -272,7 +272,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'reference-points-amp-story'                   => call_user_func(
-				function () {
+				static function () {
 					$html = str_replace(
 						array( "\n", "\t" ),
 						'',
@@ -551,7 +551,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			),
 
 			'attribute_amp_accordion_value'                => call_user_func(
-				function() {
+				static function() {
 					$html = str_replace(
 						array( "\n", "\t" ),
 						'',
@@ -1571,7 +1571,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 		$sanitizer          = new AMP_Tag_And_Attribute_Sanitizer(
 			$dom,
 			array(
-				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
 					$actual_error_codes[] = $error['code'];
 					return true;
 				},
@@ -1607,7 +1607,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'style_external'                          => array(
-				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" src="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
+				'<html amp><head><meta charset="utf-8"><link rel="stylesheet" href="https://example.com/test.css"></head><body></body></html>', // phpcs:ignore
 				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
 			),
 			'style_inline'                            => array(
@@ -1676,9 +1676,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				$expected = sprintf( $html_doc_format, $expected );
 			}
 			$html_test[] = $expected;
-			array_push( $html_test, array_shift( $body_test ) );
-			array_push( $html_test, array_shift( $body_test ) );
-			$data[] = $html_test;
+			$html_test[] = array_shift( $body_test );
+			$html_test[] = array_shift( $body_test );
+			$data[]      = $html_test;
 		}
 
 		return $data;
@@ -1703,7 +1703,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			$dom,
 			array(
 				'use_document_element'      => true,
-				'validation_error_callback' => function( $error ) use ( &$actual_error_codes ) {
+				'validation_error_callback' => static function( $error ) use ( &$actual_error_codes ) {
 					$actual_error_codes[] = $error['code'];
 					return true;
 				},
@@ -1823,7 +1823,7 @@ EOB;
 			$sanitizer = new AMP_Tag_And_Attribute_Sanitizer(
 				$dom,
 				array(
-					'validation_error_callback' => function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
+					'validation_error_callback' => static function( $error, $context ) use ( $that, $expected_errors, &$error_index ) {
 						$expected = $expected_errors[ $error_index ];
 						$expected['type'] = AMP_Validation_Error_Taxonomy::HTML_ELEMENT_ERROR_TYPE;
 						$tag = $expected['node_name'];

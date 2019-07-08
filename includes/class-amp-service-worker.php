@@ -91,7 +91,7 @@ class AMP_Service_Worker {
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
 		$service_workers->register(
 			'amp-cdn-runtime-caching',
-			function() {
+			static function() {
 				$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 				if ( empty( $urls ) ) {
 					return '';
@@ -257,7 +257,7 @@ class AMP_Service_Worker {
 		add_action( 'amp_post_template_footer', array( __CLASS__, 'install_service_worker' ) );
 		add_filter(
 			'amp_post_template_data',
-			function ( $data ) {
+			static function ( $data ) {
 				$data['amp_component_scripts']['amp-install-serviceworker'] = true;
 				return $data;
 			}
@@ -303,7 +303,7 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		$scope = intval( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] );
+		$scope = (int) $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
 		if ( WP_Service_Workers::SCOPE_ADMIN !== $scope && WP_Service_Workers::SCOPE_FRONT !== $scope ) {
 			wp_die(
 				esc_html__( 'No service workers registered for the requested scope.', 'amp' ),
@@ -337,8 +337,8 @@ class AMP_Service_Worker {
 		// Die in a way that can be unit tested.
 		add_filter(
 			'wp_die_handler',
-			function() {
-				return function() {
+			static function() {
+				return static function() {
 					die();
 				};
 			},
