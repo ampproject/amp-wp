@@ -63,9 +63,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'carousel_required' => false,
-	);
+	];
 
 	/**
 	 * Sanitize the gallery block contained by <ul> element where necessary.
@@ -107,7 +107,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = array();
+			$images = [];
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
@@ -133,12 +133,12 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_carousel = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'amp-carousel',
-				array(
+				[
 					'width'  => $width,
 					'height' => $height,
 					'type'   => 'slides',
 					'layout' => 'responsive',
-				)
+				]
 			);
 			foreach ( $images as $image ) {
 				$amp_carousel->appendChild( $image );
@@ -166,7 +166,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		$max_height = 0;
 		$max_width  = 0;
 		if ( 0 === $num_images ) {
-			return array( self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT );
+			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 		foreach ( $images as $image ) {
 			/**
@@ -184,7 +184,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		return array( $max_width, $max_height );
+		return [ $max_width, $max_height ];
 	}
 
 	/**
@@ -198,12 +198,12 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_images ) {
 			return;
 		}
-		$attributes = array(
+		$attributes = [
 			'data-amp-lightbox' => '',
 			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
 			'role'              => 'button',
 			'tabindex'          => 0,
-		);
+		];
 
 		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 			$image_node = $images->item( $j );
