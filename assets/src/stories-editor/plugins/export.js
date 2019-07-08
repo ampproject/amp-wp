@@ -8,7 +8,7 @@ import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 const { ampStoriesExport, FormData, URL } = window;
-const { getCurrentPostId } = select('core/editor');
+const { getCurrentPostId } = select( 'core/editor' );
 
 const handleExport = () => {
 	const fromData = new FormData();
