@@ -4,11 +4,12 @@
  * WordPress dependencies
  */
 import { PluginMoreMenuItem } from '@wordpress/edit-post';
-import { select } from '@wordpress/data';
+import { select, dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 const { ampStoriesExport, FormData, URL } = window;
 const { getCurrentPostId } = select( 'core/editor' );
+const { createNotice } = dispatch( 'core/notices' );
 
 const handleExport = () => {
 	const fromData = new FormData();
@@ -42,8 +43,7 @@ const handleExport = () => {
 				// Handle the returned JSON error.
 				response.json()
 					.then( ( error ) => {
-						// @todo should we show this in a different way?
-						alert( error.data.errorMessage ); // eslint-disable-line no-alert
+						createNotice( 'error', error.data.errorMessage );
 					} );
 			}
 		} );
