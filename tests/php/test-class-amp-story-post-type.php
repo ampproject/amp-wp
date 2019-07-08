@@ -424,9 +424,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$author_id = self::factory()->user->create( array( 'role' => 'author' ) );
 		wp_set_current_user( $author_id );
 
-		$story = self::factory()->post->create( [
-			'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
-		] );
+		$story = self::factory()->post->create(
+			[
+				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			]
+		);
 
 		$unsanitized_content = '<!-- wp:amp/amp-story-page {"autoAdvanceAfterDuration":0,"backgroundColors":"[{\u0022color\u0022:\u0022#abb8c3\u0022},{\u0022color\u0022:null}]"} -->
 <amp-story-page style="background-color:#ffffff" id="1371b14f-c7c3-4b9a-bd47-e24f2b8a1f11" class="wp-block-amp-amp-story-page"><amp-story-grid-layer template="fill" style="background-image:linear-gradient(to bottom, #abb8c3, transparent);opacity:1"></amp-story-grid-layer><!-- wp:amp/amp-story-text {"placeholder":"Write text…","tagName":"h1","customTextColor":"#ffffff","backgroundColor":"vivid-red","autoFontSize":45,"positionTop":10,"rotationAngle":-27} -->
@@ -440,9 +442,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/%s/%d', AMP_Story_Post_Type::POST_TYPE_SLUG, $story ) );
 		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
-		$request->set_body_params( [
-			'content' => $unsanitized_content,
-		] );
+		$request->set_body_params(
+			[
+				'content' => $unsanitized_content,
+			]
+		);
 
 		$response = rest_get_server()->dispatch( $request );
 		$new_data = $response->get_data();
