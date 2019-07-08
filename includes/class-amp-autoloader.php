@@ -100,6 +100,7 @@ class AMP_Autoloader {
 		'AMP_HTML_Utils'                     => 'includes/utils/class-amp-html-utils',
 		'AMP_Image_Dimension_Extractor'      => 'includes/utils/class-amp-image-dimension-extractor',
 		'AMP_Validation_Manager'             => 'includes/validation/class-amp-validation-manager',
+		'AMP_Validation_Callback_Wrapper'    => 'includes/validation/class-amp-validation-callback-wrapper',
 		'AMP_Validated_URL_Post_Type'        => 'includes/validation/class-amp-validated-url-post-type',
 		'AMP_Validation_Error_Taxonomy'      => 'includes/validation/class-amp-validation-error-taxonomy',
 		'AMP_CLI'                            => 'includes/class-amp-cli',

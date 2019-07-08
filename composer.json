@@ -20,7 +20,7 @@
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
     "phpcompatibility/php-compatibility": "9.2.0",
     "wp-coding-standards/wpcs": "2.1.1",
-    "xwp/wp-dev-lib": "1.1.2"
+    "xwp/wp-dev-lib": "1.2.2"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
