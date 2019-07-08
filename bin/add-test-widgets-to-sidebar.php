@@ -276,7 +276,7 @@ function amp_image_widget() {
  * @return array|WP_CLI::error The media IDs, or an error on failure.
  */
 function amp_media( $type, $count = 3 ) {
-	$query = new \WP_Query(
+	$query = new WP_Query(
 		array(
 			'post_type'      => 'attachment',
 			'post_mime_type' => $type,

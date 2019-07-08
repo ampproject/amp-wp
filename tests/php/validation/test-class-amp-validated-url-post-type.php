@@ -12,7 +12,7 @@
  *
  * @covers AMP_Validated_URL_Post_Type
  */
-class Test_AMP_Validated_URL_Post_Type extends \WP_UnitTestCase {
+class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 	const TESTED_CLASS = 'AMP_Validated_URL_Post_Type';
 

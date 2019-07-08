@@ -236,7 +236,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		ob_start();
 		$exception = null;
 		try {
-			$this->go_to( add_query_arg( \AMP_Service_Worker::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR, '1', home_url() ) );
+			$this->go_to( add_query_arg( AMP_Service_Worker::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR, '1', home_url() ) );
 		} catch ( Exception $e ) {
 			$exception = $e;
 		}

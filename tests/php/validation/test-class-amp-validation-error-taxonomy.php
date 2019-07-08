@@ -10,7 +10,7 @@
  *
  * @covers AMP_Validation_Error_Taxonomy
  */
-class Test_AMP_Validation_Error_Taxonomy extends \WP_UnitTestCase {
+class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 
 	/**
 	 * The tested class.

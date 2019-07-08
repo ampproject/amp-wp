@@ -10,7 +10,7 @@
  *
  * @covers AMP_Editor_Blocks
  */
-class Test_AMP_Editor_Blocks extends \WP_UnitTestCase {
+class Test_AMP_Editor_Blocks extends WP_UnitTestCase {
 
 	/**
 	 * The tested instance.

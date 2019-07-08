@@ -13,7 +13,7 @@
  * @covers AMP_Validation_Manager
  * @since 0.7
  */
-class Test_AMP_Validation_Manager extends \WP_UnitTestCase {
+class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 
 	/**
 	 * The name of the tested class.

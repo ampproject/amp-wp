@@ -10,7 +10,7 @@
  *
  * @since 1.0
  */
-class Test_AMP_CLI extends \WP_UnitTestCase {
+class Test_AMP_CLI extends WP_UnitTestCase {
 
 	/**
 	 * Setup.

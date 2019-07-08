@@ -227,7 +227,7 @@ function amp_get_test_data_entries() {
  * @return string|WP_CLI::error The media item ids separated by comma on success; error otherwise.
  */
 function amp_get_media_items_ids( $type, $image_count = 3 ) {
-	$query = new \WP_Query(
+	$query = new WP_Query(
 		array(
 			'post_type'      => 'attachment',
 			'post_mime_type' => $type,

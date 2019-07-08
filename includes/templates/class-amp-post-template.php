@@ -96,7 +96,7 @@ class AMP_Post_Template {
 		}
 
 		// Make sure we have a post, or bail if not.
-		if ( $this->post instanceof \WP_Post ) {
+		if ( $this->post instanceof WP_Post ) {
 			$this->ID = $this->post->ID;
 		} else {
 			return;

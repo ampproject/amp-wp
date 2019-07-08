@@ -978,7 +978,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 * Test amp_add_admin_bar_view_link()
 	 *
 	 * @covers ::amp_add_admin_bar_view_link()
-	 * @global \WP_Query $wp_query
+	 * @global WP_Query $wp_query
 	 */
 	public function test_amp_add_admin_bar_item() {
 		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';

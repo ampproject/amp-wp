@@ -2128,7 +2128,7 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		// If we have a post_type check that it is the correct one.
-		if ( isset( $_GET['post_type'] ) && \AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['post_type'] ) && AMP_Validated_URL_Post_Type::POST_TYPE_SLUG !== $_GET['post_type'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 		$action = sanitize_key( $_GET['action'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
