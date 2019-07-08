@@ -2147,7 +2147,7 @@ class AMP_Validated_URL_Post_Type {
 	 *
 	 * Manages links for details, recheck, view, forget, and forget permanently.
 	 *
-	 * @param array    $actions Row action links.
+	 * @param array   $actions Row action links.
 	 * @param WP_Post $post Current WP post.
 	 *
 	 * @return array Filtered action links.

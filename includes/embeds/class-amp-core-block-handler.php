@@ -49,7 +49,7 @@ class AMP_Core_Block_Handler extends AMP_Base_Embed_Handler {
 			return $block_content;
 		}
 		if ( isset( $this->block_ampify_methods[ $block['blockName'] ] ) ) {
-			$method_name = $this->block_ampify_methods[ $block['blockName'] ];
+			$method_name   = $this->block_ampify_methods[ $block['blockName'] ];
 			$block_content = $this->{$method_name}( $block_content, $block );
 		} elseif ( 'core/image' === $block['blockName'] || 'core/audio' === $block['blockName'] ) {
 			/*

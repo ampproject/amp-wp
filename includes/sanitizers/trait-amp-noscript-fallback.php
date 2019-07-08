@@ -47,8 +47,7 @@ trait AMP_Noscript_Fallback {
 	 * @param DOMNode $node DOM node to check.
 	 *
 	 * @return bool True if in an AMP noscript element, false otherwise.
-	 *@since 1.1
-	 *
+	 * @since 1.1
 	 */
 	protected function is_inside_amp_noscript( DOMNode $node ) {
 		return 'noscript' === $node->parentNode->nodeName && $node->parentNode->parentNode && 'amp-' === substr( $node->parentNode->parentNode->nodeName, 0, 4 );
@@ -61,8 +60,7 @@ trait AMP_Noscript_Fallback {
 	 * @param DOMNode     $old_node Old node to append in a noscript.
 	 * @param DOMDocument $dom DOM document instance.
 	 *
-	 *@since 1.1
-	 *
+	 * @since 1.1
 	 */
 	protected function append_old_node_noscript( DOMNode $new_node, DOMNode $old_node, DOMDocument $dom ) {
 		$noscript = $dom->createElement( 'noscript' );
