@@ -577,7 +577,7 @@ class AMP_Story_Post_Type {
 			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
 				$post_content = preg_replace_callback(
-					'|style=\\\"([^"]*)\\\"|', // Because the post data is slashed.
+					'|<\w+(?:-\w+)*\s[^>]*?style=\\\"([^"]*)\\\"[^>]+?>|', // Because the post data is slashed.
 					static function ( $matches ) use ( &$style_attr_values ) {
 						$hash                       = md5( $matches[1] );
 						$style_attr_values[ $hash ] = self::safecss_filter_attr( $matches[1] );
