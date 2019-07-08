@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -21,7 +22,7 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
  * Internal dependencies
  */
 import { getBackgroundColorWithOpacity } from '../../common/helpers';
-import { maybeUpdateFontSize } from '../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
@@ -31,7 +32,7 @@ class MetaBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes, isSelected, fontSize } = this.props;
 		const {
 			height,
 			width,
@@ -41,12 +42,14 @@ class MetaBlockEdit extends Component {
 		if (
 			! isSelected &&
 			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
+			prevProps.attributes.width === width &&
+			isEqual( prevProps.fontSize, fontSize )
 		) {
 			return;
 		}
 
 		maybeUpdateFontSize( this.props );
+		maybeUpdateBlockDimensions( this.props );
 	}
 
 	render() {
