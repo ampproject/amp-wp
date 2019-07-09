@@ -61,10 +61,10 @@ class AMP_Admin_Pointer {
 	 * }
 	 */
 	public function __construct( $slug, array $args ) {
-		$default_position = array(
+		$default_position = [
 			'edge'  => is_rtl() ? 'right' : 'left',
 			'align' => 'bottom',
-		);
+		];
 
 		if ( isset( $args['position'] ) ) {
 			$args['position'] = wp_parse_args( (array) $args['position'], $default_position );
@@ -73,7 +73,7 @@ class AMP_Admin_Pointer {
 		$this->slug = $slug;
 		$this->args = wp_parse_args(
 			$args,
-			array(
+			[
 				'selector'        => '',
 				'description'     => '',
 				'heading'         => '',
@@ -81,7 +81,7 @@ class AMP_Admin_Pointer {
 				'position'        => $default_position,
 				'class'           => '',
 				'active_callback' => null,
-			)
+			]
 		);
 	}
 
@@ -141,7 +141,7 @@ class AMP_Admin_Pointer {
 		wp_enqueue_style(
 			'amp-validation-tooltips',
 			amp_get_asset_url( 'css/amp-validation-tooltips.css' ),
-			array( 'wp-pointer' ),
+			[ 'wp-pointer' ],
 			AMP__VERSION
 		);
 
@@ -169,11 +169,11 @@ class AMP_Admin_Pointer {
 			$content = '<h3>' . wp_kses( $this->args['heading'], 'amp_admin_pointer' ) . '</h3>' . $content;
 		}
 
-		$args = array(
+		$args = [
 			'content'      => $content,
 			'position'     => $this->args['position'],
 			'pointerClass' => 'wp-pointer wp-amp-pointer' . ( ! empty( $this->args['class'] ) ? ' ' . $this->args['class'] : '' ),
-		);
+		];
 
 		?>
 		<script type="text/javascript">

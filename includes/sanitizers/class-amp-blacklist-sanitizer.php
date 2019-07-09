@@ -22,11 +22,11 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
-		'add_blacklisted_protocols'  => array(),
-		'add_blacklisted_tags'       => array(),
-		'add_blacklisted_attributes' => array(),
-	);
+	protected $DEFAULT_ARGS = [
+		'add_blacklisted_protocols'  => [],
+		'add_blacklisted_tags'       => [],
+		'add_blacklisted_attributes' => [],
+	];
 
 	/**
 	 * Sanitize.
@@ -187,8 +187,8 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 			$href = untrailingslashit( get_home_url() ) . $href;
 		}
 
-		$valid_protocols   = array( 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' );
-		$special_protocols = array( 'tel', 'sms' ); // These ones don't valid with `filter_var+FILTER_VALIDATE_URL`.
+		$valid_protocols   = [ 'http', 'https', 'mailto', 'sms', 'tel', 'viber', 'whatsapp' ];
+		$special_protocols = [ 'tel', 'sms' ]; // These ones don't valid with `filter_var+FILTER_VALIDATE_URL`.
 		$protocol          = strtok( $href, ':' );
 
 		if ( false === filter_var( $href, FILTER_VALIDATE_URL )
@@ -252,9 +252,9 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_protocols() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_protocols',
-			array(
+			[
 				'javascript',
-			)
+			]
 		);
 	}
 
@@ -266,7 +266,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_tags() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_tags',
-			array(
+			[
 				'script',
 				'noscript',
 				'style',
@@ -290,7 +290,7 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Other weird ones.
 				'comments-count',
-			)
+			]
 		);
 	}
 
@@ -302,13 +302,13 @@ class AMP_Blacklist_Sanitizer extends AMP_Base_Sanitizer {
 	private function get_blacklisted_attributes() {
 		return $this->merge_defaults_with_args(
 			'add_blacklisted_attributes',
-			array(
+			[
 				'style',
 				'size',
 				'clear',
 				'align',
 				'valign',
-			)
+			]
 		);
 	}
 }

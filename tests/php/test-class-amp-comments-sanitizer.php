@@ -108,9 +108,9 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	public function test_add_amp_live_list_comment_attributes() {
 		$instance = new AMP_Comments_Sanitizer(
 			$this->dom,
-			array(
+			[
 				'comments_live_list' => true,
-			)
+			]
 		);
 
 		$GLOBALS['post'] = self::factory()->post->create();
@@ -143,11 +143,11 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 
 				$update_time = strtotime( $comment_object->comment_date );
 				$children    = $comment_object->get_children(
-					array(
+					[
 						'format'       => 'flat',
 						'hierarchical' => 'flat',
 						'orderby'      => 'none',
-					)
+					]
 				);
 				foreach ( $children as $child_comment ) {
 					$update_time = max( strtotime( $child_comment->comment_date ), $update_time );
@@ -184,11 +184,11 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @return array An array of strings to add to the <form>.
 	 */
 	public function get_form_element_names() {
-		return array(
+		return [
 			'comment_post_ID',
 			'foo',
 			'bar',
-		);
+		];
 	}
 
 	/**
@@ -196,12 +196,12 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 *
 	 * @param WP_Comment[] $comments Comments.
 	 */
-	public function create_comments_list( $comments = array() ) {
+	public function create_comments_list( $comments = [] ) {
 		ob_start();
 
 		echo '<amp-live-list><ol items>';
 		wp_list_comments(
-			array(),
+			[],
 			$comments
 		);
 		echo '</ol></amp-live-list>';
@@ -216,23 +216,23 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 	 * @return WP_Comment[] $comments An array of WP_Comment instances.
 	 */
 	public function get_comments() {
-		$comments = array();
+		$comments = [];
 
 		for ( $i = 0; $i < 5; $i++ ) {
 			$comment = self::factory()->comment->create_and_get(
-				array(
+				[
 					'comment_date' => gmdate( 'Y-m-d H:i:s', time() + $i ), // Ensure each comment has a different date.
-				)
+				]
 			);
 
 			$comments[ $comment->comment_ID ] = $comment;
 
 			for ( $j = 0; $j < 3; $j++ ) {
 				$child = self::factory()->comment->create_and_get(
-					array(
+					[
 						'comment_parent' => $comment->comment_ID,
 						'comment_date'   => gmdate( 'Y-m-d H:i:s', time() + $i + $j ), // Ensure each comment has a different date.
-					)
+					]
 				);
 
 				$comments[ $child->comment_ID ] = $child;

@@ -2,20 +2,20 @@
 
 class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
-		return array(
-			'no_embed'         => array(
+		return [
+			'no_embed'         => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
-			'simple_url_https' => array(
+			],
+			'simple_url_https' => [
 				'https://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
 				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="https://www.pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
-			),
-			'simple_url_http'  => array(
+			],
+			'simple_url_http'  => [
 				'http://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
 				'<p><amp-pinterest width="450" height="750" data-do="embedPin" data-url="http://www.pinterest.com/pin/606156431067611861/"></amp-pinterest></p>' . PHP_EOL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -30,16 +30,16 @@ class AMP_Pinterest_Embed_Test extends WP_UnitTestCase {
 	}
 
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://www.pinterest.com/pin/606156431067611861/' . PHP_EOL,
-				array( 'amp-pinterest' => true ),
-			),
-		);
+				[ 'amp-pinterest' => true ],
+			],
+		];
 	}
 
 	/**

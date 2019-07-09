@@ -36,13 +36,13 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		remove_all_actions( 'wp_front_service_worker' );
 
 		AMP_Service_Worker::init();
-		$this->assertSame( 10, has_filter( 'query_vars', array( 'AMP_Service_Worker', 'add_query_var' ) ) );
-		$this->assertSame( 10, has_action( 'parse_request', array( 'AMP_Service_Worker', 'handle_service_worker_iframe_install' ) ) );
-		$this->assertSame( 10, has_action( 'wp', array( 'AMP_Service_Worker', 'add_install_hooks' ) ) );
+		$this->assertSame( 10, has_filter( 'query_vars', [ 'AMP_Service_Worker', 'add_query_var' ] ) );
+		$this->assertSame( 10, has_action( 'parse_request', [ 'AMP_Service_Worker', 'handle_service_worker_iframe_install' ] ) );
+		$this->assertSame( 10, has_action( 'wp', [ 'AMP_Service_Worker', 'add_install_hooks' ] ) );
 
-		$this->assertSame( 10, has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_cdn_script_caching' ) ) );
-		$this->assertFalse( has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_image_caching' ) ) );
-		$this->assertFalse( has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_google_fonts_caching' ) ) );
+		$this->assertSame( 10, has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_cdn_script_caching' ] ) );
+		$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_image_caching' ] ) );
+		$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_google_fonts_caching' ] ) );
 	}
 
 	/**
@@ -58,19 +58,19 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 
 		add_theme_support(
 			'amp',
-			array(
-				'service_worker' => array(
+			[
+				'service_worker' => [
 					'cdn_script_caching'   => false,
 					'image_caching'        => true,
 					'google_fonts_caching' => true,
-				),
-			)
+				],
+			]
 		);
 
 		AMP_Service_Worker::init();
-		$this->assertFalse( has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_cdn_script_caching' ) ) );
-		$this->assertSame( 10, has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_image_caching' ) ) );
-		$this->assertSame( 10, has_action( 'wp_front_service_worker', array( 'AMP_Service_Worker', 'add_google_fonts_caching' ) ) );
+		$this->assertFalse( has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_cdn_script_caching' ] ) );
+		$this->assertSame( 10, has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_image_caching' ] ) );
+		$this->assertSame( 10, has_action( 'wp_front_service_worker', [ 'AMP_Service_Worker', 'add_google_fonts_caching' ] ) );
 	}
 
 	/**
@@ -79,7 +79,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	 * @covers \AMP_Service_Worker::add_query_var()
 	 */
 	public function test_add_query_var() {
-		$query_vars = AMP_Service_Worker::add_query_var( array( 'foo' ) );
+		$query_vars = AMP_Service_Worker::add_query_var( [ 'foo' ] );
 		$this->assertSame( 'foo', $query_vars[0] );
 		$this->assertCount( 2, $query_vars );
 		$this->assertInternalType( 'string', $query_vars[1] );
@@ -132,12 +132,12 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 
 		$this->assertArraySubset(
-			array(
+			[
 				wp_scripts()->registered['amp-runtime']->src,
 				wp_scripts()->registered['amp-bind']->src,
 				wp_scripts()->registered['amp-form']->src,
 				wp_scripts()->registered['amp-install-serviceworker']->src,
-			),
+			],
 			$urls
 		);
 
@@ -148,9 +148,9 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		);
 		add_theme_support(
 			'amp',
-			array(
+			[
 				'comments_live_list' => true,
-			)
+			]
 		);
 		$this->assertContains(
 			wp_scripts()->registered['amp-live-list']->src,
@@ -165,12 +165,12 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		add_filter(
 			'amp_analytics_entries',
 			static function () {
-				return array(
-					array(
+				return [
+					[
 						'type'   => 'foo',
 						'config' => '{}',
-					),
-				);
+					],
+				];
 			}
 		);
 		$this->assertContains(
@@ -193,14 +193,14 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 		$this->go_to( get_permalink( $post_id ) );
 
 		AMP_Service_Worker::add_install_hooks();
-		$this->assertSame( 10, has_action( 'amp_post_template_footer', array( 'AMP_Service_Worker', 'install_service_worker' ) ) );
-		$this->assertFalse( has_action( 'wp_footer', array( 'AMP_Service_Worker', 'install_service_worker' ) ) );
+		$this->assertSame( 10, has_action( 'amp_post_template_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
+		$this->assertFalse( has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
 
 		add_theme_support( 'amp' );
 		$this->assertTrue( is_amp_endpoint() );
 		AMP_Service_Worker::add_install_hooks();
-		$this->assertSame( 10, has_action( 'wp_footer', array( 'AMP_Service_Worker', 'install_service_worker' ) ) );
-		$this->assertFalse( has_action( 'wp_print_scripts', array( 'AMP_Service_Worker', 'wp_print_service_workers' ) ) );
+		$this->assertSame( 10, has_action( 'wp_footer', [ 'AMP_Service_Worker', 'install_service_worker' ] ) );
+		$this->assertFalse( has_action( 'wp_print_scripts', [ 'AMP_Service_Worker', 'wp_print_service_workers' ] ) );
 	}
 
 	/**
@@ -209,7 +209,7 @@ class Test_AMP_Service_Worker extends WP_UnitTestCase {
 	 * @covers \AMP_Service_Worker::install_service_worker()
 	 */
 	public function test_install_service_worker() {
-		$output = get_echo( array( 'AMP_Service_Worker', 'install_service_worker' ) );
+		$output = get_echo( [ 'AMP_Service_Worker', 'install_service_worker' ] );
 
 		$this->assertContains( '<amp-install-serviceworker', $output );
 	}

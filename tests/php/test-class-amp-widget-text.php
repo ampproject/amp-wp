@@ -57,9 +57,9 @@ class Test_AMP_Widget_Text extends WP_UnitTestCase {
 		$this->assertTrue( is_amp_endpoint() );
 		$video            = '<video src="http://example.com" height="100" width="200"></video>';
 		$video_only_width = '<video src="http://example.com/this-video" width="500">';
-		$this->assertEquals( $video, $this->widget->inject_video_max_width_style( array( $video ) ) );
-		$this->assertEquals( $video_only_width, $this->widget->inject_video_max_width_style( array( $video_only_width ) ) );
-		$this->assertEquals( '', $this->widget->inject_video_max_width_style( array( '' ) ) );
+		$this->assertEquals( $video, $this->widget->inject_video_max_width_style( [ $video ] ) );
+		$this->assertEquals( $video_only_width, $this->widget->inject_video_max_width_style( [ $video_only_width ] ) );
+		$this->assertEquals( '', $this->widget->inject_video_max_width_style( [ '' ] ) );
 	}
 
 }

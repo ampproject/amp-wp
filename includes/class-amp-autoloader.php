@@ -28,7 +28,7 @@ class AMP_Autoloader {
 	 *
 	 * @var string[]
 	 */
-	private static $classmap = array(
+	private static $classmap = [
 		'AMP_Editor_Blocks'                  => 'includes/admin/class-amp-editor-blocks',
 		'AMP_Theme_Support'                  => 'includes/class-amp-theme-support',
 		'AMP_Story_Post_Type'                => 'includes/class-amp-story-post-type',
@@ -110,7 +110,7 @@ class AMP_Autoloader {
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
 		'AMP_Test_Stub_Sanitizer'            => 'tests/php/stubs',
 		'AMP_Test_World_Sanitizer'           => 'tests/php/stubs',
-	);
+	];
 
 	/**
 	 * Is registered.
@@ -149,7 +149,7 @@ class AMP_Autoloader {
 		}
 
 		if ( ! self::$is_registered ) {
-			spl_autoload_register( array( __CLASS__, 'autoload' ) );
+			spl_autoload_register( [ __CLASS__, 'autoload' ] );
 			self::$is_registered = true;
 		}
 	}
