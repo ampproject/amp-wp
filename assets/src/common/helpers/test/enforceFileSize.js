@@ -3,8 +3,7 @@
  */
 import { enforceFileSize } from '../';
 import { Mock, AlternateMock, MockSelectionError } from './fixtures/mockClasses';
-
-const fileSizeError = 'select-file-size-error';
+import { FILE_SIZE_ERROR_VIEW } from '../../constants';
 
 describe( 'enforceFileSize', () => {
 	it( 'should have a new error when the video file size is too big', () => {
@@ -24,7 +23,7 @@ describe( 'enforceFileSize', () => {
 		} );
 
 		enforceFileSize.call( mockThis, attachment, MockSelectionError );
-		const actualSelectionError = mockThis.secondary.get( fileSizeError );
+		const actualSelectionError = mockThis.secondary.get( FILE_SIZE_ERROR_VIEW );
 
 		expect( actualSelectionError.get( 'maxVideoMegabytesPerSecond' ) ).toBe( 1 );
 		expect( actualSelectionError.get( 'actualVideoMegabytesPerSecond' ) ).toBe( 3 );
@@ -51,7 +50,7 @@ describe( 'enforceFileSize', () => {
 
 		enforceFileSize.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( fileSizeError ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBe( undefined );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( undefined );
 	} );
 
@@ -74,7 +73,7 @@ describe( 'enforceFileSize', () => {
 
 		enforceFileSize.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( fileSizeError ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBe( undefined );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( undefined );
 	} );
 } );

@@ -12,7 +12,7 @@ import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wo
 /**
  * Internal dependencies
  */
-import { MEGABYTE_IN_BYTES, MINIMUM_FEATURED_IMAGE_WIDTH, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../constants';
+import { FILE_TYPE_ERROR_VIEW, FILE_SIZE_ERROR_VIEW, MEGABYTE_IN_BYTES, MINIMUM_FEATURED_IMAGE_WIDTH, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../constants';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -265,21 +265,20 @@ export const enforceFileType = function( attachment, SelectionError ) {
 		return;
 	}
 
-	const fileTypeError = 'select-file-type-error';
 	const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
 	const selectButton = this.get( 'select' );
 
 	// If the file type isn't allowed, display a notice and disable the 'Select' button.
 	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
 		this.secondary.set(
-			fileTypeError,
+			FILE_TYPE_ERROR_VIEW,
 			new SelectionError( { mimeType: attachment.get( 'mime' ) } )
 		);
 		if ( selectButton && selectButton.model ) {
 			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
 		}
 	} else {
-		this.secondary.unset( fileTypeError );
+		this.secondary.unset( FILE_TYPE_ERROR_VIEW );
 		if ( selectButton && selectButton.model ) {
 			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
 		}
@@ -289,7 +288,7 @@ export const enforceFileType = function( attachment, SelectionError ) {
 /**
  * If the attachment has the wrong file size, this displays a notice in the Media Library and disables the 'Select' button.
  *
- * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
+ * This is not an arrow function so that it can be called with enforceFileSize.call( this, foo, bar ).
  *
  * @param {Object} attachment The selected attachment.
  * @param {Object} SelectionError The error to display.
@@ -299,21 +298,32 @@ export const enforceFileSize = function( attachment, SelectionError ) {
 		return;
 	}
 
-	const fileSizeError = 'select-file-size-error';
 	const isVideo = 'video' === get( attachment, [ 'media_type' ], null ) || 'video' === get( attachment, [ 'attributes', 'type' ], null );
 
 	// If the file type is 'video' and its size is over the limit, display a notice in the Media Library.
 	if ( isVideo && isVideoSizeExcessive( attachment ) ) {
 		this.secondary.set(
-			fileSizeError,
+			FILE_SIZE_ERROR_VIEW,
 			new SelectionError( {
 				actualVideoMegabytesPerSecond: Math.round( getVideoBytesPerSecond( attachment ) / MEGABYTE_IN_BYTES ),
 				maxVideoMegabytesPerSecond: VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 			} )
 		);
 	} else {
-		this.secondary.unset( fileSizeError );
+		this.secondary.unset( FILE_SIZE_ERROR_VIEW );
 	}
+};
+
+/**
+ * Gets whether the Media Library has two notices.
+ *
+ * It's possible to have a notice that the file type and size are wrong.
+ * In that case, this will need different styling, so the notices don't overlap the media.
+ *
+ * @return {boolean} Whether the Media Library has two notices.
+ */
+export const mediaLibraryHasTwoNotices = function() {
+	return !! this.secondary.get( FILE_TYPE_ERROR_VIEW ) && !! this.secondary.get( FILE_SIZE_ERROR_VIEW );
 };
 
 /**
