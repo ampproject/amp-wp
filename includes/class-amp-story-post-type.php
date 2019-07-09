@@ -273,7 +273,7 @@ class AMP_Story_Post_Type {
 		add_action( 'wp_ajax_custom-header-crop', [ __CLASS__, 'crop_featured_image' ] );
 
 		// The AJAX handler for exporting an AMP story.
-		add_action( 'wp_ajax_' . self::AMP_STORIES_AJAX_ACTION, array( __CLASS__, 'handle_export' ) );
+		add_action( 'wp_ajax_' . self::AMP_STORIES_AJAX_ACTION, [ __CLASS__, 'handle_export' ] );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', [ __CLASS__, 'render_block_with_google_fonts' ], 10, 2 );
