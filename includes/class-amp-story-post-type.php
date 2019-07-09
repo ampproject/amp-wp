@@ -339,9 +339,9 @@ class AMP_Story_Post_Type {
 				if ( self::can_export() ) {
 					$export_args = self::get_export_args();
 
-					$sanitizers['AMP_Story_Export_Sanitizer'] = array(
+					$sanitizers['AMP_Story_Export_Sanitizer'] = [
 						'base_url' => $export_args['base_url'],
-					);
+					];
 				}
 				return $sanitizers;
 			},
@@ -371,11 +371,11 @@ class AMP_Story_Post_Type {
 
 						// Image URL.
 						if ( isset( $image_url ) ) {
-							$args = array(
+							$args = [
 								$export_args['base_url'],
 								'assets',
 								basename( $image_url ),
-							);
+							];
 
 							$metadata['image']['url'] = implode( '/', $args );
 						}
@@ -760,11 +760,11 @@ class AMP_Story_Post_Type {
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesExport',
-			array(
+			[
 				'action'  => self::AMP_STORIES_AJAX_ACTION,
 				'nonce'   => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-			)
+			]
 		);
 	}
 
@@ -1657,10 +1657,10 @@ class AMP_Story_Post_Type {
 	public static function get_export_args( $slug = '' ) {
 		$base_url = untrailingslashit( AMP_Options_Manager::get_option( 'story_export_base_url' ) );
 
-		return array(
+		return [
 			'base_url'      => esc_url( $base_url ),
 			'canonical_url' => ( $base_url && $slug ) ? esc_url( trailingslashit( $base_url ) . $slug ) : false,
-		);
+		];
 	}
 
 	/**
@@ -1674,9 +1674,9 @@ class AMP_Story_Post_Type {
 		// The user must have the correct permissions.
 		if ( ! current_user_can( 'edit_files' ) ) {
 			wp_send_json_error(
-				array(
+				[
 					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
-				),
+				],
 				403
 			);
 		}
@@ -1684,9 +1684,9 @@ class AMP_Story_Post_Type {
 		// We need the ZipArchive class to make this work.
 		if ( ! class_exists( 'ZipArchive', false ) ) {
 			wp_send_json_error(
-				array(
+				[
 					'errorMessage' => esc_html__( 'The ZipArchive class is required to export AMP stories.', 'amp' ),
-				),
+				],
 				403
 			);
 		}
@@ -1694,9 +1694,9 @@ class AMP_Story_Post_Type {
 		// Bail if the user has not saved the story yet.
 		if ( 'auto-draft' === get_post_status( wp_unslash( $_POST['post_ID'] ) ) ) {
 			wp_send_json_error(
-				array(
+				[
 					'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' ),
-				),
+				],
 				403
 			);
 		}
@@ -1707,18 +1707,18 @@ class AMP_Story_Post_Type {
 		// Export failed.
 		if ( is_wp_error( $export ) ) {
 			wp_send_json_error(
-				array(
+				[
 					'errorMessage' => $export->get_error_message(),
-				),
+				],
 				403
 			);
 		}
 
 		// Failed to export for an unknown reason not related to generating the archive.
 		wp_send_json_error(
-			array(
+			[
 				'errorMessage' => esc_html__( 'Could not generate the AMP story archive.', 'amp' ),
-			),
+			],
 			403
 		);
 	}
@@ -1752,21 +1752,21 @@ class AMP_Story_Post_Type {
 			$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
 
 			// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
-			$query_args = array(
+			$query_args = [
 				'story_export' => true,
 				'_wpnonce'     => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
-			);
+			];
 
 			// Passed to `wp_remote_get()`.
-			$args = array(
+			$args = [
 				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
 				'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
 				'sslverify'   => false,
 				'redirection' => 0, // Because we're in a loop for redirection.
-				'headers'     => array(
+				'headers'     => [
 					'Cache-Control' => 'no-cache',
-				),
-			);
+				],
+			];
 
 			// Get the preview URL.
 			$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );

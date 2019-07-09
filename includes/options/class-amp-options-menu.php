@@ -123,7 +123,7 @@ class AMP_Options_Menu {
 		add_settings_field(
 			'stories_export',
 			__( 'Stories Export', 'amp' ),
-			array( $this, 'render_stories_export' ),
+			[ $this, 'render_stories_export' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
 			[

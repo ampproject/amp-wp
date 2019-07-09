@@ -338,7 +338,7 @@ class AMP_Options_Manager {
 		}
 
 		// Handle the base URL for exported stories.
-		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], array( 'https' ) ) : '';
+		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
 
 		return $options;
 	}
