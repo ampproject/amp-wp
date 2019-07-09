@@ -140,12 +140,15 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 									if ( ! empty( $images ) ) {
 										foreach ( $images as $image ) {
 											if ( $update_path ) {
-												$node->setAttribute( $attribute, str_replace( $image, $get_asset_path( $image ), $asset ) );
+												$asset = str_replace( $image, $get_asset_path( $image ), $asset );
 											}
 
 											// Add to assets array.
 											$this->assets[] = $image;
 										}
+
+										// Reset the attribute after replacing all the images.
+										$node->setAttribute( $attribute, $asset );
 									}
 								} else {
 									if ( $update_path ) {
