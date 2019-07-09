@@ -10,7 +10,7 @@
  *
  * Sanitizes AMP Stories during export.
  *
- * @since 1.2
+ * @since 1.2.1
  */
 class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -19,16 +19,16 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'base_url' => '',
-	);
+	];
 
 	/**
 	 * Default assets.
 	 *
 	 * @var array
 	 */
-	protected $assets = array();
+	protected $assets = [];
 
 	/**
 	 * Sanitize the AMP Story.
@@ -36,17 +36,34 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	public function sanitize() {
 
 		// AMP Story Node.
-		$attrs = array(
-			'publisher-logo-src',
-			'publisher',
-			'poster-portrait-src',
-			'poster-square-src',
-			'poster-landscape-src',
+		$this->sanitize_assets(
+			'amp-story',
+			[
+				'publisher-logo-src',
+				'publisher',
+				'poster-portrait-src',
+				'poster-square-src',
+				'poster-landscape-src',
+			]
 		);
-		$this->sanitize_assets( 'amp-story', $attrs );
 
 		// AMP Image Nodes.
-		$this->sanitize_assets( 'amp-img', array( 'src', 'srcset' ) );
+		$this->sanitize_assets(
+			'amp-img',
+			[
+				'src',
+				'srcset',
+			]
+		);
+
+		// AMP Video Nodes.
+		$this->sanitize_assets(
+			'amp-video',
+			[
+				'src',
+				'poster',
+			]
+		);
 
 		// Send the raw HTTP header for the export assets.
 		if ( ! empty( $this->assets ) && ! headers_sent() ) {
@@ -64,6 +81,28 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		$nodes     = $this->dom->getElementsByTagName( $name );
 		$num_nodes = $nodes->length;
 
+		// Verify we have a value to update the paths with.
+		$update_path = ! empty( $this->args['base_url'] ) ? $this->args['base_url'] : false;
+
+		/**
+		 * Generates the new asset path.
+		 *
+		 * @param string $asset The original URL.
+		 *
+		 * @return bool|string Returns false when $update_path is false, else the new URL.
+		 */
+		$getPath = function( $asset ) use ( $update_path ) {
+			if ( $asset && $update_path ) {
+				$args = [
+					$update_path,
+					'assets',
+					basename( $asset ),
+				];
+				return implode( '/', $args );
+			}
+			return false;
+		};
+
 		if ( 0 < $num_nodes ) {
 			for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
 				$node = $nodes->item( $i );
@@ -74,13 +113,9 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
 				if ( ! empty( $attributes ) ) {
 					foreach ( $attributes as $attribute ) {
-
-						// Verify we have a value to update the paths with.
-						$update_path = ! empty( $this->args['base_url'] );
-
 						if ( 'amp-story' === $name && 'publisher' === $attribute ) {
 							if ( $update_path ) {
-								$parse = wp_parse_url( $this->args['base_url'] );
+								$parse = wp_parse_url( $update_path );
 
 								if ( ! empty( $parse['host'] ) ) {
 									$node->setAttribute( $attribute, $parse['host'] );
@@ -91,20 +126,35 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 
 							// Replace the asset.
 							if ( $asset ) {
-								if ( $update_path ) {
-
-									// Generates the path.
-									$args = array(
-										$this->args['base_url'],
-										'assets',
-										basename( $asset ),
+								if ( 'srcset' === $attribute ) {
+									$images = array_filter(
+										array_map(
+											static function ( $srcset_part ) {
+												// Remove descriptors for width and pixel density.
+												return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
+											},
+											preg_split( '/\s*,\s*/', $asset )
+										)
 									);
 
-									$node->setAttribute( $attribute, implode( '/', $args ) );
-								}
+									if ( ! empty( $images ) ) {
+										foreach ( $images as $image ) {
+											if ( $update_path ) {
+												$node->setAttribute( $attribute, str_replace( $image, $getPath( $image ), $asset ) );
+											}
 
-								// Add to assets array.
-								$this->assets[] = $asset;
+											// Add to assets array.
+											$this->assets[] = $image;
+										}
+									}
+								} else {
+									if ( $update_path ) {
+										$node->setAttribute( $attribute, $getPath( $asset ) );
+									}
+
+									// Add to assets array.
+									$this->assets[] = $asset;
+								}
 							}
 						}
 					}
