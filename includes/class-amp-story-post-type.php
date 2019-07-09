@@ -1788,7 +1788,7 @@ class AMP_Story_Post_Type {
 				$html = str_replace( '/*# sourceURL=amp-custom.css */', '', $html );
 
 				// Replace the Canonical URL in the document head.
-				$html = preg_replace( '/<link rel="canonical" href="(.*)">/', '<link rel="canonical" href="' . $export_args['canonical_url'] . '">', $html );
+				$html = preg_replace( '/(?<=<link rel="canonical" href=")(.*)(?=">)/', $export_args['canonical_url'], $html );
 			}
 
 			// Add index.html file.
