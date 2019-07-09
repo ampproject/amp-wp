@@ -126,9 +126,9 @@ class AMP_Options_Menu {
 			array( $this, 'render_stories_export' ),
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
-			array(
+			[
 				'class' => 'amp-stories-export-field',
-			)
+			]
 		);
 
 		add_action(
