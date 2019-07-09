@@ -81,7 +81,6 @@
 
 	<rule ref="Generic.Arrays.DisallowLongArraySyntax.Found">
 		<exclude-pattern>amp.php</exclude-pattern>
-		<severity>0</severity>
 	</rule>
 
 	<arg value="s"/>
