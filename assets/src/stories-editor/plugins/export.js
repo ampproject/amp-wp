@@ -10,18 +10,18 @@ const { getCurrentPostId } = select( 'core/editor' );
 const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
 
 const handleExport = () => {
-	const fromData = new FormData();
+	const formData = new FormData();
 	const errorMsg = __( 'Could not generate the AMP story archive.', 'amp' );
 
 	// Add the form data.
-	fromData.append( 'action', ampStoriesExport.action );
-	fromData.append( '_wpnonce', ampStoriesExport.nonce );
-	fromData.append( 'post_ID', getCurrentPostId() );
+	formData.append( 'action', ampStoriesExport.action );
+	formData.append( '_wpnonce', ampStoriesExport.nonce );
+	formData.append( 'post_ID', getCurrentPostId() );
 
 	// Request the export.
 	fetch( ampStoriesExport.ajaxUrl, {
 		method: 'POST',
-		body: fromData,
+		body: formData,
 	} )
 		.then( ( response ) => {
 			if ( response.ok ) {
