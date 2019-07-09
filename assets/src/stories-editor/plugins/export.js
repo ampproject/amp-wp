@@ -1,5 +1,3 @@
-/* global fetch */
-
 /**
  * WordPress dependencies
  */
@@ -7,12 +5,13 @@ import { PluginMoreMenuItem } from '@wordpress/edit-post';
 import { select, dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
-const { ampStoriesExport, FormData, URL } = window;
+const { ampStoriesExport, fetch, FormData, URL } = window;
 const { getCurrentPostId } = select( 'core/editor' );
-const { createNotice } = dispatch( 'core/notices' );
+const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
 
 const handleExport = () => {
 	const fromData = new FormData();
+	const errorMsg = __( 'Could not generate the AMP story archive.', 'amp' );
 
 	// Add the form data.
 	fromData.append( 'action', ampStoriesExport.action );
@@ -29,7 +28,9 @@ const handleExport = () => {
 				// Handle the returned blob data.
 				response.blob()
 					.then( ( data ) => {
-						const matches = response.headers.get( 'Content-Disposition' ).match( /"(.*?)"/ );
+						const header = response.headers.get( 'Content-Disposition' ) || '';
+						const matches = header.match( /"(.*?)"/ );
+
 						if ( matches ) {
 							const a = document.createElement( 'a' );
 							const url = URL.createObjectURL( data );
@@ -39,23 +40,29 @@ const handleExport = () => {
 									a.removeEventListener( 'click', clickHandler );
 								}, 150 );
 							};
+
+							createSuccessNotice( __( 'Generating AMP Story archive.', 'amp' ), {
+								id: 'amp-story-export__success-snackbar',
+								type: 'snackbar',
+							} );
+
 							a.addEventListener( 'click', clickHandler, false );
 							a.href = url;
 							a.download = matches[ 1 ];
 							a.click();
+						} else {
+							createErrorNotice( errorMsg, {
+								id: 'amp-story-export__error-notice',
+							} );
 						}
 					} );
 			} else {
 				// Handle the returned JSON error.
 				response.json()
 					.then( ( error ) => {
-						let msg = __( 'Could not generate the AMP story archive.', 'amp' );
-
-						if ( error.data && error.data.errorMessage ) {
-							msg = error.data.errorMessage;
-						}
-
-						createNotice( 'error', msg );
+						createErrorNotice( ( error.data && error.data.errorMessage ) ? error.data.errorMessage : errorMsg, {
+							id: 'amp-story-export__error-notice',
+						} );
 					} );
 			}
 		} );
