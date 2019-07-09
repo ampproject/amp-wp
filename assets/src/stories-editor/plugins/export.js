@@ -32,18 +32,30 @@ const handleExport = () => {
 						const matches = response.headers.get( 'Content-Disposition' ).match( /"(.*?)"/ );
 						if ( matches ) {
 							const a = document.createElement( 'a' );
-							a.href = URL.createObjectURL( data );
+							const url = URL.createObjectURL( data );
+							const clickHandler = () => {
+								setTimeout(() => {
+									URL.revokeObjectURL( url );
+									a.removeEventListener( 'click', clickHandler );
+								}, 150 );
+							};
+							a.addEventListener( 'click', clickHandler, false );
+							a.href = url;
 							a.download = matches[ 1 ];
-							document.body.appendChild( a );
 							a.click();
-							a.remove();
 						}
 					} );
 			} else {
 				// Handle the returned JSON error.
 				response.json()
 					.then( ( error ) => {
-						createNotice( 'error', error.data.errorMessage );
+						let msg = __( 'Could not generate the AMP story archive.', 'amp' );
+
+						if ( error.data && error.data.errorMessage ) {
+							msg = error.data.errorMessage;
+						}
+
+						createNotice( 'error', msg );
 					} );
 			}
 		} );
