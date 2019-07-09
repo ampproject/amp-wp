@@ -35,7 +35,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param array $args Height, width and maximum width for embed.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( $args = [] ) {
 		parent::__construct( $args );
 
 		if ( isset( $this->args['content_max_width'] ) ) {
@@ -49,9 +49,9 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
-		add_shortcode( 'vimeo', array( $this, 'shortcode' ) );
-		add_filter( 'wp_video_shortcode_override', array( $this, 'video_override' ), 10, 2 );
+		wp_embed_register_handler( 'amp-vimeo', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
+		add_shortcode( 'vimeo', [ $this, 'shortcode' ] );
+		add_filter( 'wp_video_shortcode_override', [ $this, 'video_override' ], 10, 2 );
 	}
 
 	/**
@@ -86,9 +86,9 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $this->render(
-			array(
+			[
 				'video_id' => $video_id,
-			)
+			]
 		);
 	}
 
@@ -107,10 +107,10 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		$video_id = $this->get_video_id_from_url( $url );
 
 		return $this->render(
-			array(
+			[
 				'url'      => $url,
 				'video_id' => $video_id,
-			)
+			]
 		);
 	}
 
@@ -123,18 +123,18 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'video_id' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['video_id'] ) ) {
 			return AMP_HTML_Utils::build_tag(
 				'a',
-				array(
+				[
 					'href'  => esc_url( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
-				),
+				],
 				esc_html( $args['url'] )
 			);
 		}
@@ -143,12 +143,12 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-vimeo',
-			array(
+			[
 				'data-videoid' => $args['video_id'],
 				'layout'       => 'responsive',
 				'width'        => $this->args['width'],
 				'height'       => $this->args['height'],
-			)
+			]
 		);
 	}
 
@@ -188,7 +188,7 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 		$src           = $attr['src'];
 		$vimeo_pattern = '#^https?://(.+\.)?vimeo\.com/.*#';
 		if ( 1 === preg_match( $vimeo_pattern, $src ) ) {
-			return $this->shortcode( array( $src ) );
+			return $this->shortcode( [ $src ] );
 		}
 		return $html;
 	}

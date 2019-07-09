@@ -11,7 +11,7 @@
  * @covers AMP_Admin_Pointers
  * @since 1.0
  */
-class Test_AMP_Admin_Pointers extends \WP_UnitTestCase {
+class Test_AMP_Admin_Pointers extends WP_UnitTestCase {
 
 	/**
 	 * The meta key of the dismissed pointers.
@@ -44,6 +44,6 @@ class Test_AMP_Admin_Pointers extends \WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->instance->init();
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->instance, 'enqueue_scripts' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_scripts' ] ) );
 	}
 }

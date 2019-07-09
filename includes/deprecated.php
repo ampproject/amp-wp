@@ -24,5 +24,7 @@ function amp_load_fasterimage_classes() {
  */
 function amp_get_fasterimage_client( $user_agent ) {
 	_deprecated_function( __FUNCTION__, '1.0' );
-	return new FasterImage\FasterImage( $user_agent );
+	$client = new FasterImage\FasterImage();
+	$client->setUserAgent( $user_agent );
+	return $client;
 }

@@ -2,66 +2,66 @@
 
 class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	public function get_conversion_data() {
-		return array(
-			'no_embed'                             => array(
+		return [
+			'no_embed'                             => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
-			'url_simple'                           => array(
+			],
+			'url_simple'                           => [
 				'https://twitter.com/wordpress/status/987437752164737025' . PHP_EOL,
 				'<p><amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
-			'url_with_big_tweet_id'                => array(
+			],
+			'url_with_big_tweet_id'                => [
 				'https://twitter.com/wordpress/status/705219971425574912' . PHP_EOL,
 				'<p><amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
+			],
 
-			'timeline_url_with_profile'            => array(
+			'timeline_url_with_profile'            => [
 				'https://twitter.com/wordpress' . PHP_EOL,
 				'<p><amp-twitter data-timeline-source-type="profile" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
-			'timeline_url_with_likes'              => array(
+			],
+			'timeline_url_with_likes'              => [
 				'https://twitter.com/wordpress/likes' . PHP_EOL,
 				'<p><amp-twitter data-timeline-source-type="likes" data-timeline-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
-			'timeline_url_with_list'               => array(
+			],
+			'timeline_url_with_list'               => [
 				'https://twitter.com/wordpress/lists/random_list' . PHP_EOL,
 				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="random_list" data-timeline-owner-screen-name="wordpress" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
-			'timeline_url_with_list2'              => array(
+			],
+			'timeline_url_with_list2'              => [
 				'https://twitter.com/robertnyman/lists/web-gdes' . PHP_EOL,
 				'<p><amp-twitter data-timeline-source-type="list" data-timeline-slug="web-gdes" data-timeline-owner-screen-name="robertnyman" layout="responsive" width="600" height="480"></amp-twitter></p>' . PHP_EOL,
-			),
+			],
 
-			'shortcode_without_id'                 => array(
+			'shortcode_without_id'                 => [
 				'[tweet]' . PHP_EOL,
 				'' . PHP_EOL,
-			),
-			'shortcode_simple'                     => array(
+			],
+			'shortcode_simple'                     => [
 				'[tweet 987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
-			),
-			'shortcode_with_tweet_attribute'       => array(
+			],
+			'shortcode_with_tweet_attribute'       => [
 				'[tweet tweet=987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
-			),
-			'shortcode_with_big_tweet_id'          => array(
+			],
+			'shortcode_with_big_tweet_id'          => [
 				'[tweet 705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
-			),
-			'shortcode_with_url'                   => array(
+			],
+			'shortcode_with_url'                   => [
 				'[tweet https://twitter.com/wordpress/status/987437752164737025]' . PHP_EOL,
 				'<amp-twitter data-tweetid="987437752164737025" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
-			),
-			'shortcode_with_url_with_big_tweet_id' => array(
+			],
+			'shortcode_with_url_with_big_tweet_id' => [
 				'[tweet https://twitter.com/wordpress/status/705219971425574912]' . PHP_EOL,
 				'<amp-twitter data-tweetid="705219971425574912" layout="responsive" width="600" height="480"></amp-twitter>' . PHP_EOL,
-			),
-			'shortcode_with_non_numeric_tweet_id'  => array(
+			],
+			'shortcode_with_non_numeric_tweet_id'  => [
 				'[tweet abcd]' . PHP_EOL,
 				'' . PHP_EOL,
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -76,16 +76,16 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	}
 
 	public function get_scripts_data() {
-		return array(
-			'not_converted' => array(
+		return [
+			'not_converted' => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted'     => array(
+				[],
+			],
+			'converted'     => [
 				'https://twitter.com/altjoen/status/987437752164737025' . PHP_EOL,
-				array( 'amp-twitter' => true ),
-			),
-		);
+				[ 'amp-twitter' => true ],
+			],
+		];
 	}
 
 	/**
@@ -113,26 +113,26 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_raw_embed_dataset() {
-		return array(
-			'no_embed'                         => array(
+		return [
+			'no_embed'                         => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>',
-			),
-			'embed_blockquote_without_twitter' => array(
+			],
+			'embed_blockquote_without_twitter' => [
 				'<blockquote>lorem ipsum</blockquote>',
 				'<blockquote>lorem ipsum</blockquote>',
-			),
+			],
 
-			'blockquote_embed'                 => array(
+			'blockquote_embed'                 => [
 				wpautop( '<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter>' . "\n\n",
-			),
+			],
 
-			'blockquote_embed_not_autop'       => array(
+			'blockquote_embed_not_autop'       => [
 				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
 				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter> ',
-			),
-		);
+			],
+		];
 	}
 
 	/**

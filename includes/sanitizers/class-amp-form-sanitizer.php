@@ -112,7 +112,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$target = $node->getAttribute( 'target' );
 			if ( '_top' !== $target ) {
-				if ( ! $target || in_array( $target, array( '_self', '_parent' ), true ) ) {
+				if ( ! $target || in_array( $target, [ '_self', '_parent' ], true ) ) {
 					$node->setAttribute( 'target', '_top' );
 				} elseif ( '_blank' !== $target ) {
 					$node->setAttribute( 'target', '_blank' );
@@ -135,11 +135,11 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 		 *
 		 * @var DOMElement $parent
 		 */
-		$elements = array(
+		$elements = [
 			'submit-error'   => null,
 			'submit-success' => null,
 			'submitting'     => null,
-		);
+		];
 
 		$templates = $form->getElementsByTagName( 'template' );
 		for ( $i = $templates->length - 1; $i >= 0; $i-- ) {

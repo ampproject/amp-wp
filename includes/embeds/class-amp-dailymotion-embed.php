@@ -34,7 +34,7 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 *
 	 * @param array $args Height, width and maximum width for embed.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( $args = [] ) {
 		parent::__construct( $args );
 
 		if ( isset( $this->args['content_max_width'] ) ) {
@@ -48,8 +48,8 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Register embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( 'amp-dailymotion', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
-		add_shortcode( 'dailymotion', array( $this, 'shortcode' ) );
+		wp_embed_register_handler( 'amp-dailymotion', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
+		add_shortcode( 'dailymotion', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -82,9 +82,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		return $this->render(
-			array(
+			[
 				'video_id' => $video_id,
-			)
+			]
 		);
 	}
 
@@ -102,9 +102,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function oembed( $matches, $attr, $url, $rawattr ) {
 		$video_id = $this->get_video_id_from_url( $url );
 		return $this->render(
-			array(
+			[
 				'video_id' => $video_id,
-			)
+			]
 		);
 	}
 
@@ -117,18 +117,18 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'video_id' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['video_id'] ) ) {
 			return AMP_HTML_Utils::build_tag(
 				'a',
-				array(
+				[
 					'href'  => esc_url( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
-				),
+				],
 				esc_html( $args['url'] )
 			);
 		}
@@ -137,12 +137,12 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-dailymotion',
-			array(
+			[
 				'data-videoid' => $args['video_id'],
 				'layout'       => 'responsive',
 				'width'        => $this->args['width'],
 				'height'       => $this->args['height'],
-			)
+			]
 		);
 	}
 
@@ -155,10 +155,9 @@ class AMP_DailyMotion_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function get_video_id_from_url( $url ) {
 		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['path'], $path );
-		$tok      = explode( '/', $parsed_url['path'] );
-		$tok      = explode( '_', $tok[2] );
-		$video_id = $tok[0];
+		$tok = explode( '/', $parsed_url['path'] );
+		$tok = explode( '_', $tok[2] );
 
-		return $video_id;
+		return $tok[0];
 	}
 }

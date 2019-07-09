@@ -30,7 +30,7 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @var array
 	 */
-	protected $args = array();
+	protected $args = [];
 
 	/**
 	 * Whether or not conversion was completed.
@@ -54,13 +54,13 @@ abstract class AMP_Base_Embed_Handler {
 	 *
 	 * @param array $args Height and width for embed.
 	 */
-	public function __construct( $args = array() ) {
+	public function __construct( $args = [] ) {
 		$this->args = wp_parse_args(
 			$args,
-			array(
+			[
 				'width'  => $this->DEFAULT_WIDTH,
 				'height' => $this->DEFAULT_HEIGHT,
-			)
+			]
 		);
 	}
 
@@ -75,6 +75,6 @@ abstract class AMP_Base_Embed_Handler {
 	 * @return array Scripts.
 	 */
 	public function get_scripts() {
-		return array();
+		return [];
 	}
 }

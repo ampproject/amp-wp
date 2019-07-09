@@ -13,16 +13,20 @@
  * @package AMP
  */
 
+define( 'AMP__FILE__', __FILE__ );
+define( 'AMP__DIR__', dirname( __FILE__ ) );
+define( 'AMP__VERSION', '1.2.1-alpha' );
+
 /**
  * Errors encountered while loading the plugin.
  *
  * This has to be a global for the same of PHP 5.2.
  *
- * @var \WP_Error $_amp_load_errors
+ * @var WP_Error $_amp_load_errors
  */
 global $_amp_load_errors;
 
-$_amp_load_errors = new \WP_Error();
+$_amp_load_errors = new WP_Error();
 
 if ( version_compare( phpversion(), '5.4', '<' ) ) {
 	$_amp_load_errors->add(
@@ -145,7 +149,7 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
-if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( __DIR__ . '/assets/js/amp-block-editor.js' ) ) {
+if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP__DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( AMP__DIR__ . '/assets/js/amp-block-editor.js' ) ) {
 	$_amp_load_errors->add(
 		'build_required',
 		sprintf(
@@ -160,7 +164,7 @@ if ( ! file_exists( __DIR__ . '/vendor/autoload.php' ) || ! file_exists( __DIR__
  * Displays an admin notice about why the plugin is unable to load.
  *
  * @since 1.1.2
- * @global \WP_Error $_amp_load_errors
+ * @global WP_Error $_amp_load_errors
  */
 function _amp_show_load_errors_admin_notice() {
 	global $_amp_load_errors;
@@ -207,9 +211,6 @@ if ( ! empty( $_amp_load_errors->errors ) ) {
 	return;
 }
 
-define( 'AMP__FILE__', __FILE__ );
-define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2.1-alpha' );
 
 /**
  * Print admin notice if plugin installed with incorrect slug (which impacts WordPress's auto-update system).

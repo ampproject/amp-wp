@@ -20,14 +20,14 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'sub_menu_button_class'        => '',
 		'sub_menu_button_toggle_class' => '',
 		'expand_text'                  => '',
 		'collapse_text'                => '',
 		'icon'                         => null, // Optional.
 		'sub_menu_item_state_id'       => 'navMenuItemExpanded',
-	);
+	];
 
 	/**
 	 * AMP_Nav_Menu_Dropdown_Sanitizer constructor.
@@ -37,7 +37,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
+	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		$this->args = self::ensure_defaults( $this->args );
@@ -50,7 +50,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_buffering_hooks( $args = array() ) {
+	public static function add_buffering_hooks( $args = [] ) {
 		if ( empty( $args['sub_menu_button_class'] ) || empty( $args['sub_menu_button_toggle_class'] ) ) {
 			return;
 		}
@@ -66,9 +66,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'walker_nav_menu_start_el',
-			function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
-				unset( $depth );
-
+			static function( $item_output, $item, $depth, $nav_menu_args ) use ( $args ) {
 				// Skip adding buttons to nav menu widgets for now.
 				if ( empty( $nav_menu_args->theme_location ) ) {
 					return $item_output;
@@ -112,7 +110,7 @@ class AMP_Nav_Menu_Dropdown_Sanitizer extends AMP_Base_Sanitizer {
 				if ( isset( $args['icon'] ) ) {
 					$dropdown_button .= $args['icon'];
 				}
-				if ( isset( $args['expand_text'] ) && isset( $args['collapse_text'] ) ) {
+				if ( isset( $args['expand_text'], $args['collapse_text'] ) ) {
 					$dropdown_button .= sprintf(
 						'<span class="screen-reader-text" [text]="%s">%s</span>',
 						esc_attr( sprintf( "$expanded_state_id ? %s : %s", wp_json_encode( $args['collapse_text'] ), wp_json_encode( $args['expand_text'] ) ) ),

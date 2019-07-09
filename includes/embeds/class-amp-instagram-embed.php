@@ -46,8 +46,8 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, array( $this, 'oembed' ), -1 );
-		add_shortcode( 'instagram', array( $this, 'shortcode' ) );
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
+		add_shortcode( 'instagram', [ $this, 'shortcode' ] );
 	}
 
 	/**
@@ -67,7 +67,6 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function shortcode( $attr ) {
 		$url = false;
 
-		$instagram_id = false;
 		if ( isset( $attr['url'] ) ) {
 			$url = trim( $attr['url'] );
 		}
@@ -79,10 +78,10 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 		$instagram_id = $this->get_instagram_id_from_url( $url );
 
 		return $this->render(
-			array(
+			[
 				'url'          => $url,
 				'instagram_id' => $instagram_id,
-			)
+			]
 		);
 	}
 
@@ -97,10 +96,10 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function oembed( $matches, $attr, $url, $rawattr ) {
 		return $this->render(
-			array(
+			[
 				'url'          => $url,
 				'instagram_id' => end( $matches ),
-			)
+			]
 		);
 	}
 
@@ -113,19 +112,19 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url'          => false,
 				'instagram_id' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['instagram_id'] ) ) {
 			return AMP_HTML_Utils::build_tag(
 				'a',
-				array(
+				[
 					'href'  => esc_url( $args['url'] ),
 					'class' => 'amp-wp-embed-fallback',
-				),
+				],
 				esc_html( $args['url'] )
 			);
 		}
@@ -134,13 +133,13 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			$this->amp_tag,
-			array(
+			[
 				'data-shortcode' => $args['instagram_id'],
 				'data-captioned' => '',
 				'layout'         => 'responsive',
 				'width'          => $this->args['width'],
 				'height'         => $this->args['height'],
-			)
+			]
 		);
 	}
 
@@ -199,12 +198,12 @@ class AMP_Instagram_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function create_amp_instagram_and_replace_node( $dom, $node ) {
 		$instagram_id = $this->get_instagram_id_from_url( $node->getAttribute( 'data-instgrm-permalink' ) );
 
-		$node_args = array(
+		$node_args = [
 			'data-shortcode' => $instagram_id,
 			'layout'         => 'responsive',
 			'width'          => $this->DEFAULT_WIDTH,
 			'height'         => $this->DEFAULT_HEIGHT,
-		);
+		];
 
 		if ( true === $node->hasAttribute( 'data-instgrm-captioned' ) ) {
 			$node_args['data-captioned'] = '';

@@ -60,7 +60,7 @@ abstract class AMP_Rule_Spec {
 	 * @since 1.0
 	 * @var array
 	 */
-	public static $layout_enum = array(
+	public static $layout_enum = [
 		1 => 'nodisplay',
 		2 => 'fixed',
 		3 => 'fixed-height',
@@ -70,7 +70,7 @@ abstract class AMP_Rule_Spec {
 		7 => 'flex-item',
 		8 => 'fluid',
 		9 => 'intrinsic',
-	);
+	];
 
 	/**
 	 * List of boolean attributes.
@@ -78,7 +78,7 @@ abstract class AMP_Rule_Spec {
 	 * @since 0.7
 	 * @var array
 	 */
-	public static $boolean_attributes = array(
+	public static $boolean_attributes = [
 		'allowfullscreen',
 		'async',
 		'autofocus',
@@ -123,19 +123,19 @@ abstract class AMP_Rule_Spec {
 		'truespeed',
 		'typemustmatch',
 		'visible',
-	);
+	];
 
 	/**
 	 * Additional allowed tags.
 	 *
 	 * @var array
 	 */
-	public static $additional_allowed_tags = array(
+	public static $additional_allowed_tags = [
 
 		// An experimental tag with no protoascii.
-		'amp-share-tracking' => array(
-			'attr_spec_list' => array(),
-			'tag_spec'       => array(),
-		),
-	);
+		'amp-share-tracking' => [
+			'attr_spec_list' => [],
+			'tag_spec'       => [],
+		],
+	];
 }

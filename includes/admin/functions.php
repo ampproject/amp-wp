@@ -21,15 +21,15 @@ define( 'AMP_CUSTOMIZER_QUERY_VAR', 'customize_amp' );
  * And this does not need to toggle between the AMP and normal display.
  */
 function amp_init_customizer() {
-	if ( amp_is_canonical() || ! AMP_Options_Manager::is_website_experience_enabled() ) {
+	if ( ! AMP_Options_Manager::is_website_experience_enabled() || AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 		return;
 	}
 
 	// Fire up the AMP Customizer.
-	add_action( 'customize_register', array( 'AMP_Template_Customizer', 'init' ), 500 );
+	add_action( 'customize_register', [ 'AMP_Template_Customizer', 'init' ], 500 );
 
 	// Add some basic design settings + controls to the Customizer.
-	add_action( 'amp_init', array( 'AMP_Customizer_Design_Settings', 'init' ) );
+	add_action( 'amp_init', [ 'AMP_Customizer_Design_Settings', 'init' ] );
 
 	// Add a link to the Customizer.
 	add_action( 'admin_menu', 'amp_add_customizer_link' );
@@ -51,7 +51,7 @@ function amp_admin_get_preview_permalink() {
 	// Make sure the desired post type is actually supported, and if so, prefer it.
 	$supported_post_types = get_post_types_by_support( AMP_Post_Type_Support::SLUG );
 	if ( in_array( $post_type, $supported_post_types, true ) ) {
-		$supported_post_types = array_unique( array_merge( array( $post_type ), $supported_post_types ) );
+		$supported_post_types = array_unique( array_merge( [ $post_type ], $supported_post_types ) );
 	}
 
 	// Bail if there are no supported post types.
@@ -68,7 +68,7 @@ function amp_admin_get_preview_permalink() {
 	}
 
 	$post_ids = get_posts(
-		array(
+		[
 			'no_found_rows'    => true,
 			'suppress_filters' => false,
 			'post_status'      => 'publish',
@@ -77,7 +77,7 @@ function amp_admin_get_preview_permalink() {
 			'posts_per_page'   => 1,
 			'fields'           => 'ids',
 		// @todo This should eventually do a meta_query to make sure there are none that have AMP_Post_Meta_Box::STATUS_POST_META_KEY = DISABLED_STATUS.
-		)
+		]
 	);
 
 	if ( empty( $post_ids ) ) {
@@ -99,11 +99,11 @@ function amp_add_customizer_link() {
 	}
 
 	$menu_slug = add_query_arg(
-		array(
+		[
 			'autofocus[panel]' => AMP_Template_Customizer::PANEL_ID,
 			'url'              => rawurlencode( amp_admin_get_preview_permalink() ),
 			'return'           => rawurlencode( admin_url() ),
-		),
+		],
 		'customize.php'
 	);
 
@@ -151,7 +151,7 @@ function amp_add_options_menu() {
  * @param array $analytics Analytics.
  * @return array Analytics.
  */
-function amp_add_custom_analytics( $analytics = array() ) {
+function amp_add_custom_analytics( $analytics = [] ) {
 	$analytics = amp_get_analytics( $analytics );
 
 	/**

@@ -18,27 +18,27 @@ class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array Data.
 	 */
 	public function get_data() {
-		return array(
-			'no_o2_player_item'                      => array(
+		return [
+			'no_o2_player_item'                      => [
 				'<h1>Im Not A O2 Player</h1>',
 				'<h1>Im Not A O2 Player</h1>',
-			),
-			'o2_player_item_without_script'          => array(
+			],
+			'o2_player_item_without_script'          => [
 				'<div class="vdb_player"></div>',
 				'<div class="vdb_player"></div>',
-			),
+			],
 
-			'o2_player_item'                         => array(
+			'o2_player_item'                         => [
 				'<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>',// phpcs:ignore
 				'<amp-o2-player data-pid="59521379f3bdc970c5c9d75e" data-vid="5b11a50d0239e257abfdf16a" data-bcid="59521191e9399f3a7d7de88f" data-macros="m.playback=click" layout="responsive" width="480" height="270"></amp-o2-player>',
-			),
+			],
 
-			'o2_player_item_without_required_fields' => array(
+			'o2_player_item_without_required_fields' => [
 				'<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>',// phpcs:ignore
 				'<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>',// phpcs:ignore
-			),
+			],
 
-		);
+		];
 	}
 
 	/**
@@ -68,7 +68,7 @@ class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_get_script__pid__vid__required() {
 		$source   = '<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e?m.embeded=cms_video_plugin_chromeExtension"></script></div>';// phpcs:ignore
-		$expected = array();
+		$expected = [];
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_O2_Player_Sanitizer( $dom );
@@ -89,7 +89,7 @@ class AMP_O2_Player_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function test_get_scripts__did_convert() {
 		$source   = '<div class="vdb_player"><script type="text/javascript" src="//delivery.vidible.tv/jsonp/pid=59521379f3bdc970c5c9d75e/vid=5b11a50d0239e257abfdf16a/59521191e9399f3a7d7de88f.js?m.embeded=cms_video_plugin_chromeExtension"></script></div>';// phpcs:ignore
-		$expected = array( 'amp-o2-player' => true );
+		$expected = [ 'amp-o2-player' => true ];
 
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_O2_Player_Sanitizer( $dom );

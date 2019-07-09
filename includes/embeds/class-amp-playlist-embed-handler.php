@@ -85,7 +85,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( shortcode_exists( self::SHORTCODE ) ) {
 			$this->removed_shortcode_callback = $shortcode_tags[ self::SHORTCODE ];
 		}
-		add_shortcode( self::SHORTCODE, array( $this, 'shortcode' ) );
+		add_shortcode( self::SHORTCODE, [ $this, 'shortcode' ] );
 		remove_action( 'wp_playlist_scripts', 'wp_playlist_scripts' );
 	}
 
@@ -111,7 +111,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		wp_enqueue_style(
 			'amp-playlist-shortcode',
 			amp_get_asset_url( 'css/amp-playlist-shortcode.css' ),
-			array( 'wp-mediaelement' ),
+			[ 'wp-mediaelement' ],
 			AMP__VERSION
 		);
 	}
@@ -127,11 +127,16 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function shortcode( $attr ) {
 		$data = $this->get_data( $attr );
+
 		if ( isset( $data['type'] ) && ( 'audio' === $data['type'] ) ) {
 			return $this->audio_playlist( $data );
-		} elseif ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
+		}
+
+		if ( isset( $data['type'] ) && ( 'video' === $data['type'] ) ) {
 			return $this->video_playlist( $data );
 		}
+
+		return '';
 	}
 
 	/**
@@ -147,9 +152,9 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		self::$playlist_id++;
 		$container_id = 'wpPlaylist' . self::$playlist_id . 'Carousel';
 		$state_id     = 'wpPlaylist' . self::$playlist_id;
-		$amp_state    = array(
+		$amp_state    = [
 			'selectedIndex' => 0,
-		);
+		];
 
 		$this->enqueue_styles();
 		ob_start();
@@ -196,19 +201,19 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function video_playlist( $data ) {
 		global $content_width;
-		if ( ! isset( $data['tracks'], $data['tracks'][0]['src'] ) ) {
+		if ( ! isset( $data['tracks'][0]['src'] ) ) {
 			return '';
 		}
 		self::$playlist_id++;
 		$state_id  = 'wpPlaylist' . self::$playlist_id;
-		$amp_state = array(
+		$amp_state = [
 			'selectedIndex' => 0,
-		);
+		];
 		foreach ( $data['tracks'] as $index => $track ) {
-			$amp_state[ $index ] = array(
+			$amp_state[ $index ] = [
 				'videoUrl' => $track['src'],
 				'thumb'    => isset( $track['thumb']['src'] ) ? $track['thumb']['src'] : '',
-			);
+			];
 		}
 
 		$dimensions = isset( $data['tracks'][0]['dimensions']['resized'] ) ? $data['tracks'][0]['dimensions']['resized'] : null;
@@ -246,11 +251,11 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * }
 	 */
 	public function get_thumb_dimensions( $track ) {
-		$original_height = isset( $track['thumb']['height'] ) ? intval( $track['thumb']['height'] ) : self::DEFAULT_THUMB_HEIGHT;
-		$original_width  = isset( $track['thumb']['width'] ) ? intval( $track['thumb']['width'] ) : self::DEFAULT_THUMB_WIDTH;
+		$original_height = isset( $track['thumb']['height'] ) ? (int) $track['thumb']['height'] : self::DEFAULT_THUMB_HEIGHT;
+		$original_width  = isset( $track['thumb']['width'] ) ? (int) $track['thumb']['width'] : self::DEFAULT_THUMB_WIDTH;
 		if ( $original_width > self::THUMB_MAX_WIDTH ) {
 			$ratio  = $original_width / self::THUMB_MAX_WIDTH;
-			$height = intval( $original_height / $ratio );
+			$height = (int) ( $original_height / $ratio );
 		} else {
 			$height = $original_height;
 		}
@@ -273,13 +278,13 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		<div class="wp-playlist-tracks">
 			<?php foreach ( $tracks as $index => $track ) : ?>
 				<?php
-				$on            = 'tap:AMP.setState(' . wp_json_encode( array( $state_id => array( 'selectedIndex' => $index ) ) ) . ')';
+				$on            = 'tap:AMP.setState(' . wp_json_encode( [ $state_id => [ 'selectedIndex' => $index ] ] ) . ')';
 				$initial_class = 0 === $index ? 'wp-playlist-item wp-playlist-playing' : 'wp-playlist-item';
 				$bound_class   = sprintf( '%d == %s.selectedIndex ? "wp-playlist-item wp-playlist-playing" : "wp-playlist-item"', $index, $state_id );
 				?>
 				<div class="<?php echo esc_attr( $initial_class ); ?>" [class]="<?php echo esc_attr( $bound_class ); ?>" >
 					<a class="wp-playlist-caption" on="<?php echo esc_attr( $on ); ?>">
-						<?php echo esc_html( strval( $index + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo esc_html( $this->get_title( $track ) ); ?></span>
+						<?php echo esc_html( ( $index + 1 ) . '.' ); ?> <span class="wp-playlist-item-title"><?php echo esc_html( $this->get_title( $track ) ); ?></span>
 					</a>
 					<?php if ( isset( $track['meta']['length_formatted'] ) ) : ?>
 						<div class="wp-playlist-item-length"><?php echo esc_html( $track['meta']['length_formatted'] ); ?></div>
@@ -301,7 +306,7 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 		$markup = wp_playlist_shortcode( $attr );
 		preg_match( self::PLAYLIST_REGEX, $markup, $matches );
 		if ( empty( $matches[1] ) ) {
-			return array();
+			return [];
 		}
 		return json_decode( $matches[1], true );
 	}
@@ -315,9 +320,12 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function get_title( $track ) {
 		if ( ! empty( $track['caption'] ) ) {
 			return $track['caption'];
-		} elseif ( ! empty( $track['title'] ) ) {
+		}
+
+		if ( ! empty( $track['title'] ) ) {
 			return $track['title'];
 		}
+
 		return '';
 	}
 
