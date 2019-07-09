@@ -38,6 +38,7 @@ import {
 	withStoryBlockDropZone,
 	withCallToActionValidation,
 	withVideoPosterImageNotice,
+	withEnforcedVideoUploadType,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -316,9 +317,10 @@ addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', with
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
-addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileSize', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
+addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addEnforcedVideoUploadType', withEnforcedVideoUploadType );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
