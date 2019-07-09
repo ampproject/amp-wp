@@ -18,24 +18,24 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_noscript_data() {
-		return array(
-			'document_write'      => array(
+		return [
+			'document_write'      => [
 				'<html><head></head><body>Has script? <script>document.write("Yep!")</script><noscript>Nope!</noscript></body></html>',
 				'<html><head></head><body>Has script? <!--noscript-->Nope!<!--/noscript--></body></html>',
-			),
-			'nested_elements'     => array(
+			],
+			'nested_elements'     => [
 				'<html><head></head><body><noscript>before <em><strong>middle</strong> end</em></noscript></body></html>',
 				'<html><head></head><body><!--noscript-->before <em><strong>middle</strong> end</em><!--/noscript--></body></html>',
-			),
-			'head_noscript_style' => array(
+			],
+			'head_noscript_style' => [
 				'<html><head><noscript><style>body{color:red}</style></noscript></head><body></body></html>',
 				'<html><head><!--noscript--><style>body{color:red}</style><!--/noscript--></head><body></body></html>',
-			),
-			'head_noscript_span'  => array(
+			],
+			'head_noscript_span'  => [
 				'<html><head><noscript><span>No script</span></noscript></head><body></body></html>',
 				'<html><head></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -92,9 +92,9 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 		</html>
 		<?php
 		$html = ob_get_clean();
-		$args = array(
+		$args = [
 			'use_document_element' => true,
-		);
+		];
 
 		$dom = AMP_DOM_Utils::get_dom( $html );
 		AMP_Content_Sanitizer::sanitize_document( $dom, amp_get_content_sanitizers(), $args );

@@ -16,14 +16,14 @@ class AMP_Editor_Blocks {
 	 *
 	 * @var array
 	 */
-	public $content_required_amp_scripts = array();
+	public $content_required_amp_scripts = [];
 
 	/**
 	 * AMP components that have blocks.
 	 *
 	 * @var array
 	 */
-	public $amp_blocks = array(
+	public $amp_blocks = [
 		'amp-mathml',
 		'amp-timeago',
 		'amp-o2-player',
@@ -34,14 +34,14 @@ class AMP_Editor_Blocks {
 		'amp-brid-player',
 		'amp-ima-video',
 		'amp-fit-text',
-	);
+	];
 
 	/**
 	 * Init.
 	 */
 	public function init() {
 		if ( function_exists( 'register_block_type' ) ) {
-			add_filter( 'wp_kses_allowed_html', array( $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ), 10, 2 );
+			add_filter( 'wp_kses_allowed_html', [ $this, 'whitelist_block_atts_in_wp_kses_allowed_html' ], 10, 2 );
 
 			/*
 			 * Dirty AMP is required when a site is in AMP-first mode but not all templates are being served
@@ -55,8 +55,8 @@ class AMP_Editor_Blocks {
 			 * as much as possible. For more, see <https://github.com/ampproject/amp-wp/issues/1192>.
 			 */
 			if ( amp_is_canonical() ) {
-				add_filter( 'the_content', array( $this, 'tally_content_requiring_amp_scripts' ) );
-				add_action( 'wp_print_footer_scripts', array( $this, 'print_dirty_amp_scripts' ) );
+				add_filter( 'the_content', [ $this, 'tally_content_requiring_amp_scripts' ] );
+				add_action( 'wp_print_footer_scripts', [ $this, 'print_dirty_amp_scripts' ] );
 			}
 		}
 	}
@@ -85,20 +85,22 @@ class AMP_Editor_Blocks {
 			$tag['data-close-button-aria-label'] = true;
 		}
 
+		unset( $tag );
+
 		foreach ( $this->amp_blocks as $amp_block ) {
 			if ( ! isset( $tags[ $amp_block ] ) ) {
-				$tags[ $amp_block ] = array();
+				$tags[ $amp_block ] = [];
 			}
 
 			// @todo The global attributes included here should be matched up with what is actually used by each block.
 			$tags[ $amp_block ] = array_merge(
 				array_fill_keys(
-					array(
+					[
 						'layout',
 						'width',
 						'height',
 						'class',
-					),
+					],
 					true
 				),
 				$tags[ $amp_block ]
@@ -127,7 +129,7 @@ class AMP_Editor_Blocks {
 	 */
 	public function tally_content_requiring_amp_scripts( $content ) {
 		if ( ! is_amp_endpoint() ) {
-			$pattern = sprintf( '/<(%s)\b.*?>/s', join( '|', $this->amp_blocks ) );
+			$pattern = sprintf( '/<(%s)\b.*?>/s', implode( '|', $this->amp_blocks ) );
 			if ( preg_match_all( $pattern, $content, $matches ) ) {
 				$this->content_required_amp_scripts = array_merge(
 					$this->content_required_amp_scripts,

@@ -50,132 +50,132 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.0
 	 * @var array
 	 */
-	protected static $theme_features = array(
+	protected static $theme_features = [
 		// Twenty Nineteen.
-		'twentynineteen'  => array(
-			'dequeue_scripts'                    => array(
+		'twentynineteen'  => [
+			'dequeue_scripts'                    => [
 				'twentynineteen-skip-link-focus-fix', // This is part of AMP. See <https://github.com/ampproject/amphtml/issues/18671>.
 				'twentynineteen-priority-menu',
 				'twentynineteen-touch-navigation', // @todo There could be an AMP implementation of this, similar to what is implemented on ampproject.org.
-			),
-			'remove_actions'                     => array(
-				'wp_print_footer_scripts' => array(
+			],
+			'remove_actions'                     => [
+				'wp_print_footer_scripts' => [
 					'twentynineteen_skip_link_focus_fix', // See <https://github.com/WordPress/twentynineteen/pull/47>.
-				),
-			),
-			'add_twentynineteen_masthead_styles' => array(),
-			'adjust_twentynineteen_images'       => array(),
-		),
+				],
+			],
+			'add_twentynineteen_masthead_styles' => [],
+			'adjust_twentynineteen_images'       => [],
+		],
 
 		// Twenty Seventeen.
-		'twentyseventeen' => array(
+		'twentyseventeen' => [
 			// @todo Try to implement belowEntryMetaClass().
-			'dequeue_scripts'                     => array(
+			'dequeue_scripts'                     => [
 				'twentyseventeen-html5', // Only relevant for IE<9.
 				'twentyseventeen-global', // There are somethings not yet implemented in AMP. See todos below.
 				'jquery-scrollto', // Implemented via add_smooth_scrolling().
 				'twentyseventeen-navigation', // Handled by add_nav_menu_styles, add_nav_menu_toggle, add_nav_sub_menu_buttons.
 				'twentyseventeen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			),
-			'remove_actions'                      => array(
-				'wp_head' => array(
+			],
+			'remove_actions'                      => [
+				'wp_head' => [
 					'twentyseventeen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
-				),
-			),
-			'force_svg_support'                   => array(),
-			'force_fixed_background_support'      => array(),
-			'add_twentyseventeen_masthead_styles' => array(),
-			'add_twentyseventeen_image_styles'    => array(),
-			'add_twentyseventeen_sticky_nav_menu' => array(),
-			'add_has_header_video_body_class'     => array(),
-			'add_nav_menu_styles'                 => array(
+				],
+			],
+			'force_svg_support'                   => [],
+			'force_fixed_background_support'      => [],
+			'add_twentyseventeen_masthead_styles' => [],
+			'add_twentyseventeen_image_styles'    => [],
+			'add_twentyseventeen_sticky_nav_menu' => [],
+			'add_has_header_video_body_class'     => [],
+			'add_nav_menu_styles'                 => [
 				'sub_menu_button_toggle_class' => 'toggled-on',
 				'no_js_submenu_visible'        => true,
-			),
-			'add_smooth_scrolling'                => array(
+			],
+			'add_smooth_scrolling'                => [
 				'//header[@id = "masthead"]//a[ contains( @class, "menu-scroll-down" ) ]',
-			),
-			'set_twentyseventeen_quotes_icon'     => array(),
-			'add_twentyseventeen_attachment_image_attributes' => array(),
-		),
+			],
+			'set_twentyseventeen_quotes_icon'     => [],
+			'add_twentyseventeen_attachment_image_attributes' => [],
+		],
 
 		// Twenty Sixteen.
-		'twentysixteen'   => array(
+		'twentysixteen'   => [
 			// @todo Figure out an AMP solution for onResizeARIA().
 			// @todo Try to implement belowEntryMetaClass().
-			'dequeue_scripts'     => array(
+			'dequeue_scripts'     => [
 				'twentysixteen-script',
 				'twentysixteen-html5', // Only relevant for IE<9.
 				'twentysixteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
 				'twentysixteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			),
-			'remove_actions'      => array(
-				'wp_head' => array(
+			],
+			'remove_actions'      => [
+				'wp_head' => [
 					'twentysixteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
-				),
-			),
-			'add_nav_menu_styles' => array(
+				],
+			],
+			'add_nav_menu_styles' => [
 				'sub_menu_button_toggle_class' => 'toggled-on',
 				'no_js_submenu_visible'        => true,
-			),
-		),
+			],
+		],
 
 		// Twenty Fifteen.
-		'twentyfifteen'   => array(
+		'twentyfifteen'   => [
 			// @todo Figure out an AMP solution for onResizeARIA().
-			'dequeue_scripts'     => array(
+			'dequeue_scripts'     => [
 				'twentyfifteen-script',
 				'twentyfifteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
 				'twentyfifteen-skip-link-focus-fix', // Unnecessary since part of the AMP runtime.
-			),
-			'remove_actions'      => array(
-				'wp_head' => array(
+			],
+			'remove_actions'      => [
+				'wp_head' => [
 					'twentyfifteen_javascript_detection', // AMP is essentially no-js, with any interactively added explicitly via amp-bind.
-				),
-			),
-			'add_nav_menu_styles' => array(
+				],
+			],
+			'add_nav_menu_styles' => [
 				'sub_menu_button_toggle_class' => 'toggle-on',
 				'no_js_submenu_visible'        => true,
-			),
-		),
+			],
+		],
 
 		// Twenty Fourteen.
-		'twentyfourteen'  => array(
+		'twentyfourteen'  => [
 			// @todo Figure out an AMP solution for onResizeARIA().
-			'dequeue_scripts'                    => array(
+			'dequeue_scripts'                    => [
 				'twentyfourteen-script',
 				'twentyfourteen-keyboard-image-navigation', // AMP does not yet allow for listening to keydown events.
 				'jquery-masonry', // Masonry style layout is not supported in AMP.
 				'twentyfourteen-slider',
-			),
-			'add_nav_menu_styles'                => array(),
-			'add_twentyfourteen_masthead_styles' => array(),
-			'add_twentyfourteen_slider_carousel' => array(),
-			'add_twentyfourteen_search'          => array(),
-		),
+			],
+			'add_nav_menu_styles'                => [],
+			'add_twentyfourteen_masthead_styles' => [],
+			'add_twentyfourteen_slider_carousel' => [],
+			'add_twentyfourteen_search'          => [],
+		],
 
 		// Twenty Thirteen.
-		'twentythirteen'  => array(
-			'dequeue_scripts'          => array(
+		'twentythirteen'  => [
+			'dequeue_scripts'          => [
 				'jquery-masonry', // Masonry style layout is not supported in AMP.
 				'twentythirteen-script',
-			),
-			'add_nav_menu_toggle'      => array(),
-			'add_nav_sub_menu_buttons' => array(),
-			'add_nav_menu_styles'      => array(),
-		),
+			],
+			'add_nav_menu_toggle'      => [],
+			'add_nav_sub_menu_buttons' => [],
+			'add_nav_menu_styles'      => [],
+		],
 
 		// Twenty Twelve.
-		'twentytwelve'    => array(
-			'dequeue_scripts'     => array(
+		'twentytwelve'    => [
+			'dequeue_scripts'     => [
 				'twentytwelve-navigation',
-			),
-			'add_nav_menu_styles' => array(),
-		),
+			],
+			'add_nav_menu_styles' => [],
+		],
 
-		'twentyeleven'    => array(),
-		'twentyten'       => array(),
-	);
+		'twentyeleven'    => [],
+		'twentyten'       => [],
+	];
 
 	/**
 	 * Get list of supported core themes.
@@ -198,19 +198,19 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public static function get_acceptable_errors( $template ) {
 		if ( isset( self::$theme_features[ $template ] ) ) {
-			return array(
+			return [
 				'removed_unused_css_rules' => true,
-				'illegal_css_at_rule'      => array(
-					array(
+				'illegal_css_at_rule'      => [
+					[
 						'at_rule' => 'viewport',
-					),
-					array(
+					],
+					[
 						'at_rule' => '-ms-viewport',
-					),
-				),
-			);
+					],
+				],
+			];
 		}
-		return array();
+		return [];
 	}
 
 	/**
@@ -231,7 +231,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		$support = AMP_Theme_Support::get_theme_support_args();
 		if ( ! is_array( $support ) ) {
-			$support = array();
+			$support = [];
 		}
 
 		add_theme_support( AMP_Theme_Support::SLUG, array_merge( $support, $args ) );
@@ -249,93 +249,93 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// phpcs:disable WordPress.WP.I18n.TextDomainMismatch
 		switch ( $theme ) {
 			case 'twentytwelve':
-				return array(
-					'nav_menu_toggle' => array(
+				return [
+					'nav_menu_toggle' => [
 						'nav_container_xpath'        => '//nav[ @id = "site-navigation" ]//ul',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
 						'menu_button_toggle_class'   => 'toggled-on',
-					),
-				);
+					],
+				];
 			case 'twentythirteen':
-				return array(
-					'nav_menu_toggle'   => array(
+				return [
+					'nav_menu_toggle'   => [
 						'nav_container_id'           => 'site-navigation',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//nav[ @id = "site-navigation" ]//button[ contains( @class, "menu-toggle" ) ]',
-					),
-					'nav_menu_dropdown' => array(
+					],
+					'nav_menu_dropdown' => [
 						'sub_menu_button_class'        => 'dropdown-toggle',
 						'sub_menu_button_toggle_class' => 'toggle-on',
 						'expand_text'                  => __( 'expand child menu', 'amp' ),
 						'collapse_text'                => __( 'collapse child menu', 'amp' ),
-					),
-					'nav_menu_styles'   => array(),
-				);
+					],
+					'nav_menu_styles'   => [],
+				];
 			case 'twentyfourteen':
-				return array(
-					'nav_menu_toggle' => array(
+				return [
+					'nav_menu_toggle' => [
 						'nav_container_id'           => 'primary-navigation',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//header[ @id = "masthead" ]//button[ contains( @class, "menu-toggle" ) ]',
 						'menu_button_toggle_class'   => '',
-					),
-				);
+					],
+				];
 
 			case 'twentyfifteen':
-				return array(
-					'nav_menu_toggle'   => array(
+				return [
+					'nav_menu_toggle'   => [
 						'nav_container_id'           => 'secondary',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//header[ @id = "masthead" ]//button[ contains( @class, "secondary-toggle" ) ]',
 						'menu_button_toggle_class'   => 'toggled-on',
-					),
-					'nav_menu_dropdown' => array(
+					],
+					'nav_menu_dropdown' => [
 						'sub_menu_button_class'        => 'dropdown-toggle',
 						'sub_menu_button_toggle_class' => 'toggle-on',
 						'expand_text '                 => __( 'expand child menu', 'twentyfifteen' ),
 						'collapse_text'                => __( 'collapse child menu', 'twentyfifteen' ),
-					),
-				);
+					],
+				];
 
 			case 'twentysixteen':
-				return array(
-					'nav_menu_toggle'   => array(
+				return [
+					'nav_menu_toggle'   => [
 						'nav_container_id'           => 'site-header-menu',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//header[@id = "masthead"]//button[ @id = "menu-toggle" ]',
 						'menu_button_toggle_class'   => 'toggled-on',
-					),
-					'nav_menu_dropdown' => array(
+					],
+					'nav_menu_dropdown' => [
 						'sub_menu_button_class'        => 'dropdown-toggle',
 						'sub_menu_button_toggle_class' => 'toggled-on',
 						'expand_text '                 => __( 'expand child menu', 'twentysixteen' ),
 						'collapse_text'                => __( 'collapse child menu', 'twentysixteen' ),
-					),
-				);
+					],
+				];
 
 			case 'twentyseventeen':
-				$config = array(
-					'nav_menu_toggle'   => array(
+				$config = [
+					'nav_menu_toggle'   => [
 						'nav_container_id'           => 'site-navigation',
 						'nav_container_toggle_class' => 'toggled-on',
 						'menu_button_xpath'          => '//nav[@id = "site-navigation"]//button[ contains( @class, "menu-toggle" ) ]',
 						'menu_button_toggle_class'   => 'toggled-on',
-					),
-					'nav_menu_dropdown' => array(
+					],
+					'nav_menu_dropdown' => [
 						'sub_menu_button_class'        => 'dropdown-toggle',
 						'sub_menu_button_toggle_class' => 'toggled-on',
 						'expand_text '                 => __( 'expand child menu', 'twentyseventeen' ),
 						'collapse_text'                => __( 'collapse child menu', 'twentyseventeen' ),
-					),
-				);
+					],
+				];
 
 				if ( function_exists( 'twentyseventeen_get_svg' ) ) {
 					$config['nav_menu_dropdown']['icon'] = twentyseventeen_get_svg(
-						array(
+						[
 							'icon'     => 'angle-down',
 							'fallback' => true,
-						)
+						]
 					);
 				}
 
@@ -343,7 +343,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		}
 		// phpcs:enable WordPress.WP.I18n.TextDomainMismatch
 
-		return array();
+		return [];
 	}
 
 	/**
@@ -374,8 +374,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Theme features.
 	 */
 	protected static function get_theme_features( $args, $static = false ) {
-		$theme_features   = array();
-		$theme_candidates = wp_array_slice_assoc( $args, array( 'stylesheet', 'template' ) );
+		$theme_features   = [];
+		$theme_candidates = wp_array_slice_assoc( $args, [ 'stylesheet', 'template' ] );
 		foreach ( $theme_candidates as $theme_candidate ) {
 			if ( isset( self::$theme_features[ $theme_candidate ] ) ) {
 				$theme_features = self::$theme_features[ $theme_candidate ];
@@ -388,7 +388,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$theme_features = array_merge( $args['theme_features'], $theme_features );
 		}
 
-		$final_theme_features = array();
+		$final_theme_features = [];
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( ! method_exists( __CLASS__, $theme_feature ) ) {
 				continue;
@@ -412,11 +412,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_buffering_hooks( $args = array() ) {
+	public static function add_buffering_hooks( $args = [] ) {
 		$theme_features = self::get_theme_features( $args, true );
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( __CLASS__, $theme_feature ) ) {
-				call_user_func( array( __CLASS__, $theme_feature ), $feature_args );
+				call_user_func( [ __CLASS__, $theme_feature ], $feature_args );
 			}
 		}
 	}
@@ -432,11 +432,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function set_twentyseventeen_quotes_icon() {
 		add_filter(
 			'the_content',
-			function ( $content ) {
+			static function ( $content ) {
 
 				// Why isn't Twenty Seventeen doing this to begin with? Why is it using JS to add the quote icon?
 				if ( function_exists( 'twentyseventeen_get_svg' ) && 'quote' === get_post_format() ) {
-					$icon    = twentyseventeen_get_svg( array( 'icon' => 'quote-right' ) );
+					$icon    = twentyseventeen_get_svg( [ 'icon' => 'quote-right' ] );
 					$content = preg_replace( '#(<blockquote.*?>)#s', '$1' . $icon, $content );
 				}
 
@@ -461,7 +461,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_filter(
 			'get_custom_logo',
-			function( $html ) {
+			static function( $html ) {
 				$src = wp_get_attachment_image_src( get_theme_mod( 'custom_logo' ), 'full' );
 				if ( ! $src ) {
 					return $html;
@@ -497,7 +497,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$theme_features = self::get_theme_features( $this->args, false );
 		foreach ( $theme_features as $theme_feature => $feature_args ) {
 			if ( method_exists( $this, $theme_feature ) ) {
-				call_user_func( array( $this, $theme_feature ), $feature_args );
+				$this->$theme_feature( $feature_args );
 			}
 		}
 	}
@@ -509,10 +509,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param string[] $handles Handles, where each item value is the script handle.
 	 */
-	public static function dequeue_scripts( $handles = array() ) {
+	public static function dequeue_scripts( $handles = [] ) {
 		add_action(
 			'wp_enqueue_scripts',
-			function() use ( $handles ) {
+			static function() use ( $handles ) {
 				foreach ( $handles as $handle ) {
 					wp_dequeue_script( $handle );
 				}
@@ -528,7 +528,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $actions Actions, with action name as key and value being callback.
 	 */
-	public static function remove_actions( $actions = array() ) {
+	public static function remove_actions( $actions = [] ) {
 		foreach ( $actions as $action => $callbacks ) {
 			foreach ( $callbacks as $callback ) {
 				$priority = has_action( $action, $callback );
@@ -603,17 +603,17 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_has_header_video_body_class( $args = array() ) {
+	public static function add_has_header_video_body_class( $args = [] ) {
 		$args = array_merge(
-			array(
+			[
 				'class_name' => 'has-header-video',
-			),
+			],
 			$args
 		);
 
 		add_filter(
 			'body_class',
-			function( $body_classes ) use ( $args ) {
+			static function( $body_classes ) use ( $args ) {
 				if ( has_header_video() ) {
 					$body_classes[] = $args['class_name'];
 				}
@@ -647,7 +647,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentynineteen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>
@@ -677,7 +677,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				</style>
 				<?php
-				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
@@ -701,7 +701,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				$is_front_page_layout = ( is_front_page() && 'posts' !== get_option( 'show_on_front' ) ) || ( is_home() && is_front_page() );
 				ob_start();
 				?>
@@ -783,7 +783,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				</style>
 				<?php
-				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
@@ -800,7 +800,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyseventeen_image_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>
@@ -815,7 +815,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				}
 				</style>
 				<?php
-				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
@@ -861,58 +861,58 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			$element->setAttribute( 'id', $element->getAttribute( 'id' ) . '-fixed' );
 		}
 
-		$attributes = array(
+		$attributes = [
 			'layout'              => 'nodisplay',
 			'intersection-ratios' => 1,
 			'on'                  => implode(
 				';',
-				array(
+				[
 					'exit:navigationTopShow.start',
 					'enter:navigationTopHide.start',
-				)
+				]
 			),
-		);
+		];
 		if ( is_admin_bar_showing() ) {
 			$attributes['viewport-margins'] = '32px 0';
 		}
 		$position_observer = AMP_DOM_Utils::create_node( $this->dom, 'amp-position-observer', $attributes );
 		$navigation_top->appendChild( $position_observer );
 
-		$animations = array(
-			'navigationTopShow' => array(
+		$animations = [
+			'navigationTopShow' => [
 				'duration'   => 0,
 				'fill'       => 'both',
-				'animations' => array(
+				'animations' => [
 					'selector'  => '.navigation-top.site-navigation-fixed',
 					'media'     => '(min-width: 48em)',
-					'keyframes' => array(
+					'keyframes' => [
 						'opacity'   => 1.0,
 						'transform' => 'translateY( 0 )',
-					),
-				),
-			),
-			'navigationTopHide' => array(
+					],
+				],
+			],
+			'navigationTopHide' => [
 				'duration'   => 0,
 				'fill'       => 'both',
-				'animations' => array(
+				'animations' => [
 					'selector'  => '.navigation-top.site-navigation-fixed',
 					'media'     => '(min-width: 48em)',
-					'keyframes' => array(
+					'keyframes' => [
 						'opacity'   => 0.0,
 						'transform' => sprintf( 'translateY( -%dpx )', self::get_twentyseventeen_navigation_outer_height() ),
-					),
-				),
-			),
-		);
+					],
+				],
+			],
+		];
 
 		foreach ( $animations as $animation_id => $animation ) {
 			$amp_animation   = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'amp-animation',
-				array(
+				[
 					'id'     => $animation_id,
 					'layout' => 'nodisplay',
-				)
+				]
 			);
 			$position_script = $this->dom->createElement( 'script' );
 			$position_script->setAttribute( 'type', 'application/json' );
@@ -929,10 +929,10 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @param array $args Args.
 	 */
-	public static function add_nav_menu_styles( $args = array() ) {
+	public static function add_nav_menu_styles( $args = [] ) {
 		add_action(
 			'wp_enqueue_scripts',
-			function() use ( $args ) {
+			static function() use ( $args ) {
 				ob_start();
 				?>
 				<style>
@@ -1208,7 +1208,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				<?php endif; ?>
 				</style>
 				<?php
-				$styles = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				$styles = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
 				wp_add_inline_style( get_template() . '-style', $styles );
 			},
 			11
@@ -1225,7 +1225,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// Make sure the featured image gets responsive layout.
 		add_filter(
 			'wp_get_attachment_image_attributes',
-			function( $attributes ) {
+			static function( $attributes ) {
 				if ( preg_match( '/(^|\s)(attachment-post-thumbnail)(\s|$)/', $attributes['class'] ) ) {
 					$attributes['data-amp-layout'] = 'responsive';
 				}
@@ -1242,7 +1242,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 	public static function add_twentyfourteen_masthead_styles() {
 		add_action(
 			'wp_enqueue_scripts',
-			function() {
+			static function() {
 				ob_start();
 				?>
 				<style>
@@ -1363,7 +1363,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 					<?php endif; ?>
 				</style>
 				<?php
-				$css = str_replace( array( '<style>', '</style>' ), '', ob_get_clean() );
+				$css = str_replace( [ '<style>', '</style>' ], '', ob_get_clean() );
 
 				wp_add_inline_style( 'twentyfourteen-style', $css );
 			},
@@ -1406,24 +1406,24 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		// Create the carousel slider.
 		$amp_carousel_desktop_id = 'twentyFourteenSliderDesktop';
 		$amp_carousel_mobile_id  = 'twentyFourteenSliderMobile';
-		$amp_carousel_attributes = array(
+		$amp_carousel_attributes = [
 			'layout'              => 'responsive',
 			'on'                  => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
 			'width'               => '100',
 			'type'                => 'slides',
 			'loop'                => '',
 			'data-amp-bind-slide' => $selected_slide_state_id,
-		);
+		];
 		$amp_carousel_desktop    = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'amp-carousel',
 			array_merge(
 				$amp_carousel_attributes,
-				array(
+				[
 					'id'     => $amp_carousel_desktop_id,
 					'media'  => '(min-width: 672px)',
 					'height' => '55.49132947', // Value comes from <https://github.com/WordPress/wordpress-develop/blob/fc2a8f0e11316d066a686995b8578d82cd5546cf/src/wp-content/themes/twentyfourteen/style.css#L3024>.
-				)
+				]
 			)
 		);
 		$amp_carousel_mobile     = AMP_DOM_Utils::create_node(
@@ -1431,11 +1431,11 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 			'amp-carousel',
 			array_merge(
 				$amp_carousel_attributes,
-				array(
+				[
 					'id'     => $amp_carousel_mobile_id,
 					'media'  => '(max-width: 672px)',
 					'height' => '73',
-				)
+				]
 			)
 		);
 

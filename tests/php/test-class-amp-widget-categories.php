@@ -49,7 +49,7 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	 * @covers AMP_Widget_Categories::__construct()
 	 */
 	public function test_construct() {
-		$this->assertEquals( 'AMP_Widget_Categories', get_class( $this->widget ) );
+		$this->assertInstanceOf( '\\AMP_Widget_Categories', $this->widget );
 		$this->assertEquals( 'categories', $this->widget->id_base );
 		$this->assertEquals( 'Categories', $this->widget->name );
 		$this->assertEquals( 'widget_categories', $this->widget->widget_options['classname'] );
@@ -65,19 +65,17 @@ class Test_AMP_Widget_Categories extends WP_UnitTestCase {
 	public function test_widget() {
 		wp();
 		$this->assertTrue( is_amp_endpoint() );
-		$arguments = array(
+		$arguments = [
 			'before_widget' => '<div>',
 			'after_widget'  => '</div>',
 			'before_title'  => '<h2>',
 			'after_title'   => '</h2>',
-		);
-		$instance  = array(
+		];
+		$instance  = [
 			'title'    => 'Test Categories Widget',
 			'dropdown' => 1,
-		);
-		ob_start();
-		$this->widget->widget( $arguments, $instance );
-		$output = ob_get_clean();
+		];
+		$output    = get_echo( [ $this->widget, 'widget' ], [ $arguments, $instance ] );
 
 		$this->assertContains( 'on="change:', $output );
 		$this->assertNotContains( '<script type=', $output );

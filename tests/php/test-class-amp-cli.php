@@ -10,7 +10,7 @@
  *
  * @since 1.0
  */
-class Test_AMP_CLI extends \WP_UnitTestCase {
+class Test_AMP_CLI extends WP_UnitTestCase {
 
 	/**
 	 * Setup.
@@ -19,8 +19,8 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function setUp() {
 		parent::setUp();
-		add_filter( 'pre_http_request', array( $this, 'add_comment' ) );
-		AMP_CLI::$include_conditionals      = array();
+		add_filter( 'pre_http_request', [ $this, 'add_comment' ] );
+		AMP_CLI::$include_conditionals      = [];
 		AMP_CLI::$limit_type_validate_count = 100;
 	}
 
@@ -45,14 +45,14 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertEquals( $number_original_urls, AMP_CLI::count_urls_to_validate() );
 		AMP_CLI::$limit_type_validate_count = 100;
 
-		$category         = $this->factory()->term->create( array( 'taxonomy' => 'category' ) );
+		$category         = self::factory()->term->create( [ 'taxonomy' => 'category' ] );
 		$number_new_posts = AMP_CLI::$limit_type_validate_count / 2;
-		$post_ids         = array();
+		$post_ids         = [];
 		for ( $i = 0; $i < $number_new_posts; $i++ ) {
-			$post_ids[] = $this->factory()->post->create(
-				array(
-					'tax_input' => array( 'category' => $category ),
-				)
+			$post_ids[] = self::factory()->post->create(
+				[
+					'tax_input' => [ 'category' => $category ],
+				]
 			);
 		}
 
@@ -66,12 +66,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$number_of_new_terms        = 20;
 		$expected_url_count        += $number_of_new_terms;
 		$taxonomy                   = 'category';
-		$terms_for_current_taxonomy = array();
+		$terms_for_current_taxonomy = [];
 		for ( $i = 0; $i < $number_of_new_terms; $i++ ) {
-			$terms_for_current_taxonomy[] = $this->factory()->term->create(
-				array(
+			$terms_for_current_taxonomy[] = self::factory()->term->create(
+				[
 					'taxonomy' => $taxonomy,
-				)
+				]
 			);
 		}
 
@@ -92,9 +92,9 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function test_get_posts_that_support_amp() {
 		$number_of_posts = 20;
-		$ids             = array();
+		$ids             = [];
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$ids[] = $this->factory()->post->create();
+			$ids[] = self::factory()->post->create();
 		}
 
 		// This should count all of the newly-created posts as supporting AMP.
@@ -107,7 +107,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			AMP_Post_Meta_Box::STATUS_POST_META_KEY,
 			AMP_Post_Meta_Box::DISABLED_STATUS
 		);
-		$this->assertEquals( array(), AMP_CLI::get_posts_that_support_amp( array( $first_id ) ) );
+		$this->assertEquals( [], AMP_CLI::get_posts_that_support_amp( [ $first_id ] ) );
 
 		update_post_meta(
 			$first_id,
@@ -127,9 +127,9 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		// In Transitional Mode, the IDs should also include all of the newly-created posts.
 		add_theme_support(
 			AMP_Theme_Support::SLUG,
-			array(
+			[
 				AMP_Theme_Support::PAIRED_FLAG => true,
-			)
+			]
 		);
 		$this->assertEquals( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) );
 
@@ -137,16 +137,16 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		 * If the WP-CLI command has an include argument, and is_singular isn't in it, no posts will have AMP enabled.
 		 * For example, wp amp validate-site --include=is_tag,is_category
 		 */
-		AMP_CLI::$include_conditionals = array( 'is_tag', 'is_category' );
-		$this->assertEquals( array(), AMP_CLI::get_posts_that_support_amp( $ids ) );
+		AMP_CLI::$include_conditionals = [ 'is_tag', 'is_category' ];
+		$this->assertEquals( [], AMP_CLI::get_posts_that_support_amp( $ids ) );
 
 		/*
 		 * If is_singular is in the WP-CLI argument, it should allow return these posts as being AMP-enabled.
 		 * For example, wp amp validate-site include=is_singular,is_category
 		 */
-		AMP_CLI::$include_conditionals = array( 'is_singular', 'is_category' );
+		AMP_CLI::$include_conditionals = [ 'is_singular', 'is_category' ];
 		$this->assertEmpty( array_diff( $ids, AMP_CLI::get_posts_that_support_amp( $ids ) ) );
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals = [];
 	}
 
 	/**
@@ -157,8 +157,8 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function test_does_taxonomy_support_amp() {
 		$custom_taxonomy = 'foo_custom_taxonomy';
 		register_taxonomy( $custom_taxonomy, 'post' );
-		$taxonomies_to_test = array( $custom_taxonomy, 'category', 'post_tag' );
-		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ) );
+		$taxonomies_to_test = [ $custom_taxonomy, 'category', 'post_tag' ];
+		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_category', 'is_tag', sprintf( 'is_tax[%s]', $custom_taxonomy ) ] );
 
 		// When these templates are not unchecked in the 'AMP Settings' UI, these should be supported.
 		foreach ( $taxonomies_to_test as $taxonomy ) {
@@ -166,7 +166,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		}
 
 		// When the user has not checked the boxes for 'Categories' and 'Tags,' this should be false.
-		AMP_Options_Manager::update_option( 'supported_templates', array( 'is_author' ) );
+		AMP_Options_Manager::update_option( 'supported_templates', [ 'is_author' ] );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		foreach ( $taxonomies_to_test as $taxonomy ) {
 			$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( $taxonomy ) );
@@ -190,12 +190,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		 * If the user passed allowed conditionals to the WP-CLI command like wp amp validate-site --include=is_category,is_tag
 		 * these should be supported taxonomies.
 		 */
-		AMP_CLI::$include_conditionals = array( 'is_category', 'is_tag' );
+		AMP_CLI::$include_conditionals = [ 'is_category', 'is_tag' ];
 		$this->assertTrue( AMP_CLI::does_taxonomy_support_amp( 'category' ) );
 		$this->assertTrue( AMP_CLI::does_taxonomy_support_amp( 'tag' ) );
 		$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( 'author' ) );
 		$this->assertFalse( AMP_CLI::does_taxonomy_support_amp( 'search' ) );
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals = [];
 	}
 
 	/**
@@ -207,12 +207,12 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$author_conditional = 'is_author';
 		$search_conditional = 'is_search';
 
-		AMP_Options_Manager::update_option( 'supported_templates', array( $author_conditional ) );
+		AMP_Options_Manager::update_option( 'supported_templates', [ $author_conditional ] );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		$this->assertTrue( AMP_CLI::is_template_supported( $author_conditional ) );
 		$this->assertFalse( AMP_CLI::is_template_supported( $search_conditional ) );
 
-		AMP_Options_Manager::update_option( 'supported_templates', array( $search_conditional ) );
+		AMP_Options_Manager::update_option( 'supported_templates', [ $search_conditional ] );
 		$this->assertTrue( AMP_CLI::is_template_supported( $search_conditional ) );
 		$this->assertFalse( AMP_CLI::is_template_supported( $author_conditional ) );
 	}
@@ -224,25 +224,25 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function test_get_posts_by_type() {
 		$number_posts_each_post_type = 20;
-		$post_types                  = get_post_types( array( 'public' => true ), 'names' );
+		$post_types                  = get_post_types( [ 'public' => true ], 'names' );
 
 		foreach ( $post_types as $post_type ) {
 			// Start the expected posts with the existing post(s).
 			$query          = new WP_Query(
-				array(
+				[
 					'fields'    => 'ids',
 					'post_type' => $post_type,
-				)
+				]
 			);
 			$expected_posts = $query->posts;
 
 			for ( $i = 0; $i < $number_posts_each_post_type; $i++ ) {
 				array_unshift(
 					$expected_posts,
-					$this->factory()->post->create(
-						array(
+					self::factory()->post->create(
+						[
 							'post_type' => $post_type,
-						)
+						]
 					)
 				);
 			}
@@ -265,26 +265,26 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function test_get_taxonomy_links() {
 		$number_links_each_taxonomy = 20;
 		$taxonomies                 = get_taxonomies(
-			array(
+			[
 				'public' => true,
-			)
+			]
 		);
 
 		foreach ( $taxonomies as $taxonomy ) {
 			// Begin the expected links with the term links that already exist.
-			$expected_links             = array_map( 'get_term_link', get_terms( array( 'taxonomy' => $taxonomy ) ) );
-			$terms_for_current_taxonomy = array();
+			$expected_links             = array_map( 'get_term_link', get_terms( [ 'taxonomy' => $taxonomy ] ) );
+			$terms_for_current_taxonomy = [];
 			for ( $i = 0; $i < $number_links_each_taxonomy; $i++ ) {
-				$terms_for_current_taxonomy[] = $this->factory()->term->create(
-					array(
+				$terms_for_current_taxonomy[] = self::factory()->term->create(
+					[
 						'taxonomy' => $taxonomy,
-					)
+					]
 				);
 			}
 
 			// Terms need to be associated with a post in order to be returned in get_terms().
 			wp_set_post_terms(
-				$this->factory()->post->create(),
+				self::factory()->post->create(),
 				$terms_for_current_taxonomy,
 				$taxonomy
 			);
@@ -304,7 +304,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 			$offset                    = 10;
 			$actual_links_using_offset = AMP_CLI::get_taxonomy_links( $taxonomy, $offset, $number_of_links );
 			$this->assertEquals( array_slice( $expected_links, $offset, $number_of_links ), array_values( $actual_links_using_offset ) );
-			$this->assertEquals( $number_of_links, count( $actual_links_using_offset ) );
+			$this->assertCount( $number_of_links, $actual_links_using_offset );
 		}
 	}
 
@@ -314,7 +314,7 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @covers AMP_CLI::get_author_page_urls()
 	 */
 	public function test_get_author_page_urls() {
-		$this->factory()->user->create();
+		self::factory()->user->create();
 		$users             = get_users();
 		$first_author      = $users[0];
 		$first_author_url  = get_author_posts_url( $first_author->ID, $first_author->user_nicename );
@@ -322,22 +322,22 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$second_author_url = get_author_posts_url( $second_author->ID, $second_author->user_nicename );
 
 		// Passing 0 as the offset argument should get the first author.
-		$this->assertEquals( array( $first_author_url ), $actual_urls = AMP_CLI::get_author_page_urls( 0, 1 ) );
+		$this->assertEquals( [ $first_author_url ], $actual_urls = AMP_CLI::get_author_page_urls( 0, 1 ) );
 
 		// Passing 1 as the offset argument should get the second author.
-		$this->assertEquals( array( $second_author_url ), $actual_urls = AMP_CLI::get_author_page_urls( 1, 1 ) );
+		$this->assertEquals( [ $second_author_url ], $actual_urls = AMP_CLI::get_author_page_urls( 1, 1 ) );
 
 		// If $include_conditionals is set and does not have is_author, this should not return a URL.
-		AMP_CLI::$include_conditionals = array( 'is_category' );
-		$this->assertEquals( array(), AMP_CLI::get_author_page_urls() );
+		AMP_CLI::$include_conditionals = [ 'is_category' ];
+		$this->assertEquals( [], AMP_CLI::get_author_page_urls() );
 
 		// If $include_conditionals is set and has is_author, this should return URLs.
-		AMP_CLI::$include_conditionals = array( 'is_author' );
+		AMP_CLI::$include_conditionals = [ 'is_author' ];
 		$this->assertEquals(
-			array( $first_author_url, $second_author_url ),
+			[ $first_author_url, $second_author_url ],
 			AMP_CLI::get_author_page_urls()
 		);
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals = [];
 	}
 
 	/**
@@ -347,16 +347,16 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
-		$this->assertTrue( is_string( AMP_CLI::get_search_page() ) );
+		$this->assertInternalType( 'string', AMP_CLI::get_search_page() );
 
 		// If $include_conditionals is set and does not have is_search, this should not return a URL.
-		AMP_CLI::$include_conditionals = array( 'is_author' );
+		AMP_CLI::$include_conditionals = [ 'is_author' ];
 		$this->assertEquals( null, AMP_CLI::get_search_page() );
 
 		// If $include_conditionals has is_search, this should return a URL.
-		AMP_CLI::$include_conditionals = array( 'is_search' );
-		$this->assertTrue( is_string( AMP_CLI::get_search_page() ) );
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals = [ 'is_search' ];
+		$this->assertInternalType( 'string', AMP_CLI::get_search_page() );
+		AMP_CLI::$include_conditionals = [];
 	}
 
 	/**
@@ -371,14 +371,14 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 		$this->assertContains( $year, AMP_CLI::get_date_page() );
 
 		// If $include_conditionals is set and does not have is_date, this should not return a URL.
-		AMP_CLI::$include_conditionals = array( 'is_search' );
+		AMP_CLI::$include_conditionals = [ 'is_search' ];
 		$this->assertEquals( null, AMP_CLI::get_date_page() );
 
 		// If $include_conditionals has is_date, this should return a URL.
-		AMP_CLI::$include_conditionals = array( 'is_date' );
+		AMP_CLI::$include_conditionals = [ 'is_date' ];
 		$parsed_page_url               = wp_parse_url( AMP_CLI::get_date_page() );
 		$this->assertContains( $year, $parsed_page_url['query'] );
-		AMP_CLI::$include_conditionals = array();
+		AMP_CLI::$include_conditionals = [];
 	}
 
 	/**
@@ -389,33 +389,33 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	public function test_crawl_site() {
 		$number_of_posts = 20;
 		$number_of_terms = 30;
-		$posts           = array();
-		$post_permalinks = array();
-		$terms           = array();
+		$posts           = [];
+		$post_permalinks = [];
+		$terms           = [];
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$post_id           = $this->factory()->post->create();
+			$post_id           = self::factory()->post->create();
 			$posts[]           = $post_id;
 			$post_permalinks[] = get_permalink( $post_id );
 		}
 		AMP_CLI::crawl_site();
 
 		// All of the posts created above should be present in $validated_urls.
-		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 
 		for ( $i = 0; $i < $number_of_terms; $i++ ) {
-			$terms[] = $this->factory()->category->create();
+			$terms[] = self::factory()->category->create();
 		}
 
 		// Terms need to be associated with a post in order to be returned in get_terms().
 		wp_set_post_terms( $posts[0], $terms, 'category' );
 		AMP_CLI::crawl_site();
 		$expected_validated_urls = array_map( 'get_term_link', $terms );
-		$actual_validated_urls   = self::get_validated_urls();
+		$actual_validated_urls   = $this->get_validated_urls();
 
 		// All of the terms created above should be present in $validated_urls.
 		$this->assertEmpty( array_diff( $expected_validated_urls, $actual_validated_urls ) );
-		$this->assertTrue( in_array( home_url( '/' ), self::get_validated_urls(), true ) );
+		$this->assertContains( home_url( '/' ), $this->get_validated_urls() );
 	}
 
 	/**
@@ -424,21 +424,21 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @covers AMP_CLI::validate_and_store_url()
 	 */
 	public function test_validate_and_store_url() {
-		$single_post_permalink = get_permalink( $this->factory()->post->create() );
+		$single_post_permalink = get_permalink( self::factory()->post->create() );
 		AMP_CLI::validate_and_store_url( $single_post_permalink, 'post' );
-		$this->assertTrue( in_array( $single_post_permalink, self::get_validated_urls(), true ) );
+		$this->assertContains( $single_post_permalink, $this->get_validated_urls() );
 
 		$number_of_posts = 30;
-		$post_permalinks = array();
+		$post_permalinks = [];
 
 		for ( $i = 0; $i < $number_of_posts; $i++ ) {
-			$permalink         = get_permalink( $this->factory()->post->create() );
+			$permalink         = get_permalink( self::factory()->post->create() );
 			$post_permalinks[] = $permalink;
 			AMP_CLI::validate_and_store_url( $permalink, 'post' );
 		}
 
 		// All of the posts created should be present in the validated URLs.
-		$this->assertEmpty( array_diff( $post_permalinks, self::get_validated_urls() ) );
+		$this->assertEmpty( array_diff( $post_permalinks, $this->get_validated_urls() ) );
 	}
 
 	/**
@@ -448,14 +448,14 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function get_inital_url_count() {
 		$total_count  = 'posts' === get_option( 'show_on_front' ) ? 1 : 0;
-		$post_query   = new WP_Query( array( 'post_type' => get_post_types( array( 'public' => true ), 'names' ) ) );
+		$post_query   = new WP_Query( [ 'post_type' => get_post_types( [ 'public' => true ], 'names' ) ] );
 		$total_count += $post_query->found_posts;
 
 		$term_query = new WP_Term_Query(
-			array(
-				'taxonomy' => get_taxonomies( array( 'public' => true ) ),
+			[
+				'taxonomy' => get_taxonomies( [ 'public' => true ] ),
 				'fields'   => 'ids',
-			)
+			]
 		);
 
 		$total_count += count( $term_query->terms );
@@ -473,15 +473,15 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 */
 	public function get_validated_urls() {
 		$query = new WP_Query(
-			array(
+			[
 				'post_type'      => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
 				'posts_per_page' => 100,
 				'fields'         => 'ids',
-			)
+			]
 		);
 
 		return array_map(
-			function( $post ) {
+			static function( $post ) {
 				return remove_query_arg( 'amp', AMP_Validated_URL_Post_Type::get_url_from_post( $post ) );
 			},
 			$query->posts
@@ -494,27 +494,27 @@ class Test_AMP_CLI extends \WP_UnitTestCase {
 	 * @return array The response, with a comment in the body.
 	 */
 	public function add_comment() {
-		$mock_validation = array(
-			'results' => array(
-				array(
-					'error'     => array(
+		$mock_validation = [
+			'results' => [
+				[
+					'error'     => [
 						'code' => 'foo',
-					),
+					],
 					'sanitized' => false,
-				),
-			),
+				],
+			],
 			'url'     => home_url( '/' ),
-		);
+		];
 
-		return array(
+		return [
 			'body'     => sprintf(
 				'<html amp><head></head><body></body><!--%s--></html>',
 				'AMP_VALIDATION:' . wp_json_encode( $mock_validation )
 			),
-			'response' => array(
+			'response' => [
 				'code'    => 200,
 				'message' => 'ok',
-			),
-		);
+			],
+		];
 	}
 }

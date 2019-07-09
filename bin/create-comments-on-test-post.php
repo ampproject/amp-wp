@@ -13,19 +13,19 @@
  * @return int Post ID.
  */
 function amp_create_comments_test_post() {
-	$q = new WP_Query( array( 'name' => 'amp-test-comments' ) );
+	$q = new WP_Query( [ 'name' => 'amp-test-comments' ] );
 	if ( $q->have_posts() ) {
 		$post    = $q->next_post();
 		$post_id = $post->ID;
 	} else {
 		$post_id = wp_insert_post(
-			array(
+			[
 				'post_name'    => 'amp-test-comments',
 				'post_title'   => 'AMP Test Comments',
 				'post_type'    => 'post',
 				'post_status'  => 'publish',
 				'post_content' => amp_get_test_random_content( 200 ),
-			)
+			]
 		);
 
 		if ( ! $post_id || is_wp_error( $post_id ) ) {
@@ -49,7 +49,7 @@ function amp_create_comments_test_post() {
  */
 function amp_add_comments( $post_id ) {
 	$data = amp_get_test_comment_entries();
-	$ids  = array();
+	$ids  = [];
 	foreach ( $data as $comment ) {
 		$comment['comment_post_ID'] = $post_id;
 		$yes_no                     = rand( 0, 1 );
@@ -71,14 +71,14 @@ function amp_add_comments( $post_id ) {
  * @return array Data entries.
  */
 function amp_get_test_comment_entries() {
-	$comments = array();
+	$comments = [];
 	$time     = strtotime( 'now' );
 	for ( $i = 0; $i < 30; $i++ ) {
 		$author = preg_replace( '/[^\w ]+/', '', amp_get_test_random_content( 2, '' ) );
 		$time   = strtotime( '+3 minutes', $time );
 
 		// Add comment.
-		$comments[] = array(
+		$comments[] = [
 			'comment_author'       => ucwords( $author ),
 			'comment_author_email' => strtolower( implode( '@', explode( ' ', $author ) ) ) . '.com',
 			'comment_author_url'   => strtolower( implode( '.', explode( ' ', $author ) ) ) . '.com',
@@ -89,7 +89,7 @@ function amp_get_test_comment_entries() {
 			'comment_agent'        => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
 			'comment_date'         => date( 'Y-m-d H:i:s', $time ),
 			'comment_approved'     => '1',
-		);
+		];
 	}
 
 	return $comments;

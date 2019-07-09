@@ -96,7 +96,7 @@ class AMP_Post_Template {
 		}
 
 		// Make sure we have a post, or bail if not.
-		if ( is_a( $this->post, 'WP_Post' ) ) {
+		if ( $this->post instanceof WP_Post ) {
 			$this->ID = $this->post->ID;
 		} else {
 			return;
@@ -108,7 +108,7 @@ class AMP_Post_Template {
 		}
 		$content_max_width = apply_filters( 'amp_content_max_width', $content_max_width );
 
-		$this->data = array(
+		$this->data = [
 			'content_max_width'     => $content_max_width,
 
 			'document_title'        => function_exists( 'wp_get_document_title' ) ? wp_get_document_title() : wp_title( '', false ), // Back-compat with 4.3.
@@ -116,7 +116,7 @@ class AMP_Post_Template {
 			'home_url'              => home_url( '/' ),
 			'blog_name'             => get_bloginfo( 'name' ),
 
-			'html_tag_attributes'   => array(),
+			'html_tag_attributes'   => [],
 			'body_class'            => '',
 
 			'site_icon_url'         => apply_filters( 'amp_site_icon_url', function_exists( 'get_site_icon_url' ) ? get_site_icon_url( self::SITE_ICON_SIZE ) : '' ),
@@ -127,17 +127,17 @@ class AMP_Post_Template {
 			'comments_link_text'    => false,
 
 			'amp_runtime_script'    => 'https://cdn.ampproject.org/v0.js',
-			'amp_component_scripts' => array(),
+			'amp_component_scripts' => [],
 
-			'customizer_settings'   => array(),
+			'customizer_settings'   => [],
 
-			'font_urls'             => array(),
+			'font_urls'             => [],
 
-			'post_amp_stylesheets'  => array(),
-			'post_amp_styles'       => array(), // Deprecated.
+			'post_amp_stylesheets'  => [],
+			'post_amp_styles'       => [], // Deprecated.
 
 			'amp_analytics'         => amp_add_custom_analytics(),
-		);
+		];
 
 		$this->build_post_content();
 		$this->build_post_data();
@@ -166,10 +166,10 @@ class AMP_Post_Template {
 	public function get( $property, $default = null ) {
 		if ( isset( $this->data[ $property ] ) ) {
 			return $this->data[ $property ];
-		} else {
-			/* translators: %s is key name */
-			_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 		}
+
+		/* translators: %s is key name */
+		_doing_it_wrong( __METHOD__, esc_html( sprintf( __( 'Called for non-existent key ("%s").', 'amp' ), $property ) ), '0.1' );
 
 		return $default;
 	}
@@ -196,7 +196,7 @@ class AMP_Post_Template {
 	public function load() {
 		global $wp_query;
 		$template = is_page() || $wp_query->is_posts_page ? 'page' : 'single';
-		$this->load_parts( array( $template ) );
+		$this->load_parts( [ $template ] );
 	}
 
 	/**
@@ -265,7 +265,7 @@ class AMP_Post_Template {
 		$post_modified_timestamp = get_post_modified_time( 'U', false, $this->post );
 		$post_author             = get_userdata( $this->post->post_author );
 
-		$data = array(
+		$data = [
 			'post'                     => $this->post,
 			'post_id'                  => $this->ID,
 			'post_title'               => $post_title,
@@ -274,7 +274,7 @@ class AMP_Post_Template {
 			'post_author'              => $post_author,
 			'post_canonical_link_url'  => '',
 			'post_canonical_link_text' => '',
-		);
+		];
 
 		$customizer_settings = AMP_Customizer_Settings::get_settings();
 		if ( ! empty( $customizer_settings['display_exit_link'] ) ) {
@@ -310,10 +310,10 @@ class AMP_Post_Template {
 			: __( 'View Comments', 'amp' );
 
 		$this->add_data(
-			array(
+			[
 				'comments_link_url'  => $comments_link_url,
 				'comments_link_text' => $comments_link_text,
-			)
+			]
 		);
 	}
 
@@ -325,9 +325,9 @@ class AMP_Post_Template {
 			$this->post->post_content,
 			amp_get_content_embed_handlers( $this->post ),
 			amp_get_content_sanitizers( $this->post ),
-			array(
+			[
 				'content_max_width' => $this->get( 'content_max_width' ),
-			)
+			]
 		);
 
 		$this->add_data_by_key( 'post_amp_content', $amp_content->get_amp_content() );
@@ -364,19 +364,19 @@ class AMP_Post_Template {
 		$assets = AMP_Content_Sanitizer::sanitize_document(
 			$dom,
 			amp_get_content_sanitizers( $this->post ),
-			array(
+			[
 				'content_max_width' => $this->get( 'content_max_width' ),
-			)
+			]
 		);
 
 		$sanitized_html = AMP_DOM_Utils::get_content_from_dom( $dom );
 
 		$this->add_data_by_key(
 			'featured_image',
-			array(
+			[
 				'amp_html' => $sanitized_html,
 				'caption'  => $featured_image->post_excerpt,
-			)
+			]
 		);
 
 		if ( $assets['scripts'] ) {
@@ -415,7 +415,7 @@ class AMP_Post_Template {
 	 * Build HTML tag attributes.
 	 */
 	private function build_html_tag_attributes() {
-		$attributes = array();
+		$attributes = [];
 
 		if ( function_exists( 'is_rtl' ) && is_rtl() ) {
 			$attributes['dir'] = 'rtl';
@@ -460,7 +460,7 @@ class AMP_Post_Template {
 	 */
 	private function locate_template( $file ) {
 		$search_file = sprintf( 'amp/%s', basename( $file ) );
-		return locate_template( array( $search_file ), false );
+		return locate_template( [ $search_file ], false );
 	}
 
 	/**

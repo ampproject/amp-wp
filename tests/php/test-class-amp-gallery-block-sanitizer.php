@@ -16,42 +16,42 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
-		return array(
-			'no_ul'                               => array(
+		return [
+			'no_ul'                               => [
 				'<p>Lorem Ipsum Demet Delorit.</p>',
 				'<p>Lorem Ipsum Demet Delorit.</p>',
-			),
+			],
 
-			'no_a_no_amp_img'                     => array(
+			'no_a_no_amp_img'                     => [
 				'<ul class="amp-carousel"><div></div></ul>',
 				'<ul class="amp-carousel"><div></div></ul>',
-			),
+			],
 
-			'no_amp_carousel'                     => array(
+			'no_amp_carousel'                     => [
 				'<ul><a><amp-img></amp-img></a></ul>',
 				'<ul><a><amp-img></amp-img></a></ul>',
-			),
+			],
 
-			'no_block_class'                      => array(
+			'no_block_class'                      => [
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-			),
+			],
 
-			'data_amp_with_carousel'              => array(
+			'data_amp_with_carousel'              => [
 				'<ul class="wp-block-gallery" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></amp-carousel>',
-			),
+			],
 
-			'data_amp_with_lightbox'              => array(
+			'data_amp_with_lightbox'              => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></a></figure></li></ul><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
-			),
+			],
 
-			'data_amp_with_lightbox_and_carousel' => array(
+			'data_amp_with_lightbox_and_carousel' => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="1234" height="567"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="1234" height="567" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="1234" height="567" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -71,7 +71,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Gallery_Block_Sanitizer(
 			$dom,
-			array( 'content_max_width' => 600 )
+			[ 'content_max_width' => 600 ]
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
@@ -85,22 +85,22 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_reader_mode_data() {
-		return array(
-			'no_block_class'                      => array(
+		return [
+			'no_block_class'                      => [
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<ul data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
-			),
+			],
 
-			'data_amp_with_lightbox'              => array(
+			'data_amp_with_lightbox'              => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
-			),
+			],
 
-			'data_amp_with_lightbox_and_carousel' => array(
+			'data_amp_with_lightbox_and_carousel' => [
 				'<ul class="wp-block-gallery" data-amp-lightbox="true" data-amp-carousel="true"><li class="blocks-gallery-item"><figure><a href="http://example.com"><amp-img src="http://example.com/img.png" width="600" height="400"></amp-img></a></figure></li></ul>',
 				'<amp-carousel width="600" height="400" type="slides" layout="responsive"><amp-img src="http://example.com/img.png" width="600" height="400" data-amp-lightbox="" on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img></amp-carousel><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -118,7 +118,7 @@ class AMP_Gallery_Block_Sanitizer_Test extends WP_UnitTestCase {
 		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
 		$sanitizer = new AMP_Gallery_Block_Sanitizer(
 			$dom,
-			array( 'carousel_required' => true )
+			[ 'carousel_required' => true ]
 		);
 		$sanitizer->sanitize();
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );

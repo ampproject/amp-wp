@@ -59,9 +59,9 @@ class AMP_Template_Customizer {
 		$self->register_settings();
 		$self->register_ui();
 
-		add_action( 'customize_controls_enqueue_scripts', array( $self, 'add_customizer_scripts' ) );
-		add_action( 'customize_controls_print_footer_scripts', array( $self, 'print_controls_templates' ) );
-		add_action( 'customize_preview_init', array( $self, 'init_preview' ) );
+		add_action( 'customize_controls_enqueue_scripts', [ $self, 'add_customizer_scripts' ] );
+		add_action( 'customize_controls_print_footer_scripts', [ $self, 'print_controls_templates' ] );
+		add_action( 'customize_preview_init', [ $self, 'init_preview' ] );
 	}
 
 	/**
@@ -72,15 +72,15 @@ class AMP_Template_Customizer {
 	 */
 	public function init_preview() {
 		add_action( 'amp_post_template_head', 'wp_no_robots' );
-		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_preview_scripts' ) );
-		add_action( 'amp_customizer_enqueue_preview_scripts', array( $this, 'enqueue_preview_scripts' ) );
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_preview_scripts' ] );
+		add_action( 'amp_customizer_enqueue_preview_scripts', [ $this, 'enqueue_preview_scripts' ] );
 
 		// Output scripts and styles which will break AMP validation only when preview is opened with controls for manipulation.
 		if ( $this->wp_customize->get_messenger_channel() ) {
-			add_action( 'amp_post_template_head', array( $this->wp_customize, 'customize_preview_loading_style' ) );
-			add_action( 'amp_post_template_css', array( $this, 'add_customize_preview_styles' ) );
-			add_action( 'amp_post_template_head', array( $this->wp_customize, 'remove_frameless_preview_messenger_channel' ) );
-			add_action( 'amp_post_template_footer', array( $this, 'add_preview_scripts' ) );
+			add_action( 'amp_post_template_head', [ $this->wp_customize, 'customize_preview_loading_style' ] );
+			add_action( 'amp_post_template_css', [ $this, 'add_customize_preview_styles' ] );
+			add_action( 'amp_post_template_head', [ $this->wp_customize, 'remove_frameless_preview_messenger_channel' ] );
+			add_action( 'amp_post_template_footer', [ $this, 'add_preview_scripts' ] );
 		}
 	}
 
@@ -90,12 +90,12 @@ class AMP_Template_Customizer {
 	public function register_ui() {
 		$this->wp_customize->add_panel(
 			self::PANEL_ID,
-			array(
+			[
 				'type'        => 'amp',
 				'title'       => __( 'AMP', 'amp' ),
 				/* translators: placeholder is URL to AMP project. */
 				'description' => sprintf( __( '<a href="%s" target="_blank">The AMP Project</a> is a Google-led initiative that dramatically improves loading speeds on phones and tablets. You can use the Customizer to preview changes to your AMP template before publishing them.', 'amp' ), 'https://ampproject.org' ),
-			)
+			]
 		);
 
 		/**
@@ -137,7 +137,7 @@ class AMP_Template_Customizer {
 			wp_enqueue_script(
 				'amp-customize-controls',
 				amp_get_asset_url( 'js/amp-customize-controls.js' ),
-				array( 'jquery', 'customize-controls' ),
+				[ 'jquery', 'customize-controls' ],
 				AMP__VERSION,
 				true
 			);
@@ -147,15 +147,15 @@ class AMP_Template_Customizer {
 				sprintf(
 					'ampCustomizeControls.boot( %s );',
 					wp_json_encode(
-						array(
+						[
 							'queryVar' => amp_get_slug(),
 							'panelId'  => self::PANEL_ID,
 							'ampUrl'   => amp_admin_get_preview_permalink(),
-							'l10n'     => array(
+							'l10n'     => [
 								'unavailableMessage'  => __( 'AMP is not available for the page currently being previewed.', 'amp' ),
 								'unavailableLinkText' => __( 'Navigate to an AMP compatible page', 'amp' ),
-							),
-						)
+							],
+						]
 					)
 				)
 			);
@@ -195,7 +195,7 @@ class AMP_Template_Customizer {
 		wp_enqueue_script(
 			'amp-customize-preview',
 			amp_get_asset_url( 'js/amp-customize-preview.js' ),
-			array( 'jquery', 'customize-preview' ),
+			[ 'jquery', 'customize-preview' ],
 			AMP__VERSION,
 			true
 		);
@@ -220,10 +220,10 @@ class AMP_Template_Customizer {
 			sprintf(
 				'ampCustomizePreview.boot( %s );',
 				wp_json_encode(
-					array(
+					[
 						'available' => $available,
 						'enabled'   => is_amp_endpoint(),
-					)
+					]
 				)
 			)
 		);

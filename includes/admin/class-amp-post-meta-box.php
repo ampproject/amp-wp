@@ -86,20 +86,20 @@ class AMP_Post_Meta_Box {
 		register_meta(
 			'post',
 			self::STATUS_POST_META_KEY,
-			array(
-				'sanitize_callback' => array( $this, 'sanitize_status' ),
+			[
+				'sanitize_callback' => [ $this, 'sanitize_status' ],
 				'type'              => 'string',
 				'description'       => __( 'AMP status.', 'amp' ),
 				'show_in_rest'      => true,
 				'single'            => true,
-			)
+			]
 		);
 
-		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_admin_assets' ) );
-		add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_assets' ) );
-		add_action( 'post_submitbox_misc_actions', array( $this, 'render_status' ) );
-		add_action( 'save_post', array( $this, 'save_amp_status' ) );
-		add_filter( 'preview_post_link', array( $this, 'preview_post_link' ) );
+		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
+		add_action( 'enqueue_block_editor_assets', [ $this, 'enqueue_block_assets' ] );
+		add_action( 'post_submitbox_misc_actions', [ $this, 'render_status' ] );
+		add_action( 'save_post', [ $this, 'save_amp_status' ] );
+		add_filter( 'preview_post_link', [ $this, 'preview_post_link' ] );
 	}
 
 	/**
@@ -110,7 +110,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function sanitize_status( $status ) {
 		$status = strtolower( trim( $status ) );
-		if ( ! in_array( $status, array( self::ENABLED_STATUS, self::DISABLED_STATUS ), true ) ) {
+		if ( ! in_array( $status, [ self::ENABLED_STATUS, self::DISABLED_STATUS ], true ) ) {
 			/*
 			 * In lieu of actual validation being available, clear the status entirely
 			 * so that the underlying default status will be used instead.
@@ -153,7 +153,7 @@ class AMP_Post_Meta_Box {
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: array();
+			: [];
 
 		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter
 		wp_enqueue_script(
@@ -176,16 +176,16 @@ class AMP_Post_Meta_Box {
 			sprintf(
 				'ampPostMetaBox.boot( %s );',
 				wp_json_encode(
-					array(
+					[
 						'previewLink'     => esc_url_raw( add_query_arg( amp_get_slug(), '', get_preview_post_link( $post ) ) ),
 						'canonical'       => amp_is_canonical(),
 						'enabled'         => empty( $support_errors ),
-						'canSupport'      => 0 === count( array_diff( $support_errors, array( 'post-status-disabled' ) ) ),
+						'canSupport'      => 0 === count( array_diff( $support_errors, [ 'post-status-disabled' ] ) ),
 						'statusInputName' => self::STATUS_INPUT_NAME,
-						'l10n'            => array(
+						'l10n'            => [
 							'ampPreviewBtnLabel' => __( 'Preview changes in AMP (opens in new window)', 'amp' ),
-						),
-					)
+						],
+					]
 				)
 			)
 		);
@@ -205,14 +205,14 @@ class AMP_Post_Meta_Box {
 		wp_enqueue_style(
 			self::BLOCK_ASSET_HANDLE,
 			amp_get_asset_url( 'css/' . self::BLOCK_ASSET_HANDLE . '.css' ),
-			array(),
+			[],
 			AMP__VERSION
 		);
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: array();
+			: [];
 
 		wp_enqueue_script(
 			self::BLOCK_ASSET_HANDLE,
@@ -226,15 +226,15 @@ class AMP_Post_Meta_Box {
 		$enabled_status    = $status_and_errors['status'];
 		$error_messages    = $this->get_error_messages( $status_and_errors['status'], $status_and_errors['errors'] );
 
-		$data = array(
-			'possibleStatuses' => array( self::ENABLED_STATUS, self::DISABLED_STATUS ),
+		$data = [
+			'possibleStatuses' => [ self::ENABLED_STATUS, self::DISABLED_STATUS ],
 			'defaultStatus'    => $enabled_status,
 			'errorMessages'    => $error_messages,
 			'isWebsiteEnabled' => AMP_Options_Manager::is_website_experience_enabled(),
 			'isStoriesEnabled' => AMP_Options_Manager::is_stories_experience_enabled(),
 			'hasThemeSupport'  => current_theme_supports( AMP_Theme_Support::SLUG ),
 			'isStandardMode'   => amp_is_canonical(),
-		);
+		];
 
 		wp_localize_script(
 			self::BLOCK_ASSET_HANDLE,
@@ -280,10 +280,10 @@ class AMP_Post_Meta_Box {
 		$errors            = $status_and_errors['errors'];
 		$error_messages    = $this->get_error_messages( $status, $errors );
 
-		$labels = array(
+		$labels = [
 			'enabled'  => __( 'Enabled', 'amp' ),
 			'disabled' => __( 'Disabled', 'amp' ),
-		);
+		];
 
 		// The preceding variables are used inside the following amp-status.php template.
 		include AMP__DIR__ . '/templates/admin/amp-status.php';
@@ -310,14 +310,14 @@ class AMP_Post_Meta_Box {
 		if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
 			$availability = AMP_Theme_Support::get_template_availability( $post );
 			$status       = $availability['supported'] ? self::ENABLED_STATUS : self::DISABLED_STATUS;
-			$errors       = array_diff( $availability['errors'], array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
+			$errors       = array_diff( $availability['errors'], [ 'post-status-disabled' ] ); // Subtract the status which the metabox will allow to be toggled.
 			if ( true === $availability['immutable'] ) {
 				$errors[] = 'status_immutable';
 			}
 		} else {
 			$errors = AMP_Post_Type_Support::get_support_errors( $post );
 			$status = empty( $errors ) ? self::ENABLED_STATUS : self::DISABLED_STATUS;
-			$errors = array_diff( $errors, array( 'post-status-disabled' ) ); // Subtract the status which the metabox will allow to be toggled.
+			$errors = array_diff( $errors, [ 'post-status-disabled' ] ); // Subtract the status which the metabox will allow to be toggled.
 		}
 
 		return compact( 'status', 'errors' );
@@ -332,7 +332,7 @@ class AMP_Post_Meta_Box {
 	 * @return array $error_messages The error messages, as an array of strings.
 	 */
 	public function get_error_messages( $status, $errors ) {
-		$error_messages = array();
+		$error_messages = [];
 		if ( in_array( 'status_immutable', $errors, true ) ) {
 			if ( self::ENABLED_STATUS === $status ) {
 				$error_messages[] = __( 'Your site does not allow AMP to be disabled.', 'amp' );
@@ -360,7 +360,7 @@ class AMP_Post_Meta_Box {
 		if ( in_array( 'skip-post', $errors, true ) ) {
 			$error_messages[] = __( 'A plugin or theme has disabled AMP support.', 'amp' );
 		}
-		if ( count( array_diff( $errors, array( 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ) ) ) > 0 ) {
+		if ( count( array_diff( $errors, [ 'status_immutable', 'page-on-front', 'page-for-posts', 'password-protected', 'post-type-support', 'skip-post', 'template_unsupported', 'no_matching_template' ] ) ) > 0 ) {
 			$error_messages[] = __( 'Unavailable for an unknown reason.', 'amp' );
 		}
 
@@ -375,9 +375,7 @@ class AMP_Post_Meta_Box {
 	 */
 	public function save_amp_status( $post_id ) {
 		$verify = (
-			isset( $_POST[ self::NONCE_NAME ] )
-			&&
-			isset( $_POST[ self::STATUS_INPUT_NAME ] )
+			isset( $_POST[ self::NONCE_NAME ], $_POST[ self::STATUS_INPUT_NAME ] )
 			&&
 			wp_verify_nonce( sanitize_key( wp_unslash( $_POST[ self::NONCE_NAME ] ) ), self::NONCE_ACTION )
 			&&

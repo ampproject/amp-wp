@@ -65,7 +65,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$removed_shortcode = 'wp_playlist_shortcode';
 		add_shortcode( 'playlist', $removed_shortcode );
 		$this->instance->register_embed();
-		$this->assertEquals( 'AMP_Playlist_Embed_Handler', get_class( $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] ) );
+		$this->assertInstanceOf( '\\AMP_Playlist_Embed_Handler', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][0] );
 		$this->assertEquals( 'shortcode', $shortcode_tags[ AMP_Playlist_Embed_Handler::SHORTCODE ][1] );
 		$this->assertEquals( $removed_shortcode, $this->instance->removed_shortcode_callback );
 		$this->instance->unregister_embed();
@@ -93,15 +93,15 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		global $post;
 		$playlist_shortcode = 'amp-playlist-shortcode';
 		$this->instance->register_embed();
-		$this->assertFalse( in_array( 'wp-mediaelement', wp_styles()->queue, true ) );
-		$this->assertFalse( in_array( $playlist_shortcode, wp_styles()->queue, true ) );
+		$this->assertNotContains( 'wp-mediaelement', wp_styles()->queue );
+		$this->assertNotContains( $playlist_shortcode, wp_styles()->queue );
 
-		$post               = $this->factory()->post->create_and_get();
+		$post               = self::factory()->post->create_and_get();
 		$post->post_content = '[playlist ids="5,3"]';
 		$this->instance->enqueue_styles();
 		$style = wp_styles()->registered[ $playlist_shortcode ];
 		$this->assertContains( $playlist_shortcode, wp_styles()->queue );
-		$this->assertEquals( array( 'wp-mediaelement' ), $style->deps );
+		$this->assertEquals( [ 'wp-mediaelement' ], $style->deps );
 		$this->assertEquals( $playlist_shortcode, $style->handle );
 		$this->assertEquals( amp_get_asset_url( 'css/amp-playlist-shortcode.css' ), $style->src );
 		$this->assertEquals( AMP__VERSION, $style->ver );
@@ -145,56 +145,56 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * @covers AMP_Playlist_Embed_Handler::get_thumb_dimensions()
 	 */
 	public function test_get_thumb_dimensions() {
-		$dimensions = array(
+		$dimensions = [
 			'height' => 60,
 			'width'  => 60,
-		);
-		$track      = array(
+		];
+		$track      = [
 			'thumb' => $dimensions,
-		);
+		];
 		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
-		$dimensions = array(
+		$dimensions = [
 			'height' => 68,
 			'width'  => 59,
-		);
-		$track      = array(
+		];
+		$track      = [
 			'thumb' => $dimensions,
-		);
+		];
 		$this->assertEquals( $dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
-		$dimensions          = array(
+		$dimensions          = [
 			'height' => 70,
 			'width'  => 80.5,
-		);
-		$expected_dimensions = array(
+		];
+		$expected_dimensions = [
 			'height' => 52,
 			'width'  => 60,
-		);
-		$track               = array(
+		];
+		$track               = [
 			'thumb' => $dimensions,
-		);
+		];
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
-		$dimensions          = array(
+		$dimensions          = [
 			'width' => 80.5,
-		);
-		$track               = array(
+		];
+		$track               = [
 			'thumb' => $dimensions,
-		);
-		$expected_dimensions = array(
+		];
+		$expected_dimensions = [
 			'height' => 48,
 			'width'  => 60,
-		);
+		];
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 
-		$track               = array(
-			'thumb' => array(),
-		);
-		$expected_dimensions = array(
+		$track               = [
+			'thumb' => [],
+		];
+		$expected_dimensions = [
 			'height' => AMP_Playlist_Embed_Handler::DEFAULT_THUMB_HEIGHT,
 			'width'  => AMP_Playlist_Embed_Handler::DEFAULT_THUMB_WIDTH,
-		);
+		];
 		$this->assertEquals( $expected_dimensions, $this->instance->get_thumb_dimensions( $track ) );
 	}
 
@@ -207,7 +207,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 */
 	public function test_audio_playlist() {
 		$attr     = $this->get_attributes( 'audio' );
-		$playlist = $this->instance->audio_playlist( array() );
+		$playlist = $this->instance->audio_playlist( [] );
 		$this->assertEquals( '', $playlist );
 
 		$data     = $this->instance->get_data( $attr );
@@ -225,16 +225,13 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * @covers AMP_Playlist_Embed_Handler::print_tracks()
 	 */
 	public function test_tracks() {
-		$type         = 'video';
-		$attr         = $this->get_attributes( $type );
-		$data         = $this->instance->get_data( $attr );
-		$container_id = 'fooContainerId1';
-		$state_id     = 'fooId1';
-		$expected_on  = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
+		$type        = 'video';
+		$attr        = $this->get_attributes( $type );
+		$data        = $this->instance->get_data( $attr );
+		$state_id    = 'fooId1';
+		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( [ $this->instance, 'print_tracks' ], [ $state_id, $data['tracks'] ] );
 		$this->assertContains( '<div class="wp-playlist-tracks">', $tracks );
 		$this->assertContains( $state_id, $tracks );
 		$this->assertContains( $expected_on, $tracks );
@@ -243,9 +240,7 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 		$data        = $this->instance->get_data( $attr );
 		$expected_on = 'tap:AMP.setState({&quot;' . $state_id . '&quot;:{&quot;selectedIndex&quot;:0}})';
 
-		ob_start();
-		$this->instance->print_tracks( $state_id, $data['tracks'] );
-		$tracks = ob_get_clean();
+		$tracks = get_echo( [ $this->instance, 'print_tracks' ], [ $state_id, $data['tracks'] ] );
 		$this->assertContains( $expected_on, $tracks );
 	}
 
@@ -270,23 +265,23 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	public function test_get_title() {
 		$caption = 'Example caption';
 		$title   = 'Media Title';
-		$track   = array(
+		$track   = [
 			'caption' => $caption,
-		);
+		];
 
 		$this->assertEquals( $caption, $this->instance->get_title( $track ) );
 
-		$track = array(
+		$track = [
 			'title' => $title,
-		);
+		];
 		$this->assertEquals( $title, $this->instance->get_title( $track ) );
 
-		$track = array(
+		$track = [
 			'caption' => $caption,
 			'title'   => $title,
-		);
+		];
 		$this->assertEquals( $caption, $this->instance->get_title( $track ) );
-		$this->assertEquals( null, $this->instance->get_title( array() ) );
+		$this->assertEquals( null, $this->instance->get_title( [] ) );
 	}
 
 	/**
@@ -308,15 +303,15 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 			return;
 		}
 
-		$files = array(
+		$files = [
 			$this->file_1,
 			$this->file_2,
-		);
+		];
 		$ids   = $this->get_file_ids( $files, $mime_type );
-		return array(
+		return [
 			'ids'  => implode( ',', $ids ),
 			'type' => $type,
-		);
+		];
 	}
 
 	/**
@@ -327,15 +322,15 @@ class Test_AMP_Playlist_Embed_Handler extends WP_UnitTestCase {
 	 * @return array $ids The IDs of the test files.
 	 */
 	public function get_file_ids( $files, $mime_type ) {
-		$ids = array();
+		$ids = [];
 		foreach ( $files as $file ) {
-			$ids[] = $this->factory()->attachment->create_object(
+			$ids[] = self::factory()->attachment->create_object(
 				$file,
 				0,
-				array(
+				[
 					'post_mime_type' => $mime_type,
 					'post_type'      => 'attachment',
-				)
+				]
 			);
 		}
 		return $ids;

@@ -11,4 +11,4 @@
  * @var AMP_Post_Template $this
  */
 
-$this->load_parts( array( 'header-bar' ) );
+$this->load_parts( [ 'header-bar' ] );

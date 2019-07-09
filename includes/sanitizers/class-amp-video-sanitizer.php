@@ -29,9 +29,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
-	);
+	];
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -39,9 +39,9 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'video' => array( 'amp-video', 'amp-youtube' ),
-		);
+		return [
+			'video' => [ 'amp-video', 'amp-youtube' ],
+		];
 	}
 
 	/**
@@ -78,7 +78,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$old_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
 			$old_attributes = $this->filter_data_amp_attributes( $old_attributes, $amp_data );
 
-			$sources        = array();
+			$sources        = [];
 			$new_attributes = $this->filter_attributes( $old_attributes );
 			$layout         = isset( $amp_data['layout'] ) ? $amp_data['layout'] : false;
 			if ( isset( $new_attributes['src'] ) ) {
@@ -97,7 +97,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Gather all child nodes and supply empty video dimensions from sources.
 			$fallback    = null;
-			$child_nodes = array();
+			$child_nodes = [];
 			while ( $node->firstChild ) {
 				$child_node = $node->removeChild( $node->firstChild );
 				if ( $child_node instanceof DOMElement && 'source' === $child_node->nodeName && $child_node->hasAttribute( 'src' ) ) {
@@ -147,7 +147,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Make sure the updated src and poster are applied to the original.
-			foreach ( array( 'src', 'poster', 'artwork' ) as $attr_name ) {
+			foreach ( [ 'src', 'poster', 'artwork' ] as $attr_name ) {
 				if ( $new_node->hasAttribute( $attr_name ) ) {
 					$old_node->setAttribute( $attr_name, $new_node->getAttribute( $attr_name ) );
 				}
@@ -194,12 +194,12 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			$path = wp_parse_url( $src, PHP_URL_PATH );
 			$ext  = pathinfo( $path, PATHINFO_EXTENSION );
 			$name = sanitize_title( wp_basename( $path, ".$ext" ) );
-			$args = array(
+			$args = [
 				'name'        => $name,
 				'post_type'   => 'attachment',
 				'post_status' => 'inherit',
 				'numberposts' => 1,
-			);
+			];
 
 			$attachment = get_posts( $args );
 
@@ -239,7 +239,7 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {

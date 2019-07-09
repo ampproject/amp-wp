@@ -51,10 +51,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_init() {
 		$this->instance->init();
-		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', array( $this->instance, 'enqueue_admin_assets' ) ) );
-		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', array( $this->instance, 'enqueue_block_assets' ) ) );
-		$this->assertEquals( 10, has_action( 'post_submitbox_misc_actions', array( $this->instance, 'render_status' ) ) );
-		$this->assertEquals( 10, has_action( 'save_post', array( $this->instance, 'save_amp_status' ) ) );
+		$this->assertEquals( 10, has_action( 'admin_enqueue_scripts', [ $this->instance, 'enqueue_admin_assets' ] ) );
+		$this->assertEquals( 10, has_action( 'enqueue_block_editor_assets', [ $this->instance, 'enqueue_block_assets' ] ) );
+		$this->assertEquals( 10, has_action( 'post_submitbox_misc_actions', [ $this->instance, 'render_status' ] ) );
+		$this->assertEquals( 10, has_action( 'save_post', [ $this->instance, 'save_amp_status' ] ) );
 	}
 
 	/**
@@ -103,12 +103,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// If a post type doesn't have AMP enabled, the script shouldn't be enqueued.
 		register_post_type(
 			'secret',
-			array( 'public' => false )
+			[ 'public' => false ]
 		);
 		$GLOBALS['post'] = self::factory()->post->create_and_get(
-			array(
+			[
 				'post_type' => 'secret',
-			)
+			]
 		);
 		$this->instance->enqueue_block_assets();
 		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ) );
@@ -120,7 +120,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		$block_script = wp_scripts()->registered[ AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE ];
 		$this->assertEqualSets(
-			array(
+			[
 				'lodash',
 				'moment',
 				'wp-block-editor',
@@ -135,7 +135,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 				'wp-plugins',
 				'wp-polyfill',
 				'wp-server-side-render',
-			),
+			],
 			$block_script->deps
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::BLOCK_ASSET_HANDLE, $block_script->handle );
@@ -164,12 +164,12 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Settings::render_status()
 	 */
 	public function test_render_status() {
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		wp_set_current_user(
-			$this->factory()->user->create(
-				array(
+			self::factory()->user->create(
+				[
 					'role' => 'administrator',
-				)
+				]
 			)
 		);
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -178,25 +178,19 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 
 		// This is not in AMP 'canonical mode' but rather reader or transitional mode.
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// This is in AMP-first mode with a template that can be rendered.
 		add_theme_support( AMP_Theme_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertContains( $amp_status_markup, $output );
 		$this->assertContains( $checkbox_enabled, $output );
 
 		// Post type no longer supports AMP, so no status input.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertContains( 'post type does not support it', $output );
 		$this->assertNotContains( $checkbox_enabled, $output );
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -204,25 +198,22 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// No template is available to render the post.
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
-		ob_start();
-		$this->instance->render_status( $post );
-		$output = ob_get_clean();
+		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
 		$this->assertContains( 'no supported templates to display this in AMP.', wp_strip_all_tags( $output ) );
 		$this->assertNotContains( $checkbox_enabled, $output );
 
 		// User doesn't have the capability to display the metabox.
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		wp_set_current_user(
-			$this->factory()->user->create(
-				array(
+			self::factory()->user->create(
+				[
 					'role' => 'subscriber',
-				)
+				]
 			)
 		);
 
-		ob_start();
-		$this->instance->render_status( $post );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( [ $this->instance, 'render_status' ], [ $post ] );
+		$this->assertEmpty( $output );
 	}
 
 	/**
@@ -231,13 +222,13 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 * @see AMP_Post_Meta_Box::get_status_and_errors()
 	 */
 	public function test_get_status_and_errors() {
-		$expected_status_and_errors = array(
+		$expected_status_and_errors = [
 			'status' => 'enabled',
-			'errors' => array(),
-		);
+			'errors' => [],
+		];
 
 		// A post of type post shouldn't have errors, and AMP should be enabled.
-		$post = $this->factory()->post->create_and_get();
+		$post = self::factory()->post->create_and_get();
 		$this->assertEquals(
 			$expected_status_and_errors,
 			$this->instance->get_status_and_errors( $post )
@@ -253,10 +244,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		// If post type doesn't support AMP, this method should return AMP as being disabled.
 		remove_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
 		$this->assertEquals(
-			array(
+			[
 				'status' => 'disabled',
-				'errors' => array( 'post-type-support' ),
-			),
+				'errors' => [ 'post-type-support' ],
+			],
 			$this->instance->get_status_and_errors( $post )
 		);
 		add_post_type_support( 'post', AMP_Post_Type_Support::SLUG );
@@ -265,10 +256,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		add_filter( 'amp_supportable_templates', '__return_empty_array' );
 		AMP_Options_Manager::update_option( 'all_templates_supported', false );
 		$this->assertEquals(
-			array(
+			[
 				'status' => 'disabled',
-				'errors' => array( 'no_matching_template' ),
-			),
+				'errors' => [ 'no_matching_template' ],
+			],
 			$this->instance->get_status_and_errors( $post )
 		);
 	}
@@ -280,39 +271,39 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_get_error_messages() {
 		$this->assertEquals(
-			array( 'Your site does not allow AMP to be disabled.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, array( 'status_immutable' ) )
+			[ 'Your site does not allow AMP to be disabled.' ],
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::ENABLED_STATUS, [ 'status_immutable' ] )
 		);
 
 		$this->assertEquals(
-			array( 'Your site does not allow AMP to be enabled.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'status_immutable' ) )
+			[ 'Your site does not allow AMP to be enabled.' ],
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'status_immutable' ] )
 		);
 
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'template_unsupported' ) );
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'template_unsupported' ] );
 		$this->assertContains( 'There are no', $messages[0] );
 		$this->assertContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
-			array( 'AMP cannot be enabled on password protected posts.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'password-protected' ) )
+			[ 'AMP cannot be enabled on password protected posts.' ],
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'password-protected' ] )
 		);
 
-		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'post-type-support' ) );
+		$messages = $this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'post-type-support' ] );
 		$this->assertContains( 'AMP cannot be enabled because this', $messages[0] );
 		$this->assertContains( 'page=amp-options', $messages[0] );
 
 		$this->assertEquals(
-			array(
+			[
 				'A plugin or theme has disabled AMP support.',
 				'Unavailable for an unknown reason.',
-			),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'skip-post', 'unknown-error' ) )
+			],
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'skip-post', 'unknown-error' ] )
 		);
 
 		$this->assertEquals(
-			array( 'Unavailable for an unknown reason.' ),
-			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, array( 'unknown-error' ) )
+			[ 'Unavailable for an unknown reason.' ],
+			$this->instance->get_error_messages( AMP_Post_Meta_Box::DISABLED_STATUS, [ 'unknown-error' ] )
 		);
 	}
 
@@ -323,34 +314,34 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	 */
 	public function test_save_amp_status() {
 		// Test failure.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Setup for success.
 		wp_set_current_user(
-			$this->factory->user->create(
-				array(
+			self::factory()->user->create(
+				[
 					'role' => 'administrator',
-				)
+				]
 			)
 		);
 		$_POST[ AMP_Post_Meta_Box::NONCE_NAME ]        = wp_create_nonce( AMP_Post_Meta_Box::NONCE_ACTION );
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'disabled';
 
 		// Test revision bail.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_save_post_revision( $post_id );
 		$this->assertEmpty( get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
 		// Test post update success to disable.
-		$post_id = $this->factory->post->create();
+		$post_id = self::factory()->post->create();
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_update_post(
-			array(
+			[
 				'ID'         => $post_id,
 				'post_title' => 'updated',
-			)
+			]
 		);
 		$this->assertTrue( (bool) get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 
@@ -358,10 +349,10 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		$_POST[ AMP_Post_Meta_Box::STATUS_INPUT_NAME ] = 'enabled';
 		delete_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY );
 		wp_update_post(
-			array(
+			[
 				'ID'         => $post_id,
 				'post_title' => 'updated',
-			)
+			]
 		);
 		$this->assertEquals( AMP_Post_Meta_Box::ENABLED_STATUS, get_post_meta( $post_id, AMP_Post_Meta_Box::STATUS_POST_META_KEY, true ) );
 	}

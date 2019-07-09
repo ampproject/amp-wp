@@ -8,7 +8,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	public function setUp() {
 		parent::setUp();
 		AMP_Options_Manager::register_settings();
-		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 	}
 
 	private $vendor = 'googleanalytics';
@@ -51,23 +51,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	}';
 
 	private function get_options() {
-		return AMP_Options_Manager::get_option( 'analytics', array() );
+		return AMP_Options_Manager::get_option( 'analytics', [] );
 	}
 
 	private function render_post() {
-		$user_id = $this->factory->user->create();
-		$post_id = $this->factory->post->create(
-			array(
+		$user_id = self::factory()->user->create();
+		$post_id = self::factory()->post->create(
+			[
 				'post_author' => $user_id,
-			)
+			]
 		);
 
-		// Need to use ob here since the method echos
-		ob_start();
-		amp_render_post( $post_id );
-		$amp_rendered = ob_get_clean();
-
-		return $amp_rendered;
+		return get_echo( 'amp_render_post', [ $post_id ] );
 	}
 
 	/**
@@ -79,9 +74,9 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	private function insert_one_option( $type, $config ) {
 		AMP_Options_Manager::update_option(
 			'analytics',
-			array(
+			[
 				'__new__' => compact( 'type', 'config' ),
-			)
+			]
 		);
 	}
 
@@ -103,7 +98,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 1, count( $options ) );
+		$this->assertCount( 1, $options );
 	}
 
 	/**
@@ -124,7 +119,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$options = $this->get_options();
 
-		$this->assertEquals( 2, count( $options ) );
+		$this->assertCount( 2, $options );
 	}
 
 	/**
@@ -157,7 +152,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 				break;
 			}
 		}
-		$this->AssertTrue( $analytics_js_found );
+
+		libxml_clear_errors();
+		libxml_use_internal_errors( $libxml_previous_state );
+
+		$this->assertTrue( $analytics_js_found );
 
 	}
 
@@ -182,11 +181,11 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
 
-		// One amp-analytics component should be in the page
-		$this->assertEquals( 1, $components->length );
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 
+		// One amp-analytics component should be in the page
+		$this->assertEquals( 1, $components->length );
 	}
 
 	/**
@@ -211,18 +210,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		$dom = new DOMDocument();
 		$dom->loadHTML( $amp_rendered );
 		$components = $dom->getElementsByTagName( 'amp-analytics' );
-		// Two amp-analytics components should be in the page
-		$this->assertEquals( 2, $components->length );
 
 		libxml_clear_errors();
 		libxml_use_internal_errors( $libxml_previous_state );
 
+		// Two amp-analytics components should be in the page
+		$this->assertEquals( 2, $components->length );
 	}
 
 	/**
 	 * Test amp_get_analytics()
 	 *
-	 * @covers \amp_get_analytics()
+	 * @covers ::amp_get_analytics()
 	 */
 	public function test_amp_get_analytics() {
 		$this->insert_one_option(
@@ -231,7 +230,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 
 		$analytics = amp_get_analytics();
-		$this->assertEquals( 1, count( $analytics ) );
+		$this->assertCount( 1, $analytics );
 
 		$key = key( $analytics );
 		$this->assertArrayHasKey( 'type', $analytics[ $key ] );
@@ -240,7 +239,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		add_filter(
 			'amp_analytics_entries',
-			function( $analytics ) use ( $key ) {
+			static function( $analytics ) use ( $key ) {
 				$analytics[ $key ]['type'] = 'test';
 				return $analytics;
 			}
@@ -252,7 +251,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	/**
 	 * Test amp_print_analytics()
 	 *
-	 * @covers \amp_print_analytics()
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics() {
 		$this->insert_one_option(
@@ -262,9 +261,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
-		ob_start();
-		amp_print_analytics( $analytics );
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
@@ -277,21 +274,17 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 	 * This test asserts that an issue discovered in PHP 7.1 is fixed.
 	 *
 	 * @see AMP_Theme_Support::add_hooks() Where add_action( 'wp_footer', 'amp_print_analytics' ) is done.
-	 * @covers \amp_print_analytics()
+	 * @covers ::amp_print_analytics()
 	 */
 	public function test_amp_print_analytics_when_empty() {
-
-		ob_start();
-		amp_print_analytics( '' );
-		$this->assertEmpty( ob_get_clean() );
+		$output = get_echo( 'amp_print_analytics', [ '' ] );
+		$this->assertEmpty( $output );
 
 		$this->insert_one_option(
 			$this->vendor,
 			$this->config_one
 		);
-		ob_start();
-		amp_print_analytics( '' );
-		$output = ob_get_clean();
+		$output = get_echo( 'amp_print_analytics', [ '' ] );
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
 	}
