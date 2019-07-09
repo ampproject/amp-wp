@@ -91,7 +91,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		 *
 		 * @return bool|string Returns false when $update_path is false, else the new URL.
 		 */
-		$getPath = function( $asset ) use ( $update_path ) {
+		$get_asset_path = function( $asset ) use ( $update_path ) {
 			if ( $asset && $update_path ) {
 				$args = [
 					$update_path,
@@ -140,7 +140,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 									if ( ! empty( $images ) ) {
 										foreach ( $images as $image ) {
 											if ( $update_path ) {
-												$node->setAttribute( $attribute, str_replace( $image, $getPath( $image ), $asset ) );
+												$node->setAttribute( $attribute, str_replace( $image, $get_asset_path( $image ), $asset ) );
 											}
 
 											// Add to assets array.
@@ -149,7 +149,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 									}
 								} else {
 									if ( $update_path ) {
-										$node->setAttribute( $attribute, $getPath( $asset ) );
+										$node->setAttribute( $attribute, $get_asset_path( $asset ) );
 									}
 
 									// Add to assets array.

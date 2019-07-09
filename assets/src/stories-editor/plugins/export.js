@@ -34,7 +34,7 @@ const handleExport = () => {
 							const a = document.createElement( 'a' );
 							const url = URL.createObjectURL( data );
 							const clickHandler = () => {
-								setTimeout(() => {
+								setTimeout( () => {
 									URL.revokeObjectURL( url );
 									a.removeEventListener( 'click', clickHandler );
 								}, 150 );
