@@ -1687,7 +1687,7 @@ class AMP_Story_Post_Type {
 				[
 					'errorMessage' => esc_html__( 'The ZipArchive class is required to export AMP stories.', 'amp' ),
 				],
-				403
+				400
 			);
 		}
 
@@ -1697,7 +1697,7 @@ class AMP_Story_Post_Type {
 				[
 					'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' ),
 				],
-				403
+				401
 			);
 		}
 
@@ -1706,11 +1706,19 @@ class AMP_Story_Post_Type {
 
 		// Export failed.
 		if ( is_wp_error( $export ) ) {
+			$error_data = $export->get_error_data();
+
+			if ( is_array( $error_data ) && isset( $error_data['status'] ) ) {
+				$status = $error_data['status'];
+			} else {
+				$status = 500;
+			}
+
 			wp_send_json_error(
 				[
 					'errorMessage' => $export->get_error_message(),
 				],
-				403
+				$status
 			);
 		}
 
@@ -1719,7 +1727,7 @@ class AMP_Story_Post_Type {
 			[
 				'errorMessage' => esc_html__( 'Could not generate the AMP story archive.', 'amp' ),
 			],
-			403
+			500
 		);
 	}
 
