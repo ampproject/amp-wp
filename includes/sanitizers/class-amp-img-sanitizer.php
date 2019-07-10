@@ -233,6 +233,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$class = '';
 				}
 				if ( ! $dimensions ) {
+					// @todo Why not $node->setAttribute( 'object-fit', 'contain' )? The no need for the CSS rule in amp-default.css.
 					$class .= ' amp-wp-unknown-size';
 				}
 
@@ -254,6 +255,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 					$node->setAttribute( 'width', $width );
 					if ( ! isset( $dimensions['width'] ) ) {
+						// @todo Why not $node->setAttribute( 'object-fit', 'contain' )? The no need for the CSS rule in amp-default.css.
 						$class .= ' amp-wp-unknown-width';
 					}
 				}
@@ -266,6 +268,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 					$node->setAttribute( 'height', $height );
 					if ( ! isset( $dimensions['height'] ) ) {
+						// @todo Why not $node->setAttribute( 'object-fit', 'contain' )? The no need for the CSS rule in amp-default.css.
 						$class .= ' amp-wp-unknown-height';
 					}
 				}

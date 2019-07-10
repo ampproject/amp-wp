@@ -5,7 +5,9 @@
  * Also use object-fit:contain in worst case scenario when we can't figure out dimensions for an image.
  */
 amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,
-.amp-wp-unknown-size > img {
+amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img,
+amp-img.amp-wp-unknown-size > img,
+amp-anim.amp-wp-unknown-size > img {
 	object-fit: contain;
 }
 
