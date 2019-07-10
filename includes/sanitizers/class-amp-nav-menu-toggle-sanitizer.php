@@ -20,7 +20,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'nav_container_id'           => '',
 		'nav_container_xpath'        => '', // Alternative for 'nav_container_id', if no ID available.
 		'menu_button_id'             => '',
@@ -28,7 +28,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		'nav_container_toggle_class' => '',
 		'menu_button_toggle_class'   => '', // Optional.
 		'nav_menu_toggle_state_id'   => 'navMenuToggledOn',
-	);
+	];
 
 	/**
 	 * XPath.
@@ -46,7 +46,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
+	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		// Ensure the state ID is always set.

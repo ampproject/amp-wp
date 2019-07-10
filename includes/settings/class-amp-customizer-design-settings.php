@@ -41,7 +41,7 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function is_amp_customizer_enabled() {
 
-		if ( current_theme_supports( 'amp' ) ) {
+		if ( AMP_Theme_Support::READER_MODE_SLUG !== AMP_Options_Manager::get_option( 'theme_support' ) ) {
 			return false;
 		}
 
@@ -59,10 +59,10 @@ class AMP_Customizer_Design_Settings {
 	 * Init.
 	 */
 	public static function init() {
-		add_action( 'amp_customizer_init', array( __CLASS__, 'init_customizer' ) );
+		add_action( 'amp_customizer_init', [ __CLASS__, 'init_customizer' ] );
 
 		if ( self::is_amp_customizer_enabled() ) {
-			add_filter( 'amp_customizer_get_settings', array( __CLASS__, 'append_settings' ) );
+			add_filter( 'amp_customizer_get_settings', [ __CLASS__, 'append_settings' ] );
 		}
 	}
 
@@ -71,9 +71,9 @@ class AMP_Customizer_Design_Settings {
 	 */
 	public static function init_customizer() {
 		if ( self::is_amp_customizer_enabled() ) {
-			add_action( 'amp_customizer_register_settings', array( __CLASS__, 'register_customizer_settings' ) );
-			add_action( 'amp_customizer_register_ui', array( __CLASS__, 'register_customizer_ui' ) );
-			add_action( 'amp_customizer_enqueue_preview_scripts', array( __CLASS__, 'enqueue_customizer_preview_scripts' ) );
+			add_action( 'amp_customizer_register_settings', [ __CLASS__, 'register_customizer_settings' ] );
+			add_action( 'amp_customizer_register_ui', [ __CLASS__, 'register_customizer_ui' ] );
+			add_action( 'amp_customizer_enqueue_preview_scripts', [ __CLASS__, 'enqueue_customizer_preview_scripts' ] );
 		}
 	}
 
@@ -87,45 +87,45 @@ class AMP_Customizer_Design_Settings {
 		// Header text color setting.
 		$wp_customize->add_setting(
 			'amp_customizer[header_color]',
-			array(
+			[
 				'type'              => 'option',
 				'default'           => self::DEFAULT_HEADER_COLOR,
 				'sanitize_callback' => 'sanitize_hex_color',
 				'transport'         => 'postMessage',
-			)
+			]
 		);
 
 		// Header background color.
 		$wp_customize->add_setting(
 			'amp_customizer[header_background_color]',
-			array(
+			[
 				'type'              => 'option',
 				'default'           => self::DEFAULT_HEADER_BACKGROUND_COLOR,
 				'sanitize_callback' => 'sanitize_hex_color',
 				'transport'         => 'postMessage',
-			)
+			]
 		);
 
 		// Background color scheme.
 		$wp_customize->add_setting(
 			'amp_customizer[color_scheme]',
-			array(
+			[
 				'type'              => 'option',
 				'default'           => self::DEFAULT_COLOR_SCHEME,
-				'sanitize_callback' => array( __CLASS__, 'sanitize_color_scheme' ),
+				'sanitize_callback' => [ __CLASS__, 'sanitize_color_scheme' ],
 				'transport'         => 'postMessage',
-			)
+			]
 		);
 
 		// Display exit link.
 		$wp_customize->add_setting(
 			'amp_customizer[display_exit_link]',
-			array(
+			[
 				'type'              => 'option',
 				'default'           => false,
 				'sanitize_callback' => 'rest_sanitize_boolean',
 				'transport'         => 'postMessage',
-			)
+			]
 		);
 	}
 
@@ -137,10 +137,10 @@ class AMP_Customizer_Design_Settings {
 	public static function register_customizer_ui( $wp_customize ) {
 		$wp_customize->add_section(
 			'amp_design',
-			array(
+			[
 				'title' => __( 'Design', 'amp' ),
 				'panel' => AMP_Template_Customizer::PANEL_ID,
-			)
+			]
 		);
 
 		// Header text color control.
@@ -148,12 +148,12 @@ class AMP_Customizer_Design_Settings {
 			new WP_Customize_Color_Control(
 				$wp_customize,
 				'amp_header_color',
-				array(
+				[
 					'settings' => 'amp_customizer[header_color]',
 					'label'    => __( 'Header Text Color', 'amp' ),
 					'section'  => 'amp_design',
 					'priority' => 10,
-				)
+				]
 			)
 		);
 
@@ -162,61 +162,61 @@ class AMP_Customizer_Design_Settings {
 			new WP_Customize_Color_Control(
 				$wp_customize,
 				'amp_header_background_color',
-				array(
+				[
 					'settings' => 'amp_customizer[header_background_color]',
 					'label'    => __( 'Header Background & Link Color', 'amp' ),
 					'section'  => 'amp_design',
 					'priority' => 20,
-				)
+				]
 			)
 		);
 
 		// Background color scheme.
 		$wp_customize->add_control(
 			'amp_color_scheme',
-			array(
+			[
 				'settings' => 'amp_customizer[color_scheme]',
 				'label'    => __( 'Color Scheme', 'amp' ),
 				'section'  => 'amp_design',
 				'type'     => 'radio',
 				'priority' => 30,
 				'choices'  => self::get_color_scheme_names(),
-			)
+			]
 		);
 
 		// Display exit link.
 		$wp_customize->add_control(
 			'amp_display_exit_link',
-			array(
+			[
 				'settings' => 'amp_customizer[display_exit_link]',
 				'label'    => __( 'Display link to exit reader mode?', 'amp' ),
 				'section'  => 'amp_design',
 				'type'     => 'checkbox',
 				'priority' => 40,
-			)
+			]
 		);
 
 		// Header.
 		$wp_customize->selective_refresh->add_partial(
 			'amp-wp-header',
-			array(
+			[
 				'selector'         => '.amp-wp-header',
-				'settings'         => array( 'blogname', 'amp_customizer[display_exit_link]' ), // @todo Site Icon.
-				'render_callback'  => array( __CLASS__, 'render_header_bar' ),
+				'settings'         => [ 'blogname', 'amp_customizer[display_exit_link]' ], // @todo Site Icon.
+				'render_callback'  => [ __CLASS__, 'render_header_bar' ],
 				'fallback_refresh' => false,
-			)
+			]
 		);
 
 		// Header.
 		$wp_customize->selective_refresh->add_partial(
 			'amp-wp-footer',
-			array(
+			[
 				'selector'            => '.amp-wp-footer',
-				'settings'            => array( 'blogname' ),
-				'render_callback'     => array( __CLASS__, 'render_footer' ),
+				'settings'            => [ 'blogname' ],
+				'render_callback'     => [ __CLASS__, 'render_footer' ],
 				'fallback_refresh'    => false,
 				'container_inclusive' => true,
-			)
+			]
 		);
 	}
 
@@ -226,7 +226,7 @@ class AMP_Customizer_Design_Settings {
 	public static function render_header_bar() {
 		if ( is_singular() ) {
 			$post_template = new AMP_Post_Template( get_post() );
-			$post_template->load_parts( array( 'header-bar' ) );
+			$post_template->load_parts( [ 'header-bar' ] );
 		}
 	}
 
@@ -236,7 +236,7 @@ class AMP_Customizer_Design_Settings {
 	public static function render_footer() {
 		if ( is_singular() ) {
 			$post_template = new AMP_Post_Template( get_post() );
-			$post_template->load_parts( array( 'footer' ) );
+			$post_template->load_parts( [ 'footer' ] );
 		}
 	}
 
@@ -252,16 +252,16 @@ class AMP_Customizer_Design_Settings {
 		wp_enqueue_script(
 			'amp-customizer-design-preview',
 			amp_get_asset_url( 'js/amp-customizer-design-preview.js' ),
-			array( 'amp-customize-preview' ),
+			[ 'amp-customize-preview' ],
 			false,
 			true
 		);
 		wp_localize_script(
 			'amp-customizer-design-preview',
 			'amp_customizer_design',
-			array(
+			[
 				'color_schemes' => self::get_color_schemes(),
-			)
+			]
 		);
 
 		// Prevent a theme's registered blogname partial from causing full page refreshes.
@@ -282,12 +282,12 @@ class AMP_Customizer_Design_Settings {
 	public static function append_settings( $settings ) {
 		$settings = wp_parse_args(
 			$settings,
-			array(
+			[
 				'header_color'            => self::DEFAULT_HEADER_COLOR,
 				'header_background_color' => self::DEFAULT_HEADER_BACKGROUND_COLOR,
 				'color_scheme'            => self::DEFAULT_COLOR_SCHEME,
 				'display_exit_link'       => false,
-			)
+			]
 		);
 
 		$theme_colors = self::get_colors_for_color_scheme( $settings['color_scheme'] );
@@ -295,9 +295,9 @@ class AMP_Customizer_Design_Settings {
 		return array_merge(
 			$settings,
 			$theme_colors,
-			array(
+			[
 				'link_color' => $settings['header_background_color'],
-			)
+			]
 		);
 	}
 
@@ -307,10 +307,10 @@ class AMP_Customizer_Design_Settings {
 	 * @return array Color scheme names.
 	 */
 	protected static function get_color_scheme_names() {
-		return array(
+		return [
 			'light' => __( 'Light', 'amp' ),
 			'dark'  => __( 'Dark', 'amp' ),
-		);
+		];
 	}
 
 	/**
@@ -319,22 +319,22 @@ class AMP_Customizer_Design_Settings {
 	 * @return array Color schemes.
 	 */
 	protected static function get_color_schemes() {
-		return array(
-			'light' => array(
+		return [
+			'light' => [
 				// Convert colors to greyscale for light theme color; see <http://goo.gl/2gDLsp>.
 				'theme_color'      => '#fff',
 				'text_color'       => '#353535',
 				'muted_text_color' => '#696969',
 				'border_color'     => '#c2c2c2',
-			),
-			'dark'  => array(
+			],
+			'dark'  => [
 				// Convert and invert colors to greyscale for dark theme color; see <http://goo.gl/uVB2cO>.
 				'theme_color'      => '#0a0a0a',
 				'text_color'       => '#dedede',
 				'muted_text_color' => '#b1b1b1',
 				'border_color'     => '#707070',
-			),
-		);
+			],
+		];
 	}
 
 	/**

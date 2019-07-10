@@ -15,7 +15,7 @@ the_post();
 		<title><?php echo esc_html( wp_get_document_title() ); ?></title>
 		<?php
 		wp_enqueue_scripts();
-		wp_scripts()->do_items( array( 'amp-runtime' ) ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
+		wp_scripts()->do_items( [ 'amp-runtime' ] ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
 		wp_styles()->do_items();
 		?>
 		<?php rel_canonical(); ?>

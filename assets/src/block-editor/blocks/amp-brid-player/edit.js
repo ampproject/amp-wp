@@ -20,7 +20,7 @@ const BlockEdit = ( props ) => {
 	const { autoPlay, dataPartner, dataPlayer, dataVideo, dataPlaylist, dataOutstream } = attributes;
 	const ampLayoutOptions = [
 		{ value: 'responsive', label: __( 'Responsive', 'amp' ) },
-		{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+		{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
 		{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
 		{ value: 'fill', label: __( 'Fill', 'amp' ) },
 		{ value: 'flex-item', label: __( 'Flex-item', 'amp' ) },
@@ -36,12 +36,12 @@ const BlockEdit = ( props ) => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Brid Player Settings', 'amp' ) }>
 					<TextControl
-						label={ __( 'Brid.tv partner ID (required)', 'amp' ) }
+						label={ __( 'Partner ID (required)', 'amp' ) }
 						value={ dataPartner }
 						onChange={ ( value ) => ( setAttributes( { dataPartner: value } ) ) }
 					/>
 					<TextControl
-						label={ __( 'Brid.tv player ID (required)', 'amp' ) }
+						label={ __( 'Player ID (required)', 'amp' ) }
 						value={ dataPlayer }
 						onChange={ ( value ) => ( setAttributes( { dataPlayer: value } ) ) }
 					/>
