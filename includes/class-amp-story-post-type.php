@@ -1818,9 +1818,9 @@ class AMP_Story_Post_Type {
 			$zip->addEmptyDir( $slug . '/assets' );
 
 			foreach ( $assets as $asset ) {
-				$contents = file_get_contents( $asset ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-				if ( false !== $contents ) {
-					$zip->addFromString( $slug . '/assets/' . basename( $asset ), $contents );
+				$response = wp_remote_get( $asset );
+				if ( is_array( $response ) && ! empty( $response['body'] ) ) {
+					$zip->addFromString( $slug . '/assets/' . basename( $asset ), $response['body'] );
 				}
 			}
 		}
