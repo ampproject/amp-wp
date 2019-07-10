@@ -1770,7 +1770,7 @@ class AMP_Story_Post_Type {
 		// Passed to `wp_remote_get()`.
 		$args = [
 			'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-			'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+			'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
 			'sslverify'   => false,
 			'redirection' => 0, // Because we're in a loop for redirection.
 			'headers'     => [
@@ -1793,9 +1793,8 @@ class AMP_Story_Post_Type {
 
 		if ( $export_args['canonical_url'] ) {
 
-			// Clean up the source.
+			// Clean up the source and remove comments.
 			$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
-			$html = str_replace( '/*# sourceURL=amp-custom.css */', '', $html );
 
 			// Replace the Canonical URL in the document head.
 			$html = preg_replace( '/(?<=<link rel="canonical" href=")(.*)(?=">)/', $export_args['canonical_url'], $html );

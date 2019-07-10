@@ -26,7 +26,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Default assets.
 	 *
-	 * @var array
+	 * @var string[]
 	 */
 	protected $assets = [];
 
@@ -74,10 +74,10 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Add and sanitize the export assets for the AMP Story.
 	 *
-	 * @param string $name       The DOMElement name.
-	 * @param array  $attributes The DOMElement attributes.
+	 * @param string   $name       The DOMElement name.
+	 * @param string[] $attributes The DOMElement attributes.
 	 */
-	public function sanitize_assets( $name, $attributes ) {
+	public function sanitize_assets( $name, array $attributes ) {
 		$nodes     = $this->dom->getElementsByTagName( $name );
 		$num_nodes = $nodes->length;
 
@@ -104,60 +104,52 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		};
 
 		if ( 0 < $num_nodes ) {
-			for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
-				$node = $nodes->item( $i );
+			foreach ( $nodes as $node ) {
+				foreach ( $attributes as $attribute ) {
+					if ( 'amp-story' === $name && 'publisher' === $attribute ) {
+						if ( $update_path ) {
+							$parse = wp_parse_url( $update_path );
 
-				if ( ! $node instanceof DOMElement ) {
-					continue;
-				}
-
-				if ( ! empty( $attributes ) ) {
-					foreach ( $attributes as $attribute ) {
-						if ( 'amp-story' === $name && 'publisher' === $attribute ) {
-							if ( $update_path ) {
-								$parse = wp_parse_url( $update_path );
-
-								if ( ! empty( $parse['host'] ) ) {
-									$node->setAttribute( $attribute, $parse['host'] );
-								}
+							if ( ! empty( $parse['host'] ) ) {
+								$node->setAttribute( $attribute, $parse['host'] );
 							}
-						} else {
-							$asset = $node->getAttribute( $attribute );
+						}
+					} else {
+						$asset = $node->getAttribute( $attribute );
 
-							// Replace the asset.
-							if ( $asset ) {
-								if ( 'srcset' === $attribute ) {
-									$images = array_filter(
-										array_map(
-											static function ( $srcset_part ) {
-												// Remove descriptors for width and pixel density.
-												return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
-											},
-											preg_split( '/\s*,\s*/', $asset )
-										)
-									);
+						// Replace the asset.
+						if ( $asset ) {
+							if ( 'srcset' === $attribute ) {
+								$images = array_filter(
+									array_map(
+										static function ( $srcset_part ) {
+											// Remove descriptors for width and pixel density.
+											return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
+										},
+										preg_split( '/\s*,\s*/', $asset )
+									)
+								);
 
-									if ( ! empty( $images ) ) {
-										foreach ( $images as $image ) {
-											if ( $update_path ) {
-												$asset = str_replace( $image, $get_asset_path( $image ), $asset );
-											}
-
-											// Add to assets array.
-											$this->assets[] = $image;
+								if ( ! empty( $images ) ) {
+									foreach ( $images as $image ) {
+										if ( $update_path ) {
+											$asset = str_replace( $image, $get_asset_path( $image ), $asset );
 										}
 
-										// Reset the attribute after replacing all the images.
-										$node->setAttribute( $attribute, $asset );
-									}
-								} else {
-									if ( $update_path ) {
-										$node->setAttribute( $attribute, $get_asset_path( $asset ) );
+										// Add to assets array.
+										$this->assets[] = $image;
 									}
 
-									// Add to assets array.
-									$this->assets[] = $asset;
+									// Reset the attribute after replacing all the images.
+									$node->setAttribute( $attribute, $asset );
 								}
+							} else {
+								if ( $update_path ) {
+									$node->setAttribute( $attribute, $get_asset_path( $asset ) );
+								}
+
+								// Add to assets array.
+								$this->assets[] = $asset;
 							}
 						}
 					}
