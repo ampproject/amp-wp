@@ -165,7 +165,7 @@
 	--preview-translateY: -40%;
 	height: initial !important;
 	position: absolute;
-	transform: scale(0.48) translateX(-55%) translateY(-40%) !important;
+	transform: scale(0.48) translateX(-55%) translateY(-40%);
 }
 
 .amp-stories__editor-inserter__results .components-disabled .wp-block div {
