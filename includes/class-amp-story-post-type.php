@@ -558,11 +558,12 @@ class AMP_Story_Post_Type {
 			return $response;
 		}
 
-		$search = '\/' . self::POST_TYPE_SLUG . '\/';
+		$obj = get_post_type_object( self::POST_TYPE_SLUG );
+		$slug = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
 
 		$editable_request_methods = array_map( 'trim', explode( ',', WP_REST_Server::EDITABLE ) );
 
-		if ( ! in_array( $request->get_method(), $editable_request_methods, true ) || ! preg_match( "/{$search}/i", $request->get_route() ) ) {
+		if ( ! in_array( $request->get_method(), $editable_request_methods, true ) || ! preg_match( "#^/wp/v2/{$slug}/#s", $request->get_route() ) ) {
 			return $response;
 		}
 
@@ -577,13 +578,13 @@ class AMP_Story_Post_Type {
 			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
 				$post_content = preg_replace_callback(
-					'|<\w+(?:-\w+)*\s[^>]*?style=\\\"([^"]*)\\\"[^>]+?>|', // Because the post data is slashed.
+					'|(?P<before><\w+(?:-\w+)*\s[^>]*?)style=\\\"(?P<styles>[^"]*)\\\"(?P<after>([^>]+?)*>)|', // Extra slashes appear here because $post_content is pre-slashed..
 					static function ( $matches ) use ( &$style_attr_values ) {
-						$hash                       = md5( $matches[1] );
-						$style_attr_values[ $hash ] = self::safecss_filter_attr( $matches[1] );
+						$hash                       = md5( $matches['styles'] );
+						$style_attr_values[ $hash ] = self::safecss_filter_attr( wp_unslash( $matches['styles'] ) );
 
 						// Replaces the complete style attribute value with its hashed version.
-						return str_replace( $matches[1], $hash, $matches[0] );
+						return $matches['before'] . sprintf( ' data-temp-style-hash="%s" ', $hash ) . $matches['after'];
 					},
 					$post_content
 				);
@@ -598,7 +599,13 @@ class AMP_Story_Post_Type {
 			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
 				// Replaces hashed style attribute value with the original value again.
-				return str_replace( array_keys( $style_attr_values ), array_values( $style_attr_values ), $post_content );
+				return preg_replace_callback(
+					'/ data-temp-style-hash=\\\"(?P<hash>[0-9a-f]+)\\\"/',
+					function ( $matches ) use ( $style_attr_values ) {
+						return isset( $style_attr_values[ $matches['hash'] ] ) ? sprintf( ' style="%s" ', esc_attr( wp_slash( $style_attr_values[ $matches['hash'] ] ) ) ) : '';
+					},
+					$post_content
+				);
 			},
 			20
 		);
