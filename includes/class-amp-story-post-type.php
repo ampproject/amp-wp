@@ -1750,99 +1750,97 @@ class AMP_Story_Post_Type {
 		$zip = new ZipArchive();
 		$res = $zip->open( $file, ZipArchive::CREATE | ZipArchive::OVERWRITE );
 
-		// Generate ZIP and send headers.
-		if ( true === $res ) {
-
-			// Create the zip directory.
-			$zip->addEmptyDir( $slug );
-
-			// Add README.txt file.
-			$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
-
-			// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
-			$query_args = [
-				'story_export' => true,
-				'_wpnonce'     => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
-			];
-
-			// Passed to `wp_remote_get()`.
-			$args = [
-				'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-				'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
-				'sslverify'   => false,
-				'redirection' => 0, // Because we're in a loop for redirection.
-				'headers'     => [
-					'Cache-Control' => 'no-cache',
-				],
-			];
-
-			// Get the preview URL.
-			$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );
-
-			// Ensure we have the required data.
-			if ( ! ( is_array( $response ) && isset( $response['body'] ) && isset( $response['headers']['x-amp-export-assets'] ) ) ) {
-				return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not get the AMP Story HTML.', 'amp' ) );
-			}
-
-			// Get the HTML from the response body.
-			$html = $response['body'];
-
-			$export_args = self::get_export_args( $slug );
-
-			if ( $export_args['canonical_url'] ) {
-
-				// Clean up the source.
-				$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
-				$html = str_replace( '/*# sourceURL=amp-custom.css */', '', $html );
-
-				// Replace the Canonical URL in the document head.
-				$html = preg_replace( '/(?<=<link rel="canonical" href=")(.*)(?=">)/', $export_args['canonical_url'], $html );
-			}
-
-			// Add index.html file.
-			$zip->addFromString( $slug . '/index.html', $html );
-
-			// Get the assets.
-			$assets = explode( ',', $response['headers']['x-amp-export-assets'] );
-
-			// Just in case the main image is not added in the sanitizer.
-			if ( isset( $response['headers']['x-amp-export-image-url'] ) ) {
-				$assets[] = $response['headers']['x-amp-export-image-url'];
-			}
-
-			// Add the assets.
-			if ( ! empty( $assets ) ) {
-
-				// Create the empty assets directory.
-				$zip->addEmptyDir( $slug . '/assets' );
-
-				foreach ( $assets as $asset ) {
-					$contents = file_get_contents( $asset ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-					if ( false !== $contents ) {
-						$zip->addFromString( $slug . '/assets/' . basename( $asset ), $contents );
-					}
-				}
-			}
-
-			// Close the active archive.
-			$zip->close();
-
-			// Read the file.
-			$fo = @fopen( $file, 'r' ); // phpcs:ignore
-
-			if ( ! $fo ) {
-				return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
-			} else {
-				header( 'Content-type: application/octet-stream' );
-				header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
-				header( 'Content-length: ' . filesize( $file ) );
-				fpassthru( $fo );
-				unlink( $file );
-				die();
-			}
-		} else {
+		if ( true !== $res ) {
 			/* translators: %s is the ZipArchive error code. */
 			return new WP_Error( 'amp_story_zip_archive_error', sprintf( esc_html__( 'There was an error generating the ZIP archive. Error code: %s', 'amp' ), $res ) );
+		}
+
+		// Create the zip directory.
+		$zip->addEmptyDir( $slug );
+
+		// Add README.txt file.
+		$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
+
+		// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
+		$query_args = [
+			'story_export' => true,
+			'_wpnonce'     => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
+		];
+
+		// Passed to `wp_remote_get()`.
+		$args = [
+			'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+			'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors; also, response caching is disabled when validating.
+			'sslverify'   => false,
+			'redirection' => 0, // Because we're in a loop for redirection.
+			'headers'     => [
+				'Cache-Control' => 'no-cache',
+			],
+		];
+
+		// Get the preview URL.
+		$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );
+
+		// Ensure we have the required data.
+		if ( ! ( is_array( $response ) && isset( $response['body'] ) && isset( $response['headers']['x-amp-export-assets'] ) ) ) {
+			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not get the AMP Story HTML.', 'amp' ) );
+		}
+
+		// Get the HTML from the response body.
+		$html = $response['body'];
+
+		$export_args = self::get_export_args( $slug );
+
+		if ( $export_args['canonical_url'] ) {
+
+			// Clean up the source.
+			$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
+			$html = str_replace( '/*# sourceURL=amp-custom.css */', '', $html );
+
+			// Replace the Canonical URL in the document head.
+			$html = preg_replace( '/(?<=<link rel="canonical" href=")(.*)(?=">)/', $export_args['canonical_url'], $html );
+		}
+
+		// Add index.html file.
+		$zip->addFromString( $slug . '/index.html', $html );
+
+		// Get the assets.
+		$assets = explode( ',', $response['headers']['x-amp-export-assets'] );
+
+		// Just in case the main image is not added in the sanitizer.
+		if ( isset( $response['headers']['x-amp-export-image-url'] ) ) {
+			$assets[] = $response['headers']['x-amp-export-image-url'];
+		}
+
+		// Add the assets.
+		if ( ! empty( $assets ) ) {
+
+			// Create the empty assets directory.
+			$zip->addEmptyDir( $slug . '/assets' );
+
+			foreach ( $assets as $asset ) {
+				$contents = file_get_contents( $asset ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				if ( false !== $contents ) {
+					$zip->addFromString( $slug . '/assets/' . basename( $asset ), $contents );
+				}
+			}
+		}
+
+		// Close the active archive.
+		$zip->close();
+
+		// Read the file.
+		$fo = @fopen( $file, 'r' ); // phpcs:ignore
+
+		if ( ! $fo ) {
+			return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
+		} else {
+			header( 'Content-type: application/octet-stream' );
+			header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
+			header( 'Content-length: ' . filesize( $file ) );
+			fpassthru( $fo );
+			unlink( $file );
+			die();
 		}
 	}
 }
