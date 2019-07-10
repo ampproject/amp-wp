@@ -168,7 +168,7 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 			'image_with_bad_src_url_get_fallback_dims' => [
 				'<img src="https://example.com/404.png" />',
-				'<amp-img src="https://example.com/404.png" width="' . AMP_Img_Sanitizer::FALLBACK_WIDTH . '" height="' . AMP_Img_Sanitizer::FALLBACK_HEIGHT . '" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://example.com/404.png" width="' . AMP_Img_Sanitizer::FALLBACK_WIDTH . '" height="' . AMP_Img_Sanitizer::FALLBACK_HEIGHT . '" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-unknown-height"></noscript></amp-img>',
+				'<amp-img src="https://example.com/404.png" object-fit="contain" width="' . AMP_Img_Sanitizer::FALLBACK_WIDTH . '" height="' . AMP_Img_Sanitizer::FALLBACK_HEIGHT . '" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-unknown-height amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://example.com/404.png" width="' . AMP_Img_Sanitizer::FALLBACK_WIDTH . '" height="' . AMP_Img_Sanitizer::FALLBACK_HEIGHT . '" class="amp-wp-unknown-size amp-wp-unknown-width amp-wp-unknown-height"></noscript></amp-img>',
 			],
 
 			'gif_image_conversion'                     => [
