@@ -233,6 +233,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$class = '';
 				}
 				if ( ! $dimensions ) {
+					$node->setAttribute( 'object-fit', 'contain' );
 					$class .= ' amp-wp-unknown-size';
 				}
 
