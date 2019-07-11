@@ -417,4 +417,45 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertStringStartsWith( '<amp-story-auto-ads', $actual );
 		$this->assertContains( '<script type="application/json">{"ad-attributes":{"type":"doubleclick"', $actual );
 	}
+
+	/**
+	 * Test AMP_Story_Post_Type::filter_rest_request_for_kses().
+	 *
+	 * @covers AMP_Story_Post_Type::filter_rest_request_for_kses
+	 */
+	public function test_filter_rest_request_for_kses() {
+		AMP_Story_Post_Type::register();
+
+		$author_id = self::factory()->user->create( [ 'role' => 'author' ] );
+		wp_set_current_user( $author_id );
+
+		$story = self::factory()->post->create(
+			[
+				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			]
+		);
+
+		$unsanitized_content = '<!-- wp:amp/amp-story-page {"autoAdvanceAfterDuration":0,"backgroundColors":"[{\u0022color\u0022:\u0022#abb8c3\u0022},{\u0022color\u0022:null}]"} -->
+<amp-story-page style="background-color:#ffffff" id="1371b14f-c7c3-4b9a-bd47-e24f2b8a1f11" class="wp-block-amp-amp-story-page"><amp-story-grid-layer template="fill" style="background-image:linear-gradient(to bottom, #abb8c3, transparent);opacity:1"></amp-story-grid-layer><!-- wp:amp/amp-story-text {"placeholder":"Write text…","tagName":"h1","customTextColor":"#ffffff","backgroundColor":"vivid-red","autoFontSize":45,"positionTop":10,"rotationAngle":-27} -->
+<amp-story-grid-layer template="vertical" data-block-name="amp/amp-story-text"><div class="amp-story-block-wrapper" style="position:absolute;top:10%;left:5%;width:76.22%;height:10.85%"><h1 style="background-color:rgba(207, 46, 46, 1);color:#ffffff;display:flex;transform:rotate(-27deg)" class="wp-block-amp-amp-story-text has-text-color has-background has-vivid-red-background-color" id="ccf08639-cb18-4c65-b35d-8cf2347c700b"><amp-fit-text layout="flex-item" class="amp-text-content">Hello World</amp-fit-text></h1></div></amp-story-grid-layer>
+<!-- /wp:amp/amp-story-text --></amp-story-page><!-- /wp:amp/amp-story-page -->';
+
+		$expected = '<!-- wp:amp/amp-story-page {"autoAdvanceAfterDuration":0,"backgroundColors":"[{\u0022color\u0022:\u0022#abb8c3\u0022},{\u0022color\u0022:null}]"} -->
+<amp-story-page style="background-color:#ffffff" id="1371b14f-c7c3-4b9a-bd47-e24f2b8a1f11" class="wp-block-amp-amp-story-page"><amp-story-grid-layer template="fill" style="background-image:linear-gradient(to bottom, #abb8c3, transparent);opacity:1"></amp-story-grid-layer><!-- wp:amp/amp-story-text {"placeholder":"Write text…","tagName":"h1","customTextColor":"#ffffff","backgroundColor":"vivid-red","autoFontSize":45,"positionTop":10,"rotationAngle":-27} -->
+<amp-story-grid-layer template="vertical" data-block-name="amp/amp-story-text"><div class="amp-story-block-wrapper" style="position:absolute;top:10%;left:5%;width:76.22%;height:10.85%"><h1 style="background-color:rgba(207, 46, 46, 1);color:#ffffff;display:flex;transform:rotate(-27deg)" class="wp-block-amp-amp-story-text has-text-color has-background has-vivid-red-background-color" id="ccf08639-cb18-4c65-b35d-8cf2347c700b"><amp-fit-text layout="flex-item" class="amp-text-content">Hello World</amp-fit-text></h1></div></amp-story-grid-layer>
+<!-- /wp:amp/amp-story-text --></amp-story-page><!-- /wp:amp/amp-story-page -->';
+
+		$request = new WP_REST_Request( 'PUT', sprintf( '/wp/v2/%s/%d', AMP_Story_Post_Type::POST_TYPE_SLUG, $story ) );
+		$request->add_header( 'content-type', 'application/x-www-form-urlencoded' );
+		$request->set_body_params(
+			[
+				'content' => $unsanitized_content,
+			]
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$new_data = $response->get_data();
+
+		$this->assertEquals( $expected, $new_data['content']['raw'] );
+	}
 }
