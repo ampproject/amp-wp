@@ -558,7 +558,7 @@ class AMP_Story_Post_Type {
 			return $response;
 		}
 
-		$obj = get_post_type_object( self::POST_TYPE_SLUG );
+		$obj  = get_post_type_object( self::POST_TYPE_SLUG );
 		$slug = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
 
 		$editable_request_methods = array_map( 'trim', explode( ',', WP_REST_Server::EDITABLE ) );
@@ -573,7 +573,7 @@ class AMP_Story_Post_Type {
 
 		$style_attr_values = [];
 
-		// Replace inline styles before KSES...
+		// Replace inline styles with temporary data-temp-style-hash attribute before KSES...
 		add_filter(
 			'content_save_pre',
 			static function ( $post_content ) use ( &$style_attr_values ) {
@@ -636,12 +636,13 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['animate-in']          = true;
-			$allowed_tag['animate-in-duration'] = true;
-			$allowed_tag['animate-in-delay']    = true;
-			$allowed_tag['animate-in-after']    = true;
-			$allowed_tag['data-font-family']    = true;
-			$allowed_tag['data-block-name']     = true;
+			$allowed_tag['animate-in']           = true;
+			$allowed_tag['animate-in-duration']  = true;
+			$allowed_tag['animate-in-delay']     = true;
+			$allowed_tag['animate-in-after']     = true;
+			$allowed_tag['data-font-family']     = true;
+			$allowed_tag['data-block-name']      = true;
+			$allowed_tag['data-temp-style-hash'] = true;
 		}
 
 		return $allowed_tags;
