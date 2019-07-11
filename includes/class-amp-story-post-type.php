@@ -341,6 +341,7 @@ class AMP_Story_Post_Type {
 					$slug = sanitize_title( $post->post_title, $post->ID );
 
 					$sanitizers['AMP_Story_Export_Sanitizer'] = self::get_export_args( $slug );
+					$sanitizers['AMP_Style_Sanitizer']['include_manifest_comment'] = 'never';
 				}
 				return $sanitizers;
 			},
@@ -1755,14 +1756,15 @@ class AMP_Story_Post_Type {
 		// Get the HTML from the response body.
 		$html   = $response['body'];
 		$assets = [];
+		$regex  = '<!--\s*AMP_EXPORT_ASSETS\s*:\s*(\[.*?\])\s*-->';
 
-		// Get the assets.
-		if ( preg_match( '#</body>.*?<!--\s*AMP_EXPORT_ASSETS\s*:\s*(\[.*?\])\s*-->#s', $html, $matches ) ) {
+		// Get the assets from the AMP_EXPORT_ASSETS comment.
+		if ( preg_match( '#</body>.*?' . $regex . '#s', $html, $matches ) ) {
 			$assets = json_decode( $matches[1], true );
-		}
 
-		// Clean up the source and remove comments.
-		$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
+			// Remove the comment.
+			$html = preg_replace( '/' . $regex . '/s', '', $html );
+		}
 
 		// Create the zip directory.
 		$zip->addEmptyDir( $slug );
