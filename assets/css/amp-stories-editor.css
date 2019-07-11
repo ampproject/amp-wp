@@ -46,6 +46,12 @@
 	display: none !important;
 }
 
+/* Removes margin from block wrappers */
+.editor-styles-wrapper #amp-story-editor [data-block] {
+	margin-top: 0;
+	margin-bottom: 0;
+}
+
 /* Quote block adjustments */
 .wp-block-quote__citation {
 	font-size: 16px;
