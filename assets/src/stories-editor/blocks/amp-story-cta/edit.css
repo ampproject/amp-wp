@@ -5,6 +5,16 @@
 	height: 20%;
 }
 
+.editor-block-list__layout div[data-type="amp/amp-story-cta"] * {
+
+	/* 20% of the full height of a page in the editor */
+	max-height: 110px;
+}
+
+.amp-block-story-cta__link img {
+	object-fit: contain;
+}
+
 .editor-block-list__layout div[data-type="amp/amp-story-cta"] .editor-block-mover {
 	display: none;
 }
