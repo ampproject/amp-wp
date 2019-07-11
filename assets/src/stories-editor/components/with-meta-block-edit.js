@@ -38,18 +38,23 @@ class MetaBlockEdit extends Component {
 			width,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
-		if (
-			! isSelected &&
-			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width &&
-			isEqual( prevProps.fontSize, fontSize )
-		) {
-			return;
+		// If not selected, only change font size if height or width has changed.
+		const checkFontSize = (
+			isSelected ||
+			(
+				! isSelected &&
+				prevProps.attributes.height === height &&
+				prevProps.attributes.width === width
+			)
+		);
+
+		if ( checkFontSize ) {
+			maybeUpdateFontSize( this.props );
 		}
 
-		maybeUpdateFontSize( this.props );
-		maybeUpdateBlockDimensions( this.props );
+		if ( ! isEqual( prevProps.fontSize, fontSize ) ) {
+			maybeUpdateBlockDimensions( this.props );
+		}
 	}
 
 	render() {
