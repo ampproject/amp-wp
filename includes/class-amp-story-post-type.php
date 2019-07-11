@@ -1783,7 +1783,7 @@ class AMP_Story_Post_Type {
 			$zip->addEmptyDir( $slug . '/assets' );
 
 			foreach ( $assets as $asset ) {
-				$response = wp_remote_get( $asset );
+				$response = wp_remote_get( $asset, [ 'sslverify' => false ] );
 				if ( is_array( $response ) && ! empty( $response['body'] ) ) {
 					$zip->addFromString( $slug . '/assets/' . self::export_image_basename( $asset ), $response['body'] );
 				}
