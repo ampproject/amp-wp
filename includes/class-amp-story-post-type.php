@@ -450,6 +450,7 @@ class AMP_Story_Post_Type {
 
 		// Add some more allowed attributes.
 		$allowed_attr[] = 'display';
+		$allowed_attr[] = 'opacity';
 		$allowed_attr[] = 'position';
 		$allowed_attr[] = 'top';
 		$allowed_attr[] = 'left';
@@ -602,7 +603,7 @@ class AMP_Story_Post_Type {
 				return preg_replace_callback(
 					'/ data-temp-style-hash=\\\"(?P<hash>[0-9a-f]+)\\\"/',
 					function ( $matches ) use ( $style_attr_values ) {
-						return isset( $style_attr_values[ $matches['hash'] ] ) ? sprintf( ' style="%s" ', esc_attr( wp_slash( $style_attr_values[ $matches['hash'] ] ) ) ) : '';
+						return isset( $style_attr_values[ $matches['hash'] ] ) ? sprintf( ' style="%s"', esc_attr( wp_slash( $style_attr_values[ $matches['hash'] ] ) ) ) : '';
 					},
 					$post_content
 				);
