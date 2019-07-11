@@ -20,7 +20,8 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 	 * @var array
 	 */
 	protected $DEFAULT_ARGS = [
-		'base_url' => '',
+		'base_url'      => '',
+		'canonical_url' => '',
 	];
 
 	/**
@@ -65,10 +66,68 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 			]
 		);
 
-		// Send the raw HTTP header for the export assets.
-		if ( ! empty( $this->assets ) && ! headers_sent() ) {
-			header( 'X-AMP-Export-Assets: ' . implode( ',', $this->assets ) );
+		$xpath           = new DOMXPath( $this->dom );
+		$schema_org_meta = $xpath->query( '//head/script[@type="application/ld+json"]' )->item( 0 );
+
+		if ( $schema_org_meta && $schema_org_meta->firstChild instanceof DOMText ) {
+			$metadata = json_decode( $schema_org_meta->firstChild->nodeValue );
+
+			// Adds the image to the assets array.
+			if ( isset( $metadata->image->url ) ) {
+				$image_url = $metadata->image->url;
+
+				if ( $image_url && ! in_array( $image_url, $this->assets, true ) ) {
+					$this->assets[] = $image_url;
+				}
+			}
+
+			if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
+
+				// Replace the image URL.
+				if ( isset( $image_url ) ) {
+					$args = [
+						$this->args['base_url'],
+						'assets',
+						AMP_Story_Post_Type::export_image_basename( $image_url ),
+					];
+
+					$metadata->image->url = implode( '/', $args );
+				}
+
+				$parse = wp_parse_url( $this->args['base_url'] );
+
+				// Replace the Publishers name.
+				if ( $parse['host'] ) {
+					$metadata->publisher->name = $parse['host'];
+				}
+
+				// Replace the Canonical URL.
+				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore
+			}
+
+			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
 		}
+
+		// Add a new Canonical URL in the document head.
+		if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
+			$rel_canonical = AMP_DOM_Utils::create_node(
+				$this->dom,
+				'link',
+				[
+					'rel'  => 'canonical',
+					'href' => $this->args['canonical_url'],
+				]
+			);
+
+			$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+			$head->appendChild( $rel_canonical );
+		}
+
+		// Add the export assets as an HTML comment.
+		$encoded = wp_json_encode( $this->assets, JSON_PRETTY_PRINT );
+		$encoded = str_replace( '--', '\u002d\u002d', $encoded ); // Prevent "--" in strings from breaking out of HTML comments.
+		$comment = $this->dom->createComment( 'AMP_EXPORT_ASSETS:' . $encoded . "\n" );
+		$this->dom->documentElement->appendChild( $comment );
 	}
 
 	/**
@@ -96,7 +155,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				$args = [
 					$update_path,
 					'assets',
-					basename( $asset ),
+					AMP_Story_Post_Type::export_image_basename( $asset ),
 				];
 				return implode( '/', $args );
 			}

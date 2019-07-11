@@ -337,64 +337,14 @@ class AMP_Story_Post_Type {
 			'amp_content_sanitizers',
 			static function( $sanitizers ) {
 				if ( self::can_export() ) {
-					$export_args = self::get_export_args();
+					$post = get_queried_object();
+					$slug = sanitize_title( $post->post_title, $post->ID );
 
-					$sanitizers['AMP_Story_Export_Sanitizer'] = [
-						'base_url' => $export_args['base_url'],
-					];
+					$sanitizers['AMP_Story_Export_Sanitizer'] = self::get_export_args( $slug );
 				}
 				return $sanitizers;
 			},
 			100 // Run sanitizer after the others (but before style sanitizer and validating sanitizer).
-		);
-
-		add_filter(
-			'amp_post_template_metadata',
-			static function( $metadata, $post ) {
-				if ( self::can_export() ) {
-					$export_args = self::get_export_args( sanitize_title( $post->post_title, $post->ID ) );
-
-					// Adds the image to the assets array.
-					if ( isset( $metadata['image']['url'] ) ) {
-						$image_url = $metadata['image']['url'];
-
-						// Ensures the main image is added even when not found in the sanitizer.
-						if ( $image_url && ! headers_sent() ) {
-
-							// Add the raw HTTP header for the export main image URL.
-							header( 'X-AMP-Export-Image-URL: ' . $image_url );
-						}
-					}
-
-					// Replaces URLs in the schema.
-					if ( $export_args['base_url'] ) {
-
-						// Image URL.
-						if ( isset( $image_url ) ) {
-							$args = [
-								$export_args['base_url'],
-								'assets',
-								basename( $image_url ),
-							];
-
-							$metadata['image']['url'] = implode( '/', $args );
-						}
-
-						$parse = wp_parse_url( $export_args['base_url'] );
-
-						// Publisher name.
-						if ( $parse['host'] ) {
-							$metadata['publisher']['name'] = $parse['host'];
-						}
-
-						// Canonical URL.
-						$metadata['mainEntityOfPage'] = $export_args['canonical_url'];
-					}
-				}
-				return $metadata;
-			},
-			100,
-			2
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
@@ -1664,6 +1614,28 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Returns an asset basename where the date directory structure is retained to avoid filename collisions.
+	 *
+	 * This means that an asset like `https://sample.org/wp-content/uploads/2019/07/sample.jpg`
+	 * returns the basename `2019-07-sample.jpg` instead of `sample.jpg`.
+	 *
+	 * @param string $asset The URL of the export asset.
+	 *
+	 * @return string
+	 */
+	public static function export_image_basename( $asset ) {
+		$asset = preg_replace_callback(
+			'/uploads\/(.*)/',
+			function( $matches ) {
+				return str_replace( '/', '-', $matches[1] );
+			},
+			$asset
+		);
+
+		return basename( $asset );
+	}
+
+	/**
 	 * Ajax handler to export the story ZIP archive.
 	 *
 	 * This method returns an error as JSON and the binary data on success.
@@ -1755,12 +1727,6 @@ class AMP_Story_Post_Type {
 			return new WP_Error( 'amp_story_zip_archive_error', sprintf( esc_html__( 'There was an error generating the ZIP archive. Error code: %s', 'amp' ), $res ) );
 		}
 
-		// Create the zip directory.
-		$zip->addEmptyDir( $slug );
-
-		// Add README.txt file.
-		$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
-
 		// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
 		$query_args = [
 			'story_export' => true,
@@ -1782,34 +1748,30 @@ class AMP_Story_Post_Type {
 		$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );
 
 		// Ensure we have the required data.
-		if ( ! ( is_array( $response ) && isset( $response['body'] ) && isset( $response['headers']['x-amp-export-assets'] ) ) ) {
+		if ( ! ( is_array( $response ) && isset( $response['body'] ) ) ) {
 			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not get the AMP Story HTML.', 'amp' ) );
 		}
 
 		// Get the HTML from the response body.
-		$html = $response['body'];
+		$html   = $response['body'];
+		$assets = [];
 
-		$export_args = self::get_export_args( $slug );
-
-		if ( $export_args['canonical_url'] ) {
-
-			// Clean up the source and remove comments.
-			$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
-
-			// Replace the Canonical URL in the document head.
-			$html = preg_replace( '/(?<=<link rel="canonical" href=")(.*)(?=">)/', $export_args['canonical_url'], $html );
+		// Get the assets.
+		if ( preg_match( '#</body>.*?<!--\s*AMP_EXPORT_ASSETS\s*:\s*(\[.*?\])\s*-->#s', $html, $matches ) ) {
+			$assets = json_decode( $matches[1], true );
 		}
+
+		// Clean up the source and remove comments.
+		$html = preg_replace( '/(?=<!--)([\s\S]*?-->)/', '', $html );
+
+		// Create the zip directory.
+		$zip->addEmptyDir( $slug );
+
+		// Add README.txt file.
+		$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
 
 		// Add index.html file.
 		$zip->addFromString( $slug . '/index.html', $html );
-
-		// Get the assets.
-		$assets = explode( ',', $response['headers']['x-amp-export-assets'] );
-
-		// Just in case the main image is not added in the sanitizer.
-		if ( isset( $response['headers']['x-amp-export-image-url'] ) ) {
-			$assets[] = $response['headers']['x-amp-export-image-url'];
-		}
 
 		// Add the assets.
 		if ( ! empty( $assets ) ) {
@@ -1820,7 +1782,7 @@ class AMP_Story_Post_Type {
 			foreach ( $assets as $asset ) {
 				$response = wp_remote_get( $asset );
 				if ( is_array( $response ) && ! empty( $response['body'] ) ) {
-					$zip->addFromString( $slug . '/assets/' . basename( $asset ), $response['body'] );
+					$zip->addFromString( $slug . '/assets/' . self::export_image_basename( $asset ), $response['body'] );
 				}
 			}
 		}
