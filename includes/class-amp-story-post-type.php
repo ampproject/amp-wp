@@ -451,6 +451,7 @@ class AMP_Story_Post_Type {
 		// Add some more allowed attributes.
 		$allowed_attr[] = 'display';
 		$allowed_attr[] = 'opacity';
+		$allowed_attr[] = 'object-position';
 		$allowed_attr[] = 'position';
 		$allowed_attr[] = 'top';
 		$allowed_attr[] = 'left';
@@ -625,6 +626,8 @@ class AMP_Story_Post_Type {
 			'amp-story-page',
 			'amp-story-grid-layer',
 			'amp-story-cta-layer',
+			'amp-img',
+			'amp-video',
 		];
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
@@ -644,6 +647,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['data-font-family']     = true;
 			$allowed_tag['data-block-name']      = true;
 			$allowed_tag['data-temp-style-hash'] = true;
+			$allowed_tag['layout']               = true;
 		}
 
 		return $allowed_tags;
