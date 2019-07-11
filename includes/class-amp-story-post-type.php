@@ -556,6 +556,12 @@ class AMP_Story_Post_Type {
 	 * @return WP_HTTP_Response|WP_Error The filtered response.
 	 */
 	public static function filter_rest_request_for_kses( $response, $handler, $request ) {
+
+		// Short-circuit since this is relevant only for users without unfiltered_html capability.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $response;
+		}
+
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
