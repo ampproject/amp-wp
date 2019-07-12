@@ -16,6 +16,10 @@ amp-story-grid-layer {
 	align-content: unset;
 }
 
+.amp-block-story-cta__link amp-img * {
+	object-fit: contain;
+}
+
 .wp-block-pullquote {
 	border-top: 4px solid #555d66;
 	border-bottom: 4px solid #555d66;
