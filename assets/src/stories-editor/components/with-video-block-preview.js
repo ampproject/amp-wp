@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { get } from 'lodash';
 import PropTypes from 'prop-types';
 
 /**
@@ -20,11 +19,11 @@ import { VideoBlockEditWithPreview } from './';
  */
 export default ( InitialBlockEdit ) => {
 	const withVideoBlockPreview = ( props ) => {
-		if ( 'core/video' !== props.name || ! get( props, [ 'attributes', 'src' ], null ) ) {
-			return <InitialBlockEdit { ...props } />;
+		if ( 'core/video' === props.name ) {
+			return <VideoBlockEditWithPreview { ...props } />;
 		}
 
-		return <VideoBlockEditWithPreview { ...props } />;
+		return <InitialBlockEdit { ...props } />;
 	};
 
 	withVideoBlockPreview.propTypes = {

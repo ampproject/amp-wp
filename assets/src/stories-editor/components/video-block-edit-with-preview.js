@@ -17,12 +17,16 @@ import {
 	Button,
 	IconButton,
 	PanelBody,
+	Path,
+	SVG,
 	ToggleControl,
 	Toolbar,
 } from '@wordpress/components';
 import {
 	BlockControls,
+	BlockIcon,
 	InspectorControls,
+	MediaPlaceholder,
 	MediaUpload,
 	MediaUploadCheck,
 	RichText,
@@ -30,6 +34,7 @@ import {
 
 const ALLOWED_MEDIA_TYPES = [ 'video' ];
 const VIDEO_POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
+const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
 
 /**
  * Mainly forked from the Core Video block Edit component, but allows the <video> to play instead of being disabled.
@@ -134,13 +139,46 @@ class VideoBlockEditWithPreview extends Component {
 			src,
 		} = this.props.attributes;
 		const {
+			className,
 			instanceId,
 			isSelected,
+			noticeUI,
 			setAttributes,
 		} = this.props;
+		const { editing } = this.state;
 		const switchToEditing = () => {
 			this.setState( { editing: true } );
 		};
+		const onSelectVideo = ( media ) => {
+			if ( ! media || ! media.url ) {
+				// in this case there was an error and we should continue in the editing state
+				// previous attributes should be removed because they may be temporary blob urls
+				setAttributes( { src: undefined, id: undefined } );
+				switchToEditing();
+				return;
+			}
+			// sets the block's attribute and updates the edit component from the
+			// selected media, then switches off the editing UI
+			setAttributes( { src: media.url, id: media.id } );
+			this.setState( { src: media.url, editing: false } );
+		};
+
+		if ( editing ) {
+			return (
+				<MediaPlaceholder
+					icon={ <BlockIcon icon={ icon } /> }
+					className={ className }
+					onSelect={ onSelectVideo }
+					onSelectURL={ this.onSelectURL }
+					accept="video/*"
+					allowedTypes={ ALLOWED_MEDIA_TYPES }
+					value={ this.props.attributes }
+					notices={ noticeUI }
+					onError={ this.onUploadError }
+				/>
+			);
+		}
+
 		const videoPosterDescription = `video-block__poster-image-description-${ instanceId }`;
 
 		return (
@@ -236,9 +274,11 @@ VideoBlockEditWithPreview.propTypes = {
 		poster: PropTypes.string,
 		src: PropTypes.string,
 	} ),
+	className: PropTypes.string,
 	instanceId: PropTypes.number,
 	isSelected: PropTypes.bool,
 	mediaUpload: PropTypes.func,
+	noticeUI: PropTypes.func,
 	noticeOperations: PropTypes.object,
 	setAttributes: PropTypes.func,
 };
