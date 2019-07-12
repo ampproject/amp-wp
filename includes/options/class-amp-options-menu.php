@@ -654,7 +654,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_stories_export() {
 		?>
-		<fieldset <?php disabled( ! current_user_can( 'edit_files' ) ); ?>>
+		<fieldset <?php disabled( ! current_user_can( 'publish_posts' ) ); ?>>
 			<p>
 				<label for="story_export_base_url">
 					<strong><?php echo esc_html__( 'Base URL for exported stories.', 'amp' ); ?></strong>
