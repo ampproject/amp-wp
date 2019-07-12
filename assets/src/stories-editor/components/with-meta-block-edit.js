@@ -42,7 +42,6 @@ class MetaBlockEdit extends Component {
 		const checkFontSize = (
 			isSelected ||
 			(
-				! isSelected &&
 				prevProps.attributes.height === height &&
 				prevProps.attributes.width === width
 			)
