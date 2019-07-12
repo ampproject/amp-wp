@@ -608,6 +608,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'div img{border:solid 1px red}',
 				'div amp-img,div amp-anim{border:solid 1px red}',
 			],
+			'amp-img-and-amp-anim' => [
+				sprintf( '<amp-img class="logo amp-wp-enforced-sizes" src="%s" width="200" height="100" layout="intrinsic"></amp-img><amp-anim class="spinner amp-wp-enforced-sizes" src="%s" width="200" height="100" layout="intrinsic"></amp-anim>', admin_url( 'images/wordpress-logo.png' ), admin_url( 'images/spinner-2x.gif' ) ),
+				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
+				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
+			],
 			'img_with_amp_img' => [
 				'<amp-img></amp-img>',
 				'amp-img img{background-color:red}',

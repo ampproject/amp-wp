@@ -206,6 +206,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'filter_kses_allowed_html' ], 10, 2 );
 
+		add_filter( 'rest_request_before_callbacks', [ __CLASS__, 'filter_rest_request_for_kses' ], 100, 3 );
+
 		add_action( 'wp_default_styles', [ __CLASS__, 'register_story_card_styling' ] );
 
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_editor_styles' ] );
@@ -341,7 +343,286 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Filter the allowed tags for Kses to allow for amp-story children.
+	 * Filters an inline style attribute and removes disallowed rules.
+	 *
+	 * This is equivalent to the WordPress core function of the same name,
+	 * except that this does not remove CSS with parentheses in it.
+	 *
+	 * Also, it adds a few more allowed attributes.
+	 *
+	 * @see safecss_filter_attr()
+	 *
+	 * @param string $css A string of CSS rules.
+	 *
+	 * @return string Filtered string of CSS rules.
+	 */
+	private static function safecss_filter_attr( $css ) {
+		$css = wp_kses_no_null( $css );
+		$css = str_replace( [ "\n", "\r", "\t" ], '', $css );
+
+		$allowed_protocols = wp_allowed_protocols();
+
+		$css_array = explode( ';', trim( $css ) );
+
+		/** This filter is documented in wp-includes/kses.php */
+		$allowed_attr = apply_filters(
+			'safe_style_css',
+			[
+				'background',
+				'background-color',
+				'background-image',
+				'background-position',
+
+				'border',
+				'border-width',
+				'border-color',
+				'border-style',
+				'border-right',
+				'border-right-color',
+				'border-right-style',
+				'border-right-width',
+				'border-bottom',
+				'border-bottom-color',
+				'border-bottom-style',
+				'border-bottom-width',
+				'border-left',
+				'border-left-color',
+				'border-left-style',
+				'border-left-width',
+				'border-top',
+				'border-top-color',
+				'border-top-style',
+				'border-top-width',
+
+				'border-spacing',
+				'border-collapse',
+				'caption-side',
+
+				'color',
+				'font',
+				'font-family',
+				'font-size',
+				'font-style',
+				'font-variant',
+				'font-weight',
+				'letter-spacing',
+				'line-height',
+				'text-align',
+				'text-decoration',
+				'text-indent',
+				'text-transform',
+
+				'height',
+				'min-height',
+				'max-height',
+
+				'width',
+				'min-width',
+				'max-width',
+
+				'margin',
+				'margin-right',
+				'margin-bottom',
+				'margin-left',
+				'margin-top',
+
+				'padding',
+				'padding-right',
+				'padding-bottom',
+				'padding-left',
+				'padding-top',
+
+				'flex',
+				'flex-grow',
+				'flex-shrink',
+				'flex-basis',
+
+				'clear',
+				'cursor',
+				'direction',
+				'float',
+				'overflow',
+				'vertical-align',
+				'list-style-type',
+				'grid-template-columns',
+			]
+		);
+
+		// Add some more allowed attributes.
+		$allowed_attr[] = 'display';
+		$allowed_attr[] = 'opacity';
+		$allowed_attr[] = 'object-position';
+		$allowed_attr[] = 'position';
+		$allowed_attr[] = 'top';
+		$allowed_attr[] = 'left';
+		$allowed_attr[] = 'transform';
+
+		/*
+		 * CSS attributes that accept URL data types.
+		 *
+		 * This is in accordance to the CSS spec and unrelated to
+		 * the sub-set of supported attributes above.
+		 *
+		 * See: https://developer.mozilla.org/en-US/docs/Web/CSS/url
+		 */
+		$css_url_data_types = [
+			'background',
+			'background-image',
+
+			'cursor',
+
+			'list-style',
+			'list-style-image',
+		];
+
+		if ( empty( $allowed_attr ) ) {
+			return $css;
+		}
+
+		$css = '';
+		foreach ( $css_array as $css_item ) {
+			if ( '' === $css_item ) {
+				continue;
+			}
+
+			$css_item        = trim( $css_item );
+			$css_test_string = $css_item;
+			$found           = false;
+			$url_attr        = false;
+
+			if ( strpos( $css_item, ':' ) === false ) {
+				$found = true;
+			} else {
+				$parts        = explode( ':', $css_item, 2 );
+				$css_selector = trim( $parts[0] );
+
+				if ( in_array( $css_selector, $allowed_attr, true ) ) {
+					$found    = true;
+					$url_attr = in_array( $css_selector, $css_url_data_types, true );
+				}
+			}
+
+			if ( $found && $url_attr ) {
+				// Simplified: matches the sequence `url(*)`.
+				preg_match_all( '/url\([^)]+\)/', $parts[1], $url_matches );
+
+				foreach ( $url_matches[0] as $url_match ) {
+					// Clean up the URL from each of the matches above.
+					preg_match( '/^url\(\s*([\'\"]?)(.*)(\g1)\s*\)$/', $url_match, $url_pieces );
+
+					if ( empty( $url_pieces[2] ) ) {
+						$found = false;
+						break;
+					}
+
+					$url = trim( $url_pieces[2] );
+
+					if ( empty( $url ) || wp_kses_bad_protocol( $url, $allowed_protocols ) !== $url ) {
+						$found = false;
+						break;
+					} else {
+						// Remove the whole `url(*)` bit that was matched above from the CSS.
+						$css_test_string = str_replace( $url_match, '', $css_test_string );
+					}
+				}
+			}
+
+			if ( $found ) {
+				if ( '' !== $css ) {
+					$css .= ';';
+				}
+
+				$css .= $css_item;
+			}
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Filters the response before executing any REST API callbacks.
+	 *
+	 * Temporarily modifies post content during saving in a way that KSES
+	 * does not strip actually valid CSS from post content, making block content invalid.
+	 *
+	 * @todo Remove once core has better CSS parsing.
+	 *
+	 * @link https://core.trac.wordpress.org/ticket/37134
+	 *
+	 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
+	 * @param array                     $handler  Route handler used for the request.
+	 * @param WP_REST_Request           $request  Request used to generate the response.
+	 *
+	 * @return WP_HTTP_Response|WP_Error The filtered response.
+	 */
+	public static function filter_rest_request_for_kses( $response, $handler, $request ) {
+
+		// Short-circuit since this is relevant only for users without unfiltered_html capability.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $response;
+		}
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$obj  = get_post_type_object( self::POST_TYPE_SLUG );
+		$slug = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
+
+		$editable_request_methods = array_map( 'trim', explode( ',', WP_REST_Server::EDITABLE ) );
+
+		if ( ! in_array( $request->get_method(), $editable_request_methods, true ) || ! preg_match( "#^/wp/v2/{$slug}/#s", $request->get_route() ) ) {
+			return $response;
+		}
+
+		if ( ! current_user_can( 'edit_post', $request['id'] ) ) {
+			return $response;
+		}
+
+		$style_attr_values = [];
+
+		// Replace inline styles with temporary data-temp-style-hash attribute before KSES...
+		add_filter(
+			'content_save_pre',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				$post_content = preg_replace_callback(
+					'|(?P<before><\w+(?:-\w+)*\s[^>]*?)style=\\\"(?P<styles>[^"]*)\\\"(?P<after>([^>]+?)*>)|', // Extra slashes appear here because $post_content is pre-slashed..
+					static function ( $matches ) use ( &$style_attr_values ) {
+						$hash                       = md5( $matches['styles'] );
+						$style_attr_values[ $hash ] = self::safecss_filter_attr( wp_unslash( $matches['styles'] ) );
+
+						// Replaces the complete style attribute value with its hashed version.
+						return $matches['before'] . sprintf( ' data-temp-style-hash="%s" ', $hash ) . $matches['after'];
+					},
+					$post_content
+				);
+
+				return $post_content;
+			},
+			0
+		);
+
+		// ...And bring it back afterwards.
+		add_filter(
+			'content_save_pre',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				// Replaces hashed style attribute value with the original value again.
+				return preg_replace_callback(
+					'/ data-temp-style-hash=\\\"(?P<hash>[0-9a-f]+)\\\"/',
+					function ( $matches ) use ( $style_attr_values ) {
+						return isset( $style_attr_values[ $matches['hash'] ] ) ? sprintf( ' style="%s"', esc_attr( wp_slash( $style_attr_values[ $matches['hash'] ] ) ) ) : '';
+					},
+					$post_content
+				);
+			},
+			20
+		);
+
+		return $response;
+	}
+
+	/**
+	 * Filter the allowed tags for KSES to allow for amp-story children.
 	 *
 	 * @param array $allowed_tags Allowed tags.
 	 * @return array Allowed tags.
@@ -351,6 +632,8 @@ class AMP_Story_Post_Type {
 			'amp-story-page',
 			'amp-story-grid-layer',
 			'amp-story-cta-layer',
+			'amp-img',
+			'amp-video',
 		];
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
@@ -363,11 +646,14 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['animate-in']          = true;
-			$allowed_tag['animate-in-duration'] = true;
-			$allowed_tag['animate-in-delay']    = true;
-			$allowed_tag['animate-in-after']    = true;
-			$allowed_tag['data-font-family']    = true;
+			$allowed_tag['animate-in']           = true;
+			$allowed_tag['animate-in-duration']  = true;
+			$allowed_tag['animate-in-delay']     = true;
+			$allowed_tag['animate-in-after']     = true;
+			$allowed_tag['data-font-family']     = true;
+			$allowed_tag['data-block-name']      = true;
+			$allowed_tag['data-temp-style-hash'] = true;
+			$allowed_tag['layout']               = true;
 		}
 
 		return $allowed_tags;
