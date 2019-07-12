@@ -8,10 +8,7 @@ import PropTypes from 'prop-types';
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getBlobByURL, isBlobURL } from '@wordpress/blob';
-import {
-	Component,
-	createRef,
-} from '@wordpress/element';
+import { Component, createRef } from '@wordpress/element';
 import {
 	BaseControl,
 	Button,
@@ -21,6 +18,7 @@ import {
 	SVG,
 	ToggleControl,
 	Toolbar,
+	withNotices,
 } from '@wordpress/components';
 import {
 	BlockControls,
@@ -31,15 +29,17 @@ import {
 	MediaUploadCheck,
 	RichText,
 } from '@wordpress/block-editor';
+import { compose, withInstanceId } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
 
 const ALLOWED_MEDIA_TYPES = [ 'video' ];
 const VIDEO_POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
 
 /**
- * Mainly forked from the Core Video block Edit component, but allows the <video> to play instead of being disabled.
+ * Mainly forked from the Core Video block edit component, but allows the <video> to play instead of being disabled.
  *
- * There are very few changes from the Core Video block's components.
+ * There are very few changes from the Core Video block's component.
  * The main change is that in render(), the <video> is not wrapped in <Disabled>, so it can play.
  *
  * @class
@@ -170,7 +170,7 @@ class VideoBlockEditWithPreview extends Component {
 					className={ className }
 					onSelect={ onSelectVideo }
 					onSelectURL={ this.onSelectURL }
-					accept="video/*"
+					accept="video/mp4"
 					allowedTypes={ ALLOWED_MEDIA_TYPES }
 					value={ this.props.attributes }
 					notices={ noticeUI }
@@ -283,4 +283,14 @@ VideoBlockEditWithPreview.propTypes = {
 	setAttributes: PropTypes.func,
 };
 
-export default VideoBlockEditWithPreview;
+export default compose( [
+	withSelect( ( select ) => {
+		const { getSettings } = select( 'core/block-editor' );
+		const { __experimentalMediaUpload } = getSettings();
+		return {
+			mediaUpload: __experimentalMediaUpload,
+		};
+	} ),
+	withNotices,
+	withInstanceId,
+] )( VideoBlockEditWithPreview );
