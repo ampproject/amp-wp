@@ -1646,7 +1646,7 @@ class AMP_Story_Post_Type {
 		check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce' );
 
 		// The user must have the correct permissions.
-		if ( ! current_user_can( 'edit_files' ) ) {
+		if ( ! current_user_can( 'publish_posts' ) ) {
 			wp_send_json_error(
 				[
 					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
