@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { get } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { PluginMoreMenuItem } from '@wordpress/edit-post';
@@ -6,7 +11,7 @@ import { select, dispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 const { ampStoriesExport, fetch, FormData, URL } = window;
-const { getCurrentPostId } = select( 'core/editor' );
+const { getCurrentPostId, getCurrentPost } = select( 'core/editor' );
 const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
 
 const handleExport = () => {
@@ -70,11 +75,17 @@ const handleExport = () => {
 
 export const name = 'amp-story-export';
 
-export const render = () => (
-	<PluginMoreMenuItem
-		icon={ 'media-archive' }
-		onClick={ handleExport }
-	>
-		{ __( 'AMP Story Export', 'amp' ) }
-	</PluginMoreMenuItem>
-);
+export const render = () => {
+	if ( ! get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ) ) {
+		return null;
+	}
+
+	return (
+		<PluginMoreMenuItem
+			icon={ 'media-archive' }
+			onClick={ handleExport }
+		>
+			{ __( 'Export Story', 'amp' ) }
+		</PluginMoreMenuItem>
+	);
+};

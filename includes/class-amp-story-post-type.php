@@ -1645,8 +1645,11 @@ class AMP_Story_Post_Type {
 	public static function handle_export() {
 		check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce' );
 
+		// Get the post ID.
+		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+
 		// The user must have the correct permissions.
-		if ( ! current_user_can( 'publish_posts' ) ) {
+		if ( ! current_user_can( 'publish_posts', $post_id ) ) {
 			wp_send_json_error(
 				[
 					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
@@ -1659,14 +1662,15 @@ class AMP_Story_Post_Type {
 		if ( ! class_exists( 'ZipArchive', false ) ) {
 			wp_send_json_error(
 				[
-					'errorMessage' => esc_html__( 'The ZipArchive class is required to export AMP stories.', 'amp' ),
+					/* translators: %s is the ZipArchive class name. */
+					'errorMessage' => sprintf( esc_html__( 'The %s class is required to export AMP stories.', 'amp' ), 'ZipArchive' ),
 				],
 				400
 			);
 		}
 
 		// Bail if the user has not saved the story yet.
-		if ( 'auto-draft' === get_post_status( wp_unslash( $_POST['post_ID'] ) ) ) {
+		if ( 'auto-draft' === get_post_status( $post_id ) ) {
 			wp_send_json_error(
 				[
 					'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' ),
@@ -1676,7 +1680,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// Generate and export the archive.
-		$export = self::generate_export( wp_unslash( $_POST['post_ID'] ) );
+		$export = self::generate_export( $post_id );
 
 		// Export failed.
 		if ( is_wp_error( $export ) ) {

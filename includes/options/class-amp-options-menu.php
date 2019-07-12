@@ -654,24 +654,10 @@ class AMP_Options_Menu {
 	 */
 	public function render_stories_export() {
 		?>
-		<style>
-			label[for="story_export_base_url"] span {
-				text-transform: uppercase;
-				font-size: 0.7em;
-				border: 1px solid;
-				border-radius: 2px;
-				padding: 2px;
-				margin: -15px 0  0 3px;
-				position: relative;
-				top: -2px;
-				font-weight: 400;
-				line-height: 1;
-			}
-		</style>
 		<fieldset <?php disabled( ! current_user_can( 'edit_files' ) ); ?>>
 			<p>
 				<label for="story_export_base_url">
-					<strong><?php echo wp_kses_post( __( 'Base URL for exported stories. <span>Beta</span>', 'amp' ) ); ?></strong>
+					<strong><?php echo esc_html__( 'Base URL for exported stories.', 'amp' ); ?></strong>
 				</label>
 				<br />
 				<input id="story_export_base_url" type="text" placeholder="https://" class="regular-text code" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[story_export_base_url]' ); ?>" value="<?php echo esc_url( AMP_Options_Manager::get_option( 'story_export_base_url' ) ); ?>" />
