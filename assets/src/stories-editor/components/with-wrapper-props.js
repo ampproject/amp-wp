@@ -91,7 +91,7 @@ const withWrapperProps = ( BlockListBlock ) => {
 			};
 		}
 
-		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } />;
+		return <BlockListBlock { ...props } wrapperProps={ wrapperProps } enableAnimation={ false } />;
 	} );
 };
 
