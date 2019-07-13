@@ -1578,7 +1578,7 @@ class AMP_Story_Post_Type {
 	 * @return array $image_sizes The filtered image sizes.
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
-		$full_size_name = __( 'AMP Story Max Size', 'amp' );
+		$full_size_name = __( 'Story Max Size', 'amp' );
 
 		if ( isset( $_POST['action'] ) && ( 'query-attachments' === $_POST['action'] || 'upload-attachment' === $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
@@ -1652,7 +1652,7 @@ class AMP_Story_Post_Type {
 		if ( ! current_user_can( 'publish_post', $post_id ) ) {
 			wp_send_json_error(
 				[
-					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
+					'errorMessage' => esc_html__( 'You do not have the required permissions to export stories.', 'amp' ),
 				],
 				403
 			);
@@ -1663,7 +1663,7 @@ class AMP_Story_Post_Type {
 			wp_send_json_error(
 				[
 					/* translators: %s is the ZipArchive class name. */
-					'errorMessage' => sprintf( esc_html__( 'The %s class is required to export AMP stories.', 'amp' ), 'ZipArchive' ),
+					'errorMessage' => sprintf( esc_html__( 'The %s class is required to export stories.', 'amp' ), 'ZipArchive' ),
 				],
 				400
 			);
@@ -1673,7 +1673,7 @@ class AMP_Story_Post_Type {
 		if ( 'auto-draft' === get_post_status( $post_id ) ) {
 			wp_send_json_error(
 				[
-					'errorMessage' => esc_html__( 'Save the AMP story before exporting.', 'amp' ),
+					'errorMessage' => esc_html__( 'Save the story before exporting.', 'amp' ),
 				],
 				401
 			);
@@ -1703,7 +1703,7 @@ class AMP_Story_Post_Type {
 		// Failed to export for an unknown reason not related to generating the archive.
 		wp_send_json_error(
 			[
-				'errorMessage' => esc_html__( 'Could not generate the AMP story archive.', 'amp' ),
+				'errorMessage' => esc_html__( 'Could not generate the story archive.', 'amp' ),
 			],
 			500
 		);
@@ -1719,7 +1719,7 @@ class AMP_Story_Post_Type {
 		$post = get_post( $post_id );
 
 		if ( ! $post ) {
-			return new WP_Error( 'amp_story_export_invalid_post', esc_html__( 'The AMP Story does not exist.', 'amp' ) );
+			return new WP_Error( 'amp_story_export_invalid_post', esc_html__( 'The story does not exist.', 'amp' ) );
 		}
 
 		$slug = sanitize_title( $post->post_title, $post->ID );
@@ -1755,7 +1755,7 @@ class AMP_Story_Post_Type {
 
 		// Ensure we have the required data.
 		if ( ! ( is_array( $response ) && isset( $response['body'] ) ) ) {
-			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not get the AMP Story HTML.', 'amp' ) );
+			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not retrieve story HTML.', 'amp' ) );
 		}
 
 		// Get the HTML from the response body.
@@ -1798,17 +1798,17 @@ class AMP_Story_Post_Type {
 		$zip->close();
 
 		// Read the file.
-		$fo = @fopen( $file, 'r' ); // phpcs:ignore
+		$fo = @fopen( $file, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.PHP.NoSilencedErrors.Discouraged
 
 		if ( ! $fo ) {
 			return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
-		} else {
-			header( 'Content-type: application/octet-stream' );
-			header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
-			header( 'Content-length: ' . filesize( $file ) );
-			fpassthru( $fo );
-			unlink( $file );
-			die();
 		}
+
+		header( 'Content-type: application/octet-stream' );
+		header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
+		header( 'Content-length: ' . filesize( $file ) );
+		fpassthru( $fo );
+		unlink( $file );
+		die();
 	}
 }
