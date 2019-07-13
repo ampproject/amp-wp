@@ -1,27 +1,27 @@
 /**
  * External dependencies
  */
+import PropTypes from 'prop-types';
 import { get } from 'lodash';
 
 /**
  * WordPress dependencies
  */
 import { PluginMoreMenuItem } from '@wordpress/edit-post';
-import { select, dispatch } from '@wordpress/data';
+import { compose, ifCondition } from '@wordpress/compose';
+import { withSelect, withDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 const { ampStoriesExport, fetch, FormData, URL } = window;
-const { getCurrentPostId, getCurrentPost } = select( 'core/editor' );
-const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
 
-const handleExport = () => {
+const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 	const formData = new FormData();
 	const errorMsg = __( 'Could not generate the AMP story archive.', 'amp' );
 
 	// Add the form data.
 	formData.append( 'action', ampStoriesExport.action );
 	formData.append( '_wpnonce', ampStoriesExport.nonce );
-	formData.append( 'post_ID', getCurrentPostId() );
+	formData.append( 'post_ID', postId );
 
 	// Request the export.
 	fetch( ampStoriesExport.ajaxUrl, {
@@ -75,17 +75,50 @@ const handleExport = () => {
 
 export const name = 'amp-story-export';
 
-export const render = () => {
-	if ( ! get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ) ) {
-		return null;
-	}
-
+/**
+ * Renders the actual export menu item.
+ *
+ * @param {number} postId
+ * @param {function} createErrorNotice
+ * @param {function} createSuccessNotice
+ *
+ * @return {Object} The rendered export menu item.
+ */
+const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 	return (
 		<PluginMoreMenuItem
 			icon={ 'media-archive' }
-			onClick={ handleExport }
+			onClick={ () => {
+				handleExport( { postId, createErrorNotice, createSuccessNotice } );
+			} }
 		>
 			{ __( 'Export Story', 'amp' ) }
 		</PluginMoreMenuItem>
 	);
 };
+
+renderPlugin.propTypes = {
+	postId: PropTypes.number.isRequired,
+	createErrorNotice: PropTypes.func.isRequired,
+	createSuccessNotice: PropTypes.func.isRequired,
+};
+
+export const render = compose( [
+	withSelect( ( select ) => {
+		const { getCurrentPost, getCurrentPostId } = select( 'core/editor' );
+
+		return {
+			hasPublishAction: get( getCurrentPost(), [ '_links', 'wp:action-publish' ], false ),
+			postId: getCurrentPostId(),
+		};
+	} ),
+	withDispatch( ( dispatch ) => {
+		const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
+
+		return {
+			createErrorNotice,
+			createSuccessNotice,
+		};
+	} ),
+	ifCondition( ( { hasPublishAction } ) => hasPublishAction ),
+] )( renderPlugin );
