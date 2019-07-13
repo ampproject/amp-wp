@@ -44,7 +44,7 @@ const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path f
  *
  * @class
  */
-class VideoBlockEditWithPreview extends Component {
+class CustomVideoBlockEdit extends Component {
 	constructor() {
 		super( ...arguments );
 
@@ -266,7 +266,7 @@ class VideoBlockEditWithPreview extends Component {
 	}
 }
 
-VideoBlockEditWithPreview.propTypes = {
+CustomVideoBlockEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		caption: PropTypes.string,
 		controls: PropTypes.bool,
@@ -293,4 +293,4 @@ export default compose( [
 	} ),
 	withNotices,
 	withInstanceId,
-] )( VideoBlockEditWithPreview );
+] )( CustomVideoBlockEdit );

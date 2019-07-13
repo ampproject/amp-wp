@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { VideoBlockEditWithPreview } from './';
+import { CustomVideoBlockEdit } from './';
 
 /**
  * If this is a Core Video block, this uses an alternate edit component that enables previewing the video.
@@ -18,17 +18,17 @@ import { VideoBlockEditWithPreview } from './';
  * @return {Function} The component, either unchaged, or an alternate Video block edit component.
  */
 export default ( InitialBlockEdit ) => {
-	const withVideoBlockPreview = ( props ) => {
+	const withCustomVideoBlockEdit = ( props ) => {
 		if ( 'core/video' === props.name ) {
-			return <VideoBlockEditWithPreview { ...props } />;
+			return <CustomVideoBlockEdit { ...props } />;
 		}
 
 		return <InitialBlockEdit { ...props } />;
 	};
 
-	withVideoBlockPreview.propTypes = {
+	withCustomVideoBlockEdit.propTypes = {
 		name: PropTypes.string,
 	};
 
-	return withVideoBlockPreview;
+	return withCustomVideoBlockEdit;
 };

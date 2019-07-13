@@ -31,7 +31,7 @@ import {
 	withAmpStorySettings,
 	withPageNumber,
 	withEditFeaturedImage,
-	withVideoBlockPreview,
+	withCustomVideoBlockEdit,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
@@ -313,7 +313,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
-addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withVideoBlockPreview, 9 );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );

@@ -24,8 +24,8 @@ export { default as withHasSelectedInnerBlock } from './higher-order/with-has-se
 export { default as withPageNumber } from './higher-order/with-page-number';
 export { default as withStoryFeaturedImageNotice } from './higher-order/with-story-featured-image-notice';
 export { default as withEditFeaturedImage } from './with-edit-featured-image';
-export { default as withVideoBlockPreview } from './with-video-block-preview';
-export { default as VideoBlockEditWithPreview } from './video-block-edit-with-preview';
+export { default as withCustomVideoBlockEdit } from './with-custom-video-block-edit';
+export { default as CustomVideoBlockEdit } from './custom-video-block-edit';
 export { default as withIsReordering } from './higher-order/with-is-reordering';
 export { default as withSelectedBlock } from './higher-order/with-selected-block';
 export { default as withWrapperProps } from './with-wrapper-props';
