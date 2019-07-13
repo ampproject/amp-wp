@@ -12,7 +12,7 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
+import { FeaturedImageToolbarSelect, getSelectMediaFrame } from './select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
 import { getAspectRatioType } from '../helpers';
 
@@ -52,9 +52,9 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 
 			// @todo This should be a different event.
 			// This class should only be present in the MediaUpload for the Featured Image.
-			if ( this.props.modalClass && 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
-				this.init = this.init.bind( this );
-				this.init();
+			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
+				this.initFeaturedImage = this.initFeaturedImage.bind( this );
+				this.initFeaturedImage();
 			}
 		}
 
@@ -68,8 +68,10 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
-		init() {
+		initFeaturedImage() {
+			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
 			this.frame = new FeaturedImageSelectMediaFrame( {
+				allowedTypes: this.props.allowedTypes,
 				button: {
 					text: __( 'Select', 'amp' ),
 					close: false,
@@ -99,7 +101,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 			this.frame.on( 'cropped', this.onCropped, this );
 			this.frame.on( 'skippedcrop', this.onSkippedCrop, this );
 			this.frame.on( 'close', () => {
-				this.init();
+				this.initFeaturedImage();
 			}, this );
 		}
 

@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { get, includes, template } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -197,5 +202,86 @@ export const getAspectRatioType = ( width, height ) => {
 		return 'portrait';
 	} else if ( height === width ) {
 		return 'square';
+	}
+};
+
+/**
+ * Gets the compiled template for a given notice message.
+ *
+ * @param {string} message The message to display in the template.
+ * @return {Function} compiledTemplate A function accepting the data, which creates a compiled template.
+ */
+export const getNoticeTemplate = ( message ) => {
+	const errorTemplate = template(
+		`<p>${ message }</p>`,
+		{
+			evaluate: /<#([\s\S]+?)#>/g,
+			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+			escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+		}
+	);
+
+	return ( data ) => {
+		return errorTemplate( data );
+	};
+};
+
+/**
+ * Gets whether the file type is allowed.
+ *
+ * For videos, only 'video/mp4' mime types should be allowed.
+ * But the allowedTypes property only has 'video', and it can accidentally allow mime types like 'video/quicktime'.
+ * So this returns false for videos with mime types other than 'video/mp4'.
+ *
+ * @param {Object} attachment   The file to evaluate.
+ * @param {Array}  allowedTypes The allowed file types.
+ * @return {boolean} Whether the file type is allowed.
+ */
+export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
+	const fileType = attachment.get( 'type' );
+	const mimeType = attachment.get( 'mime' );
+
+	if ( ! includes( allowedTypes, fileType ) && ! includes( allowedTypes, mimeType ) ) {
+		return false;
+	}
+
+	if ( 'video' === fileType && 'video/mp4' !== mimeType ) {
+		return false;
+	}
+
+	return true;
+};
+
+/**
+ * If the attachment has the wrong file type, this displays a notice in the Media Library and disables the 'Select' button.
+ *
+ * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
+ *
+ * @param {Object} attachment The selected attachment.
+ * @param {Object} SelectionError The error to display.
+ */
+export const enforceFileType = function( attachment, SelectionError ) {
+	if ( ! attachment ) {
+		return;
+	}
+
+	const fileTypeError = 'select-file-type-error';
+	const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
+	const selectButton = this.get( 'select' );
+
+	// If the file type isn't allowed, display a notice and disable the 'Select' button.
+	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
+		this.secondary.set(
+			fileTypeError,
+			new SelectionError( { mimeType: attachment.get( 'mime' ) } )
+		);
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
+		}
+	} else {
+		this.secondary.unset( fileTypeError );
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
+		}
 	}
 };

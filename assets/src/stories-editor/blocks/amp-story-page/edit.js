@@ -333,6 +333,7 @@ class PageEdit extends Component {
 												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
+										id="story-background-media"
 									/>
 								</MediaUploadCheck>
 								{ !! mediaId &&
