@@ -1649,7 +1649,7 @@ class AMP_Story_Post_Type {
 		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
 
 		// The user must have the correct permissions.
-		if ( ! current_user_can( 'publish_posts', $post_id ) ) {
+		if ( ! current_user_can( 'publish_post', $post_id ) ) {
 			wp_send_json_error(
 				[
 					'errorMessage' => esc_html__( 'You do not have the required permissions to export AMP stories.', 'amp' ),
