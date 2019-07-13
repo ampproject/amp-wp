@@ -2692,15 +2692,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DeclarationBlock $ruleset Ruleset.
 	 */
 	private function ampify_ruleset_selectors( $ruleset ) {
-		$selectors = [];
-		$changes   = 0;
-		$language  = strtolower( get_bloginfo( 'language' ) );
+		$selectors             = [];
+		$has_changed_selectors = false;
+		$language              = strtolower( get_bloginfo( 'language' ) );
 		foreach ( $ruleset->getSelectors() as $old_selector ) {
 			$selector = $old_selector->getSelector();
 
 			// Automatically tree-shake IE6/IE7 hacks for selectors with `* html` and `*+html`.
 			if ( preg_match( '/^\*\s*\+?\s*html/', $selector ) ) {
-				$changes++;
+				$has_changed_selectors = true;
 				continue;
 			}
 
@@ -2717,7 +2717,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				)
 			);
 			if ( $is_other_language_root ) {
-				$changes++;
+				$has_changed_selectors = true;
 				continue;
 			}
 
@@ -2750,7 +2750,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				if ( ! $has_matching_language ) {
-					$changes++;
+					$has_changed_selectors = true;
 					continue;
 				}
 			}
@@ -2759,34 +2759,59 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
-			$edited_selectors = [ $selector ];
-			foreach ( $this->selector_mappings as $html_selector => $amp_selectors ) { // Note: The $selector_mappings array contains ~6 items.
-				$html_pattern = '/' . $before_type_selector_pattern . preg_quote( $html_selector, '/' ) . $after_type_selector_pattern . '/i';
-				foreach ( $edited_selectors as &$edited_selector ) { // Note: The $edited_selectors array contains only item in the normal case.
-					$original_selector = $edited_selector;
-					$amp_selector      = array_shift( $amp_selectors );
-					$amp_tag_pattern   = '/' . $before_type_selector_pattern . preg_quote( $amp_selector, '/' ) . $after_type_selector_pattern . '/i';
-					preg_match( $amp_tag_pattern, $edited_selector, $matches );
-					if ( ! empty( $matches ) && $amp_selector === $matches[0] ) {
-						continue;
-					}
-					$edited_selector = preg_replace( $html_pattern, $amp_selector, $edited_selector, -1, $count );
-					if ( ! $count ) {
-						continue;
-					}
-					$changes += $count;
-					while ( ! empty( $amp_selectors ) ) { // Note: This array contains only a couple items.
-						$amp_selector       = array_shift( $amp_selectors );
-						$edited_selectors[] = preg_replace( $html_pattern, $amp_selector, $original_selector, -1, $count );
-					}
-				}
+			$did_edit_selector = false;
 
-				unset( $edited_selector );
+			/*
+			 * Loop over each selector mappings. A single HTML tag can map to multiple AMP tags (e.g. img could be amp-img or amp-anim).
+			 * The $selector_mappings array contains ~6 items, so rest easy your O(n^3) eyes when seeing triple nested loops!
+			 */
+			$edited_selectors = [ $selector ];
+			foreach ( $this->selector_mappings as $html_tag => $amp_tags ) {
+
+				// Create pattern for determining whether a mapped HTML element is present in this selector.
+				$html_pattern = '/' . $before_type_selector_pattern . preg_quote( $html_tag, '/' ) . $after_type_selector_pattern . '/i';
+
+				/*
+				 * Iterate over each selector and perform the tag mapping replacements.
+				 * Note that $edited_selectors array contains only item in the normal case.
+				 * Note also that the size of $edited_selectors can grow while iterating, hence disabling sniffs.
+				 */
+				for ( $i = 0; $i < count( $edited_selectors ); $i++ ) { // phpcs:ignore Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed, Squiz.PHP.DisallowSizeFunctionsInLoops.Found
+
+					// Skip doing any replacement if the AMP tag is already present, as this indicates the selector was written for AMP already.
+					$amp_tag_pattern = '/' . $before_type_selector_pattern . implode( '|', $amp_tags ) . $after_type_selector_pattern . '/i';
+					if ( preg_match( $amp_tag_pattern, $edited_selectors[ $i ], $matches ) && in_array( $matches[0], $amp_tags, true ) ) {
+						continue;
+					}
+
+					// Replace the HTML tag with the first first mapped AMP tag.
+					$edited_selector = preg_replace( $html_pattern, $amp_tags[0], $edited_selectors[ $i ], -1, $count );
+
+					// If the HTML tag was not found, then short-circuit.
+					if ( 0 === $count ) {
+						continue;
+					}
+
+					$edited_selectors_from_selector = [ $edited_selector ];
+
+					// Replace the HTML tag with the the remaining mapped AMP tags.
+					foreach ( array_slice( $amp_tags, 1 ) as $amp_tag ) { // Note: This array contains only a couple items.
+						$edited_selectors_from_selector[] = preg_replace( $html_pattern, $amp_tag, $edited_selectors[ $i ] );
+					}
+
+					// Replace the current edited selector with all the new edited selectors resulting from the mapping replacement.
+					array_splice( $edited_selectors, $i, 1, $edited_selectors_from_selector );
+					$did_edit_selector = true;
+				}
 			}
-			$selectors = array_merge( $selectors, $edited_selectors );
+
+			if ( $did_edit_selector ) {
+				$has_changed_selectors = true;
+				$selectors             = array_merge( $selectors, $edited_selectors );
+			}
 		}
 
-		if ( $changes > 0 ) {
+		if ( $has_changed_selectors ) {
 			$ruleset->setSelectors( $selectors );
 		}
 	}
