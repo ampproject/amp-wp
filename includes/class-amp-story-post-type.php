@@ -2061,7 +2061,10 @@ class AMP_Story_Post_Type {
 		$zip->addEmptyDir( $slug );
 
 		// Add README.txt file.
-		$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
+		$zip->addFromString(
+			$slug . '/README.txt',
+			file_get_contents( AMP__DIR__ . '/includes/story-export/readme.txt' ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		);
 
 		// Add index.html file.
 		$zip->addFromString( $slug . '/index.html', $html );
