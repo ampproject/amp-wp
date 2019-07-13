@@ -122,6 +122,7 @@ class Test_AMP_Options_Manager extends WP_UnitTestCase {
 				'enable_response_caching'  => true,
 				'version'                  => AMP__VERSION,
 				'story_templates_version'  => false,
+				'story_export_base_url'    => '',
 			],
 			AMP_Options_Manager::get_options()
 		);

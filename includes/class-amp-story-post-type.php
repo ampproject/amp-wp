@@ -102,6 +102,13 @@ class AMP_Story_Post_Type {
 	const AMP_STORIES_EDITOR_STYLE_HANDLE = 'amp-stories-editor';
 
 	/**
+	 * AMP Stories Ajax action.
+	 *
+	 * @var string
+	 */
+	const AMP_STORIES_AJAX_ACTION = 'amp-story-export';
+
+	/**
 	 * Check if the required version of block capabilities available.
 	 *
 	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
@@ -267,6 +274,9 @@ class AMP_Story_Post_Type {
 		// The AJAX handler for when an image is cropped and sent via POST.
 		add_action( 'wp_ajax_custom-header-crop', [ __CLASS__, 'crop_featured_image' ] );
 
+		// The AJAX handler for exporting an AMP story.
+		add_action( 'wp_ajax_' . self::AMP_STORIES_AJAX_ACTION, [ __CLASS__, 'handle_export' ] );
+
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', [ __CLASS__, 'render_block_with_google_fonts' ], 10, 2 );
 
@@ -323,6 +333,22 @@ class AMP_Story_Post_Type {
 				}
 				return $sanitizers;
 			}
+		);
+
+		add_filter(
+			'amp_content_sanitizers',
+			static function( $sanitizers ) {
+				if ( self::can_export() ) {
+					$post = get_queried_object();
+					$slug = sanitize_title( $post->post_title, $post->ID );
+
+					$sanitizers['AMP_Story_Export_Sanitizer'] = self::get_export_args( $slug );
+
+					$sanitizers['AMP_Style_Sanitizer']['include_manifest_comment'] = 'never';
+				}
+				return $sanitizers;
+			},
+			100 // Run sanitizer after the others (but before style sanitizer and validating sanitizer).
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
@@ -967,6 +993,16 @@ class AMP_Story_Post_Type {
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
 			self::get_fonts()
+		);
+
+		wp_localize_script(
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			'ampStoriesExport',
+			[
+				'action'  => self::AMP_STORIES_AJAX_ACTION,
+				'nonce'   => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			]
 		);
 	}
 
@@ -1828,7 +1864,7 @@ class AMP_Story_Post_Type {
 	 * @return array $image_sizes The filtered image sizes.
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
-		$full_size_name = __( 'AMP Story Max Size', 'amp' );
+		$full_size_name = __( 'Story Max Size', 'amp' );
 
 		if ( isset( $_POST['action'] ) && ( 'query-attachments' === $_POST['action'] || 'upload-attachment' === $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
@@ -1838,5 +1874,227 @@ class AMP_Story_Post_Type {
 		}
 
 		return $image_sizes;
+	}
+
+	/**
+	 * Checks for `story_export` and valid Ajax nonce.
+	 *
+	 * @return bool
+	 */
+	public static function can_export() {
+		return is_singular( self::POST_TYPE_SLUG ) && isset( $_GET['story_export'] ) && check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce', false );
+	}
+
+	/**
+	 * Get the args used during a story export.
+	 *
+	 * @param string $slug The slug used to build the new `canonical_url`.
+	 *
+	 * @return array
+	 */
+	public static function get_export_args( $slug = '' ) {
+		$base_url = untrailingslashit( AMP_Options_Manager::get_option( 'story_export_base_url' ) );
+
+		return [
+			'base_url'      => esc_url( $base_url ),
+			'canonical_url' => ( $base_url && $slug ) ? esc_url( trailingslashit( $base_url ) . $slug ) : false,
+		];
+	}
+
+	/**
+	 * Returns an asset basename where the date directory structure is retained to avoid filename collisions.
+	 *
+	 * This means that an asset like `https://sample.org/wp-content/uploads/2019/07/sample.jpg`
+	 * returns the basename `2019-07-sample.jpg` instead of `sample.jpg`.
+	 *
+	 * @param string $asset The URL of the export asset.
+	 *
+	 * @return string
+	 */
+	public static function export_image_basename( $asset ) {
+		$asset = preg_replace_callback(
+			'/uploads\/(.*)/',
+			function( $matches ) {
+				return str_replace( '/', '-', $matches[1] );
+			},
+			$asset
+		);
+
+		return basename( $asset );
+	}
+
+	/**
+	 * Ajax handler to export the story ZIP archive.
+	 *
+	 * This method returns an error as JSON and the binary data on success.
+	 */
+	public static function handle_export() {
+		check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce' );
+
+		// Get the post ID.
+		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+
+		// The user must have the correct permissions.
+		if ( ! current_user_can( 'publish_post', $post_id ) ) {
+			wp_send_json_error(
+				[
+					'errorMessage' => esc_html__( 'You do not have the required permissions to export stories.', 'amp' ),
+				],
+				403
+			);
+		}
+
+		// We need the ZipArchive class to make this work.
+		if ( ! class_exists( 'ZipArchive', false ) ) {
+			wp_send_json_error(
+				[
+					/* translators: %s is the ZipArchive class name. */
+					'errorMessage' => sprintf( esc_html__( 'The %s class is required to export stories.', 'amp' ), 'ZipArchive' ),
+				],
+				400
+			);
+		}
+
+		// Bail if the user has not saved the story yet.
+		if ( 'auto-draft' === get_post_status( $post_id ) ) {
+			wp_send_json_error(
+				[
+					'errorMessage' => esc_html__( 'Save the story before exporting.', 'amp' ),
+				],
+				401
+			);
+		}
+
+		// Generate and export the archive.
+		$export = self::generate_export( $post_id );
+
+		// Export failed.
+		if ( is_wp_error( $export ) ) {
+			$error_data = $export->get_error_data();
+
+			if ( is_array( $error_data ) && isset( $error_data['status'] ) ) {
+				$status = $error_data['status'];
+			} else {
+				$status = 500;
+			}
+
+			wp_send_json_error(
+				[
+					'errorMessage' => $export->get_error_message(),
+				],
+				$status
+			);
+		}
+
+		// Failed to export for an unknown reason not related to generating the archive.
+		wp_send_json_error(
+			[
+				'errorMessage' => esc_html__( 'Could not generate the story archive.', 'amp' ),
+			],
+			500
+		);
+	}
+
+	/**
+	 * Generates a Zip archive from the AMP Story.
+	 *
+	 * @param int $post_id The post ID of the AMP Story.
+	 * @return WP_Error
+	 */
+	private static function generate_export( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( ! $post ) {
+			return new WP_Error( 'amp_story_export_invalid_post', esc_html__( 'The story does not exist.', 'amp' ) );
+		}
+
+		$slug = sanitize_title( $post->post_title, $post->ID );
+		$file = wp_tempnam( $slug );
+
+		$zip = new ZipArchive();
+		$res = $zip->open( $file, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+
+		if ( true !== $res ) {
+			/* translators: %s is the ZipArchive error code. */
+			return new WP_Error( 'amp_story_zip_archive_error', sprintf( esc_html__( 'There was an error generating the ZIP archive. Error code: %s', 'amp' ), $res ) );
+		}
+
+		// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
+		$query_args = [
+			'story_export' => true,
+			'_wpnonce'     => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
+		];
+
+		// Passed to `wp_remote_get()`.
+		$args = [
+			'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+			'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to identify the sources for any given validation errors.
+			'sslverify'   => false,
+			'redirection' => 0, // Because we're in a loop for redirection.
+			'headers'     => [
+				'Cache-Control' => 'no-cache',
+			],
+		];
+
+		// Get the preview URL.
+		$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );
+
+		// Ensure we have the required data.
+		if ( ! ( is_array( $response ) && isset( $response['body'] ) ) ) {
+			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not retrieve story HTML.', 'amp' ) );
+		}
+
+		// Get the HTML from the response body.
+		$html   = $response['body'];
+		$assets = [];
+		$regex  = '<!--\s*AMP_EXPORT_ASSETS\s*:\s*(\[.*?\])\s*-->';
+
+		// Get the assets from the AMP_EXPORT_ASSETS comment.
+		if ( preg_match( '#</body>.*?' . $regex . '#s', $html, $matches ) ) {
+			$assets = json_decode( $matches[1], true );
+
+			// Remove the comment.
+			$html = preg_replace( '/' . $regex . '/s', '', $html );
+		}
+
+		// Create the zip directory.
+		$zip->addEmptyDir( $slug );
+
+		// Add README.txt file.
+		$zip->addFromString( $slug . '/README.txt', 'temporary content...' );
+
+		// Add index.html file.
+		$zip->addFromString( $slug . '/index.html', $html );
+
+		// Add the assets.
+		if ( ! empty( $assets ) ) {
+
+			// Create the empty assets directory.
+			$zip->addEmptyDir( $slug . '/assets' );
+
+			foreach ( $assets as $asset ) {
+				$response = wp_remote_get( $asset, [ 'sslverify' => false ] );
+				if ( is_array( $response ) && ! empty( $response['body'] ) ) {
+					$zip->addFromString( $slug . '/assets/' . self::export_image_basename( $asset ), $response['body'] );
+				}
+			}
+		}
+
+		// Close the active archive.
+		$zip->close();
+
+		// Read the file.
+		$fo = @fopen( $file, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.PHP.NoSilencedErrors.Discouraged
+
+		if ( ! $fo ) {
+			return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
+		}
+
+		header( 'Content-type: application/octet-stream' );
+		header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
+		header( 'Content-length: ' . filesize( $file ) );
+		fpassthru( $fo );
+		unlink( $file );
+		die();
 	}
 }
