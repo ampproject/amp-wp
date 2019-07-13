@@ -16,7 +16,7 @@ const { ampStoriesExport, fetch, FormData, URL } = window;
 
 const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 	const formData = new FormData();
-	const errorMsg = __( 'Could not generate the AMP story archive.', 'amp' );
+	const errorMsg = __( 'Could not generate story archive.', 'amp' );
 
 	// Add the form data.
 	formData.append( 'action', ampStoriesExport.action );
@@ -46,7 +46,7 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 								}, 150 );
 							};
 
-							createSuccessNotice( __( 'Generating AMP Story archive.', 'amp' ), {
+							createSuccessNotice( __( 'Generating story archive.', 'amp' ), {
 								id: 'amp-story-export__success-snackbar',
 								type: 'snackbar',
 							} );
