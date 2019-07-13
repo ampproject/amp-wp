@@ -187,16 +187,16 @@ class CustomVideoBlockEdit extends Component {
 					<Toolbar>
 						<IconButton
 							className="components-icon-button components-toolbar__control"
-							label={ __( 'Edit video' ) }
+							label={ __( 'Edit video', 'amp' ) }
 							onClick={ switchToEditing }
 							icon="edit"
 						/>
 					</Toolbar>
 				</BlockControls>
 				<InspectorControls>
-					<PanelBody title={ __( 'Video Settings' ) }>
+					<PanelBody title={ __( 'Video Settings', 'amp' ) }>
 						<ToggleControl
-							label={ __( 'Playback Controls' ) }
+							label={ __( 'Playback Controls', 'amp' ) }
 							onChange={ this.toggleAttribute( 'controls' ) }
 							checked={ controls }
 						/>
@@ -205,10 +205,10 @@ class CustomVideoBlockEdit extends Component {
 								className="editor-video-poster-control"
 							>
 								<BaseControl.VisualLabel>
-									{ __( 'Poster Image' ) }
+									{ __( 'Poster Image', 'amp' ) }
 								</BaseControl.VisualLabel>
 								<MediaUpload
-									title={ __( 'Select Poster Image' ) }
+									title={ __( 'Select Poster Image', 'amp' ) }
 									onSelect={ this.onSelectPoster }
 									allowedTypes={ VIDEO_POSTER_ALLOWED_MEDIA_TYPES }
 									render={ ( { open } ) => (
@@ -218,7 +218,7 @@ class CustomVideoBlockEdit extends Component {
 											ref={ this.posterImageButton }
 											aria-describedby={ videoPosterDescription }
 										>
-											{ ! poster ? __( 'Select Poster Image' ) : __( 'Replace image' ) }
+											{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
 										</Button>
 									) }
 								/>
@@ -228,13 +228,13 @@ class CustomVideoBlockEdit extends Component {
 								>
 									{ poster ?
 										/* translators: %s: the poster image URL. */
-										sprintf( __( 'The current poster image url is %s' ), this.props.attributes.poster ) :
-										__( 'There is no poster image currently selected' )
+										sprintf( __( 'The current poster image url is %s', 'amp' ), this.props.attributes.poster ) :
+										__( 'There is no poster image currently selected', 'amp' )
 									}
 								</p>
 								{ !! poster &&
 									<Button onClick={ this.onRemovePoster } isLink isDestructive>
-										{ __( 'Remove Poster Image' ) }
+										{ __( 'Remove Poster Image', 'amp' ) }
 									</Button>
 								}
 							</BaseControl>
@@ -254,7 +254,7 @@ class CustomVideoBlockEdit extends Component {
 					{ ( ! RichText.isEmpty( caption ) || isSelected ) && (
 						<RichText
 							tagName="figcaption"
-							placeholder={ __( 'Write caption…' ) }
+							placeholder={ __( 'Write caption…', 'amp' ) }
 							value={ caption }
 							onChange={ ( value ) => setAttributes( { caption: value } ) }
 							inlineToolbar
