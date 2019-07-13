@@ -55,11 +55,11 @@ function amp_post_template_add_scripts( $amp_template ) {
 	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	echo amp_render_scripts(
 		array_merge(
-			array(
+			[
 				// Just in case the runtime has been overridden by amp_post_template_data filter.
 				'amp-runtime' => $amp_template->get( 'amp_runtime_script' ),
-			),
-			$amp_template->get( 'amp_component_scripts', array() )
+			],
+			$amp_template->get( 'amp_component_scripts', [] )
 		)
 	);
 }
@@ -70,7 +70,7 @@ function amp_post_template_add_scripts( $amp_template ) {
  * @param AMP_Post_Template $amp_template Template.
  */
 function amp_post_template_add_fonts( $amp_template ) {
-	$font_urls = $amp_template->get( 'font_urls', array() );
+	$font_urls = $amp_template->get( 'font_urls', [] );
 	foreach ( $font_urls as $slug => $url ) {
 		printf( '<link rel="stylesheet" href="%s">', esc_url( esc_url( $url ) ) ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}

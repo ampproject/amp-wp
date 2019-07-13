@@ -50,7 +50,7 @@ class AMP_Analytics_Options_Submenu {
 
 		add_action(
 			'admin_print_styles-amp_page_' . $this->menu_slug,
-			array( $this, 'amp_options_styles' )
+			[ $this, 'amp_options_styles' ]
 		);
 	}
 
@@ -64,7 +64,7 @@ class AMP_Analytics_Options_Submenu {
 			__( 'Analytics', 'amp' ),
 			'manage_options',
 			$this->menu_slug,
-			array( $this->menu_page, 'render' )
+			[ $this->menu_page, 'render' ]
 		);
 	}
 

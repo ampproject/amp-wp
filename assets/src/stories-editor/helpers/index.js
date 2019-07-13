@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual, has } from 'lodash';
+import { every, isEqual } from 'lodash';
 
 /**
  * WordPress dependencies

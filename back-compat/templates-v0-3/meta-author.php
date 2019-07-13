@@ -8,9 +8,9 @@
 $post_author = $this->get( 'post_author' );
 $avatar_url  = get_avatar_url(
 	$post_author->user_email,
-	array(
+	[
 		'size' => 24,
-	)
+	]
 );
 ?>
 <li class="amp-wp-byline">

@@ -34,18 +34,19 @@ class AMP_Options_Manager {
 	 *
 	 * @var array
 	 */
-	protected static $defaults = array(
-		'experiences'              => array( self::WEBSITE_EXPERIENCE ),
+	protected static $defaults = [
+		'experiences'              => [ self::WEBSITE_EXPERIENCE ],
 		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
-		'supported_post_types'     => array( 'post' ),
-		'analytics'                => array(),
+		'supported_post_types'     => [ 'post' ],
+		'analytics'                => [],
 		'auto_accept_sanitization' => true,
 		'all_templates_supported'  => true,
-		'supported_templates'      => array( 'is_singular' ),
+		'supported_templates'      => [ 'is_singular' ],
 		'enable_response_caching'  => true,
 		'version'                  => AMP__VERSION,
 		'story_templates_version'  => false,
-	);
+		'story_export_base_url'    => '',
+	];
 
 	/**
 	 * Register settings.
@@ -54,17 +55,17 @@ class AMP_Options_Manager {
 		register_setting(
 			self::OPTION_NAME,
 			self::OPTION_NAME,
-			array(
+			[
 				'type'              => 'array',
-				'sanitize_callback' => array( __CLASS__, 'validate_options' ),
-			)
+				'sanitize_callback' => [ __CLASS__, 'validate_options' ],
+			]
 		);
 
-		add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'maybe_flush_rewrite_rules' ), 10, 2 );
-		add_action( 'admin_notices', array( __CLASS__, 'render_welcome_notice' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'persistent_object_caching_notice' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'render_cache_miss_notice' ) );
-		add_action( 'admin_notices', array( __CLASS__, 'render_php_css_parser_conflict_notice' ) );
+		add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'maybe_flush_rewrite_rules' ], 10, 2 );
+		add_action( 'admin_notices', [ __CLASS__, 'render_welcome_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'persistent_object_caching_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'render_cache_miss_notice' ] );
+		add_action( 'admin_notices', [ __CLASS__, 'render_php_css_parser_conflict_notice' ] );
 	}
 
 	/**
@@ -76,12 +77,12 @@ class AMP_Options_Manager {
 	 * @param array $new_options New options.
 	 */
 	public static function maybe_flush_rewrite_rules( $old_options, $new_options ) {
-		$old_post_types = isset( $old_options['supported_post_types'] ) ? $old_options['supported_post_types'] : array();
-		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : array();
+		$old_post_types = isset( $old_options['supported_post_types'] ) ? $old_options['supported_post_types'] : [];
+		$new_post_types = isset( $new_options['supported_post_types'] ) ? $new_options['supported_post_types'] : [];
 		sort( $old_post_types );
 		sort( $new_post_types );
-		$old_experiences = isset( $old_options['experiences'] ) ? $old_options['experiences'] : array();
-		$new_experiences = isset( $new_options['experiences'] ) ? $new_options['experiences'] : array();
+		$old_experiences = isset( $old_options['experiences'] ) ? $old_options['experiences'] : [];
+		$new_experiences = isset( $new_options['experiences'] ) ? $new_options['experiences'] : [];
 		sort( $old_experiences );
 		sort( $new_experiences );
 		if ( $old_post_types !== $new_post_types || $old_experiences !== $new_experiences ) {
@@ -111,9 +112,9 @@ class AMP_Options_Manager {
 	 * @return array Options.
 	 */
 	public static function get_options() {
-		$options = get_option( self::OPTION_NAME, array() );
+		$options = get_option( self::OPTION_NAME, [] );
 		if ( empty( $options ) ) {
-			$options = array(); // Ensure empty string becomes array.
+			$options = []; // Ensure empty string becomes array.
 		}
 
 		$defaults = self::$defaults;
@@ -219,30 +220,30 @@ class AMP_Options_Manager {
 			// Validate the selected experiences.
 			$options['experiences'] = array_intersect(
 				$new_options['experiences'],
-				array(
+				[
 					self::WEBSITE_EXPERIENCE,
 					self::STORIES_EXPERIENCE,
-				)
+				]
 			);
 
 			// At least one experience must be selected.
 			if ( empty( $options['experiences'] ) ) {
-				$options['experiences'] = array( self::WEBSITE_EXPERIENCE );
+				$options['experiences'] = [ self::WEBSITE_EXPERIENCE ];
 			}
 		}
 
 		// Theme support.
-		$recognized_theme_supports = array(
+		$recognized_theme_supports = [
 			AMP_Theme_Support::READER_MODE_SLUG,
 			AMP_Theme_Support::TRANSITIONAL_MODE_SLUG,
 			AMP_Theme_Support::STANDARD_MODE_SLUG,
-		);
+		];
 		if ( isset( $new_options['theme_support'] ) && in_array( $new_options['theme_support'], $recognized_theme_supports, true ) ) {
 			$options['theme_support'] = $new_options['theme_support'];
 
 			// If this option was changed, display a notice with the new template mode.
 			if ( self::get_option( 'theme_support' ) !== $new_options['theme_support'] ) {
-				add_action( 'update_option_' . self::OPTION_NAME, array( __CLASS__, 'handle_updated_theme_support_option' ) );
+				add_action( 'update_option_' . self::OPTION_NAME, [ __CLASS__, 'handle_updated_theme_support_option' ] );
 			}
 		}
 
@@ -250,7 +251,7 @@ class AMP_Options_Manager {
 
 		// Validate post type support.
 		if ( in_array( self::WEBSITE_EXPERIENCE, $options['experiences'], true ) || isset( $new_options['supported_post_types'] ) ) {
-			$options['supported_post_types'] = array();
+			$options['supported_post_types'] = [];
 			if ( isset( $new_options['supported_post_types'] ) ) {
 				foreach ( $new_options['supported_post_types'] as $post_type ) {
 					if ( ! post_type_exists( $post_type ) ) {
@@ -269,7 +270,7 @@ class AMP_Options_Manager {
 			$options['all_templates_supported'] = ! empty( $new_options['all_templates_supported'] );
 
 			// Validate supported templates.
-			$options['supported_templates'] = array();
+			$options['supported_templates'] = [];
 			if ( isset( $new_options['supported_templates'] ) ) {
 				$options['supported_templates'] = array_intersect(
 					$new_options['supported_templates'],
@@ -315,10 +316,10 @@ class AMP_Options_Manager {
 				if ( isset( $data['delete'] ) ) {
 					unset( $options['analytics'][ $entry_id ] );
 				} else {
-					$options['analytics'][ $entry_id ] = array(
+					$options['analytics'][ $entry_id ] = [
 						'type'   => $entry_vendor_type,
 						'config' => $entry_config,
-					);
+					];
 				}
 			}
 		}
@@ -335,6 +336,9 @@ class AMP_Options_Manager {
 		if ( $options['enable_response_caching'] ) {
 			AMP_Theme_Support::reset_cache_miss_url_option();
 		}
+
+		// Handle the base URL for exported stories.
+		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
 
 		return $options;
 	}
@@ -355,7 +359,7 @@ class AMP_Options_Manager {
 			return;
 		}
 
-		$supported_types = self::get_option( 'supported_post_types', array() );
+		$supported_types = self::get_option( 'supported_post_types', [] );
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $name ) {
 			$post_type = get_post_type_object( $name );
 			if ( empty( $post_type ) ) {
@@ -464,7 +468,7 @@ class AMP_Options_Manager {
 
 		$notice_id = 'amp-welcome-notice-1';
 		$dismissed = get_user_meta( get_current_user_id(), 'dismissed_wp_pointers', true );
-		if ( in_array( $notice_id, explode( ',', strval( $dismissed ) ), true ) ) {
+		if ( in_array( $notice_id, explode( ',', (string) $dismissed ), true ) ) {
 			return;
 		}
 
@@ -636,7 +640,7 @@ class AMP_Options_Manager {
 		if ( $has_theme_support ) {
 			$theme_support = current_theme_supports( AMP_Theme_Support::SLUG );
 			if ( ! is_array( $theme_support ) ) {
-				$theme_support = array();
+				$theme_support = [];
 			}
 			$theme_support['paired'] = AMP_Theme_Support::TRANSITIONAL_MODE_SLUG === $template_mode;
 			add_theme_support( AMP_Theme_Support::SLUG, $theme_support );
@@ -647,7 +651,7 @@ class AMP_Options_Manager {
 		$url = amp_admin_get_preview_permalink();
 
 		$notice_type     = 'updated';
-		$review_messages = array();
+		$review_messages = [];
 		if ( $url && $has_theme_support ) {
 			$validation = AMP_Validation_Manager::validate_url( $url );
 
@@ -755,13 +759,13 @@ class AMP_Options_Manager {
 			case AMP_Theme_Support::STANDARD_MODE_SLUG:
 				$message = esc_html__( 'Standard mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case AMP_Theme_Support::TRANSITIONAL_MODE_SLUG:
 				$message = esc_html__( 'Transitional mode activated!', 'amp' );
 				if ( $review_messages ) {
-					$message .= ' ' . join( ' ', $review_messages );
+					$message .= ' ' . implode( ' ', $review_messages );
 				}
 				break;
 			case AMP_Theme_Support::READER_MODE_SLUG:

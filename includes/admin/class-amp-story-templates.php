@@ -36,12 +36,12 @@ class AMP_Story_Templates {
 			return;
 		}
 
-		add_filter( 'rest_wp_block_query', array( $this, 'filter_rest_wp_block_query' ), 10, 2 );
-		add_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
+		add_filter( 'rest_wp_block_query', [ $this, 'filter_rest_wp_block_query' ], 10, 2 );
+		add_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 
 		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
-		add_filter( 'user_has_cap', array( $this, 'filter_user_has_cap' ), 10, 3 );
-		add_filter( 'pre_get_posts', array( $this, 'filter_pre_get_posts' ) );
+		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
+		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
 
 		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
@@ -58,8 +58,7 @@ class AMP_Story_Templates {
 	public function filter_user_has_cap( $allcaps, $caps, $args ) {
 		if ( 'edit_post' === $args[0] && isset( $args[2] ) ) {
 			if ( has_term( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY, $args[2] ) ) {
-				unset( $allcaps['edit_others_posts'] );
-				unset( $allcaps['edit_published_posts'] );
+				unset( $allcaps['edit_others_posts'], $allcaps['edit_published_posts'] );
 			}
 		}
 		return $allcaps;
@@ -84,15 +83,15 @@ class AMP_Story_Templates {
 
 		$tax_query = $query->get( 'tax_query' );
 		if ( empty( $tax_query ) ) {
-			$tax_query = array();
+			$tax_query = [];
 		}
 
-		$tax_query[] = array(
+		$tax_query[] = [
 			'taxonomy' => self::TEMPLATES_TAXONOMY,
 			'field'    => 'slug',
-			'terms'    => array( self::TEMPLATES_TERM ),
+			'terms'    => [ self::TEMPLATES_TERM ],
 			'operator' => 'NOT IN',
-		);
+		];
 
 		$query->set( 'tax_query', $tax_query );
 		return $query;
@@ -130,13 +129,13 @@ class AMP_Story_Templates {
 
 			$post_id = wp_insert_post(
 				wp_slash(
-					array(
+					[
 						'post_title'   => $template['title'],
 						'post_type'    => 'wp_block',
 						'post_status'  => 'publish',
 						'post_content' => $post_content,
 						'post_name'    => $template['name'],
-					)
+					]
 				)
 			);
 			if ( ! $post_id ) {
@@ -161,17 +160,17 @@ class AMP_Story_Templates {
 			return;
 		}
 
-		remove_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
+		remove_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 		wp_update_post(
 			wp_slash(
-				array(
+				[
 					'ID'           => $template_id,
 					'post_content' => $content,
 					'post_title'   => $template['title'],
-				)
+				]
 			)
 		);
-		add_action( 'save_post_wp_block', array( $this, 'flag_template_as_modified' ) );
+		add_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 	}
 
 	/**
@@ -180,48 +179,48 @@ class AMP_Story_Templates {
 	 * @return array Story templates.
 	 */
 	public static function get_story_templates() {
-		return array(
-			array(
+		return [
+			[
 				'title' => __( 'Template: Travel Tip', 'amp' ),
 				'name'  => 'travel-tip',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Quote', 'amp' ),
 				'name'  => 'quote',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Travel CTA', 'amp' ),
 				'name'  => 'travel-cta',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Title Page', 'amp' ),
 				'name'  => 'title-page',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Travel Vertical', 'amp' ),
 				'name'  => 'travel-vertical',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Fandom Title', 'amp' ),
 				'name'  => 'fandom-title',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Fandom CTA', 'amp' ),
 				'name'  => 'fandom-cta',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Fandom Fact', 'amp' ),
 				'name'  => 'fandom-fact',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Fandom Fact Text', 'amp' ),
 				'name'  => 'fandom-fact-text',
-			),
-			array(
+			],
+			[
 				'title' => __( 'Template: Fandom Intro', 'amp' ),
 				'name'  => 'fandom-intro',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -235,12 +234,12 @@ class AMP_Story_Templates {
 			return 0;
 		}
 
-		$args      = array(
+		$args      = [
 			'name'           => $slug,
 			'post_type'      => 'wp_block',
 			'post_status'    => 'publish',
 			'posts_per_page' => 1,
-		);
+		];
 		$templates = get_posts( $args );
 		if ( ! empty( $templates ) ) {
 			return $templates[0]->ID;
@@ -256,7 +255,7 @@ class AMP_Story_Templates {
 		register_taxonomy(
 			self::TEMPLATES_TAXONOMY,
 			'wp_block',
-			array(
+			[
 				'query_var'             => self::TEMPLATES_TAXONOMY,
 				'show_admin_column'     => false,
 				'show_in_rest'          => true,
@@ -269,17 +268,17 @@ class AMP_Story_Templates {
 				'hierarchical'          => false,
 				'show_in_menu'          => false,
 				'meta_box_cb'           => false,
-			)
+			]
 		);
 
 		if ( ! term_exists( self::TEMPLATES_TERM, self::TEMPLATES_TAXONOMY ) ) {
 			wp_insert_term(
 				__( 'Story Template', 'amp' ),
 				self::TEMPLATES_TAXONOMY,
-				array(
+				[
 					'description' => __( 'Story Template', 'amp' ),
 					'slug'        => self::TEMPLATES_TERM,
-				)
+				]
 			);
 		}
 	}
@@ -302,21 +301,21 @@ class AMP_Story_Templates {
 			return $args;
 		}
 		parse_str( $parts['query'], $params );
-		if ( ! isset( $params['post'] ) || ! isset( $params['action'] ) ) {
+		if ( ! isset( $params['post'], $params['action'] ) ) {
 			return $args;
 		}
 
 		$edited_post = get_post( absint( $params['post'] ) );
 		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== $edited_post->post_type ) {
 			if ( ! isset( $args['tax_query'] ) ) {
-				$args['tax_query'] = array();
+				$args['tax_query'] = [];
 			}
-			$args['tax_query'][] = array(
+			$args['tax_query'][] = [
 				'taxonomy' => self::TEMPLATES_TAXONOMY,
 				'field'    => 'slug',
-				'terms'    => array( self::TEMPLATES_TERM ),
+				'terms'    => [ self::TEMPLATES_TERM ],
 				'operator' => 'NOT IN',
-			);
+			];
 		}
 
 		return $args;

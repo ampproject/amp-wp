@@ -30,26 +30,26 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 	public function test_get_eligible_post_types() {
 		register_post_type(
 			'book',
-			array(
+			[
 				'label'  => 'Book',
 				'public' => true,
-			)
+			]
 		);
 		register_post_type(
 			'secret',
-			array(
+			[
 				'label'  => 'Secret',
 				'public' => false,
-			)
+			]
 		);
 
 		$this->assertEqualSets(
-			array(
+			[
 				'post',
 				'page',
 				'attachment',
 				'book',
-			),
+			],
 			AMP_Post_Type_Support::get_eligible_post_types()
 		);
 	}
@@ -63,19 +63,19 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		register_post_type(
 			'book',
-			array(
+			[
 				'label'  => 'Book',
 				'public' => true,
-			)
+			]
 		);
 		register_post_type(
 			'poem',
-			array(
+			[
 				'label'  => 'Poem',
 				'public' => true,
-			)
+			]
 		);
-		AMP_Options_Manager::update_option( 'supported_post_types', array( 'post', 'poem' ) );
+		AMP_Options_Manager::update_option( 'supported_post_types', [ 'post', 'poem' ] );
 
 		AMP_Post_Type_Support::add_post_type_support();
 		$this->assertTrue( post_type_supports( 'post', AMP_Post_Type_Support::SLUG ) );
@@ -92,27 +92,27 @@ class Test_AMP_Post_Type_Support extends WP_UnitTestCase {
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		register_post_type(
 			'book',
-			array(
+			[
 				'label'  => 'Book',
 				'public' => true,
-			)
+			]
 		);
 
 		// Post type support.
-		$book_id = $this->factory()->post->create( array( 'post_type' => 'book' ) );
-		$this->assertEquals( array( 'post-type-support' ), AMP_Post_Type_Support::get_support_errors( $book_id ) );
+		$book_id = self::factory()->post->create( [ 'post_type' => 'book' ] );
+		$this->assertEquals( [ 'post-type-support' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		add_post_type_support( 'book', AMP_Post_Type_Support::SLUG );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
 		// Password-protected.
 		add_filter( 'post_password_required', '__return_true' );
-		$this->assertEquals( array( 'password-protected' ), AMP_Post_Type_Support::get_support_errors( $book_id ) );
+		$this->assertEquals( [ 'password-protected' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		remove_filter( 'post_password_required', '__return_true' );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 
 		// Skip-post.
 		add_filter( 'amp_skip_post', '__return_true' );
-		$this->assertEquals( array( 'skip-post' ), AMP_Post_Type_Support::get_support_errors( $book_id ) );
+		$this->assertEquals( [ 'skip-post' ], AMP_Post_Type_Support::get_support_errors( $book_id ) );
 		remove_filter( 'amp_skip_post', '__return_true' );
 		$this->assertEmpty( AMP_Post_Type_Support::get_support_errors( $book_id ) );
 	}

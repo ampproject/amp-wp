@@ -29,24 +29,24 @@ class AMP_Story_Sanitizer_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_data() {
-		return array(
-			'story_without_cta' => array(
+		return [
+			'story_without_cta' => [
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page>',
 				null, // Same.
-			),
-			'story_with_cta_on_first_page' => array(
+			],
+			'story_with_cta_on_first_page' => [
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page>',
-			),
-			'story_with_cta_on_second_page' => array(
+			],
+			'story_with_cta_on_second_page' => [
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
 				null, // Same.
-			),
-			'story_with_multiple_cta_on_second_page' => array(
+			],
+			'story_with_multiple_cta_on_second_page' => [
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><amp-story-page><amp-story-grid-layer></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
 				'<amp-story-page><amp-story-grid-layer><p>Lorem Ipsum Demet Delorit.</p></amp-story-grid-layer></amp-story-page><amp-story-page><amp-story-grid-layer></amp-story-grid-layer><amp-story-cta-layer><a href="">Foo</a></amp-story-cta-layer></amp-story-page>',
-			),
-		);
+			],
+		];
 	}
 
 	/**

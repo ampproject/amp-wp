@@ -25,9 +25,9 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function register_embed() {
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			// @todo Move this to Jetpack.
-			add_shortcode( 'soundcloud', array( $this, 'shortcode' ) );
+			add_shortcode( 'soundcloud', [ $this, 'shortcode' ] );
 		}
-		add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 2 );
+		add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 2 );
 	}
 
 	/**
@@ -38,7 +38,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			// @todo Move this to Jetpack.
 			remove_shortcode( 'soundcloud' );
 		}
-		remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
+		remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 	}
 
 	/**
@@ -54,7 +54,6 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	public function oembed( $matches, $attr, $url ) {
 		_deprecated_function( __METHOD__, '0.6' );
-		unset( $matches, $attr );
 		return $this->render( $this->extract_params_from_iframe_src( $url ), $url );
 	}
 
@@ -84,7 +83,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( preg_match( '#<iframe[^>]*?src="(?P<src>[^"]+)"#s', $html, $matches ) ) {
 			$src   = html_entity_decode( $matches['src'], ENT_QUOTES );
-			$query = array();
+			$query = [];
 			parse_str( wp_parse_url( $src, PHP_URL_QUERY ), $query );
 			if ( ! empty( $query['url'] ) ) {
 				$props = $this->extract_params_from_iframe_src( $query['url'] );
@@ -163,19 +162,19 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args, $url ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'track_id'    => false,
 				'playlist_id' => false,
 				'height'      => null,
 				'width'       => null,
 				'visual'      => null,
 				'fallback'    => '',
-			)
+			]
 		);
 
 		$this->did_convert_elements = true;
 
-		$attributes = array();
+		$attributes = [];
 		if ( ! empty( $args['track_id'] ) ) {
 			$attributes['data-trackid'] = $args['track_id'];
 		} elseif ( ! empty( $args['playlist_id'] ) ) {
@@ -191,7 +190,7 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		// @todo Set width to $args['width'] and layout to responsive once amp-soundcloud supports it: <https://github.com/ampproject/amphtml/issues/23144>.
-		$attributes['height'] = $args['height'] ? $args['height'] : $this->args['height'];
+		$attributes['height'] = $args['height'] ?: $this->args['height'];
 		$attributes['layout'] = 'fixed-height';
 
 		return AMP_HTML_Utils::build_tag(
@@ -210,10 +209,10 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function render_embed_fallback( $url ) {
 		return AMP_HTML_Utils::build_tag(
 			'a',
-			array(
+			[
 				'href'  => esc_url_raw( $url ),
 				'class' => 'amp-wp-embed-fallback',
-			),
+			],
 			esc_html( $url )
 		);
 	}
@@ -227,15 +226,15 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 	private function extract_params_from_iframe_src( $url ) {
 		$parsed_url = wp_parse_url( $url );
 		if ( preg_match( '#tracks/(?P<track_id>\d+)#', $parsed_url['path'], $matches ) ) {
-			return array(
+			return [
 				'track_id' => $matches['track_id'],
-			);
+			];
 		}
 		if ( preg_match( '#playlists/(?P<playlist_id>\d+)#', $parsed_url['path'], $matches ) ) {
-			return array(
+			return [
 				'playlist_id' => $matches['playlist_id'],
-			);
+			];
 		}
-		return array();
+		return [];
 	}
 }

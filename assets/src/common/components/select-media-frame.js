@@ -11,10 +11,9 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { enforceFileSize, enforceFileType, getNoticeTemplate, mediaLibraryHasTwoNotices } from '../helpers';
+import { enforceFileType, getNoticeTemplate } from '../helpers';
 
 const { wp } = window;
-const NOTICE_CLASSNAME = 'notice notice-warning notice-alt inline';
 
 /**
  * FeaturedImageSelectionError
@@ -25,7 +24,7 @@ const NOTICE_CLASSNAME = 'notice notice-warning notice-alt inline';
  * @augments Backbone.View
  */
 const FeaturedImageSelectionError = wp.media.View.extend( {
-	className: NOTICE_CLASSNAME,
+	className: 'notice notice-warning notice-alt inline',
 	template: ( () => {
 		const message = sprintf(
 			/* translators: 1: image width in pixels. 2: image height in pixels. 3: required minimum width in pixels. 4: required minimum height in pixels. */
@@ -52,37 +51,12 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
  * @augments Backbone.View
  */
 export const SelectionFileTypeError = wp.media.View.extend( {
-	className: NOTICE_CLASSNAME,
+	className: 'notice notice-warning notice-alt inline',
 	template: ( () => {
 		const message = sprintf(
 			/* translators: 1: the selected file type. */
 			__( 'The selected file mime type, %1$s, is not allowed.', 'amp' ),
 			'{{mimeType}}',
-		);
-
-		return getNoticeTemplate( message );
-	} )(),
-} );
-
-/**
- * SelectionFileSizeError
- *
- * Applies when the video size is more than a certain amount of MB per second.
- * Very similar to the FeaturedImageSelectionError class.
- *
- * @class
- * @augments wp.media.View
- * @augments wp.Backbone.View
- * @augments Backbone.View
- */
-export const SelectionFileSizeError = wp.media.View.extend( {
-	className: NOTICE_CLASSNAME,
-	template: ( () => {
-		const message = sprintf(
-			/* translators: 1: the recommended max MB per second for videos. 2: the actual MB per second of the video. */
-			__( 'A video size of less than %1$s MB per second is recommended. The selected video is %2$s MB per second.', 'amp' ),
-			'{{maxVideoMegabytesPerSecond}}',
-			'{{actualVideoMegabytesPerSecond}}',
 		);
 
 		return getNoticeTemplate( message );
@@ -141,7 +115,7 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 } );
 
 /**
- * EnforcedFileToolbarSelect
+ * EnforcedFileTypeToolbarSelect
  *
  * Prevents selecting an attachment that has the wrong file type, like .mov or .txt.
  *
@@ -153,7 +127,7 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
  * @augments Backbone.View
  * @inheritDoc
  */
-export const EnforcedFileToolbarSelect = wp.media.view.Toolbar.Select.extend( {
+export const EnforcedFileTypeToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 	/**
 	 * Refresh the view.
 	 */
@@ -165,13 +139,6 @@ export const EnforcedFileToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 		const attachment = selection.models[ 0 ];
 
 		enforceFileType.call( this, attachment, SelectionFileTypeError );
-		enforceFileSize.call( this, attachment, SelectionFileSizeError );
-
-		// If there are two notices, like for wrong size and type, prevent the notices from covering the media.
-		const mediaFrame = this.$el.parents( '.media-frame' );
-		if ( mediaFrame ) {
-			mediaFrame.toggleClass( 'has-two-notices', mediaLibraryHasTwoNotices.call( this ) );
-		}
 	},
 } );
 

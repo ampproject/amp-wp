@@ -67,9 +67,9 @@ export class MockSelectionError extends Mock {
 	/**
 	 * Class constructor.
 	 *
-	 * @param {Object} errorData The data of the error.
+	 * @param {Object} errorData Error data.
 	 */
-	constructor( errorData ) {
+	constructor( errorData = {} ) {
 		super( ...arguments );
 
 		for ( const name in errorData ) {

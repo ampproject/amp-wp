@@ -66,14 +66,14 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			add_shortcode( 'soundcloud', 'soundcloud_shortcode' );
 		}
 
-		add_filter( 'pre_http_request', array( $this, 'mock_http_request' ), 10, 3 );
+		add_filter( 'pre_http_request', [ $this, 'mock_http_request' ], 10, 3 );
 	}
 
 	/**
 	 * After a test method runs, reset any state in WordPress the test method might have changed.
 	 */
 	public function tearDown() {
-		remove_filter( 'pre_http_request', array( $this, 'mock_http_request' ) );
+		remove_filter( 'pre_http_request', [ $this, 'mock_http_request' ] );
 		parent::tearDown();
 	}
 
@@ -97,16 +97,16 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 			$body = $this->track_oembed_response;
 		}
 
-		return array(
+		return [
 			'body'          => $body,
-			'headers'       => array(),
-			'response'      => array(
+			'headers'       => [],
+			'response'      => [
 				'code'    => 200,
 				'message' => 'ok',
-			),
-			'cookies'       => array(),
+			],
+			'cookies'       => [],
 			'http_response' => null,
-		);
+		];
 	}
 
 	/**
@@ -115,22 +115,22 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 * @return array
 	 */
 	public function get_conversion_data() {
-		$data = array(
-			'no_embed'        => array(
+		$data = [
+			'no_embed'        => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>' . PHP_EOL,
-			),
+			],
 
-			'track_simple'    => array(
+			'track_simple'    => [
 				$this->track_url . PHP_EOL,
 				'<p><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart &#8211; Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
-			),
+			],
 
-			'playlist_simple' => array(
+			'playlist_simple' => [
 				$this->playlist_url . PHP_EOL,
 				'<p><amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" layout="fixed-height">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music &#8211; The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud></p>' . PHP_EOL,
-			),
-		);
+			],
+		];
 
 		// @todo All the following should be moved to Jetpack.
 		if ( defined( 'JETPACK__PLUGIN_DIR' ) ) {
@@ -139,38 +139,38 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 		if ( function_exists( 'soundcloud_shortcode' ) ) {
 			$data = array_merge(
 				$data,
-				array(
-					'shortcode_with_bare_track_api_url'   => array(
+				[
+					'shortcode_with_bare_track_api_url'   => [
 						'[soundcloud https://api.soundcloud.com/tracks/89299804]' . PHP_EOL,
 						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					),
+					],
 
-					'shortcode_with_track_api_url'        => array(
+					'shortcode_with_track_api_url'        => [
 						'[soundcloud url=https://api.soundcloud.com/tracks/89299804]' . PHP_EOL,
 						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					),
+					],
 
-					'shortcode_with_track_permalink'      => array(
+					'shortcode_with_track_permalink'      => [
 						"[soundcloud url=$this->track_url]",
 						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					),
+					],
 
-					'shortcode_with_bare_track_permalink' => array(
+					'shortcode_with_bare_track_permalink' => [
 						"[soundcloud $this->track_url]",
 						'<amp-soundcloud data-trackid="90097394" data-visual="true" height="400" layout="fixed-height">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/jack-villano-villano/mozart-requiem-in-d-minor">Mozart - Requiem in D minor Complete Full by Jack Villano Villano</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					),
+					],
 
-					'shortcode_with_playlist_permalink'   => array(
+					'shortcode_with_playlist_permalink'   => [
 						"[soundcloud url=$this->playlist_url]",
 						'<amp-soundcloud data-playlistid="40936190" data-visual="true" height="450" layout="fixed-height">' . ( function_exists( 'wp_filter_oembed_iframe_title_attribute' ) ? '<a fallback href="https://soundcloud.com/classical-music-playlist/sets/classical-music-essential-collection">Classical Music - The Essential Collection by Classical Music</a>' : '' ) . '</amp-soundcloud>' . PHP_EOL,
-					),
+					],
 
 					// This apparently only works on WordPress.com.
-					'shortcode_with_id'                   => array(
+					'shortcode_with_id'                   => [
 						'[soundcloud id=89299804]' . PHP_EOL,
 						'<amp-soundcloud data-trackid="89299804" data-visual="false" height="166" layout="fixed-height"></amp-soundcloud>' . PHP_EOL,
-					),
-				)
+					],
+				]
 			);
 		}
 
@@ -202,20 +202,20 @@ class AMP_SoundCloud_Embed_Test extends WP_UnitTestCase {
 	 * @return array Scripts data.
 	 */
 	public function get_scripts_data() {
-		return array(
-			'not_converted'      => array(
+		return [
+			'not_converted'      => [
 				'<p>Hello World.</p>',
-				array(),
-			),
-			'converted_track'    => array(
+				[],
+			],
+			'converted_track'    => [
 				$this->track_url . PHP_EOL,
-				array( 'amp-soundcloud' => true ),
-			),
-			'converted_playlist' => array(
+				[ 'amp-soundcloud' => true ],
+			],
+			'converted_playlist' => [
 				$this->playlist_url . PHP_EOL,
-				array( 'amp-soundcloud' => true ),
-			),
-		);
+				[ 'amp-soundcloud' => true ],
+			],
+		];
 	}
 
 	/**
