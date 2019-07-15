@@ -108,19 +108,32 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
 		}
 
-		// Add a new Canonical URL in the document head.
+		// Add or update Canonical URL in the document head.
 		if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
-			$rel_canonical = AMP_DOM_Utils::create_node(
-				$this->dom,
-				'link',
-				[
-					'rel'  => 'canonical',
-					'href' => $this->args['canonical_url'],
-				]
-			);
+			$head          = $this->dom->getElementsByTagName( 'head' )->item( 0 );
+			$links         = [];
+			$link_elements = $head->getElementsByTagName( 'link' );
+			$rel_canonical = null;
 
-			$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-			$head->appendChild( $rel_canonical );
+			foreach ( $link_elements as $link ) {
+				if ( $link->hasAttribute( 'rel' ) ) {
+					$links[ $link->getAttribute( 'rel' ) ][] = $link;
+				}
+			}
+
+			if ( empty( $links['canonical'] ) ) {
+				$rel_canonical = AMP_DOM_Utils::create_node(
+					$this->dom,
+					'link',
+					[
+						'rel'  => 'canonical',
+						'href' => $this->args['canonical_url'],
+					]
+				);
+				$head->appendChild( $rel_canonical );
+			} else {
+				$links['canonical']->setAttribute( 'rel', $this->args['canonical_url'] );
+			}
 		}
 
 		// Add the export assets as an HTML comment.
