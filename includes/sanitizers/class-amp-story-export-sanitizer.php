@@ -86,7 +86,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				// Replace the image URL.
 				if ( isset( $image_url ) ) {
 					$args = [
-						$this->args['base_url'],
+						$this->args['canonical_url'],
 						'assets',
 						AMP_Story_Post_Type::export_image_basename( $image_url ),
 					];
@@ -141,7 +141,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		$num_nodes = $nodes->length;
 
 		// Verify we have a value to update the paths with.
-		$update_path = ! empty( $this->args['base_url'] ) ? $this->args['base_url'] : false;
+		$update_path = ! empty( $this->args['canonical_url'] ) ? $this->args['canonical_url'] : false;
 
 		/**
 		 * Generates the new asset path.
