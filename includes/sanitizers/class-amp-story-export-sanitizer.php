@@ -81,6 +81,15 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			// Adds the logo image to the assets array.
+			if ( isset( $metadata->publisher->logo->url ) ) {
+				$logo_url = $metadata->publisher->logo->url;
+
+				if ( $logo_url && ! in_array( $logo_url, $this->assets, true ) ) {
+					$this->assets[] = $logo_url;
+				}
+			}
+
 			if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
 
 				// Replace the image URL.
@@ -92,6 +101,17 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					];
 
 					$metadata->image->url = implode( '/', $args );
+				}
+
+				// Replace the logo URL.
+				if ( isset( $logo_url ) ) {
+					$args = [
+						$this->args['canonical_url'],
+						'assets',
+						AMP_Story_Post_Type::export_image_basename( $logo_url ),
+					];
+
+					$metadata->publisher->logo->url = implode( '/', $args );
 				}
 
 				// Replace the Canonical URL.
