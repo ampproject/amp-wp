@@ -23,6 +23,11 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 	formData.append( '_wpnonce', ampStoriesExport.nonce );
 	formData.append( 'post_ID', postId );
 
+	createSuccessNotice( __( 'Generating story archive.', 'amp' ), {
+		id: 'amp-story-export__success-snackbar',
+		type: 'snackbar',
+	} );
+
 	// Request the export.
 	fetch( ampStoriesExport.ajaxUrl, {
 		method: 'POST',
@@ -45,11 +50,6 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 									a.removeEventListener( 'click', clickHandler );
 								}, 150 );
 							};
-
-							createSuccessNotice( __( 'Generating story archive.', 'amp' ), {
-								id: 'amp-story-export__success-snackbar',
-								type: 'snackbar',
-							} );
 
 							a.addEventListener( 'click', clickHandler, false );
 							a.href = url;
