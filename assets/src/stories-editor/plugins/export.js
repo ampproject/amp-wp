@@ -39,12 +39,9 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice, removeN
 	 */
 	const showErrorNotice = ( error = null ) => {
 		removeNotice( progressNoticeId );
-		createErrorNotice( error ? error.message : errorMsg,
-			{
-				id: errorNoticeId,
-				type: 'snackbar',
-			}
-		);
+		createErrorNotice( error ? error.message : errorMsg, {
+			id: errorNoticeId,
+		} );
 	};
 
 	// Request the export.
