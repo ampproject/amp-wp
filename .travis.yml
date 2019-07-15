@@ -95,6 +95,20 @@ jobs:
         - npm run test:e2e
         - npm run env:stop
 
+    - name: E2E tests (Author)
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD= E2E_ROLE=author
+      install:
+        - nvm install
+        - composer install
+        # npm is handled by `npm run env:start`
+      script:
+        - npm run env:start
+        - npm run build:js # after npm dependencies have been installed
+        - npm run env:reset-site
+        - npm run test:e2e
+        - npm run env:stop
+
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"
       env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_GROUP=external-http
