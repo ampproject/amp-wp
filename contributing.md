@@ -248,6 +248,12 @@ For debugging purposes, you can also run the E2E tests in non-headless mode:
 HEADLESS=false npm run test:e2e
 ```
 
+Sometimes one might to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
+                                                                                                                                                       
+For example, such a plugin could create a custom post type and the accompanying E2E test would verify that block validation errors are shown for this custom post type too.
+
+These plugins can be added to `tests/e2e/plugins` and then activated via the WordPress admin.
+
 ### Coding Standards
 
 All contributions to this project will be checked against [WordPress-Coding-Standards](https://github.com/WordPress-Coding-Standards/WordPress-Coding-Standards) with PHPCS, and for JavaScript linting is done with ESLint.
