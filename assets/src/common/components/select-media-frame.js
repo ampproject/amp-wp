@@ -175,7 +175,10 @@ export const getSelectMediaFrame = ( ToolbarSelect ) => {
 		createSelectToolbar( toolbar, options ) {
 			options = options || this.options.button || {};
 			options.controller = this;
-			options = Object.assign( {}, options, { allowedTypes: get( this, [ 'options', 'allowedTypes' ], null ) } );
+			options = {
+				...options,
+				allowedTypes: get( this, [ 'options', 'allowedTypes' ], null ),
+			};
 
 			toolbar.view = new ToolbarSelect( options );
 		},
