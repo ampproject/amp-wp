@@ -93,6 +93,7 @@ jobs:
         - npm run build:js # after npm dependencies have been installed
         - npm run env:reset-site
         - npm run test:e2e
+        - npm run env:stop
 
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"
