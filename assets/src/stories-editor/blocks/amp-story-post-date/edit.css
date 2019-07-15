@@ -14,6 +14,7 @@
 
 .wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date:not(.is-amp-fit-text) {
 	display: block;
+	font-size: 16px;
 }
 
 .wp-block[data-type="amp/amp-story-post-date"] .wp-block-amp-amp-story-post-date.is-measuring {
