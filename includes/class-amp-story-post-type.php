@@ -2028,7 +2028,7 @@ class AMP_Story_Post_Type {
 		// Passed to `wp_remote_get()`.
 		$args = [
 			'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
-			'timeout'     => 15, // Increase from default of 5 to give extra time for the plugin to process story for exporting.
+			'timeout'     => 20, // Increase from default of 5 to give extra time for the plugin to process story for exporting.
 			'sslverify'   => false,
 			'redirection' => 0, // Because we're in a loop for redirection.
 			'headers'     => [
