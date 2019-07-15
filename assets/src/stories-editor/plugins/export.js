@@ -14,7 +14,7 @@ import { __ } from '@wordpress/i18n';
 
 const { ampStoriesExport, fetch, FormData, URL } = window;
 
-const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
+const handleExport = ( { postId, createErrorNotice, createSuccessNotice, removeNotice } ) => {
 	const formData = new FormData();
 	const errorMsg = __( 'Could not generate story archive.', 'amp' );
 
@@ -23,10 +23,29 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 	formData.append( '_wpnonce', ampStoriesExport.nonce );
 	formData.append( 'post_ID', postId );
 
-	createSuccessNotice( __( 'Generating story archive.', 'amp' ), {
-		id: 'amp-story-export__success-snackbar',
+	const progressNoticeId = 'amp-story-export__success-snackbar';
+	const errorNoticeId = 'amp-story-export__error-notice';
+
+	removeNotice( errorNoticeId );
+	createSuccessNotice( __( 'Generating story archive…', 'amp' ), {
+		id: progressNoticeId,
 		type: 'snackbar',
 	} );
+
+	/**
+	 * Show error notice.
+	 *
+	 * @param {?Error} error
+	 */
+	const showErrorNotice = ( error = null ) => {
+		removeNotice( progressNoticeId );
+		createErrorNotice( error ? error.message : errorMsg,
+			{
+				id: errorNoticeId,
+				type: 'snackbar',
+			}
+		);
+	};
 
 	// Request the export.
 	fetch( ampStoriesExport.ajaxUrl, {
@@ -42,6 +61,9 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 						const matches = header.match( /"(.*?)"/ );
 
 						if ( matches ) {
+							// Hide progress notice right before triggering download.
+							removeNotice( progressNoticeId );
+
 							const a = document.createElement( 'a' );
 							const url = URL.createObjectURL( data );
 							const clickHandler = () => {
@@ -56,21 +78,19 @@ const handleExport = ( { postId, createErrorNotice, createSuccessNotice } ) => {
 							a.download = matches[ 1 ];
 							a.click();
 						} else {
-							createErrorNotice( errorMsg, {
-								id: 'amp-story-export__error-notice',
-							} );
+							showErrorNotice();
 						}
-					} );
+					} )
+					.catch( showErrorNotice );
 			} else {
 				// Handle the returned JSON error.
 				response.json()
 					.then( ( error ) => {
-						createErrorNotice( ( error.data && error.data.errorMessage ) ? error.data.errorMessage : errorMsg, {
-							id: 'amp-story-export__error-notice',
-						} );
-					} );
+						showErrorNotice( ( error.data && error.data.errorMessage ) ? new Error( error.data.errorMessage ) : null );
+					} )
+					.catch( showErrorNotice );
 			}
-		} );
+		} ).catch( showErrorNotice );
 };
 
 export const name = 'amp-story-export';
@@ -81,15 +101,16 @@ export const name = 'amp-story-export';
  * @param {number} postId
  * @param {function} createErrorNotice
  * @param {function} createSuccessNotice
+ * @param {function} removeNotice
  *
  * @return {Object} The rendered export menu item.
  */
-const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice } ) => {
+const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice, removeNotice } ) => {
 	return (
 		<PluginMoreMenuItem
 			icon={ 'media-archive' }
 			onClick={ () => {
-				handleExport( { postId, createErrorNotice, createSuccessNotice } );
+				handleExport( { postId, createErrorNotice, createSuccessNotice, removeNotice } );
 			} }
 		>
 			{ __( 'Export Story', 'amp' ) }
@@ -101,6 +122,7 @@ renderPlugin.propTypes = {
 	postId: PropTypes.number.isRequired,
 	createErrorNotice: PropTypes.func.isRequired,
 	createSuccessNotice: PropTypes.func.isRequired,
+	removeNotice: PropTypes.func.isRequired,
 };
 
 export const render = compose( [
@@ -113,11 +135,12 @@ export const render = compose( [
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { createErrorNotice, createSuccessNotice } = dispatch( 'core/notices' );
+		const { createErrorNotice, createSuccessNotice, removeNotice } = dispatch( 'core/notices' );
 
 		return {
 			createErrorNotice,
 			createSuccessNotice,
+			removeNotice,
 		};
 	} ),
 	ifCondition( ( { hasPublishAction } ) => hasPublishAction ),
