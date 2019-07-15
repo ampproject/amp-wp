@@ -94,13 +94,6 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					$metadata->image->url = implode( '/', $args );
 				}
 
-				$parse = wp_parse_url( $this->args['base_url'] );
-
-				// Replace the Publishers name.
-				if ( $parse['host'] ) {
-					$metadata->publisher->name = $parse['host'];
-				}
-
 				// Replace the Canonical URL.
 				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore
 			}
