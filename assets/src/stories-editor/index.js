@@ -38,7 +38,6 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
-	withVideoPosterImageNotice,
 	withEnforcedVideoUploadType,
 } from './components';
 import {
@@ -321,7 +320,6 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
-addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
 addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addEnforcedVideoUploadType', withEnforcedVideoUploadType );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );

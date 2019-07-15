@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -13,6 +14,7 @@ import {
 	BaseControl,
 	Button,
 	IconButton,
+	Notice,
 	PanelBody,
 	Path,
 	SVG,
@@ -92,6 +94,10 @@ class CustomVideoBlockEdit extends Component {
 		if ( this.props.attributes.poster !== prevProps.attributes.poster ) {
 			this.videoPlayer.current.load();
 		}
+
+		if ( ! this.props.attributes.poster && this.props.videoFeaturedImage ) {
+			this.props.setAttributes( { poster: this.props.videoFeaturedImage.source_url } );
+		}
 	}
 	toggleAttribute( attribute ) {
 		return ( newValue ) => {
@@ -150,6 +156,7 @@ class CustomVideoBlockEdit extends Component {
 				switchToEditing();
 				return;
 			}
+
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id } );
@@ -215,16 +222,25 @@ class CustomVideoBlockEdit extends Component {
 										</Button>
 									) }
 								/>
-								<p
-									id={ videoPosterDescription }
-									hidden
-								>
-									{ poster ?
-										/* translators: %s: the poster image URL. */
-										sprintf( __( 'The current poster image url is %s', 'amp' ), this.props.attributes.poster ) :
-										__( 'There is no poster image currently selected', 'amp' )
-									}
-								</p>
+								{ poster && (
+									<p
+										id={ videoPosterDescription }
+										hidden
+									>
+										{
+											/* translators: %s: the poster image URL. */
+											sprintf( __( 'The current poster image url is %s', 'amp' ), this.props.attributes.poster )
+										}
+									</p>
+								) }
+								{ ! poster && (
+									<Notice
+										status="error"
+										isDismissible={ false }
+									>
+										{ __( 'A poster is required for videos in stories.', 'amp' ) }
+									</Notice>
+								) }
 							</BaseControl>
 						</MediaUploadCheck>
 					</PanelBody>
@@ -267,17 +283,33 @@ CustomVideoBlockEdit.propTypes = {
 	instanceId: PropTypes.number,
 	isSelected: PropTypes.bool,
 	mediaUpload: PropTypes.func,
+	getMedia: PropTypes.func,
 	noticeUI: PropTypes.func,
 	noticeOperations: PropTypes.object,
 	setAttributes: PropTypes.func,
+	videoFeaturedImage: PropTypes.shape( {
+		source_url: PropTypes.string,
+	} ),
 };
 
 export default compose( [
-	withSelect( ( select ) => {
+	withSelect( ( select, props ) => {
+		const { getMedia } = select( 'core' );
 		const { getSettings } = select( 'core/block-editor' );
 		const { __experimentalMediaUpload } = getSettings();
+
+		let videoFeaturedImage;
+
+		if ( props.attributes.id && ! props.attributes.poster ) {
+			const media = getMedia( props.attributes.id );
+			const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
+			videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
+		}
+
 		return {
 			mediaUpload: __experimentalMediaUpload,
+			getMedia,
+			videoFeaturedImage,
 		};
 	} ),
 	withNotices,
