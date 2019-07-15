@@ -115,10 +115,10 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				}
 
 				// Replace the Canonical URL.
-				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore
+				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 
-			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
+			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT );
 		}
 
 		// Add or update Canonical URL in the document head.
