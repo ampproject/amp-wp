@@ -136,7 +136,7 @@ class CustomVideoBlockEdit extends Component {
 	render() {
 		const {
 			caption,
-			controls,
+			loop,
 			poster,
 			src,
 		} = this.props.attributes;
@@ -198,9 +198,9 @@ class CustomVideoBlockEdit extends Component {
 				<InspectorControls>
 					<PanelBody title={ __( 'Video Settings', 'amp' ) }>
 						<ToggleControl
-							label={ __( 'Playback Controls', 'amp' ) }
-							onChange={ this.toggleAttribute( 'controls' ) }
-							checked={ controls }
+							label={ __( 'Loop', 'amp' ) }
+							onChange={ this.toggleAttribute( 'loop' ) }
+							checked={ loop }
 						/>
 						<MediaUploadCheck>
 							<BaseControl
@@ -247,8 +247,8 @@ class CustomVideoBlockEdit extends Component {
 					<video
 						autoPlay
 						muted
-						loop
-						controls={ controls }
+						loop={ loop }
+						controls={ ! loop }
 						poster={ poster }
 						ref={ this.videoPlayer }
 						src={ src }
@@ -272,6 +272,7 @@ CustomVideoBlockEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		caption: PropTypes.string,
 		controls: PropTypes.bool,
+		loop: PropTypes.bool,
 		id: PropTypes.number,
 		poster: PropTypes.string,
 		src: PropTypes.string,
