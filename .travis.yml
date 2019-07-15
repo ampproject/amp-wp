@@ -30,7 +30,9 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
-env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+env:
+  global:
+    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 install:
   - nvm install
