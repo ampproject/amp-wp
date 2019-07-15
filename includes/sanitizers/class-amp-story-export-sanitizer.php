@@ -113,7 +113,6 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 			$head          = $this->dom->getElementsByTagName( 'head' )->item( 0 );
 			$links         = [];
 			$link_elements = $head->getElementsByTagName( 'link' );
-			$rel_canonical = null;
 
 			foreach ( $link_elements as $link ) {
 				if ( $link->hasAttribute( 'rel' ) ) {
@@ -132,7 +131,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				);
 				$head->appendChild( $rel_canonical );
 			} else {
-				$links['canonical']->setAttribute( 'rel', $this->args['canonical_url'] );
+				$links['canonical']->setAttribute( 'href', $this->args['canonical_url'] );
 			}
 		}
 
