@@ -59,7 +59,6 @@ class CustomVideoBlockEdit extends Component {
 		this.toggleAttribute = this.toggleAttribute.bind( this );
 		this.onSelectURL = this.onSelectURL.bind( this );
 		this.onSelectPoster = this.onSelectPoster.bind( this );
-		this.onRemovePoster = this.onRemovePoster.bind( this );
 		this.onUploadError = this.onUploadError.bind( this );
 	}
 
@@ -117,14 +116,6 @@ class CustomVideoBlockEdit extends Component {
 	onSelectPoster( image ) {
 		const { setAttributes } = this.props;
 		setAttributes( { poster: image.url } );
-	}
-
-	onRemovePoster() {
-		const { setAttributes } = this.props;
-		setAttributes( { poster: '' } );
-
-		// Move focus back to the Media Upload button.
-		this.posterImageButton.current.focus();
 	}
 
 	onUploadError( message ) {
@@ -234,11 +225,6 @@ class CustomVideoBlockEdit extends Component {
 										__( 'There is no poster image currently selected', 'amp' )
 									}
 								</p>
-								{ !! poster &&
-									<Button onClick={ this.onRemovePoster } isLink isDestructive>
-										{ __( 'Remove Poster Image', 'amp' ) }
-									</Button>
-								}
 							</BaseControl>
 						</MediaUploadCheck>
 					</PanelBody>
