@@ -34,6 +34,12 @@ import {
 import { compose, withInstanceId } from '@wordpress/compose';
 import { withSelect } from '@wordpress/data';
 
+/**
+ * Internal dependencies
+ */
+import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
+import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
+
 const ALLOWED_MEDIA_TYPES = [ 'video' ];
 const VIDEO_POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
@@ -62,6 +68,7 @@ class CustomVideoBlockEdit extends Component {
 		this.onSelectURL = this.onSelectURL.bind( this );
 		this.onSelectPoster = this.onSelectPoster.bind( this );
 		this.onUploadError = this.onUploadError.bind( this );
+		this.onLoadedMetadata = this.onLoadedMetadata.bind( this );
 	}
 
 	componentDidMount() {
@@ -78,6 +85,7 @@ class CustomVideoBlockEdit extends Component {
 				mediaUpload( {
 					filesList: [ file ],
 					onFileChange: ( [ { url } ] ) => {
+						this.setState( { duration: null, videoSize: null } );
 						setAttributes( { src: url } );
 					},
 					onError: ( message ) => {
@@ -88,15 +96,28 @@ class CustomVideoBlockEdit extends Component {
 				} );
 			}
 		}
+
+		if ( src ) {
+			getContentLengthFromUrl( src ).then( ( videoSize ) => {
+				this.setState( { videoSize } );
+			} );
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		if ( this.props.attributes.poster !== prevProps.attributes.poster ) {
+		const { poster, src } = this.props.attributes;
+		if ( poster !== prevProps.attributes.poster ) {
 			this.videoPlayer.current.load();
 		}
 
-		if ( ! this.props.attributes.poster && this.props.videoFeaturedImage ) {
+		if ( ! poster && this.props.videoFeaturedImage ) {
 			this.props.setAttributes( { poster: this.props.videoFeaturedImage.source_url } );
+		}
+
+		if ( prevProps.attributes.src !== src ) {
+			getContentLengthFromUrl( src ).then( ( videoSize ) => {
+				this.setState( { videoSize } );
+			} );
 		}
 	}
 	toggleAttribute( attribute ) {
@@ -116,7 +137,7 @@ class CustomVideoBlockEdit extends Component {
 			setAttributes( { src: newSrc, id: undefined } );
 		}
 
-		this.setState( { editing: false } );
+		this.setState( { editing: false, duration: null, videoSize: null } );
 	}
 
 	onSelectPoster( image ) {
@@ -128,6 +149,12 @@ class CustomVideoBlockEdit extends Component {
 		const { noticeOperations } = this.props;
 		noticeOperations.removeAllNotices();
 		noticeOperations.createErrorNotice( message );
+	}
+
+	onLoadedMetadata( event ) {
+		const duration = Math.round( event.currentTarget.duration );
+
+		this.setState( { duration } );
 	}
 
 	render() {
@@ -160,7 +187,7 @@ class CustomVideoBlockEdit extends Component {
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id } );
-			this.setState( { src: media.url, editing: false } );
+			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
 		};
 
 		if ( editing ) {
@@ -180,6 +207,9 @@ class CustomVideoBlockEdit extends Component {
 		}
 
 		const videoPosterDescription = `video-block__poster-image-description-${ instanceId }`;
+
+		const videoBytesPerSecond = this.state.duration && this.state.videoSize ? this.state.videoSize / this.state.duration : 0;
+		const isExcessiveVideoSize = videoBytesPerSecond ? isVideoSizeExcessive( videoBytesPerSecond ) : null;
 
 		return (
 			<>
@@ -243,6 +273,27 @@ class CustomVideoBlockEdit extends Component {
 								) }
 							</BaseControl>
 						</MediaUploadCheck>
+						{
+							isExcessiveVideoSize && (
+								<Notice status="warning" isDismissible={ false } >
+									{
+										sprintf(
+											/* translators: %d: the number of recommended megabytes per second */
+											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
+											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+										)
+									}
+									{ ' ' }
+									{
+										sprintf(
+											/* translators: %d: the number of actual megabytes per second */
+											__( 'The selected video is %d MB per second.', 'amp' ),
+											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+										)
+									}
+								</Notice>
+							)
+						}
 					</PanelBody>
 				</InspectorControls>
 				<figure className="wp-block-video">
@@ -254,6 +305,7 @@ class CustomVideoBlockEdit extends Component {
 						poster={ poster }
 						ref={ this.videoPlayer }
 						src={ src }
+						onLoadedMetadata={ this.onLoadedMetadata }
 					/>
 					{ ( ! RichText.isEmpty( caption ) || isSelected ) && (
 						<RichText
@@ -283,8 +335,7 @@ CustomVideoBlockEdit.propTypes = {
 	instanceId: PropTypes.number,
 	isSelected: PropTypes.bool,
 	mediaUpload: PropTypes.func,
-	getMedia: PropTypes.func,
-	noticeUI: PropTypes.func,
+	noticeUI: PropTypes.oneOfType( [ PropTypes.func, PropTypes.bool ] ),
 	noticeOperations: PropTypes.object,
 	setAttributes: PropTypes.func,
 	videoFeaturedImage: PropTypes.shape( {
@@ -308,7 +359,6 @@ export default compose( [
 
 		return {
 			mediaUpload: __experimentalMediaUpload,
-			getMedia,
 			videoFeaturedImage,
 		};
 	} ),

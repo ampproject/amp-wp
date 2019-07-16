@@ -225,3 +225,15 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	height: 100%;
 	width: 100%;
 }
+
+/* If the Media Library has 2 notices, like for wrong video file type and size, prevent them from covering the media. */
+.media-frame.has-two-notices .media-frame-content {
+	bottom: 120px;
+}
+
+/* More space for notices in the sidebar */
+
+.components-panel__body .components-notice {
+	margin-left: 0;
+	margin-right: 0;
+}
