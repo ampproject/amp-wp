@@ -76,41 +76,43 @@ class CallToActionEdit extends Component {
 					isDraggable={ true }
 					isMovable={ true }
 				>
-					<div id='amp-story-cta-button' className={ className } ref={ this.bindRef }>
-						<RichText
-							placeholder={ __( 'Add text…', 'amp' ) }
-							value={ text }
-							onChange={ ( value ) => setAttributes( { text: value } ) }
-							formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
-							className={ classnames(
-								'amp-block-story-cta__link', {
-									'has-background': backgroundColor.color,
-									[ backgroundColor.class ]: backgroundColor.class,
-									'has-text-color': textColor.color,
-									[ textColor.class ]: textColor.class,
-								}
-							) }
-							style={ {
-								backgroundColor: appliedBackgroundColor,
-								color: textColor.color,
-								fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
-							} }
-						/>
+					<div id='amp-story-cta-button'>
+						<div className={ className } ref={ this.bindRef }>
+							<RichText
+								placeholder={ __( 'Add text…', 'amp' ) }
+								value={ text }
+								onChange={ ( value ) => setAttributes( { text: value } ) }
+								formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
+								className={ classnames(
+									'amp-block-story-cta__link', {
+										'has-background': backgroundColor.color,
+										[ backgroundColor.class ]: backgroundColor.class,
+										'has-text-color': textColor.color,
+										[ textColor.class ]: textColor.class,
+									}
+								) }
+								style={ {
+									backgroundColor: appliedBackgroundColor,
+									color: textColor.color,
+									fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+								} }
+							/>
+						</div>
+						{ isSelected && (
+							<form
+								className="amp-block-story-cta__inline-link"
+								onSubmit={ ( event ) => event.preventDefault() }>
+								<Dashicon icon="admin-links" />
+								<URLInput
+									value={ url }
+									onChange={ ( value ) => setAttributes( { url: value } ) }
+									autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
+								/>
+								<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+							</form>
+						) }
 					</div>
 				</StoryBlockMover>
-				{ isSelected && (
-					<form
-						className="amp-block-story-cta__inline-link"
-						onSubmit={ ( event ) => event.preventDefault() }>
-						<Dashicon icon="admin-links" />
-						<URLInput
-							value={ url }
-							onChange={ ( value ) => setAttributes( { url: value } ) }
-							autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
-						/>
-						<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
-					</form>
-				) }
 			</>
 		);
 	}
