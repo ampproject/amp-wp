@@ -2375,6 +2375,7 @@ class AMP_Theme_Support {
 			'height'   => $video_settings['height'],
 			'layout'   => 'responsive',
 			'autoplay' => '',
+			'loop'     => '',
 			'id'       => 'wp-custom-header-video',
 		];
 
@@ -2405,8 +2406,6 @@ class AMP_Theme_Support {
 						'data-param-playsinline'    => '1', // Prevent fullscreen playback on iOS.
 						'data-param-disablekb'      => '1', // Disable keyboard conttrols.
 						'data-param-fs'             => '0', // Suppress full screen button.
-						'data-param-loop'           => '1', // Loop video playback.
-						'data-param-playlist'       => $youtube_id, // Currently needed to make looping work. See <https://developers.google.com/youtube/player_parameters#loop> and <https://github.com/ampproject/amphtml/pull/22856>.
 					]
 				)
 			);
@@ -2416,8 +2415,7 @@ class AMP_Theme_Support {
 				array_merge(
 					$video_attributes,
 					[
-						'src'  => $video_settings['videoUrl'],
-						'loop' => '',
+						'src' => $video_settings['videoUrl'],
 					]
 				)
 			);
