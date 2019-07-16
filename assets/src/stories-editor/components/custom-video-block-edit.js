@@ -136,7 +136,7 @@ class CustomVideoBlockEdit extends Component {
 			setAttributes( { src: newSrc, id: undefined } );
 		}
 
-		this.setState( { editing: false } );
+		this.setState( { editing: false, duration: null, videoSize: null } );
 	}
 
 	onSelectPoster( image ) {
@@ -151,7 +151,7 @@ class CustomVideoBlockEdit extends Component {
 	}
 
 	onLoadedMetadata( event ) {
-		const duration = event.currentTarget.duration;
+		const duration = Math.round( event.currentTarget.duration );
 
 		this.setState( { duration } );
 	}
