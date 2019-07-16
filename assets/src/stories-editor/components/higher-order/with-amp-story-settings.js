@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { get } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import {
@@ -16,7 +11,7 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose, createHigherOrderComponent, withSafeTimeout } from '@wordpress/compose';
+import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import {
 	IconButton,
 	PanelBody,
@@ -63,7 +58,6 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 const applyWithSelect = withSelect( ( select, props ) => {
 	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlockOrder, getBlockIndex } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
-	const { getMedia } = select( 'core' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
@@ -74,16 +68,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 	const blockClientIds = getBlockOrder( parentBlockId );
 	const blockIndex = getBlockIndex( props.clientId, parentBlockId );
-
-	const isVideoBlock = 'core/video' === props.name;
-	let videoFeaturedImage;
-
-	// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
-	if ( isVideoBlock && props.attributes.id && ! props.attributes.poster ) {
-		const media = getMedia( props.attributes.id );
-		const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
-		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
-	}
 
 	const reversedIndex = blockClientIds.length - 1 - blockIndex;
 
@@ -116,7 +100,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 					};
 				} );
 		},
-		videoFeaturedImage,
 	};
 } );
 
@@ -175,7 +158,6 @@ const enhance = compose(
 	applyFallbackStyles,
 	applyWithSelect,
 	applyWithDispatch,
-	withSafeTimeout,
 );
 
 export default createHigherOrderComponent(
@@ -205,14 +187,12 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
-				videoFeaturedImage,
 				startBlockActions,
 				stopBlockActions,
 				bringForward,
 				sendBackward,
 				moveFront,
 				moveBack,
-				setTimeout,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -243,13 +223,6 @@ export default createHigherOrderComponent(
 				ampAnimationDelay,
 				rotationAngle,
 			} = attributes;
-
-			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
-			if ( isVideoBlock && videoFeaturedImage ) {
-				setTimeout( () => {
-					setAttributes( { poster: videoFeaturedImage.source_url } );
-				}, 100 );
-			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
 			// In case of table, the min height depends on the number of rows, each row takes 45px.

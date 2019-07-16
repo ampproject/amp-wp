@@ -81,12 +81,21 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 				}
 			}
 
+			// Adds the logo image to the assets array.
+			if ( isset( $metadata->publisher->logo->url ) ) {
+				$logo_url = $metadata->publisher->logo->url;
+
+				if ( $logo_url && ! in_array( $logo_url, $this->assets, true ) ) {
+					$this->assets[] = $logo_url;
+				}
+			}
+
 			if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
 
 				// Replace the image URL.
 				if ( isset( $image_url ) ) {
 					$args = [
-						$this->args['base_url'],
+						$this->args['canonical_url'],
 						'assets',
 						AMP_Story_Post_Type::export_image_basename( $image_url ),
 					];
@@ -94,33 +103,40 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 					$metadata->image->url = implode( '/', $args );
 				}
 
-				$parse = wp_parse_url( $this->args['base_url'] );
+				// Replace the logo URL.
+				if ( isset( $logo_url ) ) {
+					$args = [
+						$this->args['canonical_url'],
+						'assets',
+						AMP_Story_Post_Type::export_image_basename( $logo_url ),
+					];
 
-				// Replace the Publishers name.
-				if ( $parse['host'] ) {
-					$metadata->publisher->name = $parse['host'];
+					$metadata->publisher->logo->url = implode( '/', $args );
 				}
 
 				// Replace the Canonical URL.
-				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore
+				$metadata->mainEntityOfPage = $this->args['canonical_url']; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			}
 
-			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE );
+			$schema_org_meta->firstChild->nodeValue = wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT );
 		}
 
-		// Add a new Canonical URL in the document head.
+		// Add or update Canonical URL in the document head.
 		if ( $this->args['base_url'] && $this->args['canonical_url'] ) {
-			$rel_canonical = AMP_DOM_Utils::create_node(
-				$this->dom,
-				'link',
-				[
-					'rel'  => 'canonical',
-					'href' => $this->args['canonical_url'],
-				]
-			);
-
-			$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-			$head->appendChild( $rel_canonical );
+			$canonical_link = $xpath->query( '/html/head/link[ @rel = "canonical" ]' )->item( 0 );
+			if ( $canonical_link instanceof DOMElement ) {
+				$canonical_link->setAttribute( 'href', $this->args['canonical_url'] );
+			} else {
+				$canonical_link = AMP_DOM_Utils::create_node(
+					$this->dom,
+					'link',
+					[
+						'rel'  => 'canonical',
+						'href' => $this->args['canonical_url'],
+					]
+				);
+				$this->dom->getElementsByTagName( 'head' )->item( 0 )->appendChild( $canonical_link );
+			}
 		}
 
 		// Add the export assets as an HTML comment.
@@ -141,7 +157,7 @@ class AMP_Story_Export_Sanitizer extends AMP_Base_Sanitizer {
 		$num_nodes = $nodes->length;
 
 		// Verify we have a value to update the paths with.
-		$update_path = ! empty( $this->args['base_url'] ) ? $this->args['base_url'] : false;
+		$update_path = ! empty( $this->args['canonical_url'] ) ? $this->args['canonical_url'] : false;
 
 		/**
 		 * Generates the new asset path.

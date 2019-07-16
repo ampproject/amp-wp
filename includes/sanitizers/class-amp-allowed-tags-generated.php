@@ -13,7 +13,7 @@
  */
 class AMP_Allowed_Tags_Generated {
 
-	private static $spec_file_revision = 882;
+	private static $spec_file_revision = 896;
 	private static $minimum_validator_revision_required = 375;
 
 	private static $descendant_tag_lists = array(
@@ -465,6 +465,7 @@ class AMP_Allowed_Tags_Generated {
 								'maps',
 								'bip',
 								'bbmi',
+								'itms-services',
 								'fb-me',
 								'fb-messenger',
 								'intent',
@@ -1862,6 +1863,7 @@ class AMP_Allowed_Tags_Generated {
 						),
 					),
 					'type' => array(
+						'dispatch_key' => 2,
 						'mandatory' => true,
 						'value' => array(
 							'carousel',
@@ -5044,12 +5046,14 @@ class AMP_Allowed_Tags_Generated {
 							),
 						),
 					),
-					'bookend-config-src' => array(
-						'value_url' => array(
-							'protocol' => array(
-								'http',
-								'https',
-							),
+					'live-story' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'live-story-disabled' => array(
+						'value' => array(
+							'',
 						),
 					),
 					'poster-landscape-src' => array(
@@ -5303,6 +5307,12 @@ class AMP_Allowed_Tags_Generated {
 							'nodisplay',
 						),
 					),
+					'theme' => array(
+						'value' => array(
+							'dark',
+							'light',
+						),
+					),
 				),
 				'tag_spec' => array(
 					'descendant_tag_list' => 'amp-story-page-attachment-allowed-descendants',
@@ -5448,6 +5458,14 @@ class AMP_Allowed_Tags_Generated {
 					'noloading' => array(
 						'value' => array(
 							'',
+						),
+					),
+					'src' => array(
+						'value_url' => array(
+							'allow_relative' => false,
+							'protocol' => array(
+								'https',
+							),
 						),
 					),
 				),
@@ -6207,6 +6225,7 @@ class AMP_Allowed_Tags_Generated {
 					'lightbox-thumbnail-id' => array(
 						'value_regex_casei' => '^[a-z][a-z\\d_-]*',
 					),
+					'loop' => array(),
 					'media' => array(),
 					'noloading' => array(
 						'value' => array(
@@ -6391,6 +6410,36 @@ class AMP_Allowed_Tags_Generated {
 				'tag_spec' => array(
 					'mandatory_ancestor' => 'amp-app-banner',
 					'spec_name' => 'amp-app-banner button[open-button]',
+				),
+			),
+			array(
+				'attr_spec_list' => array(
+					'disabled' => array(
+						'value' => array(
+							'',
+						),
+					),
+					'load-more-clickable' => array(
+						'dispatch_key' => 1,
+						'mandatory' => true,
+						'value' => array(
+							'',
+						),
+					),
+					'name' => array(
+						'blacklisted_value_regex' => '(^|\\s)(__amp_\\S*|__count__|__defineGetter__|__defineSetter__|__lookupGetter__|__lookupSetter__|__noSuchMethod__|__parent__|__proto__|__AMP_\\S*|\\$p|\\$proxy|acceptCharset|addEventListener|appendChild|assignedSlot|attachShadow|baseURI|checkValidity|childElementCount|childNodes|classList|className|clientHeight|clientLeft|clientTop|clientWidth|compareDocumentPosition|computedName|computedRole|contentEditable|createShadowRoot|enqueAction|firstChild|firstElementChild|getAnimations|getAttribute|getAttributeNS|getAttributeNode|getAttributeNodeNS|getBoundingClientRect|getClientRects|getDestinationInsertionPoints|getElementsByClassName|getElementsByTagName|getElementsByTagNameNS|getRootNode|hasAttribute|hasAttributeNS|hasAttributes|hasChildNodes|hasPointerCapture|innerHTML|innerText|inputMode|insertAdjacentElement|insertAdjacentHTML|insertAdjacentText|isContentEditable|isDefaultNamespace|isEqualNode|isSameNode|lastChild|lastElementChild|lookupNamespaceURI|namespaceURI|nextElementSibling|nextSibling|nodeName|nodeType|nodeValue|offsetHeight|offsetLeft|offsetParent|offsetTop|offsetWidth|outerHTML|outerText|ownerDocument|parentElement|parentNode|previousElementSibling|previousSibling|querySelector|querySelectorAll|releasePointerCapture|removeAttribute|removeAttributeNS|removeAttributeNode|removeChild|removeEventListener|replaceChild|reportValidity|requestPointerLock|scrollHeight|scrollIntoView|scrollIntoViewIfNeeded|scrollLeft|scrollWidth|setAttribute|setAttributeNS|setAttributeNode|setAttributeNodeNS|setPointerCapture|shadowRoot|styleMap|tabIndex|tagName|textContent|toString|valueOf|(webkit|ms|moz|o)dropzone|(webkit|moz|ms|o)MatchesSelector|(webkit|moz|ms|o)RequestFullScreen|(webkit|moz|ms|o)RequestFullscreen)(\\s|$)',
+					),
+					'role' => array(),
+					'tabindex' => array(),
+					'type' => array(),
+					'value' => array(),
+				),
+				'tag_spec' => array(
+					'mandatory_parent' => 'amp-list-load-more',
+					'requires_extension' => array(
+						'amp-list',
+					),
+					'spec_name' => 'amp-list-load-more button[load-more-clickable]',
 				),
 			),
 		),
@@ -14018,12 +14067,8 @@ class AMP_Allowed_Tags_Generated {
 				),
 				'tag_spec' => array(
 					'extension_spec' => array(
-						'deprecated_version' => array(
-							'0.1',
-						),
 						'name' => 'amp-story',
 						'version' => array(
-							'0.1',
 							'1.0',
 							'latest',
 						),
@@ -14615,6 +14660,7 @@ class AMP_Allowed_Tags_Generated {
 			),
 			array(
 				'attr_spec_list' => array(
+					'[data-expand]' => array(),
 					'expanded' => array(
 						'value' => array(
 							'',
@@ -16774,6 +16820,11 @@ class AMP_Allowed_Tags_Generated {
 			),
 		),
 		'subscriptions-display' => array(
+			'requires_extension' => array(
+				'amp-subscriptions',
+			),
+		),
+		'subscriptions-lang' => array(
 			'requires_extension' => array(
 				'amp-subscriptions',
 			),

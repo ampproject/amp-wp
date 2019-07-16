@@ -6,6 +6,7 @@ const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const OptimizeCSSAssetsPlugin = require( 'optimize-css-assets-webpack-plugin' );
 const RtlCssPlugin = require( 'rtlcss-webpack-plugin' );
 const TerserPlugin = require( 'terser-webpack-plugin' );
+const WebpackBar = require( 'webpackbar' );
 
 /**
  * WordPress dependencies
@@ -74,6 +75,10 @@ const ampStories = {
 		new RtlCssPlugin( {
 			filename: '../css/[name]-compiled-rtl.css',
 		} ),
+		new WebpackBar( {
+			name: 'AMP Stories',
+			color: '#fddb33',
+		} ),
 	],
 	optimization: {
 		...sharedConfig.optimization,
@@ -99,6 +104,13 @@ const ampValidation = {
 		'amp-validation-detail-toggle': './assets/src/amp-validation/amp-validation-detail-toggle.js',
 		'amp-validation-single-error-url-details': './assets/src/amp-validation/amp-validation-single-error-url-details.js',
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'AMP Validation',
+			color: '#1c5fec',
+		} ),
+	],
 };
 
 const blockEditor = {
@@ -122,6 +134,13 @@ const blockEditor = {
 			},
 		],
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Block Editor',
+			color: '#1773a8',
+		} ),
+	],
 };
 
 const classicEditor = {
@@ -130,6 +149,13 @@ const classicEditor = {
 	entry: {
 		'amp-post-meta-box': './assets/src/classic-editor/amp-post-meta-box.js',
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Block Editor',
+			color: '#1773a8',
+		} ),
+	],
 };
 
 const admin = {
@@ -138,6 +164,13 @@ const admin = {
 	entry: {
 		'amp-validation-tooltips': './assets/src/admin/amp-validation-tooltips.js',
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Admin',
+			color: '#67b255',
+		} ),
+	],
 };
 
 const customizer = {
@@ -148,13 +181,26 @@ const customizer = {
 		'amp-customize-preview': './assets/src/customizer/amp-customize-preview.js',
 		'amp-customizer-design-preview': './assets/src/customizer/amp-customizer-design-preview.js',
 	},
+	plugins: [
+		...defaultConfig.plugins,
+		new WebpackBar( {
+			name: 'Customizer',
+			color: '#f27136',
+		} ),
+	],
 };
 
 const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
-	plugins: [], // Disable BundleAnalyzerPlugin for polyfills.
+	// Disable BundleAnalyzerPlugin for polyfills.
+	plugins: [
+		new WebpackBar( {
+			name: 'WordPress Polyfills',
+			color: '#21a0d0',
+		} ),
+	],
 	entry: {
 		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
 		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
