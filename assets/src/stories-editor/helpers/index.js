@@ -816,19 +816,19 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
  *
  * @param {string} axis            X or Y axis.
  * @param {number} percentageValue Value in percent.
- * @param {number} baseMeasure     Value to compare against to get pixels from.
+ * @param {number} baseValue       Value to compare against to get pixels from.
  *
  * @return {number} Value in percentage.
  */
-export const getPixelsFromPercentage = ( axis, percentageValue, baseMeasure = 0 ) => {
+export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) => {
 	if ( ! baseMeasure ) {
 		if ( 'x' === axis ) {
-			baseMeasure = STORY_PAGE_INNER_WIDTH;
+			baseValue = STORY_PAGE_INNER_WIDTH;
 		} else if ( 'y' === axis ) {
-			baseMeasure = STORY_PAGE_INNER_HEIGHT;
+			baseValue = STORY_PAGE_INNER_HEIGHT;
 		}
 	}
-	return Math.round( ( percentageValue / 100 ) * baseMeasure );
+	return Math.round( ( percentageValue / 100 ) * baseValue );
 };
 
 /**
