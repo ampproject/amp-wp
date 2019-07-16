@@ -30,12 +30,15 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
-env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+env:
+  global:
+    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 install:
   - nvm install
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
+  - export DIFF_HEAD=HEAD
   - source "$DEV_LIB_PATH/travis.install.sh"
 
 before_script:
@@ -91,6 +94,21 @@ jobs:
         - npm run build:js # after npm dependencies have been installed
         - npm run env:reset-site
         - npm run test:e2e
+        - npm run env:stop
+
+    - name: E2E tests (Author)
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD= E2E_ROLE=author
+      install:
+        - nvm install
+        - composer install
+        # npm is handled by `npm run env:start`
+      script:
+        - npm run env:start
+        - npm run build:js # after npm dependencies have been installed
+        - npm run env:reset-site
+        - npm run test:e2e
+        - npm run env:stop
 
     - name: PHP unit tests w/ external-http (7.3, WordPress latest)
       php: "7.3"

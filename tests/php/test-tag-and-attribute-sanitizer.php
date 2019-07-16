@@ -277,7 +277,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						[ "\n", "\t" ],
 						'',
 						'
-						<amp-story standalone supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
+						<amp-story standalone live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
 							<i>bad</i>
 							<amp-story-page id="my-first-page">
 								<i>bad</i>
@@ -314,6 +314,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<a href="https://example.com">Click me.</a>
 									<button>Hello</button>
 								</amp-story-cta-layer>
+								<amp-story-page-attachment layout="nodisplay" theme="dark" data-cta-text="Read more" data-title="My title">
+									<h1>My title</h1>
+									<p>Lots of interesting text with <a href="https://example.ampproject.org">links</a>!</p>
+									<p>More text and a YouTube video!</p>
+									<amp-youtube data-videoid="b4Vhdr8jtx0" layout="responsive" width="480" height="270">
+									</amp-youtube>
+									<p>And a tweet!</p>
+									<amp-twitter data-tweetid="885634330868850689" layout="responsive" width="480" height="270">
+									</amp-twitter>
+								</amp-story-page-attachment>
 							</amp-story-page>
 							<i>bad</i>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
@@ -326,7 +336,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-twitter' ],
+						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube' ],
 					];
 				}
 			),
@@ -1359,6 +1369,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<button>Click here to see more!</button>
 								</template>
 							</amp-list-load-more>
+							<amp-list-load-more load-more-failed>
+								<div>
+									Here is some unclickable text saying sorry loading failed.
+								</div>
+								<button load-more-clickable>Click me to reload!</button>
+							</amp-list-load-more>
 							<amp-list-load-more load-more-loading>
 								<svg>...</svg>
 							</amp-list-load-more>
@@ -1389,7 +1405,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-youtube'                                  => [
-				'<amp-youtube id="myLiveChannel" data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q" width="358" height="204" layout="responsive" dock><amp-img src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg" placeholder layout="fill"></amp-img></amp-youtube>',
+				'<amp-youtube id="myLiveChannel" loop data-live-channelid="UCB8Kb4pxYzsDsHxzBfnid4Q" width="358" height="204" layout="responsive" dock><amp-img src="https://i.ytimg.com/vi/Wm1fWz-7nLQ/hqdefault_live.jpg" placeholder layout="fill"></amp-img></amp-youtube>',
 				null,
 				[ 'amp-youtube', 'amp-video-docking' ],
 			],
