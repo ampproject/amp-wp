@@ -18,6 +18,10 @@ import { withSafeTimeout } from '@wordpress/compose';
  * Internal dependencies
  */
 import { getPixelsFromPercentage } from '../../helpers';
+import {
+	STORY_PAGE_INNER_WIDTH,
+	STORY_PAGE_INNER_HEIGHT
+} from '../../constants';
 
 const { Image } = window;
 
@@ -104,8 +108,9 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { elementId, transferData, onDragStart = noop } = this.props;
+		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
+		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {
 			event.preventDefault();
@@ -137,8 +142,13 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		if ( isCTABlock ) {
+			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), STORY_PAGE_INNER_HEIGHT / 5 ) }px`;
+			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH / 5 ) }px`;
+		} else {
+			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
+			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		}
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -204,6 +214,7 @@ class Draggable extends Component {
 }
 
 Draggable.propTypes = {
+	blockName: PropTypes.string,
 	elementId: PropTypes.string,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
