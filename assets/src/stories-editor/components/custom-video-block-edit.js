@@ -270,23 +270,25 @@ class CustomVideoBlockEdit extends Component {
 							</BaseControl>
 						</MediaUploadCheck>
 						{
-							isExcessiveVideoSize &&
-							<Notice status="warning" isDismissible={ false } >
-								{
-									sprintf(
-										/* translators: %d: the number of recommended megabytes per second */
-										__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
-										VIDEO_ALLOWED_MEGABYTES_PER_SECOND
-									)
-								}
-								{
-									videoBytesPerSecond && ' ' + sprintf(
-										/* translators: %d: the number of actual megabytes per second */
-										__( 'The selected video is %d MB per second.', 'amp' ),
-										Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
-									)
-								}
-							</Notice>
+							isExcessiveVideoSize && (
+								<Notice status="warning" isDismissible={ false } >
+									{
+										sprintf(
+											/* translators: %d: the number of recommended megabytes per second */
+											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
+											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
+										)
+									}
+									{ ' ' }
+									{
+										sprintf(
+											/* translators: %d: the number of actual megabytes per second */
+											__( 'The selected video is %d MB per second.', 'amp' ),
+											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
+										)
+									}
+								</Notice>
+							)
 						}
 					</PanelBody>
 				</InspectorControls>
