@@ -390,5 +390,5 @@ export const getContentLengthFromUrl = async ( url ) => {
 	const response = await fetch( url, {
 		method: 'head',
 	} );
-	return response.headers.get( 'content-length' );
+	return Number( response.headers.get( 'content-length' ) );
 };
