@@ -74,11 +74,11 @@ class CallToActionEdit extends Component {
 				<StoryBlockMover
 					clientId={ this.props.clientId }
 					blockName={ name }
-					blockElementId='amp-story-cta-button'
+					blockElementId={ `amp-story-cta-button-${ this.props.clientId }` }
 					isDraggable={ true }
 					isMovable={ true }
 				>
-					<div id='amp-story-cta-button' style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+					<div className='amp-story-cta-button' id={ `amp-story-cta-button-${ this.props.clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 						<div className={ className } ref={ this.bindRef }>
 							<RichText
 								placeholder={ __( 'Add text…', 'amp' ) }

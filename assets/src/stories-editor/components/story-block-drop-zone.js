@@ -35,6 +35,11 @@ class BlockDropZone extends Component {
 	onDrop( event ) {
 		const { updateBlockAttributes, srcBlockName, srcClientId } = this.props;
 
+		if ( 'amp/amp-story-cta' === srcBlockName ) {
+			this.onCTAButtonDrop( event );
+			return;
+		}
+
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
 		const element = document.getElementById( elementId );
@@ -59,6 +64,32 @@ class BlockDropZone extends Component {
 		updateBlockAttributes( srcClientId, {
 			positionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta ),
 			positionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta ),
+		} );
+	}
+
+	onCTAButtonDrop( event ) {
+		const { updateBlockAttributes, srcClientId } = this.props;
+
+		const elementId = `amp-story-cta-button-${ srcClientId }`;
+		const cloneElementId = `clone-amp-story-cta-button-${ srcClientId }`;
+		const element = document.getElementById( elementId );
+		const clone = document.getElementById( cloneElementId );
+		const btnWrapperSelector = `block-${ srcClientId }`;
+
+		// Get the editor wrapper element for calculating the width and height.
+		const wrapperEl = document.querySelector( btnWrapperSelector );
+		if ( ! element || ! clone || ! wrapperEl ) {
+			event.preventDefault();
+			return;
+		}
+
+		const clonePosition = clone.getBoundingClientRect();
+		const wrapperPosition = wrapperEl.getBoundingClientRect();
+
+		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
+		updateBlockAttributes( srcClientId, {
+			btnPositionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
+			btnPositionTop: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top ),
 		} );
 	}
 
