@@ -152,8 +152,8 @@ const classicEditor = {
 	plugins: [
 		...defaultConfig.plugins,
 		new WebpackBar( {
-			name: 'Block Editor',
-			color: '#1773a8',
+			name: 'Classic Editor',
+			color: '#dc3232',
 		} ),
 	],
 };
