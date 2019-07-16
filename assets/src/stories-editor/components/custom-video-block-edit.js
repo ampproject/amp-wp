@@ -85,6 +85,7 @@ class CustomVideoBlockEdit extends Component {
 				mediaUpload( {
 					filesList: [ file ],
 					onFileChange: ( [ { url } ] ) => {
+						this.setState( { duration: null, videoSize: null } );
 						setAttributes( { src: url } );
 					},
 					onError: ( message ) => {
@@ -186,7 +187,7 @@ class CustomVideoBlockEdit extends Component {
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id } );
-			this.setState( { src: media.url, editing: false } );
+			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
 		};
 
 		if ( editing ) {
