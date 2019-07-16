@@ -58,8 +58,8 @@ const EnhancedResizableBox = ( props ) => {
 	const isText = 'amp/amp-story-text' === blockName;
 
 	if ( isText ) {
-		height += TEXT_BLOCK_PADDING * 2;
-		width += TEXT_BLOCK_PADDING * 2;
+		height += TEXT_BLOCK_BORDER * 2;
+		width += TEXT_BLOCK_BORDER * 2;
 	}
 
 	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
@@ -99,8 +99,8 @@ const EnhancedResizableBox = ( props ) => {
 				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
 
 				onResizeStop( {
-					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedWidth, 10 ),
-					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_PADDING * 2 ) : parseInt( appliedHeight, 10 ),
+					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedWidth, 10 ),
+					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedHeight, 10 ),
 					positionTop,
 					positionLeft,
 				} );
