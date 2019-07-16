@@ -821,7 +821,7 @@ export const getPercentageFromPixels = ( axis, pixelValue ) => {
  * @return {number} Value in percentage.
  */
 export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) => {
-	if ( ! baseMeasure ) {
+	if ( ! baseValue ) {
 		if ( 'x' === axis ) {
 			baseValue = STORY_PAGE_INNER_WIDTH;
 		} else if ( 'y' === axis ) {

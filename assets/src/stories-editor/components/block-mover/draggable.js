@@ -142,13 +142,14 @@ class Draggable extends Component {
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// Position clone over the original element.
+		let baseWidth = STORY_PAGE_INNER_WIDTH,
+			baseHeight = STORY_PAGE_INNER_HEIGHT;
 		if ( isCTABlock ) {
-			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), STORY_PAGE_INNER_HEIGHT / 5 ) }px`;
-			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH / 5 ) }px`;
-		} else {
-			this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-			this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+			baseWidth = STORY_PAGE_INNER_WIDTH / 5;
+			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 		}
+		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), baseWidth ) }px`;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
