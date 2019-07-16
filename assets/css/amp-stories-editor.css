@@ -14,6 +14,7 @@
 
 #amp-story-editor,
 .amp-story-page-preview .editor-styles-wrapper,
+.amp-story-resize-container,
 .block-editor-block-preview .block-editor-block-preview__content > div {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
@@ -23,11 +24,6 @@
 	#amp-story-editor {
 		min-width: 820px;
 	}
-}
-
-#amp-story-editor,
-.amp-story-page-preview .editor-styles-wrapper {
-	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
 
 /*
@@ -228,4 +224,16 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 .wp-block-video video {
 	height: 100%;
 	width: 100%;
+}
+
+/* If the Media Library has 2 notices, like for wrong video file type and size, prevent them from covering the media. */
+.media-frame.has-two-notices .media-frame-content {
+	bottom: 120px;
+}
+
+/* More space for notices in the sidebar */
+
+.components-panel__body .components-notice {
+	margin-left: 0;
+	margin-right: 0;
 }

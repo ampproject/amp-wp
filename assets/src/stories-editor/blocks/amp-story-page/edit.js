@@ -41,10 +41,13 @@ import {
 	getTotalAnimationDuration,
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
-	isVideoSizeExcessive,
-	getVideoBytesPerSecond,
 	getUniqueId,
 } from '../../helpers';
+import {
+	getVideoBytesPerSecond,
+	isVideoSizeExcessive,
+} from '../../../common/helpers';
+
 import {
 	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_MEDIA_TYPES,
@@ -53,9 +56,11 @@ import {
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-	MEGABYTE_IN_BYTES,
 } from '../../constants';
+import {
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+} from '../../../common/constants';
 import './edit.css';
 
 class PageEdit extends Component {
@@ -263,7 +268,7 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
@@ -333,6 +338,7 @@ class PageEdit extends Component {
 												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
+										id="story-background-media"
 									/>
 								</MediaUploadCheck>
 								{ !! mediaId &&

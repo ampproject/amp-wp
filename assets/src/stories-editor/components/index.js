@@ -24,10 +24,12 @@ export { default as withHasSelectedInnerBlock } from './higher-order/with-has-se
 export { default as withPageNumber } from './higher-order/with-page-number';
 export { default as withStoryFeaturedImageNotice } from './higher-order/with-story-featured-image-notice';
 export { default as withEditFeaturedImage } from './with-edit-featured-image';
+export { default as withCustomVideoBlockEdit } from './with-custom-video-block-edit';
+export { default as CustomVideoBlockEdit } from './custom-video-block-edit';
 export { default as withIsReordering } from './higher-order/with-is-reordering';
 export { default as withSelectedBlock } from './higher-order/with-selected-block';
 export { default as withWrapperProps } from './with-wrapper-props';
 export { default as withActivePageState } from './with-active-page-state';
 export { default as withStoryBlockDropZone } from './with-story-block-drop-zone';
 export { default as withCallToActionValidation } from './higher-order/with-call-to-action-validation';
-export { default as withVideoPosterImageNotice } from './higher-order/with-video-poster-image-notice';
+export { default as withEnforcedVideoUploadType } from './with-enforced-video-upload-type';
