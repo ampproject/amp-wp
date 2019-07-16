@@ -331,8 +331,7 @@ CustomVideoBlockEdit.propTypes = {
 	instanceId: PropTypes.number,
 	isSelected: PropTypes.bool,
 	mediaUpload: PropTypes.func,
-	getMedia: PropTypes.func,
-	noticeUI: PropTypes.func,
+	noticeUI: PropTypes.oneOfType( [ PropTypes.func, PropTypes.bool ] ),
 	noticeOperations: PropTypes.object,
 	setAttributes: PropTypes.func,
 	videoFeaturedImage: PropTypes.shape( {
