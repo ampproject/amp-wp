@@ -2,17 +2,21 @@
  * External dependencies
  */
 import { get, has, includes, reduce, template } from 'lodash';
-
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
-
 /**
  * Internal dependencies
  */
-import { FILE_TYPE_ERROR_VIEW, FILE_SIZE_ERROR_VIEW, MEGABYTE_IN_BYTES, MINIMUM_FEATURED_IMAGE_WIDTH, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../constants';
+import {
+	FILE_SIZE_ERROR_VIEW,
+	FILE_TYPE_ERROR_VIEW,
+	MEGABYTE_IN_BYTES,
+	MINIMUM_FEATURED_IMAGE_WIDTH,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+} from '../constants';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -301,7 +305,7 @@ export const enforceFileSize = function( attachment, SelectionError ) {
 	const isVideo = 'video' === get( attachment, [ 'media_type' ], null ) || 'video' === get( attachment, [ 'attributes', 'type' ], null );
 
 	// If the file type is 'video' and its size is over the limit, display a notice in the Media Library.
-	if ( isVideo && isVideoSizeExcessive( attachment ) ) {
+	if ( isVideo && isVideoSizeExcessive( getVideoBytesPerSecond( attachment ) ) ) {
 		this.secondary.set(
 			FILE_SIZE_ERROR_VIEW,
 			new SelectionError( {
@@ -330,7 +334,7 @@ export const mediaLibraryHasTwoNotices = function() {
  * Gets the number of megabytes per second for the video.
  *
  * @param {Object} media The media object of the video.
- * @return {number|null} Number of megabytes per second, or null if media details unavailable.
+ * @return {?number} Number of megabytes per second, or null if media details unavailable.
  */
 export const getVideoBytesPerSecond = ( media ) => {
 	if ( has( media, [ 'media_details', 'filesize' ] ) && has( media, [ 'media_details', 'length' ] ) ) {
@@ -343,13 +347,13 @@ export const getVideoBytesPerSecond = ( media ) => {
 };
 
 /**
- * Gets whether the video file size is over a certain amount of MB per second.
+ * Gets whether the video file size is over a certain amount of bytes per second.
  *
- * @param {Object} media The media object of the video.
+ * @param {number} videoSize Video size per second, in bytes.
  * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
  */
-export const isVideoSizeExcessive = ( media ) => {
-	return getVideoBytesPerSecond( media ) > VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+export const isVideoSizeExcessive = ( videoSize ) => {
+	return videoSize > VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
 };
 
 /**
@@ -372,4 +376,19 @@ export const getSecondsFromTime = ( time ) => {
 		},
 		0
 	);
+};
+
+/**
+ * Given a URL, returns file size in bytes.
+ *
+ * @param {string} url URL to a file.
+ * @return {Promise<number>} File size in bytes.
+ */
+export const getContentLengthFromUrl = async ( url ) => {
+	const { fetch } = window;
+
+	const response = await fetch( url, {
+		method: 'head',
+	} );
+	return response.headers.get( 'content-length' );
 };

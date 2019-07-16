@@ -268,7 +268,7 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (

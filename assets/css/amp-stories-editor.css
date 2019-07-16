@@ -234,3 +234,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 .media-frame.has-two-notices .media-frame-content {
 	bottom: 120px;
 }
+
+/* More space for notices in the sidebar */
+
+.components-panel__body .components-notice {
+	margin-left: 0;
+	margin-right: 0;
+}
