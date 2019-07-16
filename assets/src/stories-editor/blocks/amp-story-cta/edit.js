@@ -25,6 +25,7 @@ import './edit.css';
 import { select } from '@wordpress/data';
 import { getUniqueId } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
+import { StoryBlockMover } from '../../components';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
@@ -68,27 +69,35 @@ class CallToActionEdit extends Component {
 
 		return (
 			<>
-				<div className={ className } ref={ this.bindRef }>
-					<RichText
-						placeholder={ __( 'Add text…', 'amp' ) }
-						value={ text }
-						onChange={ ( value ) => setAttributes( { text: value } ) }
-						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
-						className={ classnames(
-							'amp-block-story-cta__link', {
-								'has-background': backgroundColor.color,
-								[ backgroundColor.class ]: backgroundColor.class,
-								'has-text-color': textColor.color,
-								[ textColor.class ]: textColor.class,
-							}
-						) }
-						style={ {
-							backgroundColor: appliedBackgroundColor,
-							color: textColor.color,
-							fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
-						} }
-					/>
-				</div>
+				<StoryBlockMover
+					clientId={ this.props.clientId }
+					blockName={ name }
+					blockElementId='amp-story-cta-button'
+					isDraggable={ true }
+					isMovable={ true }
+				>
+					<div id='amp-story-cta-button' className={ className } ref={ this.bindRef }>
+						<RichText
+							placeholder={ __( 'Add text…', 'amp' ) }
+							value={ text }
+							onChange={ ( value ) => setAttributes( { text: value } ) }
+							formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
+							className={ classnames(
+								'amp-block-story-cta__link', {
+									'has-background': backgroundColor.color,
+									[ backgroundColor.class ]: backgroundColor.class,
+									'has-text-color': textColor.color,
+									[ textColor.class ]: textColor.class,
+								}
+							) }
+							style={ {
+								backgroundColor: appliedBackgroundColor,
+								color: textColor.color,
+								fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+							} }
+						/>
+					</div>
+				</StoryBlockMover>
 				{ isSelected && (
 					<form
 						className="amp-block-story-cta__inline-link"

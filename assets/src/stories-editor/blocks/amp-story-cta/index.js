@@ -36,6 +36,14 @@ const schema = {
 		type: 'string',
 		default: '#32373c',
 	},
+	btnPositionTop: {
+		type: 'number',
+		default: 0,
+	},
+	btnPositionLeft: {
+		type: 'number',
+		default: 25,
+	}
 };
 
 export const name = 'amp/amp-story-cta';
