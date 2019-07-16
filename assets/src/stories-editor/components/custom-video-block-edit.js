@@ -96,7 +96,7 @@ class CustomVideoBlockEdit extends Component {
 			}
 		}
 
-		if ( ! id && src ) {
+		if ( src ) {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
@@ -104,12 +104,19 @@ class CustomVideoBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		if ( this.props.attributes.poster !== prevProps.attributes.poster ) {
+		const { poster, src } = this.props.attributes;
+		if ( poster !== prevProps.attributes.poster ) {
 			this.videoPlayer.current.load();
 		}
 
-		if ( ! this.props.attributes.poster && this.props.videoFeaturedImage ) {
+		if ( ! poster && this.props.videoFeaturedImage ) {
 			this.props.setAttributes( { poster: this.props.videoFeaturedImage.source_url } );
+		}
+
+		if ( ! prevProps.attributes.src && src ) {
+			getContentLengthFromUrl( src ).then( ( videoSize ) => {
+				this.setState( { videoSize } );
+			} );
 		}
 	}
 	toggleAttribute( attribute ) {
@@ -127,10 +134,6 @@ class CustomVideoBlockEdit extends Component {
 		if ( newSrc !== src ) {
 			// Omit the embed block logic, as that didn't seem to work.
 			setAttributes( { src: newSrc, id: undefined } );
-
-			getContentLengthFromUrl( newSrc ).then( ( videoSize ) => {
-				this.setState( { videoSize } );
-			} );
 		}
 
 		this.setState( { editing: false } );
@@ -205,7 +208,7 @@ class CustomVideoBlockEdit extends Component {
 		const videoPosterDescription = `video-block__poster-image-description-${ instanceId }`;
 
 		const videoBytesPerSecond = this.state.duration && this.state.videoSize ? this.state.videoSize / this.state.duration : 0;
-		const isExcessiveVideoSize = videoBytesPerSecond && isVideoSizeExcessive( videoBytesPerSecond );
+		const isExcessiveVideoSize = videoBytesPerSecond ? isVideoSizeExcessive( videoBytesPerSecond ) : null;
 
 		return (
 			<>
@@ -355,7 +358,6 @@ export default compose( [
 
 		return {
 			mediaUpload: __experimentalMediaUpload,
-			getMedia,
 			videoFeaturedImage,
 		};
 	} ),
