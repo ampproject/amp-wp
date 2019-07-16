@@ -273,6 +273,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private $selector_mappings = [];
 
 	/**
+	 * Elements in extensions which use the video-manager, and thus the video-autoplay.css.
+	 *
+	 * @var array
+	 */
+	private $video_autoplay_elements = [
+		'amp-3q-player',
+		'amp-brid-player',
+		'amp-brightcove',
+		'amp-dailymotion',
+		'amp-delight-player',
+		'amp-gfycat',
+		'amp-ima-video',
+		'amp-mowplayer',
+		'amp-nexxtv-player',
+		'amp-ooyala-player',
+		'amp-powr-player',
+		'amp-story-auto-ads',
+		'amp-video',
+		'amp-video-iframe',
+		'amp-vimeo',
+		'amp-viqeo-player',
+		'amp-wistia-player',
+		'amp-youtube',
+	];
+
+	/**
 	 * Get error codes that can be raised during parsing of CSS.
 	 *
 	 * This is used to determine which validation errors should be taken into account
@@ -508,6 +534,16 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 					return false;
 				}
 				continue;
+			}
+
+			// Class names for extensions which use the video-manager, and thus video-autoplay.css.
+			if ( 'amp-video-' === substr( $class_name, 0, 10 ) ) {
+				foreach ( $this->video_autoplay_elements as $video_autoplay_element ) {
+					if ( $this->has_used_tag_names( [ $video_autoplay_element ] ) ) {
+						continue 2;
+					}
+				}
+				return false;
 			}
 
 			/*
