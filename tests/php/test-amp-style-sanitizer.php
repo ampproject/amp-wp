@@ -448,6 +448,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .non-existent { color: black; } </style>
+					<style> .amp-video-eq { display: none; } </style>
 					</head><body><p>Hello!</p></body></html>
 				',
 				[
@@ -476,6 +477,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-no-group { color: ghostwhite; } </style>
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .amp-video-eq { display: none; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -510,6 +512,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-no-group{color:ghostwhite}',
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
+					'.amp-video-eq{display:none}',
 					'', // Because no non-existent.
 				],
 				[],

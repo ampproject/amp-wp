@@ -2409,6 +2409,9 @@ class AMP_Theme_Support {
 					]
 				)
 			);
+
+			// Hide equalizer video animation.
+			$video_markup .= '<style>#wp-custom-header-video .amp-video-eq { display:none; }</style>';
 		} else {
 			$video_markup = AMP_HTML_Utils::build_tag(
 				'amp-video',
