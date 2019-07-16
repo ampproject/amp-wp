@@ -62,6 +62,8 @@ class CallToActionEdit extends Component {
 			url,
 			customBackgroundColor,
 			opacity,
+			btnPositionTop,
+			btnPositionLeft,
 		} = attributes;
 
 		const { colors } = select( 'core/block-editor' ).getSettings();
@@ -76,7 +78,7 @@ class CallToActionEdit extends Component {
 					isDraggable={ true }
 					isMovable={ true }
 				>
-					<div id='amp-story-cta-button'>
+					<div id='amp-story-cta-button' style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 						<div className={ className } ref={ this.bindRef }>
 							<RichText
 								placeholder={ __( 'Add text…', 'amp' ) }
