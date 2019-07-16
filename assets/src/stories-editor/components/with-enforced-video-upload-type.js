@@ -15,7 +15,7 @@ import PropTypes from 'prop-types';
 export default ( InitialMediaPlaceholder ) => {
 	const withEnforcedVideoUploadType = ( props ) => {
 		const { accept, className } = props;
-		let newProps = { ... props };
+		let newProps = { ...props };
 
 		if ( 'wp-block-video' === className && 'video/*' === accept ) {
 			newProps = { ...props, accept: 'video/mp4' };
