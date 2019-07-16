@@ -114,7 +114,7 @@ class CustomVideoBlockEdit extends Component {
 			this.props.setAttributes( { poster: this.props.videoFeaturedImage.source_url } );
 		}
 
-		if ( ! prevProps.attributes.src && src ) {
+		if ( prevProps.attributes.src !== src ) {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
