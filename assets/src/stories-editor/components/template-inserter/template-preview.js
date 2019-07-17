@@ -52,7 +52,7 @@ class TemplatePreview extends Component {
 
 TemplatePreview.propTypes = {
 	item: PropTypes.shape( {
-		id: PropTypes.string.isRequired,
+		id: PropTypes.number.isRequired,
 	} ).isRequired,
 	setTimeout: PropTypes.func.isRequired,
 };
