@@ -82,8 +82,15 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
-		this.cloneWrapper.style.top =
-			`${ parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop }px`;
+		const top = parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop;
+
+		// Don't allow the CTA button to go over its top limit.
+		if ( 'amp/amp-story-cta' === this.props.blockName ) {
+			this.cloneWrapper.style.top = top >= 0 ? `${ top }px` : '0px';
+		} else {
+			this.cloneWrapper.style.top = `${ top }px`;
+		}
+
 		this.cloneWrapper.style.left =
 			`${ parseInt( this.cloneWrapper.style.left, 10 ) + event.clientX - this.cursorLeft }px`;
 

@@ -30,6 +30,7 @@
 }
 
 .block-editor-block-list__block[data-type="amp/amp-story-cta"] .block-editor-block-list__block-edit {
+
 	/* Let's position the block so that there would be no space between the Page borders and the content */
 	--cta-margin: 3px;
 	height: calc(100% + calc(var(--cta-margin) * 2));
