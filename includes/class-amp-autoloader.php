@@ -35,6 +35,7 @@ class AMP_Autoloader {
 		'AMP_Service_Worker'                 => 'includes/class-amp-service-worker',
 		'AMP_Story_Templates'                => 'includes/admin/class-amp-story-templates',
 		'AMP_HTTP'                           => 'includes/class-amp-http',
+		'AMP_REST_API'                       => 'includes/class-amp-rest-api',
 		'AMP_Comment_Walker'                 => 'includes/class-amp-comment-walker',
 		'AMP_Template_Customizer'            => 'includes/admin/class-amp-customizer',
 		'AMP_Post_Meta_Box'                  => 'includes/admin/class-amp-post-meta-box',
