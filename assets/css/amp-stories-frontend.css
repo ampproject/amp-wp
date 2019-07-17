@@ -16,6 +16,10 @@ amp-story-grid-layer {
 	align-content: unset;
 }
 
+.amp-block-story-cta__link {
+	position: absolute;
+}
+
 .amp-block-story-cta__link amp-img * {
 	object-fit: contain;
 }

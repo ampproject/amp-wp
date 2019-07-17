@@ -34,8 +34,7 @@
 	/* Let's position the block so that there would be no space between the Page borders and the content */
 	--cta-margin: 3px;
 	height: calc(100% + calc(var(--cta-margin) * 2));
-	width: calc(100% + calc(var(--cta-margin) * 2));
-	left: calc(var(--cta-margin) * -1);
+	width: 100%;
 	bottom: calc(var(--cta-margin) * -1);
 }
 

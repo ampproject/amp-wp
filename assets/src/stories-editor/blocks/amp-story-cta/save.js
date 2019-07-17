@@ -15,12 +15,17 @@ import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '.
 
 const CallToActionEdit = ( { attributes } ) => {
 	const {
-		url,
+		btnPositionLeft,
+		btnPositionTop,
 		text,
+		url,
 	} = attributes;
 
 	const className = getClassNameFromBlockAttributes( { ...attributes, className: 'amp-block-story-cta__link' } );
 	const styles = getStylesFromBlockAttributes( attributes );
+
+	styles.top = btnPositionTop ? `${ btnPositionTop }%` : undefined;
+	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
 
 	return (
 		<amp-story-cta-layer>

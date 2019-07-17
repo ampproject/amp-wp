@@ -25,16 +25,6 @@ amp-story-grid-layer[template="fill"] .wp-block-image {
 	display: block;
 }
 
-.wp-block-amp-amp-story-cta.aligncenter {
-	text-align: center;
-}
-
-.wp-block-amp-amp-story-cta.alignright {
-
-	/*rtl:ignore*/
-	text-align: right;
-}
-
 .amp-block-story-cta__link {
 	border: none;
 	box-shadow: none;

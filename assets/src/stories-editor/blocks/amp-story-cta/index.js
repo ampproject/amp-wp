@@ -42,7 +42,7 @@ const schema = {
 	},
 	btnPositionLeft: {
 		type: 'number',
-		default: 25,
+		default: 0,
 	},
 };
 
