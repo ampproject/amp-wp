@@ -897,7 +897,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'btnPositionTop', 'btnPositionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
@@ -1009,7 +1009,7 @@ export const getStylesFromBlockAttributes = ( {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
 		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
-		textAlign: align,
+		textAlign: align ? align : undefined,
 	};
 };
 

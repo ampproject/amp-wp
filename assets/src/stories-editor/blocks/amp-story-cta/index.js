@@ -23,10 +23,6 @@ const schema = {
 		source: 'html',
 		selector: 'a',
 	},
-	align: {
-		type: 'string',
-		default: 'center',
-	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
 		type: 'string',
