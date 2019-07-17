@@ -85,26 +85,18 @@ class BlockDropZone extends Component {
 		// Lets take the % based on the wrapper for top and left.
 		const possibleDelta = 'amp/amp-story-text' === srcBlockName ? TEXT_BLOCK_BORDER : 0;
 
+		const leftPosKey = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
+		const topPosKey = isCTABlock ? 'btnPositionTop' : 'positionTop';
+
 		// Let's get the base value to measure the top percentage from.
 		let baseHeight = STORY_PAGE_INNER_HEIGHT;
 		if ( isCTABlock ) {
 			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 		}
-		const positionLeft = getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta );
-		const positionTop = getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta, baseHeight );
-
-		if ( isCTABlock ) {
-			// Change the btn attributes, not for the block itself.
-			updateBlockAttributes( srcClientId, {
-				btnPositionLeft: positionLeft,
-				btnPositionTop: positionTop,
-			} );
-		} else {
-			updateBlockAttributes( srcClientId, {
-				positionLeft,
-				positionTop,
-			} );
-		}
+		updateBlockAttributes( srcClientId, {
+			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta ),
+			[ topPosKey ]: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta, baseHeight ),
+		} );
 	}
 
 	render() {
