@@ -44,6 +44,8 @@ CallToActionEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		url: PropTypes.string,
 		text: PropTypes.string,
+		btnPositionLeft: PropTypes.number,
+		btnPositionTop: PropTypes.number,
 		backgroundColor: PropTypes.shape( {
 			color: PropTypes.string,
 			name: PropTypes.string,
