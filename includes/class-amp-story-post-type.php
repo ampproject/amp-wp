@@ -215,6 +215,8 @@ class AMP_Story_Post_Type {
 
 		add_filter( 'rest_request_before_callbacks', [ __CLASS__, 'filter_rest_request_for_kses' ], 100, 3 );
 
+		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
+
 		add_action( 'wp_default_styles', [ __CLASS__, 'register_story_card_styling' ] );
 
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_editor_styles' ] );
@@ -756,6 +758,23 @@ class AMP_Story_Post_Type {
 
 				return false;
 			}
+		);
+	}
+
+	/**
+	 * Registers additional REST API fields upon API initialization.
+	 */
+	public static function rest_api_init() {
+		register_rest_field(
+			'attachment',
+			'featured_media',
+			[
+				'schema'          => [
+					'description' => __( 'The ID of the featured media for the object.' ),
+					'type'        => 'integer',
+					'context'     => [ 'view', 'edit', 'embed' ],
+				],
+			]
 		);
 	}
 

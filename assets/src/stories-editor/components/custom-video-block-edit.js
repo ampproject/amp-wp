@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -376,8 +375,7 @@ export default compose( [
 
 		if ( id && ! poster ) {
 			const media = getMedia( id );
-			const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
-			videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
+			videoFeaturedImage = media && media.featured_media && getMedia( media.featured_media );
 		}
 
 		/**
@@ -393,9 +391,7 @@ export default compose( [
 				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
 					setAttributes( { poster: posterUrl } );
 
-					// Set newly uploaded image as video's featured image.
 					if ( id ) {
-						// @todo: Figure out why passing featured_media does not work.
 						saveMedia( {
 							id,
 							featured_media: posterId,
