@@ -111,6 +111,10 @@
 	margin-top: -1.5em;
 }
 
+.is-dragging-components-draggable .amp-block-story-cta__inline-link {
+	display: none;
+}
+
 .amp-block-story-cta__inline-link .block-editor-url-input {
 	width: auto;
 }
