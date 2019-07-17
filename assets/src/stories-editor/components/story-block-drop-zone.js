@@ -51,10 +51,10 @@ class BlockDropZone extends Component {
 		const cloneElementId = `clone-amp-story-cta-button-${ srcClientId }`;
 		const element = document.getElementById( elementId );
 		const clone = document.getElementById( cloneElementId );
-		const btnWrapperId = `block-${ srcClientId }`;
+		const btnWrapperSelector = `#block-${ srcClientId } .editor-block-list__block-edit`;
 
 		// Get the editor wrapper element for calculating the width and height.
-		const wrapperEl = document.getElementById( btnWrapperId );
+		const wrapperEl = document.querySelector( btnWrapperSelector );
 		if ( ! element || ! clone || ! wrapperEl ) {
 			event.preventDefault();
 			return;
