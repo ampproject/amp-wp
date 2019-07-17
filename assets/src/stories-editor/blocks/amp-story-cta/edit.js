@@ -50,11 +50,13 @@ class CallToActionEdit extends Component {
 		const {
 			attributes,
 			backgroundColor,
-			textColor,
-			setAttributes,
-			isSelected,
 			className,
+			clientId,
 			fontSize,
+			isSelected,
+			name,
+			setAttributes,
+			textColor,
 		} = this.props;
 
 		const {
@@ -72,13 +74,13 @@ class CallToActionEdit extends Component {
 		return (
 			<>
 				<StoryBlockMover
-					clientId={ this.props.clientId }
+					clientId={ clientId }
 					blockName={ name }
-					blockElementId={ `amp-story-cta-button-${ this.props.clientId }` }
+					blockElementId={ `amp-story-cta-button-${ clientId }` }
 					isDraggable={ true }
 					isMovable={ true }
 				>
-					<div className='amp-story-cta-button' id={ `amp-story-cta-button-${ this.props.clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+					<div className='amp-story-cta-button' id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 						<div className={ className } ref={ this.bindRef }>
 							<RichText
 								placeholder={ __( 'Add text…', 'amp' ) }
