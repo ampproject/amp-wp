@@ -81,7 +81,7 @@ class CallToActionEdit extends Component {
 					isMovable={ true }
 				>
 					<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
-						<div className={ className } ref={ this.bindRef }>
+						<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
 							<RichText
 								placeholder={ __( 'Add text…', 'amp' ) }
 								value={ text }
@@ -96,7 +96,6 @@ class CallToActionEdit extends Component {
 									}
 								) }
 								style={ {
-									backgroundColor: appliedBackgroundColor,
 									color: textColor.color,
 									fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 								} }

@@ -56,6 +56,7 @@
 
 .wp-block-amp-amp-story-cta {
 	display: inline-block;
+	padding: 5px;
 	margin-bottom: 0;
 	position: relative;
 }
@@ -90,7 +91,7 @@
 	display: inline-block;
 	font-size: 18px;
 	margin: 0;
-	padding: 12px 24px;
+	padding: 7px 19px;
 	text-align: center;
 	text-decoration: none;
 	white-space: normal;
