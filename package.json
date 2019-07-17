@@ -24,7 +24,7 @@
     "prop-types": "15.7.2"
   },
   "devDependencies": {
-    "@babel/cli": "7.5.0",
+    "@babel/cli": "7.5.5",
     "@babel/core": "7.5.4",
     "@babel/plugin-proposal-object-rest-spread": "7.5.4",
     "@babel/plugin-transform-react-jsx": "7.3.0",
