@@ -23,7 +23,6 @@ import { withDispatch } from '@wordpress/data';
 import { getPercentageFromPixels } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
-	STORY_PAGE_INNER_WIDTH,
 	TEXT_BLOCK_BORDER
 } from '../constants';
 
@@ -65,12 +64,11 @@ class BlockDropZone extends Component {
 		const wrapperPosition = wrapperEl.getBoundingClientRect();
 
 		// Let's get the base value to measure the percentage from.
-		const baseWidth = STORY_PAGE_INNER_WIDTH / 5;
 		const baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 
 		// We will set the new position based on where the button's clone was moved to, with reference being the CTA block itself.
 		updateBlockAttributes( srcClientId, {
-			btnPositionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left, baseWidth ),
+			btnPositionLeft: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
 			btnPositionTop: clonePosition.top - wrapperPosition.top > 0 ? getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top, baseHeight ) : 0,
 		} );
 	}
