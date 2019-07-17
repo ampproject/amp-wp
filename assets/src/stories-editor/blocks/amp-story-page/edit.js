@@ -45,6 +45,7 @@ import {
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
+	maybeSupplyPoster,
 	isVideoSizeExcessive,
 } from '../../../common/helpers';
 
@@ -134,6 +135,7 @@ class PageEdit extends Component {
 			mediaType,
 			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
 		} );
+		maybeSupplyPoster.call( this, media );
 	}
 
 	componentDidUpdate( prevProps ) {

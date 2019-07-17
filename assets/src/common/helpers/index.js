@@ -392,3 +392,27 @@ export const getContentLengthFromUrl = async ( url ) => {
 	} );
 	return Number( response.headers.get( 'content-length' ) );
 };
+
+/**
+ * On selecting a video, ensure that there is a poster image.
+ *
+ * Not an arrow function so that it can be called like maybeSupplyPoster.call( this, media ).
+ * @todo: if the image matches the defaultImagePattern or it doesn't exist,
+ * get an image using canvas, like Weston suggested.
+ * Then POST the image to an endpoint, and use that image if it succeeds.
+ *
+ * @param {Object} media The selected media.
+ */
+export const maybeSupplyPoster = function( media ) {
+	if ( ! media || ! media.image ) {
+		return;
+	}
+
+	// Videos often have a 'default' image from WP core as media.image, which isn't useful as a poster.
+	const defaultImagePattern = /wp-includes\/images\/media\/video\.png$/;
+	const { image } = media;
+	if ( ! image.src.match( defaultImagePattern ) ) {
+		const { setAttributes } = this.props;
+		setAttributes( { poster: image.src } );
+	}
+};

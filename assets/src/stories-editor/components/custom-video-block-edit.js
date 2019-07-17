@@ -37,7 +37,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
+import { getContentLengthFromUrl, isVideoSizeExcessive, maybeSupplyPoster } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
 
 const ALLOWED_MEDIA_TYPES = [ 'video' ];
@@ -188,6 +188,7 @@ class CustomVideoBlockEdit extends Component {
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id } );
 			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
+			maybeSupplyPoster.call( this, media );
 		};
 
 		if ( editing ) {
