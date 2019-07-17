@@ -35,6 +35,12 @@ class BlockDropZone extends Component {
 		this.onDrop = this.onDrop.bind( this );
 	}
 
+	/**
+	 * Handles the drop event for blocks within a page.
+	 * Separate handling for CTA block.
+	 *
+	 * @param {Object} event Drop event.
+	 */
 	onDrop( event ) {
 		const { srcBlockName, updateBlockAttributes, srcClientId } = this.props;
 		const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
@@ -75,16 +81,15 @@ class BlockDropZone extends Component {
 		const clonePosition = clone.getBoundingClientRect();
 		const wrapperPosition = wrapperEl.getBoundingClientRect();
 
+		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
+		// Lets take the % based on the wrapper for top and left.
+		const possibleDelta = 'amp/amp-story-text' === srcBlockName ? TEXT_BLOCK_BORDER : 0;
+
 		// Let's get the base value to measure the top percentage from.
 		let baseHeight = STORY_PAGE_INNER_HEIGHT;
 		if ( isCTABlock ) {
 			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 		}
-
-		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
-		// Lets take the % based on the wrapper for top and left.
-		const possibleDelta = 'amp/amp-story-text' === srcBlockName ? TEXT_BLOCK_BORDER : 0;
-
 		const positionLeft = getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta );
 		const positionTop = getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta, baseHeight );
 
