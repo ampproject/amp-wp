@@ -64,11 +64,6 @@ export const settings = {
 
 	attributes: schema,
 
-	supports: {
-		align: true,
-		alignWide: false,
-	},
-
 	edit,
 
 	save,
