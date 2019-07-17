@@ -32,11 +32,12 @@ import {
 	RichText,
 } from '@wordpress/block-editor';
 import { compose, withInstanceId } from '@wordpress/compose';
-import { withSelect } from '@wordpress/data';
+import { withSelect, withDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
+import { getFirstFrameOfVideo } from '../helpers';
 import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
 
@@ -77,8 +78,9 @@ class CustomVideoBlockEdit extends Component {
 			mediaUpload,
 			noticeOperations,
 			setAttributes,
+			uploadVideoFrame,
 		} = this.props;
-		const { id, src = '' } = attributes;
+		const { id, src = '', poster } = attributes;
 		if ( ! id && isBlobURL( src ) ) {
 			const file = getBlobByURL( src );
 			if ( file ) {
@@ -101,10 +103,15 @@ class CustomVideoBlockEdit extends Component {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
+
+			if ( ! poster ) {
+				uploadVideoFrame( src );
+			}
 		}
 	}
 
 	componentDidUpdate( prevProps ) {
+		const { uploadVideoFrame } = this.props;
 		const { poster, src } = this.props.attributes;
 		if ( poster !== prevProps.attributes.poster ) {
 			this.videoPlayer.current.load();
@@ -118,8 +125,13 @@ class CustomVideoBlockEdit extends Component {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
+
+			if ( ! poster ) {
+				uploadVideoFrame( src );
+			}
 		}
 	}
+
 	toggleAttribute( attribute ) {
 		return ( newValue ) => {
 			this.props.setAttributes( { [ attribute ]: newValue } );
@@ -341,25 +353,62 @@ CustomVideoBlockEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	uploadVideoFrame: PropTypes.func,
 };
 
 export default compose( [
+	withDispatch( ( dispatch ) => {
+		const { saveMedia } = dispatch( 'core' );
+
+		return {
+			saveMedia,
+		};
+	} ),
 	withSelect( ( select, props ) => {
 		const { getMedia } = select( 'core' );
 		const { getSettings } = select( 'core/block-editor' );
-		const { __experimentalMediaUpload } = getSettings();
+		const { __experimentalMediaUpload: mediaUpload } = getSettings();
 
 		let videoFeaturedImage;
 
-		if ( props.attributes.id && ! props.attributes.poster ) {
-			const media = getMedia( props.attributes.id );
+		const { attributes, setAttributes, saveMedia } = props;
+		const { id, poster } = attributes;
+
+		if ( id && ! poster ) {
+			const media = getMedia( id );
 			const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
 			videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
 		}
 
+		/**
+		 * Uploads the video's first frame as an attachment.
+		 *
+		 * @param {string} src Video URL.
+		 */
+		const uploadVideoFrame = async ( src ) => {
+			const img = await getFirstFrameOfVideo( src );
+
+			mediaUpload( {
+				filesList: [ img ],
+				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+					setAttributes( { poster: posterUrl } );
+
+					// Set newly uploaded image as video's featured image.
+					if ( id ) {
+						// @todo: Figure out why passing featured_media does not work.
+						saveMedia( {
+							id,
+							featured_media: posterId,
+						} );
+					}
+				},
+			} );
+		};
+
 		return {
-			mediaUpload: __experimentalMediaUpload,
+			mediaUpload,
 			videoFeaturedImage,
+			uploadVideoFrame,
 		};
 	} ),
 	withNotices,
