@@ -80,7 +80,7 @@ class CallToActionEdit extends Component {
 					isDraggable={ true }
 					isMovable={ true }
 				>
-					<div className='amp-story-cta-button' id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+					<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 						<div className={ className } ref={ this.bindRef }>
 							<RichText
 								placeholder={ __( 'Add text…', 'amp' ) }
@@ -129,10 +129,13 @@ CallToActionEdit.propTypes = {
 		anchor: PropTypes.string,
 		customBackgroundColor: PropTypes.string,
 		opacity: PropTypes.number,
+		btnPositionLeft: PropTypes.number,
+		btnPositionTop: PropTypes.number,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool,
 	className: PropTypes.string,
+	clientId: PropTypes.string,
 	fontSize: PropTypes.shape( {
 		name: PropTypes.string,
 		shortName: PropTypes.string,
@@ -145,6 +148,7 @@ CallToActionEdit.propTypes = {
 		slug: PropTypes.string,
 		class: PropTypes.string,
 	} ).isRequired,
+	name: PropTypes.string.isRequired,
 	textColor: PropTypes.shape( {
 		color: PropTypes.string,
 		name: PropTypes.string,

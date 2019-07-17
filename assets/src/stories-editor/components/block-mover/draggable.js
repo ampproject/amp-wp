@@ -20,7 +20,7 @@ import { withSafeTimeout } from '@wordpress/compose';
 import { getPixelsFromPercentage } from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
-	STORY_PAGE_INNER_HEIGHT
+	STORY_PAGE_INNER_HEIGHT,
 } from '../../constants';
 
 const { Image } = window;
@@ -148,16 +148,12 @@ class Draggable extends Component {
 		const clone = element.cloneNode( true );
 		this.cloneWrapper.style.transform = clone.style.transform;
 
-		// Position clone over the original element.
-		let baseWidth = STORY_PAGE_INNER_WIDTH,
-			baseHeight = STORY_PAGE_INNER_HEIGHT;
+		// 20% of the full value in case of CTA block.
+		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 
-		// 20% of the full value.
-		if ( isCTABlock ) {
-			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
-		}
+		// Position clone over the original element.
 		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), baseWidth ) }px`;
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;

@@ -23,7 +23,7 @@ import { withDispatch } from '@wordpress/data';
 import { getPercentageFromPixels } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
-	TEXT_BLOCK_BORDER
+	TEXT_BLOCK_BORDER,
 } from '../constants';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';

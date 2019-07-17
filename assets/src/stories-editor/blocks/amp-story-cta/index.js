@@ -43,7 +43,7 @@ const schema = {
 	btnPositionLeft: {
 		type: 'number',
 		default: 25,
-	}
+	},
 };
 
 export const name = 'amp/amp-story-cta';
