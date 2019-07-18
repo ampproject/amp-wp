@@ -1,5 +1,4 @@
 <?php
-
 /**
  * AMP REST API.
  *
