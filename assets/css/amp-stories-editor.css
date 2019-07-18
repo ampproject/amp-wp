@@ -12,7 +12,8 @@
 	padding-right: 50px;
 }
 
-.editor-styles-wrapper,
+.editor-styles-wrapper .wp-block:not([data-font-family]),
+.editor-styles-wrapper #amp-story-editor,
 .block-editor-block-preview .block-editor-block-preview__content > div {
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
