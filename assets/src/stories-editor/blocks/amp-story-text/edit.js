@@ -42,11 +42,14 @@ class TextBlockEdit extends Component {
 			width,
 			content,
 			ampFitText,
+			ampFontFamily,
 		} = attributes;
 
-		const checkFontSize = (
-			prevProps.attributes.height !== height ||
+		const checkFontSize = ampFitText && (
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
 			prevProps.attributes.width !== width ||
+			prevProps.attributes.height !== height ||
 			prevProps.attributes.content !== content
 		);
 
@@ -54,9 +57,11 @@ class TextBlockEdit extends Component {
 			maybeUpdateFontSize( this.props );
 		}
 
-		const checkBlockDimensions = (
+		const checkBlockDimensions = ! ampFitText && (
 			! isEqual( prevProps.fontSize, fontSize ) ||
-			( prevProps.attributes.ampFitText !== ampFitText && ! ampFitText )
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.attributes.content !== content
 		);
 
 		if ( checkBlockDimensions ) {
@@ -183,6 +188,7 @@ TextBlockEdit.propTypes = {
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
 		className: PropTypes.string,
+		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
