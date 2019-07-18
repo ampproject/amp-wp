@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, dragAndResize } from '@wordpress/e2e-test-utils';
+import { visitAdminPage } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { insertStoryBlockBySearch } from './utils';
+import { insertStoryBlockBySearch } from '../utils';
 
 describe( 'Stories Editor Screen', () => {
 	it( 'Should not display CTA icon when only one Page is present', async () => {
