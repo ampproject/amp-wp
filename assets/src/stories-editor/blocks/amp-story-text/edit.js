@@ -46,6 +46,7 @@ class TextBlockEdit extends Component {
 		} = attributes;
 
 		const checkFontSize = ampFitText && (
+			prevProps.attributes.ampFitText !== ampFitText ||
 			prevProps.attributes.height !== height ||
 			prevProps.attributes.width !== width ||
 			prevProps.attributes.content !== content ||

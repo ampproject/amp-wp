@@ -43,6 +43,7 @@ class MetaBlockEdit extends Component {
 		// If not selected, only change font size if height or width has changed.
 		const checkFontSize = ampFitText && (
 			isSelected ||
+			prevProps.attributes.ampFitText !== ampFitText ||
 			prevProps.attributes.height !== height ||
 			prevProps.attributes.width !== width ||
 			prevProps.attributes.ampFontFamily !== ampFontFamily
