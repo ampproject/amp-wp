@@ -47,10 +47,10 @@ class TextBlockEdit extends Component {
 
 		const checkFontSize = ampFitText && (
 			prevProps.attributes.ampFitText !== ampFitText ||
-			prevProps.attributes.height !== height ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
 			prevProps.attributes.width !== width ||
-			prevProps.attributes.content !== content ||
-			prevProps.attributes.ampFontFamily !== ampFontFamily
+			prevProps.attributes.height !== height ||
+			prevProps.attributes.content !== content
 		);
 
 		if ( checkFontSize ) {
@@ -60,7 +60,8 @@ class TextBlockEdit extends Component {
 		const checkBlockDimensions = ! ampFitText && (
 			! isEqual( prevProps.fontSize, fontSize ) ||
 			prevProps.attributes.ampFitText !== ampFitText ||
-			prevProps.attributes.ampFontFamily !== ampFontFamily
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.attributes.content !== content
 		);
 
 		if ( checkBlockDimensions ) {

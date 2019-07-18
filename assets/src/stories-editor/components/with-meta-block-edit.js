@@ -32,7 +32,7 @@ class MetaBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected, fontSize } = this.props;
+		const { attributes, fontSize, blockContent } = this.props;
 		const {
 			height,
 			width,
@@ -40,13 +40,12 @@ class MetaBlockEdit extends Component {
 			ampFontFamily,
 		} = attributes;
 
-		// If not selected, only change font size if height or width has changed.
 		const checkFontSize = ampFitText && (
-			isSelected ||
 			prevProps.attributes.ampFitText !== ampFitText ||
-			prevProps.attributes.height !== height ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
 			prevProps.attributes.width !== width ||
-			prevProps.attributes.ampFontFamily !== ampFontFamily
+			prevProps.attributes.height !== height ||
+			prevProps.blockContent !== blockContent
 		);
 
 		if ( checkFontSize ) {
@@ -56,7 +55,8 @@ class MetaBlockEdit extends Component {
 		const checkBlockDimensions = ! ampFitText && (
 			! isEqual( prevProps.fontSize, fontSize ) ||
 			prevProps.attributes.ampFitText !== ampFitText ||
-			prevProps.attributes.ampFontFamily !== ampFontFamily
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.blockContent !== blockContent
 		);
 
 		if ( checkBlockDimensions ) {
