@@ -120,3 +120,11 @@ amp-story-grid-layer .wp-block-quote {
 	font-size: 14px;
 	text-align: center;
 }
+
+.wp-block-amp-amp-story-post-author.amp-text-content,
+.wp-block-amp-amp-story-post-title.amp-text-content,
+.wp-block-amp-amp-story-post-date.amp-text-content {
+
+	/* --story-page-vw is accessible in the FE, this equals 16px in the editor */
+	font-size: calc(4.88 * var(--story-page-vw));
+}
