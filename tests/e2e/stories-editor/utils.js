@@ -7,7 +7,7 @@
  * Default helpers from WP won't work due to changed selectors.
  *
  * @param {string} searchTerm Search term to find the block by.
- * @returns {Promise<void>}
+ * @return {Promise<void>} Promise.
  */
 export async function insertStoryBlockBySearch( searchTerm ) {
 	await page.click( '.edit-post-header [aria-label="Add element"]' );
