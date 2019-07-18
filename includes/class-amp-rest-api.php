@@ -21,19 +21,25 @@ class AMP_REST_API
             return;
         }
 
-        // Register one rest_prepare filter for each custom post type.
-        add_action('registered_post_type', [ __CLASS__, 'add_rest_prepare_filter' ]);
+        add_action('rest_api_init', [ __CLASS__, 'rest_api_init' ]);
     }
 
     /**
-     * Register a rest_prepare filter for the $post_type.
+     * Register other actions and filters to be used during the REST API initilization.
      *
-     * @param  string $post_type The post type.
      * @return void
-     */
-    public static function add_rest_prepare_filter( $post_type )
+     */ 
+    public static function rest_api_init()
     {
-        add_filter('rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3);
+        // Register a rest_prepare_{$post_type} filter for each one of the post types supported
+        // by the AMP plugin.
+        foreach( AMP_Post_Type_Support::get_builtin_supported_post_types() as $post_type ) {
+            $post_type_supported = post_type_supports($post_type, AMP_Post_Type_Support::SLUG);
+        
+            if ($post_type_supported ) {
+                add_filter('rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3);
+            }
+        }
     }
 
     /**
