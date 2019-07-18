@@ -7,6 +7,7 @@ module.exports = {
 		'<rootDir>/specs/**/__tests__/**/*.js',
 		'<rootDir>/specs/**/?(*.)(spec|test).js',
 		'<rootDir>/specs/**/test/*.js',
+		'<rootDir>/stories-editor/**/?(*.)(spec|test).js',
 	],
 	transform: {
 		'^.+\\.[jt]sx?$': '<rootDir>/../../node_modules/@wordpress/scripts/config/babel-transform',
