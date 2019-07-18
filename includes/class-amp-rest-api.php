@@ -58,6 +58,14 @@ class AMP_REST_API
         // If "_amp" is present and there a content.rendered, output the content.amp field.
         if ($amp && isset($response->data['content']['rendered'])) {
             $response->data['content']['amp'] = 'An AMP valid version of content.rendered.';
+            $response->data['amp'] = array(
+                "styles" => "amp-img { border: 5px solid black; } ...",
+                "scripts" => array(
+                    "https://cdn.ampproject.org/v0/amp-install-serviceworker-0.1.js",
+                    "https://cdn.ampproject.org/v0/amp-animation-0.1.js",
+                    "https://cdn.ampproject.org/v0/amp-iframe-0.1.js"
+                )
+            );
         }
         return $response;
     }
