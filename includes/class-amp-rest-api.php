@@ -11,6 +11,7 @@
  */
 class AMP_REST_API {
 
+
 	/**
 	 * Init.
 	 */
@@ -26,7 +27,7 @@ class AMP_REST_API {
 	public static function rest_api_init() {
 		// Register a rest_prepare_{$post_type} filter for each one of the post types supported
 		// by the AMP plugin.
-		foreach ( AMP_Post_Type_Support::get_builtin_supported_post_types() as $post_type ) {
+		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
 			$post_type_supported = post_type_supports( $post_type, AMP_Post_Type_Support::SLUG );
 
 			if ( $post_type_supported ) {
