@@ -52,8 +52,12 @@ class AMP_REST_API
      */
     public static function add_content_amp_field( $response, $post, $request )
     {
-        if (isset($response->data['content']['rendered']) ) {
-            $response->data['content']['amp'] = 'An AMP valid HTML generated with the AMP Plugin.';
+        // Check if the query param "_amp" is present.
+        $amp = is_string($request->get_param('_amp'));
+                                
+        // If "_amp" is present and there a content.rendered, output the content.amp field.
+        if ($amp && isset($response->data['content']['rendered'])) {
+            $response->data['content']['amp'] = 'An AMP valid version of content.rendered.';
         }
         return $response;
     }
