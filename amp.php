@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2.1-alpha
+ * Version: 1.2.1-beta1-20190718T190243Z-620e5841
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2.1-alpha' );
+define( 'AMP__VERSION', '1.2.1-beta1-20190718T190243Z-620e5841' );
 
 /**
  * Errors encountered while loading the plugin.
