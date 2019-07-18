@@ -15,10 +15,6 @@ class AMP_REST_API {
 	 * Init.
 	 */
 	public static function init() {
-		if ( ! class_exists( 'AMP_REST_API' ) ) {
-			return;
-		}
-
 		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
 	}
 
