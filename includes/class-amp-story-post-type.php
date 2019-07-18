@@ -769,7 +769,7 @@ class AMP_Story_Post_Type {
 			'attachment',
 			'featured_media',
 			[
-				'schema'          => [
+				'schema' => [
 					'description' => __( 'The ID of the featured media for the object.' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit', 'embed' ],
