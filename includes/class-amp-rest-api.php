@@ -44,7 +44,7 @@ class AMP_REST_API {
 	public static function add_content_amp_field( $response, $post, $request ) {
 		// Skip if _amp param is not present.
 		// @todo Figure out a better way to selectively include amp content without having to introduce a new query var.
-		if ( false === $request->get_param( '_amp' ) || ! isset( $response->data['content']['rendered'] ) ) {
+		if ( null === $request->get_param( '_amp' ) || ! isset( $response->data['content']['rendered'] ) ) {
 			return $response;
 		}
 
