@@ -42,6 +42,7 @@ import {
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
 	getUniqueId,
+	getFirstFrameOfVideo,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -136,13 +137,34 @@ class PageEdit extends Component {
 		} );
 	}
 
+	componentDidMount() {
+		const { attributes, uploadVideoFrame } = this.props;
+		const { mediaType, mediaId, mediaUrl, poster } = attributes;
+
+		if ( mediaId && mediaUrl && VIDEO_BACKGROUND_TYPE === mediaType && ! poster ) {
+			uploadVideoFrame( mediaUrl );
+		}
+	}
+
 	componentDidUpdate( prevProps ) {
+		const { attributes, setAttributes, videoFeaturedImage, uploadVideoFrame } = this.props;
+		const { mediaType, mediaUrl, poster } = attributes;
+
 		if (
-			VIDEO_BACKGROUND_TYPE === this.props.attributes.mediaType &&
-			this.props.attributes.mediaUrl !== prevProps.attributes.mediaUrl &&
-			this.videoPlayer.current
+			VIDEO_BACKGROUND_TYPE === mediaType &&
+			prevProps.attributes.mediaUrl !== mediaUrl
 		) {
-			this.videoPlayer.current.load();
+			if ( this.videoPlayer.current ) {
+				this.videoPlayer.current.load();
+			}
+
+			if ( ! poster ) {
+				if ( videoFeaturedImage ) {
+					setAttributes( { poster: videoFeaturedImage.source_url } );
+				} else {
+					uploadVideoFrame( mediaUrl );
+				}
+			}
 		}
 	}
 
@@ -340,14 +362,12 @@ class PageEdit extends Component {
 										) }
 										id="story-background-media"
 									/>
+									{ mediaUrl && (
+										<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
+											{ _x( 'Remove', 'background media', 'amp' ) }
+										</Button>
+									) }
 								</MediaUploadCheck>
-								{ !! mediaId &&
-								<MediaUploadCheck>
-									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-										{ _x( 'Remove', 'background media', 'amp' ) }
-									</Button>
-								</MediaUploadCheck>
-								}
 							</BaseControl>
 							{ VIDEO_BACKGROUND_TYPE === mediaType && (
 								<MediaUploadCheck>
@@ -492,18 +512,67 @@ PageEdit.propTypes = {
 	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
+	videoFeaturedImage: PropTypes.shape( {
+		source_url: PropTypes.string,
+	} ),
+	uploadVideoFrame: PropTypes.func,
 };
 
 export default compose(
-	withSelect( ( select, { clientId, attributes } ) => {
+	withDispatch( () => {
+		const { saveMedia } = dispatch( 'core' );
+		const { moveBlockToPosition	} = dispatch( 'core/block-editor' );
+		return {
+			moveBlockToPosition,
+			saveMedia,
+		};
+	} ),
+	withSelect( ( select, { clientId, attributes, setAttributes, saveMedia } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlockRootClientId, getSettings } = select( 'core/block-editor' );
+		const { getAnimatedBlocks } = select( 'amp/story' );
+
+		const { __experimentalMediaUpload: mediaUpload } = getSettings();
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
-		const { getAnimatedBlocks } = select( 'amp/story' );
 
-		const { mediaId } = attributes;
+		const { mediaType, mediaId, poster } = attributes;
+
+		const media = mediaId ? getMedia( mediaId ) : undefined;
+
+		let videoFeaturedImage;
+
+		if ( VIDEO_BACKGROUND_TYPE === mediaType && media && media.featured_media && ! poster ) {
+			videoFeaturedImage = getMedia( media.featured_media );
+		}
+
+		/**
+		 * Uploads the video's first frame as an attachment.
+		 *
+		 * @param {string} src Video URL.
+		 */
+		const uploadVideoFrame = async ( src ) => {
+			const img = await getFirstFrameOfVideo( src );
+
+			mediaUpload( {
+				filesList: [ img ],
+				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+					if ( ! posterId ) {
+						return;
+					}
+
+					setAttributes( { poster: posterUrl } );
+
+					if ( mediaId ) {
+						saveMedia( {
+							id: mediaId,
+							featured_media: posterId,
+						} );
+					}
+				},
+			} );
+		};
 
 		const animatedBlocks = getAnimatedBlocks();
 		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
@@ -511,18 +580,12 @@ export default compose(
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 		return {
-			media: mediaId ? getMedia( mediaId ) : null,
+			media,
+			videoFeaturedImage,
+			uploadVideoFrame,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 		};
 	} ),
-	withDispatch( () => {
-		const {
-			moveBlockToPosition,
-		} = dispatch( 'core/block-editor' );
-		return {
-			moveBlockToPosition,
-		};
-	} )
 )( PageEdit );

@@ -78,6 +78,7 @@ class CustomVideoBlockEdit extends Component {
 			noticeOperations,
 			setAttributes,
 			uploadVideoFrame,
+			videoFeaturedImage,
 		} = this.props;
 		const { id, src = '', poster } = attributes;
 		if ( ! id && isBlobURL( src ) ) {
@@ -85,9 +86,9 @@ class CustomVideoBlockEdit extends Component {
 			if ( file ) {
 				mediaUpload( {
 					filesList: [ file ],
-					onFileChange: ( [ { url } ] ) => {
+					onFileChange: ( [ { id: mediaId, url } ] ) => {
 						this.setState( { duration: null, videoSize: null } );
-						setAttributes( { src: url } );
+						setAttributes( { id: mediaId, src: url } );
 					},
 					onError: ( message ) => {
 						this.setState( { editing: true } );
@@ -104,7 +105,11 @@ class CustomVideoBlockEdit extends Component {
 			} );
 
 			if ( ! poster ) {
-				uploadVideoFrame( src );
+				if ( videoFeaturedImage ) {
+					setAttributes( { poster: videoFeaturedImage.source_url } );
+				} else {
+					uploadVideoFrame( src );
+				}
 			}
 		}
 	}
@@ -363,19 +368,18 @@ export default compose( [
 			saveMedia,
 		};
 	} ),
-	withSelect( ( select, props ) => {
+	withSelect( ( select, { attributes, setAttributes, saveMedia } ) => {
 		const { getMedia } = select( 'core' );
 		const { getSettings } = select( 'core/block-editor' );
 		const { __experimentalMediaUpload: mediaUpload } = getSettings();
 
 		let videoFeaturedImage;
 
-		const { attributes, setAttributes, saveMedia } = props;
 		const { id, poster } = attributes;
 
 		if ( id && ! poster ) {
 			const media = getMedia( id );
-			videoFeaturedImage = media && media.featured_media && getMedia( media.featured_media );
+			videoFeaturedImage = media && media.featured_media > 0 && getMedia( media.featured_media );
 		}
 
 		/**
@@ -389,6 +393,10 @@ export default compose( [
 			mediaUpload( {
 				filesList: [ img ],
 				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+					if ( ! posterId ) {
+						return;
+					}
+
 					setAttributes( { poster: posterUrl } );
 
 					if ( id ) {
