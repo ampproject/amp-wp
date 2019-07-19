@@ -12,6 +12,7 @@ import { RichText } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
+import PropTypes from 'prop-types';
 
 const blockAttributes = {
 	url: {
@@ -35,6 +36,41 @@ const blockAttributes = {
 	},
 };
 
+/**
+ * Deprecated save function for plugin version 1.2.1
+ *
+ * @param {Object} attributes Attributes.
+ * @return {*} CTA save.
+ */
+const CallToActionSaveV121 = ( { attributes } ) => {
+	const {
+		url,
+		text,
+	} = attributes;
+
+	const className = getClassNameFromBlockAttributes( { ...attributes, className: 'amp-block-story-cta__link' } );
+	const styles = getStylesFromBlockAttributes( attributes );
+
+	return (
+		<amp-story-cta-layer>
+			<RichText.Content
+				tagName="a"
+				className={ className }
+				href={ url }
+				style={ styles }
+				value={ text }
+			/>
+		</amp-story-cta-layer>
+	);
+};
+
+CallToActionSaveV121.propTypes = {
+	attributes: PropTypes.shape( {
+		url: PropTypes.string,
+		text: PropTypes.string,
+	} ).isRequired,
+};
+
 const deprecated = [
 	{
 		attributes: {
@@ -48,27 +84,9 @@ const deprecated = [
 			align: true,
 			alignWide: false,
 		},
-		save( { attributes } ) {
-			const {
-				url,
-				text,
-			} = attributes;
 
-			const className = getClassNameFromBlockAttributes( { ...attributes, className: 'amp-block-story-cta__link' } );
-			const styles = getStylesFromBlockAttributes( attributes );
+		save: CallToActionSaveV121,
 
-			return (
-				<amp-story-cta-layer>
-					<RichText.Content
-						tagName="a"
-						className={ className }
-						href={ url }
-						style={ styles }
-						value={ text }
-					/>
-				</amp-story-cta-layer>
-			);
-		},
 		migrate( attributes ) {
 			return {
 				...omit( attributes, 'align' ),
