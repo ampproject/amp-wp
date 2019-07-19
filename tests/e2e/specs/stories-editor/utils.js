@@ -4,7 +4,7 @@
 
 /**
  * Opens the inserter, searches the block and inserts it.
- * Default helpers from WP won't work due to changed selectors.
+ * Default `insertBlock` from WP won't work since it's using "Add block" aria-label as selector.
  *
  * @param {string} searchTerm Search term to find the block by.
  * @return {Promise<void>} Promise.
