@@ -33,6 +33,7 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { isBlobURL } from '@wordpress/blob';
 
 /**
  * Internal dependencies
@@ -558,13 +559,11 @@ export default compose(
 			mediaUpload( {
 				filesList: [ img ],
 				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
-					if ( ! posterId ) {
-						return;
+					if ( ! isBlobURL( posterUrl ) ) {
+						setAttributes( { poster: posterUrl } );
 					}
 
-					setAttributes( { poster: posterUrl } );
-
-					if ( mediaId ) {
+					if ( mediaId && posterId ) {
 						saveMedia( {
 							id: mediaId,
 							featured_media: posterId,

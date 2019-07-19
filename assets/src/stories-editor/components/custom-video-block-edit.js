@@ -393,13 +393,11 @@ export default compose( [
 			mediaUpload( {
 				filesList: [ img ],
 				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
-					if ( ! posterId ) {
-						return;
+					if ( ! isBlobURL( posterUrl ) ) {
+						setAttributes( { poster: posterUrl } );
 					}
 
-					setAttributes( { poster: posterUrl } );
-
-					if ( id ) {
+					if ( id && posterId ) {
 						saveMedia( {
 							id,
 							featured_media: posterId,
