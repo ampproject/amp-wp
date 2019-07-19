@@ -19,7 +19,7 @@ class AMP_REST_API {
 	}
 
 	/**
-	 * Register other actions and filters to be used during the REST API initilization.
+	 * Register other actions and filters to be used during the REST API initialization.
 	 *
 	 * @return void
 	 */
@@ -65,6 +65,10 @@ class AMP_REST_API {
 			'scripts' => [],
 		];
 
+		/*
+		 * Note that $response->data['content']['rendered'] is not being used here because the embed handlers were not
+		 * registered when the_content was previously applied.
+		 */
 		/** This filter is documented in wp-includes/post-template.php */
 		$content = apply_filters( 'the_content', $post->post_content );
 
