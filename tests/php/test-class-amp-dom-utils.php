@@ -110,6 +110,15 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
 		$this->assertEquals( $original, $restored );
 
+		// Check tag with self-closing attribute.
+		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
+		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
+		$this->assertNotEquals( $converted, $original );
+
+		// Preserve trailing slash that is actually the attribute value.
+		$original = '<a href=/>Home</a>';
+		$this->assertEquals( AMP_DOM_Utils::convert_amp_bind_attributes( $original ), $original );
+
 		// Test malformed.
 		$malformed_html = [
 			'<amp-img width="123" [text]="..."</amp-img>',
