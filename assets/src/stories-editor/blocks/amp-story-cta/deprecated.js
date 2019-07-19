@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { omit } from 'lodash';
+
+/**
  * WordPress dependencies
  */
 import { RichText } from '@wordpress/block-editor';
@@ -7,7 +12,6 @@ import { RichText } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
-
 
 const blockAttributes = {
 	url: {
@@ -38,7 +42,7 @@ const deprecated = [
 				type: 'string',
 				default: 'center',
 			},
-			...blockAttributes
+			...blockAttributes,
 		},
 		supports: {
 			align: true,
@@ -65,7 +69,14 @@ const deprecated = [
 				</amp-story-cta-layer>
 			);
 		},
-	}
+		migrate( attributes ) {
+			return {
+				...omit( attributes, 'align' ),
+				btnPositionTop: 0,
+				btnPositionLeft: 30,
+			};
+		},
+	},
 ];
 
 export default deprecated;

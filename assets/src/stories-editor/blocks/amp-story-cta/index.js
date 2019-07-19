@@ -8,6 +8,7 @@ import { __ } from '@wordpress/i18n';
  */
 import edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 import blockIcon from '../../../../images/call-to-action.svg';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
@@ -38,7 +39,7 @@ const schema = {
 	},
 	btnPositionLeft: {
 		type: 'number',
-		default: 0,
+		default: 30,
 	},
 };
 

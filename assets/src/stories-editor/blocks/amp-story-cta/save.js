@@ -40,7 +40,7 @@ const CallToActionSave = ( { attributes } ) => {
 	);
 };
 
-CallToActionEdit.propTypes = {
+CallToActionSave.propTypes = {
 	attributes: PropTypes.shape( {
 		url: PropTypes.string,
 		text: PropTypes.string,
