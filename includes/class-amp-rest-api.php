@@ -82,13 +82,23 @@ class AMP_REST_API {
 				$src = wp_scripts()->registered[ $handle ]->src;
 			}
 
+			/*
+			* Extract both the runtime version and the element or template version.
+			* The regexp pattern used comes from the official documentation:
+			* https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#extended-components
+			*/
+			preg_match( '/\/v(\d+)\/[a-z-]+-(latest|\d+|\d+\.\d+)\.js/', $src, $versions );
+			$runtime_version = (int) $versions[1];
+
 			$async  = true;
-			$script = compact( 'src', 'async' );
+			$script = compact( 'src', 'async', 'runtime_version' );
 
 			if ( 'amp-mustache' === $handle ) {
-				$script['custom-template'] = $handle;
+				$script['custom-template']  = $handle;
+				$script['template_version'] = $versions[2];
 			} else {
-				$script['custom-element'] = $handle;
+				$script['custom-element']  = $handle;
+				$script['element_version'] = $versions[2];
 			}
 
 			$data['scripts'][ $handle ] = $script;
