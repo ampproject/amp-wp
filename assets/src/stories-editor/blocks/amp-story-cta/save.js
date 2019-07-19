@@ -13,7 +13,7 @@ import { RichText } from '@wordpress/block-editor';
  */
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
 
-const CallToActionEdit = ( { attributes } ) => {
+const CallToActionSave = ( { attributes } ) => {
 	const {
 		btnPositionLeft,
 		btnPositionTop,
@@ -70,4 +70,4 @@ CallToActionEdit.propTypes = {
 	} ).isRequired,
 };
 
-export default CallToActionEdit;
+export default CallToActionSave;

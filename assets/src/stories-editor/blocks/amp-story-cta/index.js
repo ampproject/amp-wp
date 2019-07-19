@@ -64,6 +64,8 @@ export const settings = {
 
 	save,
 
+	deprecated,
+
 	transforms: {
 		from: [
 			{
