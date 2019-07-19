@@ -315,9 +315,9 @@ The following script creates a post with all core Gutenberg blocks. To run it:
 
 1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
 1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 1. Do `npm install && composer selfupdate && composer install`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
     1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
     1. USe new version as the title, followed by some highlight tagline of the release.

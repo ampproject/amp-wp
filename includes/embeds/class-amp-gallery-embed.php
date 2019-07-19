@@ -127,6 +127,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'url'    => $url,
 				'width'  => $width,
 				'height' => $height,
+				'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Logic from wp_get_attachment_image().
 			];
 		}
 
@@ -217,6 +218,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
+				'alt'    => $props['alt'],
 			];
 			$max_width  = max( $max_width, $props['width'] );
 			$max_height = max( $max_height, $props['height'] );
