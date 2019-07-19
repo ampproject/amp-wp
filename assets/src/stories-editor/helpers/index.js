@@ -1519,7 +1519,8 @@ export const getUniqueId = () => {
  */
 export const getFirstFrameOfVideo = async ( src ) => {
 	const video = document.createElement( 'video' );
-	video.setAttribute( 'muted', 'muted' );
+	video.muted = true;
+	video.crossOrigin = 'anonymous';
 
 	return new Promise( ( resolve ) => {
 		video.src = src;
