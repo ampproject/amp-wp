@@ -83,25 +83,20 @@ class AMP_REST_API {
 			}
 
 			/*
-			* Extract both the runtime version and the element or template version.
-			* The regexp pattern used comes from the official documentation:
-			* https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#extended-components
-			*/
-			preg_match( '/\/v(\d+)\/[a-z-]+-(latest|\d+|\d+\.\d+)\.js/', $src, $versions );
-			$runtime_version = (int) $versions[1];
-
-			$async  = true;
-			$script = compact( 'src', 'async', 'runtime_version' );
-
-			if ( 'amp-mustache' === $handle ) {
-				$script['custom-template']  = $handle;
-				$script['template_version'] = $versions[2];
-			} else {
-				$script['custom-element']  = $handle;
-				$script['element_version'] = $versions[2];
+			 * Extract both the runtime version and the extension version.
+			 * The regexp pattern used comes from the official documentation:
+			 * https://amp.dev/documentation/guides-and-tutorials/learn/spec/amphtml/#extended-components
+			 */
+			if ( preg_match( '#/v(?P<runtime_version>\d+)/[a-z-]+-(?P<extension_version>latest|\d+|\d+\.\d+)\.js#', $src, $matches ) ) {
+				$data['scripts'][ $handle ] = array_merge(
+					compact( 'src' ),
+					wp_array_slice_assoc( $matches, [ 'runtime_version', 'extension_version' ] ),
+					[
+						'async'          => true,
+						'extension_type' => 'amp-mustache' === $handle ? 'custom-template' : 'custom-element',
+					]
+				);
 			}
-
-			$data['scripts'][ $handle ] = $script;
 		}
 
 		// Remove filters that to clean up applying filters for whatever comes next.
