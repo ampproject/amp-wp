@@ -21,7 +21,7 @@ import {
 	getRadianFromDeg,
 } from '../../helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
+import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_PADDING } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -57,14 +57,6 @@ const EnhancedResizableBox = ( props ) => {
 	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
 	const isText = 'amp/amp-story-text' === blockName;
 
-	if ( isText ) {
-		height += TEXT_BLOCK_BORDER * 2;
-		width += TEXT_BLOCK_BORDER * 2;
-	}
-
-	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
-	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
-
 	return (
 		<ResizableBox
 			{ ...otherProps }
@@ -95,12 +87,12 @@ const EnhancedResizableBox = ( props ) => {
 				const elementTop = parseFloat( blockElement.style.top );
 				const elementLeft = parseFloat( blockElement.style.left );
 
-				const positionTop = ! isText ? Number( elementTop.toFixed( 2 ) ) : Number( ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 ) );
-				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
+				const positionTop = Number( elementTop.toFixed( 2 ) );
+				const positionLeft = Number( elementLeft.toFixed( 2 ) );
 
 				onResizeStop( {
-					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedWidth, 10 ),
-					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedHeight, 10 ),
+					width: parseInt( appliedWidth, 10 ),
+					height: parseInt( appliedHeight, 10 ),
 					positionTop,
 					positionLeft,
 				} );
@@ -170,8 +162,8 @@ const EnhancedResizableBox = ( props ) => {
 						}
 					}
 
-					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
-					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
+					const scrollWidth = textElement.scrollWidth;
+					const scrollHeight = textElement.scrollHeight;
 					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;

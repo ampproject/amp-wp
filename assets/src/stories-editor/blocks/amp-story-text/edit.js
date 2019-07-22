@@ -195,7 +195,12 @@ class TextBlockEdit extends Component {
 						/>
 					}
 					{ ! isEditing &&
-						<div className={ textWrapperClassName }>
+						<div
+							className={ textWrapperClassName }
+							onDoubleClick={ () => {
+								this.toggleIsEditing( true );
+							} }
+						>
 							<p
 								className={ classnames( className, {
 									'has-text-color': textColor.color,
@@ -208,9 +213,6 @@ class TextBlockEdit extends Component {
 									fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
 									textAlign: align,
 									position: ampFitText && content.length ? 'static' : undefined,
-								} }
-								onDoubleClick={ () => {
-									this.toggleIsEditing( true );
 								} }
 							>
 								{ content }

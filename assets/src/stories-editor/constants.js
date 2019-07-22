@@ -234,5 +234,4 @@ export const AMP_STORY_FONT_IMAGES = {
 	Ubuntu,
 };
 
-export const TEXT_BLOCK_BORDER = 5;
 export const TEXT_BLOCK_PADDING = 7;
