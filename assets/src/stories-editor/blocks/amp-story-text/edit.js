@@ -202,7 +202,7 @@ class TextBlockEdit extends Component {
 							} }
 						>
 							<p
-								className={ classnames( className, {
+								className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text is-amp-fit-text', {
 									'has-text-color': textColor.color,
 									[ textColor.class ]: textColor.class,
 									[ fontSize.class ]: ampFitText ? undefined : fontSize.class,

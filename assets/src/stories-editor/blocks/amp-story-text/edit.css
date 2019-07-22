@@ -11,7 +11,7 @@
 }
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right {
-	right: -10px;
+	right: -13px;
 }
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right::before {
@@ -19,7 +19,6 @@
 }
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-bottom {
-	bottom: -8px;
 	width: 50px;
 	left: calc(50% - 25px);
 }
