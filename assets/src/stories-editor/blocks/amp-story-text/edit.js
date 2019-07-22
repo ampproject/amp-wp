@@ -156,6 +156,8 @@ class TextBlockEdit extends Component {
 			wrapperClass += ' ' + styleClasses.join( ' ' );
 		}
 
+		const textWrapperClassName = 'wp-block-amp-story-text';
+
 		return (
 			<>
 				<BlockControls>
@@ -169,7 +171,7 @@ class TextBlockEdit extends Component {
 				} ) } style={ wrapperStyle } >
 					{ isEditing &&
 						<RichText
-							wrapperClassName="wp-block-amp-story-text"
+							wrapperClassName={ textWrapperClassName }
 							tagName="p"
 							// Ensure line breaks are normalised to HTML.
 							value={ content }
@@ -193,7 +195,7 @@ class TextBlockEdit extends Component {
 						/>
 					}
 					{ ! isEditing &&
-						<div className="wp-block-amp-story-text">
+						<div className={ textWrapperClassName }>
 							<p
 								className={ classnames( className, {
 									'has-text-color': textColor.color,
