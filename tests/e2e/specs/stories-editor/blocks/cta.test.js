@@ -6,9 +6,17 @@ import { visitAdminPage } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { insertStoryBlockBySearch } from '../utils';
+import { insertStoryBlockBySearch, toggleStories } from '../utils';
 
 describe( 'Stories Editor Screen', () => {
+	beforeAll( async () => {
+		await toggleStories( true );
+	} );
+
+	afterAll( async () => {
+		await toggleStories( false );
+	} );
+
 	it( 'Should not display CTA icon when only one Page is present', async () => {
 		await visitAdminPage( 'post-new.php', 'post_type=amp_story' );
 
