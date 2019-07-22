@@ -31,6 +31,8 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		global $wp_styles;
 		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
+
+		AMP_Story_Media::init();
 	}
 
 	/**

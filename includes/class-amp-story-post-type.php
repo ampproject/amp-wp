@@ -1623,7 +1623,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// Add 4px more height, as the <iframe> needs that to display the full image.
-		$new_height = (string) ( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		$new_height = (string) ( ( AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
 		return preg_replace(
 			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
 			sprintf( '${1}%s${3}', $new_height ),
