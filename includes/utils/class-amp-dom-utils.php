@@ -295,7 +295,12 @@ class AMP_DOM_Utils {
 		 * @return string Replacement.
 		 */
 		$replace_callback = static function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
-			$old_attrs = rtrim( $tag_matches['attrs'] );
+
+			// Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
+			$old_attrs = preg_replace( '#(?<!=)/$#', '', $tag_matches['attrs'] );
+
+			$old_attrs = rtrim( $old_attrs );
+
 			$new_attrs = '';
 			$offset    = 0;
 			while ( preg_match( $attr_regex, substr( $old_attrs, $offset ), $attr_matches ) ) {
