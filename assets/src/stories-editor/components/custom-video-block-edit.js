@@ -148,8 +148,7 @@ class CustomVideoBlockEdit extends Component {
 		// Set the block's src from the edit component's state, and switch off
 		// the editing UI.
 		if ( newSrc !== src ) {
-			// Omit the embed block logic, as that didn't seem to work.
-			setAttributes( { src: newSrc, id: undefined } );
+			setAttributes( { src: newSrc, id: undefined, poster: undefined } );
 		}
 
 		this.setState( { editing: false, duration: null, videoSize: null } );
@@ -193,14 +192,14 @@ class CustomVideoBlockEdit extends Component {
 			if ( ! media || ! media.url ) {
 				// in this case there was an error and we should continue in the editing state
 				// previous attributes should be removed because they may be temporary blob urls
-				setAttributes( { src: undefined, id: undefined } );
+				setAttributes( { src: undefined, id: undefined, poster: undefined } );
 				switchToEditing();
 				return;
 			}
 
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
-			setAttributes( { src: media.url, id: media.id } );
+			setAttributes( { src: media.url, id: media.id, poster: undefined } );
 			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
 		};
 
