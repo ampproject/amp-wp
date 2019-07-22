@@ -43,7 +43,26 @@ class AMP_Story_Media {
 	 */
 	const STORY_SMALL_IMAGE_DIMENSION = 696;
 
+	/**
+	 * The poster post meta key.
+	 *
+	 * @var string
+	 */
+	const POSTER_POST_META_KEY = 'amp_is_poster';
+
 	public static function init() {
+		register_meta(
+			'post',
+			self::POSTER_POST_META_KEY,
+			[
+				'sanitize_callback' => 'rest_sanitize_boolean',
+				'type'              => 'boolean',
+				'description'       => __( 'Whether the attachment is a poster image.', 'amp' ),
+				'show_in_rest'      => true,
+				'single'            => true,
+			]
+		);
+
 		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
 		add_image_size( 'amp-publisher-logo', 100, 100, true );
 
