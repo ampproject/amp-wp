@@ -1,5 +1,13 @@
 <?php
+/**
+ * Class AMP_Story_Media
+ *
+ * @package AMP
+ */
 
+/**
+ * Class AMP_Story_Media
+ */
 class AMP_Story_Media {
 	/**
 	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
@@ -50,6 +58,9 @@ class AMP_Story_Media {
 	 */
 	const POSTER_POST_META_KEY = 'amp_is_poster';
 
+	/**
+	 * Init.
+	 */
 	public static function init() {
 		register_meta(
 			'post',
@@ -291,7 +302,6 @@ class AMP_Story_Media {
 
 		$meta_query = (array) $query->get( 'meta_query' );
 
-		//Add our meta query to the original meta queries
 		$meta_query[] = [
 			'key'     => self::POSTER_POST_META_KEY,
 			'compare' => 'NOT EXISTS',
