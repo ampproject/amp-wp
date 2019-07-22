@@ -76,10 +76,9 @@ class CustomVideoBlockEdit extends Component {
 			mediaUpload,
 			noticeOperations,
 			setAttributes,
-			uploadVideoFrame,
-			videoFeaturedImage,
 		} = this.props;
-		const { id, src = '', poster } = attributes;
+		const { id, src = '' } = attributes;
+
 		if ( ! id && isBlobURL( src ) ) {
 			const file = getBlobByURL( src );
 			if ( file ) {
@@ -102,34 +101,28 @@ class CustomVideoBlockEdit extends Component {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
-
-			if ( ! poster ) {
-				if ( videoFeaturedImage ) {
-					setAttributes( { poster: videoFeaturedImage.source_url } );
-				} else {
-					uploadVideoFrame( src );
-				}
-			}
 		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { uploadVideoFrame } = this.props;
-		const { poster, src } = this.props.attributes;
+		const { attributes, setAttributes, videoFeaturedImage, uploadVideoFrame, media } = this.props;
+		const { poster, src, id } = attributes;
 		if ( poster !== prevProps.attributes.poster && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
-		}
-
-		if ( ! poster && this.props.videoFeaturedImage ) {
-			this.props.setAttributes( { poster: this.props.videoFeaturedImage.source_url } );
 		}
 
 		if ( prevProps.attributes.src !== src ) {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
+		}
 
-			if ( ! poster ) {
+		if ( ! poster && videoFeaturedImage ) {
+			setAttributes( { poster: videoFeaturedImage.source_url } );
+		}
+
+		if ( ! poster && ( prevProps.attributes.src !== src || prevProps.media !== media ) ) {
+			if ( ! id || ( media && ! media.featured_media ) ) {
 				uploadVideoFrame( src );
 			}
 		}
@@ -356,6 +349,7 @@ CustomVideoBlockEdit.propTypes = {
 	mediaUpload: PropTypes.func,
 	noticeUI: PropTypes.oneOfType( [ PropTypes.func, PropTypes.bool ] ),
 	noticeOperations: PropTypes.object,
+	media: PropTypes.object,
 	setAttributes: PropTypes.func,
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
@@ -380,9 +374,10 @@ export default compose( [
 
 		const { id, poster } = attributes;
 
-		if ( id && ! poster ) {
-			const media = getMedia( id );
-			videoFeaturedImage = media && media.featured_media > 0 && getMedia( media.featured_media );
+		const media = id ? getMedia( id ) : undefined;
+
+		if ( media && media.featured_media && ! poster ) {
+			videoFeaturedImage = getMedia( media.featured_media );
 		}
 
 		/**
@@ -418,6 +413,7 @@ export default compose( [
 		};
 
 		return {
+			media,
 			mediaUpload,
 			videoFeaturedImage,
 			uploadVideoFrame,
