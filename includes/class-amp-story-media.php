@@ -89,6 +89,8 @@ class AMP_Story_Media {
 		// The AJAX handler for when an image is cropped and sent via POST.
 		add_action( 'wp_ajax_custom-header-crop', [ __CLASS__, 'crop_featured_image' ] );
 
+		add_action( 'pre_get_posts', [ __CLASS__, 'filter_poster_attachments' ] );
+
 		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
 	}
 
@@ -271,6 +273,31 @@ class AMP_Story_Media {
 		$object['height']        = $dimensions['dst_height'];
 
 		wp_send_json_success( $object );
+	}
+
+	/**
+	 * Filters the current query to hide all automatically extracted poster image attachments.
+	 *
+	 * Reduces unnecessary noise in the media library.
+	 *
+	 * @param WP_Query $query WP_Query instance, passed by reference.
+	 */
+	public static function filter_poster_attachments( &$query ) {
+		$post_type = (array) $query->get( 'post_type' );
+
+		if ( ! in_array( 'any', $post_type, true ) && ! in_array( 'attachment', $post_type, true ) ) {
+			return;
+		}
+
+		$meta_query = (array) $query->get( 'meta_query' );
+
+		//Add our meta query to the original meta queries
+		$meta_query[] = [
+			'key'     => self::POSTER_POST_META_KEY,
+			'compare' => 'NOT EXISTS',
+		];
+
+		$query->set( 'meta_query', $meta_query );
 	}
 
 	/**
