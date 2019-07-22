@@ -563,6 +563,10 @@ export default compose(
 						saveMedia( {
 							id: mediaId,
 							featured_media: posterId,
+						} );
+
+						saveMedia( {
+							id: posterId,
 							meta: {
 								amp_is_poster: true,
 							},
