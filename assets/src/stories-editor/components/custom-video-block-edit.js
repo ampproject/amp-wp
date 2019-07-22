@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -16,6 +17,7 @@ import {
 	Notice,
 	PanelBody,
 	Path,
+	ResponsiveWrapper,
 	SVG,
 	ToggleControl,
 	Toolbar,
@@ -39,9 +41,8 @@ import { withSelect, withDispatch } from '@wordpress/data';
 import { getFirstFrameOfVideo } from '../helpers';
 import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
+import { POSTER_ALLOWED_MEDIA_TYPES, ALLOWED_VIDEO_TYPES } from '../constants';
 
-const ALLOWED_MEDIA_TYPES = [ 'video' ];
-const VIDEO_POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
 const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path fill="none" d="M0 0h24v24H0V0z" /><Path d="M4 6.47L5.76 10H20v8H4V6.47M22 4h-4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4z" /></SVG>;
 
 /**
@@ -63,10 +64,8 @@ class CustomVideoBlockEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
-		this.posterImageButton = createRef();
 		this.toggleAttribute = this.toggleAttribute.bind( this );
 		this.onSelectURL = this.onSelectURL.bind( this );
-		this.onSelectPoster = this.onSelectPoster.bind( this );
 		this.onUploadError = this.onUploadError.bind( this );
 		this.onLoadedMetadata = this.onLoadedMetadata.bind( this );
 	}
@@ -94,7 +93,7 @@ class CustomVideoBlockEdit extends Component {
 						this.setState( { editing: true } );
 						noticeOperations.createErrorNotice( message );
 					},
-					allowedTypes: ALLOWED_MEDIA_TYPES,
+					allowedTypes: ALLOWED_VIDEO_TYPES,
 				} );
 			}
 		}
@@ -156,11 +155,6 @@ class CustomVideoBlockEdit extends Component {
 		this.setState( { editing: false, duration: null, videoSize: null } );
 	}
 
-	onSelectPoster( image ) {
-		const { setAttributes } = this.props;
-		setAttributes( { poster: image.url } );
-	}
-
 	onUploadError( message ) {
 		const { noticeOperations } = this.props;
 		noticeOperations.removeAllNotices();
@@ -175,18 +169,22 @@ class CustomVideoBlockEdit extends Component {
 
 	render() {
 		const {
-			caption,
-			loop,
-			poster,
-			src,
-		} = this.props.attributes;
-		const {
 			className,
 			instanceId,
 			isSelected,
 			noticeUI,
+			attributes,
 			setAttributes,
 		} = this.props;
+		const {
+			caption,
+			loop,
+			poster,
+			src,
+			width,
+			height,
+		} = attributes;
+
 		const { editing } = this.state;
 		const switchToEditing = () => {
 			this.setState( { editing: true } );
@@ -214,7 +212,7 @@ class CustomVideoBlockEdit extends Component {
 					onSelect={ onSelectVideo }
 					onSelectURL={ this.onSelectURL }
 					accept="video/mp4"
-					allowedTypes={ ALLOWED_MEDIA_TYPES }
+					allowedTypes={ ALLOWED_VIDEO_TYPES }
 					value={ this.props.attributes }
 					notices={ noticeUI }
 					onError={ this.onUploadError }
@@ -222,9 +220,9 @@ class CustomVideoBlockEdit extends Component {
 			);
 		}
 
-		const videoPosterDescription = `video-block__poster-image-description-${ instanceId }`;
-
 		const videoBytesPerSecond = this.state.duration && this.state.videoSize ? this.state.videoSize / this.state.duration : 0;
+		const videoPosterId = `video-block__poster-image-${ instanceId }`;
+
 		const isExcessiveVideoSize = videoBytesPerSecond ? isVideoSizeExcessive( videoBytesPerSecond ) : null;
 
 		return (
@@ -248,45 +246,49 @@ class CustomVideoBlockEdit extends Component {
 						/>
 						<MediaUploadCheck>
 							<BaseControl
+								id={ videoPosterId }
+								label={ __( 'Poster Image', 'amp' ) }
 								className="editor-video-poster-control"
 							>
-								<BaseControl.VisualLabel>
-									{ __( 'Poster Image', 'amp' ) }
-								</BaseControl.VisualLabel>
+								{
+									! poster &&
+									<Notice status="error" isDismissible={ false } >
+										{ __( 'A poster image must be set.', 'amp' ) }
+									</Notice>
+								}
 								<MediaUpload
 									title={ __( 'Select Poster Image', 'amp' ) }
-									onSelect={ this.onSelectPoster }
-									allowedTypes={ VIDEO_POSTER_ALLOWED_MEDIA_TYPES }
+									onSelect={ ( image ) => {
+										setAttributes( { poster: image.url } );
+									} }
+									allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
 									render={ ( { open } ) => (
 										<Button
-											isDefault
+											id={ videoPosterId }
+											className={ classnames(
+												'video-block__poster-image',
+												{
+													'editor-post-featured-image__toggle': ! poster,
+													'editor-post-featured-image__preview': poster,
+												}
+											) }
 											onClick={ open }
-											ref={ this.posterImageButton }
-											aria-describedby={ videoPosterDescription }
+											aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
 										>
-											{ ! poster ? __( 'Select Poster Image', 'amp' ) : __( 'Replace image', 'amp' ) }
+											{ poster && (
+												<ResponsiveWrapper
+													naturalWidth={ width }
+													naturalHeight={ height }
+												>
+													<img src={ poster } alt="" />
+												</ResponsiveWrapper>
+											) }
+											{ ! poster &&
+											__( 'Set Poster Image', 'amp' )
+											}
 										</Button>
 									) }
 								/>
-								{ poster && (
-									<p
-										id={ videoPosterDescription }
-										hidden
-									>
-										{
-											/* translators: %s: the poster image URL. */
-											sprintf( __( 'The current poster image url is %s', 'amp' ), this.props.attributes.poster )
-										}
-									</p>
-								) }
-								{ ! poster && (
-									<Notice
-										status="error"
-										isDismissible={ false }
-									>
-										{ __( 'A poster is required for videos in stories.', 'amp' ) }
-									</Notice>
-								) }
 							</BaseControl>
 						</MediaUploadCheck>
 						{
@@ -346,6 +348,8 @@ CustomVideoBlockEdit.propTypes = {
 		id: PropTypes.number,
 		poster: PropTypes.string,
 		src: PropTypes.string,
+		width: PropTypes.number,
+		height: PropTypes.number,
 	} ),
 	className: PropTypes.string,
 	instanceId: PropTypes.number,

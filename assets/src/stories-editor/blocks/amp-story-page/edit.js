@@ -52,7 +52,7 @@ import {
 
 import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_MEDIA_TYPES,
+	ALLOWED_BACKGROUND_MEDIA_TYPES,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
@@ -354,7 +354,7 @@ class PageEdit extends Component {
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
 										onSelect={ this.onSelectMedia }
-										allowedTypes={ ALLOWED_MEDIA_TYPES }
+										allowedTypes={ ALLOWED_BACKGROUND_MEDIA_TYPES }
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
@@ -399,6 +399,7 @@ class PageEdit extends Component {
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
 												<Button
+													id="editor-amp-story-page-poster"
 													className={ classnames(
 														'editor-amp-story-page-background',
 														{
@@ -423,13 +424,6 @@ class PageEdit extends Component {
 												</Button>
 											) }
 										/>
-										{
-											poster && (
-												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
-													{ __( 'Remove Image', 'amp' ) }
-												</Button>
-											)
-										}
 									</BaseControl>
 								</MediaUploadCheck>
 							) }
