@@ -13,9 +13,6 @@
 
 	/* Remove the top/bottom padding from the available space. */
 	max-height: calc(110px - 24px);
-
-	/* Counteract the height increase caused by the inline-block. */
-	margin-bottom: -9px;
 }
 
 .amp-block-story-cta__link img {
