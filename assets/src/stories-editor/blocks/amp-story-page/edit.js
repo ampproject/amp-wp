@@ -552,8 +552,10 @@ export default compose(
 
 			mediaUpload( {
 				filesList: [ img ],
-				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
-					if ( ! isBlobURL( posterUrl ) ) {
+				onFileChange: ( [ { id: posterId, url: posterOriginalUrl, sizes: posterImageSizes } ] ) => {
+					if ( ! isBlobURL( posterOriginalUrl ) ) {
+						const posterUrl = has( posterImageSizes, [ MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? posterImageSizes[ MAX_IMAGE_SIZE_SLUG ].url : posterOriginalUrl;
+
 						setAttributes( { poster: posterUrl } );
 					}
 
