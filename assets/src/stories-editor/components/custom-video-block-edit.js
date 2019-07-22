@@ -116,7 +116,7 @@ class CustomVideoBlockEdit extends Component {
 	componentDidUpdate( prevProps ) {
 		const { uploadVideoFrame } = this.props;
 		const { poster, src } = this.props.attributes;
-		if ( poster !== prevProps.attributes.poster ) {
+		if ( poster !== prevProps.attributes.poster && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
 		}
 
