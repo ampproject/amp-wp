@@ -125,6 +125,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$urls[] = [
 				'href'   => $href,
 				'url'    => $url,
+				'srcset' => wp_get_attachment_image_srcset( $attachment_id, $atts['size'] ),
 				'width'  => $width,
 				'height' => $height,
 				'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Logic from wp_get_attachment_image().
@@ -215,6 +216,7 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
+				'srcset' => $props['srcset'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
