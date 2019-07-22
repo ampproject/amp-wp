@@ -28,7 +28,12 @@ class TextBlockEdit extends Component {
 	constructor() {
 		super( ...arguments );
 
+		this.state = {
+			isEditing: false,
+		};
+
 		this.onReplace = this.onReplace.bind( this );
+		this.toggleIsEditing = this.toggleIsEditing.bind( this );
 	}
 
 	componentDidMount() {
@@ -36,7 +41,7 @@ class TextBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, fontSize } = this.props;
+		const { attributes, fontSize, isSelected } = this.props;
 		const {
 			height,
 			width,
@@ -44,6 +49,11 @@ class TextBlockEdit extends Component {
 			ampFitText,
 			ampFontFamily,
 		} = attributes;
+
+		// If the block was unselected, make sure that it's not editing anymore.
+		if ( ! isSelected && prevProps.isSelected ) {
+			this.toggleIsEditing( false );
+		}
 
 		const checkFontSize = ampFitText && (
 			prevProps.attributes.ampFitText !== ampFitText ||
@@ -88,7 +98,17 @@ class TextBlockEdit extends Component {
 		) ) );
 	}
 
+	toggleIsEditing( enable ) {
+		if ( enable !== this.state.isEditing ) {
+			this.setState( {
+				isEditing: ! this.state.isEditing,
+			} );
+		}
+	}
+
 	render() {
+		const { isEditing } = this.state;
+
 		const {
 			attributes,
 			setAttributes,
@@ -147,29 +167,54 @@ class TextBlockEdit extends Component {
 				<div className={ classnames( wrapperClass, {
 					'with-line-height': ampFitText,
 				} ) } style={ wrapperStyle } >
-					<RichText
-						wrapperClassName="wp-block-amp-story-text"
-						tagName="p"
-						// Ensure line breaks are normalised to HTML.
-						value={ content }
-						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-						// The 2 following lines are necessary for pasting to work.
-						onReplace={ this.onReplace }
-						onSplit={ () => {} }
-						style={ {
-							color: textColor.color,
-							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-							textAlign: align,
-							position: ampFitText && content.length ? 'static' : undefined,
-						} }
-						className={ classnames( className, {
-							'has-text-color': textColor.color,
-							[ textColor.class ]: textColor.class,
-							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-							'is-amp-fit-text': ampFitText,
-						} ) }
-						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-					/>
+					{ isEditing &&
+						<RichText
+							wrapperClassName="wp-block-amp-story-text"
+							tagName="p"
+							// Ensure line breaks are normalised to HTML.
+							value={ content }
+							onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
+							// The 2 following lines are necessary for pasting to work.
+							onReplace={ this.onReplace }
+							onSplit={ () => {} }
+							style={ {
+								color: textColor.color,
+								fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+								textAlign: align,
+								position: ampFitText && content.length ? 'static' : undefined,
+							} }
+							className={ classnames( className, {
+								'has-text-color': textColor.color,
+								[ textColor.class ]: textColor.class,
+								[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+								'is-amp-fit-text': ampFitText,
+							} ) }
+							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+						/>
+					}
+					{ ! isEditing &&
+						<div className="wp-block-amp-story-text">
+							<p
+								className={ classnames( className, {
+									'has-text-color': textColor.color,
+									[ textColor.class ]: textColor.class,
+									[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+									'is-amp-fit-text': ampFitText,
+								} ) }
+								style={ {
+									color: textColor.color,
+									fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+									textAlign: align,
+									position: ampFitText && content.length ? 'static' : undefined,
+								} }
+								onDoubleClick={ () => {
+									this.toggleIsEditing( true );
+								} }
+							>
+								{ content }
+							</p>
+						</div>
+					}
 				</div>
 			</>
 		);
