@@ -18,7 +18,7 @@ if ( have_posts() ) {
 			AMP_Story_Post_Type::the_single_story_card(
 				[
 					'post' => get_post(),
-					'size' => AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE,
+					'size' => AMP_Story_Media::STORY_CARD_IMAGE_SIZE,
 				]
 			);
 			?>
