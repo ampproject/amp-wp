@@ -126,7 +126,14 @@ class CustomVideoBlockEdit extends Component {
 
 		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
-		} else if ( media && ! media.featured_media && ! this.state.extractingPoster ) {
+		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
+			/*
+			 * The video has changed, and its media object has been loaded already.
+			 *
+			 * Since it's clear that the video does not have a featured (poster) image,
+			 * one can be generated now.
+			 */
+
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id, src } )
@@ -155,6 +162,10 @@ class CustomVideoBlockEdit extends Component {
 
 			this.setState( { extractingPoster: true } );
 
+			/*
+			 * Since the video has been added via URL, there's no attachment object
+			 * a poster image could be retrieved from.
+			 */
 			uploadVideoFrame( { src: newSrc } )
 				.then( ( posterUrl ) => {
 					setAttributes( { poster: posterUrl } );
@@ -212,14 +223,7 @@ class CustomVideoBlockEdit extends Component {
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id, poster: undefined } );
-			this.setState( { src: media.url, editing: false, duration: null, videoSize: null, extractingPoster: true } );
-
-			uploadVideoFrame( { id: media.id, src: media.url } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
-					this.setState( { extractingPoster: false } );
-				} )
-				.catch( () => this.setState( { extractingPoster: false } ) );
+			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
 		};
 
 		if ( editing ) {

@@ -142,17 +142,6 @@ class PageEdit extends Component {
 			mediaType,
 			poster,
 		} );
-
-		if ( VIDEO_BACKGROUND_TYPE === mediaType && ! poster ) {
-			this.setState( { extractingPoster: true } );
-
-			uploadVideoFrame( { id: media.id, src: media.url } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
-					this.setState( { extractingPoster: false } );
-				} )
-				.catch( () => this.setState( { extractingPoster: false } ) );
-		}
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -173,7 +162,13 @@ class PageEdit extends Component {
 
 		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
-		} else if ( media && ! media.featured_media && ! this.state.extractingPoster ) {
+		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
+			/*
+			 * The video has changed, and its media object has been loaded already.
+			 *
+			 * Since it's clear that the video does not have a featured (poster) image,
+			 * one can be generated now.
+			 */
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
