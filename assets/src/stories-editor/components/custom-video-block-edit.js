@@ -126,7 +126,7 @@ class CustomVideoBlockEdit extends Component {
 				 *
 				 * Those are the cases where we need to extract the poster image.
 				 */
-				if ( ! id || ( media && ! media.featured_media ) ) {
+				if ( ! this.state.extractingPoster && ( ! id || ( media && ! media.featured_media ) ) ) {
 					this.setState( { extractingPoster: true } );
 					uploadVideoFrame( { src, onFinish: () => this.setState( { extractingPoster: false } ) } );
 				}

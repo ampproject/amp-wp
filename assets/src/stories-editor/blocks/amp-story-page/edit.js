@@ -154,7 +154,7 @@ class PageEdit extends Component {
 			if ( ! poster && ( prevProps.attributes.mediaUrl !== mediaUrl || prevProps.media !== media ) ) {
 				if ( videoFeaturedImage ) {
 					setAttributes( { poster: videoFeaturedImage.source_url } );
-				} else if ( ! mediaId || ( media && ! media.featured_media ) ) {
+				} else if ( ! this.state.extractingPoster && ( ! mediaId || ( media && ! media.featured_media ) ) ) {
 					/*
 					 * Either there is no associated attachment at all (and thus no media object),
 					 * or there is one, but it doesn't have a featured image.
