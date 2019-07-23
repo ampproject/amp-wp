@@ -10,6 +10,10 @@
 	width: 100%;
 }
 
+.is-not-editing .wp-block-amp-amp-story-text.block-editor-rich-text__editable.editor-rich-text__editable {
+	cursor: grab;
+}
+
 .wp-block-amp-story-text-wrapper.is-empty-draggable-text,
 .wp-block-amp-story-text-wrapper:not(.with-line-height) {
 	height: 100%;

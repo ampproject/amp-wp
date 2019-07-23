@@ -41,7 +41,7 @@ class TextBlockEdit extends Component {
 		maybeUpdateFontSize( this.props );
 	}
 
-	componentDidUpdate( prevProps ) {
+	componentDidUpdate( prevProps, prevState ) {
 		const { attributes, fontSize, isSelected } = this.props;
 		const {
 			height,
@@ -77,6 +77,20 @@ class TextBlockEdit extends Component {
 
 		if ( checkBlockDimensions ) {
 			maybeUpdateBlockDimensions( this.props );
+		}
+
+		// If the state changed to editing, focus on the text.
+		if ( this.state.isEditing && ! prevState.isEditing ) {
+			const textInput = document.querySelector( '.is-selected .wp-block-amp-amp-story-text' );
+			if ( textInput ) {
+				// Create selection, collapse it in the end of the content.
+				const range = document.createRange();
+				range.selectNodeContents( textInput );
+				range.collapse( false );
+				const selection = window.getSelection();
+				selection.removeAllRanges();
+				selection.addRange( range );
+			}
 		}
 	}
 
@@ -211,7 +225,9 @@ class TextBlockEdit extends Component {
 							isMovable={ true }
 						>
 							<div
-								className="editor-rich-text block-editor-rich-text wp-block-amp-story-text"
+								role="textbox"
+								tabIndex="-1"
+								className="is-not-editing editor-rich-text block-editor-rich-text wp-block-amp-story-text"
 								onDoubleClick={ () => {
 									this.toggleIsEditing( true );
 								} }
@@ -223,7 +239,7 @@ class TextBlockEdit extends Component {
 								} }
 							>
 								<p
-									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable wp-block-amp-amp-story-text', textClassNames ) }
+									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
 									style={ textStyle }
 								>
 									{ content.length ? content : (
