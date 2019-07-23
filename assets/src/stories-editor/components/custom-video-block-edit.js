@@ -61,6 +61,7 @@ class CustomVideoBlockEdit extends Component {
 
 		this.state = {
 			editing: ! this.props.attributes.src,
+			extractingPoster: false,
 		};
 
 		this.videoPlayer = createRef();
@@ -117,13 +118,20 @@ class CustomVideoBlockEdit extends Component {
 			} );
 		}
 
-		if ( ! poster && videoFeaturedImage ) {
-			setAttributes( { poster: videoFeaturedImage.source_url } );
-		}
-
-		if ( ! poster && ( prevProps.attributes.src !== src || prevProps.media !== media ) ) {
-			if ( ! id || ( media && ! media.featured_media ) ) {
-				uploadVideoFrame( src );
+		if ( ! poster ) {
+			if ( prevProps.attributes.src !== src || prevProps.media !== media ) {
+				/*
+				 * Either there is no associated attachment at all (and thus no media object),
+				 * or there is one, but it doesn't have a featured image.
+				 *
+				 * Those are the cases where we need to extract the poster image.
+				 */
+				if ( ! id || ( media && ! media.featured_media ) ) {
+					this.setState( { extractingPoster: true } );
+					uploadVideoFrame( { src, onFinish: () => this.setState( { extractingPoster: false } ) } );
+				}
+			} else if ( videoFeaturedImage ) {
+				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 		}
 	}
@@ -236,53 +244,55 @@ class CustomVideoBlockEdit extends Component {
 							onChange={ this.toggleAttribute( 'loop' ) }
 							checked={ loop }
 						/>
-						<MediaUploadCheck>
-							<BaseControl
-								id={ videoPosterId }
-								label={ __( 'Poster Image', 'amp' ) }
-								className="editor-video-poster-control"
-							>
-								{
-									! poster &&
-									<Notice status="error" isDismissible={ false } >
-										{ __( 'A poster image must be set.', 'amp' ) }
-									</Notice>
-								}
-								<MediaUpload
-									title={ __( 'Select Poster Image', 'amp' ) }
-									onSelect={ ( image ) => {
-										setAttributes( { poster: image.url } );
-									} }
-									allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
-									render={ ( { open } ) => (
-										<Button
-											id={ videoPosterId }
-											className={ classnames(
-												'video-block__poster-image',
-												{
-													'editor-post-featured-image__toggle': ! poster,
-													'editor-post-featured-image__preview': poster,
-												}
-											) }
-											onClick={ open }
-											aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
-										>
-											{ poster && (
-												<ResponsiveWrapper
-													naturalWidth={ width }
-													naturalHeight={ height }
-												>
-													<img src={ poster } alt="" />
-												</ResponsiveWrapper>
-											) }
-											{ ! poster &&
+						{ ( ! this.state.extractingPoster || poster ) && (
+							<MediaUploadCheck>
+								<BaseControl
+									id={ videoPosterId }
+									label={ __( 'Poster Image', 'amp' ) }
+									className="editor-video-poster-control"
+								>
+									{
+										! poster &&
+										<Notice status="error" isDismissible={ false } >
+											{ __( 'A poster image must be set.', 'amp' ) }
+										</Notice>
+									}
+									<MediaUpload
+										title={ __( 'Select Poster Image', 'amp' ) }
+										onSelect={ ( image ) => {
+											setAttributes( { poster: image.url } );
+										} }
+										allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
+										render={ ( { open } ) => (
+											<Button
+												id={ videoPosterId }
+												className={ classnames(
+													'video-block__poster-image',
+													{
+														'editor-post-featured-image__toggle': ! poster,
+														'editor-post-featured-image__preview': poster,
+													}
+												) }
+												onClick={ open }
+												aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
+											>
+												{ poster && (
+													<ResponsiveWrapper
+														naturalWidth={ width }
+														naturalHeight={ height }
+													>
+														<img src={ poster } alt="" />
+													</ResponsiveWrapper>
+												) }
+												{ ! poster &&
 											__( 'Set Poster Image', 'amp' )
-											}
-										</Button>
-									) }
-								/>
-							</BaseControl>
-						</MediaUploadCheck>
+												}
+											</Button>
+										) }
+									/>
+								</BaseControl>
+							</MediaUploadCheck>
+						) }
 						{
 							isExcessiveVideoSize && (
 								<Notice status="warning" isDismissible={ false } >
@@ -383,9 +393,10 @@ export default compose( [
 		/**
 		 * Uploads the video's first frame as an attachment.
 		 *
-		 * @param {string} src Video URL.
+		 * @param {string}   src      Video URL.
+		 * @param {function} onFinish Callback for when process is finished.
 		 */
-		const uploadVideoFrame = async ( src ) => {
+		const uploadVideoFrame = async ( { src, onFinish } ) => {
 			const img = await getFirstFrameOfVideo( src );
 
 			mediaUpload( {
@@ -393,6 +404,7 @@ export default compose( [
 				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
 					if ( ! isBlobURL( posterUrl ) ) {
 						setAttributes( { poster: posterUrl } );
+						onFinish();
 					}
 
 					if ( id && posterId ) {
@@ -409,6 +421,7 @@ export default compose( [
 						} );
 					}
 				},
+				onError: () => onFinish(),
 			} );
 		};
 

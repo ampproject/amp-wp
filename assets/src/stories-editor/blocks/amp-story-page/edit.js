@@ -78,6 +78,10 @@ class PageEdit extends Component {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
+		this.state = {
+			extractingPoster: false,
+		};
+
 		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
@@ -144,16 +148,21 @@ class PageEdit extends Component {
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType ) {
 			if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
-				if ( this.videoPlayer.current ) {
-					this.videoPlayer.current.load();
-				}
+				this.videoPlayer.current.load();
 			}
 
 			if ( ! poster && ( prevProps.attributes.mediaUrl !== mediaUrl || prevProps.media !== media ) ) {
 				if ( videoFeaturedImage ) {
 					setAttributes( { poster: videoFeaturedImage.source_url } );
 				} else if ( ! mediaId || ( media && ! media.featured_media ) ) {
-					uploadVideoFrame( mediaUrl );
+					/*
+					 * Either there is no associated attachment at all (and thus no media object),
+					 * or there is one, but it doesn't have a featured image.
+					 *
+					 * Those are the cases where we need to extract the poster image.
+					 */
+					this.setState( { extractingPoster: true } );
+					uploadVideoFrame( { src: mediaUrl, onFinish: () => this.setState( { extractingPoster: false } ) } );
 				}
 			}
 		}
@@ -360,7 +369,7 @@ class PageEdit extends Component {
 									) }
 								</MediaUploadCheck>
 							</BaseControl>
-							{ VIDEO_BACKGROUND_TYPE === mediaType && (
+							{ VIDEO_BACKGROUND_TYPE === mediaType && ( ! this.state.extractingPoster || poster ) && (
 								<MediaUploadCheck>
 									<BaseControl
 										id="editor-amp-story-page-poster"
@@ -417,18 +426,13 @@ class PageEdit extends Component {
 									</BaseControl>
 								</MediaUploadCheck>
 							) }
-							{ mediaUrl && (
-								<>
-									{ /* Note: FocalPointPicker is only available in Gutenberg 5.1+ */ }
-									{ IMAGE_BACKGROUND_TYPE === mediaType && FocalPointPicker && (
-										<FocalPointPicker
-											label={ __( 'Focal Point Picker', 'amp' ) }
-											url={ mediaUrl }
-											value={ focalPoint }
-											onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
-										/>
-									) }
-								</>
+							{ IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl && FocalPointPicker && (
+								<FocalPointPicker
+									label={ __( 'Focal Point Picker', 'amp' ) }
+									url={ mediaUrl }
+									value={ focalPoint }
+									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+								/>
 							) }
 						</>
 					</PanelBody>
@@ -506,7 +510,7 @@ PageEdit.propTypes = {
 export default compose(
 	withDispatch( () => {
 		const { saveMedia } = dispatch( 'core' );
-		const { moveBlockToPosition	} = dispatch( 'core/block-editor' );
+		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
 			moveBlockToPosition,
 			saveMedia,
@@ -535,9 +539,10 @@ export default compose(
 		/**
 		 * Uploads the video's first frame as an attachment.
 		 *
-		 * @param {string} src Video URL.
+		 * @param {string}   src      Video URL.
+		 * @param {function} onFinish Callback for when process is finished.
 		 */
-		const uploadVideoFrame = async ( src ) => {
+		const uploadVideoFrame = async ( { src, onFinish } ) => {
 			const img = await getFirstFrameOfVideo( src );
 
 			mediaUpload( {
@@ -547,6 +552,7 @@ export default compose(
 						const posterUrl = has( posterImageSizes, [ MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? posterImageSizes[ MAX_IMAGE_SIZE_SLUG ].url : posterOriginalUrl;
 
 						setAttributes( { poster: posterUrl } );
+						onFinish();
 					}
 
 					if ( mediaId && posterId ) {
@@ -563,6 +569,7 @@ export default compose(
 						} );
 					}
 				},
+				onError: () => onFinish(),
 			} );
 		};
 
