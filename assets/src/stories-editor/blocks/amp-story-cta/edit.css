@@ -5,10 +5,14 @@
 	height: 20%;
 }
 
-.editor-block-list__layout div[data-type="amp/amp-story-cta"] * {
+.block-editor-block-list__layout div[data-type="amp/amp-story-cta"]:not(#id) {
+	margin-top: 0;
+}
 
-	/* 20% of the full height of a page in the editor */
-	max-height: 110px;
+.editor-block-list__layout div[data-type="amp/amp-story-cta"] img {
+
+	/* Remove the top/bottom padding from the available space. */
+	max-height: calc(110px - 24px);
 }
 
 .amp-block-story-cta__link img {
