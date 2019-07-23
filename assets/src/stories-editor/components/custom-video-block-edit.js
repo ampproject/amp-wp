@@ -106,8 +106,8 @@ class CustomVideoBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, videoFeaturedImage } = this.props;
-		const { poster, src } = attributes;
+		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
+		const { poster, src, id } = attributes;
 
 		if ( poster !== prevProps.attributes.poster && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
@@ -120,8 +120,21 @@ class CustomVideoBlockEdit extends Component {
 				} );
 		}
 
-		if ( ! poster && videoFeaturedImage ) {
+		if ( poster ) {
+			return;
+		}
+
+		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
+		} else if ( media && ! media.featured_media && ! this.state.extractingPoster ) {
+			this.setState( { extractingPoster: true } );
+
+			uploadVideoFrame( { id, src } )
+				.then( ( posterUrl ) => {
+					setAttributes( { poster: posterUrl } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 	}
 

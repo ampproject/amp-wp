@@ -156,17 +156,32 @@ class PageEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, videoFeaturedImage } = this.props;
-		const { mediaType, mediaUrl, poster } = attributes;
+		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
+		const { mediaType, mediaUrl, mediaId, poster } = attributes;
 
-		if ( VIDEO_BACKGROUND_TYPE === mediaType ) {
-			if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
-				this.videoPlayer.current.load();
-			}
+		if ( VIDEO_BACKGROUND_TYPE !== mediaType ) {
+			return;
+		}
 
-			if ( ! poster && videoFeaturedImage ) {
-				setAttributes( { poster: videoFeaturedImage.source_url } );
-			}
+		if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
+			this.videoPlayer.current.load();
+		}
+
+		if ( poster ) {
+			return;
+		}
+
+		if ( videoFeaturedImage ) {
+			setAttributes( { poster: videoFeaturedImage.source_url } );
+		} else if ( media && ! media.featured_media && ! this.state.extractingPoster ) {
+			this.setState( { extractingPoster: true } );
+
+			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
+				.then( ( posterUrl ) => {
+					setAttributes( { poster: posterUrl } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 	}
 
