@@ -43,6 +43,7 @@ import {
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
+import { isBlobURL } from '@wordpress/blob';
 
 const { ampStoriesFonts } = window;
 
@@ -52,7 +53,10 @@ const {
 	getBlockOrder,
 	getBlock,
 	getClientIdsWithDescendants,
+	getSettings,
 } = select( 'core/block-editor' );
+
+const { getAnimatedBlocks } = select( 'amp/story' );
 
 const {
 	addAnimation,
@@ -61,13 +65,8 @@ const {
 	changeAnimationDelay,
 } = dispatch( 'amp/story' );
 
-const {
-	getAnimatedBlocks,
-} = select( 'amp/story' );
-
-const {
-	updateBlockAttributes,
-} = dispatch( 'core/block-editor' );
+const { saveMedia } = dispatch( 'core' );
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -1533,6 +1532,44 @@ export const getFirstFrameOfVideo = async ( src ) => {
 			ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
 
 			canvas.toBlob( resolve );
+		} );
+	} );
+};
+
+/**
+ * Uploads the video's first frame as an attachment.
+ *
+ * @param {number} id  Video ID.
+ * @param {string} src Video URL.
+ */
+export const uploadVideoFrame = async ( { id: videoId, src } ) => {
+	const { __experimentalMediaUpload: mediaUpload } = getSettings();
+
+	const img = await getFirstFrameOfVideo( src );
+
+	return new Promise( ( resolve, reject ) => {
+		mediaUpload( {
+			filesList: [ img ],
+			onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+				if ( videoId && posterId ) {
+					saveMedia( {
+						id: videoId,
+						featured_media: posterId,
+					} );
+
+					saveMedia( {
+						id: posterId,
+						meta: {
+							amp_is_poster: true,
+						},
+					} );
+				}
+
+				if ( ! isBlobURL( posterUrl ) ) {
+					resolve( posterUrl );
+				}
+			},
+			onError: () => reject(),
 		} );
 	} );
 };

@@ -33,7 +33,6 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { isBlobURL } from '@wordpress/blob';
 
 /**
  * Internal dependencies
@@ -43,7 +42,7 @@ import {
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
 	getUniqueId,
-	getFirstFrameOfVideo,
+	uploadVideoFrame,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -99,8 +98,10 @@ class PageEdit extends Component {
 	 * @param {string} media.image.src  Media image URL
 	 */
 	onSelectMedia( media ) {
+		const { setAttributes } = this.props;
+
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes(
+			setAttributes(
 				{
 					mediaUrl: undefined,
 					mediaId: undefined,
@@ -133,37 +134,38 @@ class PageEdit extends Component {
 		}
 
 		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+		const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
 
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
 			mediaType,
-			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
+			poster,
 		} );
+
+		if ( VIDEO_BACKGROUND_TYPE === mediaType && ! poster ) {
+			this.setState( { extractingPoster: true } );
+
+			uploadVideoFrame( { id: media.id, src: media.url } )
+				.then( ( posterUrl ) => {
+					setAttributes( { poster: posterUrl } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, media, videoFeaturedImage, uploadVideoFrame } = this.props;
-		const { mediaId, mediaType, mediaUrl, poster } = attributes;
+		const { attributes, setAttributes, videoFeaturedImage } = this.props;
+		const { mediaType, mediaUrl, poster } = attributes;
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType ) {
 			if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
 				this.videoPlayer.current.load();
 			}
 
-			if ( ! poster && ( prevProps.attributes.mediaUrl !== mediaUrl || prevProps.media !== media ) ) {
-				if ( videoFeaturedImage ) {
-					setAttributes( { poster: videoFeaturedImage.source_url } );
-				} else if ( ! this.state.extractingPoster && ( ! mediaId || ( media && ! media.featured_media ) ) ) {
-					/*
-					 * Either there is no associated attachment at all (and thus no media object),
-					 * or there is one, but it doesn't have a featured image.
-					 *
-					 * Those are the cases where we need to extract the poster image.
-					 */
-					this.setState( { extractingPoster: true } );
-					uploadVideoFrame( { src: mediaUrl, onFinish: () => this.setState( { extractingPoster: false } ) } );
-				}
+			if ( ! poster && videoFeaturedImage ) {
+				setAttributes( { poster: videoFeaturedImage.source_url } );
 			}
 		}
 	}
@@ -504,24 +506,19 @@ PageEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
-	uploadVideoFrame: PropTypes.func,
 };
 
 export default compose(
 	withDispatch( () => {
-		const { saveMedia } = dispatch( 'core' );
 		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
 			moveBlockToPosition,
-			saveMedia,
 		};
 	} ),
-	withSelect( ( select, { clientId, attributes, setAttributes, saveMedia } ) => {
+	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId, getSettings } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
-
-		const { __experimentalMediaUpload: mediaUpload } = getSettings();
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
@@ -536,43 +533,6 @@ export default compose(
 			videoFeaturedImage = getMedia( media.featured_media );
 		}
 
-		/**
-		 * Uploads the video's first frame as an attachment.
-		 *
-		 * @param {string}   src      Video URL.
-		 * @param {function} onFinish Callback for when process is finished.
-		 */
-		const uploadVideoFrame = async ( { src, onFinish } ) => {
-			const img = await getFirstFrameOfVideo( src );
-
-			mediaUpload( {
-				filesList: [ img ],
-				onFileChange: ( [ { id: posterId, url: posterOriginalUrl, sizes: posterImageSizes } ] ) => {
-					if ( ! isBlobURL( posterOriginalUrl ) ) {
-						const posterUrl = has( posterImageSizes, [ MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? posterImageSizes[ MAX_IMAGE_SIZE_SLUG ].url : posterOriginalUrl;
-
-						setAttributes( { poster: posterUrl } );
-						onFinish();
-					}
-
-					if ( mediaId && posterId ) {
-						saveMedia( {
-							id: mediaId,
-							featured_media: posterId,
-						} );
-
-						saveMedia( {
-							id: posterId,
-							meta: {
-								amp_is_poster: true,
-							},
-						} );
-					}
-				},
-				onError: () => onFinish(),
-			} );
-		};
-
 		const animatedBlocks = getAnimatedBlocks();
 		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
@@ -581,7 +541,6 @@ export default compose(
 		return {
 			media,
 			videoFeaturedImage,
-			uploadVideoFrame,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,

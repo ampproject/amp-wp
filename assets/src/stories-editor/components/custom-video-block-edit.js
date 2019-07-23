@@ -33,12 +33,12 @@ import {
 	RichText,
 } from '@wordpress/block-editor';
 import { compose, withInstanceId } from '@wordpress/compose';
-import { withSelect, withDispatch } from '@wordpress/data';
+import { withSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
-import { getFirstFrameOfVideo } from '../helpers';
+import { uploadVideoFrame } from '../helpers';
 import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
 import { POSTER_ALLOWED_MEDIA_TYPES, ALLOWED_VIDEO_TYPES } from '../constants';
@@ -106,33 +106,22 @@ class CustomVideoBlockEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, videoFeaturedImage, uploadVideoFrame, media } = this.props;
-		const { poster, src, id } = attributes;
+		const { attributes, setAttributes, videoFeaturedImage } = this.props;
+		const { poster, src } = attributes;
+
 		if ( poster !== prevProps.attributes.poster && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
 		}
 
-		if ( prevProps.attributes.src !== src && ! isBlobURL( src ) ) {
-			getContentLengthFromUrl( src ).then( ( videoSize ) => {
-				this.setState( { videoSize } );
-			} );
+		if ( src !== prevProps.attributes.src && ! isBlobURL( src ) ) {
+			getContentLengthFromUrl( src )
+				.then( ( videoSize ) => {
+					this.setState( { videoSize } );
+				} );
 		}
 
-		if ( ! poster ) {
-			if ( prevProps.attributes.src !== src || prevProps.media !== media ) {
-				/*
-				 * Either there is no associated attachment at all (and thus no media object),
-				 * or there is one, but it doesn't have a featured image.
-				 *
-				 * Those are the cases where we need to extract the poster image.
-				 */
-				if ( ! this.state.extractingPoster && ( ! id || ( media && ! media.featured_media ) ) ) {
-					this.setState( { extractingPoster: true } );
-					uploadVideoFrame( { src, onFinish: () => this.setState( { extractingPoster: false } ) } );
-				}
-			} else if ( videoFeaturedImage ) {
-				setAttributes( { poster: videoFeaturedImage.source_url } );
-			}
+		if ( ! poster && videoFeaturedImage ) {
+			setAttributes( { poster: videoFeaturedImage.source_url } );
 		}
 	}
 
@@ -150,6 +139,15 @@ class CustomVideoBlockEdit extends Component {
 		// the editing UI.
 		if ( newSrc !== src ) {
 			setAttributes( { src: newSrc, id: undefined, poster: undefined } );
+
+			this.setState( { extractingPoster: true } );
+
+			uploadVideoFrame( { src: newSrc } )
+				.then( ( posterUrl ) => {
+					setAttributes( { poster: posterUrl } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 
 		this.setState( { editing: false, duration: null, videoSize: null } );
@@ -201,7 +199,14 @@ class CustomVideoBlockEdit extends Component {
 			// sets the block's attribute and updates the edit component from the
 			// selected media, then switches off the editing UI
 			setAttributes( { src: media.url, id: media.id, poster: undefined } );
-			this.setState( { src: media.url, editing: false, duration: null, videoSize: null } );
+			this.setState( { src: media.url, editing: false, duration: null, videoSize: null, extractingPoster: true } );
+
+			uploadVideoFrame( { id: media.id, src: media.url } )
+				.then( ( posterUrl ) => {
+					setAttributes( { poster: posterUrl } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
 		};
 
 		if ( editing ) {
@@ -364,21 +369,11 @@ CustomVideoBlockEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
-	uploadVideoFrame: PropTypes.func,
 };
 
 export default compose( [
-	withDispatch( ( dispatch ) => {
-		const { saveMedia } = dispatch( 'core' );
-
-		return {
-			saveMedia,
-		};
-	} ),
-	withSelect( ( select, { attributes, setAttributes, saveMedia } ) => {
+	withSelect( ( select, { attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getSettings } = select( 'core/block-editor' );
-		const { __experimentalMediaUpload: mediaUpload } = getSettings();
 
 		let videoFeaturedImage;
 
@@ -390,46 +385,9 @@ export default compose( [
 			videoFeaturedImage = getMedia( media.featured_media );
 		}
 
-		/**
-		 * Uploads the video's first frame as an attachment.
-		 *
-		 * @param {string}   src      Video URL.
-		 * @param {function} onFinish Callback for when process is finished.
-		 */
-		const uploadVideoFrame = async ( { src, onFinish } ) => {
-			const img = await getFirstFrameOfVideo( src );
-
-			mediaUpload( {
-				filesList: [ img ],
-				onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
-					if ( ! isBlobURL( posterUrl ) ) {
-						setAttributes( { poster: posterUrl } );
-						onFinish();
-					}
-
-					if ( id && posterId ) {
-						saveMedia( {
-							id,
-							featured_media: posterId,
-						} );
-
-						saveMedia( {
-							id: posterId,
-							meta: {
-								amp_is_poster: true,
-							},
-						} );
-					}
-				},
-				onError: () => onFinish(),
-			} );
-		};
-
 		return {
 			media,
-			mediaUpload,
 			videoFeaturedImage,
-			uploadVideoFrame,
 		};
 	} ),
 	withNotices,
