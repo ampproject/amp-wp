@@ -98,7 +98,7 @@ class CustomVideoBlockEdit extends Component {
 			}
 		}
 
-		if ( src ) {
+		if ( src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
@@ -112,7 +112,7 @@ class CustomVideoBlockEdit extends Component {
 			this.videoPlayer.current.load();
 		}
 
-		if ( prevProps.attributes.src !== src ) {
+		if ( prevProps.attributes.src !== src && ! isBlobURL( src ) ) {
 			getContentLengthFromUrl( src ).then( ( videoSize ) => {
 				this.setState( { videoSize } );
 			} );
