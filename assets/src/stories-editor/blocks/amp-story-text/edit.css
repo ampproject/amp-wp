@@ -10,6 +10,14 @@
 	width: 100%;
 }
 
+.wp-block-amp-story-text-wrapper.is-empty-draggable-text {
+	height: 100%;
+}
+
+.wp-block-amp-story-text-wrapper.is-empty-draggable-text .amp-text-placeholder {
+	opacity: 0.62;
+}
+
 .wp-block[data-type="amp/amp-story-text"] .amp-story-resize-container .components-resizable-box__handle-right {
 	right: -13px;
 }

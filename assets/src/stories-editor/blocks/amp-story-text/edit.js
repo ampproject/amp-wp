@@ -173,6 +173,7 @@ class TextBlockEdit extends Component {
 				</BlockControls>
 				<div className={ classnames( wrapperClass, {
 					'with-line-height': ampFitText,
+					'is-empty-draggable-text': ! isEditing && ! content.length,
 				} ) } style={ wrapperStyle } >
 					{ isEditing &&
 						<RichText
@@ -208,7 +209,6 @@ class TextBlockEdit extends Component {
 							isMovable={ true }
 						>
 							<div
-								className={ textWrapperClassName }
 								onDoubleClick={ () => {
 									this.toggleIsEditing( true );
 								} }
@@ -227,7 +227,11 @@ class TextBlockEdit extends Component {
 										position: ampFitText && content.length ? 'static' : undefined,
 									} }
 								>
-									{ content }
+									{ content.length ? content : (
+										<p className='amp-text-placeholder'>
+											{ placeholder || __( 'Write text…', 'amp' ) }
+										</p>
+									) }
 								</p>
 							</div>
 						</StoryBlockMover>
@@ -254,7 +258,7 @@ TextBlockEdit.propTypes = {
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	clientId: PropTypes.string.isRequired,
-	isPartOfMultiSelection: PropTypes.bool.isRequired,
+	isPartOfMultiSelection: PropTypes.bool,
 	onReplace: PropTypes.func.isRequired,
 	name: PropTypes.string.isRequired,
 	setAttributes: PropTypes.func.isRequired,
