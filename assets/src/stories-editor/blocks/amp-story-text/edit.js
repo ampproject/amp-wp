@@ -215,6 +215,12 @@ class TextBlockEdit extends Component {
 								onDoubleClick={ () => {
 									this.toggleIsEditing( true );
 								} }
+								onMouseDown={ ( event ) => {
+									// Prevent text selection on double click.
+									if ( 1 < event.detail ) {
+										event.preventDefault();
+									}
+								} }
 							>
 								<p
 									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable wp-block-amp-amp-story-text', textClassNames ) }
