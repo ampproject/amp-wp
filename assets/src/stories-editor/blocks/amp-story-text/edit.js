@@ -162,6 +162,7 @@ class TextBlockEdit extends Component {
 
 		const textWrapperClassName = 'wp-block-amp-story-text';
 
+		// StoryBlockMover is added here to the Text block since it depends on isEditing state.
 		return (
 			<>
 				<BlockControls>
@@ -252,6 +253,8 @@ TextBlockEdit.propTypes = {
 		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
+	clientId: PropTypes.string.isRequired,
+	isPartOfMultiSelection: PropTypes.bool.isRequired,
 	onReplace: PropTypes.func.isRequired,
 	name: PropTypes.string.isRequired,
 	setAttributes: PropTypes.func.isRequired,
