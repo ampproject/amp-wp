@@ -241,7 +241,6 @@ export default createHigherOrderComponent(
 			}
 
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
-
 			return (
 				<>
 					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
@@ -279,15 +278,20 @@ export default createHigherOrderComponent(
 									stopBlockActions();
 								} }
 							>
-								<StoryBlockMover
-									clientId={ props.clientId }
-									blockName={ name }
-									blockElementId={ `block-${ props.clientId }` }
-									isDraggable={ ! props.isPartOfMultiSelection }
-									isMovable={ isMovableBlock }
-								>
+								{ isTextBlock && (
 									<BlockEdit { ...props } />
-								</StoryBlockMover>
+								) }
+								{ ! isTextBlock && (
+									<StoryBlockMover
+										clientId={ props.clientId }
+										blockName={ name }
+										blockElementId={ `block-${ props.clientId }` }
+										isDraggable={ ! props.isPartOfMultiSelection }
+										isMovable={ isMovableBlock }
+									>
+										<BlockEdit { ...props } />
+									</StoryBlockMover>
+								) }
 							</RotatableBox>
 						</ResizableBox>
 					) }

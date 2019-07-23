@@ -41,7 +41,7 @@ const withStoryBlockDropZone = () => {
 		 * Using dropzone of each single element would result the dropzone moving together with the element.
 		 */
 		if ( 'amp/amp-story-page' === blockName && hasSelectedInnerBlock && selectedBlock ) {
-			return <StoryBlockDropZone srcClientId={ selectedBlock.clientId } srcBlockName={ selectedBlock.name } />;
+			return <StoryBlockDropZone srcClientId={ selectedBlock.clientId } />;
 		}
 		return null;
 	} );

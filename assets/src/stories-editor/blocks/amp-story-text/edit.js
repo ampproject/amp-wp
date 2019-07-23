@@ -23,6 +23,7 @@ import { select } from '@wordpress/data';
 import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
+import { StoryBlockMover } from '../../components';
 
 class TextBlockEdit extends Component {
 	constructor() {
@@ -113,10 +114,13 @@ class TextBlockEdit extends Component {
 			attributes,
 			setAttributes,
 			className,
+			clientId,
 			fontSize,
+			isPartOfMultiSelection,
 			backgroundColor,
 			customBackgroundColor,
 			textColor,
+			name,
 		} = this.props;
 
 		const {
@@ -195,29 +199,37 @@ class TextBlockEdit extends Component {
 						/>
 					}
 					{ ! isEditing &&
-						<div
-							className={ textWrapperClassName }
-							onDoubleClick={ () => {
-								this.toggleIsEditing( true );
-							} }
+						<StoryBlockMover
+							clientId={ clientId }
+							blockName={ name }
+							blockElementId={ `block-${ clientId }` }
+							isDraggable={ ! isPartOfMultiSelection }
+							isMovable={ true }
 						>
-							<p
-								className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text is-amp-fit-text', {
-									'has-text-color': textColor.color,
-									[ textColor.class ]: textColor.class,
-									[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-									'is-amp-fit-text': ampFitText,
-								} ) }
-								style={ {
-									color: textColor.color,
-									fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-									textAlign: align,
-									position: ampFitText && content.length ? 'static' : undefined,
+							<div
+								className={ textWrapperClassName }
+								onDoubleClick={ () => {
+									this.toggleIsEditing( true );
 								} }
 							>
-								{ content }
-							</p>
-						</div>
+								<p
+									className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text is-amp-fit-text', {
+										'has-text-color': textColor.color,
+										[ textColor.class ]: textColor.class,
+										[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+										'is-amp-fit-text': ampFitText,
+									} ) }
+									style={ {
+										color: textColor.color,
+										fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+										textAlign: align,
+										position: ampFitText && content.length ? 'static' : undefined,
+									} }
+								>
+									{ content }
+								</p>
+							</div>
+						</StoryBlockMover>
 					}
 				</div>
 			</>

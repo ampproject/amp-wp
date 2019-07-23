@@ -32,7 +32,7 @@ class BlockDropZone extends Component {
 	}
 
 	onDrop( event ) {
-		const { updateBlockAttributes, srcBlockName, srcClientId } = this.props;
+		const { updateBlockAttributes, srcClientId } = this.props;
 
 		const elementId = `block-${ srcClientId }`;
 		const cloneElementId = `clone-block-${ srcClientId }`;
@@ -73,7 +73,6 @@ class BlockDropZone extends Component {
 BlockDropZone.propTypes = {
 	updateBlockAttributes: PropTypes.func,
 	srcClientId: PropTypes.string,
-	srcBlockName: PropTypes.string,
 };
 
 export default withDispatch( ( dispatch ) => {
