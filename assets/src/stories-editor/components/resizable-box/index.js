@@ -80,6 +80,11 @@ const EnhancedResizableBox = ( props ) => {
 				let appliedWidth = width + deltaW;
 				let appliedHeight = height + deltaH;
 
+				// Restore the full height for Text block wrapper.
+				if ( textBlockWrapper ) {
+					textBlockWrapper.style.height = '100%';
+				}
+
 				// Ensure the measures not crossing limits.
 				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
 				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
@@ -224,8 +229,10 @@ const EnhancedResizableBox = ( props ) => {
 				lastWidth = appliedWidth;
 				lastHeight = appliedHeight;
 
-				if ( textBlockWrapper && ampFitText ) {
-					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+				if ( textBlockWrapper ) {
+					if ( ampFitText ) {
+						textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+					}
 					// Also add the height to the wrapper since the background color is set to the wrapper.
 					textBlockWrapper.style.height = appliedHeight + 'px';
 				}
