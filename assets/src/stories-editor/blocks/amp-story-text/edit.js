@@ -229,7 +229,7 @@ class TextBlockEdit extends Component {
 									} }
 								>
 									{ content.length ? content : (
-										<p className='amp-text-placeholder'>
+										<p className="amp-text-placeholder">
 											{ placeholder || __( 'Write text…', 'amp' ) }
 										</p>
 									) }
