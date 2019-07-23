@@ -225,7 +225,7 @@ const EnhancedResizableBox = ( props ) => {
 				lastHeight = appliedHeight;
 
 				if ( textBlockWrapper && ampFitText ) {
-					textBlockWrapper.style.lineHeight = isText ? appliedHeight - ( TEXT_BLOCK_PADDING * 2 ) + 'px' : appliedHeight + 'px';
+					textBlockWrapper.style.lineHeight = appliedHeight + 'px';
 				}
 
 				// If it's image, let's change the width and height of the image, too.
