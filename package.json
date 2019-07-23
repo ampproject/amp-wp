@@ -65,7 +65,7 @@
     "enzyme": "3.10.0",
     "eslint": "6.1.0",
     "eslint-plugin-jest": "22.13.6",
-    "eslint-plugin-react": "7.14.2",
+    "eslint-plugin-react": "7.14.3",
     "grunt": "1.0.4",
     "grunt-contrib-clean": "2.0.0",
     "grunt-contrib-copy": "1.0.0",
