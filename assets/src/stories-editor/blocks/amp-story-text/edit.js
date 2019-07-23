@@ -217,7 +217,7 @@ class TextBlockEdit extends Component {
 								} }
 							>
 								<p
-									className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text', textClassNames ) }
+									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable wp-block-amp-amp-story-text', textClassNames ) }
 									style={ textStyle }
 								>
 									{ content.length ? content : (
