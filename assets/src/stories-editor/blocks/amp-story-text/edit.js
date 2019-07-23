@@ -209,6 +209,7 @@ class TextBlockEdit extends Component {
 							isMovable={ true }
 						>
 							<div
+								className="editor-rich-text block-editor-rich-text wp-block-amp-story-text"
 								onDoubleClick={ () => {
 									this.toggleIsEditing( true );
 								} }
