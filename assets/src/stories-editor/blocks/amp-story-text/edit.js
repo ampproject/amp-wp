@@ -161,6 +161,18 @@ class TextBlockEdit extends Component {
 		}
 
 		const textWrapperClassName = 'wp-block-amp-story-text';
+		const textClassNames = {
+			'has-text-color': textColor.color,
+			[ textColor.class ]: textColor.class,
+			[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+			'is-amp-fit-text': ampFitText,
+		};
+		const textStyle = {
+			color: textColor.color,
+			fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+			textAlign: align,
+			position: ampFitText && content.length ? 'static' : undefined,
+		};
 
 		// StoryBlockMover is added here to the Text block since it depends on isEditing state.
 		return (
@@ -185,18 +197,8 @@ class TextBlockEdit extends Component {
 							// The 2 following lines are necessary for pasting to work.
 							onReplace={ this.onReplace }
 							onSplit={ () => {} }
-							style={ {
-								color: textColor.color,
-								fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-								textAlign: align,
-								position: ampFitText && content.length ? 'static' : undefined,
-							} }
-							className={ classnames( className, {
-								'has-text-color': textColor.color,
-								[ textColor.class ]: textColor.class,
-								[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-								'is-amp-fit-text': ampFitText,
-							} ) }
+							style={ textStyle }
+							className={ classnames( className, textClassNames ) }
 							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
 						/>
 					}
@@ -215,18 +217,8 @@ class TextBlockEdit extends Component {
 								} }
 							>
 								<p
-									className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text is-amp-fit-text', {
-										'has-text-color': textColor.color,
-										[ textColor.class ]: textColor.class,
-										[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-										'is-amp-fit-text': ampFitText,
-									} ) }
-									style={ {
-										color: textColor.color,
-										fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-										textAlign: align,
-										position: ampFitText && content.length ? 'static' : undefined,
-									} }
+									className={ classnames( className + ' block-editor-rich-text__editable wp-block-amp-amp-story-text is-amp-fit-text', textClassNames ) }
+									style={ textStyle }
 								>
 									{ content.length ? content : (
 										<p className="amp-text-placeholder">
