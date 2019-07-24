@@ -236,3 +236,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	margin-left: 0;
 	margin-right: 0;
 }
+
+/* Custom video block poster image */
+
+.video-block__poster-image.editor-post-featured-image__preview img {
+	object-fit: cover;
+}
