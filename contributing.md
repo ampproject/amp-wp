@@ -245,7 +245,7 @@ npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
 For debugging purposes, you can also run the E2E tests in non-headless mode:
 
 ```bash
-HEADLESS=false npm run test:e2e
+npm run test:e2e:interactive
 ```
 
 Sometimes one might to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
