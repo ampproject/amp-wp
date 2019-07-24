@@ -14,7 +14,7 @@ import { createNewPost, getAllBlocks, selectBlockByClientId } from '@wordpress/e
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience } from '../../utils';
+import { activateExperience, deactivateExperience, insertBlock } from '../../utils';
 
 describe( 'Video Poster Image Extraction', () => {
 	beforeAll( async () => {
@@ -58,6 +58,40 @@ describe( 'Video Poster Image Extraction', () => {
 
 			// Wait for poster to be extracted.
 			await page.waitForSelector( '#editor-amp-story-page-poster' );
+		} );
+	} );
+
+	describe( 'Video block', () => {
+		it( 'should extract the poster image from a newly added video', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
+			// Using the regular inserter.
+			await insertBlock( 'Video' );
+
+			// Click the media library button.
+			await page.waitForSelector( '.editor-media-placeholder__media-library-button' );
+			await page.click( '.editor-media-placeholder__media-library-button' );
+
+			// Wait for media modal to appear and upload video.
+			await page.waitForSelector( '.media-modal input[type=file]' );
+			const inputElement = await page.$( '.media-modal input[type=file]' );
+			const testImagePath = path.join( __dirname, '..', '..', 'assets', 'clothes-hanged-to-dry-1295231.mp4' );
+			const filename = uuid();
+			const tmpFileName = path.join( os.tmpdir(), filename + '.mp4' );
+			fs.copyFileSync( testImagePath, tmpFileName );
+			await inputElement.uploadFile( tmpFileName );
+
+			// Wait for upload.
+			await page.waitForSelector( `.media-modal li[aria-label="${ filename }"]` );
+
+			// Insert the uploaded video.
+			await page.click( '.media-modal button.media-button-select' );
+
+			// Wait for video to be inserted.
+			await page.waitForSelector( '.wp-block-video video' );
+
+			// Wait for poster to be extracted.
+			await page.waitForSelector( '.video-block__poster-image img' );
 		} );
 	} );
 } );
