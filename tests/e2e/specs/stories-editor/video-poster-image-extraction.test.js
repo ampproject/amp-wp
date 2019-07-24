@@ -51,7 +51,7 @@ describe( 'Video Poster Image Extraction', () => {
 			await page.waitForSelector( `.media-modal li[aria-label="${ filename }"]` );
 
 			// Insert the uploaded video.
-			await page.click( '.media-modal button.media-button-insert' );
+			await page.click( '.media-modal button.media-button-select' );
 
 			// Wait for video to be inserted.
 			await page.waitForSelector( '.editor-amp-story-page-video' );
