@@ -65,20 +65,28 @@ class AMP_Story_Templates {
 	}
 
 	/**
-	 * Temporarily filter pre_get_posts to not display templates in the list of reusable blocks.
+	 * Ensures that the templates only display in the AMP Story editor.
+	 *
+	 * This filters pre_get_posts to not display templates in the list of reusable blocks,
+	 * or anywhere other than in the AMP Story editor.
 	 *
 	 * @param object $query WP_Query object.
 	 * @return object WP Query modified object.
 	 */
 	public function filter_pre_get_posts( $query ) {
-		global $pagenow;
-
-		if ( 'edit.php' !== $pagenow || ! $query->is_admin ) {
+		if ( 'wp_block' !== $query->get( 'post_type' ) ) {
 			return $query;
 		}
 
-		if ( 'wp_block' !== $query->get( 'post_type' ) ) {
-			return $query;
+		$referer = wp_parse_url( wp_get_referer() );
+		if ( isset( $referer['query'] ) ) {
+			if ( 'post_type=' . AMP_Story_Post_Type::POST_TYPE_SLUG === $referer['query'] ) {
+				return $query; // This is in the editor for a new AMP Story.
+			}
+			$parsed_args = wp_parse_args( $referer['query'] );
+			if ( isset( $parsed_args['post'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
+				return $query; // This is in the editor for an existing AMP Story.
+			}
 		}
 
 		$tax_query = $query->get( 'tax_query' );
