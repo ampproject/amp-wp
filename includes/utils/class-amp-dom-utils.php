@@ -623,7 +623,16 @@ class AMP_DOM_Utils {
 	 */
 	public static function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
-			$node->setAttribute( $name, $value );
+			try {
+				$node->setAttribute( $name, $value );
+			} catch ( DOMException $e ) {
+				/*
+				 * Catch a "Invalid Character Error" when libxml is able to parse attributes with invalid characters,
+				 * but it throws error when attempting to set them via DOM methods. For example, '...this' can be parsed
+				 * as an attribute but it will throw an exception when attempting to setAttribute().
+				 */
+				continue;
+			}
 		}
 	}
 
