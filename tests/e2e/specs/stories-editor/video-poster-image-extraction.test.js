@@ -18,11 +18,11 @@ import { activateExperience, deactivateExperience } from '../../utils';
 
 describe( 'Video Poster Image Extraction', () => {
 	beforeAll( async () => {
-		activateExperience( 'stories' );
+		await activateExperience( 'stories' );
 	} );
 
 	afterAll( async () => {
-		deactivateExperience( 'stories' );
+		await deactivateExperience( 'stories' );
 	} );
 
 	describe( 'Page block', () => {
