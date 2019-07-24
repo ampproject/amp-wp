@@ -3,7 +3,6 @@ version: '3.1'
 services:
   wordpress:
     image: wordpress
-    restart: always
     ports:
       - 8890:80
     environment:
@@ -22,7 +21,6 @@ services:
 
   cli:
     image: wordpress:cli
-    restart: always
     user: xfs
     volumes:
       - wordpress_data:/var/www/html
