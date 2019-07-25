@@ -48,6 +48,11 @@ class AMP_REST_API {
 			return $response;
 		}
 
+		// Skip if AMP is disabled for the post.
+		if ( ! post_supports_amp( $post ) ) {
+			return $response;
+		}
+
 		$sanitizers     = amp_get_content_sanitizers();
 		$embed_handlers = AMP_Theme_Support::register_content_embed_handlers();
 		$sanitizers['AMP_Embed_Sanitizer']['embed_handlers'] = $embed_handlers;
