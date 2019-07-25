@@ -131,6 +131,7 @@ class TextBlockEdit extends Component {
 			clientId,
 			fontSize,
 			isPartOfMultiSelection,
+			isSelected,
 			backgroundColor,
 			customBackgroundColor,
 			textColor,
@@ -228,8 +229,10 @@ class TextBlockEdit extends Component {
 								role="textbox"
 								tabIndex="-1"
 								className="is-not-editing editor-rich-text block-editor-rich-text wp-block-amp-story-text"
-								onDoubleClick={ () => {
-									this.toggleIsEditing( true );
+								onClick={ () => {
+									if ( isSelected ) {
+										this.toggleIsEditing( true );
+									}
 								} }
 								onMouseDown={ ( event ) => {
 									// Prevent text selection on double click.
