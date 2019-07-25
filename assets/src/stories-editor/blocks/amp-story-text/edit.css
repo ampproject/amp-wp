@@ -18,6 +18,7 @@
 .wp-block-amp-story-text-wrapper:not(.with-line-height) {
 	height: 100%;
 }
+
 .wp-block-amp-story-text-wrapper .amp-overlay {
 	height: 100%;
 	width: 100%;
