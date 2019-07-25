@@ -53,8 +53,7 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		// Currently skipped because openTemplateInserter() seems to cause errors.
-		it.skip( 'should load story templates in the stories editor', async () => { // eslint-disable-line jest/no-disabled-tests
+		it( 'should load story templates in the stories editor', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
