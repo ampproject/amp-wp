@@ -32,7 +32,10 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		if ( ! post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		// Hide story templates even when the stories feature is not active.
+		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
+
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
@@ -41,7 +44,6 @@ class AMP_Story_Templates {
 
 		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
 		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
-		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
 
 		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
