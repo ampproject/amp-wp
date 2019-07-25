@@ -18,6 +18,16 @@
 .wp-block-amp-story-text-wrapper:not(.with-line-height) {
 	height: 100%;
 }
+.wp-block-amp-story-text-wrapper .amp-overlay {
+	height: 100%;
+	width: 100%;
+	z-index: 1000;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
 
 .wp-block-amp-story-text-wrapper.is-empty-draggable-text .amp-text-placeholder {
 	opacity: 0.62;

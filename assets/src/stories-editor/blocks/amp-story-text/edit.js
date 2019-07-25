@@ -16,6 +16,7 @@ import {
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { ENTER } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -31,10 +32,12 @@ class TextBlockEdit extends Component {
 
 		this.state = {
 			isEditing: false,
+			hasOverlay: true,
 		};
 
 		this.onReplace = this.onReplace.bind( this );
 		this.toggleIsEditing = this.toggleIsEditing.bind( this );
+		this.toggleOverlay = this.toggleOverlay.bind( this );
 	}
 
 	componentDidMount() {
@@ -54,6 +57,7 @@ class TextBlockEdit extends Component {
 		// If the block was unselected, make sure that it's not editing anymore.
 		if ( ! isSelected && prevProps.isSelected ) {
 			this.toggleIsEditing( false );
+			this.toggleOverlay( true );
 		}
 
 		const checkFontSize = ampFitText && (
@@ -121,8 +125,16 @@ class TextBlockEdit extends Component {
 		}
 	}
 
+	toggleOverlay( add ) {
+		if ( add !== this.state.hasOverlay ) {
+			this.setState( {
+				hasOverlay: ! this.state.hasOverlay,
+			} );
+		}
+	}
+
 	render() {
-		const { isEditing } = this.state;
+		const { isEditing, hasOverlay } = this.state;
 
 		const {
 			attributes,
@@ -234,6 +246,11 @@ class TextBlockEdit extends Component {
 										this.toggleIsEditing( true );
 									}
 								} }
+								onKeyDown={ ( e ) => {
+									if ( ENTER === e.keyCode && isSelected ) {
+										this.toggleIsEditing( true );
+									}
+								} }
 								onMouseDown={ ( event ) => {
 									// Prevent text selection on double click.
 									if ( 1 < event.detail ) {
@@ -241,6 +258,18 @@ class TextBlockEdit extends Component {
 									}
 								} }
 							>
+								{ hasOverlay && (
+									<div
+										role="textbox"
+										tabIndex="-1"
+										className="amp-overlay"
+										onClick={ ( e ) => {
+											this.toggleOverlay( false );
+											e.stopPropagation();
+										} }
+										onKeyDown={ () => {} }
+									></div>
+								) }
 								<p
 									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
 									style={ textStyle }
