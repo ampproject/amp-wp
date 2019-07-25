@@ -16,6 +16,13 @@ amp-story-grid-layer {
 	align-content: unset;
 }
 
+.amp-block-story-cta__link amp-img {
+	max-height: 100%;
+
+	/* Counteract the height increase caused by the inline-block. */
+	margin-bottom: -.2em;
+}
+
 .amp-block-story-cta__link amp-img * {
 	object-fit: contain;
 }

@@ -295,7 +295,12 @@ class AMP_DOM_Utils {
 		 * @return string Replacement.
 		 */
 		$replace_callback = static function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
-			$old_attrs = rtrim( $tag_matches['attrs'] );
+
+			// Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
+			$old_attrs = preg_replace( '#(?<!=)/$#', '', $tag_matches['attrs'] );
+
+			$old_attrs = rtrim( $old_attrs );
+
 			$new_attrs = '';
 			$offset    = 0;
 			while ( preg_match( $attr_regex, substr( $old_attrs, $offset ), $attr_matches ) ) {
@@ -618,7 +623,16 @@ class AMP_DOM_Utils {
 	 */
 	public static function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
-			$node->setAttribute( $name, $value );
+			try {
+				$node->setAttribute( $name, $value );
+			} catch ( DOMException $e ) {
+				/*
+				 * Catch a "Invalid Character Error" when libxml is able to parse attributes with invalid characters,
+				 * but it throws error when attempting to set them via DOM methods. For example, '...this' can be parsed
+				 * as an attribute but it will throw an exception when attempting to setAttribute().
+				 */
+				continue;
+			}
 		}
 	}
 
