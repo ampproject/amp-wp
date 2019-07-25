@@ -4,7 +4,7 @@ services:
   wordpress:
     image: wordpress
     ports:
-      - 8890:80
+      - "127.0.0.1:8890:80"
     environment:
       WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_PASSWORD: example
