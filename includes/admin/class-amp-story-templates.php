@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.3';
+	const STORY_TEMPLATES_VERSION = '0.3.4';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -32,7 +32,10 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		if ( ! post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		// Hide story templates even when the stories feature is not active.
+		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
+
+		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
@@ -41,7 +44,6 @@ class AMP_Story_Templates {
 
 		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
 		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
-		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
 
 		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
@@ -65,20 +67,31 @@ class AMP_Story_Templates {
 	}
 
 	/**
-	 * Temporarily filter pre_get_posts to not display templates in the list of reusable blocks.
+	 * Ensures that the templates only display in the AMP Story editor.
+	 *
+	 * This filters pre_get_posts to not display templates in the list of reusable blocks,
+	 * or anywhere other than in the AMP Story editor.
 	 *
 	 * @param object $query WP_Query object.
 	 * @return object WP Query modified object.
 	 */
 	public function filter_pre_get_posts( $query ) {
-		global $pagenow;
-
-		if ( 'edit.php' !== $pagenow || ! $query->is_admin ) {
+		if ( 'wp_block' !== $query->get( 'post_type' ) ) {
 			return $query;
 		}
 
-		if ( 'wp_block' !== $query->get( 'post_type' ) ) {
-			return $query;
+		$referer = wp_parse_url( wp_get_referer() );
+
+		if ( isset( $referer['query'] ) ) {
+			$parsed_args = wp_parse_args( $referer['query'] );
+
+			if ( isset( $parsed_args['post_type'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === $parsed_args['post_type'] ) {
+				return $query; // This is in the editor for a new AMP Story.
+			}
+
+			if ( isset( $parsed_args['post'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
+				return $query; // This is in the editor for an existing AMP Story.
+			}
 		}
 
 		$tax_query = $query->get( 'tax_query' );
