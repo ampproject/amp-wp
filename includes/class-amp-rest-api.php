@@ -29,6 +29,9 @@ class AMP_REST_API {
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
 			if ( post_type_supports( $post_type, AMP_Post_Type_Support::SLUG ) && post_type_supports( $post_type, 'editor' ) ) {
 				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
+
+				// The rest_{$this->post_type}_item_schema filter is still a work in progress:
+				// https://core.trac.wordpress.org/ticket/47779
 				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ], 10, 2 );
 			}
 		}
@@ -36,9 +39,6 @@ class AMP_REST_API {
 
 	/**
 	 * Extends the schema of the content field with a new `amp` property.
-	 *
-	 * Depends on the implementation of the rest_{$this->post_type}_item_schema filter:
-	 * https://core.trac.wordpress.org/attachment/ticket/47779/class-wp-rest-posts-controller.diff
 	 *
 	 * @param array  $schema         Post schema data.
 	 * @param string $post_type_slug Post type slug.
