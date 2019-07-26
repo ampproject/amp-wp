@@ -197,17 +197,11 @@ export const addAMPAttributes = ( settings, name ) => {
 			type: 'string',
 			source: 'attribute',
 			attribute: 'id',
-			selector: 'amp-story-grid-layer .amp-story-block-wrapper > *, amp-story-cta-layer',
-		},
-		ampAnimationType: {
-			type: 'string',
+			selector: 'amp-story-grid-layer .amp-story-block-wrapper, amp-story-cta-layer',
 		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
-		},
-		ampAnimationAfter: {
-			type: 'string',
 		},
 		fontSize: {
 			type: 'string',
@@ -437,13 +431,8 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
-	const newProps = { ...props };
-
-	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || getUniqueId();
-
 	if ( attributes.rotationAngle ) {
-		let style = ! newProps.style ? {} : newProps.style;
+		let style = ! props.style ? {} : props.style;
 		style = {
 			...style,
 			transform: `rotate(${ parseInt( attributes.rotationAngle ) }deg)`,
@@ -456,7 +445,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	return {
-		...newProps,
+		...props,
 		...ampAttributes,
 	};
 };
@@ -557,10 +546,12 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
 		}
 	}
+	// Always add anchor ID regardless of block support. Needed for animations.
+	const id = attributes.anchor || getUniqueId();
 
 	return (
 		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
+			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts } id={ id }>
 				{ element }
 			</div>
 		</amp-story-grid-layer>
@@ -1344,6 +1335,29 @@ export const maybeSetTagName = ( clientId ) => {
 };
 
 /**
+ * Initialize animation making sure that the predecessor animation has been initialized at first.
+ *
+ * @param {Object} block Animated block.
+ * @param {Object} page Parent page.
+ * @param {Object} allBlocks All blocks.
+ */
+const initializeAnimation = ( block, page, allBlocks ) => {
+	const { ampAnimationAfter } = block.attributes;
+	const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	if ( predecessor ) {
+		const animations = getAnimatedBlocks();
+		const pageAnimationOrder = animations[ page ] || [];
+		const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor.clientId );
+
+		// We need to initialize the predecessor first.
+		if ( ! predecessorEntry ) {
+			initializeAnimation( predecessor, page, allBlocks );
+		}
+	}
+	addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+};
+
+/**
  * Initializes the animations if it hasn't been done yet.
  */
 export const maybeInitializeAnimations = () => {
@@ -1354,10 +1368,8 @@ export const maybeInitializeAnimations = () => {
 			const page = getBlockRootClientId( block.clientId );
 
 			if ( page ) {
-				const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
-				const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
-
-				addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+				const { ampAnimationType, ampAnimationDuration, ampAnimationDelay } = block.attributes;
+				initializeAnimation( block, page, allBlocks );
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
 				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
