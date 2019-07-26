@@ -14,4 +14,5 @@ module.exports = {
 		'.git',
 		'node_modules',
 	],
+	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
 };
