@@ -62,7 +62,7 @@ describe.skip( 'Video Poster Image Extraction', () => { // eslint-disable-line j
 			await page.waitForSelector( '.editor-amp-story-page-video' );
 
 			// Wait for poster to be extracted.
-			await page.waitForSelector( '#editor-amp-story-page-poster' );
+			await expect( page ).toMatchElement( '#editor-amp-story-page-poster' );
 		} );
 	} );
 
@@ -96,7 +96,7 @@ describe.skip( 'Video Poster Image Extraction', () => { // eslint-disable-line j
 			await page.waitForSelector( '.wp-block-video video' );
 
 			// Wait for poster to be extracted.
-			await page.waitForSelector( '.video-block__poster-image img' );
+			await expect( page ).toMatchElement( '.video-block__poster-image img' );
 		} );
 	} );
 } );

@@ -104,8 +104,8 @@ export const normalizeTerm = ( term ) => {
 };
 
 export class InserterMenu extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 		this.state = {
 			childItems: [],
 			filterValue: '',
@@ -299,7 +299,7 @@ export class InserterMenu extends Component {
 					aria-label={ __( 'Available block types', 'amp' ) }
 				>
 
-					{ !! suggestedItems.length &&
+					{ Boolean( suggestedItems.length ) &&
 						<PanelBody
 							title={ _x( 'Most Used', 'blocks', 'amp' ) }
 							opened={ isPanelOpen( 'suggested' ) }
@@ -329,7 +329,7 @@ export class InserterMenu extends Component {
 						);
 					} ) }
 
-					{ !! reusableItems.length && (
+					{ Boolean( reusableItems.length ) && (
 						<PanelBody
 							className="editor-inserter__reusable-blocks-panel block-editor-inserter__reusable-blocks-panel"
 							title={ __( 'Reusable', 'amp' ) }

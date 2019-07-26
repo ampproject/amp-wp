@@ -29,7 +29,7 @@ describe( 'enforceFileSize', () => {
 		expect( actualSelectionError.get( 'actualVideoMegabytesPerSecond' ) ).toBe( 3 );
 
 		// This shouldn't disable the 'Select' button in the Media Library.
-		expect( selectButton.model.get( 'disabled' ) ).toBe( undefined );
+		expect( selectButton.model.get( 'disabled' ) ).toBeUndefined( );
 	} );
 
 	it( 'should not have an error when the video file size is under the maximum', () => {
@@ -50,8 +50,8 @@ describe( 'enforceFileSize', () => {
 
 		enforceFileSize.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBe( undefined );
-		expect( selectButton.model.get( 'disabled' ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBeUndefined( );
+		expect( selectButton.model.get( 'disabled' ) ).toBeUndefined( );
 	} );
 
 	it( 'should not have an error if the file type is not a video', () => {
@@ -73,7 +73,7 @@ describe( 'enforceFileSize', () => {
 
 		enforceFileSize.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBe( undefined );
-		expect( selectButton.model.get( 'disabled' ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_SIZE_ERROR_VIEW ) ).toBeUndefined( );
+		expect( selectButton.model.get( 'disabled' ) ).toBeUndefined( );
 	} );
 } );

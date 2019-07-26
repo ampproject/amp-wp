@@ -7,7 +7,7 @@ describe( 'addAMPExtraProps', () => {
 	it( 'does not modify non-child blocks', () => {
 		const props = addAMPExtraProps( {}, { name: 'foo/bar' }, {} );
 
-		expect( props ).toEqual( {} );
+		expect( props ).toStrictEqual( {} );
 	} );
 
 	it( 'generates a unique ID', () => {
@@ -19,7 +19,7 @@ describe( 'addAMPExtraProps', () => {
 	it( 'uses the existing anchor attribute as the ID', () => {
 		const props = addAMPExtraProps( {}, { name: 'amp/amp-story-text' }, { anchor: 'foo' } );
 
-		expect( props ).toEqual( { id: 'foo' } );
+		expect( props ).toStrictEqual( { id: 'foo' } );
 	} );
 
 	it( 'adds a font family attribute', () => {

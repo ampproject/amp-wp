@@ -17,7 +17,7 @@ describe( 'selectors', () => {
 				errors,
 			};
 
-			expect( getValidationErrors( state ) ).toEqual( errors );
+			expect( getValidationErrors( state ) ).toStrictEqual( errors );
 		} );
 	} );
 
@@ -29,7 +29,7 @@ describe( 'selectors', () => {
 				errors,
 			};
 
-			expect( getBlockValidationErrors( state, 'foo' ) ).toEqual( [ { baz: 'boo', clientId: 'foo' } ] );
+			expect( getBlockValidationErrors( state, 'foo' ) ).toStrictEqual( [ { baz: 'boo', clientId: 'foo' } ] );
 		} );
 	} );
 
@@ -37,7 +37,7 @@ describe( 'selectors', () => {
 		it( 'should return the validation errors review link', () => {
 			const state = { reviewLink: 'https://example.com' };
 
-			expect( getReviewLink( state ) ).toEqual( 'https://example.com' );
+			expect( getReviewLink( state ) ).toStrictEqual( 'https://example.com' );
 		} );
 	} );
 

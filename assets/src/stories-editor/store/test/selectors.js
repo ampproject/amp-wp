@@ -15,7 +15,7 @@ describe( 'actions', () => {
 		it( 'should return an empty object if state is empty', () => {
 			const state = {};
 
-			expect( getAnimatedBlocks( state ) ).toEqual( {} );
+			expect( getAnimatedBlocks( state ) ).toStrictEqual( {} );
 		} );
 	} );
 
@@ -92,7 +92,7 @@ describe( 'actions', () => {
 			const page = 'foo';
 			const state = { blocks: { } };
 
-			expect( getBlockIndex( state, page ) ).toBe( null );
+			expect( getBlockIndex( state, page ) ).toBeNull( );
 		} );
 
 		it( 'should return the page\'s index in the block order list', () => {
