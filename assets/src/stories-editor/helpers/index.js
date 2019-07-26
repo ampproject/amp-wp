@@ -14,6 +14,7 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
+import { isBlobURL } from '@wordpress/blob';
 
 /**
  * Internal dependencies
@@ -43,7 +44,7 @@ import {
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import { isBlobURL } from '@wordpress/blob';
+import { coreDeprecations } from '../deprecations';
 
 const { ampStoriesFonts } = window;
 
@@ -348,6 +349,28 @@ export const addAMPAttributes = ( settings, name ) => {
 			...settings.supports,
 			anchor: false,
 		},
+	};
+};
+
+export const deprecateCoreBlocks = ( settings, name ) => {
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return settings;
+	}
+	if ( 'core/image' === name ) {
+		debugger;
+	}
+
+	let deprecated = settings.deprecated ? { ...settings.deprecated } : {};
+	const blockDeprecation = coreDeprecations[ name ] || undefined;
+	if ( blockDeprecation ) {
+		deprecated = { ...deprecated, ...blockDeprecation };
+	}
+
+	return {
+		...settings,
+		...deprecated,
 	};
 };
 

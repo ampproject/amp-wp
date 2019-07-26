@@ -47,6 +47,7 @@ import {
 	filterBlockTransforms,
 	addAMPAttributes,
 	addAMPExtraProps,
+	deprecateCoreBlocks,
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	maybeInitializeAnimations,
@@ -311,6 +312,7 @@ plugins.keys().forEach( ( modulePath ) => {
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransforms', filterBlockTransforms );
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
