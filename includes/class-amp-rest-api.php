@@ -30,8 +30,7 @@ class AMP_REST_API {
 			if ( post_type_supports( $post_type, AMP_Post_Type_Support::SLUG ) && post_type_supports( $post_type, 'editor' ) ) {
 				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
 
-				// The rest_{$this->post_type}_item_schema filter is still a work in progress:
-				// https://core.trac.wordpress.org/ticket/47779
+				// The rest_{$this->post_type}_item_schema filter is still a work in progress: https://core.trac.wordpress.org/ticket/47779.
 				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ], 10, 2 );
 			}
 		}
