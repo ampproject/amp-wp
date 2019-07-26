@@ -29,8 +29,89 @@ class AMP_REST_API {
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
 			if ( post_type_supports( $post_type, AMP_Post_Type_Support::SLUG ) && post_type_supports( $post_type, 'editor' ) ) {
 				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
+				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ], 10, 2 );
 			}
 		}
+	}
+
+	/**
+	 * Extends the schema of the content field with a new `amp` property.
+	 *
+	 * Depends on the implementation of the rest_{$this->post_type}_item_schema filter:
+	 * https://core.trac.wordpress.org/attachment/ticket/47779/class-wp-rest-posts-controller.diff
+	 *
+	 * @param array  $schema         Post schema data.
+	 * @param string $post_type_slug Post type slug.
+	 */
+	public static function extend_content_schema( $schema, $post_type_slug ) {
+		$schema['properties']['content']['properties']['amp'] = [
+			'description' => __( 'The AMP content for the object.' ),
+			'type'        => 'object',
+			'context'     => [ 'view', 'edit' ],
+			'readonly'    => true,
+			'properties'  => [
+				'markup'  => [
+					'description' => __( 'HTML content for the object, transformed to be valid AMP.' ),
+					'type'        => 'string',
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'styles'  => [
+					'description' => __( 'An array of tree-shaken CSS styles extracted from the content.' ),
+					'type'        => 'array',
+					'items'       => [
+						'type' => 'string',
+					],
+					'context'     => [ 'view', 'edit' ],
+					'readonly'    => true,
+				],
+				'scripts' => [
+					'description'          => __( 'An object of scripts, extracted from the AMP elements and templates present in the content.' ),
+					'type'                 => 'object',
+					'context'              => [ 'view', 'edit' ],
+					'readonly'             => true,
+					'additionalProperties' => [
+						'type'       => 'object',
+						'context'    => [ 'view', 'edit' ],
+						'readonly'   => true,
+						'properties' => [
+							'src'               => [
+								'type'        => 'string',
+								'description' => __( 'The source of the script.' ),
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'runtime_version'   => [
+								'type'        => 'string',
+								'description' => __( 'The runtime version of AMP used by the script.' ),
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'extension_version' => [
+								'type'        => 'string',
+								'description' => __( 'The version of the script itself.' ),
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'async'             => [
+								'type'        => 'boolean',
+								'description' => __( 'Whether or not the script should be loaded asynchronously.' ),
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+							'extension_type'    => [
+								'type'        => 'string',
+								'enum'        => [ 'custom-template', 'custom-element' ],
+								'description' => __( 'Type of the script, either a template or an element.' ),
+								'context'     => [ 'view', 'edit' ],
+								'readonly'    => true,
+							],
+						],
+					],
+				],
+			],
+		];
+		return $schema;
 	}
 
 	/**
