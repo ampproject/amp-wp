@@ -13,6 +13,6 @@ describe( 'getPixelsFromPercentage', () => {
 	it( 'returns a rounded number', () => {
 		const result = getPixelsFromPercentage( 'x', 12.345 );
 
-		expect( result.toString() ).toEqual( expect.not.stringContaining( '.' ) );
+		expect( result.toString() ).toStrictEqual( expect.not.stringContaining( '.' ) );
 	} );
 } );

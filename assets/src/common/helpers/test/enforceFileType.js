@@ -65,7 +65,7 @@ describe( 'enforceFileType', () => {
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBeUndefined( );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( false );
 	} );
 
@@ -78,7 +78,7 @@ describe( 'enforceFileType', () => {
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBeUndefined( );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( false );
 	} );
 } );

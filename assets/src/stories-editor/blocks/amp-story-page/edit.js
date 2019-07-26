@@ -71,7 +71,7 @@ class PageEdit extends Component {
 	}
 
 	constructor( props ) {
-		super( ...arguments );
+		super( props );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
@@ -248,14 +248,14 @@ class PageEdit extends Component {
 		}
 	}
 
-	render() {
+	render() { // eslint-disable-line complexity
 		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
 
 		const {
 			mediaId,
 			mediaType,
 			mediaUrl,
-			focalPoint = { x: .5, y: .5 },
+			focalPoint = { x: 0.5, y: 0.5 },
 			overlayOpacity,
 			poster,
 			autoAdvanceAfter,

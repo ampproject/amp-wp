@@ -25,8 +25,8 @@ import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
 
 class TextBlockEdit extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onReplace = this.onReplace.bind( this );
 	}

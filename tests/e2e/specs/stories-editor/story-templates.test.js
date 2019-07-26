@@ -59,7 +59,7 @@ describe( 'Story Templates', () => {
 			await openTemplateInserter();
 
 			const numberOfTemplates = await page.$$eval( '.block-editor-block-preview', ( templates ) => templates.length );
-			expect( numberOfTemplates ).toEqual( 11 ); // 10 default templates plus the empty page.
+			expect( numberOfTemplates ).toStrictEqual( 11 ); // 10 default templates plus the empty page.
 		} );
 	} );
 } );
