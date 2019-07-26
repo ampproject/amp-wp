@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { IconButton } from '@wordpress/components';
+import {DropZoneProvider, IconButton} from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
@@ -15,7 +15,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import Indicator from './indicator';
+import ReordererIndicator from './reordererIndicator';
 import { Reorderer } from '../';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 import './edit.css';
@@ -79,11 +79,18 @@ class EditorCarousel extends Component {
 						} }
 						disabled={ null === previousPage }
 					/>
-					<Indicator
-						pages={ pages }
-						currentPage={ currentPage }
-						onClick={ goToPage }
-					/>
+					<div className="amp-story-editor-carousel-item-list">
+						<DropZoneProvider>
+						{ pages.map( ( page ) => (
+							<ReordererIndicator
+								key={ `page-${ page.clientId }` }
+								page={ page }
+								currentPage={ currentPage }
+								onClick={ goToPage }
+							/>
+						) ) }
+						</DropZoneProvider>
+					</div>
 					<IconButton
 						icon="arrow-right-alt2"
 						label={ __( 'Next Page', 'amp' ) }

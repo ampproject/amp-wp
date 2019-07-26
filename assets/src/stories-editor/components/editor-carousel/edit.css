@@ -27,13 +27,28 @@
 	display: none;
 }
 
-.amp-story-editor-carousel-navigation {
+.amp-story-editor-carousel-navigation{
 	display: flex;
 	justify-content: space-between;
 	margin-top: 5em;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list {
+/* temporary style fix hack */
+.amp-story-editor-carousel-navigation .components-drop-zone__provider{
+	flex: 1;
+	display: flex;
+	margin: 0;
+	padding: 0;
+	list-style-type: none;
+	justify-content: center;
+	max-width: 100%;
+
+	border: none;
+	border-radius: 0;
+	background: transparent;
+}
+
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list {
 	flex: 1;
 	display: flex;
 	margin: 0;
@@ -43,28 +58,67 @@
 	max-width: 30%;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item {
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item{
+	position: relative;
 	flex: 1;
 	height: .5em;
 	max-width: 5em;
+	cursor: grab;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item + .amp-story-editor-carousel-item {
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item{
+	width: 100%;
+	height: 100%;
+}
+
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item + .amp-story-reorderer-carousel-item {
 	margin-left: 20px;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button {
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list button {
 	background: #eff0f1;
 	width: 100%;
 	height: 100%;
 	display: block;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:hover,
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list button:focus {
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list button:hover,
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list button:focus {
 	background: #e0e0e0;
 }
 
-.editor-styles-wrapper ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item--active button {
+.editor-styles-wrapper div.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item--active button {
 	background: #666;
+}
+
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-active {
+	opacity: 0;
+	visibility: hidden;
+}
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-indicator,
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-over-element {
+	opacity: 1;
+	visibility: visible;
+	transition: opacity .3s, background-color .3s;
+}
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-indicator {
+	background: #eff0f1;
+	border: none !important;
+	margin: 0 10px;
+}
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-over-element.is-close-to-right {
+	border-right: 3px solid #0071a1;
+}
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-over-element.is-close-to-left {
+	border-left: 3px solid #0071a1;
+}
+
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone__content,
+div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .is-dragging-over-element .components-drop-zone__content {
+	display: none;
 }
