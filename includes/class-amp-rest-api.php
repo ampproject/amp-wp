@@ -44,19 +44,19 @@ class AMP_REST_API {
 	 */
 	public static function extend_content_schema( $schema, $post_type_slug ) {
 		$schema['properties']['content']['properties']['amp'] = [
-			'description' => __( 'The AMP content for the object.' ),
+			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
 			'context'     => [ 'view', 'edit' ],
 			'readonly'    => true,
 			'properties'  => [
 				'markup'  => [
-					'description' => __( 'HTML content for the object, transformed to be valid AMP.' ),
+					'description' => __( 'HTML content for the object, transformed to be valid AMP.', 'amp' ),
 					'type'        => 'string',
 					'context'     => [ 'view', 'edit' ],
 					'readonly'    => true,
 				],
 				'styles'  => [
-					'description' => __( 'An array of tree-shaken CSS styles extracted from the content.' ),
+					'description' => __( 'An array of tree-shaken CSS styles extracted from the content.', 'amp' ),
 					'type'        => 'array',
 					'items'       => [
 						'type' => 'string',
@@ -65,7 +65,7 @@ class AMP_REST_API {
 					'readonly'    => true,
 				],
 				'scripts' => [
-					'description'          => __( 'An object of scripts, extracted from the AMP elements and templates present in the content.' ),
+					'description'          => __( 'An object of scripts, extracted from the AMP elements and templates present in the content.', 'amp' ),
 					'type'                 => 'object',
 					'context'              => [ 'view', 'edit' ],
 					'readonly'             => true,
@@ -76,32 +76,32 @@ class AMP_REST_API {
 						'properties' => [
 							'src'               => [
 								'type'        => 'string',
-								'description' => __( 'The source of the script.' ),
+								'description' => __( 'The source of the script.', 'amp' ),
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'runtime_version'   => [
 								'type'        => 'string',
-								'description' => __( 'The runtime version of AMP used by the script.' ),
+								'description' => __( 'The runtime version of AMP used by the script.', 'amp' ),
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'extension_version' => [
 								'type'        => 'string',
-								'description' => __( 'The version of the script itself.' ),
+								'description' => __( 'The version of the script itself.', 'amp' ),
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'async'             => [
 								'type'        => 'boolean',
-								'description' => __( 'Whether or not the script should be loaded asynchronously.' ),
+								'description' => __( 'Whether or not the script should be loaded asynchronously.', 'amp' ),
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
 							'extension_type'    => [
 								'type'        => 'string',
 								'enum'        => [ 'custom-template', 'custom-element' ],
-								'description' => __( 'Type of the script, either a template or an element.' ),
+								'description' => __( 'Type of the script, either a template or an element.', 'amp' ),
 								'context'     => [ 'view', 'edit' ],
 								'readonly'    => true,
 							],
