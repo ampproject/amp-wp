@@ -110,14 +110,6 @@ div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .comp
 	margin: 0 10px;
 }
 
-div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-over-element.is-close-to-right {
-	border-right: 3px solid #0071a1;
-}
-
-div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone.is-dragging-over-element.is-close-to-left {
-	border-left: 3px solid #0071a1;
-}
-
 div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .components-drop-zone__content,
 div.amp-story-editor-carousel-item-list .amp-story-reorderer-carousel-item .is-dragging-over-element .components-drop-zone__content {
 	display: none;
