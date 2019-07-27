@@ -71,9 +71,6 @@ class ReordererIndicator extends Component {
 		const isBlockDropType = ( dropType ) => dropType === 'block';
 		const isSameBlock = ( src, dst ) => src === dst;
 
-		console.log( this.props, isBlockDropType(), isSameBlock() );
-
-
 		if ( ! isBlockDropType( type ) || isSameBlock( srcClientId, clientId ) ) {
 			return;
 		}
