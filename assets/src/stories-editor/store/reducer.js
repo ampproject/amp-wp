@@ -124,6 +124,13 @@ export function blocks( state = {}, action ) {
 				isReordering: true,
 			};
 
+		case 'SETUP_ORDER':
+			return {
+				...state,
+				order,
+				isReordering: false,
+			};
+
 		case 'STOP_REORDERING':
 			return {
 				...state,
