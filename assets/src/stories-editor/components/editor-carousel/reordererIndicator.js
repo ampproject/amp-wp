@@ -152,6 +152,7 @@ ReordererIndicator.propTypes = {
 	} ).isRequired,
 	movePageToPosition: PropTypes.func.isRequired,
 	index: PropTypes.number.isRequired,
+	currentPage: PropTypes.string,
 	onClick: PropTypes.func.isRequired,
 };
 
