@@ -49,6 +49,7 @@ class EditorCarousel extends Component {
 	}
 
 	componentDidMount() {
+		this.props.setupOrder();
 		this.translateWrapper();
 	}
 
@@ -139,16 +140,20 @@ export default compose(
 			previousPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, -1 ) : null,
 			nextPage: getCurrentPage() ? getAdjacentBlockClientId( currentPage, 1 ) : null,
 			isReordering: isReordering(),
+			blockOrder: getBlockOrder(),
 		};
 	} ),
-	withDispatch( ( dispatch ) => {
-		const { setCurrentPage } = dispatch( 'amp/story' );
+	withDispatch( ( dispatch, { blockOrder } ) => {
+		const { setCurrentPage, setupOrder } = dispatch( 'amp/story' );
 		const { selectBlock } = dispatch( 'core/block-editor' );
 
 		return {
 			onChangePage: ( pageClientId ) => {
 				setCurrentPage( pageClientId );
 				selectBlock( pageClientId );
+			},
+			setupOrder: () => {
+				setupOrder( blockOrder );
 			},
 		};
 	} )
