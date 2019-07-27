@@ -87,6 +87,20 @@ export function setCurrentPage( page ) {
 }
 
 /**
+ * Returns an action object in signalling that the page collection has changed.
+ *
+ * @param {string[]} order The current block order.
+ *
+ * @return {Object} Action object.
+ */
+export function setupOrder( order ) {
+	return {
+		type: 'SETUP_ORDER',
+		order,
+	};
+}
+
+/**
  * Returns an action object in signalling that reorder mode should be initiated.
  *
  * @param {string[]} order The current block order.
