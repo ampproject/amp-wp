@@ -80,6 +80,10 @@ class ReordererIndicator extends Component {
 		movePageToPosition( srcClientId, insertIndex );
 	}
 
+	componentDidMount() {
+		this.props.setupOrder();
+	}
+
 	render() {
 		const { page, index, currentPage, onClick } = this.props;
 		const { clientId } = page;
@@ -155,17 +159,22 @@ ReordererIndicator.propTypes = {
 
 const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {
 	const { getBlockIndex } = select( 'amp/story' );
+	const { getBlockOrder } = select( 'core/block-editor' );
 
 	return {
 		index: getBlockIndex( clientId ),
+		blockOrder: getBlockOrder(),
 	};
 } );
 
-const applyWithDispatch = withDispatch( ( dispatch ) => {
-	const { movePageToPosition } = dispatch( 'amp/story' );
+const applyWithDispatch = withDispatch( ( dispatch, { blockOrder } ) => {
+	const { movePageToPosition, setupOrder } = dispatch( 'amp/story' );
 
 	return {
 		movePageToPosition,
+		setupOrder: () => {
+			setupOrder( blockOrder );
+		},
 	};
 } );
 
