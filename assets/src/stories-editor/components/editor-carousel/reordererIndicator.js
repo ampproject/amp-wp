@@ -81,7 +81,7 @@ class ReordererIndicator extends Component {
 	}
 
 	componentDidMount() {
-		this.props.setupOrder();
+		this.props.setOrder();
 	}
 
 	render() {
@@ -168,12 +168,12 @@ const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {
 } );
 
 const applyWithDispatch = withDispatch( ( dispatch, { blockOrder } ) => {
-	const { movePageToPosition, setupOrder } = dispatch( 'amp/story' );
+	const { movePageToPosition, setOrder } = dispatch( 'amp/story' );
 
 	return {
 		movePageToPosition,
-		setupOrder: () => {
-			setupOrder( blockOrder );
+		setOrder: () => {
+			setOrder( blockOrder );
 		},
 	};
 } );
