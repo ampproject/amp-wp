@@ -155,6 +155,7 @@ ReordererIndicator.propTypes = {
 	index: PropTypes.number.isRequired,
 	currentPage: PropTypes.string,
 	onClick: PropTypes.func.isRequired,
+	setOrder: PropTypes.func.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {

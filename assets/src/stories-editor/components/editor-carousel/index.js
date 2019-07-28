@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {DropZoneProvider, IconButton} from '@wordpress/components';
+import { DropZoneProvider, IconButton } from '@wordpress/components';
 import { Component } from '@wordpress/element';
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
@@ -81,14 +81,14 @@ class EditorCarousel extends Component {
 					/>
 					<div className="amp-story-editor-carousel-item-list">
 						<DropZoneProvider>
-						{ pages.map( ( page ) => (
-							<ReordererIndicator
-								key={ `page-${ page.clientId }` }
-								page={ page }
-								currentPage={ currentPage }
-								onClick={ goToPage }
-							/>
-						) ) }
+							{ pages.map( ( page ) => (
+								<ReordererIndicator
+									key={ `page-${ page.clientId }` }
+									page={ page }
+									currentPage={ currentPage }
+									onClick={ goToPage }
+								/>
+							) ) }
 						</DropZoneProvider>
 					</div>
 					<IconButton
