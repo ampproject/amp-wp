@@ -44,7 +44,12 @@ import {
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import { coreDeprecations } from '../deprecations';
+import { coreDeprecations } from '../deprecations/core-blocks';
+import {
+	addAMPExtraPropsDeprecations,
+	wrapBlockInGridLayerDeprecations,
+	addAMPAttributesDeprecations,
+} from '../deprecations/filters';
 
 const { ampStoriesFonts } = window;
 
@@ -145,7 +150,7 @@ export const setBlockParent = ( props ) => {
  *
  * @return {number} Block height in pixels.
  */
-const getDefaultMinimumBlockHeight = ( name ) => {
+export const getDefaultMinimumBlockHeight = ( name ) => {
 	switch ( name ) {
 		case 'core/quote':
 		case 'core/video':
@@ -185,11 +190,19 @@ export const addAMPAttributes = ( settings, name ) => {
 		return settings;
 	}
 
+	if ( settings.attributes.deprecated && addAMPAttributesDeprecations[ settings.attributes.deprecated.default ] ) {
+		const deprecateAMPAttributes = addAMPAttributesDeprecations[ settings.attributes.deprecated.default ];
+		if ( 'function' === typeof deprecateAMPAttributes ) {
+			return deprecateAMPAttributes( settings, name );
+		}
+	}
+
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+
 	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
@@ -358,9 +371,6 @@ export const deprecateCoreBlocks = ( settings, name ) => {
 	if ( ! isMovableBlock ) {
 		return settings;
 	}
-	if ( 'core/image' === name ) {
-		debugger;
-	}
 
 	let deprecated = settings.deprecated ? { ...settings.deprecated } : {};
 	const blockDeprecation = coreDeprecations[ name ] || undefined;
@@ -454,6 +464,13 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
+	if ( attributes.deprecated && addAMPExtraPropsDeprecations[ attributes.deprecated ] ) {
+		const deprecatedExtraProps = addAMPExtraPropsDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecatedExtraProps ) {
+			return deprecatedExtraProps( props, blockType, attributes );
+		}
+	}
+
 	if ( attributes.rotationAngle ) {
 		let style = ! props.style ? {} : props.style;
 		style = {
@@ -518,6 +535,13 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
 		return element;
+	}
+
+	if ( attributes.deprecated && wrapBlockInGridLayerDeprecations[ attributes.deprecated ] ) {
+		const deprecateWrapBlocksInGridLayer = wrapBlockInGridLayerDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecateWrapBlocksInGridLayer ) {
+			return deprecateWrapBlocksInGridLayer( element, blockType, attributes );
+		}
 	}
 
 	const {
@@ -1366,7 +1390,11 @@ export const maybeSetTagName = ( clientId ) => {
  */
 const initializeAnimation = ( block, page, allBlocks ) => {
 	const { ampAnimationAfter } = block.attributes;
-	const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	let predecessor;
+	if ( ampAnimationAfter ) {
+		predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	}
+
 	if ( predecessor ) {
 		const animations = getAnimatedBlocks();
 		const pageAnimationOrder = animations[ page ] || [];

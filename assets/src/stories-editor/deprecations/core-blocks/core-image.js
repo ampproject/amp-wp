@@ -7,7 +7,7 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { RichText } from '@wordpress/block-editor';
-import { getPercentageFromPixels, getUniqueId } from '../helpers';
+import { omit } from 'lodash';
 
 const blockAttributes = {
 	align: {
@@ -114,11 +114,15 @@ const blockAttributes = {
 	},
 };
 
-const deprecatedImage = [
-	{
-		attributes: blockAttributes,
-		save( props ) {
-			const { attributes } = props;
+const deprecatedImage = {
+	0: {
+		attributes: {
+			...blockAttributes,
+			deprecated: {
+				default: '1.2.0',
+			},
+		},
+		save( { attributes } ) {
 			const {
 				url,
 				alt,
@@ -132,59 +136,7 @@ const deprecatedImage = [
 				id,
 				linkTarget,
 				sizeSlug,
-				ampAnimationType,
-				ampAnimationDelay,
-				ampAnimationDuration,
-				ampAnimationAfter,
-				positionTop,
-				positionLeft,
-				rotationAngle,
 			} = attributes;
-
-			let style = ! props.style ? {} : props.style;
-			if ( rotationAngle ) {
-				style = {
-					...style,
-					transform: `rotate(${ parseInt( rotationAngle ) }deg)`,
-				};
-			}
-
-			if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-				style = {
-					...style,
-					position: 'absolute',
-					top: `${ positionTop || 0 }%`,
-					left: `${ positionLeft || 0 }%`,
-				};
-			}
-
-			// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-			if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
-				style = {
-					...style,
-					width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
-					height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
-				};
-			}
-
-			const animationAtts = {};
-
-			// Add animation if necessary.
-			if ( ampAnimationType ) {
-				animationAtts[ 'animate-in' ] = ampAnimationType;
-
-				if ( ampAnimationDelay ) {
-					animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
-				}
-
-				if ( ampAnimationDuration ) {
-					animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
-				}
-
-				if ( ampAnimationAfter ) {
-					animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
-				}
-			}
 
 			const classes = classnames( {
 				[ `align${ align }` ]: align,
@@ -218,32 +170,28 @@ const deprecatedImage = [
 				</>
 			);
 
-			const anchorId = attributes.anchor || getUniqueId();
 			if ( 'left' === align || 'right' === align || 'center' === align ) {
 				return (
-					<amp-story-grid-layer template="vertical" data-block-name="core/image" >
-						<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
-							<div>
-								<figure className={ classes } id={ anchorId }>
-									{ figure }
-								</figure>
-							</div>
-						</div>
-					</amp-story-grid-layer>
+					<div>
+						<figure className={ classes }>
+							{ figure }
+						</figure>
+					</div>
 				);
 			}
 
 			return (
-				<amp-story-grid-layer template="vertical" data-block-name="core/image" >
-					<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
-						<figure className={ classes } id={ anchorId }>
-							{ figure }
-						</figure>
-					</div>
-				</amp-story-grid-layer>
+				<figure className={ classes }>
+					{ figure }
+				</figure>
 			);
 		},
+		migrate: ( attributes ) => {
+			return {
+				...omit( attributes, [ 'deprecated', 'anchor' ] ),
+			};
+		},
 	},
-];
+};
 
 export default deprecatedImage;

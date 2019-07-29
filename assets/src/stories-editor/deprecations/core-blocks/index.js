@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import coreImage from './core-image';
 
 export const coreDeprecations = {
