@@ -58,11 +58,12 @@ class Indicator extends Component {
 	}
 
 	getInsertIndex( position ) {
-		const { index } = this.props;
+		let { index } = this.props;
 
 		if ( index !== undefined ) {
-			return position.x === 'right' ? index + 1 : index;
+			index = position.x === 'right' ? index + 1 : index;
 		}
+		return index;
 	}
 
 	onDrop( event, position ) {
