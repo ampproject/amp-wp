@@ -93,7 +93,6 @@ ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item .componen
 ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item .components-drop-zone.is-dragging-indicator {
 	background: #eff0f1;
 	border: none !important;
-	margin: 0 10px;
 }
 
 ul.amp-story-editor-carousel-item-list .amp-story-editor-carousel-item .components-drop-zone.is-dragging-over-element.is-close-to-right {
