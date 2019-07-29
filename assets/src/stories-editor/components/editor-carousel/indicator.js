@@ -106,7 +106,7 @@ class Indicator extends Component {
 		} );
 
 		return (
-			<div className="amp-story-reorderer-carousel-item">
+			<>
 				<Draggable
 					elementId={ pageElementId }
 					transferData={ transferData }
@@ -116,11 +116,7 @@ class Indicator extends Component {
 					{
 						( { onDraggableStart, onDraggableEnd } ) => (
 							<>
-								<DropZone
-									className={ this.state.isDragging ? 'is-dragging-indicator' : undefined }
-									onDrop={ this.onDrop }
-								/>
-								<div
+								<li
 									key={ page.clientId }
 									className={ className }
 									onDragStart={ onDraggableStart }
@@ -128,6 +124,10 @@ class Indicator extends Component {
 									draggable
 									id={ pageElementId }
 								>
+									<DropZone
+										className={ this.state.isDragging ? 'is-dragging-indicator' : undefined }
+										onDrop={ this.onDrop }
+									/>
 									<Tooltip text={ toolTip( index + 1 ) }>
 										<Button
 											onClick={ ( e ) => {
@@ -141,12 +141,12 @@ class Indicator extends Component {
 											</span>
 										</Button>
 									</Tooltip>
-								</div>
+								</li>
 							</>
 						)
 					}
 				</Draggable>
-			</div>
+			</>
 		);
 	}
 }

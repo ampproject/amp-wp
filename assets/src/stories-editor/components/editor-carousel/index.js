@@ -79,8 +79,8 @@ class EditorCarousel extends Component {
 						} }
 						disabled={ null === previousPage }
 					/>
-					<div className="amp-story-editor-carousel-item-list">
-						<DropZoneProvider>
+					<DropZoneProvider>
+						<ul className="amp-story-editor-carousel-item-list">
 							{ pages.map( ( page ) => (
 								<Indicator
 									key={ `page-${ page.clientId }` }
@@ -89,8 +89,8 @@ class EditorCarousel extends Component {
 									onClick={ goToPage }
 								/>
 							) ) }
-						</DropZoneProvider>
-					</div>
+						</ul>
+					</DropZoneProvider>
 					<IconButton
 						icon="arrow-right-alt2"
 						label={ __( 'Next Page', 'amp' ) }
