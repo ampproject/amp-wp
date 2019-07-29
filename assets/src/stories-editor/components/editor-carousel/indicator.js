@@ -82,7 +82,7 @@ class Indicator extends Component {
 	}
 
 	componentDidMount() {
-		this.props.setOrder();
+		this.props.resetOrder();
 	}
 
 	render() {
@@ -158,7 +158,7 @@ Indicator.propTypes = {
 	index: PropTypes.number.isRequired,
 	currentPage: PropTypes.string,
 	onClick: PropTypes.func.isRequired,
-	setOrder: PropTypes.func.isRequired,
+	resetOrder: PropTypes.func.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {
@@ -172,12 +172,12 @@ const applyWithSelect = withSelect( ( select, { page: { clientId } } ) => {
 } );
 
 const applyWithDispatch = withDispatch( ( dispatch, { blockOrder } ) => {
-	const { movePageToPosition, setOrder } = dispatch( 'amp/story' );
+	const { movePageToPosition, resetOrder } = dispatch( 'amp/story' );
 
 	return {
 		movePageToPosition,
-		setOrder: () => {
-			setOrder( blockOrder );
+		resetOrder: () => {
+			resetOrder( blockOrder );
 		},
 	};
 } );
