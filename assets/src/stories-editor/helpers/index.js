@@ -372,16 +372,17 @@ export const deprecateCoreBlocks = ( settings, name ) => {
 		return settings;
 	}
 
-	let deprecated = settings.deprecated ? { ...settings.deprecated } : {};
+	let deprecated = settings.deprecated ? settings.deprecated : [];
 	const blockDeprecation = coreDeprecations[ name ] || undefined;
 	if ( blockDeprecation ) {
-		deprecated = { ...deprecated, ...blockDeprecation };
+		deprecated = [ ...deprecated, ...blockDeprecation ];
+		return {
+			...settings,
+			deprecated,
+		};
 	}
 
-	return {
-		...settings,
-		...deprecated,
-	};
+	return settings;
 };
 
 /**

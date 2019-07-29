@@ -112,10 +112,13 @@ const blockAttributes = {
 		type: 'boolean',
 		default: false,
 	},
+	sizeSlug: {
+		type: 'string',
+	},
 };
 
-const deprecatedImage = {
-	0: {
+const deprecatedImage = [
+	{
 		attributes: {
 			...blockAttributes,
 			deprecated: {
@@ -192,6 +195,6 @@ const deprecatedImage = {
 			};
 		},
 	},
-};
+];
 
 export default deprecatedImage;
