@@ -73,6 +73,9 @@ jobs:
         - composer validate --no-check-all
         - composer normalize --dry-run
         - npm run lint
+        - npm run build:js
+      after_success:
+        - npx sizereport --config
 
     - stage: test
       name: JavaScript unit tests
