@@ -245,10 +245,17 @@ npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
 For debugging purposes, you can also run the E2E tests in non-headless mode:
 
 ```bash
-HEADLESS=false npm run test:e2e
+npm run test:e2e:interactive
 ```
 
-Sometimes one might to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
+Note that this will also slow down all interactions during tests by 80ms. You can control these values individually too:
+
+```bash
+PUPPETEER_HEADLESS=false npm run test:e2e # Interactive mode, normal speed.
+PUPPETEER_SLOWMO=200 npm run test:e2e # Headless mode, slowed down by 200ms.
+```
+
+Sometimes one might want to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
                                                                                                                                                        
 For example, such a plugin could create a custom post type and the accompanying E2E test would verify that block validation errors are shown for this custom post type too.
 
@@ -315,9 +322,9 @@ The following script creates a post with all core Gutenberg blocks. To run it:
 
 1. Create changelog draft on [Wiki page](https://github.com/ampproject/amp-wp/wiki/Release-Changelog-Draft).
 1. Check out the branch intended for release (`develop` for major, `x.y` for minor) and pull latest commits.
+1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 1. Do `npm install && composer selfupdate && composer install`.
 1. Do `npm run build` and install the `amp.zip` onto a normal WordPress install running a stable release build; do smoke test to ensure it works.
-1. Bump plugin versions in `amp.php` (×2: the metadata block in the header and also the `AMP__VERSION` constant).
 1. [Draft new release](https://github.com/ampproject/amp-wp/releases/new) on GitHub targeting the required branch (`develop` for major, `x.y` for minor).
     1. Use the new plugin version as the tag (e.g. `1.2-beta3` or `1.2.1-RC1`)
     1. USe new version as the title, followed by some highlight tagline of the release.

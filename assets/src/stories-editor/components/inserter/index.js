@@ -24,7 +24,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import InserterMenu from './menu';
+import InserterMenu from './menu'; // eslint-disable-line import/no-named-as-default
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
 	<IconButton
@@ -46,8 +46,8 @@ defaultRenderToggle.propTypes = {
 };
 
 class Inserter extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onToggle = this.onToggle.bind( this );
 		this.renderToggle = this.renderToggle.bind( this );

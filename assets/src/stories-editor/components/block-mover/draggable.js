@@ -27,8 +27,8 @@ const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onDragStart = this.onDragStart.bind( this );
 		this.onDragOver = this.onDragOver.bind( this );
@@ -79,9 +79,9 @@ class Draggable extends Component {
 	 */
 	onDragOver( event ) {
 		this.cloneWrapper.style.top =
-			`${ parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop }px`;
+			`${ parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop }px`;
 		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left, 10 ) + event.clientX - this.cursorLeft }px`;
+			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;

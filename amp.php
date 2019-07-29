@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2.1-alpha
+ * Version: 1.2.1-beta1
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2.1-alpha' );
+define( 'AMP__VERSION', '1.2.1-beta1' );
 
 /**
  * Errors encountered while loading the plugin.
@@ -365,8 +365,10 @@ function amp_init() {
 
 	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 		AMP_Story_Post_Type::register();
-		add_action( 'wp_loaded', 'amp_story_templates' );
 	}
+
+	// Does its own is_stories_experience_enabled() check.
+	add_action( 'wp_loaded', 'amp_story_templates' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );

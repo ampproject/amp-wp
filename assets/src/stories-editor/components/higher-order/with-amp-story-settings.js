@@ -162,7 +162,7 @@ const enhance = compose(
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return enhance( ( props ) => {
+		return enhance( ( props ) => { // eslint-disable-line complexity
 			const {
 				clientId,
 				name,

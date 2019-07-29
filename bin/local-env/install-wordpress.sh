@@ -81,7 +81,6 @@ docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER touch /var/www/h
 echo -e $(status_message "Activating AMP plugin...")
 docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
 
-
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
 # todo: Use `wp plugin install --activate` once WP-CLI is updated, see https://github.com/wp-cli/extension-command/issues/176.

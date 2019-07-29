@@ -28,7 +28,7 @@ import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
-		super( ...arguments );
+		super( props );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );

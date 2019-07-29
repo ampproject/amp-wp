@@ -43,6 +43,7 @@ import {
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
+import { isBlobURL } from '@wordpress/blob';
 
 const { ampStoriesFonts } = window;
 
@@ -52,7 +53,10 @@ const {
 	getBlockOrder,
 	getBlock,
 	getClientIdsWithDescendants,
+	getSettings,
 } = select( 'core/block-editor' );
+
+const { getAnimatedBlocks } = select( 'amp/story' );
 
 const {
 	addAnimation,
@@ -61,13 +65,8 @@ const {
 	changeAnimationDelay,
 } = dispatch( 'amp/story' );
 
-const {
-	getAnimatedBlocks,
-} = select( 'amp/story' );
-
-const {
-	updateBlockAttributes,
-} = dispatch( 'core/block-editor' );
+const { saveMedia } = dispatch( 'core' );
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -1157,9 +1156,10 @@ const getBlockInnerTextElement = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const slug = name.replace( '/', '-' );
 			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-	}
 
-	return null;
+		default:
+			return null;
+	}
 };
 
 /**
@@ -1208,6 +1208,9 @@ export const maybeUpdateFontSize = ( block ) => {
 				}
 			}
 
+			break;
+
+		default:
 			break;
 	}
 };
@@ -1267,6 +1270,9 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
 
+			break;
+
+		default:
 			break;
 	}
 };
@@ -1485,6 +1491,8 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
+
+	return undefined;
 };
 
 /**
@@ -1507,4 +1515,70 @@ export const getCallToActionBlock = ( pageClientId ) => {
  */
 export const getUniqueId = () => {
 	return uuid().replace( /^\d/, 'a' );
+};
+
+/**
+ * Returns an image of the first frame of a given video.
+ *
+ * @todo Perhaps allow specifying wanted image type.
+ *
+ * @param {string} src Video src URL.
+ * @return {Promise<string>} The extracted image in base64-encoded format.
+ */
+export const getFirstFrameOfVideo = ( src ) => {
+	const video = document.createElement( 'video' );
+	video.muted = true;
+	video.crossOrigin = 'anonymous';
+
+	return new Promise( ( resolve ) => {
+		video.src = src;
+		video.addEventListener( 'loadeddata', () => {
+			const canvas = document.createElement( 'canvas' );
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+
+			const ctx = canvas.getContext( '2d' );
+			ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
+
+			canvas.toBlob( resolve );
+		} );
+	} );
+};
+
+/**
+ * Uploads the video's first frame as an attachment.
+ *
+ * @param {number} id  Video ID.
+ * @param {string} src Video URL.
+ */
+export const uploadVideoFrame = async ( { id: videoId, src } ) => {
+	const { __experimentalMediaUpload: mediaUpload } = getSettings();
+
+	const img = await getFirstFrameOfVideo( src );
+
+	return new Promise( ( resolve, reject ) => {
+		mediaUpload( {
+			filesList: [ img ],
+			onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+				if ( videoId && posterId ) {
+					saveMedia( {
+						id: videoId,
+						featured_media: posterId,
+					} );
+
+					saveMedia( {
+						id: posterId,
+						meta: {
+							amp_is_poster: true,
+						},
+					} );
+				}
+
+				if ( ! isBlobURL( posterUrl ) ) {
+					resolve( posterUrl );
+				}
+			},
+			onError: reject,
+		} );
+	} );
 };

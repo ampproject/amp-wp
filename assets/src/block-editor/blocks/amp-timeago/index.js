@@ -59,6 +59,8 @@ export const settings = {
 		if ( 'left' === align || 'right' === align || 'center' === align ) {
 			return { 'data-align': align };
 		}
+
+		return undefined;
 	},
 
 	edit,
