@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -99,7 +100,9 @@ class Indicator extends Component {
 
 		/* translators: %s: Page number */
 		const toolTip = ( pageNumber ) => sprintf( __( 'Go to page %s', 'amp' ), pageNumber );
-		const className = page.clientId === currentPage ? 'amp-story-editor-carousel-item amp-story-editor-carousel-item--active' : 'amp-story-editor-carousel-item';
+		const className = classnames( 'amp-story-editor-carousel-item', {
+			'amp-story-editor-carousel-item--active': page.clientId === currentPage,
+		} );
 
 		return (
 			<div className="amp-story-reorderer-carousel-item">
