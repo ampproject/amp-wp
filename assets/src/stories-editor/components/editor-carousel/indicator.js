@@ -115,34 +115,31 @@ class Indicator extends Component {
 				>
 					{
 						( { onDraggableStart, onDraggableEnd } ) => (
-							<>
-								<li
-									key={ page.clientId }
-									className={ className }
-									onDragStart={ onDraggableStart }
-									onDragEnd={ onDraggableEnd }
-									draggable
-									id={ pageElementId }
-								>
-									<DropZone
-										className={ this.state.isDragging ? 'is-dragging-indicator' : undefined }
-										onDrop={ this.onDrop }
-									/>
-									<Tooltip text={ toolTip( index + 1 ) }>
-										<Button
-											onClick={ ( e ) => {
-												e.preventDefault();
-												onClick( page.clientId );
-											} }
-											disabled={ page.clientId === currentPage }
-										>
-											<span className="screen-reader-text">
-												{ label( index + 1 ) }
-											</span>
-										</Button>
-									</Tooltip>
-								</li>
-							</>
+							<li
+								key={ page.clientId }
+								className={ className }
+								onDragStart={ onDraggableStart }
+								onDragEnd={ onDraggableEnd }
+								draggable
+								id={ pageElementId }
+							>
+								<DropZone
+									className={ this.state.isDragging ? 'is-dragging-indicator' : undefined }
+									onDrop={ this.onDrop }
+								/>
+								<Tooltip text={ toolTip( index + 1 ) }>
+									<Button
+										onClick={ ( e ) => {
+											e.preventDefault();
+											onClick( page.clientId );
+										} }
+									>
+										<span className="screen-reader-text">
+											{ label( index + 1 ) }
+										</span>
+									</Button>
+								</Tooltip>
+							</li>
 						)
 					}
 				</Draggable>
