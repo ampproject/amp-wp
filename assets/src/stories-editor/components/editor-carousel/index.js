@@ -15,7 +15,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import ReordererIndicator from './reordererIndicator';
+import Indicator from './indicator';
 import { Reorderer } from '../';
 import { STORY_PAGE_INNER_WIDTH } from '../../constants';
 import './edit.css';
@@ -82,7 +82,7 @@ class EditorCarousel extends Component {
 					<div className="amp-story-editor-carousel-item-list">
 						<DropZoneProvider>
 							{ pages.map( ( page ) => (
-								<ReordererIndicator
+								<Indicator
 									key={ `page-${ page.clientId }` }
 									page={ page }
 									currentPage={ currentPage }

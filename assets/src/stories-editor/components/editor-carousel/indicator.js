@@ -45,7 +45,7 @@ const parseDropEvent = ( event ) => {
  * Re-uses existing Draggable and DropZone provided by WordPress
  * in order to not re-invent the wheel.
  */
-class ReordererIndicator extends Component {
+class Indicator extends Component {
 	constructor() {
 		super( ...arguments );
 
@@ -147,7 +147,7 @@ class ReordererIndicator extends Component {
 	}
 }
 
-ReordererIndicator.propTypes = {
+Indicator.propTypes = {
 	page: PropTypes.shape( {
 		clientId: PropTypes.string.isRequired,
 	} ).isRequired,
@@ -182,4 +182,4 @@ const applyWithDispatch = withDispatch( ( dispatch, { blockOrder } ) => {
 export default compose(
 	applyWithSelect,
 	applyWithDispatch,
-)( ReordererIndicator );
+)( Indicator );
