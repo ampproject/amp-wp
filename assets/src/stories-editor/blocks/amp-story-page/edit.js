@@ -172,8 +172,8 @@ class PageEdit extends Component {
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
+				.then( ( { url } ) => {
+					setAttributes( { poster: url } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );

@@ -1559,7 +1559,9 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 	return new Promise( ( resolve, reject ) => {
 		mediaUpload( {
 			filesList: [ img ],
-			onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+			onFileChange: ( [ fileObj ] ) => {
+				const { id: posterId, url: posterUrl } = fileObj;
+
 				if ( videoId && posterId ) {
 					saveMedia( {
 						id: videoId,
@@ -1575,7 +1577,7 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 				}
 
 				if ( ! isBlobURL( posterUrl ) ) {
-					resolve( posterUrl );
+					resolve( fileObj );
 				}
 			},
 			onError: reject,

@@ -137,8 +137,8 @@ class CustomVideoBlockEdit extends Component {
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id, src } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
+				.then( ( { url } ) => {
+					setAttributes( { poster: url } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
@@ -167,8 +167,8 @@ class CustomVideoBlockEdit extends Component {
 			 * a poster image could be retrieved from.
 			 */
 			uploadVideoFrame( { src: newSrc } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
+				.then( ( { url } ) => {
+					setAttributes( { poster: url } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
