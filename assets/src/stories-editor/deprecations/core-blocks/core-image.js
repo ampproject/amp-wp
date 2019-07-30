@@ -2,12 +2,13 @@
  * External dependencies
  */
 import classnames from 'classnames';
+import PropTypes from 'prop-types';
+import { omit } from 'lodash';
 
 /**
  * WordPress dependencies
  */
 import { RichText } from '@wordpress/block-editor';
-import { omit } from 'lodash';
 
 const blockAttributes = {
 	align: {
@@ -117,6 +118,89 @@ const blockAttributes = {
 	},
 };
 
+const saveV120 = ( { attributes } ) => {
+	const {
+		url,
+		alt,
+		caption,
+		align,
+		href,
+		rel,
+		linkClass,
+		width,
+		height,
+		id,
+		linkTarget,
+		sizeSlug,
+	} = attributes;
+
+	const classes = classnames( {
+		[ `align${ align }` ]: align,
+		[ `size-${ sizeSlug }` ]: sizeSlug,
+		'is-resized': width || height,
+	} );
+
+	const image = (
+		<img
+			src={ url }
+			alt={ alt }
+			className={ id ? `wp-image-${ id }` : null }
+			width={ width }
+			height={ height }
+		/>
+	);
+
+	const figure = (
+		<>
+			{ href ? (
+				<a
+					className={ linkClass }
+					href={ href }
+					target={ linkTarget }
+					rel={ rel }
+				>
+					{ image }
+				</a>
+			) : image }
+			{ ! RichText.isEmpty( caption ) && <RichText.Content tagName="figcaption" value={ caption } /> }
+		</>
+	);
+
+	if ( 'left' === align || 'right' === align || 'center' === align ) {
+		return (
+			<div>
+				<figure className={ classes }>
+					{ figure }
+				</figure>
+			</div>
+		);
+	}
+
+	return (
+		<figure className={ classes }>
+			{ figure }
+		</figure>
+	);
+};
+
+saveV120.propTypes = {
+	attributes: PropTypes.shape( {
+		text: PropTypes.string,
+		url: PropTypes.string,
+		alt: PropTypes.string,
+		caption: PropTypes.bool,
+		align: PropTypes.string,
+		href: PropTypes.string,
+		rel: PropTypes.string,
+		linkClass: PropTypes.string,
+		width: PropTypes.number,
+		height: PropTypes.number,
+		id: PropTypes.string,
+		linkTarget: PropTypes.string,
+		sizeSlug: PropTypes.string,
+	} ).isRequired,
+};
+
 const deprecatedImage = [
 	{
 		attributes: {
@@ -125,70 +209,9 @@ const deprecatedImage = [
 				default: '1.2.0',
 			},
 		},
-		save( { attributes } ) {
-			const {
-				url,
-				alt,
-				caption,
-				align,
-				href,
-				rel,
-				linkClass,
-				width,
-				height,
-				id,
-				linkTarget,
-				sizeSlug,
-			} = attributes;
 
-			const classes = classnames( {
-				[ `align${ align }` ]: align,
-				[ `size-${ sizeSlug }` ]: sizeSlug,
-				'is-resized': width || height,
-			} );
+		save: saveV120,
 
-			const image = (
-				<img
-					src={ url }
-					alt={ alt }
-					className={ id ? `wp-image-${ id }` : null }
-					width={ width }
-					height={ height }
-				/>
-			);
-
-			const figure = (
-				<>
-					{ href ? (
-						<a
-							className={ linkClass }
-							href={ href }
-							target={ linkTarget }
-							rel={ rel }
-						>
-							{ image }
-						</a>
-					) : image }
-					{ ! RichText.isEmpty( caption ) && <RichText.Content tagName="figcaption" value={ caption } /> }
-				</>
-			);
-
-			if ( 'left' === align || 'right' === align || 'center' === align ) {
-				return (
-					<div>
-						<figure className={ classes }>
-							{ figure }
-						</figure>
-					</div>
-				);
-			}
-
-			return (
-				<figure className={ classes }>
-					{ figure }
-				</figure>
-			);
-		},
 		migrate: ( attributes ) => {
 			return {
 				...omit( attributes, [ 'deprecated', 'anchor' ] ),
