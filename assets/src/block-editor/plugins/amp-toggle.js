@@ -45,7 +45,7 @@ function AMPToggle( { isEnabled, onChange } ) {
 					)
 				}
 				{
-					!! errorMessages.length &&
+					Boolean( errorMessages.length ) &&
 					(
 						<Notice
 							status="warning"

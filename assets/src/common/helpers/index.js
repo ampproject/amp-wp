@@ -204,9 +204,9 @@ export const getAspectRatioType = ( width, height ) => {
 		return 'landscape';
 	} else if ( height > width ) {
 		return 'portrait';
-	} else if ( height === width ) {
-		return 'square';
 	}
+
+	return 'square';
 };
 
 /**
@@ -327,7 +327,7 @@ export const enforceFileSize = function( attachment, SelectionError ) {
  * @return {boolean} Whether the Media Library has two notices.
  */
 export const mediaLibraryHasTwoNotices = function() {
-	return !! this.secondary.get( FILE_TYPE_ERROR_VIEW ) && !! this.secondary.get( FILE_SIZE_ERROR_VIEW );
+	return Boolean( this.secondary.get( FILE_TYPE_ERROR_VIEW ) ) && Boolean( this.secondary.get( FILE_SIZE_ERROR_VIEW ) );
 };
 
 /**

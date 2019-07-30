@@ -2,6 +2,7 @@ module.exports = {
 	...require( '@wordpress/scripts/config/jest-e2e.config' ),
 	setupFilesAfterEnv: [
 		'<rootDir>/config/bootstrap.js',
+		'expect-puppeteer',
 	],
 	testMatch: [
 		'<rootDir>/specs/**/__tests__/**/*.js',

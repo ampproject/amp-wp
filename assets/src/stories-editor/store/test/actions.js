@@ -21,7 +21,7 @@ describe( 'actions', () => {
 			const predecessor = 'baz';
 
 			const result = addAnimation( page, item, predecessor );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'ADD_ANIMATION',
 				page,
 				item,
@@ -37,7 +37,7 @@ describe( 'actions', () => {
 			const animationType = 'drop';
 
 			const result = changeAnimationType( page, item, animationType );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'CHANGE_ANIMATION_TYPE',
 				page,
 				item,
@@ -53,7 +53,7 @@ describe( 'actions', () => {
 			const duration = 5000;
 
 			const result = changeAnimationDuration( page, item, duration );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'CHANGE_ANIMATION_DURATION',
 				page,
 				item,
@@ -69,7 +69,7 @@ describe( 'actions', () => {
 			const delay = 1000;
 
 			const result = changeAnimationDelay( page, item, delay );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'CHANGE_ANIMATION_DELAY',
 				page,
 				item,
@@ -83,7 +83,7 @@ describe( 'actions', () => {
 			const page = 'foo';
 
 			const result = setCurrentPage( page );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'SET_CURRENT_PAGE',
 				page,
 			} );
@@ -93,8 +93,9 @@ describe( 'actions', () => {
 	describe( 'startReordering', () => {
 		it( 'should return the START_REORDERING action', () => {
 			const result = startReordering();
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'START_REORDERING',
+				order: undefined,
 			} );
 		} );
 	} );
@@ -105,7 +106,7 @@ describe( 'actions', () => {
 			const index = 2;
 
 			const result = movePageToPosition( page, index );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'MOVE_PAGE',
 				page,
 				index,
@@ -116,7 +117,7 @@ describe( 'actions', () => {
 	describe( 'saveOrder', () => {
 		it( 'should return the STOP_REORDERING action', () => {
 			const result = saveOrder();
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'STOP_REORDERING',
 			} );
 		} );
@@ -125,8 +126,9 @@ describe( 'actions', () => {
 	describe( 'resetOrder', () => {
 		it( 'should return the RESET_ORDER action', () => {
 			const result = resetOrder();
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'RESET_ORDER',
+				order: undefined,
 			} );
 		} );
 	} );

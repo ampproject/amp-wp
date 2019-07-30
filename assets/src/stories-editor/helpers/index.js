@@ -1195,9 +1195,10 @@ const getBlockInnerTextElement = ( block ) => {
 		case 'amp/amp-story-post-date':
 			const slug = name.replace( '/', '-' );
 			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-	}
 
-	return null;
+		default:
+			return null;
+	}
 };
 
 /**
@@ -1246,6 +1247,9 @@ export const maybeUpdateFontSize = ( block ) => {
 				}
 			}
 
+			break;
+
+		default:
 			break;
 	}
 };
@@ -1305,6 +1309,9 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 				metaBlockElement.classList.toggle( 'is-measuring' );
 			}
 
+			break;
+
+		default:
 			break;
 	}
 };
@@ -1548,6 +1555,8 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
+
+	return undefined;
 };
 
 /**
@@ -1580,7 +1589,7 @@ export const getUniqueId = () => {
  * @param {string} src Video src URL.
  * @return {Promise<string>} The extracted image in base64-encoded format.
  */
-export const getFirstFrameOfVideo = async ( src ) => {
+export const getFirstFrameOfVideo = ( src ) => {
 	const video = document.createElement( 'video' );
 	video.muted = true;
 	video.crossOrigin = 'anonymous';
@@ -1633,7 +1642,7 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 					resolve( posterUrl );
 				}
 			},
-			onError: () => reject(),
+			onError: reject,
 		} );
 	} );
 };

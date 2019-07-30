@@ -222,7 +222,7 @@ subscribe( async () => {
 	const newEditorMode = getEditorMode();
 	if ( 'visual' === newEditorMode && newEditorMode !== editorMode ) {
 		while ( ! document.querySelector( '.editor-block-list__layout' ) ) {
-			await new Promise( ( r ) => setTimeout( r, 200 ) );
+			await new Promise( ( r ) => setTimeout( r, 200 ) ); // eslint-disable-line no-await-in-loop
 		}
 
 		renderStoryComponents();

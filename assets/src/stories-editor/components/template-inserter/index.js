@@ -25,8 +25,8 @@ import './edit.css';
 import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../helpers';
 
 class TemplateInserter extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onToggle = this.onToggle.bind( this );
 

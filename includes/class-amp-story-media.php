@@ -319,7 +319,7 @@ class AMP_Story_Media {
 			'featured_media',
 			[
 				'schema' => [
-					'description' => __( 'The ID of the featured media for the object.' ),
+					'description' => __( 'The ID of the featured media for the object.', 'amp' ),
 					'type'        => 'integer',
 					'context'     => [ 'view', 'edit', 'embed' ],
 				],

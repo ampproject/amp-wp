@@ -16,8 +16,8 @@ import { Component } from '@wordpress/element';
 import { BlockPreview } from '../';
 
 class TemplatePreview extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			shouldLoad: false,

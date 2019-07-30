@@ -25,13 +25,13 @@ describe( 'getVideoBytesPerSecond', () => {
 		const attachment = new Mock();
 		const length = 5;
 		attachment.set( { media_details: { length } } );
-		expect( getVideoBytesPerSecond( attachment ) ).toBe( null );
+		expect( getVideoBytesPerSecond( attachment ) ).toBeNull( );
 	} );
 
 	it( 'should return null if the length is not defined', () => {
 		const attachment = new Mock();
 		const filesize = 8000000;
 		attachment.set( { media_details: { filesize } } );
-		expect( getVideoBytesPerSecond( attachment ) ).toBe( null );
+		expect( getVideoBytesPerSecond( attachment ) ).toBeNull( );
 	} );
 } );

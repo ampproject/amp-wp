@@ -19,7 +19,7 @@ describe( 'reducer', () => {
 			clientId,
 		} );
 
-		expect( state ).toEqual( {
+		expect( state ).toStrictEqual( {
 			errors: [
 				{ ...error, clientId },
 			],
@@ -33,7 +33,7 @@ describe( 'reducer', () => {
 			type: 'RESET_VALIDATION_ERRORS',
 		} );
 
-		expect( state ).toEqual( {
+		expect( state ).toStrictEqual( {
 			errors: [],
 		} );
 	} );
@@ -44,7 +44,7 @@ describe( 'reducer', () => {
 			url: 'https://example.com',
 		} );
 
-		expect( state ).toEqual( {
+		expect( state ).toStrictEqual( {
 			reviewLink: 'https://example.com',
 		} );
 	} );

@@ -99,8 +99,8 @@ const EnhancedResizableBox = ( props ) => {
 				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
 
 				onResizeStop( {
-					width: isText ? parseInt( appliedWidth, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedWidth, 10 ),
-					height: isText ? parseInt( appliedHeight, 10 ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedHeight, 10 ),
+					width: isText ? parseInt( appliedWidth ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedWidth ),
+					height: isText ? parseInt( appliedHeight ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedHeight ),
 					positionTop,
 					positionLeft,
 				} );
@@ -132,6 +132,10 @@ const EnhancedResizableBox = ( props ) => {
 							break;
 						case 'core/code':
 							textElement = blockElement.querySelector( '.wp-block-code' );
+							break;
+
+						default:
+							break;
 					}
 				} else {
 					textElement = null;
@@ -145,7 +149,7 @@ const EnhancedResizableBox = ( props ) => {
 
 				onResizeStart();
 			} }
-			onResize={ ( event, direction, element ) => {
+			onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
 				// Handle case where media is inserted from URL.

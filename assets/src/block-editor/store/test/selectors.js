@@ -47,7 +47,7 @@ describe( 'selectors', () => {
 		it( 'should return the default AMP status', () => {
 			const state = { defaultStatus: 'enabled' };
 
-			expect( getDefaultStatus( state ) ).toEqual( 'enabled' );
+			expect( getDefaultStatus( state ) ).toStrictEqual( 'enabled' );
 		} );
 	} );
 
@@ -55,7 +55,7 @@ describe( 'selectors', () => {
 		it( 'should return the possible AMP statuses', () => {
 			const state = { possibleStatuses: [ 'enabled', 'disabled' ] };
 
-			expect( getPossibleStatuses( state ) ).toEqual( [ 'enabled', 'disabled' ] );
+			expect( getPossibleStatuses( state ) ).toStrictEqual( [ 'enabled', 'disabled' ] );
 		} );
 	} );
 } );
