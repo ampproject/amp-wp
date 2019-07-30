@@ -10,18 +10,6 @@ describe( 'addAMPExtraProps', () => {
 		expect( props ).toStrictEqual( {} );
 	} );
 
-	it( 'generates a unique ID', () => {
-		const props = addAMPExtraProps( {}, { name: 'amp/amp-story-text' }, {} );
-
-		expect( props ).toHaveProperty( 'id' );
-	} );
-
-	it( 'uses the existing anchor attribute as the ID', () => {
-		const props = addAMPExtraProps( {}, { name: 'amp/amp-story-text' }, { anchor: 'foo' } );
-
-		expect( props ).toStrictEqual( { id: 'foo' } );
-	} );
-
 	it( 'adds a font family attribute', () => {
 		const props = addAMPExtraProps( {}, { name: 'amp/amp-story-text' }, { ampFontFamily: 'Roboto' } );
 
