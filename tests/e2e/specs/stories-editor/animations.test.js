@@ -69,10 +69,9 @@ describe( 'Story Animations', () => {
 		await page.waitForSelector( '.wp-block-amp-amp-story-post-date' );
 		await selectBlockByClassName( 'wp-block-amp-amp-story-post-date' );
 
-		page.waitForSelector( '.components-animate__appear button[aria-label="Begin after: Story Author"]' );
-
+		page.waitForSelector( 'button[aria-label="Begin after: Story Author"]' );
 		expect( await page.evaluate( () => {
-			return document.querySelector( '.components-animate__appear button[aria-label="Begin after: Story Author"]' ).innerHTML;
+			return document.querySelector( 'button[aria-label="Begin after: Story Author"]' ).innerHTML;
 		} ) ).toContain( 'admin' );
 	} );
 
