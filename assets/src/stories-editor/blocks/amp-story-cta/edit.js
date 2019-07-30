@@ -73,7 +73,7 @@ class CallToActionEdit extends Component {
 						placeholder={ __( 'Add text…', 'amp' ) }
 						value={ text }
 						onChange={ ( value ) => setAttributes( { text: value } ) }
-						formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
+						allowedFormats={ [ 'bold', 'italic', 'strikethrough' ] }
 						className={ classnames(
 							'amp-block-story-cta__link', {
 								'has-background': backgroundColor.color,
