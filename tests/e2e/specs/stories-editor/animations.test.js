@@ -72,7 +72,7 @@ describe( 'Story Animations', () => {
 		page.waitForSelector( '.components-animate__appear button[aria-label="Begin after: Story Author"]' );
 
 		expect( await page.evaluate( () => {
-			//return document.querySelector( '.components-animate__appear button[aria-label="Begin after: Story Author"]' ).innerHTML;
+			return document.querySelector( '.components-animate__appear button[aria-label="Begin after: Story Author"]' ).innerHTML;
 		} ) ).toContain( 'admin' );
 	} );
 
