@@ -21,25 +21,30 @@ describe( 'Story Animations', () => {
 		await createNewPost( { postType: 'amp_story' } );
 	} );
 
+	const animationTypeSelector = '.components-select-control__input';
+	const unSelectedAnimationSelector = '.components-animate__appear button[aria-checked="false"]';
+	const authorBlockClassName = 'wp-block-amp-amp-story-post-author';
+
 	it( 'should save correct animation values', async () => {
 		// Add Author block with animation.
+
+		const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
 		await insertBlock( 'Author' );
-		await page.waitForSelector( '.components-select-control__input' );
-		await page.select( '.components-select-control__input', 'fly-in-bottom' );
-		await page.waitForSelector( 'input[aria-label="Delay (ms)"]' );
-		await page.type( 'input[aria-label="Delay (ms)"]', '15' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'fly-in-bottom' );
+		await page.waitForSelector( animationDelaySelector );
+		await page.type( animationDelaySelector, '15' );
 
 		await saveDraft();
 		await page.reload();
 
-		await page.waitForSelector( '.wp-block-amp-amp-story-post-author' );
+		await page.waitForSelector( `.${ authorBlockClassName }` );
+		await selectBlockByClassName( authorBlockClassName );
+		await page.waitForSelector( animationDelaySelector );
 
-		await selectBlockByClassName( 'wp-block-amp-amp-story-post-author' );
-		await page.waitForSelector( 'input[aria-label="Delay (ms)"]' );
-
-		expect( await page.evaluate( () => {
-			return document.querySelector( 'input[aria-label="Delay (ms)"]' ).value;
-		} ) ).toBe( '15' );
+		expect( await page.evaluate( ( selector ) => {
+			return document.querySelector( selector ).value;
+		}, animationDelaySelector ) ).toBe( '15' );
 
 		expect( await page.evaluate( () => {
 			return document.querySelector( '.components-select-control__input [value="fly-in-bottom"]' ).selected;
@@ -49,54 +54,64 @@ describe( 'Story Animations', () => {
 	it( 'should save correct animation after values', async () => {
 		// Add Author block with animation.
 		await insertBlock( 'Author' );
-		await page.waitForSelector( '.components-select-control__input' );
-		await page.select( '.components-select-control__input', 'fly-in-bottom' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'fly-in-bottom' );
 
 		// Add Date block with animation.
 		await insertBlock( 'Date' );
-		await page.waitForSelector( '.components-select-control__input' );
-		await page.select( '.components-select-control__input', 'pulse' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'pulse' );
 
 		// Add Author block as Begin After.
 		await page.waitForSelector( 'button[aria-label="Begin immediately"]' );
 		await clickButton( 'Immediately' );
 
-		page.waitForSelector( '.components-animate__appear button[aria-checked="false"]' );
-		await page.click( '.components-animate__appear button[aria-checked="false"]' );
+		await page.waitForSelector( unSelectedAnimationSelector );
+		await page.evaluate( ( selector ) => {
+			document.querySelector( selector ).click();
+		}, unSelectedAnimationSelector );
 		await saveDraft();
 		await page.reload();
 
-		await page.waitForSelector( '.wp-block-amp-amp-story-post-date' );
-		await selectBlockByClassName( 'wp-block-amp-amp-story-post-date' );
+		const dateBlockClassName = 'wp-block-amp-amp-story-post-date';
+		await page.waitForSelector( `.${ dateBlockClassName }` );
+		await selectBlockByClassName( dateBlockClassName );
 
-		page.waitForSelector( 'button[aria-label="Begin after: Story Author"]' );
-		expect( await page.evaluate( () => {
-			return document.querySelector( 'button[aria-label="Begin after: Story Author"]' ).innerHTML;
-		} ) ).toContain( 'admin' );
+		const selectedAuthorSelector = 'button[aria-label="Begin after: Story Author"]';
+		await page.waitForSelector( selectedAuthorSelector );
+
+		expect( await page.evaluate( ( selector ) => {
+			return document.querySelector( selector ).innerHTML;
+		}, selectedAuthorSelector ) ).toContain( 'admin' );
 	} );
 
 	it( 'should not allow creating a cycle in animation after', async () => {
 		// Add Author block with animation.
 		await insertBlock( 'Author' );
-		await page.select( '.components-select-control__input', 'fly-in-bottom' );
+		await page.select( animationTypeSelector, 'fly-in-bottom' );
 
 		// Add Date block with animation.
 		await insertBlock( 'Date' );
-		await page.select( '.components-select-control__input', 'pulse' );
+		await page.select( animationTypeSelector, 'pulse' );
 		await page.waitForSelector( 'label[for="amp-stories-animation-order-picker"]' );
 		await clickButton( 'Immediately' );
 
-		await page.waitForSelector( '.components-animate__appear button[aria-checked="false"]' );
-		await page.click( '.components-animate__appear button[aria-checked="false"]' );
-
-		await selectBlockByClassName( 'wp-block-amp-amp-story-post-author' );
+		await page.waitForSelector( unSelectedAnimationSelector );
+		await page.evaluate( ( selector ) => {
+			document.querySelector( selector ).click();
+		}, unSelectedAnimationSelector );
+		await selectBlockByClassName( authorBlockClassName );
 
 		await page.waitForSelector( 'label[for="amp-stories-animation-order-picker"]' );
 		await clickButton( 'Immediately' );
 		await page.waitForSelector( '.components-animate__appear' );
 
+		expect( await page.evaluate( ( selector ) => {
+			return document.querySelector( selector );
+		}, unSelectedAnimationSelector ) ).toBeNull();
+
 		expect( await page.evaluate( () => {
-			return document.querySelector( '.components-animate__appear button[aria-checked="false"]' );
-		} ) ).toBeNull();
+			return document.querySelector( 'button[aria-label="Begin immediately"]' ).innerHTML;
+		} ) ).toContain( 'Immediately' );
 	} );
 } );
