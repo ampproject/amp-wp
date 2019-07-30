@@ -58,6 +58,7 @@ import {
 	maybeUpdateAutoAdvanceAfterMedia,
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
+	maybeAddMissingAnchor,
 } from './helpers';
 
 import { ALLOWED_BLOCKS } from './constants';
@@ -268,6 +269,8 @@ store.subscribe( () => {
 		for ( const item of animatedBlocksPerPage ) {
 			const { id, parent, animationType, duration, delay } = item;
 
+			// If the parent block wasn't saved previously it doesn't have an anchor and we have to set it.
+			maybeAddMissingAnchor( parent );
 			const parentBlock = parent ? getBlock( parent ) : undefined;
 
 			updateBlockAttributes( id, {
