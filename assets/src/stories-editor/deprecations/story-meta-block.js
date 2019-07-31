@@ -15,7 +15,6 @@ import { RichText } from '@wordpress/block-editor';
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../helpers';
 
 export default ( { tagName } ) => {
-
 	const blockAttributes = {
 		align: {
 			type: 'string',
@@ -26,7 +25,7 @@ export default ( { tagName } ) => {
 	 * Meta blocks save logic for plugin version 1.2.0
 	 *
 	 * @param {Object} Attributes attributes
-	 * @returns {Object} Save element.
+	 * @return {Object} Save element.
 	 */
 	const MetaBlockSaveV120 = ( { attributes } ) => {
 		const { ampFitText } = attributes;
@@ -75,6 +74,6 @@ export default ( { tagName } ) => {
 					...omit( attributes, [ 'deprecated', 'anchor' ] ),
 				};
 			},
-		}
+		},
 	];
 };
