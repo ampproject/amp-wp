@@ -3,10 +3,10 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
-import { includes } from 'lodash';
+import { includes, get } from 'lodash';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { migrateV120 } from './shared';
 

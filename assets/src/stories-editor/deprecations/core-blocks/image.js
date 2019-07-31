@@ -5,7 +5,7 @@ import classnames from 'classnames';
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { migrateV120 } from './shared';
 

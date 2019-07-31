@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import classnames from 'classnames';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { migrateV120 } from './shared';
 
@@ -132,7 +132,7 @@ const saveV120 = ( { attributes } ) => {
 
 	const classes = classnames( backgroundClass, {
 		'has-fixed-layout': hasFixedLayout,
-		'has-background': !! backgroundClass,
+		'has-background': Boolean( backgroundClass ),
 	} );
 
 	const Section = ( { type, rows } ) => {
@@ -158,6 +158,11 @@ const saveV120 = ( { attributes } ) => {
 				) ) }
 			</Tag>
 		);
+	};
+
+	Section.propTypes = {
+		rows: PropTypes.object,
+		type: PropTypes.string,
 	};
 
 	return (

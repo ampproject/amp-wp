@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { migrateV120 } from './shared';
 
@@ -22,7 +22,7 @@ const blockAttributes = {
 	},
 	textAlign: {
 		type: 'string',
-	}
+	},
 };
 
 const saveV120 = ( { attributes } ) => {

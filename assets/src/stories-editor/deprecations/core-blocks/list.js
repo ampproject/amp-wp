@@ -4,7 +4,7 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies.
+ * Internal dependencies
  */
 import { migrateV120 } from './shared';
 
@@ -24,7 +24,7 @@ const blockAttributes = {
 		selector: 'ol,ul',
 		multiline: 'li',
 		default: '',
-	}
+	},
 };
 
 const saveV120 = ( { attributes } ) => {
