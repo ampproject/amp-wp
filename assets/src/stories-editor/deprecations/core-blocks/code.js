@@ -2,7 +2,11 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
+
+/**
+ * Internal dependencies.
+ */
+import { migrateV120 } from './shared';
 
 const blockAttributes = {
 	content: {
@@ -33,11 +37,7 @@ const deprecated = [
 
 		save: saveV120,
 
-		migrate: ( attributes ) => {
-			return {
-				...omit( attributes, [ 'deprecated', 'anchor' ] ),
-			};
-		},
+		migrate: migrateV120,
 	},
 ];
 

@@ -2,7 +2,11 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
+
+/**
+ * Internal dependencies.
+ */
+import { migrateV120 } from './shared';
 
 /**
  * WordPress dependencies
@@ -115,14 +119,8 @@ const deprecated = [
 				default: '1.2.0',
 			},
 		},
-
 		save: saveV120,
-
-		migrate: ( attributes ) => {
-			return {
-				...omit( attributes, [ 'deprecated', 'anchor' ] ),
-			};
-		},
+		migrate: migrateV120,
 	},
 ];
 
