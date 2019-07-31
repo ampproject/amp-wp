@@ -1318,6 +1318,23 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 	}
 };
 
+export const maybeRemoveDeprecatedSetting = ( clientId ) => {
+	const block = getBlock( clientId );
+
+	if ( ! block ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	if ( attributes.deprecated && 'migrated' === attributes.deprecated ) {
+		debugger;
+		updateBlockAttributes( clientId, {
+			deprecated: null,
+		} );
+	}
+};
+
 /**
  * Sets width and height for blocks if they haven't been modified yet.
  *

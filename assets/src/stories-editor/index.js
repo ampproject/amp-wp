@@ -56,6 +56,7 @@ import {
 	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
+	maybeRemoveDeprecatedSetting,
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
@@ -214,6 +215,7 @@ subscribe( async () => {
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
 		maybeSetInitialSize( block );
+		maybeRemoveDeprecatedSetting( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
