@@ -50,6 +50,7 @@ import {
 	wrapBlockInGridLayerDeprecations,
 	addAMPAttributesDeprecations,
 } from '../deprecations/filters';
+import { default as MetaBlockDeprecated } from '../deprecations/story-meta-block';
 
 const { ampStoriesFonts } = window;
 
@@ -1066,6 +1067,7 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		attributes: schema,
 		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
+		deprecated: MetaBlockDeprecated( { tagName } ),
 	};
 };
 

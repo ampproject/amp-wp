@@ -8,7 +8,6 @@ import { __ } from '@wordpress/i18n';
  */
 import { getMetaBlockSettings } from '../../helpers';
 import './edit.css';
-import deprecated from './deprecated';
 
 export const name = 'amp/amp-story-post-author';
 
@@ -28,6 +27,4 @@ export const settings = {
 		attribute: 'author',
 		isEditable: false,
 	} ),
-
-	deprecated,
 };
