@@ -201,7 +201,7 @@ saveV120.propTypes = {
 	} ).isRequired,
 };
 
-const deprecatedImage = [
+const deprecated = [
 	{
 		attributes: {
 			...blockAttributes,
@@ -220,4 +220,4 @@ const deprecatedImage = [
 	},
 ];
 
-export default deprecatedImage;
+export default deprecated;
