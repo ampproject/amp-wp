@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { last } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import { createNewPost, clickButton, saveDraft } from '@wordpress/e2e-test-utils';
@@ -11,7 +6,7 @@ import { createNewPost, clickButton, saveDraft } from '@wordpress/e2e-test-utils
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience, insertBlock, selectBlockByClassName } from '../../utils';
+import { activateExperience, deactivateExperience, insertBlock, selectBlockByClassName, openPreviewPage } from '../../utils';
 
 describe( 'Story Animations', () => {
 	beforeAll( async () => {
@@ -120,34 +115,22 @@ describe( 'Story Animations', () => {
 		} ) ).toContain( 'Immediately' );
 	} );
 
-	// This test is skipped since for some reason the preview tab stays waiting.
-	// @todo Needs fixing.
-	it.skip( 'should save ID to the same element as animation', async () => { // eslint-disable-line jest/no-disabled-tests
+	it( 'should save ID to the same element as animation', async () => {
 		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.select( animationTypeSelector, 'pulse' );
 		await saveDraft();
-
-		const previewSelector = '.editor-post-preview';
-		await page.waitForSelector( previewSelector );
-
-		let openTabs = await browser.pages();
-		const expectedTabsCount = openTabs.length + 1;
-
-		await page.click( previewSelector );
-		await page.waitForNavigation();
-
-		// Wait for the new tab to open.
-		while ( openTabs.length < expectedTabsCount ) {
-			openTabs = await browser.pages(); // eslint-disable-line
-		}
-
-		const previewPage = last( openTabs );
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
 		await previewPage.waitForSelector( '.amp-story-block-wrapper' );
 
-		expect( await previewPage.evaluate( () => {
-			const el = document.querySelector( '.amp-story-block-wrapper' );
-			return el.getAttribute( 'id' ).length && el.getAttribute( 'animate-in' ).length;
-		} ) ).toBe( true );
+		const [ elementHandle ] = await previewPage.$x( '//*[contains(@class,"amp-story-block-wrapper")]' );
+		const idHandle = await elementHandle.getProperty( 'id' );
+		const idValue = await idHandle.jsonValue();
+		expect( idValue ).not.toBeUndefined();
+
+		const animationHandle = await elementHandle.getProperty( 'animate-in' );
+		const animateValue = await animationHandle.jsonValue();
+		expect( animateValue ).toBe( 'pulse' );
 	} );
 } );
