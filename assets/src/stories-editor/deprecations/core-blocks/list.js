@@ -48,6 +48,10 @@ const deprecated = [
 			},
 		},
 
+		supports: {
+			className: false,
+		},
+
 		save: saveV120,
 
 		migrate: ( attributes ) => {
