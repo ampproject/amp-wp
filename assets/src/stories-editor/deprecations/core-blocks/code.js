@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { omit } from 'lodash';
 
 const blockAttributes = {
 	content: {
