@@ -1321,20 +1321,18 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 /**
  * Remove deprecated attribute if the block was just migrated.
  *
- * @param {string} clientId Block Id.
+ * @param {Object} block Block.
  */
-export const maybeRemoveDeprecatedSetting = ( clientId ) => {
-	const block = getBlock( clientId );
-
+export const maybeRemoveDeprecatedSetting = ( block ) => {
 	if ( ! block ) {
 		return;
 	}
 
 	const { attributes } = block;
 
-	// If the block was just migrated, save the block.
+	// If the block was just migrated, update the block to initiate unsaved state.
 	if ( attributes.deprecated && 'migrated' === attributes.deprecated ) {
-		updateBlockAttributes( clientId, {
+		updateBlockAttributes( block.clientId, {
 			deprecated: null,
 		} );
 	}

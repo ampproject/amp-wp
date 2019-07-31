@@ -119,6 +119,7 @@ domReady( () => {
 		if ( block.attributes.ampFontFamily ) {
 			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
 		}
+		maybeRemoveDeprecatedSetting( block );
 	}
 
 	// Enforce fixed toolbar.
@@ -215,7 +216,6 @@ subscribe( async () => {
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
 		maybeSetInitialSize( block );
-		maybeRemoveDeprecatedSetting( block );
 	}
 
 	allBlocksWithChildren = getClientIdsWithDescendants();
