@@ -11,7 +11,7 @@ import { omit } from 'lodash';
  */
 export const migrateV120 = ( attributes ) => {
 	return {
-		...omit( attributes, [ 'anchor', 'ampAnimationAfter' ] ),
+		...omit( attributes, [ 'anchor' ] ),
 		deprecated: 'migrated', // This is needed for detecting migrated blocks in the editor.
 	};
 };

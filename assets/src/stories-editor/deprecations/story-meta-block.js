@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { omit } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -13,6 +12,7 @@ import { RichText } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../helpers';
+import { migrateV120 } from './shared';
 
 export default ( { tagName } ) => {
 	const blockAttributes = {
@@ -69,11 +69,7 @@ export default ( { tagName } ) => {
 				},
 			},
 			save: MetaBlockSaveV120,
-			migrate: ( attributes ) => {
-				return {
-					...omit( attributes, [ 'deprecated', 'anchor' ] ),
-				};
-			},
+			migrate: migrateV120,
 		},
 	];
 };

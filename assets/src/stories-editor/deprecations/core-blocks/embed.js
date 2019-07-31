@@ -7,7 +7,7 @@ import classnames from 'classnames';
 /**
  * Internal dependencies
  */
-import { migrateV120 } from './shared';
+import { migrateV120 } from '../shared';
 
 /**
  * WordPress dependencies

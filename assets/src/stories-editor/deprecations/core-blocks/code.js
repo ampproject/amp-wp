@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * Internal dependencies
  */
-import { migrateV120 } from './shared';
+import { migrateV120 } from '../shared';
 
 const blockAttributes = {
 	content: {
