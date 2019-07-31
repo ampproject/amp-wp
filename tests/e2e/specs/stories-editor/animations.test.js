@@ -124,13 +124,14 @@ describe( 'Story Animations', () => {
 		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
 		await previewPage.waitForSelector( '.amp-story-block-wrapper' );
 
-		const [ elementHandle ] = await previewPage.$x( '//*[contains(@class,"amp-story-block-wrapper")]' );
-		const idHandle = await elementHandle.getProperty( 'id' );
-		const idValue = await idHandle.jsonValue();
-		expect( idValue ).not.toBeUndefined();
-
-		const animationHandle = await elementHandle.getProperty( 'animate-in' );
+		let [ elementHandle ] = await previewPage.$x( '//*[contains(@class,"amp-story-block-wrapper")]/@animate-in' );
+		const animationHandle = await elementHandle.getProperty( 'value' );
 		const animateValue = await animationHandle.jsonValue();
 		expect( animateValue ).toBe( 'pulse' );
+
+		[ elementHandle ] = await previewPage.$x( '//*[contains(@class,"amp-story-block-wrapper")]/@id' );
+		const idHandle = await elementHandle.getProperty( 'value' );
+		const idValue = await idHandle.jsonValue();
+		expect( idValue ).not.toBeUndefined();
 	} );
 } );
