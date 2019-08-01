@@ -921,28 +921,24 @@ function amp_get_post_image_metadata( $post = null ) {
 }
 
 /**
- * Get schema.org metadata for the current query.
+ * Get the publisher logo.
  *
- * @since 0.7
- * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
+ * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
+ * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
+ * would not be acceptable, even though it fits in the 600x60px rectangle."
  *
- * @return array $metadata All schema.org metadata for the post.
+ * @since 1.2.1
+ * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
+ *
+ * @return array {
+ *     Publisher logo. Returns WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
+ *
+ *     @type string $url    Image URL.
+ *     @type int    $width  Width. Optional.
+ *     @type int    $height Height. Optional.
+ * }
  */
-function amp_get_schemaorg_metadata() {
-	$metadata = [
-		'@context'  => 'http://schema.org',
-		'publisher' => [
-			'@type' => 'Organization',
-			'name'  => get_bloginfo( 'name' ),
-		],
-	];
-
-	/*
-	 * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
-	 * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
-	 * would not be acceptable, even though it fits in the 600x60px rectangle."
-	 * See <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
-	 */
+function amp_get_publisher_logo() {
 	$max_logo_width  = 600;
 	$max_logo_height = 60;
 	$custom_logo_id  = get_theme_mod( 'custom_logo' );
@@ -991,12 +987,40 @@ function amp_get_schemaorg_metadata() {
 		unset( $schema_img['width'], $schema_img['height'] ); // Clear width/height since now unknown, and not required.
 	}
 
-	if ( ! empty( $schema_img['url'] ) ) {
+	// Fallback to serving the WordPress logo.
+	if ( empty( $schema_img['url'] ) ) {
+		return [
+			'url' => admin_url( 'images/wordpress-logo.png' ),
+		];
+	}
+
+	return $schema_img;
+}
+
+/**
+ * Get schema.org metadata for the current query.
+ *
+ * @since 0.7
+ * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
+ *
+ * @return array $metadata All schema.org metadata for the post.
+ */
+function amp_get_schemaorg_metadata() {
+	$metadata = [
+		'@context'  => 'http://schema.org',
+		'publisher' => [
+			'@type' => 'Organization',
+			'name'  => get_bloginfo( 'name' ),
+		],
+	];
+
+	$publisher_logo = amp_get_publisher_logo();
+	if ( $publisher_logo ) {
 		$metadata['publisher']['logo'] = array_merge(
 			[
 				'@type' => 'ImageObject',
 			],
-			$schema_img
+			$publisher_logo
 		);
 	}
 
