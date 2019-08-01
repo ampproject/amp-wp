@@ -1359,7 +1359,7 @@ class AMP_Story_Post_Type {
 		];
 
 		$style['top']  = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
-		$style['left'] = empty( $atts['positionLeft'] ) ? '0%' : $atts['positionLeft'] . '%';
+		$style['left'] = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
 		if ( isset( $atts['width'] ) ) {
 			$style['width'] = self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%';
 		}
