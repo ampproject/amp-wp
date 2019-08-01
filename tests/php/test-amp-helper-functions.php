@@ -776,6 +776,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$expected_publisher = [
 			'@type' => $publisher_type,
 			'name'  => 'Foo',
+			'logo'  => [
+				'@type' => 'ImageObject',
+				'url'   => admin_url( 'images/wordpress-logo.png' ),
+			],
 		];
 
 		$user_id = self::factory()->user->create(
