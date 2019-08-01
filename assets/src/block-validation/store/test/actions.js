@@ -13,9 +13,10 @@ describe( 'actions', () => {
 			const error = { foo: 'bar' };
 
 			const result = addValidationError( error );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'ADD_VALIDATION_ERROR',
 				error,
+				clientId: undefined,
 			} );
 		} );
 
@@ -24,7 +25,7 @@ describe( 'actions', () => {
 			const error = { foo: 'bar' };
 
 			const result = addValidationError( error, clientId );
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'ADD_VALIDATION_ERROR',
 				error,
 				clientId,
@@ -36,7 +37,7 @@ describe( 'actions', () => {
 		it( 'should return the RESET_VALIDATION_ERRORS action', () => {
 			const result = resetValidationErrors();
 
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'RESET_VALIDATION_ERRORS',
 			} );
 		} );
@@ -44,10 +45,12 @@ describe( 'actions', () => {
 
 	describe( 'updateReviewLink', () => {
 		it( 'should return the UPDATE_REVIEW_LINK action', () => {
-			const result = updateReviewLink();
+			const url = 'https://example.com/';
+			const result = updateReviewLink( url );
 
-			expect( result ).toEqual( {
+			expect( result ).toStrictEqual( {
 				type: 'UPDATE_REVIEW_LINK',
+				url,
 			} );
 		} );
 	} );

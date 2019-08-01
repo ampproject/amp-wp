@@ -10,7 +10,7 @@ describe( 'block order controls', () => {
 	describe( 'getBlockOrderDescription', () => {
 		const type = 'TestType';
 
-		it( 'Should generate a title for the first item moving up', () => {
+		it( 'should generate a title for the first item moving up', () => {
 			expect( getBlockOrderDescription(
 				type,
 				1,
@@ -23,7 +23,7 @@ describe( 'block order controls', () => {
 			);
 		} );
 
-		it( 'Should generate a title for the last item moving down', () => {
+		it( 'should generate a title for the last item moving down', () => {
 			expect( getBlockOrderDescription(
 				type,
 				3,
@@ -34,7 +34,7 @@ describe( 'block order controls', () => {
 			) ).toBe( `Block ${ type } is at the end of the content and can’t be moved down` );
 		} );
 
-		it( 'Should generate a title for the second item moving up', () => {
+		it( 'should generate a title for the second item moving up', () => {
 			expect( getBlockOrderDescription(
 				type,
 				2,
@@ -45,7 +45,7 @@ describe( 'block order controls', () => {
 			) ).toBe( `Move ${ type } block from position 2 up to position 1` );
 		} );
 
-		it( 'Should generate a title for the second item moving down', () => {
+		it( 'should generate a title for the second item moving down', () => {
 			expect( getBlockOrderDescription(
 				type,
 				2,
@@ -56,7 +56,7 @@ describe( 'block order controls', () => {
 			) ).toBe( `Move ${ type } block from position 2 down to position 3` );
 		} );
 
-		it( 'Should generate a title for the only item in the list', () => {
+		it( 'should generate a title for the only item in the list', () => {
 			expect( getBlockOrderDescription(
 				type,
 				1,

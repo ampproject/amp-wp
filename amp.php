@@ -364,8 +364,10 @@ function amp_init() {
 
 	if ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 		AMP_Story_Post_Type::register();
-		add_action( 'wp_loaded', 'amp_story_templates' );
 	}
+
+	// Does its own is_stories_experience_enabled() check.
+	add_action( 'wp_loaded', 'amp_story_templates' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
 		WP_CLI::add_command( 'amp', new AMP_CLI() );

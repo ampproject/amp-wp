@@ -45,8 +45,8 @@ const parseDropEvent = ( event ) => {
 };
 
 class BlockNavigationItem extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			isDragging: false,
@@ -62,6 +62,8 @@ class BlockNavigationItem extends Component {
 			const index = getBlockIndex( clientId );
 			return position.y === 'top' ? index : index + 1;
 		}
+
+		return undefined;
 	}
 
 	onDrop( event, position ) {

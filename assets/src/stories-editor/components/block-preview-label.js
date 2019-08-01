@@ -93,6 +93,9 @@ export default withSelect( ( select, { block, label } ) => {
 		case 'amp/amp-story-post-title':
 			label = getEditedPostAttribute( 'title' ) || blockType.title;
 			break;
+
+		default:
+			break;
 	}
 
 	return {

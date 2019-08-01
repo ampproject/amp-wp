@@ -56,8 +56,8 @@ const icon = <SVG viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><Path f
  * @class
  */
 class CustomVideoBlockEdit extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			editing: ! this.props.attributes.src,

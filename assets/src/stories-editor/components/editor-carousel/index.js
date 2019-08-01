@@ -25,8 +25,8 @@ const TOTAL_PAGE_MARGIN = 50;
 const PAGE_BORDER = 1;
 
 class EditorCarousel extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.translateWrapper.bind( this );
 	}

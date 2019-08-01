@@ -27,8 +27,8 @@ import './edit.css';
 import { StoryBlockMover } from '../../components';
 
 class TextBlockEdit extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			isEditing: false,

@@ -127,14 +127,14 @@ const assertNoResultsMessageToBePresent = ( element ) => {
 	const noResultsMessage = element.querySelector(
 		'.block-editor-inserter__no-results'
 	);
-	expect( noResultsMessage.textContent ).toEqual( 'No blocks found.' );
+	expect( noResultsMessage.textContent ).toStrictEqual( 'No blocks found.' );
 };
 
 const assertNoResultsMessageNotToBePresent = ( element ) => {
 	const noResultsMessage = element.querySelector(
 		'.block-editor-inserter__no-results'
 	);
-	expect( noResultsMessage ).toBe( null );
+	expect( noResultsMessage ).toBeNull( );
 };
 
 const assertOpenedPanels = ( element, expectedOpen = 0 ) => {
@@ -175,7 +175,7 @@ describe( 'InserterMenu', () => {
 			'.block-editor-block-types-list__item'
 		);
 
-		expect( visibleBlocks ).toBe( null );
+		expect( visibleBlocks ).toBeNull( );
 
 		assertNoResultsMessageToBePresent( element );
 	} );
@@ -186,9 +186,9 @@ describe( 'InserterMenu', () => {
 			'.block-editor-block-types-list__item-title'
 		);
 		expect( visibleBlocks ).toHaveLength( 3 );
-		expect( visibleBlocks[ 0 ].textContent ).toEqual( 'Text' );
-		expect( visibleBlocks[ 1 ].textContent ).toEqual( 'Advanced Text' );
-		expect( visibleBlocks[ 2 ].textContent ).toEqual( 'Some Other Block' );
+		expect( visibleBlocks[ 0 ].textContent ).toStrictEqual( 'Text' );
+		expect( visibleBlocks[ 1 ].textContent ).toStrictEqual( 'Advanced Text' );
+		expect( visibleBlocks[ 2 ].textContent ).toStrictEqual( 'Some Other Block' );
 	} );
 
 	it( 'should limit the number of items shown in the suggested tab', () => {
@@ -327,25 +327,25 @@ describe( 'InserterMenu', () => {
 
 describe( 'searchItems', () => {
 	it( 'should search items using the title ignoring case', () => {
-		expect( searchItems( items, 'TEXT' ) ).toEqual(
+		expect( searchItems( items, 'TEXT' ) ).toStrictEqual(
 			[ textItem, advancedTextItem, textEmbedItem ]
 		);
 	} );
 
 	it( 'should search items using the keywords', () => {
-		expect( searchItems( items, 'GOOGL' ) ).toEqual(
+		expect( searchItems( items, 'GOOGL' ) ).toStrictEqual(
 			[ youtubeItem ]
 		);
 	} );
 
 	it( 'should search items using the categories', () => {
-		expect( searchItems( items, 'LAYOUT' ) ).toEqual(
+		expect( searchItems( items, 'LAYOUT' ) ).toStrictEqual(
 			[ moreItem ]
 		);
 	} );
 
 	it( 'should ignore a leading slash on a search term', () => {
-		expect( searchItems( items, '/GOOGL' ) ).toEqual(
+		expect( searchItems( items, '/GOOGL' ) ).toStrictEqual(
 			[ youtubeItem ]
 		);
 	} );
@@ -353,19 +353,19 @@ describe( 'searchItems', () => {
 
 describe( 'normalizeTerm', () => {
 	it( 'should remove diacritics', () => {
-		expect( normalizeTerm( 'média' ) ).toEqual(
+		expect( normalizeTerm( 'média' ) ).toStrictEqual(
 			'media'
 		);
 	} );
 
 	it( 'should trim whitespace', () => {
-		expect( normalizeTerm( '  média  ' ) ).toEqual(
+		expect( normalizeTerm( '  média  ' ) ).toStrictEqual(
 			'media'
 		);
 	} );
 
 	it( 'should convert to lowercase', () => {
-		expect( normalizeTerm( '  Média  ' ) ).toEqual(
+		expect( normalizeTerm( '  Média  ' ) ).toStrictEqual(
 			'media'
 		);
 	} );

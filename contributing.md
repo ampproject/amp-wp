@@ -245,10 +245,17 @@ npm run test:e2e -- --wordpress-base-url=https://my-amp-dev-site.local
 For debugging purposes, you can also run the E2E tests in non-headless mode:
 
 ```bash
-HEADLESS=false npm run test:e2e
+npm run test:e2e:interactive
 ```
 
-Sometimes one might to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
+Note that this will also slow down all interactions during tests by 80ms. You can control these values individually too:
+
+```bash
+PUPPETEER_HEADLESS=false npm run test:e2e # Interactive mode, normal speed.
+PUPPETEER_SLOWMO=200 npm run test:e2e # Headless mode, slowed down by 200ms.
+```
+
+Sometimes one might want to test additional scenarios that aren't possible in a WordPress installation out of the box. That's why the test setup allows for for adding some utility plugins that can be activated during E2E tests.
                                                                                                                                                        
 For example, such a plugin could create a custom post type and the accompanying E2E test would verify that block validation errors are shown for this custom post type too.
 
