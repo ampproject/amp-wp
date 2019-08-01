@@ -29,6 +29,8 @@ $metadata = amp_get_schemaorg_metadata();
 		<?php
 		if ( isset( $metadata['publisher']['logo']['url'] ) ) {
 			$publisher_logo_src = $metadata['publisher']['logo']['url'];
+		} elseif ( isset( $metadata['publisher']['logo'] ) && is_string( $metadata['publisher']['logo'] ) ) {
+			$publisher_logo_src = $metadata['publisher']['logo'];
 		} else {
 			$publisher_logo_src = admin_url( 'images/wordpress-logo.png' );
 		}
@@ -52,12 +54,12 @@ $metadata = amp_get_schemaorg_metadata();
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
-			poster-portrait-src="<?php echo esc_url( $meta_images['poster-portrait']['url'] ); ?>"
-			<?php if ( isset( $meta_images['poster-square']['url'] ) ) : ?>
-				poster-square-src="<?php echo esc_url( $meta_images['poster-square']['url'] ); ?>"
+			poster-portrait-src="<?php echo esc_url( $meta_images['poster-portrait'] ); ?>"
+			<?php if ( isset( $meta_images['poster-square'] ) ) : ?>
+				poster-square-src="<?php echo esc_url( $meta_images['poster-square'] ); ?>"
 			<?php endif; ?>
-			<?php if ( isset( $meta_images['poster-landscape']['url'] ) ) : ?>
-				poster-landscape-src="<?php echo esc_url( $meta_images['poster-landscape']['url'] ); ?>"
+			<?php if ( isset( $meta_images['poster-landscape'] ) ) : ?>
+				poster-landscape-src="<?php echo esc_url( $meta_images['poster-landscape'] ); ?>"
 			<?php endif; ?>
 		>
 			<?php

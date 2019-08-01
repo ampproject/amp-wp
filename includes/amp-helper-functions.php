@@ -936,18 +936,10 @@ function amp_get_post_image_metadata( $post = null ) {
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
  * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
- * @return array {
- *     Publisher logo. Returns WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
- *
- *     @type string $url    Image URL.
- *     @type int    $width  Width. Optional.
- *     @type int    $height Height. Optional.
- * }
+ * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
 function amp_get_publisher_logo() {
-	$schema_img = [
-		'url' => '',
-	];
+	$logo_image_url = null;
 
 	// @todo Consider passing this as an argument rather than relying on global state.
 	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
@@ -964,26 +956,16 @@ function amp_get_publisher_logo() {
 	if ( has_custom_logo() && $custom_logo_id ) {
 		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
 		if ( $custom_logo_img ) {
-			// @todo Warning: The width/height returned may not actually be physically the $logo_width and $logo_height for the image returned.
-			$schema_img = [
-				'url'    => $custom_logo_img[0],
-				'width'  => $custom_logo_img[1],
-				'height' => $custom_logo_img[2],
-			];
+			$logo_image_url = $custom_logo_img[0];
 		}
 	}
 
 	// Try Site Icon, though it is not ideal for non-Story because it should be square.
 	$site_icon_id = get_option( 'site_icon' );
-	if ( empty( $schema_img['url'] ) && $site_icon_id ) {
+	if ( empty( $logo_image_url ) && $site_icon_id ) {
 		$site_icon_src = wp_get_attachment_image_src( $site_icon_id, [ $logo_width, $logo_height ], false );
 		if ( ! empty( $site_icon_src ) ) {
-			// @todo Warning: The width/height returned may not actually be physically the $logo_width and $logo_height for the image returned.
-			$schema_img = [
-				'url'    => $site_icon_src[0],
-				'width'  => $site_icon_src[1],
-				'height' => $site_icon_src[2],
-			];
+			$logo_image_url = $site_icon_src[0];
 		}
 	}
 
@@ -998,20 +980,17 @@ function amp_get_publisher_logo() {
 	 *
 	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
-	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $schema_img['url'] );
-	if ( $filtered_schema_img_url !== $schema_img['url'] ) {
-		$schema_img['url'] = $filtered_schema_img_url;
-		unset( $schema_img['width'], $schema_img['height'] ); // Clear width/height since now unknown, and not required.
+	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
+	if ( $filtered_schema_img_url !== $logo_image_url ) {
+		$logo_image_url = $filtered_schema_img_url;
 	}
 
 	// Fallback to serving the WordPress logo.
-	if ( empty( $schema_img['url'] ) ) {
-		return [
-			'url' => admin_url( 'images/wordpress-logo.png' ),
-		];
+	if ( empty( $logo_image_url ) ) {
+		$logo_image_url = admin_url( 'images/wordpress-logo.png' );
 	}
 
-	return $schema_img;
+	return $logo_image_url;
 }
 
 /**
@@ -1033,12 +1012,7 @@ function amp_get_schemaorg_metadata() {
 
 	$publisher_logo = amp_get_publisher_logo();
 	if ( $publisher_logo ) {
-		$metadata['publisher']['logo'] = array_merge(
-			[
-				'@type' => 'ImageObject',
-			],
-			$publisher_logo
-		);
+		$metadata['publisher']['logo'] = amp_get_publisher_logo();
 	}
 
 	$post = get_queried_object();
@@ -1064,7 +1038,7 @@ function amp_get_schemaorg_metadata() {
 
 		$image_metadata = amp_get_post_image_metadata( $post );
 		if ( $image_metadata ) {
-			$metadata['image'] = $image_metadata;
+			$metadata['image'] = $image_metadata['url'];
 		}
 
 		/**

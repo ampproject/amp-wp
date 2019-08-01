@@ -117,28 +117,17 @@ class AMP_Story_Media {
 	 * @see AMP_Story_Media::poster_portrait_fallback()
 	 *
 	 * @param int|WP_Post|null $post Post.
-	 * @return array[] Images.
+	 * @return string[] Images.
 	 */
 	public static function get_story_meta_images( $post = null ) {
 		$thumbnail_id = get_post_thumbnail_id( $post );
 
-		$images     = [];
-		$image_srcs = [
-			'poster-portrait'  => wp_get_attachment_image_src( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE ),
-			'poster-square'    => wp_get_attachment_image_src( $thumbnail_id, self::STORY_SQUARE_IMAGE_SIZE ),
-			'poster-landscape' => wp_get_attachment_image_src( $thumbnail_id, self::STORY_LANDSCAPE_IMAGE_SIZE ),
+		$images = [
+			'poster-portrait'  => wp_get_attachment_image_url( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE ),
+			'poster-square'    => wp_get_attachment_image_url( $thumbnail_id, self::STORY_SQUARE_IMAGE_SIZE ),
+			'poster-landscape' => wp_get_attachment_image_url( $thumbnail_id, self::STORY_LANDSCAPE_IMAGE_SIZE ),
 		];
-		foreach ( $image_srcs as $name => $image_src ) {
-			if ( ! empty( $image_src ) ) {
-				$images[ $name ] = [
-					'url'    => $image_src[0],
-					'width'  => $image_src[1],
-					'height' => $image_src[2],
-				];
-			}
-		}
-
-		return $images;
+		return array_filter( $images );
 	}
 
 	/**
@@ -156,16 +145,13 @@ class AMP_Story_Media {
 
 		if ( ! isset( $data['image'] ) ) {
 			$data['image'] = [];
+		} elseif ( is_string( $data['image'] ) ) {
+			$data['image'] = [ $data['image'] ];
 		} elseif ( isset( $data['image']['@type'] ) ) {
 			$data['image'] = [ $data['image'] ];
 		}
 
-		foreach ( self::get_story_meta_images() as $meta_image ) {
-			$data['image'][] = array_merge(
-				[ '@type' => 'ImageObject' ],
-				$meta_image
-			);
-		}
+		$data['image'] = array_merge( $data['image'], array_values( self::get_story_meta_images() ) );
 
 		return $data;
 	}
