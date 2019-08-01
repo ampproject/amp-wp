@@ -200,6 +200,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
@@ -208,12 +209,6 @@ export const addAMPAttributes = ( settings, name ) => {
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
-		anchor: {
-			type: 'string',
-			source: 'attribute',
-			attribute: 'id',
-			selector: 'amp-story-grid-layer .amp-story-block-wrapper, amp-story-cta-layer',
-		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
@@ -256,7 +251,20 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	if ( isCTABlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: 'amp-story-cta-layer',
+		};
+	}
+
 	if ( isMovableBlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+		};
+
 		addedAttributes.positionTop = {
 			default: 0,
 			type: 'number',
@@ -1384,7 +1392,7 @@ export const maybeInitializeAnimations = () => {
 				initializeAnimation( block, page, allBlocks );
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
-				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) ) : undefined );
 				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 			}
 		}
