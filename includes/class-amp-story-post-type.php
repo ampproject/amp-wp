@@ -1360,8 +1360,12 @@ class AMP_Story_Post_Type {
 
 		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
 		$style['left']   = empty( $atts['positionLeft'] ) ? '0%' : $atts['positionLeft'] . '%';
-		$style['width']  = isset( $atts['width'] ) ? self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%' : 0;
-		$style['height'] = isset( $atts['height'] ) ? self::get_percentage_from_pixels( 'y', $atts['height'] ) . '%' : 0;
+		if ( isset( $atts['width'] ) ) {
+			$style['width'] = self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%';
+		}
+		if ( isset( $atts['height'] ) ) {
+			$style['height'] = self::get_percentage_from_pixels( 'y', $atts['height'] ) . '%';
+		}
 
 		$wrapper_style = isset( $atts['style'] ) ? $atts['style'] : '';
 
