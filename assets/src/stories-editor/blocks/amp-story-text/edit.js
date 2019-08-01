@@ -16,7 +16,6 @@ import {
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import { ENTER } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -237,17 +236,11 @@ class TextBlockEdit extends Component {
 							isDraggable={ ! isPartOfMultiSelection }
 							isMovable={ true }
 						>
+							{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
 							<div
-								role="textbox"
-								tabIndex="-1"
 								className="is-not-editing editor-rich-text block-editor-rich-text wp-block-amp-story-text"
 								onClick={ () => {
 									if ( isSelected ) {
-										this.toggleIsEditing( true );
-									}
-								} }
-								onKeyDown={ ( e ) => {
-									if ( ENTER === e.keyCode && isSelected ) {
 										this.toggleIsEditing( true );
 									}
 								} }
@@ -258,17 +251,14 @@ class TextBlockEdit extends Component {
 									}
 								} }
 							>
-								{ hasOverlay && (
-									<div
-										role="textbox"
-										tabIndex="-1"
-										className="amp-overlay"
-										onClick={ ( e ) => {
-											this.toggleOverlay( false );
-											e.stopPropagation();
-										} }
-										onKeyDown={ () => {} }
-									></div>
+								{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
+								{ hasOverlay && ( <div
+									className="amp-overlay"
+									onClick={ ( e ) => {
+										this.toggleOverlay( false );
+										e.stopPropagation();
+									} }
+								></div>
 								) }
 								<p
 									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
