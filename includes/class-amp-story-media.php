@@ -151,7 +151,10 @@ class AMP_Story_Media {
 			$data['image'] = [ $data['image'] ];
 		}
 
-		$data['image'] = array_merge( $data['image'], array_values( self::get_story_meta_images() ) );
+		$data['image'] = array_merge(
+			array_values( self::get_story_meta_images() ),
+			$data['image']
+		);
 
 		return $data;
 	}

@@ -943,11 +943,17 @@ function amp_get_publisher_logo() {
 
 	// @todo Consider passing this as an argument rather than relying on global state.
 	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		// The should be *at least* 96px square, so this is why multiplied by 10.
+		// This should be at least 96px square, so this is why multiplied by 10.
 		$logo_width  = 960;
 		$logo_height = 960;
 	} else {
-		// The should be *at most* 60x600px rectangle.
+		/*
+		 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
+		 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
+		 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
+		 * but it is not preferred; a landscape logo should be provided if possible.
+		 */
+		// @todo Increase by multiplier?
 		$logo_width  = 600;
 		$logo_height = 60;
 	}
@@ -976,7 +982,6 @@ function amp_get_publisher_logo() {
 	 * But the Custom Logo is now the preferred publisher logo, if it exists and its dimensions aren't too big.
 	 *
 	 * @since 0.3
-	 * @todo We should consider removing this because the image is not going to be the correct dimensions. This filter is primarily for Reader mode templates.
 	 *
 	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
