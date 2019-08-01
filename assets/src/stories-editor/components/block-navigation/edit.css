@@ -234,12 +234,12 @@
 }
 
 .block-editor-block-navigation__list li .block-navigation__placeholder {
-	display: none;
+	transition: height 0.2s ease;
+	height: 0;
 }
 
 /* When dragging near the top of a drop zone, display the placeholder so there is a space between this and the button above. */
 .block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top + .block-navigation__placeholder {
-	display: block;
 	visibility: hidden;
 	height: 36px;
 }
