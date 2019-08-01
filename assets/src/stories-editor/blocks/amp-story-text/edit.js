@@ -236,8 +236,10 @@ class TextBlockEdit extends Component {
 							isDraggable={ ! isPartOfMultiSelection }
 							isMovable={ true }
 						>
-							{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
+							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
 							<div
+								role="textbox"
+								tabIndex="-1"
 								className="is-not-editing editor-rich-text block-editor-rich-text wp-block-amp-story-text"
 								onClick={ () => {
 									if ( isSelected ) {
@@ -251,8 +253,10 @@ class TextBlockEdit extends Component {
 									}
 								} }
 							>
-								{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */ }
+								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
 								{ hasOverlay && ( <div
+									role="textbox"
+									tabIndex="-1"
 									className="amp-overlay"
 									onClick={ ( e ) => {
 										this.toggleOverlay( false );
