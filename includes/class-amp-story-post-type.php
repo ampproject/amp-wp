@@ -1298,7 +1298,7 @@ class AMP_Story_Post_Type {
 	public static function get_percentage_from_pixels( $axis, $pixels ) {
 		if ( 'x' === $axis ) {
 			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_WIDTH ) * 100 ), 2 );
-		} else if ( 'y' === $axis ) {
+		} elseif ( 'y' === $axis ) {
 			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_HEIGHT ) * 100 ), 2 );
 		}
 		return 0;
@@ -1324,7 +1324,7 @@ class AMP_Story_Post_Type {
 			return $block_content;
 		}
 
-		$movable_blocks = array(
+		$movable_blocks = [
 			'core/code',
 			'core/embed',
 			'core/image',
@@ -1342,7 +1342,7 @@ class AMP_Story_Post_Type {
 			'core/html',
 			'core/block', // Reusable blocks.
 			'core/template', // Reusable blocks.
-		);
+		];
 
 		$name = $block['blockName'];
 
@@ -1351,15 +1351,15 @@ class AMP_Story_Post_Type {
 			return $block_content;
 		}
 
-		$atts = $block['attrs'];
-		$wrapper_atts = array();
+		$atts         = $block['attrs'];
+		$wrapper_atts = [];
 
-		$style = array(
+		$style = [
 			'position' => 'absolute',
-		);
+		];
 
-		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
-		$style['left']   = empty( $atts['positionLeft'] ) ? '0%' : $atts['positionLeft'] . '%';
+		$style['top']  = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left'] = empty( $atts['positionLeft'] ) ? '0%' : $atts['positionLeft'] . '%';
 		if ( isset( $atts['width'] ) ) {
 			$style['width'] = self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%';
 		}
@@ -1388,14 +1388,17 @@ class AMP_Story_Post_Type {
 			}
 		}
 
-		$wrapper_atts['id'] = isset( $atts['anchor'] ) ? $atts['anchor'] : wp_generate_uuid4();
+		if ( isset( $atts['anchor'] ) ) {
+			$wrapper_atts['id'] = $atts['anchor'];
+		}
+
 		$before = "<amp-story-grid-layer template='vertical' data-block-name='$name'>
 			<div class='amp-story-block-wrapper'";
 		foreach ( $wrapper_atts as $att => $value ) {
 			$before .= " $att='$value'";
 		}
 		$before .= '>';
-		$after = '</div></amp-story-grid-layer>';
+		$after   = '</div></amp-story-grid-layer>';
 
 		return $before . $block_content . $after;
 	}
