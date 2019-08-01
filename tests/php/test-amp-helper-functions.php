@@ -776,10 +776,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$expected_publisher = [
 			'@type' => $publisher_type,
 			'name'  => 'Foo',
-			'logo'  => [
-				'@type' => 'ImageObject',
-				'url'   => admin_url( 'images/wordpress-logo.png' ),
-			],
+			'logo'  => admin_url( 'images/wordpress-logo.png' ),
 		];
 
 		$user_id = self::factory()->user->create(
@@ -834,12 +831,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		set_theme_mod( 'custom_logo', $custom_logo_id );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
-			[
-				'@type'  => $logo_type,
-				'height' => $custom_logo_height,
-				'url'    => $expected_logo_img[0],
-				'width'  => $custom_logo_width,
-			],
+			$expected_logo_img[0],
 			$metadata['publisher']['logo']
 		);
 		set_theme_mod( 'custom_logo', null );
@@ -855,12 +847,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
 
 		update_option( 'site_icon', $site_icon_id );
-		$expected_schema_site_icon = [
-			'@type'  => $logo_type,
-			'height' => 32,
-			'url'    => $expected_site_icon_img[0],
-			'width'  => 32,
-		];
+		$expected_schema_site_icon = $expected_site_icon_img[0];
 		$metadata                  = amp_get_schemaorg_metadata();
 		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
 		update_option( 'site_icon', null );
@@ -883,15 +870,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		);
 		set_theme_mod( 'custom_logo', $custom_logo_id );
 		update_option( 'site_icon', $site_icon_id );
-		$metadata   = amp_get_schemaorg_metadata();
-		$max_height = 60;
+		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
-			[
-				'@type'  => $logo_type,
-				'height' => $max_height,
-				'url'    => $expected_logo_img[0],
-				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
-			],
+			$expected_logo_img[0],
 			$metadata['publisher']['logo']
 		);
 		set_theme_mod( 'custom_logo', null );
@@ -914,7 +895,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		set_theme_mod( 'custom_logo', $custom_logo_id );
 		add_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
 		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo'] );
 		remove_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
 		set_theme_mod( 'custom_logo', null );
 
