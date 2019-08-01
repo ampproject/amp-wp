@@ -9,6 +9,7 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
  */
 import edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 
 export const name = 'amp/amp-story-text';
 
@@ -63,6 +64,8 @@ export const settings = {
 	edit,
 
 	save,
+
+	deprecated,
 
 	transforms: {
 		from: [
