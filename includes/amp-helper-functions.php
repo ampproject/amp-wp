@@ -923,12 +923,18 @@ function amp_get_post_image_metadata( $post = null ) {
 /**
  * Get the publisher logo.
  *
+ * "The following guidelines apply to logos used for general AMP pages, not AMP stories. There
+ * are different logo requirements for AMP stories."
+ *
  * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
  * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
  * would not be acceptable, even though it fits in the 600x60px rectangle."
  *
+ * For AMP Stories: "The logo shape should be a square, not a rectangle. … The logo should be at least 96x96 pixels."
+ *
  * @since 1.2.1
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
+ * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
  * @return array {
  *     Publisher logo. Returns WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
@@ -939,15 +945,26 @@ function amp_get_post_image_metadata( $post = null ) {
  * }
  */
 function amp_get_publisher_logo() {
-	$max_logo_width  = 600;
-	$max_logo_height = 60;
-	$custom_logo_id  = get_theme_mod( 'custom_logo' );
-	$schema_img      = [];
+	$schema_img = [
+		'url' => '',
+	];
 
+	// @todo Consider passing this as an argument rather than relying on global state.
+	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+		// The should be *at least* 96px square, so this is why multiplied by 10.
+		$logo_width  = 960;
+		$logo_height = 960;
+	} else {
+		// The should be *at most* 60x600px rectangle.
+		$logo_width  = 600;
+		$logo_height = 60;
+	}
+
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( has_custom_logo() && $custom_logo_id ) {
-		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $max_logo_width, $max_logo_height ], false );
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
 		if ( $custom_logo_img ) {
-			// @todo Warning: The width/height returned may not actually be physically the $max_logo_width and $max_logo_height for the image returned.
+			// @todo Warning: The width/height returned may not actually be physically the $logo_width and $logo_height for the image returned.
 			$schema_img = [
 				'url'    => $custom_logo_img[0],
 				'width'  => $custom_logo_img[1],
@@ -956,19 +973,18 @@ function amp_get_publisher_logo() {
 		}
 	}
 
-	// Try Site Icon, though it is not ideal because "The logo should be a rectangle, not a square." per <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
-	if ( empty( $schema_img['url'] ) ) {
-		/*
-		 * Note that AMP_Post_Template::SITE_ICON_SIZE is used and not $max_logo_height because 32px is the largest
-		 * size that is defined in \WP_Site_Icon::$site_icon_sizes which is less than 60px. It may be a good idea
-		 * to add a site_icon_image_sizes filter which appends 60 to the list of sizes, but this will only help
-		 * when adding a new site icon and it would be irrelevant when a custom logo is present, per above.
-		 */
-		$schema_img = [
-			'url'    => get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ),
-			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
-			'height' => AMP_Post_Template::SITE_ICON_SIZE,
-		];
+	// Try Site Icon, though it is not ideal for non-Story because it should be square.
+	$site_icon_id = get_option( 'site_icon' );
+	if ( empty( $schema_img['url'] ) && $site_icon_id ) {
+		$site_icon_src = wp_get_attachment_image_src( $site_icon_id, [ $logo_width, $logo_height ], false );
+		if ( ! empty( $site_icon_src ) ) {
+			// @todo Warning: The width/height returned may not actually be physically the $logo_width and $logo_height for the image returned.
+			$schema_img = [
+				'url'    => $site_icon_src[0],
+				'width'  => $site_icon_src[1],
+				'height' => $site_icon_src[2],
+			];
+		}
 	}
 
 	/**
@@ -978,6 +994,7 @@ function amp_get_publisher_logo() {
 	 * But the Custom Logo is now the preferred publisher logo, if it exists and its dimensions aren't too big.
 	 *
 	 * @since 0.3
+	 * @todo We should consider removing this because the image is not going to be the correct dimensions. This filter is primarily for Reader mode templates.
 	 *
 	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */

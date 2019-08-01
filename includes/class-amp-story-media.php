@@ -75,7 +75,7 @@ class AMP_Story_Media {
 		);
 
 		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
-		add_image_size( 'amp-publisher-logo', 100, 100, true );
+		add_image_size( 'amp-publisher-logo', 100, 100, true ); // @todo Why 100 and not 96?
 
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
 		add_image_size( self::STORY_CARD_IMAGE_SIZE, self::STORY_SMALL_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
