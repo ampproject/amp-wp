@@ -1304,23 +1304,6 @@ class AMP_Story_Post_Type {
 		return 0;
 	}
 
-	private static function add_extra_block_attributes( $block_content, $block ) {
-	    if ( ! is_array( $block['attrs'] ) ) {
-	        return $block_content;
-        }
-	    $to_add = '';
-	    // Add data-font-family attribute.
-	    if ( isset( $block['attrs']['data-font-family'] ) ) {
-	        $to_add = 'data-font-family="' . esc_attr( $block['attrs']['data-font-family'] ) . '"';
-	        $block_content = preg_replace( '/^<(\w+)/i', "$1 $to_add>", $block_content );
-        }
-	    if ( isset( $block['attrs']['rotationAngle'] ) ) {
-	        $to_add = 'rotation'
-        }
-		$result = preg_replace( '/^<(\w+)/i', '$1 style="xxxx:yyyy;">', $block_content );
-	    return $block_content;
-    }
-
 	/**
 	 * Wraps each movable block into amp-story-grid-layer and animation wrapper with necessary attributes.
 	 *
@@ -1390,7 +1373,9 @@ class AMP_Story_Post_Type {
 			$wrapper_style .= "$att:$value;";
 		}
 
-		$wrapper_atts['style'] = $wrapper_style;
+		if ( ! empty( $wrapper_style ) ) {
+			$wrapper_atts['style'] = $wrapper_style;
+		}
 
 		if ( ! empty( $atts['ampAnimationType'] ) ) {
 			$wrapper_atts['animate-in'] = $atts['ampAnimationType'];
@@ -1412,7 +1397,7 @@ class AMP_Story_Post_Type {
 		$before = "<amp-story-grid-layer template='vertical' data-block-name='$name'>
 			<div class='amp-story-block-wrapper'";
 		foreach ( $wrapper_atts as $att => $value ) {
-			$before .= " $att='$value'";
+			$before .= " $att='" . esc_attr( $value ) . "'";
 		}
 		$before .= '>';
 		$after   = '</div></amp-story-grid-layer>';
