@@ -1394,7 +1394,7 @@ class AMP_Story_Post_Type {
 			$wrapper_atts['id'] = $atts['anchor'];
 		}
 
-		$before = '<amp-story-grid-layer template="vertical" data-block-name="' . $name . '"><div class="amp-story-block-wrapper"';
+		$before = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper"';
 		foreach ( $wrapper_atts as $att => $value ) {
 			$before .= ' ' . $att . '="' . esc_attr( $value ) . '"';
 		}

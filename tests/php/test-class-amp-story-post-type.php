@@ -485,7 +485,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			],
 			'blockName' => 'amp/amp-story-text',
 		];
-		$expected      = '<amp-story-grid-layer template="vertical" data-block-name="amp/amp-story-text"><div class="amp-story-block-wrapper" style="position:absolute;top:0%;left:15%;width:100.00%;height:100.00%;" animate-in="pulse" animate-in-delay="500" animate-in-after="123"><p>Some block.</p></div></amp-story-grid-layer>';
+		$expected      = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper" style="position:absolute;top:0%;left:15%;width:100.00%;height:100.00%;" animate-in="pulse" animate-in-delay="500" animate-in-after="123"><p>Some block.</p></div></amp-story-grid-layer>';
 
 		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
 		$this->assertEquals( $expected, $filtered_block );
