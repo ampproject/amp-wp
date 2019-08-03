@@ -24,6 +24,10 @@ class AMP_REST_API {
 	 * @return void
 	 */
 	public static function rest_api_init() {
+		if ( ! AMP_Options_Manager::is_website_experience_enabled() ) {
+			return;
+		}
+
 		// Register a rest_prepare_{$post_type} filter for each one of the post types supported
 		// by the AMP plugin.
 		foreach ( AMP_Post_Type_Support::get_eligible_post_types() as $post_type ) {
