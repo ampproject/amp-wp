@@ -42,14 +42,28 @@ class AMP_REST_API {
 	 * @return WP_REST_Response Response object.
 	 */
 	public static function add_content_amp_field( $response, $post, $request ) {
-		// Skip if _amp param is not present.
-		// @todo Figure out a better way to selectively include amp content without having to introduce a new query var.
-		if ( null === $request->get_param( '_amp' ) ) {
+		// Skip if AMP is disabled for the post.
+		if ( ! post_supports_amp( $post ) ) {
 			return $response;
 		}
 
-		// Skip if AMP is disabled for the post.
-		if ( ! post_supports_amp( $post ) ) {
+		// Obtain the AMP link.
+		$standalone_content_url      = add_query_arg( AMP_Theme_Support::STANDALONE_CONTENT_QUERY_VAR, '', $response->data['link'] );
+		$content_template_link       = amp_get_permalink( $post );
+		$response->data['amp_links'] = [
+			'standalone_content' => [
+				'origin' => $standalone_content_url,
+				'cache'  => AMP_HTTP::get_amp_cache_url( $standalone_content_url ),
+			],
+			'complete_template'  => [
+				'origin' => $content_template_link,
+				'cache'  => AMP_HTTP::get_amp_cache_url( $content_template_link ),
+			],
+		];
+
+		// Skip if _amp param is not present.
+		// @todo Figure out a better way to selectively include amp content without having to introduce a new query var.
+		if ( null === $request->get_param( '_amp' ) ) {
 			return $response;
 		}
 

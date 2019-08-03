@@ -292,6 +292,11 @@ function is_amp_endpoint() {
 		return true;
 	}
 
+	// AMP standalone content requests are always an AMP endpoint.
+	if ( $wp_query instanceof WP_Query && $wp_query->is_singular() && AMP_Theme_Support::is_standalone_content_request() ) {
+		return true;
+	}
+
 	/*
 	 * If this is a URL for validation, and validation is forced for all URLs, return true.
 	 * Normally, this would be false if the user has deselected a template,

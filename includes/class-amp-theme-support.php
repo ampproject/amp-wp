@@ -79,6 +79,14 @@ class AMP_Theme_Support {
 	const READER_MODE_SLUG = 'reader';
 
 	/**
+	 * Query var for requesting standalone AMP content.
+	 *
+	 * @since 1.3
+	 * @var string
+	 */
+	const STANDALONE_CONTENT_QUERY_VAR = 'amp_standalone_content';
+
+	/**
 	 * Flag used in args passed to add_theme_support('amp') to indicate transitional mode supported.
 	 *
 	 * @since 1.2
@@ -184,6 +192,9 @@ class AMP_Theme_Support {
 			 * action to template_redirect--the wp action--is used instead.
 			 */
 			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+		} elseif ( AMP_Options_Manager::is_website_experience_enabled() && self::is_standalone_content_request() ) {
+			add_action( 'wp', [ __CLASS__, 'finish_init' ], PHP_INT_MAX );
+
 		} elseif ( AMP_Options_Manager::is_stories_experience_enabled() ) {
 			add_action(
 				'wp',
@@ -195,6 +206,17 @@ class AMP_Theme_Support {
 				PHP_INT_MAX
 			);
 		}
+	}
+
+	/**
+	 * Determines whether the request is for standalone AMP content.
+	 *
+	 * @since 1.3
+	 *
+	 * @return bool Whether requesting standalone content.
+	 */
+	public static function is_standalone_content_request() {
+		return isset( $_GET[ self::STANDALONE_CONTENT_QUERY_VAR ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**
@@ -370,7 +392,25 @@ class AMP_Theme_Support {
 	 * @since 0.7
 	 */
 	public static function finish_init() {
-		if ( ! is_amp_endpoint() ) {
+		if ( self::is_standalone_content_request() ) {
+			$queried_object = get_queried_object();
+			if ( ! ( $queried_object instanceof WP_Post ) || ! post_supports_amp( $queried_object ) ) {
+				wp_die(
+					esc_html__( 'AMP content is not available for this URL.', 'amp' ),
+					esc_html__( 'AMP Content Unavailable' ),
+					[ 'response' => 400 ]
+				);
+			}
+
+			add_filter(
+				'template_include',
+				function () {
+					return __DIR__ . '/templates/standalone-content.php';
+				},
+				PHP_INT_MAX
+			);
+
+		} elseif ( ! is_amp_endpoint() ) {
 			/*
 			 * Redirect to AMP-less variable if AMP is not available for this URL and yet the query var is present.
 			 * Temporary redirect is used for admin users because implied transitional mode and template support can be
