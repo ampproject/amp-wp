@@ -31,8 +31,8 @@ import { Component, forwardRef } from '@wordpress/element';
  * @type {Component}
  */
 export class IgnoreNestedEvents extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.proxyEvent = this.proxyEvent.bind( this );
 
@@ -51,7 +51,7 @@ export class IgnoreNestedEvents extends Component {
 	 * @return {void}
 	 */
 	proxyEvent( event ) {
-		const isHandled = !! event.nativeEvent._blockHandled;
+		const isHandled = Boolean( event.nativeEvent._blockHandled );
 
 		// Assign into the native event, since React will reuse their synthetic
 		// event objects and this property assignment could otherwise leak.
@@ -83,7 +83,7 @@ export class IgnoreNestedEvents extends Component {
 			// Try to match prop key as event handler
 			const match = key.match( /^on([A-Z][a-zA-Z]+?)(Handled)?$/ );
 			if ( match ) {
-				const isHandledProp = !! match[ 2 ];
+				const isHandledProp = Boolean( match[ 2 ] );
 				if ( isHandledProp ) {
 					// Avoid assigning through the invalid prop key. This
 					// assumes mutation of shallow clone by above spread.

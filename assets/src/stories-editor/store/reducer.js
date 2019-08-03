@@ -48,9 +48,12 @@ export function animations( state = {}, action ) {
 				// If animation was disabled, update all successors.
 				if ( ! animationType ) {
 					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+					const itemSuccessors = pageAnimationOrder.filter( ( { parent: p } ) => p === item );
 
-					for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
-						pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+					for ( const successor in itemSuccessors ) {
+						if ( entryIndex( successor ) !== -1 ) {
+							pageAnimationOrder[ entryIndex( successor ) ].parent = itemPredecessor.parent;
+						}
 					}
 				}
 			} else {
@@ -81,9 +84,10 @@ export function animations( state = {}, action ) {
 				...newAnimationOrder,
 				[ page ]: pageAnimationOrder,
 			};
-	}
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 /**
@@ -100,9 +104,10 @@ export function currentPage( state = undefined, action ) {
 	switch ( action.type ) {
 		case 'SET_CURRENT_PAGE':
 			return page;
-	}
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 /**
@@ -148,9 +153,10 @@ export function blocks( state = {}, action ) {
 				order,
 				isReordering: false,
 			};
-	}
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 export default combineReducers( { animations, currentPage, blocks } );

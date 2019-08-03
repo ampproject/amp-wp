@@ -10,6 +10,13 @@
  * @method void assertFalse( bool $expectsFalse, string $errorMessage=null )
  */
 class AMP_DOM_Utils_Test extends WP_UnitTestCase {
+
+	/**
+	 * Test UTF-8 content.
+	 *
+	 * @covers AMP_DOM_Utils::get_dom_from_content()
+	 * @covers AMP_DOM_Utils::get_content_from_dom()
+	 */
 	public function test_utf8_content() {
 		$source   = '<p>Iñtërnâtiônàlizætiøn</p>';
 		$expected = '<p>Iñtërnâtiônàlizætiøn</p>';
@@ -19,6 +26,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $content );
 	}
 
+	/**
+	 * Test adding no attributes to node.
+	 *
+	 * @covers AMP_DOM_Utils::add_attributes_to_node()
+	 */
 	public function test_add_attributes_to_node__no_attributes() {
 		$dom  = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node = $dom->createElement( 'b' );
@@ -26,6 +38,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertFalse( $node->hasAttributes() );
 	}
 
+	/**
+	 * Test adding attribute with no value to node.
+	 *
+	 * @covers AMP_DOM_Utils::add_attributes_to_node()
+	 */
 	public function test_add_attributes_to_node__attribute_without_value() {
 		$dom        = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node       = $dom->createElement( 'div' );
@@ -36,6 +53,11 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->check_node_has_attributes( $node, $attributes );
 	}
 
+	/**
+	 * Test adding attribute with value to node.
+	 *
+	 * @covers AMP_DOM_Utils::add_attributes_to_node()
+	 */
 	public function test_add_attributes_to_node__attribute_with_value() {
 		$dom        = AMP_DOM_Utils::get_dom_from_content( '<p>Hello World</p>' );
 		$node       = $dom->createElement( 'div' );
@@ -49,6 +71,12 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->check_node_has_attributes( $node, $attributes );
 	}
 
+	/**
+	 * Assert node has the expected attributes.
+	 *
+	 * @param DOMElement $node        Element.
+	 * @param string[]   $attributes Attributes.
+	 */
 	protected function check_node_has_attributes( $node, $attributes ) {
 		$this->assertEquals( count( $attributes ), $node->attributes->length );
 		foreach ( $node->attributes as $attr ) {
@@ -60,30 +88,66 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		}
 	}
 
+	/**
+	 * Test that node is empty.
+	 *
+	 * @covers AMP_DOM_Utils::is_node_empty()
+	 */
 	public function test__is_node_empty__yes() {
 		$source = '<p></p>';
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $source );
 		$node   = $dom->getElementsByTagName( 'p' )->item( 0 );
 
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $node
+		 */
 		$this->assertTrue( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
 
+	/**
+	 * Test that node with text is not empty.
+	 *
+	 * @covers AMP_DOM_Utils::is_node_empty()
+	 */
 	public function test__is_node_empty__no__has_text() {
 		$source = '<p>Hello</p>';
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $source );
 		$node   = $dom->getElementsByTagName( 'p' )->item( 0 );
 
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $node
+		 */
 		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
 
+	/**
+	 * Test that element is not empty when it has a child.
+	 *
+	 * @covers AMP_DOM_Utils::is_node_empty()
+	 */
 	public function test__is_node_empty__no__has_child() {
 		$source = '<p><b></b></p>';
 		$dom    = AMP_DOM_Utils::get_dom_from_content( $source );
 		$node   = $dom->getElementsByTagName( 'p' )->item( 0 );
 
+		/**
+		 * Element.
+		 *
+		 * @var DOMElement $node
+		 */
 		$this->assertFalse( AMP_DOM_Utils::is_node_empty( $node ) );
 	}
 
+	/**
+	 * Test that empty tag is parsed and serialized without changes.
+	 *
+	 * @covers AMP_DOM_Utils::get_dom_from_content()
+	 * @covers AMP_DOM_Utils::get_content_from_dom()
+	 */
 	public function test__get_content_from_dom__br_no_closing_tag() {
 		$source   = '<br>';
 		$expected = '<br>';
@@ -109,6 +173,15 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		$this->assertContains( 'width=300 height="200" data-foo="bar" selected', $converted );
 		$restored = AMP_DOM_Utils::restore_amp_bind_attributes( $converted );
 		$this->assertEquals( $original, $restored );
+
+		// Check tag with self-closing attribute.
+		$original  = '<input type="text" role="textbox" class="calc-input" id="liens" name="liens" [value]="(result1 != null) ? result1.liens : \'verifying…\'" />';
+		$converted = AMP_DOM_Utils::convert_amp_bind_attributes( $original );
+		$this->assertNotEquals( $converted, $original );
+
+		// Preserve trailing slash that is actually the attribute value.
+		$original = '<a href=/>Home</a>';
+		$this->assertEquals( AMP_DOM_Utils::convert_amp_bind_attributes( $original ), $original );
 
 		// Test malformed.
 		$malformed_html = [
@@ -197,6 +270,13 @@ class AMP_DOM_Utils_Test extends WP_UnitTestCase {
 		);
 
 		// Ensure that mustache var in a[href] attribute is intact.
+		/**
+		 * Elements
+		 *
+		 * @var DOMElement $template_link
+		 * @var DOMElement $template_img
+		 * @var DOMElement $template_blockquote
+		 */
 		$template_link = $xpath->query( '//template/a' )->item( 0 );
 		$this->assertSame( '{{href}}', $template_link->getAttribute( 'href' ) );
 		$this->assertEquals( 'Hello {{name}}', $template_link->getAttribute( 'title' ) );

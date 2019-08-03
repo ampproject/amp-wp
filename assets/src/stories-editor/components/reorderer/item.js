@@ -50,8 +50,8 @@ const parseDropEvent = ( event ) => {
  * in order to not re-invent the wheel.
  */
 class ReordererItem extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			isDragging: false,
@@ -66,6 +66,8 @@ class ReordererItem extends Component {
 		if ( index !== undefined ) {
 			return position.x === 'right' ? index + 1 : index;
 		}
+
+		return undefined;
 	}
 
 	onDrop( event, position ) {

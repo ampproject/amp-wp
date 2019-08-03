@@ -16,6 +16,13 @@ amp-story-grid-layer {
 	align-content: unset;
 }
 
+.amp-block-story-cta__link amp-img {
+	max-height: 100%;
+
+	/* Counteract the height increase caused by the inline-block. */
+	margin-bottom: -.2em;
+}
+
 .amp-block-story-cta__link amp-img * {
 	object-fit: contain;
 }
@@ -119,4 +126,12 @@ amp-story-grid-layer .wp-block-quote {
 	color: #555d66;
 	font-size: 14px;
 	text-align: center;
+}
+
+.wp-block-amp-amp-story-post-author.amp-text-content,
+.wp-block-amp-amp-story-post-title.amp-text-content,
+.wp-block-amp-amp-story-post-date.amp-text-content {
+
+	/* --story-page-vw is accessible in the FE, this equals 16px in the editor */
+	font-size: calc(4.88 * var(--story-page-vw));
 }

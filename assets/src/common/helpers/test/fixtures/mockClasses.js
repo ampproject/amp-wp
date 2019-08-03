@@ -14,6 +14,8 @@ export class Mock {
 		if ( this.hasOwnProperty( key ) ) {
 			return this[ key ];
 		}
+
+		return undefined;
 	}
 
 	/**
@@ -70,7 +72,7 @@ export class MockSelectionError extends Mock {
 	 * @param {Object} errorData Error data.
 	 */
 	constructor( errorData = {} ) {
-		super( ...arguments );
+		super( errorData );
 
 		for ( const name in errorData ) {
 			if ( errorData.hasOwnProperty( name ) ) {

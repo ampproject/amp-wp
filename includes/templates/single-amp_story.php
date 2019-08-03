@@ -35,9 +35,9 @@ the_post();
 
 		// There is a fallback poster-portrait image added via a filter, in case there's no featured image.
 		$thumbnail_id     = get_post_thumbnail_id();
-		$poster_portrait  = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_CARD_IMAGE_SIZE );
-		$poster_square    = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_SQUARE_IMAGE_SIZE );
-		$poster_landscape = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE );
+		$poster_portrait  = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_CARD_IMAGE_SIZE );
+		$poster_square    = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_SQUARE_IMAGE_SIZE );
+		$poster_landscape = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_LANDSCAPE_IMAGE_SIZE );
 		?>
 		<amp-story
 			standalone

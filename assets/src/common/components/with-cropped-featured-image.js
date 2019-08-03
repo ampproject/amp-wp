@@ -47,8 +47,8 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		/**
 		 * Constructs the class.
 		 */
-		constructor() {
-			super( ...arguments );
+		constructor( ...args ) {
+			super( ...args );
 
 			// @todo This should be a different event.
 			// This class should only be present in the MediaUpload for the Featured Image.
@@ -132,8 +132,8 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 				getAspectRatioType( realWidth, realHeight ) === getAspectRatioType( ALTERNATE_EXPECTED_WIDTH, ALTERNATE_EXPECTED_HEIGHT )
 			);
 
-			let xInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_WIDTH, 10 ) : parseInt( EXPECTED_WIDTH, 10 ),
-				yInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_HEIGHT, 10 ) : parseInt( EXPECTED_HEIGHT, 10 );
+			let xInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_WIDTH ) : parseInt( EXPECTED_WIDTH ),
+				yInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_HEIGHT ) : parseInt( EXPECTED_HEIGHT );
 
 			const ratio = xInit / yInit,
 				xImg = xInit,

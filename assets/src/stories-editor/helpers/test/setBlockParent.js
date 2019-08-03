@@ -9,7 +9,7 @@ describe( 'setBlockParent', () => {
 	it( 'does not change the parent for the page block', () => {
 		const result = setBlockParent( { name: 'amp/amp-story-page' } );
 
-		expect( result ).toEqual( { name: 'amp/amp-story-page' } );
+		expect( result ).toStrictEqual( { name: 'amp/amp-story-page' } );
 	} );
 
 	it( 'sets an empty parent for reusable blocks', () => {

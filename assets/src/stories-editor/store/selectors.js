@@ -27,7 +27,10 @@ export function isValidAnimationPredecessor( state, page, item, predecessor ) {
 	}
 
 	const pageAnimationOrder = state.animations[ page ] || [];
-	const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor );
+
+	const findEntry = ( entryId ) => pageAnimationOrder.find( ( { id } ) => id === entryId );
+
+	const predecessorEntry = findEntry( predecessor );
 
 	if ( ! predecessorEntry ) {
 		return false;
@@ -41,7 +44,7 @@ export function isValidAnimationPredecessor( state, page, item, predecessor ) {
 				return true;
 			}
 
-			const parentItem = pageAnimationOrder.find( ( { id } ) => id === parent );
+			const parentItem = findEntry( parent );
 			parent = parentItem ? parentItem.parent : undefined;
 		}
 
