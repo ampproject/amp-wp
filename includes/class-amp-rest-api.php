@@ -35,7 +35,7 @@ class AMP_REST_API {
 				add_filter( 'rest_prepare_' . $post_type, [ __CLASS__, 'add_content_amp_field' ], 10, 3 );
 
 				// The rest_{$this->post_type}_item_schema filter is still a work in progress: https://core.trac.wordpress.org/ticket/47779.
-				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ], 10, 2 );
+				add_filter( 'rest_' . $post_type . '_item_schema', [ __CLASS__, 'extend_content_schema' ] );
 			}
 		}
 	}
@@ -43,15 +43,10 @@ class AMP_REST_API {
 	/**
 	 * Extends the schema of the content field with a new `amp` property.
 	 *
-	 * @param array  $schema         Post schema data.
-	 * @param string $post_type_slug Post type slug.
+	 * @param array $schema Post schema data.
 	 * @return array Schema.
 	 */
-	public static function extend_content_schema( $schema, $post_type_slug ) {
-		if ( ! post_type_supports( $post_type_slug, 'amp' ) ) {
-			return $schema;
-		}
-
+	public static function extend_content_schema( $schema ) {
 		$schema['properties']['content']['properties']['amp'] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
