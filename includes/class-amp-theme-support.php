@@ -399,7 +399,7 @@ class AMP_Theme_Support {
 			if ( ! ( $queried_object instanceof WP_Post ) || ! post_supports_amp( $queried_object ) ) {
 				wp_die(
 					esc_html__( 'AMP content is not available for this URL.', 'amp' ),
-					esc_html__( 'AMP Content Unavailable' ),
+					esc_html__( 'AMP Content Unavailable', 'amp' ),
 					[ 'response' => 400 ]
 				);
 			}
