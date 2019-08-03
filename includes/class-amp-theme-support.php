@@ -393,6 +393,8 @@ class AMP_Theme_Support {
 	 */
 	public static function finish_init() {
 		if ( self::is_standalone_content_request() ) {
+
+			// Fail request if it is not for a single post that supports AMP.
 			$queried_object = get_queried_object();
 			if ( ! ( $queried_object instanceof WP_Post ) || ! post_supports_amp( $queried_object ) ) {
 				wp_die(
@@ -402,6 +404,16 @@ class AMP_Theme_Support {
 				);
 			}
 
+			// Prevent including extraneous stylesheets.
+			add_filter( 'show_admin_bar', '__return_false' );
+			add_filter(
+				'print_styles_array',
+				function ( $handles ) {
+					return array_intersect( $handles, [ 'amp-default', 'wp-block-library', 'wp-block-library-theme' ] );
+				}
+			);
+
+			// Override template to only include standalone content.
 			add_filter(
 				'template_include',
 				function () {
