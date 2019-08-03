@@ -41,8 +41,13 @@ class AMP_REST_API {
 	 *
 	 * @param array  $schema         Post schema data.
 	 * @param string $post_type_slug Post type slug.
+	 * @return array Schema.
 	 */
 	public static function extend_content_schema( $schema, $post_type_slug ) {
+		if ( ! post_type_supports( $post_type_slug, 'amp' ) ) {
+			return $schema;
+		}
+
 		$schema['properties']['content']['properties']['amp'] = [
 			'description' => __( 'The AMP content for the object.', 'amp' ),
 			'type'        => 'object',
@@ -110,6 +115,56 @@ class AMP_REST_API {
 				],
 			],
 		];
+
+		$schema['properties']['amp_links'] = [
+			'description'          => __( 'Links for the AMP version.', 'amp' ),
+			'type'                 => 'object',
+			'context'              => [ 'view', 'edit' ],
+			'readonly'             => true,
+			'additionalProperties' => [
+				'complete_template'  => [
+					'description'          => __( 'Links for the AMP version in a complete template.', 'amp' ),
+					'type'                 => 'object',
+					'context'              => [ 'view', 'edit' ],
+					'readonly'             => true,
+					'additionalProperties' => [
+						'cache'  => [
+							'type'        => 'string',
+							'description' => __( 'Link for the AMP version in a complete template on origin.', 'amp' ),
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'origin' => [
+							'type'        => 'string',
+							'description' => __( 'Link for the AMP version in a complete template on the ampproject.org AMP Cache.', 'amp' ),
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+				'standalone_content' => [
+					'description'          => __( 'Links for the AMP version in standalone content.', 'amp' ),
+					'type'                 => 'object',
+					'context'              => [ 'view', 'edit' ],
+					'readonly'             => true,
+					'additionalProperties' => [
+						'cache'  => [
+							'type'        => 'string',
+							'description' => __( 'Link for the AMP version in standalone content on origin.', 'amp' ),
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'origin' => [
+							'type'        => 'string',
+							'description' => __( 'Link for the AMP version in standalone content on the ampproject.org AMP Cache.', 'amp' ),
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
+		];
+
 		return $schema;
 	}
 
