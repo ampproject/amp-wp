@@ -1850,7 +1850,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Loop through node's children and remove the ones that are not whitelisted.
+	 * Check whether the node validates the constraints for children.
 	 *
 	 * @param DOMNode $node Node.
 	 * @param array   $child_tags {
@@ -1878,24 +1878,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Verify that all of the child are among the set of allowed elements.
-		$removed_count = 0;
 		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
 			foreach ( $child_elements as $child_element ) {
 				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
-					$removed_count++;
-					$this->remove_invalid_child( $child_element );
+					return false;
 				}
 			}
 		}
 
 		// If there aren't the exact number of elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
-			return ( count( $child_elements ) - $removed_count ) === $child_tags['mandatory_num_child_tags'];
+			return count( $child_elements ) === $child_tags['mandatory_num_child_tags'];
 		}
 
 		// If there aren't enough elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
-			return ( count( $child_elements ) - $removed_count ) >= $child_tags['mandatory_min_num_child_tags'];
+			return count( $child_elements ) >= $child_tags['mandatory_min_num_child_tags'];
 		}
 
 		return true;
