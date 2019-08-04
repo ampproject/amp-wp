@@ -181,7 +181,7 @@
 /**
  * Hide Block Manager option
  */
-.edit-post-more-menu__content .components-menu-group:nth-last-of-type(2) div[role="menu"] > .components-button:first-child {
+.edit-post-more-menu__content .components-menu-group:nth-last-of-type(2) div[role="group"] > .components-button:first-child {
 	display: none;
 }
 
