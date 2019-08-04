@@ -12,6 +12,12 @@
  * @package AMP
  */
 
+/**
+ * Context.
+ *
+ * @var AMP_Post_Template $this
+ */
+
 ?>
 <header id="top" class="amp-wp-header">
 	<div>
