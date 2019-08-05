@@ -1305,6 +1305,38 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Get default height by block name.
+	 *
+	 * @param string $block Block name.
+	 *
+	 * @return int Height in pixels.
+	 */
+	protected static function get_blocks_default_height( $block ) {
+		switch ( $block ) {
+			case 'core/quote':
+			case 'core/video':
+			case 'core/embed':
+				return 200;
+
+			case 'core/pullquote':
+				return 250;
+
+			case 'core/table':
+				return 100;
+
+			case 'amp/amp-story-post-author':
+			case 'amp/amp-story-post-date':
+				return 50;
+
+			case 'amp/amp-story-post-title':
+				return 100;
+
+			default:
+				return 60;
+		}
+	}
+
+	/**
 	 * Wraps each movable block into amp-story-grid-layer and animation wrapper with necessary attributes.
 	 *
 	 * @param string $block_content The block content about to be appended.
@@ -1358,14 +1390,15 @@ class AMP_Story_Post_Type {
 			'position' => 'absolute',
 		];
 
-		$style['top']  = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
-		$style['left'] = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
-		if ( isset( $atts['width'] ) ) {
-			$style['width'] = self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%';
-		}
-		if ( isset( $atts['height'] ) ) {
-			$style['height'] = self::get_percentage_from_pixels( 'y', $atts['height'] ) . '%';
-		}
+		// Set default values if missing.
+		$width  = isset( $atts['width'] ) ? $atts['width'] : 250;
+		$height = isset( $atts['height'] ) ? $atts['height'] : self::get_blocks_default_height( $name );
+
+		// Set passed attributes or default values (0, 5) for top and left.
+		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left']   = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
+		$style['width']  = self::get_percentage_from_pixels( 'x', $width ) . '%';
+		$style['height'] = self::get_percentage_from_pixels( 'y', $height ) . '%';
 
 		$wrapper_style = isset( $atts['style'] ) ? $atts['style'] : '';
 
