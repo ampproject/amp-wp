@@ -118,21 +118,22 @@ class AMP_DOM_Utils {
 				},
 				$document
 			);
+		}
 
-			/*
-			 * Add a pre-HTML5-style declaration of the encoding since libxml<2.8 doesn't recognize
-			 * HTML5's meta charset. See <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
-			 */
-			$document = preg_replace(
-				'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
-				'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
-				$document,
-				1,
-				$count
-			);
-			if ( 1 === $count ) {
-				$added_back_compat_meta_content_type = true;
-			}
+		/*
+		 * Add a pre-HTML5-style declaration of the encoding since libxml doesn't always recognize
+		 * HTML5's meta charset. In libxml<2.8 it never does, see <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
+		 * In libxml>=2.8, if the meta charset does not appear at the beginning of the head then it fails to be understood.
+		 */
+		$document = preg_replace(
+			'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
+			'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
+			$document,
+			1,
+			$count
+		);
+		if ( 1 === $count ) {
+			$added_back_compat_meta_content_type = true;
 		}
 
 		/*
