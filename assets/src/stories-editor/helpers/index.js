@@ -1393,7 +1393,7 @@ export const maybeInitializeAnimations = () => {
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
 				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) ) : undefined );
-				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) ) : undefined );
 			}
 		}
 	}
