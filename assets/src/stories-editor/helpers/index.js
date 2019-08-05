@@ -200,6 +200,7 @@ export const addAMPAttributes = ( settings, name ) => {
 
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
@@ -208,12 +209,6 @@ export const addAMPAttributes = ( settings, name ) => {
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
-		anchor: {
-			type: 'string',
-			source: 'attribute',
-			attribute: 'id',
-			selector: 'amp-story-grid-layer .amp-story-block-wrapper, amp-story-cta-layer',
-		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
@@ -256,7 +251,20 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	if ( isCTABlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: 'amp-story-cta-layer',
+		};
+	}
+
 	if ( isMovableBlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+		};
+
 		addedAttributes.positionTop = {
 			default: 0,
 			type: 'number',
@@ -285,26 +293,16 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 
 		addedAttributes.ampAnimationType = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in',
+			type: 'string',
 		};
 		addedAttributes.ampAnimationDelay = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-delay',
 			default: 0,
 		};
 		addedAttributes.ampAnimationDuration = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-duration',
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-after',
+			type: 'string',
 		};
 	}
 
@@ -545,66 +543,7 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 			return deprecateWrapBlocksInGridLayer( element, blockType, attributes );
 		}
 	}
-
-	const {
-		ampAnimationType,
-		ampAnimationDelay,
-		ampAnimationDuration,
-		ampAnimationAfter,
-		positionTop,
-		positionLeft,
-		width,
-		height,
-	} = attributes;
-
-	let style = {};
-
-	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		style = {
-			...style,
-			position: 'absolute',
-			top: `${ positionTop || 0 }%`,
-			left: `${ positionLeft || 0 }%`,
-		};
-	}
-
-	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
-		style = {
-			...style,
-			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
-			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
-		};
-	}
-
-	const animationAtts = {};
-
-	// Add animation if necessary.
-	if ( ampAnimationType ) {
-		animationAtts[ 'animate-in' ] = ampAnimationType;
-
-		if ( ampAnimationDelay ) {
-			animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
-		}
-
-		if ( ampAnimationDuration ) {
-			animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
-		}
-
-		if ( ampAnimationAfter ) {
-			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
-		}
-	}
-	// Always add anchor ID regardless of block support. Needed for animations.
-	const id = attributes.anchor || getUniqueId();
-
-	return (
-		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts } id={ id }>
-				{ element }
-			</div>
-		</amp-story-grid-layer>
-	);
+	return element;
 };
 
 /**
@@ -1453,7 +1392,7 @@ export const maybeInitializeAnimations = () => {
 				initializeAnimation( block, page, allBlocks );
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
-				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) ) : undefined );
 				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
 			}
 		}

@@ -67,6 +67,20 @@ class AMP_Story_Post_Type {
 	const AMP_STORIES_AJAX_ACTION = 'amp-story-export';
 
 	/**
+	 * Story page inner width in the editor.
+	 *
+	 * @var number
+	 */
+	const STORY_PAGE_INNER_WIDTH = 328;
+
+	/**
+	 * Story page inner height in the editor.
+	 *
+	 * @var number
+	 */
+	const STORY_PAGE_INNER_HEIGHT = 553;
+
+	/**
 	 * Check if the required version of block capabilities available.
 	 *
 	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
@@ -213,6 +227,9 @@ class AMP_Story_Post_Type {
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
 		add_filter( 'render_block', [ __CLASS__, 'render_block_with_google_fonts' ], 10, 2 );
+
+		// Wrap each movable inner block in amp-story-grid-layer.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
 
 		add_filter( 'use_block_editor_for_post_type', [ __CLASS__, 'use_block_editor_for_story_post_type' ], PHP_INT_MAX, 2 );
 		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
@@ -1268,6 +1285,123 @@ class AMP_Story_Post_Type {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Converts pixel to percentage based on the editor page sizes.
+	 *
+	 * @param string $axis Axis: x or y.
+	 * @param number $pixels Pixel value.
+	 *
+	 * @return int|string Percentage value compared to AMP Story editor page.
+	 */
+	public static function get_percentage_from_pixels( $axis, $pixels ) {
+		if ( 'x' === $axis ) {
+			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_WIDTH ) * 100 ), 2 );
+		} elseif ( 'y' === $axis ) {
+			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_HEIGHT ) * 100 ), 2 );
+		}
+		return 0;
+	}
+
+	/**
+	 * Wraps each movable block into amp-story-grid-layer and animation wrapper with necessary attributes.
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 *
+	 * @return string Modified content.
+	 */
+	public static function render_block_with_grid_layer( $block_content, $block ) {
+
+		$post = get_post();
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return $block_content;
+		}
+
+		// If the block content already includes amp-story-grid-layer, stop.
+		if ( false !== strpos( $block_content, 'amp-story-grid-layer' ) ) {
+			return $block_content;
+		}
+
+		$movable_blocks = [
+			'core/code',
+			'core/embed',
+			'core/image',
+			'core/list',
+			'core/preformatted',
+			'core/pullquote',
+			'core/quote',
+			'core/table',
+			'core/verse',
+			'core/video',
+			'amp/amp-story-text',
+			'amp/amp-story-post-author',
+			'amp/amp-story-post-date',
+			'amp/amp-story-post-title',
+			'core/html',
+			'core/block', // Reusable blocks.
+			'core/template', // Reusable blocks.
+		];
+
+		$name = $block['blockName'];
+
+		// If the block is not movable, it doesn't need the wrapper.
+		if ( ! in_array( $name, $movable_blocks, true ) ) {
+			return $block_content;
+		}
+
+		$atts         = $block['attrs'];
+		$wrapper_atts = [];
+
+		$style = [
+			'position' => 'absolute',
+		];
+
+		$style['top']  = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left'] = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
+		if ( isset( $atts['width'] ) ) {
+			$style['width'] = self::get_percentage_from_pixels( 'x', $atts['width'] ) . '%';
+		}
+		if ( isset( $atts['height'] ) ) {
+			$style['height'] = self::get_percentage_from_pixels( 'y', $atts['height'] ) . '%';
+		}
+
+		$wrapper_style = isset( $atts['style'] ) ? $atts['style'] : '';
+
+		foreach ( $style as $att => $value ) {
+			$wrapper_style .= "$att:$value;";
+		}
+
+		if ( ! empty( $wrapper_style ) ) {
+			$wrapper_atts['style'] = $wrapper_style;
+		}
+
+		if ( ! empty( $atts['ampAnimationType'] ) ) {
+			$wrapper_atts['animate-in'] = $atts['ampAnimationType'];
+			if ( ! empty( $atts['ampAnimationDelay'] ) ) {
+				$wrapper_atts['animate-in-delay'] = $atts['ampAnimationDelay'];
+			}
+			if ( ! empty( $atts['ampAnimationDuration'] ) ) {
+				$wrapper_atts['animate-in-duration'] = $atts['ampAnimationDuration'];
+			}
+			if ( ! empty( $atts['ampAnimationAfter'] ) ) {
+				$wrapper_atts['animate-in-after'] = $atts['ampAnimationAfter'];
+			}
+		}
+
+		if ( isset( $atts['anchor'] ) ) {
+			$wrapper_atts['id'] = $atts['anchor'];
+		}
+
+		$before = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper"';
+		foreach ( $wrapper_atts as $att => $value ) {
+			$before .= ' ' . $att . '="' . esc_attr( $value ) . '"';
+		}
+		$before .= '>';
+		$after   = '</div></amp-story-grid-layer>';
+
+		return $before . $block_content . $after;
 	}
 
 	/**
