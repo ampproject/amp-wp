@@ -17,7 +17,7 @@ describe( 'Block Manager', () => {
 		await deactivateExperience( 'stories' );
 	} );
 
-	it( 'the button should not appear due to styling of display: none', async () => {
+	it( 'the button should not appear, due to styling of display: none', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
 		// Select the page block.
@@ -26,9 +26,7 @@ describe( 'Block Manager', () => {
 		);
 
 		// Click the 'More tools & options' button to expand the popover.
-		const buttonSelector = '.components-button.components-icon-button.components-dropdown-menu__toggle';
-		await page.waitForSelector( buttonSelector );
-		await page.click( buttonSelector );
+		await page.click( '.components-button.components-icon-button.components-dropdown-menu__toggle' );
 
 		await expect( page ).not.toMatch( 'Block Manager' );
 	} );
