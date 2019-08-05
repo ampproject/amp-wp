@@ -48,7 +48,7 @@
     "@wordpress/keycodes": "2.4.0",
     "@wordpress/plugins": "2.5.0",
     "@wordpress/postcss-themes": "2.1.0",
-    "@wordpress/scripts": "3.3.0",
+    "@wordpress/scripts": "3.4.0",
     "@wordpress/server-side-render": "1.0.0",
     "@wordpress/url": "2.6.0",
     "@wordpress/wordcount": "2.4.0",
