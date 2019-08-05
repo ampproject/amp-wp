@@ -42,7 +42,7 @@
     "@wordpress/edit-post": "3.6.0",
     "@wordpress/editor": "9.4.0",
     "@wordpress/element": "2.6.0",
-    "@wordpress/eslint-plugin": "2.3.0",
+    "@wordpress/eslint-plugin": "2.4.0",
     "@wordpress/hooks": "2.4.0",
     "@wordpress/i18n": "3.5.0",
     "@wordpress/keycodes": "2.4.0",
