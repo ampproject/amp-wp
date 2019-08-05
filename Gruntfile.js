@@ -1,5 +1,5 @@
 /* eslint-env node */
-/* eslint-disable camelcase, no-console, no-param-reassign */
+/* eslint-disable no-console */
 
 module.exports = function( grunt ) {
 	'use strict';
