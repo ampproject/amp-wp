@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* eslint-disable no-console */
 
 module.exports = function( grunt ) {
 	'use strict';
@@ -116,7 +115,7 @@ module.exports = function( grunt ) {
 								matches = content.match( versionRegex );
 								if ( matches ) {
 									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version );
+									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}
