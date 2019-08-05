@@ -3,7 +3,8 @@
   "extends": [
     "plugin:@wordpress/eslint-plugin/recommended",
     "plugin:jest/all",
-    "plugin:import/recommended"
+    "plugin:import/recommended",
+    "plugin:eslint-comments/recommended"
   ],
   "settings": {
     "react": {
