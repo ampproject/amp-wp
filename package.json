@@ -44,7 +44,7 @@
     "@wordpress/element": "2.6.0",
     "@wordpress/eslint-plugin": "2.4.0",
     "@wordpress/hooks": "2.5.0",
-    "@wordpress/i18n": "3.5.0",
+    "@wordpress/i18n": "3.6.0",
     "@wordpress/keycodes": "2.4.0",
     "@wordpress/plugins": "2.4.0",
     "@wordpress/postcss-themes": "2.1.0",
