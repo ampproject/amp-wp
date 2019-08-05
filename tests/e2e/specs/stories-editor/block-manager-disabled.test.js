@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, getAllBlocks, selectBlockByClientId } from '@wordpress/e2e-test-utils';
+import { createNewPost } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -20,14 +20,11 @@ describe( 'Block Manager', () => {
 	it( 'the button should not appear, due to styling of display: none', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
-		// Select the page block.
-		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
-		);
-
 		// Click the 'More tools & options' button to expand the popover.
-		await page.click( '.components-button.components-icon-button.components-dropdown-menu__toggle' );
+		await page.click( '.edit-post-more-menu .components-dropdown-menu__toggle' );
 
-		await expect( page ).not.toMatch( 'Block Manager' );
+		// The text 'Block Manager' should not be present.
+		const blockManagerButton = await page.waitForXPath( '//button[contains(text(), "Block Manager")]' );
+		expect( await blockManagerButton.isIntersectingViewport() ).toStrictEqual( false );
 	} );
 } );
