@@ -1,12 +1,14 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, dragAndResize, getEditedPostContent } from '@wordpress/e2e-test-utils';
+import { createNewPost, dragAndResize, selectBlockByClientId } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience, selectBlockByClassName } from '../../utils';
+import { activateExperience, deactivateExperience, selectBlockByClassName, getBlocksOnPage } from '../../utils';
+
+const textBlockClass = 'wp-block-amp-story-text';
 
 describe( 'Text Block', () => {
 	beforeAll( async () => {
@@ -16,8 +18,6 @@ describe( 'Text Block', () => {
 	afterAll( async () => {
 		await deactivateExperience( 'stories' );
 	} );
-
-	const textBlockClass = 'wp-block-amp-story-text';
 
 	beforeEach( async () => {
 		await createNewPost( { postType: 'amp_story' } );
@@ -42,15 +42,30 @@ describe( 'Text Block', () => {
 
 	// @todo Dragging is not working for some reason.
 	it.skip( 'should allow dragging the Text block from anywhere when not editing', async () => { // eslint-disable-line jest/no-disabled-tests
-		const textBlock = await page.$( '.wp-block-amp-story-text-wrapper' );
-		await dragAndResize( textBlock, { x: 0, y: 25 } );
-		expect( await getEditedPostContent() ).toBe( '' );
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		const textBlockEl = await page.$( '.wp-block-amp-story-text-wrapper' );
+
+		await selectBlockByClientId( textBlockBefore.clientId );
+		await dragAndResize( textBlockEl, { x: 50, y: 50 } );
+
+		const textBlockAfter = ( await getBlocksOnPage() )[ 0 ];
+
+		expect( textBlockBefore.attributes.positionTop ).not.toStrictEqual( textBlockAfter.attributes.positionTop );
+		expect( textBlockBefore.attributes.positionLeft ).not.toStrictEqual( textBlockAfter.attributes.positionLeft );
 	} );
 
 	// @todo This test is useless until dragging actually works in the previous test.
 	it.skip( 'should not allow dragging in editable mode', async () => { // eslint-disable-line jest/no-disabled-tests
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		const textBlockEl = await page.$( '.wp-block-amp-story-text-wrapper' );
+
+		await selectBlockByClientId( textBlockBefore.clientId );
 		await page.click( `.${ textBlockClass }` );
-		const textBlock = await page.$( '.wp-block-amp-story-text-wrapper' );
-		await dragAndResize( textBlock, { x: 0, y: 25 } );
+		await dragAndResize( textBlockEl, { x: 0, y: 25 } );
+
+		const textBlockAfter = ( await getBlocksOnPage() )[ 0 ];
+
+		expect( textBlockBefore.attributes.positionTop ).toStrictEqual( textBlockAfter.attributes.positionTop );
+		expect( textBlockBefore.attributes.positionLeft ).toStrictEqual( textBlockAfter.attributes.positionLeft );
 	} );
 } );
