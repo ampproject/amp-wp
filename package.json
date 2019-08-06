@@ -21,6 +21,7 @@
   "dependencies": {
     "classnames": "2.2.6",
     "dom-scroll-into-view": "2.0.0",
+    "memize": "1.0.5",
     "prop-types": "15.7.2"
   },
   "devDependencies": {

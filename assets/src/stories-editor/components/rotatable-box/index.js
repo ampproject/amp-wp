@@ -16,6 +16,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { findClosestSnap } from '../../helpers';
 import './edit.css';
 
 class RotatableBox extends Component {
@@ -31,7 +32,6 @@ class RotatableBox extends Component {
 		this.onRotate = this.onRotate.bind( this );
 		this.onRotateStop = this.onRotateStop.bind( this );
 		this.onKeyUp = this.onKeyUp.bind( this );
-		this.findClosestSnap = this.findClosestSnap.bind( this );
 	}
 
 	componentDidMount() {
@@ -108,28 +108,6 @@ class RotatableBox extends Component {
 		);
 	}
 
-	/**
-	 * Given a rotation angle, finds the closest angle to snap to.
-	 *
-	 * Inspired by the implementation in re-resizable.
-	 *
-	 * @see https://github.com/bokuweb/re-resizable
-	 *
-	 * @param {number} angle
-	 * @return {number} New angle.
-	 */
-	findClosestSnap( angle ) {
-		const { snap, snapGap } = this.props;
-
-		const closestGapIndex = snap.reduce(
-			( prev, curr, index ) => ( Math.abs( curr - angle ) < Math.abs( snap[ prev ] - angle ) ? index : prev ),
-			0,
-		);
-		const gap = Math.abs( snap[ closestGapIndex ] - angle );
-
-		return snapGap === 0 || gap < snapGap ? snap[ closestGapIndex ] : angle;
-	}
-
 	onRotate( e ) {
 		if ( ! this.state.isRotating ) {
 			return;
@@ -150,7 +128,7 @@ class RotatableBox extends Component {
 		const rad2deg = ( 180 / Math.PI );
 		let angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
 
-		angle = this.findClosestSnap( angle );
+		angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
 
 		if ( this.state.angle === angle ) {
 			return;
@@ -225,7 +203,7 @@ RotatableBox.propTypes = {
 	onRotate: PropTypes.func,
 	onRotateStop: PropTypes.func,
 	children: PropTypes.any.isRequired,
-	snap: PropTypes.arrayOf( PropTypes.number ),
+	snap: PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.number ), PropTypes.func ] ),
 	snapGap: PropTypes.number,
 };
 
