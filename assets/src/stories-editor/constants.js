@@ -106,12 +106,13 @@ export const ALLOWED_BLOCKS = [
 
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
-export const ALLOWED_MEDIA_TYPES = [ 'image', 'video/mp4' ];
-export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
+
+export const ALLOWED_VIDEO_TYPES = [ 'video/mp4' ];
+export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ALLOWED_VIDEO_TYPES ];
+export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
+
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
 export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
-export const MEGABYTE_IN_BYTES = 1000000;
-export const VIDEO_ALLOWED_MEGABYTES_PER_SECOND = 1;
 
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,

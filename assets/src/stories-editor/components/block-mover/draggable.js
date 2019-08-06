@@ -31,8 +31,8 @@ const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onDragStart = this.onDragStart.bind( this );
 		this.onDragOver = this.onDragOver.bind( this );
@@ -82,7 +82,7 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
-		const top = parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop;
+		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 
 		// Don't allow the CTA button to go over its top limit.
 		if ( 'amp/amp-story-cta' === this.props.blockName ) {
@@ -92,7 +92,7 @@ class Draggable extends Component {
 		}
 
 		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left, 10 ) + event.clientX - this.cursorLeft }px`;
+			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;

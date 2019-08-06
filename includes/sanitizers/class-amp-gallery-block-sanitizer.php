@@ -161,30 +161,37 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	protected function get_carousel_dimensions( $element ) {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $image
+		 */
 		$images     = $element->getElementsByTagName( 'amp-img' );
 		$num_images = $images->length;
-		$max_height = 0;
-		$max_width  = 0;
+
+		$max_aspect_ratio = 0;
+		$carousel_width   = 0;
+		$carousel_height  = 0;
+
 		if ( 0 === $num_images ) {
 			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 		foreach ( $images as $image ) {
-			/**
-			 * Image.
-			 *
-			 * @var DOMElement $image
-			 */
-			$image_height = $image->getAttribute( 'height' );
-			if ( is_numeric( $image_height ) ) {
-				$max_height = max( $max_height, $image_height );
+			if ( ! is_numeric( $image->getAttribute( 'width' ) ) || ! is_numeric( $image->getAttribute( 'height' ) ) ) {
+				continue;
 			}
-			$image_width = $image->getAttribute( 'width' );
-			if ( is_numeric( $image_width ) ) {
-				$max_width = max( $max_width, $image_width );
+			$width  = (float) $image->getAttribute( 'width' );
+			$height = (float) $image->getAttribute( 'height' );
+
+			$this_aspect_ratio = $width / $height;
+			if ( $this_aspect_ratio > $max_aspect_ratio ) {
+				$max_aspect_ratio = $this_aspect_ratio;
+				$carousel_width   = $width;
+				$carousel_height  = $height;
 			}
 		}
 
-		return [ $max_width, $max_height ];
+		return [ $carousel_width, $carousel_height ];
 	}
 
 	/**

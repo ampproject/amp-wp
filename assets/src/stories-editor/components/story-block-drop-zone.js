@@ -29,8 +29,8 @@ import {
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
 class BlockDropZone extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onDrop = this.onDrop.bind( this );
 	}

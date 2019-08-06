@@ -2099,7 +2099,7 @@ class AMP_Validated_URL_Post_Type {
 
 		if ( $page_title ) {
 			/* translators: Admin screen title. %s: Admin screen name */
-			return sprintf( __( '%s &#8212; WordPress' ), $page_title );
+			return sprintf( __( '%s &#8212; WordPress', 'default' ), $page_title );
 		}
 
 		return $title;

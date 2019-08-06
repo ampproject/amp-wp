@@ -125,8 +125,10 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			$urls[] = [
 				'href'   => $href,
 				'url'    => $url,
+				'srcset' => wp_get_attachment_image_srcset( $attachment_id, $atts['size'] ),
 				'width'  => $width,
 				'height' => $height,
+				'alt'    => trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) ), // Logic from wp_get_attachment_image().
 			];
 		}
 
@@ -207,19 +209,28 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 			return '';
 		}
 
-		$max_width  = 0;
-		$max_height = 0;
+		$max_aspect_ratio = 0;
+		$carousel_width   = 0;
+		$carousel_height  = 0;
 
 		$images = [];
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
+				'srcset' => $props['srcset'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
+				'alt'    => $props['alt'],
 			];
-			$max_width  = max( $max_width, $props['width'] );
-			$max_height = max( $max_height, $props['height'] );
+
+			$this_aspect_ratio = $props['width'] / $props['height'];
+			if ( $this_aspect_ratio > $max_aspect_ratio ) {
+				$max_aspect_ratio = $this_aspect_ratio;
+				$carousel_width   = $props['width'];
+				$carousel_height  = $props['height'];
+			}
+
 			if ( ! empty( $args['lightbox'] ) ) {
 				$image_atts['lightbox'] = '';
 				$image_atts['on']       = 'tap:' . AMP_Img_Sanitizer::AMP_IMAGE_LIGHTBOX_ID;
@@ -247,8 +258,8 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		return AMP_HTML_Utils::build_tag(
 			'amp-carousel',
 			[
-				'width'  => $max_width,
-				'height' => $max_height,
+				'width'  => $carousel_width,
+				'height' => $carousel_height,
 				'type'   => 'slides',
 				'layout' => 'responsive',
 			],

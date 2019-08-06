@@ -29,7 +29,7 @@ import { StoryBlockMover } from '../../components';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
-		super( ...arguments );
+		super( props );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
@@ -86,7 +86,6 @@ class CallToActionEdit extends Component {
 								placeholder={ __( 'Add text…', 'amp' ) }
 								value={ text }
 								onChange={ ( value ) => setAttributes( { text: value } ) }
-								formattingControls={ [ 'bold', 'italic', 'strikethrough' ] }
 								className={ classnames(
 									'amp-block-story-cta__link', {
 										'has-background': backgroundColor.color,

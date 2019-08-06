@@ -2,11 +2,11 @@
  * Internal dependencies
  */
 import { enforceFileType } from '../';
+import { FILE_TYPE_ERROR_VIEW } from '../../constants';
 import { Mock, AlternateMock, MockSelectionError } from './fixtures/mockClasses';
 
 const videoAllowedTypes = [ 'video' ];
 const imageAllowedTypes = [ 'image' ];
-const fileTypeError = 'select-file-type-error';
 
 /**
  * Gets an instance of Mock to pass as the this argument to call().
@@ -34,7 +34,7 @@ describe( 'enforceFileType', () => {
 		attachment.set( { type: 'video', mime: mimeType } );
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
-		const actualSelectionError = mockThis.secondary.get( fileTypeError );
+		const actualSelectionError = mockThis.secondary.get( FILE_TYPE_ERROR_VIEW );
 
 		expect( actualSelectionError.get( 'mimeType' ) ).toBe( mimeType );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( true );
@@ -49,7 +49,7 @@ describe( 'enforceFileType', () => {
 		attachment.set( { type: 'text', mime: mimeType } );
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
-		const actualSelectionError = mockThis.secondary.get( fileTypeError );
+		const actualSelectionError = mockThis.secondary.get( FILE_TYPE_ERROR_VIEW );
 
 		expect( actualSelectionError.get( 'mimeType' ) ).toBe( mimeType );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( true );
@@ -65,7 +65,7 @@ describe( 'enforceFileType', () => {
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( fileTypeError ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBeUndefined( );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( false );
 	} );
 
@@ -78,7 +78,7 @@ describe( 'enforceFileType', () => {
 
 		enforceFileType.call( mockThis, attachment, MockSelectionError );
 
-		expect( mockThis.secondary.get( fileTypeError ) ).toBe( undefined );
+		expect( mockThis.secondary.get( FILE_TYPE_ERROR_VIEW ) ).toBeUndefined( );
 		expect( selectButton.model.get( 'disabled' ) ).toBe( false );
 	} );
 } );

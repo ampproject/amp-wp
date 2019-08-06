@@ -14,8 +14,10 @@ import { ValidationErrorMessage } from '../';
 const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const { getBlockValidationErrors } = select( 'amp/block-validation' );
 
+	const blockValidationErrors = getBlockValidationErrors( clientId );
+
 	return {
-		blockValidationErrors: getBlockValidationErrors( clientId ),
+		blockValidationErrors: blockValidationErrors.length ? blockValidationErrors : undefined,
 	};
 } );
 
@@ -30,11 +32,11 @@ export default createHigherOrderComponent(
 		return applyWithSelect( ( props ) => {
 			const { blockValidationErrors, onReplace } = props;
 
-			const errorCount = blockValidationErrors.length;
-
-			if ( errorCount === 0 ) {
+			if ( ! blockValidationErrors ) {
 				return <BlockEdit { ...props } />;
 			}
+
+			const errorCount = blockValidationErrors.length;
 
 			const actions = [
 				{

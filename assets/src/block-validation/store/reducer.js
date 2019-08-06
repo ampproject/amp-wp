@@ -32,7 +32,8 @@ export default ( state = undefined, action ) => {
 				...state,
 				reviewLink: url,
 			};
-	}
 
-	return state;
+		default:
+			return state;
+	}
 };

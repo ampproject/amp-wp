@@ -104,8 +104,8 @@ export const normalizeTerm = ( term ) => {
 };
 
 export class InserterMenu extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 		this.state = {
 			childItems: [],
 			filterValue: '',
@@ -171,7 +171,6 @@ export class InserterMenu extends Component {
 
 				this.props.setTimeout( () => {
 					// We need a generic way to access the panel's container
-					// eslint-disable-next-line react/no-find-dom-node
 					scrollIntoView( this.panels[ panel ], this.inserterResults.current, {
 						alignWithTop: true,
 					} );
@@ -299,7 +298,7 @@ export class InserterMenu extends Component {
 					aria-label={ __( 'Available block types', 'amp' ) }
 				>
 
-					{ !! suggestedItems.length &&
+					{ Boolean( suggestedItems.length ) &&
 						<PanelBody
 							title={ _x( 'Most Used', 'blocks', 'amp' ) }
 							opened={ isPanelOpen( 'suggested' ) }
@@ -329,7 +328,7 @@ export class InserterMenu extends Component {
 						);
 					} ) }
 
-					{ !! reusableItems.length && (
+					{ Boolean( reusableItems.length ) && (
 						<PanelBody
 							className="editor-inserter__reusable-blocks-panel block-editor-inserter__reusable-blocks-panel"
 							title={ __( 'Reusable', 'amp' ) }
@@ -357,7 +356,7 @@ export class InserterMenu extends Component {
 				}
 			</div>
 		);
-		/* eslint-enable jsx-a11y/no-autofocus, jsx-a11y/no-noninteractive-element-interactions */
+		/* eslint-enable jsx-a11y/no-autofocus, jsx-a11y/no-static-element-interactions */
 	}
 }
 
@@ -429,7 +428,6 @@ export default compose(
 		// This breaks the withDispatch not containing any logic rule.
 		// Since it's a function only called when the event handlers are called,
 		// it's fine to extract it.
-		// eslint-disable-next-line no-restricted-syntax
 		function getInsertionIndex( name ) {
 			const {
 				getBlockIndex,

@@ -448,6 +448,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .non-existent { color: black; } </style>
+					<style> .amp-video-eq { display: none; } </style>
 					</head><body><p>Hello!</p></body></html>
 				',
 				[
@@ -476,6 +477,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-no-group { color: ghostwhite; } </style>
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
+					<style> .amp-video-eq { display: none; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -510,6 +512,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-no-group{color:ghostwhite}',
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
+					'.amp-video-eq{display:none}',
 					'', // Because no non-existent.
 				],
 				[],
@@ -1862,8 +1865,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 		return [
 			'local_css_files' => [
 				[
-					admin_url( 'css/colors/../login.css' ),
-					includes_url( 'css/buttons.css' ),
+					plugins_url( 'tests/php/data/css/foo/../login.css', AMP__FILE__ ),
+					plugins_url( 'tests/php/data/css/buttons.css', AMP__FILE__ ),
 				],
 				'<style>div::after{content:"After login"}</style><div><input type="checkbox"><button class="wp-core-ui button"></button></div>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 				0, // Zero HTTP requests.
@@ -1885,7 +1888,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					admin_url( 'css/local-does-not-exist.css' ),
 					'https://bogus.example.com/remote-does-not-exist.css',
-					admin_url( 'css/colors/../login.css' ),
+					plugins_url( 'tests/php/data/css/foo/../login.css', AMP__FILE__ ),
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -1925,7 +1928,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					admin_url( 'css/local-does-not-exist.css' ),
 					'https://bogus.example.com/remote-does-not-exist.css',
-					admin_url( 'css/colors/../login.css' ),
+					plugins_url( 'tests/php/data/css/foo/../login.css', AMP__FILE__ ),
 					'https://bogus.example.com/remote-also-does-not-exist.css',
 				],
 				'<style>div::after{content:"End"}</style><style>@import url("https://bogus.example.com/remote-finally-does-not-exist.css");</style><body class="locale-he-il"><div class="login message"></div><table class="form-table"><td></td></table></body>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
@@ -1991,7 +1994,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				1,
 				static function( $requested_url ) {
 					if ( false !== strpos( $requested_url, 'import-buttons.php' ) ) {
-						return sprintf( '@import "%s";body{color:#123456}', includes_url( '/css/buttons.css' ) );
+						return sprintf( '@import "%s";body{color:#123456}', plugins_url( 'tests/php/data/css/buttons.css', AMP__FILE__ ) );
 					}
 					return null;
 				},

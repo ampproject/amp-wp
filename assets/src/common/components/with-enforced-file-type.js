@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { EnforcedFileTypeToolbarSelect, getSelectMediaFrame } from './select-media-frame';
+import { EnforcedFileToolbarSelect, getSelectMediaFrame } from './select-media-frame';
 
 const { wp } = window;
 
@@ -35,8 +35,8 @@ export default ( InitialMediaUpload ) => {
 		/**
 		 * Constructs the class.
 		 */
-		constructor() {
-			super( ...arguments );
+		constructor( ...args ) {
+			super( ...args );
 
 			// This class should only be present in the MediaUpload for the AMP Story 'Background Media' or when only 'video' types are allowed, like in the Core Video block.
 			if ( 'story-background-media' === this.props.id || isEqual( [ 'video' ], this.props.allowedTypes ) ) {
@@ -55,7 +55,7 @@ export default ( InitialMediaUpload ) => {
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
 		initFileTypeMedia() {
-			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileTypeToolbarSelect );
+			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileToolbarSelect );
 			const previousOnSelect = this.onSelect;
 			const isVideo = isEqual( [ 'video' ], this.props.allowedTypes );
 			const queryType = isVideo ? 'video/mp4' : this.props.allowedTypes; // For the Video block, only display .mp4 files.

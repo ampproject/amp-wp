@@ -26,7 +26,7 @@ describe( 'reducers', () => {
 				predecessor,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -44,7 +44,7 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -76,7 +76,7 @@ describe( 'reducers', () => {
 				predecessor: item2,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 					{ id: item2, parent: item },
@@ -106,7 +106,7 @@ describe( 'reducers', () => {
 				page,
 			} );
 
-			expect( state ).toEqual( page );
+			expect( state ).toStrictEqual( page );
 		} );
 	} );
 
@@ -117,7 +117,7 @@ describe( 'reducers', () => {
 				order: [ 'page-1', 'page-2' ],
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: true,
 			} );
@@ -133,7 +133,7 @@ describe( 'reducers', () => {
 				type: 'STOP_REORDERING',
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: false,
 			} );
@@ -145,7 +145,7 @@ describe( 'reducers', () => {
 				order: [ 'page-1', 'page-2' ],
 			} );
 
-			expect( originalState ).toEqual( {
+			expect( originalState ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: true,
 			} );
@@ -156,7 +156,7 @@ describe( 'reducers', () => {
 				index: 1,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				order: [ 'page-2', 'page-1' ],
 				isReordering: true,
 			} );
@@ -166,7 +166,7 @@ describe( 'reducers', () => {
 				order: [ 'page-1', 'page-2' ],
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: false,
 			} );

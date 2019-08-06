@@ -5,6 +5,6 @@ import { getMinimumPortraitFeaturedImageDimensions } from '../';
 
 describe( 'getMinimumPortraitFeaturedImageDimensions', () => {
 	it( 'should return size with correct portrait aspect ratio', () => {
-		expect( getMinimumPortraitFeaturedImageDimensions() ).toEqual( { width: 1200, height: 2133 } );
+		expect( getMinimumPortraitFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 2133 } );
 	} );
 } );

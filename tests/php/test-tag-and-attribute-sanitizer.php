@@ -72,15 +72,21 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-animation'                                => [
-				'<amp-animation layout="nodisplay"><span>bad</span><script type="application/json">{}</script><strong>very bad</strong></amp-animation>',
 				'<amp-animation layout="nodisplay"><script type="application/json">{}</script></amp-animation>',
+				null,
 				[ 'amp-animation' ],
 			],
 
-			'amp-call-tracking'                            => [
-				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
-				'<amp-call-tracking config="https://example.com/calltracking.json">--and not great: <a href="tel:123456789">+1 (23) 456-789</a>not great</amp-call-tracking>',
+			'amp-call-tracking-ok'                         => [
+				'<amp-call-tracking config="https://example.com/calltracking.json"><a href="tel:123456789">+1 (23) 456-789</a></amp-call-tracking>',
+				null,
 				[ 'amp-call-tracking' ],
+			],
+
+			'amp-call-tracking-bad-children'               => [
+				'<amp-call-tracking config="https://example.com/calltracking.json"><b>bad</b>--and not great: <a href="tel:123456789">+1 (23) 456-789</a><i>more bad</i>not great</amp-call-tracking>',
+				'',
+				[],
 			],
 
 			'amp-call-tracking_blacklisted_config'         => [
@@ -278,9 +284,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'',
 						'
 						<amp-story standalone live-story-disabled supports-landscape title="My Story" publisher="The AMP Team" publisher-logo-src="https://example.com/logo/1x1.png" poster-portrait-src="https://example.com/my-story/poster/3x4.jpg" poster-square-src="https://example.com/my-story/poster/1x1.jpg" poster-landscape-src="https://example.com/my-story/poster/4x3.jpg" background-audio="my.mp3">
-							<i>bad</i>
 							<amp-story-page id="my-first-page">
-								<i>bad</i>
 								<amp-story-grid-layer template="fill">
 									<amp-img id="object1" animate-in="rotate-in-left" src="https://example.ampproject.org/helloworld/bg1.jpg" width="900" height="1600">
 									</amp-img>
@@ -295,9 +299,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 								</amp-story-grid-layer>
 								<amp-pixel src="https://example.com/tracker/foo" layout="nodisplay"></amp-pixel>
 							</amp-story-page>
-							<i>bad</i>
 							<amp-story-page id="my-second-page">
-								<i>bad</i>
 								<amp-analytics config="https://example.com/analytics.account.config.json"></amp-analytics>
 								<amp-story-grid-layer template="thirds">
 									<amp-img grid-area="bottom-third" src="https://example.ampproject.org/helloworld/bg2.gif" width="900" height="1600">
@@ -325,9 +327,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									</amp-twitter>
 								</amp-story-page-attachment>
 							</amp-story-page>
-							<i>bad</i>
 							<amp-story-bookend src="bookendv1.json" layout="nodisplay"></amp-story-bookend>
-							<i>bad</i>
 							<amp-analytics id="75a1fdc3143c" type="googleanalytics"><script type="application/json">{"vars":{"account":"UA-XXXXXX-1"},"triggers":{"trackPageview":{"on":"visible","request":"pageview"}}}</script></amp-analytics>
 						</amp-story>
 						'
@@ -568,7 +568,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'
 						<amp-accordion class="sample" disable-session-states="">
 							ok
-							<p>bad</p>
 							<section expanded>
 								<h4>Section 1</h4>
 								<p>Bunch of awesome content.</p>
@@ -584,8 +583,6 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<figcaption>Images work as well.</figcaption>
 								</figure>
 							</section>
-							ok
-							<div>bad</div>
 							ok
 						</amp-accordion>
 						'
@@ -735,7 +732,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'remove_node_with_disallowed_ancestor_and_disallowed_child_nodes' => [
-				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><i>bad</i><ul><li>Hello</li></ul><ol><li>Hello</li></ol><i>bad</i></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
+				'<amp-sidebar><amp-app-banner>This node is not allowed here.</amp-app-banner><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav><amp-app-banner>This node is not allowed here.</amp-app-banner></amp-sidebar>',
 				'<amp-sidebar><nav><ul><li>Hello</li></ul><ol><li>Hello</li></ol></nav></amp-sidebar>',
 				[ 'amp-sidebar' ],
 			],
@@ -786,6 +783,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						<div id="target-element"></div>
 					'
 				),
+				null,
+				[ 'amp-sidebar' ],
+			],
+
+			'amp_sidebar_with_div_inside_nav'              => [
+				'
+				<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="right">
+					<nav>
+						<ul>
+							<li><a href="https://example.com/"></a></li>
+						</ul>
+						<div class="some-div">
+							...
+						</div>
+					</nav>
+				</amp-sidebar>
+				',
 				null,
 				[ 'amp-sidebar' ],
 			],
@@ -1328,13 +1342,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'amp-image-slider'                             => [
-				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><div second>This apple is red</div></amp-image-slider>',
+				null,
 				[ 'amp-image-slider' ],
 			],
 
 			'amp-image-slider-bad-children'                => [
 				'<amp-image-slider layout="responsive" width="100" height="200"><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img></amp-image-slider>',
+				'',
+				[],
+			],
+
+			'amp-image-slider-more-bad-children'           => [
+				'<amp-image-slider layout="responsive" width="100" height="200"><span>Not allowed</span><amp-img src="/green-apple.jpg" alt="A green apple"></amp-img><i>forbidden</i><amp-img src="/red-apple.jpg" alt="A red apple"></amp-img><div first>This apple is green</div><strong>not allowed</strong><div second>This apple is red</div><i>not</i> <span>ok</span></amp-image-slider>',
 				'',
 				[],
 			],

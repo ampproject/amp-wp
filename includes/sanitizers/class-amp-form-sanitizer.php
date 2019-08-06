@@ -175,7 +175,7 @@ class AMP_Form_Sanitizer extends AMP_Base_Sanitizer {
 					$reason = sprintf( __( 'The server responded with %1$s (code %2$s).', 'amp' ), '{{status_text}}', '{{status_code}}' );
 				} else {
 					$p->appendChild( $this->dom->createTextNode( __( 'It appears your submission was successful.', 'amp' ) ) );
-					$reason = __( 'Even though the server responded OK, it is possible the submission was not processed.' );
+					$reason = __( 'Even though the server responded OK, it is possible the submission was not processed.', 'amp' );
 				}
 				$reason .= ' ' . __( 'Please contact the developer of this form processor to improve this message.', 'amp' );
 

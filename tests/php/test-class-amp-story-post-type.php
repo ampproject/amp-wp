@@ -82,7 +82,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 				[
 					[
 						'post' => $story,
-						'size' => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+						'size' => AMP_Story_Media::STORY_LANDSCAPE_IMAGE_SIZE,
 					],
 				]
 			);
@@ -98,7 +98,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			[
 				[
 					'post'         => $first_story,
-					'size'         => AMP_Story_Post_Type::STORY_LANDSCAPE_IMAGE_SIZE,
+					'size'         => AMP_Story_Media::STORY_LANDSCAPE_IMAGE_SIZE,
 					'disable_link' => true,
 				],
 			]

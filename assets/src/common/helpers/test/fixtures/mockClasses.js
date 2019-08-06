@@ -14,6 +14,8 @@ export class Mock {
 		if ( this.hasOwnProperty( key ) ) {
 			return this[ key ];
 		}
+
+		return undefined;
 	}
 
 	/**
@@ -67,14 +69,15 @@ export class MockSelectionError extends Mock {
 	/**
 	 * Class constructor.
 	 *
-	 * @param {Object} file The file, including a mimeType.
+	 * @param {Object} errorData Error data.
 	 */
-	constructor( file = {} ) {
-		super( ...arguments );
+	constructor( errorData = {} ) {
+		super( errorData );
 
-		const { mimeType } = file;
-		if ( mimeType ) {
-			this.mimeType = mimeType;
+		for ( const name in errorData ) {
+			if ( errorData.hasOwnProperty( name ) ) {
+				this[ name ] = errorData[ name ];
+			}
 		}
 	}
 }
