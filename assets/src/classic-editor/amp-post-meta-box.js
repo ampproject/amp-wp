@@ -10,7 +10,7 @@ import jQuery from 'jquery';
  *
  * @since 0.6
  */
-window.ampPostMetaBox = ( function( $ ) { // eslint-disable-line no-unused-vars
+window.ampPostMetaBox = ( function( $ ) {
 	'use strict';
 
 	const component = {

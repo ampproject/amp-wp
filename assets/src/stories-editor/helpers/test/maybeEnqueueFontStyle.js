@@ -24,6 +24,10 @@ describe( 'maybeEnqueueFontStyle', () => {
 		maybeEnqueueFontStyle( 'Roboto' );
 		maybeEnqueueFontStyle( 'Roboto' );
 
-		expect( document.head ).toMatchSnapshot();
+		expect( document.querySelectorAll( '#roboto-font' ) ).toHaveLength( 1 );
+		expect( document.querySelector( '#roboto-font' ).getAttribute( 'rel' ) ).toStrictEqual( 'stylesheet' );
+		expect( document.querySelector( '#roboto-font' ).getAttribute( 'type' ) ).toStrictEqual( 'text/css' );
+		expect( document.querySelector( '#roboto-font' ).getAttribute( 'media' ) ).toStrictEqual( 'all' );
+		expect( document.querySelector( '#roboto-font' ).getAttribute( 'crossorigin' ) ).toStrictEqual( 'anonymous' );
 	} );
 } );

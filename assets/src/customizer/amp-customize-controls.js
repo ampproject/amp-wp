@@ -2,7 +2,7 @@
 
 /* eslint no-magic-numbers: [ "error", { "ignore": [ 0, 1, 250] } ] */
 
-window.ampCustomizeControls = ( function( api, $ ) { // eslint-disable-line no-unused-vars
+window.ampCustomizeControls = ( function( api, $ ) {
 	'use strict';
 
 	const component = {
