@@ -36,7 +36,7 @@ describe( 'Featured Image Automatically Set', () => {
 	} );
 
 	describe( 'Image Block', () => {
-		it( 'on uploading a big enough image to the Core Image block, it should set it as the featured image', async () => {
+		it( 'should set the featured image on uploading a big enough image to the Core Image block', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await insertBlock( 'Image' );
@@ -69,7 +69,7 @@ describe( 'Featured Image Automatically Set', () => {
 	} );
 
 	describe( 'Background Media', () => {
-		it( 'on uploading a big enough image as the Background Media of a page, it should set it as the featured image', async () => {
+		it( 'should set the featured image on uploading a big enough image as the Background Media', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			// Select the default page block.
