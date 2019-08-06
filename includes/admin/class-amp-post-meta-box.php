@@ -286,7 +286,7 @@ class AMP_Post_Meta_Box {
 		];
 
 		// The preceding variables are used inside the following amp-status.php template.
-		include AMP__DIR__ . '/templates/admin/amp-status.php';
+		include AMP__DIR__ . '/includes/templates/amp-enabled-classic-editor-toggle.php';
 	}
 
 	/**
