@@ -11,6 +11,7 @@ import { activateExperience, deactivateExperience, insertBlock, uploadMedia } fr
 const EXPECTED_NOTICE_TEXT = 'A video size of less than 1 MB per second is recommended. The selected video is 2 MB per second.';
 const NOTICE_SELECTOR = '.media-toolbar-secondary .notice-warning';
 const OVERSIZED_VIDEO = 'oversize-video-45321.mp4';
+const CORRECT_VIDEO = 'clothes-hanged-to-dry-1295231.mp4';
 const SELECT_BUTTON = '.media-modal button.media-button-select';
 
 /**
@@ -21,6 +22,7 @@ const SELECT_BUTTON = '.media-modal button.media-button-select';
 describe( 'Media File Size Warnings', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
+		await createNewPost( { postType: 'amp_story' } );
 	} );
 
 	afterAll( async () => {
@@ -29,8 +31,6 @@ describe( 'Media File Size Warnings', () => {
 
 	describe( 'Background Media', () => {
 		it( 'should display a warning in the Media Library when a large video is uploaded', async () => {
-			await createNewPost( { postType: 'amp_story' } );
-
 			// Select the default page block.
 			await selectBlockByClientId(
 				( await getAllBlocks() )[ 0 ].clientId
@@ -50,8 +50,6 @@ describe( 'Media File Size Warnings', () => {
 		} );
 
 		it( 'should not display a warning in the Media Library for an appropriate video file size', async () => {
-			await createNewPost( { postType: 'amp_story' } );
-
 			// Select the default page block.
 			await selectBlockByClientId(
 				( await getAllBlocks() )[ 0 ].clientId
@@ -60,7 +58,7 @@ describe( 'Media File Size Warnings', () => {
 			// Click the media selection button.
 			await page.waitForSelector( '.editor-amp-story-page-background' );
 			await page.click( '.editor-amp-story-page-background' );
-			await uploadMedia( 'clothes-hanged-to-dry-1295231.mp4' );
+			await uploadMedia( CORRECT_VIDEO );
 
 			// The warning Notice component should not appear.
 			await expect( page ).not.toMatchElement( NOTICE_SELECTOR );
@@ -75,8 +73,6 @@ describe( 'Media File Size Warnings', () => {
 
 	describe( 'Video Block', () => {
 		it( 'should display a warning in the Media Library when a large video is uploaded', async () => {
-			await createNewPost( { postType: 'amp_story' } );
-
 			// Using the regular inserter.
 			await insertBlock( 'Video' );
 
@@ -90,6 +86,25 @@ describe( 'Media File Size Warnings', () => {
 			await expect( warningNotice ).toMatch( EXPECTED_NOTICE_TEXT );
 
 			// It should be possible to insert the uploaded video, as this should not disable the 'Select' button.
+			await expect( page ).toClick( SELECT_BUTTON );
+		} );
+
+		it( 'should not display a warning in the Media Library for a correct video file size', async () => {
+			// Using the regular inserter.
+			await insertBlock( 'Video' );
+
+			// Click the media library button.
+			await page.waitForSelector( '.editor-media-placeholder__media-library-button' );
+			await page.click( '.editor-media-placeholder__media-library-button' );
+			await uploadMedia( CORRECT_VIDEO );
+
+			// The warning Notice component should not appear.
+			await expect( page ).not.toMatchElement( NOTICE_SELECTOR );
+
+			// The warning notice text should not appear.
+			await expect( page ).not.toMatch( EXPECTED_NOTICE_TEXT );
+
+			// It should be possible to insert the uploaded video.
 			await expect( page ).toClick( SELECT_BUTTON );
 		} );
 	} );
