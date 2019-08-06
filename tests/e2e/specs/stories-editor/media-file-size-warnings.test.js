@@ -22,7 +22,6 @@ const SELECT_BUTTON = '.media-modal button.media-button-select';
 describe( 'Media File Size Warnings', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
-		await createNewPost( { postType: 'amp_story' } );
 	} );
 
 	afterAll( async () => {
@@ -31,6 +30,8 @@ describe( 'Media File Size Warnings', () => {
 
 	describe( 'Background Media', () => {
 		it( 'should display a warning in the Media Library when a large video is uploaded', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
 			// Select the default page block.
 			await selectBlockByClientId(
 				( await getAllBlocks() )[ 0 ].clientId
@@ -50,6 +51,8 @@ describe( 'Media File Size Warnings', () => {
 		} );
 
 		it( 'should not display a warning in the Media Library for an appropriate video file size', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
 			// Select the default page block.
 			await selectBlockByClientId(
 				( await getAllBlocks() )[ 0 ].clientId
@@ -73,6 +76,8 @@ describe( 'Media File Size Warnings', () => {
 
 	describe( 'Video Block', () => {
 		it( 'should display a warning in the Media Library when a large video is uploaded', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
 			// Using the regular inserter.
 			await insertBlock( 'Video' );
 
@@ -90,6 +95,8 @@ describe( 'Media File Size Warnings', () => {
 		} );
 
 		it( 'should not display a warning in the Media Library for a correct video file size', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
 			// Using the regular inserter.
 			await insertBlock( 'Video' );
 
