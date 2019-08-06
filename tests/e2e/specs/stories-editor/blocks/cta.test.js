@@ -6,7 +6,13 @@ import { visitAdminPage, createNewPost, clickButton } from '@wordpress/e2e-test-
 /**
  * Internal dependencies
  */
-import { activateExperience, clickButtonByLabel, deactivateExperience, insertBlock } from '../../../utils';
+import {
+	activateExperience,
+	clickButtonByLabel,
+	goToPreviousPage,
+	deactivateExperience,
+	insertBlock,
+} from '../../../utils';
 
 describe( 'Stories Editor Screen', () => {
 	beforeAll( async () => {
@@ -41,13 +47,14 @@ describe( 'Stories Editor Screen', () => {
 
 		await insertBlock( 'Page' );
 
-		await clickButtonByLabel( 'Call to Action' );
-		await clickButtonByLabel( 'Previous Page' );
+		await insertBlock( 'Call to Action' );
+		await goToPreviousPage();
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
 
-		await page.waitForSelector( '.wp-block .block-editor-warning__message' );
-		const element = await page.$( '.wp-block .block-editor-warning__message' );
+		const errorSelector = '.wp-block .block-editor-warning__message';
+		await page.waitForSelector( errorSelector );
+		const element = await page.$( errorSelector );
 		const text = await ( await element.getProperty( 'textContent' ) ).jsonValue();
 		expect( text ).toStrictEqual( 'Call to Action: This block can not be used on the first page.' );
 	} );

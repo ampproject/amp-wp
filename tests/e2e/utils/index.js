@@ -7,3 +7,4 @@ export { searchForBlock } from './search-for-block';
 export { insertBlock } from './insert-block';
 export { openTemplateInserter } from './open-template-inserter';
 export { clickButtonByLabel } from './click-button-by-label';
+export { goToPreviousPage } from './go-to-previous-page';
