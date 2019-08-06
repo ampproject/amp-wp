@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, createNewPost } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, createNewPost, clickButton } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { insertBlock, activateExperience, deactivateExperience } from '../../../utils';
+import { activateExperience, clickButtonByLabel, deactivateExperience, insertBlock } from '../../../utils';
 
 describe( 'Stories Editor Screen', () => {
 	beforeAll( async () => {
@@ -34,5 +34,21 @@ describe( 'Stories Editor Screen', () => {
 			'//div[@id="amp-story-shortcuts"]//button[@aria-label="Call to Action"]'
 		);
 		expect( nodes ).toHaveLength( 1 );
+	} );
+
+	it( 'should display validation error when CTA block is on the first Page', async () => {
+		await createNewPost( { postType: 'amp_story' } );
+
+		await insertBlock( 'Page' );
+
+		await clickButtonByLabel( 'Call to Action' );
+		await clickButtonByLabel( 'Previous Page' );
+		await clickButtonByLabel( 'More options' );
+		await clickButton( 'Remove Block' );
+
+		await page.waitForSelector( '.wp-block .block-editor-warning__message' );
+		const element = await page.$( '.wp-block .block-editor-warning__message' );
+		const text = await ( await element.getProperty( 'textContent' ) ).jsonValue();
+		expect( text ).toStrictEqual( 'Call to Action: This block can not be used on the first page.' );
 	} );
 } );
