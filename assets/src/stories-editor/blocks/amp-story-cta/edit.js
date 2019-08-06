@@ -35,6 +35,14 @@ class CallToActionEdit extends Component {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
+		this.state = {
+			isEditing: false,
+			hasOverlay: true,
+		};
+
+		this.toggleIsEditing = this.toggleIsEditing.bind( this );
+		this.toggleOverlay = this.toggleOverlay.bind( this );
+
 		this.nodeRef = null;
 		this.bindRef = this.bindRef.bind( this );
 	}
@@ -44,6 +52,43 @@ class CallToActionEdit extends Component {
 			return;
 		}
 		this.nodeRef = node;
+	}
+
+	toggleIsEditing( enable ) {
+		if ( enable !== this.state.isEditing ) {
+			this.setState( {
+				isEditing: ! this.state.isEditing,
+			} );
+		}
+	}
+
+	toggleOverlay( add ) {
+		if ( add !== this.state.hasOverlay ) {
+			this.setState( {
+				hasOverlay: ! this.state.hasOverlay,
+			} );
+		}
+	}
+
+	componentDidUpdate( prevProps, prevState ) {
+		const { isSelected } = this.props;
+		// If the block was unselected, make sure that it's not editing anymore.
+		if ( ! isSelected && prevProps.isSelected ) {
+			this.toggleIsEditing( false );
+			this.toggleOverlay( true );
+		}
+		if ( this.state.isEditing && ! prevState.isEditing ) {
+			const textInput = document.querySelector( '.is-selected .amp-block-story-cta__link' );
+			if ( textInput ) {
+				// Create selection, collapse it in the end of the content.
+				const range = document.createRange();
+				range.selectNodeContents( textInput );
+				range.collapse( false );
+				const selection = window.getSelection();
+				selection.removeAllRanges();
+				selection.addRange( range );
+			}
+		}
 	}
 
 	render() {
@@ -68,37 +113,84 @@ class CallToActionEdit extends Component {
 			btnPositionLeft,
 		} = attributes;
 
+		const { isEditing, hasOverlay } = this.state;
+
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
 
+		const placeholder = __( 'Add text…', 'amp' );
+		const textWrapperClass = classnames(
+			'amp-block-story-cta__link', {
+				'has-background': backgroundColor.color,
+				[ backgroundColor.class ]: backgroundColor.class,
+				'has-text-color': textColor.color,
+				[ textColor.class ]: textColor.class,
+			}
+		);
+		const textStyle = {
+			color: textColor.color,
+			fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
+		};
 		return (
 			<>
 				<StoryBlockMover
 					clientId={ clientId }
 					blockName={ name }
 					blockElementId={ `amp-story-cta-button-${ clientId }` }
-					isDraggable={ true }
+					isDraggable={ ! isEditing }
 					isMovable={ true }
 				>
 					<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
 						<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
-							<RichText
-								placeholder={ __( 'Add text…', 'amp' ) }
-								value={ text }
-								onChange={ ( value ) => setAttributes( { text: value } ) }
-								className={ classnames(
-									'amp-block-story-cta__link', {
-										'has-background': backgroundColor.color,
-										[ backgroundColor.class ]: backgroundColor.class,
-										'has-text-color': textColor.color,
-										[ textColor.class ]: textColor.class,
+							{ isEditing && (
+								<RichText
+									placeholder={ placeholder }
+									value={ text }
+									onChange={ ( value ) => setAttributes( { text: value } ) }
+									className={ textWrapperClass }
+									style={ textStyle }
+								/>
+							) }
+							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
+							{ ! isEditing && <div
+								role="textbox"
+								tabIndex="-1"
+								className="is-not-editing editor-rich-text block-editor-rich-text"
+								onClick={ () => {
+									if ( isSelected ) {
+										this.toggleIsEditing( true );
 									}
-								) }
-								style={ {
-									color: textColor.color,
-									fontSize: fontSize.size ? fontSize.size + 'px' : undefined,
 								} }
-							/>
+								onMouseDown={ ( event ) => {
+									// Prevent text selection on double click.
+									if ( 1 < event.detail ) {
+										event.preventDefault();
+									}
+								} }
+							>
+								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
+								{ hasOverlay && ( <div
+									role="textbox"
+									tabIndex="-1"
+									className="amp-overlay"
+									onClick={ ( e ) => {
+										this.toggleOverlay( false );
+										e.stopPropagation();
+									} }
+								></div>
+								) }
+								<div
+									role="textbox"
+									className={ textWrapperClass }
+									style={ textStyle }>
+									{ text.length ? text : (
+										<span className="amp-text-placeholder">
+											{ placeholder }
+										</span>
+									) }
+								</div>
+							</div>
+							}
 						</div>
 						{ isSelected && (
 							<form

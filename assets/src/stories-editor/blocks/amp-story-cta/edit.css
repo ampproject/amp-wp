@@ -19,6 +19,21 @@
 	object-fit: contain;
 }
 
+.amp-block-story-cta__link .amp-text-placeholder {
+	opacity: 0.62;
+}
+
+div[data-type="amp/amp-story-cta"] .amp-overlay {
+	height: 100%;
+	width: 100%;
+	z-index: 1000;
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+}
+
 .editor-block-list__layout div[data-type="amp/amp-story-cta"] .editor-block-mover {
 	display: none;
 }
