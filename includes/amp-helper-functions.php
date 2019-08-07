@@ -936,16 +936,17 @@ function amp_get_post_image_metadata( $post = null ) {
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
  * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
+ * @param bool $is_amp_story Whether the logo should be obtained for use in AMP Stories.
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
-function amp_get_publisher_logo() {
+function amp_get_publisher_logo( $is_amp_story = false ) {
 	$logo_image_url = null;
 
 	// @todo Consider passing this as an argument rather than relying on global state.
-	if ( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
-		// This should be at least 96px square, so this is why multiplied by 10.
-		$logo_width  = 960;
-		$logo_height = 960;
+	if ( $is_amp_story ) {
+		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
+		$logo_width  = 512;
+		$logo_height = 512;
 	} else {
 		/*
 		 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
@@ -953,7 +954,6 @@ function amp_get_publisher_logo() {
 		 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
 		 * but it is not preferred; a landscape logo should be provided if possible.
 		 */
-		// @todo Increase by multiplier?
 		$logo_width  = 600;
 		$logo_height = 60;
 	}
@@ -992,7 +992,11 @@ function amp_get_publisher_logo() {
 
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
-		$logo_image_url = admin_url( 'images/wordpress-logo.png' );
+		if ( $is_amp_story ) {
+			$logo_image_url = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+		} else {
+			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
+		}
 	}
 
 	return $logo_image_url;
@@ -1015,9 +1019,9 @@ function amp_get_schemaorg_metadata() {
 		],
 	];
 
-	$publisher_logo = amp_get_publisher_logo();
+	$publisher_logo = amp_get_publisher_logo( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 	if ( $publisher_logo ) {
-		$metadata['publisher']['logo'] = amp_get_publisher_logo();
+		$metadata['publisher']['logo'] = $publisher_logo;
 	}
 
 	$post = get_queried_object();
