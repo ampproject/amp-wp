@@ -43,6 +43,7 @@ import {
 	getCallToActionBlock,
 	getUniqueId,
 	uploadVideoFrame,
+	getPosterImageFromFileObj,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -172,8 +173,8 @@ class PageEdit extends Component {
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
-				.then( ( { url } ) => {
-					setAttributes( { poster: url } );
+				.then( ( fileObj ) => {
+					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );

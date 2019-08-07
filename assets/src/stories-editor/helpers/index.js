@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, has, isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -37,6 +37,7 @@ import {
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MAX_IMAGE_SIZE_SLUG,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1583,4 +1584,24 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 			onError: reject,
 		} );
 	} );
+};
+
+/**
+ * Given a media object, returns a suitable poster image URL.
+ *
+ * @param {Object} fileObj Media object.
+ * @return {string} Poster image URL.
+ */
+export const getPosterImageFromFileObj = ( fileObj ) => {
+	const { url } = fileObj;
+
+	let newPoster = url;
+
+	if ( has( fileObj, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url;
+	} else if ( has( fileObj, [ 'media_details', 'sizes', 'large', 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes.large.source_url;
+	}
+
+	return newPoster;
 };
