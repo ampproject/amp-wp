@@ -16,6 +16,7 @@ import {
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
+import { ENTER } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -236,7 +237,6 @@ class TextBlockEdit extends Component {
 							isDraggable={ ! isPartOfMultiSelection }
 							isMovable={ true }
 						>
-							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
 							<div
 								role="textbox"
 								tabIndex="-1"
@@ -252,8 +252,14 @@ class TextBlockEdit extends Component {
 										event.preventDefault();
 									}
 								} }
+								onKeyDown={ ( e ) => {
+									e.stopPropagation();
+									if ( ENTER === e.keyCode && isSelected ) {
+										this.toggleOverlay( false );
+										this.toggleIsEditing( true );
+									}
+								} }
 							>
-								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
 								{ hasOverlay && ( <div
 									role="textbox"
 									tabIndex="-1"
@@ -261,6 +267,13 @@ class TextBlockEdit extends Component {
 									onClick={ ( e ) => {
 										this.toggleOverlay( false );
 										e.stopPropagation();
+									} }
+									onKeyDown={ ( e ) => {
+										e.stopPropagation();
+										if ( ENTER === e.keyCode && isSelected ) {
+											this.toggleOverlay( false );
+											this.toggleIsEditing( true );
+										}
 									} }
 								></div>
 								) }
