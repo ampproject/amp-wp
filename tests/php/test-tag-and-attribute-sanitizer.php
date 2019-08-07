@@ -426,7 +426,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'carousel_lightbox'                            => [
 				'<amp-carousel width="450" height="300" delay="100" arrows [slide]="foo" autoplay loop lightbox></amp-carousel>',
-				null,
+				'<amp-carousel width="450" height="300" delay="100" arrows data-amp-bind-slide="foo" autoplay loop lightbox></amp-carousel>',
 				[ 'amp-bind', 'amp-carousel', 'amp-lightbox-gallery' ],
 			],
 
@@ -981,19 +981,19 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_bind_attr'                                => [
 				'<p [text]="\'Hello \' + foo">Hello World</p><button on="tap:AMP.setState({foo: \'amp-bind\'})">Update</button>',
-				null, // No change.
+				'<p data-amp-bind-text="\'Hello \' + foo">Hello World</p><button on="tap:AMP.setState({foo: \'amp-bind\'})">Update</button>',
 				[ 'amp-bind' ],
 			],
 
 			'amp_bind_with_greater_than_symbol'            => [
 				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className => \'\' != className )">hello</div>',
-				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className =&gt; \'\' != className )">hello</div>',
+				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" data-amp-bind-class="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className =&gt; \'\' != className )">hello</div>',
 				[ 'amp-bind' ],
 			],
 
 			'amp_bad_bind_attr'                            => [
 				'<a [href]=\'/\' [hidden]>test</a><p [text]="\'Hello \' + name" [unrecognized] title="Foo"><button [disabled]="" [type]=\'\'>Hello World</button></p>',
-				'<a [href]="/" [hidden]>test</a><p [text]="\'Hello \' + name" title="Foo"><button [disabled]="" [type]="">Hello World</button></p>',
+				'<a data-amp-bind-href="/" data-amp-bind-hidden>test</a><p data-amp-bind-text="\'Hello \' + name" title="Foo"><button data-amp-bind-disabled="" data-amp-bind-type="">Hello World</button></p>', // @todo Should data-amp-bind-unrecognized be removed of not?
 				[ 'amp-bind' ],
 			],
 
@@ -1081,7 +1081,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_date_picker_range'                        => [
 				'<amp-date-picker type="range" minimum-nights="2" maximum-nights="4" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span [text]="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
-				null, // No change.
+				'<amp-date-picker type="range" minimum-nights="2" maximum-nights="4" mode="overlay" id="range-date-picker" on=" select: AMP.setState({ dates: event.dates, startDate: event.start, endDate: event.end })" format="YYYY-MM-DD" open-after-select min="2017-10-26" start-input-selector="#range-start" end-input-selector="#range-end" class="example-picker space-between"><div class="ampstart-input"><input class="border-none p0" id="range-start" placeholder="Start date"></div><div class="ampstart-input"><input class="border-none p0" id="range-end" placeholder="End date"></div><button class="ampstart-btn caps" on="tap:range-date-picker.clear">Clear</button><template type="amp-mustache" info-template><span data-amp-bind-text="(startDate &amp;&amp; endDate ? \'You picked \' + startDate.date + \' as start date and \' + endDate.date + \' as end date.\' : \'You will see your chosen dates here.\')"> You will see your chosen dates here.</span></template></amp-date-picker>',
 				[ 'amp-date-picker', 'amp-bind', 'amp-mustache' ],
 			],
 
@@ -1121,9 +1121,9 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'non-layout-span-element-attrs'                => [
-				'<span id="test" width="1" height="1" heights="(min-width:500px) 200px, 80%" sizes="(min-width: 650px) 50vw, 100vw" layout="nodisplay" [height]="1" [width]="1">Test</span>',
+				'<span id="test" width="1" height="1" heights="(min-width:500px) 200px, 80%" sizes="(min-width: 650px) 50vw, 100vw" layout="nodisplay" [height]="1" [width]="1">Test</span>', // @todo Should data-amp-bind-height etc be removed or not?
 				'<span id="test">Test</span>',
-				[],
+				[], // @todo Should amp-bind be added or not?
 			],
 
 			'non-layout-col-element-attrs'                 => [
@@ -1307,7 +1307,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp-lightbox'                                 => [
 				'<amp-lightbox id="my-lightbox" [open]="true" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
-				null,
+				'<amp-lightbox id="my-lightbox" data-amp-bind-open="true" animate-in="fly-in-top" layout="nodisplay"><div class="lightbox" on="tap:my-lightbox.close" role="button" tabindex="0"><h1>Hello World!</h1></div></amp-lightbox>',
 				[ 'amp-lightbox', 'amp-bind' ],
 			],
 
@@ -1331,7 +1331,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'amp_textarea_with_autoexpand_and_defaulttext' => [
 				'<textarea name="with-autoexpand" autoexpand [defaulttext]="hello" [text]="goodbye">hello</textarea>',
-				null,
+				'<textarea name="with-autoexpand" autoexpand data-amp-bind-defaulttext="hello" data-amp-bind-text="goodbye">hello</textarea>',
 				[ 'amp-form', 'amp-bind' ],
 			],
 
@@ -1432,7 +1432,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'details'                                      => [
 				'<details open [open]="foo.state"><summary>Learn more</summary><p>You are educated</p></details>',
-				null,
+				'<details open data-amp-bind-open="foo.state"><summary>Learn more</summary><p>You are educated</p></details>',
 				[ 'amp-bind' ],
 			],
 
