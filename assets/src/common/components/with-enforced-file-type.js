@@ -39,7 +39,7 @@ export default ( InitialMediaUpload ) => {
 			super( ...args );
 
 			// This class should only be present in the MediaUpload for the AMP Story 'Background Media' or when only 'video' types are allowed, like in the Core Video block.
-			if ( 'story-background-media' === this.props.id || isEqual( [ 'video' ], this.props.allowedTypes ) ) {
+			if ( 'story-background-media' === this.props.id || isEqual( [ 'video/mp4' ], this.props.allowedTypes ) ) {
 				this.initFileTypeMedia = this.initFileTypeMedia.bind( this );
 				this.initFileTypeMedia();
 			}

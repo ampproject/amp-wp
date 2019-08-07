@@ -6,5 +6,6 @@ export { openGlobalBlockInserter } from './open-global-block-inserter';
 export { searchForBlock } from './search-for-block';
 export { insertBlock } from './insert-block';
 export { openTemplateInserter } from './open-template-inserter';
+export { uploadMedia } from './upload-media';
 export { selectBlockByClassName } from './select-block-by-classname';
 export { getBlocksOnPage } from './get-blocks-on-page';

@@ -34,6 +34,8 @@ import {
 	MIN_BLOCK_WIDTH,
 	MIN_BLOCK_HEIGHTS,
 	BLOCKS_WITH_RESIZING,
+	BLOCK_ROTATION_SNAPS,
+	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/bring-forward.svg';
@@ -277,6 +279,8 @@ export default createHigherOrderComponent(
 
 									stopBlockActions();
 								} }
+								snap={ BLOCK_ROTATION_SNAPS }
+								snapGap={ BLOCK_ROTATION_SNAP_GAP }
 							>
 								{ isTextBlock && (
 									<BlockEdit { ...props } />
@@ -311,6 +315,8 @@ export default createHigherOrderComponent(
 
 								stopBlockActions();
 							} }
+							snap={ BLOCK_ROTATION_SNAPS }
+							snapGap={ BLOCK_ROTATION_SNAP_GAP }
 						>
 							<StoryBlockMover
 								clientId={ props.clientId }
