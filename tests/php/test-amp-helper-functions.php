@@ -792,9 +792,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		unset( $object['ID'] );
 
 		// Update the attachment.
-		add_filter( 'intermediate_image_sizes_advanced', array( $wp_site_icon, 'additional_sizes' ) );
+		add_filter( 'intermediate_image_sizes_advanced', [ $wp_site_icon, 'additional_sizes' ] );
 		$attachment_id = $wp_site_icon->insert_attachment( $object, $cropped );
-		remove_filter( 'intermediate_image_sizes_advanced', array( $wp_site_icon, 'additional_sizes' ) );
+		remove_filter( 'intermediate_image_sizes_advanced', [ $wp_site_icon, 'additional_sizes' ] );
 
 		return $attachment_id;
 	}
