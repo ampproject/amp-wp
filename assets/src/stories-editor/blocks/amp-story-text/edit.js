@@ -252,9 +252,9 @@ class TextBlockEdit extends Component {
 										event.preventDefault();
 									}
 								} }
-								onKeyDown={ ( e ) => {
-									e.stopPropagation();
-									if ( ENTER === e.keyCode && isSelected ) {
+								onKeyDown={ ( event ) => {
+									event.stopPropagation();
+									if ( ENTER === event.keyCode && isSelected ) {
 										this.toggleOverlay( false );
 										this.toggleIsEditing( true );
 									}
@@ -264,13 +264,13 @@ class TextBlockEdit extends Component {
 									role="textbox"
 									tabIndex="-1"
 									className="amp-overlay"
-									onClick={ ( e ) => {
+									onClick={ ( event ) => {
 										this.toggleOverlay( false );
-										e.stopPropagation();
+										event.stopPropagation();
 									} }
-									onKeyDown={ ( e ) => {
-										e.stopPropagation();
-										if ( ENTER === e.keyCode && isSelected ) {
+									onKeyDown={ ( event ) => {
+										event.stopPropagation();
+										if ( ENTER === event.keyCode && isSelected ) {
 											this.toggleOverlay( false );
 											this.toggleIsEditing( true );
 										}
