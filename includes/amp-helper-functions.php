@@ -936,13 +936,12 @@ function amp_get_post_image_metadata( $post = null ) {
  * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
  * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
  *
- * @param bool $is_amp_story Whether the logo should be obtained for use in AMP Stories.
  * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
-function amp_get_publisher_logo( $is_amp_story = false ) {
+function amp_get_publisher_logo() {
 	$logo_image_url = null;
 
-	// @todo Consider passing this as an argument rather than relying on global state.
+	$is_amp_story = is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG );
 	if ( $is_amp_story ) {
 		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
 		$logo_width  = 512;
@@ -958,10 +957,11 @@ function amp_get_publisher_logo( $is_amp_story = false ) {
 		$logo_height = 60;
 	}
 
+	// Use the Custom Logo if set, but only for Stories if it is square.
 	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( has_custom_logo() && $custom_logo_id ) {
 		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
-		if ( $custom_logo_img ) {
+		if ( $custom_logo_img && ( ! $is_amp_story || $custom_logo_img[2] === $custom_logo_img[1] ) ) {
 			$logo_image_url = $custom_logo_img[0];
 		}
 	}
@@ -1019,7 +1019,7 @@ function amp_get_schemaorg_metadata() {
 		],
 	];
 
-	$publisher_logo = amp_get_publisher_logo( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+	$publisher_logo = amp_get_publisher_logo();
 	if ( $publisher_logo ) {
 		$metadata['publisher']['logo'] = $publisher_logo;
 	}
