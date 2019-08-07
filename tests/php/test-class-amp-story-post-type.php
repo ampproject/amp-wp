@@ -458,4 +458,88 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $new_data['content']['raw'] );
 	}
+
+	/**
+	 * Test AMP_Story_Post_Type::render_block_with_grid_layer().
+	 *
+	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 */
+	public function test_render_block_with_grid_layer() {
+		$GLOBALS['post'] = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			]
+		);
+
+		$block_content = '<p>Some block.</p>';
+		$block         = [
+			'attrs'     => [
+				'positionTop'       => 0,
+				'positionLeft'      => 15,
+				'width'             => 328,
+				'height'            => 553,
+				'ampAnimationType'  => 'pulse',
+				'ampAnimationDelay' => '500',
+				'ampAnimationAfter' => 123,
+				'someRandomAtt'     => 'random',
+			],
+			'blockName' => 'amp/amp-story-text',
+		];
+		$expected      = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper" style="position:absolute;top:0%;left:15%;width:100.00%;height:100.00%;" animate-in="pulse" animate-in-delay="500" animate-in-after="123"><p>Some block.</p></div></amp-story-grid-layer>';
+
+		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$this->assertEquals( $expected, $filtered_block );
+	}
+
+	/**
+	 * Test AMP_Story_Post_Type::render_block_with_grid_layer() when wrapper already exists.
+	 *
+	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 */
+	public function test_render_block_with_grid_layer_with_existing_wrappers() {
+		$GLOBALS['post'] = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			]
+		);
+
+		$block_content = '<amp-story-grid-layer><p>Some block.</p></amp-story-grid-layer>';
+		$block         = [
+			'attrs'     => [
+				'positionTop'  => 0,
+				'positionLeft' => 15,
+			],
+			'blockName' => 'amp/amp-story-text',
+		];
+		$expected      = '<amp-story-grid-layer><p>Some block.</p></amp-story-grid-layer>';
+
+		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$this->assertEquals( $expected, $filtered_block );
+	}
+
+	/**
+	 * Test AMP_Story_Post_Type::render_block_with_grid_layer() with not movable block type.
+	 *
+	 * @covers AMP_Story_Post_Type::render_block_with_grid_layer
+	 */
+	public function test_render_block_with_grid_layer_with_not_movable_block() {
+		$GLOBALS['post'] = self::factory()->post->create_and_get(
+			[
+				'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG,
+			]
+		);
+
+		$block_content = '<p>Some block.</p>';
+		$block         = [
+			'attrs'     => [
+				'positionTop'  => 0,
+				'positionLeft' => 15,
+			],
+			'blockName' => 'amp/amp-story-cta',
+		];
+		$expected      = '<p>Some block.</p>';
+
+		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
+		$this->assertEquals( $expected, $filtered_block );
+	}
 }
