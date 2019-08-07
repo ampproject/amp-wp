@@ -87,6 +87,7 @@
     "postcss-loader": "3.0.0",
     "postcss-nested": "4.1.2",
     "postcss-preset-env": "6.7.0",
+    "rtlcss": "2.4.0",
     "rtlcss-webpack-plugin": "4.0.3",
     "source-map-loader": "0.2.4",
     "svg-inline-loader": "0.8.0",
@@ -100,6 +101,9 @@
   "scripts": {
     "build": "npm-run-all build:*",
     "build:prepare": "grunt clean",
+    "build:css": "npm-run-all build:css:*",
+    "build:css:copy": "cp -R assets/css/src/* assets/css",
+    "build:css:rtlcss": "rtlcss -d assets/css/src assets/css -e '-rtl.css'",
     "build:js": "wp-scripts build",
     "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
