@@ -616,6 +616,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
 				'amp-img.amp-wp-enforced-sizes[layout="intrinsic"] > img,amp-anim.amp-wp-enforced-sizes[layout="intrinsic"] > img{object-fit:contain}',
 			],
+			'admin-bar-style-selectors' => [
+				'<div id="wpadminbar"><a href="https://example.com/"><amp-img src="https://example.com/foo.png" width="100" height="100"></amp-img><amp-anim src="https://example.com/foo.gif" width="100" height="100"></amp-anim></a></div>',
+				'#wpadminbar a, #wpadminbar a:hover, #wpadminbar a img, #wpadminbar a img:hover { border: none; text-decoration: none; background: none;}',
+				'#wpadminbar a,#wpadminbar a:hover,#wpadminbar a amp-img,#wpadminbar a amp-anim,#wpadminbar a amp-img:hover,#wpadminbar a amp-anim:hover{border:none;text-decoration:none;background:none}',
+			],
 			'img_with_amp_img' => [
 				'<amp-img></amp-img>',
 				'amp-img img{background-color:red}',
