@@ -21,6 +21,7 @@
   "dependencies": {
     "classnames": "2.2.6",
     "dom-scroll-into-view": "2.0.0",
+    "memize": "1.0.5",
     "prop-types": "15.7.2"
   },
   "devDependencies": {
@@ -61,7 +62,7 @@
     "browserslist": "4.6.6",
     "core-js": "3.1.4",
     "cross-env": "5.2.0",
-    "css-loader": "3.1.0",
+    "css-loader": "3.2.0",
     "cssnano": "4.1.10",
     "enzyme": "3.10.0",
     "eslint": "6.1.0",

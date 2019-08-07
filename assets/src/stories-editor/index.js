@@ -47,6 +47,7 @@ import {
 	filterBlockTransforms,
 	addAMPAttributes,
 	addAMPExtraProps,
+	deprecateCoreBlocks,
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	maybeInitializeAnimations,
@@ -55,8 +56,10 @@ import {
 	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
+	maybeRemoveDeprecatedSetting,
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
+	maybeAddMissingAnchor,
 } from './helpers';
 
 import { ALLOWED_BLOCKS } from './constants';
@@ -116,6 +119,7 @@ domReady( () => {
 		if ( block.attributes.ampFontFamily ) {
 			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
 		}
+		maybeRemoveDeprecatedSetting( block );
 	}
 
 	// Enforce fixed toolbar.
@@ -267,6 +271,8 @@ store.subscribe( () => {
 		for ( const item of animatedBlocksPerPage ) {
 			const { id, parent, animationType, duration, delay } = item;
 
+			// If the parent block wasn't saved previously it doesn't have an anchor and we have to set it.
+			maybeAddMissingAnchor( parent );
 			const parentBlock = parent ? getBlock( parent ) : undefined;
 
 			updateBlockAttributes( id, {
@@ -311,6 +317,7 @@ plugins.keys().forEach( ( modulePath ) => {
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransforms', filterBlockTransforms );
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
