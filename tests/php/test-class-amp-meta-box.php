@@ -60,20 +60,31 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 	/**
 	 * Test enqueue_admin_assets.
 	 *
-	 * @see AMP_Settings::enqueue_admin_assets()
+	 * @see AMP_Post_Meta_Box::enqueue_admin_assets()
 	 */
 	public function test_enqueue_admin_assets() {
 		// Test enqueue outside of a post with AMP support.
 		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+
 		$this->instance->enqueue_admin_assets( 'foo-bar.php' );
+
 		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 
 		// Test enqueue on a post with AMP support.
 		$post            = self::factory()->post->create_and_get();
 		$GLOBALS['post'] = $post;
 		set_current_screen( 'post.php' );
 		$this->instance->enqueue_admin_assets();
+
+		$this->assertFalse( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+		$this->assertFalse( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
+
+		set_current_screen( 'post.php' );
+		get_current_screen()->is_block_editor = false;
+		$this->instance->enqueue_admin_assets();
+
 		$this->assertTrue( wp_style_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$this->assertTrue( wp_script_is( AMP_Post_Meta_Box::ASSETS_HANDLE ) );
 		$script_data = wp_scripts()->get_data( AMP_Post_Meta_Box::ASSETS_HANDLE, 'after' );
@@ -83,9 +94,8 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 		}
 
 		// Test inline script boot.
-		$this->assertTrue( false !== stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
-		unset( $GLOBALS['post'] );
-		unset( $GLOBALS['current_screen'] );
+		$this->assertNotSame( false, stripos( wp_json_encode( $script_data ), 'ampPostMetaBox.boot(' ) );
+		unset( $GLOBALS['post'], $GLOBALS['current_screen'] );
 	}
 
 	/**
