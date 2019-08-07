@@ -25,6 +25,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
 		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
+
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+					WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+				}
+			}
+		}
+
 		parent::tearDown();
 	}
 
