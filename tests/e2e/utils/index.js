@@ -9,5 +9,4 @@ export { openPreviewPage } from './open-preview-page';
 export { openTemplateInserter } from './open-template-inserter';
 export { selectBlockByClassName } from './select-block-by-classname';
 export { uploadMedia } from './upload-media';
-export { selectBlockByClassName } from './select-block-by-classname';
 export { getBlocksOnPage } from './get-blocks-on-page';
