@@ -1,4 +1,4 @@
-window.ampCustomizePreview = ( function( api ) { // eslint-disable-line no-unused-vars
+window.ampCustomizePreview = ( function( api ) {
 	'use strict';
 
 	const component = {};

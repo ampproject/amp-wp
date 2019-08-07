@@ -1313,7 +1313,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	private function process_stylesheet( $stylesheet, $options = [] ) {
 		$parsed      = null;
 		$cache_key   = null;
-		$cache_group = 'amp-parsed-stylesheet-v18'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
+		$cache_group = 'amp-parsed-stylesheet-v19'; // This should be bumped whenever the PHP-CSS-Parser is updated or parsed format is updated.
 
 		$cache_impacting_options = array_merge(
 			wp_array_slice_assoc(
@@ -2795,8 +2795,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$before_type_selector_pattern = '(?<=^|\(|\s|>|\+|~|,|})';
 			$after_type_selector_pattern  = '(?=$|[^a-zA-Z0-9_-])';
 
-			$did_edit_selector = false;
-
 			/*
 			 * Loop over each selector mappings. A single HTML tag can map to multiple AMP tags (e.g. img could be amp-img or amp-anim).
 			 * The $selector_mappings array contains ~6 items, so rest easy your O(n^3) eyes when seeing triple nested loops!
@@ -2837,14 +2835,11 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 					// Replace the current edited selector with all the new edited selectors resulting from the mapping replacement.
 					array_splice( $edited_selectors, $i, 1, $edited_selectors_from_selector );
-					$did_edit_selector = true;
+					$has_changed_selectors = true;
 				}
 			}
 
-			if ( $did_edit_selector ) {
-				$has_changed_selectors = true;
-				$selectors             = array_merge( $selectors, $edited_selectors );
-			}
+			$selectors = array_merge( $selectors, $edited_selectors );
 		}
 
 		if ( $has_changed_selectors ) {

@@ -16,6 +16,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { findClosestSnap } from '../../helpers';
 import './edit.css';
 
 class RotatableBox extends Component {
@@ -125,7 +126,9 @@ class RotatableBox extends Component {
 		const y = e.clientY - centerY;
 
 		const rad2deg = ( 180 / Math.PI );
-		const angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
+		let angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
+
+		angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
 
 		if ( this.state.angle === angle ) {
 			return;
@@ -187,6 +190,7 @@ class RotatableBox extends Component {
 RotatableBox.defaultProps = {
 	angle: 0,
 	initialAngle: 0,
+	snapGap: 0,
 };
 
 RotatableBox.propTypes = {
@@ -199,6 +203,8 @@ RotatableBox.propTypes = {
 	onRotate: PropTypes.func,
 	onRotateStop: PropTypes.func,
 	children: PropTypes.any.isRequired,
+	snap: PropTypes.oneOfType( [ PropTypes.arrayOf( PropTypes.number ), PropTypes.func ] ),
+	snapGap: PropTypes.number,
 };
 
 export default compose(

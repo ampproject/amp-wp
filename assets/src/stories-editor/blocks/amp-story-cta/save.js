@@ -11,10 +11,11 @@ import { RichText } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
+import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes, getUniqueId } from '../../helpers';
 
 const CallToActionEdit = ( { attributes } ) => {
 	const {
+		anchor,
 		url,
 		text,
 	} = attributes;
@@ -23,7 +24,7 @@ const CallToActionEdit = ( { attributes } ) => {
 	const styles = getStylesFromBlockAttributes( attributes );
 
 	return (
-		<amp-story-cta-layer>
+		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
 			<RichText.Content
 				tagName="a"
 				className={ className }
@@ -37,6 +38,7 @@ const CallToActionEdit = ( { attributes } ) => {
 
 CallToActionEdit.propTypes = {
 	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
 		url: PropTypes.string,
 		text: PropTypes.string,
 		backgroundColor: PropTypes.shape( {
