@@ -229,18 +229,27 @@
 	display: none;
 }
 
-.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-close-to-bottom {
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone {
 	background: none;
-	border-bottom: 3px solid #0071a1;
 }
 
-.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
-	background: none;
-	border: none;
+.block-editor-block-navigation__list li .block-navigation__placeholder {
+	transition: height 0.3s ease;
+	height: 0;
 }
 
-.block-editor-block-navigation__list li:first-child .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
-	background: none;
-	border-top: 3px solid #0071a1;
-	border-bottom: none;
+/* When dragging near the top of a drop zone, display the placeholder so there is a space between this and the button above. */
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top + .block-navigation__placeholder {
+	visibility: hidden;
+	height: 36px;
+}
+
+/* Allow dropping below the last <button> by doubling the height of the drop zone. */
+.block-editor-block-navigation__list li:nth-last-child(1) .components-drop-zone:not(.is-close-to-top) {
+	height: 72px;
+}
+
+/* Hide the dragged <button>, as there will be a clone. */
+.block-editor-block-navigation__item-is-dragging > .editor-block-navigation__item-button {
+	display: none;
 }
