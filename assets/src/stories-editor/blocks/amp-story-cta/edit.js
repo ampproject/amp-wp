@@ -183,7 +183,7 @@ class CallToActionEdit extends Component {
 									role="textbox"
 									className={ textWrapperClass }
 									style={ textStyle }>
-									{ text.length ? text : (
+									{ text && text.length ? text : (
 										<span className="amp-text-placeholder">
 											{ placeholder }
 										</span>

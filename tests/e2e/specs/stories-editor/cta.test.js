@@ -12,7 +12,7 @@ import {
 	goToPreviousPage,
 	deactivateExperience,
 	insertBlock,
-} from '../../../utils';
+} from '../../utils';
 
 describe( 'Stories Editor Screen', () => {
 	beforeAll( async () => {
