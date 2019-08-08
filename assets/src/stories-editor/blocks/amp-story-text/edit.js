@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, RawHTML } from '@wordpress/element';
 import {
 	RichText,
 	BlockControls,
@@ -282,11 +282,13 @@ class TextBlockEdit extends Component {
 									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
 									style={ textStyle }
 								>
-									{ content.length ? content : (
-										<p className="amp-text-placeholder">
-											{ placeholder || __( 'Write text…', 'amp' ) }
-										</p>
-									) }
+									{ content && content.length ?
+										<RawHTML>{ content }</RawHTML> :
+										(
+											<p className="amp-text-placeholder">
+												{ placeholder || __( 'Write text…', 'amp' ) }
+											</p>
+										) }
 								</p>
 							</div>
 						</StoryBlockMover>
