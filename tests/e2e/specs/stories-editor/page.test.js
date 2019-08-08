@@ -1,12 +1,7 @@
 /**
- * External dependencies
- */
-import { first } from 'lodash';
-
-/**
  * WordPress dependencies
  */
-import { createNewPost, saveDraft, findSidebarPanelToggleButtonWithTitle } from '@wordpress/e2e-test-utils';
+import { createNewPost, saveDraft, clickButton } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -15,6 +10,8 @@ import {
 	activateExperience,
 	deactivateExperience,
 	clickButtonByLabel,
+	selectBlockByClassName,
+	getSidebarPanelToggleByTitle,
 } from '../../utils';
 
 describe( 'Story Page', () => {
@@ -28,15 +25,17 @@ describe( 'Story Page', () => {
 
 	beforeEach( async () => {
 		await createNewPost( { postType: 'amp_story' } );
+		await selectBlockByClassName( 'amp-page-active' );
 	} );
 
 	it( 'should be possible to add background color to Page', async () => {
 		const panelTitle = 'Background Color';
-		await page.waitForSelector( `//div[contains(@class,"edit-post-sidebar")]//button[@class="components-button components-panel__body-toggle"][contains(text(),"${ panelTitle }")]` );
-		const backgroundColorPanel = first( await page.$x( `//div[contains(@class,"edit-post-sidebar")]//button[@class="components-button components-panel__body-toggle"][contains(text(),"${ panelTitle }")]` ) );
-		expect( backgroundColorPanel ).toBeDefined();
+		const colorToggle = getSidebarPanelToggleByTitle( panelTitle );
 
-		await backgroundColorPanel.click( 'button' );
+		expect( colorToggle.length ).not.toEqual( 0 );
+
+		await colorToggle.click();
+
 		await clickButtonByLabel( 'Color: Vivid red' );
 
 		await saveDraft();
