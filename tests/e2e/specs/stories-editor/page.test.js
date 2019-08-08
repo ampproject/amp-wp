@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, saveDraft, clickButton } from '@wordpress/e2e-test-utils';
+import {createNewPost, saveDraft, clickButton, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -10,8 +10,9 @@ import {
 	activateExperience,
 	deactivateExperience,
 	clickButtonByLabel,
-	selectBlockByClassName,
 	getSidebarPanelToggleByTitle,
+	uploadMedia,
+	openPreviewPage,
 } from '../../utils';
 
 describe( 'Story Page', () => {
@@ -25,7 +26,10 @@ describe( 'Story Page', () => {
 
 	beforeEach( async () => {
 		await createNewPost( { postType: 'amp_story' } );
-		await selectBlockByClassName( 'amp-page-active' );
+		// Select the default page block.
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
 	} );
 
 	it( 'should be possible to add background color to Page', async () => {
@@ -92,18 +96,38 @@ describe( 'Story Page', () => {
 		);
 		expect( nodes.length ).not.toEqual( 0 );
 	} );
-/*
-		it( 'should be possible to add Background Image', async () => {
-		} );
 
-		it( 'should be possible to add Background Video', async () => {
-		} );
+	it( 'should be possible to add Background Image', async () => {
 
-		it( 'should save tha page advancement setting correctly', async () => {
+		// Click the media selection button.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( 'large-image-36521.jpg' );
 
-		} );
+		// Insert the image.
+		await page.click( '.media-modal button.media-button-select' );
 
-		it( 'should consider animations time when setting the page advancement', async () => {
+		// Wait for media to be inserted.
+		await page.waitForSelector( '.components-focal-point-picker-wrapper' );
+		await saveDraft();
+		await page.reload();
 
-		} );*/
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		await previewPage.waitForSelector( '.amp-story-block-wrapper' );
+
+		const [ elementHandle ] = await previewPage.$x( '//amp-story-page/amp-story-grid-layer/amp-img/@src' );
+		const srcHandle = await elementHandle.getProperty( 'value' );
+		const src = await srcHandle.jsonValue();
+		expect( src ).toContain( '.jpg' );
+		expect( src ).toContain( 'http://localhost:8890/wp-content/uploads/2019/08/' );
+	} );
+
+	/*it( 'should save tha page advancement setting correctly', async () => {
+
+	} );
+
+	it( 'should consider animations time when setting the page advancement', async () => {
+
+	} );*/
 } );
