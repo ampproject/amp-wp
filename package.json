@@ -87,7 +87,6 @@
     "postcss-loader": "3.0.0",
     "postcss-nested": "4.1.2",
     "postcss-preset-env": "6.7.0",
-    "react-svg-loader": "3.0.3",
     "rtlcss-webpack-plugin": "4.0.3",
     "source-map-loader": "0.2.4",
     "terser-webpack-plugin": "1.4.1",
