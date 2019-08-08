@@ -221,7 +221,6 @@ class TextBlockEdit extends Component {
 							// Ensure line breaks are normalised to HTML.
 							value={ content }
 							onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-							multiline={ true }
 							// The 2 following lines are necessary for pasting to work.
 							onReplace={ this.onReplace }
 							onSplit={ () => {} }

@@ -131,14 +131,13 @@ class AMP_Post_Meta_Box {
 		$post     = get_post();
 		$screen   = get_current_screen();
 		$validate = (
-			isset( $screen->base )
-			&&
-			'post' === $screen->base
-			&&
-			is_post_type_viewable( $post->post_type )
-			&&
+			isset( $screen->base ) &&
+			'post' === $screen->base &&
+			! $screen->is_block_editor &&
+			is_post_type_viewable( $post->post_type ) &&
 			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		);
+
 		if ( ! $validate ) {
 			return;
 		}
