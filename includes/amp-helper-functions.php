@@ -985,10 +985,7 @@ function amp_get_publisher_logo() {
 	 *
 	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
-	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
-	if ( $filtered_schema_img_url !== $logo_image_url ) {
-		$logo_image_url = $filtered_schema_img_url;
-	}
+	$logo_image_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
 
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
