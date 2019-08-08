@@ -130,12 +130,22 @@ const blockEditor = {
 			...defaultConfig.module.rules,
 			{
 				test: /\.css$/,
-				use: 'null-loader',
+				use: [
+					MiniCssExtractPlugin.loader,
+					'css-loader',
+					'postcss-loader',
+				],
 			},
 		],
 	},
 	plugins: [
 		...defaultConfig.plugins,
+		new MiniCssExtractPlugin( {
+			filename: '../css/[name]-compiled.css',
+		} ),
+		new RtlCssPlugin( {
+			filename: '../css/[name]-compiled-rtl.css',
+		} ),
 		new WebpackBar( {
 			name: 'Block Editor',
 			color: '#1773a8',
