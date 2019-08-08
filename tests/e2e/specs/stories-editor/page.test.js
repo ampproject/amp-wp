@@ -120,7 +120,7 @@ describe( 'Story Page', () => {
 		const srcHandle = await elementHandle.getProperty( 'value' );
 		const src = await srcHandle.jsonValue();
 		expect( src ).toContain( '.jpg' );
-		expect( src ).toContain( 'http://localhost:8890/wp-content/uploads/2019/08/' );
+		expect( src ).toContain( 'wp-content/uploads' );
 	} );
 
 	it( 'should save tha page advancement setting correctly', async () => {
