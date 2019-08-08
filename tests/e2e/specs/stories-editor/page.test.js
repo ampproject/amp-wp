@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import {createNewPost, saveDraft, clickButton, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
+import { createNewPost, saveDraft, clickButton, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -13,6 +13,7 @@ import {
 	getSidebarPanelToggleByTitle,
 	uploadMedia,
 	openPreviewPage,
+	insertBlock,
 } from '../../utils';
 
 describe( 'Story Page', () => {
@@ -98,7 +99,6 @@ describe( 'Story Page', () => {
 	} );
 
 	it( 'should be possible to add Background Image', async () => {
-
 		// Click the media selection button.
 		await page.waitForSelector( '.editor-amp-story-page-background' );
 		await page.click( '.editor-amp-story-page-background' );
@@ -123,11 +123,61 @@ describe( 'Story Page', () => {
 		expect( src ).toContain( 'http://localhost:8890/wp-content/uploads/2019/08/' );
 	} );
 
-	/*it( 'should save tha page advancement setting correctly', async () => {
+	it( 'should save tha page advancement setting correctly', async () => {
+		const pageAdvancementSelector = '.components-select-control__input';
+		await page.waitForSelector( pageAdvancementSelector );
+		await page.select( pageAdvancementSelector, 'time' );
 
+		const secondsSelector = 'input[aria-label="Time in seconds"]';
+		await page.waitForSelector( secondsSelector );
+		await page.type( secondsSelector, '15' );
+
+		await saveDraft();
+		await page.reload();
+
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+		await page.waitForSelector( secondsSelector );
+
+		expect( await page.evaluate( ( selector ) => {
+			return document.querySelector( selector ).value;
+		}, secondsSelector ) ).toBe( '15' );
+
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		await previewPage.waitForSelector( '.amp-story-block-wrapper' );
+
+		const [ elementHandle ] = await previewPage.$x( '//amp-story-page/@auto-advance-after' );
+		const secondsHandle = await elementHandle.getProperty( 'value' );
+		const seconds = await secondsHandle.jsonValue();
+		expect( seconds ).toStrictEqual( '15s' );
 	} );
 
 	it( 'should consider animations time when setting the page advancement', async () => {
+		await insertBlock( 'Author' );
 
-	} );*/
+		const animationTypeSelector = '.is-opened select.components-select-control__input';
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'pulse' );
+
+		const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
+		await page.waitForSelector( animationDelaySelector );
+		await page.type( animationDelaySelector, '1500' );
+
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
+		const pageAdvancementSelector = '.components-select-control__input';
+		await page.waitForSelector( pageAdvancementSelector );
+		await page.select( pageAdvancementSelector, 'time' );
+
+		const secondsSelector = 'input[aria-label="Time in seconds"]';
+		await page.waitForSelector( secondsSelector );
+
+		expect( await page.evaluate( ( selector ) => {
+			return document.querySelector( selector ).value;
+		}, secondsSelector ) ).toBe( '2' );
+	} );
 } );
