@@ -44,6 +44,7 @@ const blockAttributes = {
  */
 const CallToActionSaveV121 = ( { attributes } ) => {
 	const {
+		anchor,
 		url,
 		text,
 	} = attributes;
@@ -52,7 +53,7 @@ const CallToActionSaveV121 = ( { attributes } ) => {
 	const styles = getStylesFromBlockAttributes( attributes );
 
 	return (
-		<amp-story-cta-layer>
+		<amp-story-cta-layer id={ anchor }>
 			<RichText.Content
 				tagName="a"
 				className={ className }
@@ -66,6 +67,7 @@ const CallToActionSaveV121 = ( { attributes } ) => {
 
 CallToActionSaveV121.propTypes = {
 	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
 		url: PropTypes.string,
 		text: PropTypes.string,
 	} ).isRequired,
