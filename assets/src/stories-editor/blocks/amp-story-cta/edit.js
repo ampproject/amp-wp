@@ -122,7 +122,6 @@ class CallToActionEdit extends Component {
 		const textWrapperClass = classnames(
 			'amp-block-story-cta__link', {
 				'has-background': backgroundColor.color,
-				[ backgroundColor.class ]: backgroundColor.class,
 				'has-text-color': textColor.color,
 				[ textColor.class ]: textColor.class,
 			}
