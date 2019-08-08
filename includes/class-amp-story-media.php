@@ -71,6 +71,7 @@ class AMP_Story_Media {
 				'description'       => __( 'Whether the attachment is a poster image.', 'amp' ),
 				'show_in_rest'      => true,
 				'single'            => true,
+				'object_subtype'    => 'attachment',
 			]
 		);
 

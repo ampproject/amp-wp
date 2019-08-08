@@ -38,7 +38,7 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { uploadVideoFrame } from '../helpers';
+import { uploadVideoFrame, getPosterImageFromFileObj } from '../helpers';
 import { getContentLengthFromUrl, isVideoSizeExcessive } from '../../common/helpers';
 import { MEGABYTE_IN_BYTES, VIDEO_ALLOWED_MEGABYTES_PER_SECOND } from '../../common/constants';
 import { POSTER_ALLOWED_MEDIA_TYPES, ALLOWED_VIDEO_TYPES } from '../constants';
@@ -137,8 +137,8 @@ class CustomVideoBlockEdit extends Component {
 			this.setState( { extractingPoster: true } );
 
 			uploadVideoFrame( { id, src } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
+				.then( ( fileObj ) => {
+					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
@@ -167,8 +167,8 @@ class CustomVideoBlockEdit extends Component {
 			 * a poster image could be retrieved from.
 			 */
 			uploadVideoFrame( { src: newSrc } )
-				.then( ( posterUrl ) => {
-					setAttributes( { poster: posterUrl } );
+				.then( ( fileObj ) => {
+					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
 					this.setState( { extractingPoster: false } );
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );

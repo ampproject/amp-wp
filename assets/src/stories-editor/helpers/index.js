@@ -3,7 +3,7 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual } from 'lodash';
+import { every, has, isEqual } from 'lodash';
 import memize from 'memize';
 
 /**
@@ -15,6 +15,7 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
+import { isBlobURL } from '@wordpress/blob';
 
 /**
  * Internal dependencies
@@ -38,13 +39,20 @@ import {
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
+	MAX_IMAGE_SIZE_SLUG,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
-import { isBlobURL } from '@wordpress/blob';
+import { coreDeprecations } from '../deprecations/core-blocks';
+import {
+	addAMPExtraPropsDeprecations,
+	wrapBlockInGridLayerDeprecations,
+	addAMPAttributesDeprecations,
+} from '../deprecations/filters';
+import { default as MetaBlockDeprecated } from '../deprecations/story-meta-block';
 
 const { ampStoriesFonts } = window;
 
@@ -145,7 +153,7 @@ export const setBlockParent = ( props ) => {
  *
  * @return {number} Block height in pixels.
  */
-const getDefaultMinimumBlockHeight = ( name ) => {
+export const getDefaultMinimumBlockHeight = ( name ) => {
 	switch ( name ) {
 		case 'core/quote':
 		case 'core/video':
@@ -185,30 +193,27 @@ export const addAMPAttributes = ( settings, name ) => {
 		return settings;
 	}
 
+	if ( settings.attributes.deprecated && addAMPAttributesDeprecations[ settings.attributes.deprecated.default ] ) {
+		const deprecateAMPAttributes = addAMPAttributesDeprecations[ settings.attributes.deprecated.default ];
+		if ( 'function' === typeof deprecateAMPAttributes ) {
+			return deprecateAMPAttributes( settings, name );
+		}
+	}
+
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
+
 	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
-		anchor: {
-			type: 'string',
-			source: 'attribute',
-			attribute: 'id',
-			selector: 'amp-story-grid-layer .amp-story-block-wrapper > *, amp-story-cta-layer',
-		},
-		ampAnimationType: {
-			type: 'string',
-		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
-		},
-		ampAnimationAfter: {
-			type: 'string',
 		},
 		fontSize: {
 			type: 'string',
@@ -248,7 +253,20 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	if ( isCTABlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: 'amp-story-cta-layer',
+		};
+	}
+
 	if ( isMovableBlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+		};
+
 		addedAttributes.positionTop = {
 			default: 0,
 			type: 'number',
@@ -277,26 +295,16 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 
 		addedAttributes.ampAnimationType = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in',
+			type: 'string',
 		};
 		addedAttributes.ampAnimationDelay = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-delay',
 			default: 0,
 		};
 		addedAttributes.ampAnimationDuration = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-duration',
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-after',
+			type: 'string',
 		};
 	}
 
@@ -356,6 +364,26 @@ export const addAMPAttributes = ( settings, name ) => {
 			anchor: false,
 		},
 	};
+};
+
+export const deprecateCoreBlocks = ( settings, name ) => {
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return settings;
+	}
+
+	let deprecated = settings.deprecated ? settings.deprecated : [];
+	const blockDeprecation = coreDeprecations[ name ] || undefined;
+	if ( blockDeprecation ) {
+		deprecated = [ ...deprecated, ...blockDeprecation ];
+		return {
+			...settings,
+			deprecated,
+		};
+	}
+
+	return settings;
 };
 
 /**
@@ -438,13 +466,15 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
-	const newProps = { ...props };
-
-	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || getUniqueId();
+	if ( attributes.deprecated && addAMPExtraPropsDeprecations[ attributes.deprecated ] ) {
+		const deprecatedExtraProps = addAMPExtraPropsDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecatedExtraProps ) {
+			return deprecatedExtraProps( props, blockType, attributes );
+		}
+	}
 
 	if ( attributes.rotationAngle ) {
-		let style = ! newProps.style ? {} : newProps.style;
+		let style = ! props.style ? {} : props.style;
 		style = {
 			...style,
 			transform: `rotate(${ parseInt( attributes.rotationAngle ) }deg)`,
@@ -457,7 +487,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	return {
-		...newProps,
+		...props,
 		...ampAttributes,
 	};
 };
@@ -509,63 +539,13 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	const {
-		ampAnimationType,
-		ampAnimationDelay,
-		ampAnimationDuration,
-		ampAnimationAfter,
-		positionTop,
-		positionLeft,
-		width,
-		height,
-	} = attributes;
-
-	let style = {};
-
-	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		style = {
-			...style,
-			position: 'absolute',
-			top: `${ positionTop || 0 }%`,
-			left: `${ positionLeft || 0 }%`,
-		};
-	}
-
-	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
-		style = {
-			...style,
-			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
-			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
-		};
-	}
-
-	const animationAtts = {};
-
-	// Add animation if necessary.
-	if ( ampAnimationType ) {
-		animationAtts[ 'animate-in' ] = ampAnimationType;
-
-		if ( ampAnimationDelay ) {
-			animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
-		}
-
-		if ( ampAnimationDuration ) {
-			animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
-		}
-
-		if ( ampAnimationAfter ) {
-			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
+	if ( attributes.deprecated && wrapBlockInGridLayerDeprecations[ attributes.deprecated ] ) {
+		const deprecateWrapBlocksInGridLayer = wrapBlockInGridLayerDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecateWrapBlocksInGridLayer ) {
+			return deprecateWrapBlocksInGridLayer( element, blockType, attributes );
 		}
 	}
-
-	return (
-		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
-				{ element }
-			</div>
-		</amp-story-grid-layer>
-	);
+	return element;
 };
 
 /**
@@ -1028,6 +1008,7 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		attributes: schema,
 		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
+		deprecated: MetaBlockDeprecated( { tagName } ),
 	};
 };
 
@@ -1279,6 +1260,26 @@ export const maybeUpdateBlockDimensions = ( block ) => {
 };
 
 /**
+ * Remove deprecated attribute if the block was just migrated.
+ *
+ * @param {Object} block Block.
+ */
+export const maybeRemoveDeprecatedSetting = ( block ) => {
+	if ( ! block ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	// If the block was just migrated, update the block to initiate unsaved state.
+	if ( attributes.deprecated && 'migrated' === attributes.deprecated ) {
+		updateBlockAttributes( block.clientId, {
+			deprecated: null,
+		} );
+	}
+};
+
+/**
  * Sets width and height for blocks if they haven't been modified yet.
  *
  * @param {string} clientId Block ID.
@@ -1352,6 +1353,33 @@ export const maybeSetTagName = ( clientId ) => {
 };
 
 /**
+ * Initialize animation making sure that the predecessor animation has been initialized at first.
+ *
+ * @param {Object} block Animated block.
+ * @param {Object} page Parent page.
+ * @param {Object} allBlocks All blocks.
+ */
+const initializeAnimation = ( block, page, allBlocks ) => {
+	const { ampAnimationAfter } = block.attributes;
+	let predecessor;
+	if ( ampAnimationAfter ) {
+		predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	}
+
+	if ( predecessor ) {
+		const animations = getAnimatedBlocks();
+		const pageAnimationOrder = animations[ page ] || [];
+		const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor.clientId );
+
+		// We need to initialize the predecessor first.
+		if ( ! predecessorEntry ) {
+			initializeAnimation( predecessor, page, allBlocks );
+		}
+	}
+	addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+};
+
+/**
  * Initializes the animations if it hasn't been done yet.
  */
 export const maybeInitializeAnimations = () => {
@@ -1362,14 +1390,12 @@ export const maybeInitializeAnimations = () => {
 			const page = getBlockRootClientId( block.clientId );
 
 			if ( page ) {
-				const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
-				const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
-
-				addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+				const { ampAnimationType, ampAnimationDuration, ampAnimationDelay } = block.attributes;
+				initializeAnimation( block, page, allBlocks );
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
-				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
-				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) ) : undefined );
 			}
 		}
 	}
@@ -1560,7 +1586,9 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 	return new Promise( ( resolve, reject ) => {
 		mediaUpload( {
 			filesList: [ img ],
-			onFileChange: ( [ { id: posterId, url: posterUrl } ] ) => {
+			onFileChange: ( [ fileObj ] ) => {
+				const { id: posterId, url: posterUrl } = fileObj;
+
 				if ( videoId && posterId ) {
 					saveMedia( {
 						id: videoId,
@@ -1576,12 +1604,47 @@ export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 				}
 
 				if ( ! isBlobURL( posterUrl ) ) {
-					resolve( posterUrl );
+					resolve( fileObj );
 				}
 			},
 			onError: reject,
 		} );
 	} );
+};
+
+/**
+ * Given a media object, returns a suitable poster image URL.
+ *
+ * @param {Object} fileObj Media object.
+ * @return {string} Poster image URL.
+ */
+export const getPosterImageFromFileObj = ( fileObj ) => {
+	const { url } = fileObj;
+
+	let newPoster = url;
+
+	if ( has( fileObj, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url;
+	} else if ( has( fileObj, [ 'media_details', 'sizes', 'large', 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes.large.source_url;
+	}
+
+	return newPoster;
+};
+
+/**
+ * Add anchor for a block if it's missing.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeAddMissingAnchor = ( clientId ) => {
+	const block = getBlock( clientId );
+	if ( ! block ) {
+		return;
+	}
+	if ( ! block.attributes.anchor ) {
+		updateBlockAttributes( block.clientId, { anchor: getUniqueId() } );
+	}
 };
 
 /**
