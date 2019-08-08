@@ -7,5 +7,6 @@ export async function getSidebarPanelToggleByTitle( panelTitle ) {
 	const selector = `//button[@class="components-button components-panel__body-toggle"]//span[contains(text(),"${ panelTitle }")]`;
 	await page.waitForXPath( selector );
 
-	return await page.$x( selector )[ 0 ];
+	const toggles = await page.$x( selector );
+	return toggles[ 0 ];
 }
