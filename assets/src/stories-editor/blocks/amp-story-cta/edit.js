@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
+import { Component, RawHTML } from '@wordpress/element';
 import {
 	Dashicon,
 	IconButton,
@@ -182,11 +182,12 @@ class CallToActionEdit extends Component {
 									role="textbox"
 									className={ textWrapperClass }
 									style={ textStyle }>
-									{ text && text.length ? text : (
-										<span className="amp-text-placeholder">
-											{ placeholder }
-										</span>
-									) }
+									{ text && text.length ?
+										<RawHTML>{ text }</RawHTML> : (
+											<span className="amp-text-placeholder">
+												{ placeholder }
+											</span>
+										) }
 								</div>
 							</div>
 							}
