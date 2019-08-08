@@ -1483,6 +1483,11 @@ class Test_AMP_Validation_Manager extends WP_UnitTestCase {
 		$this->assertEqualSets( $expected_dependencies, $script->deps );
 		$this->assertEquals( AMP__VERSION, $script->ver );
 		$this->assertContains( $slug, wp_scripts()->queue );
+
+		$style = wp_styles()->registered[ $slug ];
+		$this->assertContains( 'css/amp-block-validation-compiled.css', $style->src );
+		$this->assertEquals( AMP__VERSION, $style->ver );
+		$this->assertContains( $slug, wp_styles()->queue );
 	}
 
 	/**
