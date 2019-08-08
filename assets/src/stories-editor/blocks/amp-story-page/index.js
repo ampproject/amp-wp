@@ -9,7 +9,7 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
  */
 import edit from './edit';
 import save from './save';
-import blockIcon from '../../../../images/amp-story-page-icon.svg';
+import BlockIcon from '../../../../images/amp-story-page-icon.svg';
 
 export const name = 'amp/amp-story-page';
 
@@ -57,7 +57,7 @@ const schema = {
 export const settings = {
 	title: __( 'Page', 'amp' ),
 	category: 'layout',
-	icon: blockIcon( { width: 24, height: 24 } ),
+	icon: <BlockIcon width={ 24 } height={ 24 } />,
 	attributes: schema,
 
 	supports: {

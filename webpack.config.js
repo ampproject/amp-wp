@@ -55,7 +55,7 @@ const ampStories = {
 			...defaultConfig.module.rules,
 			{
 				test: /\.svg$/,
-				loader: 'svg-inline-loader',
+				use: [ '@svgr/webpack' ],
 			},
 			{
 				test: /\.css$/,

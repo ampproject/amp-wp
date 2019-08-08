@@ -19,8 +19,8 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
  * Internal dependencies
  */
 import TemplatePreview from './template-preview';
-import pageIcon from '../../../../images/add-page-inserter.svg';
-import addTemplateIcon from '../../../../images/add-template.svg';
+import PageIcon from '../../../../images/add-page-inserter.svg';
+import AddTemplateIcon from '../../../../images/add-template.svg';
 import './edit.css';
 import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../helpers';
 
@@ -83,7 +83,7 @@ class TemplateInserter extends Component {
 				expandOnMobile
 				renderToggle={ ( { onToggle, isOpen } ) => (
 					<IconButton
-						icon={ addTemplateIcon( { width: 16, height: 16 } ) }
+						icon={ <AddTemplateIcon width={ 16 } height={ 16 } /> }
 						label={ __( 'Insert Template', 'amp' ) }
 						onClick={ onToggle }
 						className="editor-inserter__amp-inserter"
@@ -110,7 +110,7 @@ class TemplateInserter extends Component {
 								<div role="list" className="editor-block-types-list block-editor-block-types-list">
 									<div className="editor-block-preview block-editor-block-preview">
 										<IconButton
-											icon={ pageIcon( { width: 86, height: 96 } ) }
+											icon={ <PageIcon width={ 86 } height={ 96 } /> }
 											label={ __( 'Blank Page', 'amp' ) }
 											onClick={ () => {
 												onSelect( null );

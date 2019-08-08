@@ -8,16 +8,11 @@ module.exports = function( api ) {
 
 	return {
 		...config,
-		plugins: [
-			...config.plugins,
-			'inline-react-svg',
-		],
 		sourceMaps: true,
 		env: {
 			production: {
 				plugins: [
 					...config.plugins,
-					'inline-react-svg',
 					'transform-react-remove-prop-types',
 				],
 			},
