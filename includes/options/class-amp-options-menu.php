@@ -196,7 +196,7 @@ class AMP_Options_Menu {
 				line-height: 1;
 			}
 		</style>
-		<fieldset>
+		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
 			<dl>
 				<dt>
 					<input type="checkbox" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[experiences][]' ); ?>" id="website_experience" value="<?php echo esc_attr( AMP_Options_Manager::WEBSITE_EXPERIENCE ); ?>" <?php checked( in_array( AMP_Options_Manager::WEBSITE_EXPERIENCE, $experiences, true ) ); ?>>
