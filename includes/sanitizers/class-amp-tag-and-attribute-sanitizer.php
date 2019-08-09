@@ -1666,7 +1666,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			'data-' === substr( $attr_name, 0, 5 )
+			( 'data-' === substr( $attr_name, 0, 5 ) && AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
 			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, [ 'amp', '⚡' ], true ) )
