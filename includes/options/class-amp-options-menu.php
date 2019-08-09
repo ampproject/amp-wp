@@ -51,7 +51,6 @@ class AMP_Options_Menu {
 	 * Add menu.
 	 */
 	public function add_menu_items() {
-
 		/*
 		 * Note that the admin items for Validated URLs and Validation Errors will also be placed under this admin menu
 		 * page when the current user can manage_options.
