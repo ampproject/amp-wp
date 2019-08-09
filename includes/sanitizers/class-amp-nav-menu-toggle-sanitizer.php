@@ -112,7 +112,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$button_on = sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" );
 		$button_el->setAttribute( 'on', $button_on );
 		$button_el->setAttribute( 'aria-expanded', 'false' );
-		$button_el->setAttribute( 'data-amp-bind-aria-expanded', "$state_id ? 'true' : 'false'" );
+		$button_el->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$state_id ? 'true' : 'false'" );
 		if ( ! empty( $this->args['menu_button_toggle_class'] ) ) {
 			$button_el->setAttribute(
 				AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class',

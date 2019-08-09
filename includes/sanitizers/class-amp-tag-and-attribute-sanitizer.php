@@ -596,7 +596,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$is_bind_attribute = (
 						'[' === $name[0]
 						||
-						'data-amp-bind-' === substr( $name, 0, 40 )
+						AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 40 )
 						||
 						( isset( $this->rev_alternate_attr_name_lookup[ $name ] ) && '[' === $this->rev_alternate_attr_name_lookup[ $name ][0] )
 					);
