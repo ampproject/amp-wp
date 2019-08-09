@@ -37,23 +37,23 @@ describe( 'Block Position Controls', () => {
 
 		it( 'should send the block forward on clicking that button', async () => {
 			// The Video block was the last added, so it should be at the front.
-			expect( last( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toEqual( 'core/video' );
+			expect( last( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toStrictEqual( 'core/video' );
 
 			// Send the code block forward, but not completely to the front.
 			await page.click( CODE_BLOCK_SELECTOR );
-			await clickButton( 'Forward' )
+			await clickButton( 'Forward' );
 
 			// The code block should be have moved forward in the order, but is not yet at the front, that would be an index of 4.
-			expect( ( await getAllBlocks() )[ 0 ].innerBlocks[ 3 ].name ).toEqual( CODE_BLOCK_NAME );
+			expect( ( await getAllBlocks() )[ 0 ].innerBlocks[ 3 ].name ).toStrictEqual( CODE_BLOCK_NAME );
 		} );
 
 		it( 'should send the block completely to the front on clicking that button', async () => {
 			// Send the block completely to the front.
 			await page.click( CODE_BLOCK_SELECTOR );
-			await clickButton( 'Front' )
+			await clickButton( 'Front' );
 
 			// The code block should now be at the front, which means it'll be last in getAllBlocks().
-			expect( last( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toEqual( CODE_BLOCK_NAME );
+			expect( last( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toStrictEqual( CODE_BLOCK_NAME );
 		} );
 
 		it( 'should send the block backward on clicking that button', async () => {
@@ -62,7 +62,7 @@ describe( 'Block Position Controls', () => {
 			await page.click( '.amp-story-controls-send-backwards' );
 
 			// The code block should be have moved backward in the order, but is not completely at the back, that would be an index of 0.
-			expect( ( await getAllBlocks() )[ 0 ].innerBlocks[ 1 ].name ).toEqual( CODE_BLOCK_NAME );
+			expect( ( await getAllBlocks() )[ 0 ].innerBlocks[ 1 ].name ).toStrictEqual( CODE_BLOCK_NAME );
 		} );
 
 		it( 'should send the block completely to the back on clicking that button', async () => {
@@ -71,7 +71,7 @@ describe( 'Block Position Controls', () => {
 			await page.click( '.amp-story-controls-send-back' );
 
 			// The code block should now be at the back, which means it'll be first in getAllBlocks().
-			expect( first( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toEqual( CODE_BLOCK_NAME );
+			expect( first( ( await getAllBlocks() )[ 0 ].innerBlocks ).name ).toStrictEqual( CODE_BLOCK_NAME );
 		} );
 	} );
 
@@ -81,7 +81,7 @@ describe( 'Block Position Controls', () => {
 		} );
 
 		it( 'should not have the Block Position controls when there is only one block on the page', async () => {
-			expect( page ).not.toMatch( 'Block Position' );
+			await expect( page ).not.toMatch( 'Block Position' );
 		} );
 
 		it( 'should disable the Forward and Front buttons when the selected block is already at the front', async () => {
