@@ -48,6 +48,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	public function test_register() {
 		global $wp_taxonomies;
 		add_theme_support( AMP_Theme_Support::SLUG );
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		AMP_Validation_Error_Taxonomy::register();
 		$taxonomy_object = $wp_taxonomies[ AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG ];
@@ -544,6 +545,7 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 */
 	public function test_add_admin_hooks() {
 		add_theme_support( AMP_Theme_Support::SLUG );
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validation_Error_Taxonomy::register();
 
 		// add_group_terms_clauses_filter() needs the screen to be set.
@@ -973,6 +975,9 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	 * @covers \AMP_Validation_Error_Taxonomy::filter_tag_row_actions()
 	 */
 	public function test_filter_tag_row_actions() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
+		global $pagenow;
+		$pagenow = 'edit-tags.php';
 
 		// Prevent an error in add_query_arg().
 		$_SERVER['REQUEST_URI'] = 'https://example.com';
