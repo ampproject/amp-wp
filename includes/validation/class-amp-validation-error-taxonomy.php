@@ -259,7 +259,7 @@ class AMP_Validation_Error_Taxonomy {
 				'show_tagcloud'      => false,
 				'show_in_quick_edit' => false,
 				'hierarchical'       => false, // Or true? Code could be the parent term?
-				'show_in_menu'       => self::should_show_in_menu() || AMP_Validated_URL_Post_Type::should_show_in_menu(),
+				'show_in_menu'       => current_user_can( 'manage_options' ),
 				'meta_box_cb'        => false,
 				'capabilities'       => [
 					// Note that delete_terms is needed so the checkbox (cb) table column will work.
@@ -274,19 +274,6 @@ class AMP_Validation_Error_Taxonomy {
 		}
 
 		self::accept_validation_errors( AMP_Core_Theme_Sanitizer::get_acceptable_errors( get_template() ) );
-	}
-
-	/**
-	 * Determine whether the admin menu item should be included.
-	 *
-	 * @return bool Whether to show in menu.
-	 */
-	public static function should_show_in_menu() {
-		global $pagenow;
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return true;
-		}
-		return ( 'edit-tags.php' === $pagenow && ( isset( $_GET['taxonomy'] ) && self::TAXONOMY_SLUG === $_GET['taxonomy'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
 	/**

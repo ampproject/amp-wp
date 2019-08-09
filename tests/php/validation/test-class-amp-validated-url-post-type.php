@@ -55,27 +55,6 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test should_show_in_menu.
-	 *
-	 * @covers AMP_Validated_URL_Post_Type::should_show_in_menu()
-	 */
-	public function test_should_show_in_menu() {
-		global $pagenow;
-		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		$pagenow           = 'edit.php';
-		$_GET['post_type'] = 'post';
-		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		$_GET['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-		$this->assertTrue( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-	}
-
-	/**
 	 * Test add_admin_hooks.
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()

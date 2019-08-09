@@ -52,19 +52,16 @@ class AMP_Options_Menu {
 	 */
 	public function add_menu_items() {
 
-		$user_can_manage_options = current_user_can( 'manage_options' );
-
-		// Abort if the user doesn't have the capability to see anything.
-		if ( ! $user_can_manage_options && ! current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return;
-		}
-
+		/*
+		 * Note that the admin items for Validated URLs and Validation Errors will also be placed under this admin menu
+		 * page when the current user can manage_options.
+		 */
 		add_menu_page(
 			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
-			$user_can_manage_options ? 'manage_options' : 'edit_posts',
-			$user_can_manage_options ? AMP_Options_Manager::OPTION_NAME : esc_attr( 'edit.php?post_type=' . AMP_Validated_URL_Post_Type::POST_TYPE_SLUG ),
-			$user_can_manage_options ? [ $this, 'render_screen' ] : '',
+			'manage_options',
+			AMP_Options_Manager::OPTION_NAME,
+			[ $this, 'render_screen' ],
 			self::ICON_BASE64_SVG
 		);
 

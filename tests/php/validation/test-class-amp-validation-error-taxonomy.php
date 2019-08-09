@@ -84,27 +84,6 @@ class Test_AMP_Validation_Error_Taxonomy extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test should_show_in_menu.
-	 *
-	 * @covers AMP_Validation_Error_Taxonomy::should_show_in_menu()
-	 */
-	public function test_should_show_in_menu() {
-		global $pagenow;
-		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
-
-		$pagenow          = 'edit-tags.php';
-		$_GET['taxonomy'] = 'post_tag';
-		$this->assertFalse( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
-
-		$_GET['taxonomy'] = AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG;
-		$this->assertTrue( AMP_Validation_Error_Taxonomy::should_show_in_menu() );
-	}
-
-	/**
 	 * Test get_term.
 	 *
 	 * @covers AMP_Validation_Error_Taxonomy::get_term()
