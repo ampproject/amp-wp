@@ -8,7 +8,7 @@
 /**
  * Class AMP_Vimeo_Embed_Test
  *
- * @covers AMP_SoundCloud_Embed_Handler
+ * @covers AMP_Vimeo_Embed_Handler
  */
 class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 
