@@ -56,6 +56,7 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 					function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
 						$responsive_width  = $matches['width'];
 						$responsive_height = $matches['height'];
+						return '';
 					},
 					$class
 				)
