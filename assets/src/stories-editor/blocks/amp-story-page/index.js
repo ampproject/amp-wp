@@ -31,6 +31,9 @@ const schema = {
 	mediaType: {
 		type: 'string',
 	},
+	mediaAlt: {
+		type: 'string',
+	},
 	poster: {
 		type: 'string',
 	},

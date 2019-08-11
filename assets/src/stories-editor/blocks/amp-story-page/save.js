@@ -22,6 +22,7 @@ const PageSave = ( { attributes } ) => {
 		mediaId,
 		mediaUrl,
 		mediaType,
+		mediaAlt,
 		poster,
 		autoAdvanceAfter,
 		autoAdvanceAfterDuration,
@@ -55,13 +56,13 @@ const PageSave = ( { attributes } ) => {
 							<img
 								src={ mediaUrl }
 								layout="fill"
-								alt={ '' /* @todo This needs to be pulled from the media. */ }
+								alt={ mediaAlt }
 								className={ mediaId ? `wp-image-${ mediaId }` : null }
 								object-position={ objectPosition }
 							/>
 						) }
 						{ VIDEO_BACKGROUND_TYPE === mediaType && (
-							<amp-video layout="fill" src={ mediaUrl } poster={ poster } muted autoplay loop />
+							<amp-video layout="fill" aria-label={ mediaAlt } src={ mediaUrl } poster={ poster } muted autoplay loop />
 						) }
 					</amp-story-grid-layer>
 				)
@@ -78,6 +79,7 @@ PageSave.propTypes = {
 		backgroundColors: PropTypes.string,
 		mediaId: PropTypes.number,
 		mediaType: PropTypes.string,
+		mediaAlt: PropTypes.string,
 		mediaUrl: PropTypes.string,
 		focalPoint: PropTypes.shape( {
 			x: PropTypes.number.isRequired,
