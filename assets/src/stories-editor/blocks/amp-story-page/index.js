@@ -25,7 +25,7 @@ const schema = {
 	mediaUrl: {
 		type: 'string',
 		source: 'attribute',
-		selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
+		selector: 'amp-story-grid-layer[template="fill"] > img, amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
 		attribute: 'src',
 	},
 	mediaType: {

@@ -19,6 +19,7 @@ const PageSave = ( { attributes } ) => {
 		anchor,
 		focalPoint,
 		overlayOpacity,
+		mediaId,
 		mediaUrl,
 		mediaType,
 		poster,
@@ -43,9 +44,7 @@ const PageSave = ( { attributes } ) => {
 		overlayStyle.opacity = overlayOpacity / 100;
 	}
 
-	const imgStyle = {
-		objectPosition: IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'initial',
-	};
+	const objectPosition = IMAGE_BACKGROUND_TYPE === mediaType && focalPoint ? `${ focalPoint.x * 100 }% ${ focalPoint.y * 100 }%` : 'initial';
 
 	return (
 		<amp-story-page style={ { backgroundColor: '#ffffff' } } id={ anchor } auto-advance-after={ advanceAfter }>
@@ -53,7 +52,13 @@ const PageSave = ( { attributes } ) => {
 				mediaUrl && (
 					<amp-story-grid-layer template="fill">
 						{ IMAGE_BACKGROUND_TYPE === mediaType && (
-							<amp-img layout="fill" src={ mediaUrl } style={ imgStyle } />
+							<img
+								src={ mediaUrl }
+								layout="fill"
+								alt={ '' /* @todo This needs to be pulled from the media. */ }
+								className={ mediaId ? `wp-image-${ mediaId }` : null }
+								object-position={ objectPosition }
+							/>
 						) }
 						{ VIDEO_BACKGROUND_TYPE === mediaType && (
 							<amp-video layout="fill" src={ mediaUrl } poster={ poster } muted autoplay loop />
