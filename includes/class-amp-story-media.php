@@ -85,7 +85,7 @@ class AMP_Story_Media {
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// The default image size for AMP Story image block and background media image.
-		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
+		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1280 );
 
 		// Include additional story image sizes in Schema.org metadata.
 		add_filter( 'amp_schemaorg_metadata', [ __CLASS__, 'filter_schemaorg_metadata_images' ], 100 );
