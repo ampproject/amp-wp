@@ -130,7 +130,10 @@ domReady( () => {
 	renderStoryComponents();
 
 	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
+	const writingFlowClickRedirectElement = document.querySelector( '.block-editor-writing-flow__click-redirect' );
+	if ( writingFlowClickRedirectElement ) {
+		writingFlowClickRedirectElement.remove();
+	}
 
 	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
 		registerBlockStyle( roundedBlock, {
