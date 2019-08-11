@@ -136,7 +136,7 @@ class PageEdit extends Component {
 		}
 
 		const mediaAlt = media.alt || media.title;
-		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+		const mediaUrl = media.url;
 		const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
 
 		this.props.setAttributes( {
