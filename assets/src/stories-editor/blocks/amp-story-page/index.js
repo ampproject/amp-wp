@@ -7,6 +7,7 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import deprecated from './deprecated';
 import edit from './edit';
 import save from './save';
 import blockIcon from '../../../../images/amp-story-page-icon.svg';
@@ -82,6 +83,8 @@ export const settings = {
 	edit,
 
 	save,
+
+	deprecated,
 
 	transforms: {
 		from: [
