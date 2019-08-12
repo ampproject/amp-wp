@@ -587,7 +587,6 @@ export const renderStoryComponents = () => {
 	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
 	if ( editorBlockList && ! document.getElementById( 'amp-story-editor' ) ) {
-
 		const ampStoryWrapper = document.createElement( 'div' );
 		ampStoryWrapper.id = 'amp-story-editor';
 
