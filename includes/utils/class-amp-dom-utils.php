@@ -15,6 +15,7 @@ class AMP_DOM_Utils {
 	/**
 	 * Attribute prefix for AMP-bind data attributes.
 	 *
+	 * @since 1.2.1
 	 * @var string
 	 */
 	const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
