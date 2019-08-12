@@ -883,6 +883,8 @@ class AMP_Validation_Error_Taxonomy {
 						AMP__VERSION
 					);
 
+					wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
+
 					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
 					$script_dependencies = file_exists( $script_deps_path )
 						? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -903,6 +905,8 @@ class AMP_Validation_Error_Taxonomy {
 						AMP__VERSION
 					);
 
+					wp_styles()->add_data( 'amp-validation-error-taxonomy', 'rtl', 'replace' );
+
 					wp_enqueue_script(
 						'amp-validation-detail-toggle',
 						amp_get_asset_url( 'js/amp-validation-detail-toggle.js' ),
@@ -919,6 +923,8 @@ class AMP_Validation_Error_Taxonomy {
 						[ 'common' ],
 						AMP__VERSION
 					);
+
+					wp_styles()->add_data( 'amp-validation-single-error-url', 'rtl', 'replace' );
 
 					$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-single-error-url-details.deps.json';
 					$script_dependencies = file_exists( $script_deps_path )

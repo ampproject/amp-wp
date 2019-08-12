@@ -269,6 +269,8 @@ class AMP_Validated_URL_Post_Type {
 				false,
 				AMP__VERSION
 			);
+
+			wp_styles()->add_data( 'amp-admin-tables', 'rtl', 'replace' );
 		}
 
 		if ( 'edit-' . self::POST_TYPE_SLUG !== $screen->id ) {
@@ -281,6 +283,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'wp-pointer' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
@@ -301,6 +305,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'common', 'amp-validation-tooltips' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-error-taxonomy', 'rtl', 'replace' );
 
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
