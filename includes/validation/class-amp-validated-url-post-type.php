@@ -112,7 +112,7 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => ( self::should_show_in_menu() || AMP_Validation_Error_Taxonomy::should_show_in_menu() ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
 				// @todo Show in rest.
 			]
 		);
@@ -154,25 +154,12 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
-	 * Determine whether the admin menu item should be included.
-	 *
-	 * @return bool Whether to show in menu.
-	 */
-	public static function should_show_in_menu() {
-		global $pagenow;
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return true;
-		}
-		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-
-	/**
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_user_can( 'manage_options' ) ) {
 			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
 			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
 		}
@@ -282,6 +269,8 @@ class AMP_Validated_URL_Post_Type {
 				false,
 				AMP__VERSION
 			);
+
+			wp_styles()->add_data( 'amp-admin-tables', 'rtl', 'replace' );
 		}
 
 		if ( 'edit-' . self::POST_TYPE_SLUG !== $screen->id ) {
@@ -294,6 +283,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'wp-pointer' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
@@ -314,6 +305,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'common', 'amp-validation-tooltips' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-error-taxonomy', 'rtl', 'replace' );
 
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',

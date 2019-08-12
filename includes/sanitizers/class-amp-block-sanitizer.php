@@ -33,6 +33,11 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Element.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
 			// We are only looking for <figure> elements which have wp-block-embed as class.
@@ -42,11 +47,36 @@ class AMP_Block_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			// Remove classes like wp-embed-aspect-16-9 since responsive layout is handled by AMP's layout system.
-			$node->setAttribute( 'class', preg_replace( '/(?<=^|\s)wp-embed-aspect-\d+-\d+(?=\s|$)/', '', $class ) );
+			$responsive_width  = null;
+			$responsive_height = null;
+			$node->setAttribute(
+				'class',
+				preg_replace_callback(
+					'/(?<=^|\s)wp-embed-aspect-(?P<width>\d+)-(?P<height>\d+)(?=\s|$)/',
+					function ( $matches ) use ( &$responsive_width, &$responsive_height ) {
+						$responsive_width  = $matches['width'];
+						$responsive_height = $matches['height'];
+						return '';
+					},
+					$class
+				)
+			);
 
 			// We're looking for <figure> elements that have one child node only.
 			if ( 1 !== count( $node->childNodes ) ) {
 				continue;
+			}
+
+			// @todo Should this only be done if the body has a .wp-embed-responsive class (i.e. current_theme_supports( 'responsive-embeds' ))?
+			// @todo Should we consider just eliminating the .wp-block-embed__wrapper element since unnecessary?
+			// For visual parity with blocks in non-AMP pages, override the oEmbed's natural responsive dimensions with the aspect ratio specified in the wp-embed-aspect-* class name.
+			if ( $responsive_width && $responsive_height ) {
+				$xpath       = new DOMXPath( $this->dom );
+				$amp_element = $xpath->query( './div[ contains( @class, "wp-block-embed__wrapper" ) ]/*[ @layout = "responsive" ]', $node )->item( 0 );
+				if ( $amp_element instanceof DOMElement ) {
+					$amp_element->setAttribute( 'width', $responsive_width );
+					$amp_element->setAttribute( 'height', $responsive_height );
+				}
 			}
 
 			$attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );

@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "classnames": "2.2.6",
-    "dom-scroll-into-view": "2.0.0",
+    "dom-scroll-into-view": "2.0.1",
     "memize": "1.0.5",
     "prop-types": "15.7.2"
   },
@@ -60,7 +60,7 @@
     "babel-plugin-inline-react-svg": "1.1.0",
     "babel-plugin-transform-react-remove-prop-types": "0.4.24",
     "browserslist": "4.6.6",
-    "core-js": "3.2.0",
+    "core-js": "3.2.1",
     "cross-env": "5.2.0",
     "css-loader": "3.2.0",
     "cssnano": "4.1.10",
@@ -87,6 +87,7 @@
     "postcss-loader": "3.0.0",
     "postcss-nested": "4.1.2",
     "postcss-preset-env": "6.7.0",
+    "rtlcss": "2.4.0",
     "rtlcss-webpack-plugin": "4.0.3",
     "source-map-loader": "0.2.4",
     "svg-inline-loader": "0.8.0",
@@ -100,6 +101,9 @@
   "scripts": {
     "build": "npm-run-all build:*",
     "build:prepare": "grunt clean",
+    "build:css": "npm-run-all build:css:*",
+    "build:css:copy": "cp -R assets/css/src/* assets/css",
+    "build:css:rtlcss": "rtlcss -d assets/css/src assets/css -e '-rtl.css'",
     "build:js": "wp-scripts build",
     "build:run": "grunt build",
     "build:zip": "grunt create-build-zip",
