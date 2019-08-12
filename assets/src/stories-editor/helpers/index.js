@@ -663,6 +663,12 @@ export const renderStoryComponents = () => {
 			customInserter
 		);
 	}
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	const writingFlowClickRedirectElement = document.querySelector( '.block-editor-writing-flow__click-redirect' );
+	if ( writingFlowClickRedirectElement ) {
+		writingFlowClickRedirectElement.remove();
+	}
 };
 
 // Todo: Make these customizable?
