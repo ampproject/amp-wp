@@ -1,6 +1,22 @@
 <?php
+/**
+ * Class AMP_Vimeo_Embed_Test
+ *
+ * @package AMP
+ */
 
+/**
+ * Class AMP_Vimeo_Embed_Test
+ *
+ * @covers AMP_Vimeo_Embed_Handler
+ */
 class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
+
+	/**
+	 * Get conversion data.
+	 *
+	 * @return array
+	 */
 	public function get_conversion_data() {
 		return [
 			'no_embed'                      => [
@@ -10,6 +26,11 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 
 			'url_simple'                    => [
 				'https://vimeo.com/172355597' . PHP_EOL,
+				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
+			],
+
+			'url_unlisted'                  => [
+				'https://vimeo.com/172355597/abcdef0123' . PHP_EOL,
 				'<p><amp-vimeo data-videoid="172355597" layout="responsive" width="600" height="338"></amp-vimeo></p>' . PHP_EOL,
 			],
 
@@ -32,7 +53,12 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test conversion.
+	 *
 	 * @dataProvider get_conversion_data
+	 *
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
 	public function test__conversion( $source, $expected ) {
 		$embed = new AMP_Vimeo_Embed_Handler();
@@ -42,6 +68,11 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 		$this->assertEquals( $expected, $filtered_content );
 	}
 
+	/**
+	 * Get scripts data.
+	 *
+	 * @return array Scripts data.
+	 */
 	public function get_scripts_data() {
 		return [
 			'not_converted' => [
@@ -56,7 +87,12 @@ class AMP_Vimeo_Embed_Test extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test get_scripts().
+	 *
 	 * @dataProvider get_scripts_data
+	 *
+	 * @param string $source   Source.
+	 * @param string $expected Expected.
 	 */
 	public function test__get_scripts( $source, $expected ) {
 		$embed = new AMP_Vimeo_Embed_Handler();
