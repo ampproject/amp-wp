@@ -31,6 +31,7 @@ const TextBlockSave = ( { attributes } ) => {
 				style={ styles }
 				className={ className }
 				value={ content }
+				multiline="p"
 				format="string"
 			/>
 		);

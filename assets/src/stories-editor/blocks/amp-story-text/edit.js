@@ -149,9 +149,8 @@ class TextBlockEdit extends Component {
 				} ) } style={ wrapperStyle } >
 					<RichText
 						wrapperClassName="wp-block-amp-story-text"
-						tagName="p"
-						// Ensure line breaks are normalised to HTML.
 						value={ content }
+						multiline="p"
 						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
 						// The 2 following lines are necessary for pasting to work.
 						onReplace={ this.onReplace }
