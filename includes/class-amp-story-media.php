@@ -75,9 +75,6 @@ class AMP_Story_Media {
 			]
 		);
 
-		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
-		add_image_size( 'amp-publisher-logo', 100, 100, true );
-
 		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
 		add_image_size( self::STORY_CARD_IMAGE_SIZE, self::STORY_SMALL_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
 
@@ -89,6 +86,9 @@ class AMP_Story_Media {
 
 		// The default image size for AMP Story image block and background media image.
 		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
+
+		// Include additional story image sizes in Schema.org metadata.
+		add_filter( 'amp_schemaorg_metadata', [ __CLASS__, 'filter_schemaorg_metadata_images' ], 100 );
 
 		// In case there is no featured image for the poster-portrait-src, add a fallback image.
 		add_filter( 'wp_get_attachment_image_src', [ __CLASS__, 'poster_portrait_fallback' ], 10, 3 );
@@ -104,6 +104,57 @@ class AMP_Story_Media {
 		add_action( 'pre_get_posts', [ __CLASS__, 'filter_poster_attachments' ] );
 
 		add_action( 'rest_api_init', [ __CLASS__, 'rest_api_init' ] );
+	}
+
+	/**
+	 * Get story meta images.
+	 *
+	 * There is a fallback poster-portrait image added via a filter, in case there's no featured image.
+	 *
+	 * @since 1.2.1
+	 * @see AMP_Story_Media::poster_portrait_fallback()
+	 *
+	 * @param int|WP_Post|null $post Post.
+	 * @return string[] Images.
+	 */
+	public static function get_story_meta_images( $post = null ) {
+		$thumbnail_id = get_post_thumbnail_id( $post );
+
+		$images = [
+			'poster-portrait'  => wp_get_attachment_image_url( $thumbnail_id, self::STORY_CARD_IMAGE_SIZE ),
+			'poster-square'    => wp_get_attachment_image_url( $thumbnail_id, self::STORY_SQUARE_IMAGE_SIZE ),
+			'poster-landscape' => wp_get_attachment_image_url( $thumbnail_id, self::STORY_LANDSCAPE_IMAGE_SIZE ),
+		];
+		return array_filter( $images );
+	}
+
+	/**
+	 * Include additional story image sizes in Schema.org metadata for AMP Stories.
+	 *
+	 * @since 1.2.1
+	 *
+	 * @param array $data Metadata.
+	 * @return array Metadata.
+	 */
+	public static function filter_schemaorg_metadata_images( $data ) {
+		if ( ! is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) ) {
+			return $data;
+		}
+
+		if ( ! isset( $data['image'] ) ) {
+			$data['image'] = [];
+		} elseif ( is_string( $data['image'] ) ) {
+			$data['image'] = [ $data['image'] ];
+		} elseif ( isset( $data['image']['@type'] ) ) {
+			$data['image'] = [ $data['image'] ];
+		}
+
+		$data['image'] = array_merge(
+			array_values( self::get_story_meta_images() ),
+			$data['image']
+		);
+
+		return $data;
 	}
 
 	/**

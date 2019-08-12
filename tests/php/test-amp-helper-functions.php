@@ -25,6 +25,15 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		global $wp_scripts, $pagenow;
 		$wp_scripts = null;
 		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
+
+		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
+			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+				if ( 'amp/' === substr( $block->name, 0, 4 ) ) {
+					WP_Block_Type_Registry::get_instance()->unregister( $block->name );
+				}
+			}
+		}
+
 		parent::tearDown();
 	}
 
@@ -765,17 +774,44 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test amp_get_schemaorg_metadata().
+	 * Insert site icon attachment.
+	 *
+	 * @param string $file Image file path.
+	 * @return int|WP_Error Attachment ID or error.
+	 */
+	public function insert_site_icon_attachment( $file ) {
+		$attachment_id = self::factory()->attachment->create_upload_object( $file, null );
+		$cropped       = wp_crop_image( $attachment_id, 0, 0, 512, 512, 512, 512 );
+
+		require_once ABSPATH . 'wp-admin/includes/class-wp-site-icon.php';
+		$wp_site_icon = new WP_Site_Icon();
+
+		/** This filter is documented in wp-admin/includes/class-custom-image-header.php */
+		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
+		$object  = $wp_site_icon->create_attachment_object( $cropped, $attachment_id );
+		unset( $object['ID'] );
+
+		// Update the attachment.
+		add_filter( 'intermediate_image_sizes_advanced', [ $wp_site_icon, 'additional_sizes' ] );
+		$attachment_id = $wp_site_icon->insert_attachment( $object, $cropped );
+		remove_filter( 'intermediate_image_sizes_advanced', [ $wp_site_icon, 'additional_sizes' ] );
+
+		return $attachment_id;
+	}
+
+	/**
+	 * Test amp_get_schemaorg_metadata() for non-story.
 	 *
 	 * @covers ::amp_get_schemaorg_metadata()
+	 * @covers ::amp_get_publisher_logo()
 	 */
-	public function test_amp_get_schemaorg_metadata() {
+	public function test_amp_get_schemaorg_metadata_non_story() {
 		update_option( 'blogname', 'Foo' );
 		$publisher_type     = 'Organization';
-		$logo_type          = 'ImageObject';
 		$expected_publisher = [
 			'@type' => $publisher_type,
 			'name'  => 'Foo',
+			'logo'  => amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' ),
 		];
 
 		$user_id = self::factory()->user->create(
@@ -799,6 +835,9 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			]
 		);
 
+		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
+		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
+
 		// Test non-singular, with no publisher logo.
 		$this->go_to( home_url() );
 		$metadata = amp_get_schemaorg_metadata();
@@ -806,113 +845,36 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayNotHasKey( '@type', $metadata );
 		$this->assertArrayHasKey( 'publisher', $metadata );
 		$this->assertEquals( $expected_publisher, $metadata['publisher'] );
+		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
 
-		// Test the custom_logo as the publisher logo.
-		$custom_logo_src    = 'example/custom-logo.jpeg';
-		$custom_logo_height = 45;
-		$custom_logo_width  = 600;
-		$custom_logo_id     = self::factory()->attachment->create_object(
-			[
-				'file'           => $custom_logo_src,
-				'post_mime_type' => 'image/jpeg',
-			]
-		);
-		$expected_logo_img  = wp_get_attachment_image_src( $custom_logo_id, 'full', false );
-
-		update_post_meta(
-			$custom_logo_id,
-			'_wp_attachment_metadata',
-			[
-				'width'  => $custom_logo_width,
-				'height' => $custom_logo_height,
-			]
-		);
-		set_theme_mod( 'custom_logo', $custom_logo_id );
+		// Set site icon which now should get used instead of default for publisher logo.
+		update_option( 'site_icon', $site_icon_attachment_id );
 		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
-			[
-				'@type'  => $logo_type,
-				'height' => $custom_logo_height,
-				'url'    => $expected_logo_img[0],
-				'width'  => $custom_logo_width,
-			],
+			wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ),
 			$metadata['publisher']['logo']
 		);
-		set_theme_mod( 'custom_logo', null );
+		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
 
-		// Test the site icon as the publisher logo.
-		$site_icon_src          = 'foo/site-icon.jpeg';
-		$site_icon_id           = self::factory()->attachment->create_object(
-			[
-				'file'           => $site_icon_src,
-				'post_mime_type' => 'image/jpeg',
-			]
-		);
-		$expected_site_icon_img = wp_get_attachment_image_src( $site_icon_id, 'full', false );
-
-		update_option( 'site_icon', $site_icon_id );
-		$expected_schema_site_icon = [
-			'@type'  => $logo_type,
-			'height' => 32,
-			'url'    => $expected_site_icon_img[0],
-			'width'  => 32,
-		];
-		$metadata                  = amp_get_schemaorg_metadata();
-		$this->assertEquals( $expected_schema_site_icon, $metadata['publisher']['logo'] );
-		update_option( 'site_icon', null );
-
-		/**
-		 * Test the publisher logo when the Custom Logo naturally has too much height, a common scenario.
-		 *
-		 * It's expected that the URL is the same,
-		 * but the height should be 60, the maximum height for the schema.org publisher logo.
-		 * And the width should be proportional to the new height.
-		 */
-		$custom_logo_excessive_height = 250;
-		update_post_meta(
-			$custom_logo_id,
-			'_wp_attachment_metadata',
-			[
-				'width'  => $custom_logo_width,
-				'height' => $custom_logo_excessive_height,
-			]
-		);
-		set_theme_mod( 'custom_logo', $custom_logo_id );
-		update_option( 'site_icon', $site_icon_id );
-		$metadata   = amp_get_schemaorg_metadata();
-		$max_height = 60;
+		// Set custom logo which now should get used instead of default for publisher logo.
+		set_theme_mod( 'custom_logo', $custom_logo_attachment_id );
+		$metadata = amp_get_schemaorg_metadata();
 		$this->assertEquals(
-			[
-				'@type'  => $logo_type,
-				'height' => $max_height,
-				'url'    => $expected_logo_img[0],
-				'width'  => $custom_logo_width * $max_height / $custom_logo_excessive_height, // Proportional to downsized height.
-			],
+			wp_get_attachment_image_url( $custom_logo_attachment_id, 'full', false ),
 			$metadata['publisher']['logo']
 		);
-		set_theme_mod( 'custom_logo', null );
-		update_option( 'site_icon', null );
+		$this->assertEquals( wp_get_attachment_image_url( $custom_logo_attachment_id, 'full', false ), amp_get_publisher_logo() );
 
-		/**
-		 * Test that the 'amp_site_icon_url' filter also applies to the Custom Logo.
-		 *
-		 * Before, this only applied to the Site Icon, as that was the only possible schema.org publisher logo.
-		 * But now that the Custom Logo is preferred, this filter should also apply to that.
-		 */
-		update_post_meta(
-			$custom_logo_id,
-			'_wp_attachment_metadata',
-			[
-				'width'  => $custom_logo_width,
-				'height' => $custom_logo_height,
-			]
-		);
-		set_theme_mod( 'custom_logo', $custom_logo_id );
+		// Test amp_site_icon_url filter overrides previous.
 		add_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
 		$metadata = amp_get_schemaorg_metadata();
-		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo']['url'] );
+		$this->assertEquals( self::MOCK_SITE_ICON, $metadata['publisher']['logo'] );
+		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+
+		// Clear out all customized icons.
 		remove_filter( 'amp_site_icon_url', [ __CLASS__, 'mock_site_icon' ] );
-		set_theme_mod( 'custom_logo', null );
+		delete_option( 'site_icon' );
+		remove_theme_mod( 'custom_logo' );
 
 		// Test page.
 		$this->go_to( get_permalink( $page_id ) );
@@ -925,6 +887,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( get_the_title( $page_id ), $metadata['headline'] );
 		$this->assertArrayHasKey( 'datePublished', $metadata );
 		$this->assertArrayHasKey( 'dateModified', $metadata );
+		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
 
 		// Test post.
 		$this->go_to( get_permalink( $post_id ) );
@@ -943,6 +906,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			],
 			$metadata['author']
 		);
+		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
 
 		// Test override.
 		$this->go_to( get_permalink( $post_id ) );
@@ -972,6 +936,68 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'did_amp_post_template_metadata', $metadata );
 		$this->assertArrayHasKey( 'did_amp_schemaorg_metadata', $metadata );
 		$this->assertEquals( 'George', $metadata['author']['name'] );
+		$this->assertEquals( $metadata['publisher']['logo'], amp_get_publisher_logo() );
+	}
+
+	/**
+	 * Test amp_get_schemaorg_metadata() for a story.
+	 *
+	 * @covers ::amp_get_schemaorg_metadata()
+	 * @covers ::amp_get_publisher_logo()
+	 */
+	public function test_amp_get_schemaorg_metadata_story() {
+		if ( ! AMP_Story_Post_Type::has_required_block_capabilities() ) {
+			$this->markTestSkipped( 'Lacking required block capabilities.' );
+		}
+		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE, AMP_Options_Manager::STORIES_EXPERIENCE ] );
+		AMP_Story_Post_Type::register();
+
+		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
+		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
+		$fallback_publisher_logo   = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+
+		$post_id = self::factory()->post->create(
+			[
+				'post_type'  => AMP_Story_Post_Type::POST_TYPE_SLUG,
+				'post_title' => 'Example Story',
+			]
+		);
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+
+		// Test default fallback icon.
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( $fallback_publisher_logo, $metadata['publisher']['logo'] );
+		$this->assertEquals( $fallback_publisher_logo, amp_get_publisher_logo() );
+
+		// Set site icon which now should get used instead of default for publisher logo, since it is square.
+		update_option( 'site_icon', $site_icon_attachment_id );
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals(
+			wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ),
+			$metadata['publisher']['logo']
+		);
+		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
+
+		// Set custom logo which still shouldn't affect the icon since it is not square.
+		set_theme_mod( 'custom_logo', $custom_logo_attachment_id );
+		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
+		delete_option( 'site_icon' );
+		$this->assertEquals( $fallback_publisher_logo, amp_get_publisher_logo() );
+
+		// Set the custom logo to be the site icon, which will allow it to be used since it is square.
+		set_theme_mod( 'custom_logo', $site_icon_attachment_id );
+		$this->assertEquals( wp_get_attachment_image_url( $site_icon_attachment_id, 'full', false ), amp_get_publisher_logo() );
+
+		// Check other meta.
+		$metadata = amp_get_schemaorg_metadata();
+		$this->assertEquals( 'http://schema.org', $metadata['@context'] );
+		$this->assertEquals( get_option( 'blogname' ), $metadata['publisher']['name'] );
+		$this->assertEquals( 'BlogPosting', $metadata['@type'] );
+		$this->assertEquals( get_permalink( $post_id ), $metadata['mainEntityOfPage'] );
+		$this->assertEquals( get_the_title( $post_id ), $metadata['headline'] );
+		$this->assertArrayHasKey( 'datePublished', $metadata );
+		$this->assertArrayHasKey( 'dateModified', $metadata );
 	}
 
 	/**
