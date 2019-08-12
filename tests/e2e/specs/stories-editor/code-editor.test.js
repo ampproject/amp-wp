@@ -29,6 +29,9 @@ describe( 'Code Editor', () => {
 
 		await expect( page ).not.toMatchElement( '#amp-story-block-navigation' );
 
+		await expect( page ).toMatchElement( '.block-editor-inserter .block-editor-inserter__toggle[disabled]' );
+		await expect( page ).toMatchElement( '#amp-story-shortcuts .components-icon-button[disabled]' );
+
 		await switchEditorModeTo( 'Visual' );
 		await page.click( '.edit-post-more-menu [aria-label="More tools & options"]' );
 
