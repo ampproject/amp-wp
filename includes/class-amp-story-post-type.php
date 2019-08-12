@@ -1740,6 +1740,65 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
+	 * Registers the Page Attachment block.
+	 */
+	public static function register_block_page_attachment() {
+		register_block_type(
+			'amp/amp-story-page-attachment',
+			[
+				'attributes'      => [
+					'postId' => [
+						'type'    => 'number',
+                        'default' => null,
+					],
+					'title'  => [
+						'type'    => 'string',
+						'default' => null,
+					],
+					'text'   => [
+						'type'    => 'string',
+						'default' => __( 'Swipe up', 'amp' ),
+					],
+					'theme'  => [
+						'type'    => 'string',
+						'default' => 'light',
+					],
+				],
+				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],
+			]
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Latest Stories.
+	 * Much of this is taken from the Core block Latest Posts.
+	 *
+	 * @see render_block_core_latest_posts()
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_page_attachment( $attributes ) {
+	    if ( ! isset( $attributes['postId'] ) ) {
+	        return null;
+        }
+
+	    $excerpt = get_the_excerpt( absint( $attributes['postId'] ) );
+
+	    if ( empty( $excerpt ) ) {
+	        return null;
+        }
+
+		ob_start();
+		?>
+        <amp-story-page-attachment layout="nodisplay" data-theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+            <?php echo esc_html( $excerpt ); ?>
+        </amp-story-page-attachment>
+		<?php
+
+		return ob_get_clean();
+	}
+
+	/**
 	 * Add RSS feed link for stories.
 	 *
 	 * @since 1.2
