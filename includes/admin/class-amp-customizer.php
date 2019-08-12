@@ -165,6 +165,8 @@ class AMP_Template_Customizer {
 				'amp-customizer',
 				amp_get_asset_url( 'css/amp-customizer.css' )
 			);
+
+			wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
 		}
 
 		/**
