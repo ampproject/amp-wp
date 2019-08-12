@@ -128,13 +128,18 @@ Inserter.propTypes = {
 	rootClientId: PropTypes.string,
 	clientId: PropTypes.string,
 	isAppender: PropTypes.bool,
+	showInserter: PropTypes.bool,
 };
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { isReordering } = select( 'amp/story' );
 
+	// As used in <HeaderToolbar> component
+	const showInserter = select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled;
+
 	return {
 		isReordering: isReordering(),
+		disabled: ! showInserter,
 	};
 } );
 
