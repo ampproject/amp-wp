@@ -54,8 +54,8 @@ const PageSave = ( { attributes } ) => {
 					<amp-story-grid-layer template="fill">
 						{ IMAGE_BACKGROUND_TYPE === mediaType && (
 							<img
-								src={ mediaUrl }
 								layout="fill"
+								src={ mediaUrl }
 								alt={ mediaAlt }
 								className={ mediaId ? `wp-image-${ mediaId }` : null }
 								object-position={ objectPosition }
