@@ -985,6 +985,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-bind' ],
 			],
 
+			'data_amp_bind_attr'                           => [
+				'<p data-amp-bind-text="\'Hello \' + foo">Hello World</p><button on="tap:AMP.setState({foo: \'amp-bind\'})">Update</button>',
+				null,
+				[ 'amp-bind' ],
+			],
+
 			'amp_bind_with_greater_than_symbol'            => [
 				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" [class]="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className => \'\' != className )">hello</div>',
 				'<div class="home page-template-default page page-id-7 logged-in wp-custom-logo group-blog" data-amp-bind-class="minnow.bodyClasses.concat( minnow.navMenuExpanded ? \'sidebar-open\' : \'\' ).filter( className =&gt; \'\' != className )">hello</div>',
