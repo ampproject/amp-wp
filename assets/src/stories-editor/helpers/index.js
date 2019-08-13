@@ -586,7 +586,7 @@ export const renderStoryComponents = () => {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
 	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
-	if ( editorBlockList ) {
+	if ( editorBlockList && ! document.getElementById( 'amp-story-editor' ) ) {
 		const ampStoryWrapper = document.createElement( 'div' );
 		ampStoryWrapper.id = 'amp-story-editor';
 
@@ -662,6 +662,12 @@ export const renderStoryComponents = () => {
 			<Inserter position="bottom right" />,
 			customInserter
 		);
+	}
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	const writingFlowClickRedirectElement = document.querySelector( '.block-editor-writing-flow__click-redirect' );
+	if ( writingFlowClickRedirectElement ) {
+		writingFlowClickRedirectElement.remove();
 	}
 };
 

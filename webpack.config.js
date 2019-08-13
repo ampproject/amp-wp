@@ -12,6 +12,8 @@ const WebpackBar = require( 'webpackbar' );
  * WordPress dependencies
  */
 const defaultConfig = require( '@wordpress/scripts/config/webpack.config' );
+const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
+const { defaultRequestToExternal, defaultRequestToHandle } = require( '@wordpress/dependency-extraction-webpack-plugin/util' );
 
 const sharedConfig = {
 	output: {
@@ -204,8 +206,32 @@ const wpPolyfills = {
 	...defaultConfig,
 	...sharedConfig,
 	externals: {},
-	// Disable BundleAnalyzerPlugin for polyfills.
 	plugins: [
+		new DependencyExtractionWebpackPlugin( {
+			useDefaults: false,
+			requestToHandle: ( request ) => {
+				switch ( request ) {
+					case '@wordpress/dom-ready':
+					case '@wordpress/i18n':
+					case '@wordpress/server-side-render':
+						return undefined;
+
+					default:
+						return defaultRequestToHandle( request );
+				}
+			},
+			requestToExternal: ( request ) => {
+				switch ( request ) {
+					case '@wordpress/dom-ready':
+					case '@wordpress/i18n':
+					case '@wordpress/server-side-render':
+						return undefined;
+
+					default:
+						return defaultRequestToExternal( request );
+				}
+			},
+		} ),
 		new WebpackBar( {
 			name: 'WordPress Polyfills',
 			color: '#21a0d0',
@@ -214,6 +240,7 @@ const wpPolyfills = {
 	entry: {
 		'wp-i18n': './assets/src/polyfills/wp-i18n.js',
 		'wp-dom-ready': './assets/src/polyfills/wp-dom-ready.js',
+		'wp-server-side-render': './assets/src/polyfills/wp-server-side-render.js',
 	},
 };
 
