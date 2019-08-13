@@ -1,17 +1,37 @@
-.amp-story-resize-container .components-resizable-box__handle-right {
+.amp-story-resize-container .components-resizable-box__handle-right.components-resizable-box__side-handle {
 	right: -14px;
 	height: 50px;
 	top: calc(50% - 25px);
 }
 
-.amp-story-resize-container .components-resizable-box__handle-right::before {
+.amp-story-resize-container .components-resizable-box__handle-right.components-resizable-box__side-handle::before {
 	margin: 0;
 }
 
-.amp-story-resize-container .components-resizable-box__handle-bottom {
+.amp-story-resize-container .components-resizable-box__handle-bottom.components-resizable-box__side-handle {
 	bottom: -14px;
 	width: 50px;
 	left: calc(50% - 25px);
+}
+
+.amp-story-resize-container .components-resizable-box__handle-bottom.components-resizable-box__side-handle::before {
+	margin: 0 auto;
+}
+
+.wp-block .components-resizable-box__handle,
+.wp-block.is-typing .components-resizable-box__handle {
+	display: block;
+	opacity: 0;
+	transition: opacity .3s;
+}
+
+.wp-block.amp-page-active .wp-block:hover .components-resizable-box__handle,
+.wp-block.amp-page-active .wp-block .components-resizable-box__handle:hover {
+	opacity: 1;
+}
+
+.amp-story-resize-container .amp-story-editor__rotate-container {
+	height: 100%;
 }
 
 .amp-story-editor__rotate-container .components-resizable-box__handle {
@@ -29,24 +49,4 @@
 /* Dragging the preview image in the image block engaged the drop zone for an image, so make this non-draggable in webkit. */
 .block-editor-block-list__block[data-type="core/image"] img {
 	-webkit-user-drag: none;
-}
-
-.amp-story-resize-container .components-resizable-box__handle-bottom::before {
-	margin: 0 auto;
-}
-
-.amp-story-resize-container .amp-story-editor__rotate-container {
-	height: 100%;
-}
-
-.wp-block .components-resizable-box__handle,
-.wp-block.is-typing .components-resizable-box__handle {
-	display: block;
-	opacity: 0;
-	transition: opacity .3s;
-}
-
-.wp-block.amp-page-active .wp-block:hover .components-resizable-box__handle,
-.wp-block.amp-page-active .wp-block .components-resizable-box__handle:hover {
-	opacity: 1;
 }
