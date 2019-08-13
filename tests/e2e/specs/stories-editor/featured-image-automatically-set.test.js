@@ -64,7 +64,7 @@ describe( 'Featured Image Automatically Set', () => {
 			expect( await getFeaturedImageFromDocument() ).toContain( uploadedImage );
 
 			// The featured image in the store should not be 0, meaning it is set.
-			expect( await getFeaturedImageFromStore() ).not.toEqual( 0 );
+			expect( await getFeaturedImageFromStore() ).not.toStrictEqual( 0 );
 		} );
 	} );
 
@@ -96,7 +96,7 @@ describe( 'Featured Image Automatically Set', () => {
 			expect( await getFeaturedImageFromDocument() ).toContain( uploadedImage );
 
 			// The featured image in the store should not be 0, meaning it is set.
-			expect( await getFeaturedImageFromStore() ).not.toEqual( 0 );
+			expect( await getFeaturedImageFromStore() ).not.toStrictEqual( 0 );
 		} );
 	} );
 } );
