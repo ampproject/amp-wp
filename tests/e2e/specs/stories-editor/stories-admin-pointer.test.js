@@ -9,6 +9,6 @@ describe( 'AMP Stories Admin Pointer', () => {
 		const nodes = await page.$x(
 			'//*[contains(@class,"wp-amp-pointer")]//p[contains(text(), "You can now enable Stories")]'
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 } );

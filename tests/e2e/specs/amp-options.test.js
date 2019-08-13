@@ -14,7 +14,7 @@ describe( 'AMP Settings Screen', () => {
 		const nodes = await page.$x(
 			'//*[contains(@class,"amp-welcome-notice")]//h1[contains(text(), "Welcome to AMP for WordPress")]'
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should display a warning about missing object cache', async () => {
@@ -22,7 +22,7 @@ describe( 'AMP Settings Screen', () => {
 		const nodes = await page.$x(
 			'//*[contains(@class,"notice-warning")]//p[contains(text(), "The AMP plugin performs at its best when persistent object cache is enabled")]'
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should display a message about theme compatibility', async () => {
@@ -30,7 +30,7 @@ describe( 'AMP Settings Screen', () => {
 		const nodes = await page.$x(
 			'//*[contains(@class,"notice-success")]//p[contains(text(), "Your active theme is known to work well in standard or transitional mode.")]'
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should toggle Website Mode section', async () => {
@@ -69,7 +69,7 @@ describe( 'AMP Settings Screen', () => {
 		const nodes = await page.$x(
 			'//*[contains(@class,"notice-info")]//p[contains(text(), "To use stories, you currently must have the latest version")]'
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 
 		await activatePlugin( 'gutenberg' );
 	} );
