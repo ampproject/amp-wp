@@ -148,6 +148,7 @@ class CallToActionEdit extends Component {
 								blockElementId={ `amp-story-cta-button-${ clientId }` }
 								clientId={ clientId }
 								name={ name }
+								isDraggable={ true }
 								isEditing={ isEditing }
 								isSelected={ isSelected }
 								hasOverlay={ hasOverlay }
