@@ -1000,7 +1000,7 @@ function amp_get_publisher_logo() {
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
 		if ( $is_amp_story ) {
-			$logo_image_url = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
 		} else {
 			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 		}
