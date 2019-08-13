@@ -1443,12 +1443,15 @@ export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, di
 	const alpha = Math.atan2( deltaY, deltaX );
 	// Get the difference with rotation angle.
 	const beta = alpha - getRadianFromDeg( angle );
-	const deltaW = 'right' === direction ? deltaL * Math.cos( beta ) : 0;
-	const deltaH = 'bottom' === direction ? deltaL * Math.sin( beta ) : 0;
+
+	const resizedHorizontally = direction.toLowerCase().includes( 'left' ) || direction.toLowerCase().includes( 'right' );
+	const resizedVertically = direction.toLowerCase().includes( 'top' ) || direction.toLowerCase().includes( 'bottom' );
+	const deltaW = resizedHorizontally ? deltaL * Math.cos( beta ) : 0;
+	const deltaH = resizedVertically ? deltaL * Math.sin( beta ) : 0;
 
 	return {
-		deltaW,
-		deltaH,
+		deltaW: 'left' === direction ? -deltaW : deltaW,
+		deltaH: 'top' === direction ? -deltaH : deltaH,
 	};
 };
 
