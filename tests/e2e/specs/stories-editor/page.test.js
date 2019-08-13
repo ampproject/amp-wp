@@ -49,7 +49,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should allow adding gradient', async () => {
@@ -68,7 +68,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should allow adding opacity', async () => {
@@ -95,7 +95,7 @@ describe( 'Story Page', () => {
 		const nodes = await page.$x(
 			`//div[contains(@class, "amp-page-active")]//div[contains(@style,"${ style }")]`
 		);
-		expect( nodes.length ).not.toEqual( 0 );
+		expect( nodes.length ).not.toStrictEqual( 0 );
 	} );
 
 	it( 'should be possible to add Background Image', async () => {
