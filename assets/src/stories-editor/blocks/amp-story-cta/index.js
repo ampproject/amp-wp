@@ -2,14 +2,14 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
 import save from './save';
-import blockIcon from '../../../../images/call-to-action.svg';
-import { createBlock, getBlockAttributes } from '@wordpress/blocks';
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	url: {
