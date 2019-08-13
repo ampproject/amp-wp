@@ -1564,8 +1564,9 @@ export const getFirstFrameOfVideo = ( src ) => {
 	video.crossOrigin = 'anonymous';
 
 	return new Promise( ( resolve ) => {
-		video.src = src;
 		video.addEventListener( 'loadeddata', () => {
+			video.pause();
+
 			const canvas = document.createElement( 'canvas' );
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
@@ -1575,6 +1576,9 @@ export const getFirstFrameOfVideo = ( src ) => {
 
 			canvas.toBlob( resolve );
 		} );
+
+		video.src = src;
+		video.play();
 	} );
 };
 
