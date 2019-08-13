@@ -1,2 +1,6 @@
-assets/css/src/admin-bar.css
-assets/css/*.css
+/assets/css/*.css
+/assets/css/src/admin-bar.css
+/bin
+/build
+/tests
+/vendor
