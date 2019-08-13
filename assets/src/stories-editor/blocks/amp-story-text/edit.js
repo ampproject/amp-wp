@@ -20,7 +20,7 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
 import { DraggableText } from '../../components';
@@ -84,16 +84,7 @@ class TextBlockEdit extends Component {
 
 		// If the state changed to editing, focus on the text.
 		if ( this.state.isEditing && ! prevState.isEditing ) {
-			const textInput = document.querySelector( '.is-selected .wp-block-amp-amp-story-text' );
-			if ( textInput ) {
-				// Create selection, collapse it in the end of the content.
-				const range = document.createRange();
-				range.selectNodeContents( textInput );
-				range.collapse( false );
-				const selection = window.getSelection();
-				selection.removeAllRanges();
-				selection.addRange( range );
-			}
+			setInputSelectionToEnd( '.is-selected .wp-block-amp-amp-story-text' );
 		}
 	}
 

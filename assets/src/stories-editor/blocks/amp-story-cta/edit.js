@@ -23,7 +23,7 @@ import {
  */
 import './edit.css';
 import { select } from '@wordpress/data';
-import { getUniqueId } from '../../helpers';
+import { getUniqueId, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import { DraggableText } from '../../components';
 
@@ -78,16 +78,7 @@ class CallToActionEdit extends Component {
 			this.toggleOverlay( true );
 		}
 		if ( this.state.isEditing && ! prevState.isEditing ) {
-			const textInput = document.querySelector( '.is-selected .amp-block-story-cta__link' );
-			if ( textInput ) {
-				// Create selection, collapse it in the end of the content.
-				const range = document.createRange();
-				range.selectNodeContents( textInput );
-				range.collapse( false );
-				const selection = window.getSelection();
-				selection.removeAllRanges();
-				selection.addRange( range );
-			}
+			setInputSelectionToEnd( '.is-selected .amp-block-story-cta__link' );
 		}
 	}
 
