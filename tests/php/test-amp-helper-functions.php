@@ -954,7 +954,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
 		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
-		$fallback_publisher_logo   = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+		$fallback_publisher_logo   = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
 
 		$post_id = self::factory()->post->create(
 			[

@@ -168,7 +168,7 @@ class AMP_Story_Media {
 	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return [
-				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
+				amp_get_asset_url( 'images/stories-editor/story-fallback-poster.jpg' ),
 				self::STORY_LARGE_IMAGE_DIMENSION,
 				self::STORY_SMALL_IMAGE_DIMENSION,
 			];
