@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, RawHTML } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	Dashicon,
 	IconButton,
@@ -25,7 +25,7 @@ import './edit.css';
 import { select } from '@wordpress/data';
 import { getUniqueId } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
-import { StoryBlockMover } from '../../components';
+import { DraggableText } from '../../components';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
@@ -132,81 +132,47 @@ class CallToActionEdit extends Component {
 		};
 		return (
 			<>
-				<StoryBlockMover
-					clientId={ clientId }
-					blockName={ name }
-					blockElementId={ `amp-story-cta-button-${ clientId }` }
-					isDraggable={ ! isEditing }
-					isMovable={ true }
-				>
-					<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
-						<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
-							{ isEditing && (
-								<RichText
-									placeholder={ placeholder }
-									value={ text }
-									onChange={ ( value ) => setAttributes( { text: value } ) }
-									className={ textWrapperClass }
-									style={ textStyle }
-								/>
-							) }
-							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
-							{ ! isEditing && <div
-								role="textbox"
-								tabIndex="-1"
-								className="is-not-editing editor-rich-text block-editor-rich-text"
-								onClick={ () => {
-									if ( isSelected ) {
-										this.toggleIsEditing( true );
-									}
-								} }
-								onMouseDown={ ( event ) => {
-									// Prevent text selection on double click.
-									if ( 1 < event.detail ) {
-										event.preventDefault();
-									}
-								} }
-							>
-								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
-								{ hasOverlay && ( <div
-									role="textbox"
-									tabIndex="-1"
-									className="amp-overlay"
-									onClick={ ( e ) => {
-										this.toggleOverlay( false );
-										e.stopPropagation();
-									} }
-								></div>
-								) }
-								<div
-									role="textbox"
-									className={ textWrapperClass }
-									style={ textStyle }>
-									{ text && text.length ?
-										<RawHTML>{ text }</RawHTML> : (
-											<span className="amp-text-placeholder">
-												{ placeholder }
-											</span>
-										) }
-								</div>
-							</div>
-							}
-						</div>
-						{ isSelected && (
-							<form
-								className="amp-block-story-cta__inline-link"
-								onSubmit={ ( event ) => event.preventDefault() }>
-								<Dashicon icon="admin-links" />
-								<URLInput
-									value={ url }
-									onChange={ ( value ) => setAttributes( { url: value } ) }
-									autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
-								/>
-								<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
-							</form>
+				<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+					<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
+						{ isEditing && (
+							<RichText
+								placeholder={ placeholder }
+								value={ text }
+								onChange={ ( value ) => setAttributes( { text: value } ) }
+								className={ textWrapperClass }
+								style={ textStyle }
+							/>
 						) }
+						{ ! isEditing &&
+							<DraggableText
+								clientId={ clientId }
+								name={ name }
+								isEditing={ isEditing }
+								isSelected={ isSelected }
+								hasOverlay={ hasOverlay }
+								toggleIsEditing={ this.toggleIsEditing }
+								toggleOverlay={ this.toggleOverlay }
+								text={ text }
+								textStyle={ textStyle }
+								textWrapperClass={ textWrapperClass }
+								placeholder={ placeholder }
+							/>
+						}
 					</div>
-				</StoryBlockMover>
+					{ isSelected && isEditing && (
+						<form
+							className="amp-block-story-cta__inline-link"
+							onSubmit={ ( event ) => event.preventDefault() }>
+							<Dashicon icon="admin-links" />
+							<URLInput
+								value={ url }
+								onChange={ ( value ) => setAttributes( { url: value } ) }
+								autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
+							/>
+							<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+						</form>
+					) }
+				</div>
 			</>
 		);
 	}
