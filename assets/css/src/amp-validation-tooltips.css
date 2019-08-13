@@ -5,3 +5,7 @@
 	cursor: pointer;
 	color: #767676;
 }
+
+.tooltip[hidden] {
+	visibility: hidden;
+}

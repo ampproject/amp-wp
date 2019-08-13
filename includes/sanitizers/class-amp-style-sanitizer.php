@@ -451,7 +451,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes .= ' ' . implode( ' ', $matches[2] );
 			}

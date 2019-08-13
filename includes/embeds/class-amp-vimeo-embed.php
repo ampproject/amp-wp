@@ -156,16 +156,15 @@ class AMP_Vimeo_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Determine the video ID from the URL.
 	 *
 	 * @param string $url URL.
-	 * @return integer Video ID.
+	 * @return int Video ID.
 	 */
 	private function get_video_id_from_url( $url ) {
-		$parsed_url = wp_parse_url( $url );
-		parse_str( $parsed_url['path'], $path );
+		$path = wp_parse_url( $url, PHP_URL_PATH );
 
+		// @todo This will not get the private key for unlisted videos (which look like https://vimeo.com/123456789/abcdef0123), but amp-vimeo doesn't support them currently anyway.
 		$video_id = '';
-		if ( $path ) {
-			$tok      = explode( '/', $parsed_url['path'] );
-			$video_id = end( $tok );
+		if ( $path && preg_match( ':^/(\d+):', $path, $matches ) ) {
+			$video_id = $matches[1];
 		}
 
 		return $video_id;

@@ -2,6 +2,7 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -9,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 import edit from './edit';
 import save from './save';
 import deprecated from './deprecated';
-import blockIcon from '../../../../images/call-to-action.svg';
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 const schema = {

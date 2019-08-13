@@ -6,6 +6,8 @@
  */
 
 the_post();
+
+$metadata = amp_get_schemaorg_metadata();
 ?>
 <!DOCTYPE html>
 <html amp <?php language_attributes(); ?>>
@@ -20,24 +22,21 @@ the_post();
 		?>
 		<?php rel_canonical(); ?>
 		<?php amp_add_generator_metadata(); ?>
-		<?php amp_print_schemaorg_metadata(); ?>
+		<script type="application/ld+json"><?php echo wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE ); ?></script>
 		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 	</head>
 	<body>
 		<?php
-		$metadata = amp_get_schemaorg_metadata();
 		if ( isset( $metadata['publisher']['logo']['url'] ) ) {
-			$publisher_logo_src = $metadata['publisher']['logo']['url']; // @todo Use amp-publisher-logo.
+			$publisher_logo_src = $metadata['publisher']['logo']['url'];
+		} elseif ( isset( $metadata['publisher']['logo'] ) && is_string( $metadata['publisher']['logo'] ) ) {
+			$publisher_logo_src = $metadata['publisher']['logo'];
 		} else {
 			$publisher_logo_src = admin_url( 'images/wordpress-logo.png' );
 		}
 		$publisher = isset( $metadata['publisher']['name'] ) ? $metadata['publisher']['name'] : get_option( 'blogname' );
 
-		// There is a fallback poster-portrait image added via a filter, in case there's no featured image.
-		$thumbnail_id     = get_post_thumbnail_id();
-		$poster_portrait  = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_CARD_IMAGE_SIZE );
-		$poster_square    = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_SQUARE_IMAGE_SIZE );
-		$poster_landscape = wp_get_attachment_image_url( $thumbnail_id, AMP_Story_Media::STORY_LANDSCAPE_IMAGE_SIZE );
+		$meta_images = AMP_Story_Media::get_story_meta_images();
 		?>
 		<amp-story
 			standalone
@@ -55,12 +54,12 @@ the_post();
 			publisher-logo-src="<?php echo esc_url( $publisher_logo_src ); ?>"
 			publisher="<?php echo esc_attr( $publisher ); ?>"
 			title="<?php the_title_attribute(); ?>"
-			poster-portrait-src="<?php echo esc_url( $poster_portrait ); ?>"
-			<?php if ( $poster_square ) : ?>
-				poster-square-src="<?php echo esc_url( $poster_square ); ?>"
+			poster-portrait-src="<?php echo esc_url( $meta_images['poster-portrait'] ); ?>"
+			<?php if ( isset( $meta_images['poster-square'] ) ) : ?>
+				poster-square-src="<?php echo esc_url( $meta_images['poster-square'] ); ?>"
 			<?php endif; ?>
-			<?php if ( $poster_landscape ) : ?>
-				poster-landscape-src="<?php echo esc_url( $poster_landscape ); ?>"
+			<?php if ( isset( $meta_images['poster-landscape'] ) ) : ?>
+				poster-landscape-src="<?php echo esc_url( $meta_images['poster-landscape'] ); ?>"
 			<?php endif; ?>
 		>
 			<?php

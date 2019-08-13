@@ -13,6 +13,14 @@
 class AMP_DOM_Utils {
 
 	/**
+	 * Attribute prefix for AMP-bind data attributes.
+	 *
+	 * @since 1.2.1
+	 * @var string
+	 */
+	const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
+
+	/**
 	 * HTML elements that are self-closing.
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
@@ -224,16 +232,14 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @deprecated Use AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX alone.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
 	 */
 	public static function get_amp_bind_placeholder_prefix() {
-		static $attribute_prefix;
-		if ( ! isset( $attribute_prefix ) ) {
-			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
-		}
-		return $attribute_prefix;
+		_deprecated_function( __METHOD__, '1.2.1' );
+		return self::AMP_BIND_DATA_ATTR_PREFIX;
 	}
 
 	/**
@@ -284,7 +290,6 @@ class AMP_DOM_Utils {
 	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
 	 */
 	public static function convert_amp_bind_attributes( $html ) {
-		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
 		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
@@ -295,7 +300,7 @@ class AMP_DOM_Utils {
 		 * @param array $tag_matches Tag matches.
 		 * @return string Replacement.
 		 */
-		$replace_callback = static function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
+		$replace_callback = static function( $tag_matches ) use ( $attr_regex ) {
 
 			// Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
 			$old_attrs = preg_replace( '#(?<!=)/$#', '', $tag_matches['attrs'] );
@@ -308,7 +313,7 @@ class AMP_DOM_Utils {
 				$offset += strlen( $attr_matches[0] );
 
 				if ( '[' === $attr_matches['name'][0] ) {
-					$new_attrs .= ' ' . $amp_bind_attr_prefix . trim( $attr_matches['name'], '[]' );
+					$new_attrs .= ' ' . self::AMP_BIND_DATA_ATTR_PREFIX . trim( $attr_matches['name'], '[]' );
 					if ( isset( $attr_matches['value'] ) ) {
 						$new_attrs .= $attr_matches['value'];
 					}
@@ -363,14 +368,16 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @deprecated Allow the data-amp-bind-* attributes to be used instead.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
 	 * @return string HTML with amp-bind attributes restored.
 	 */
 	public static function restore_amp_bind_attributes( $html ) {
+		_deprecated_function( __METHOD__, '1.2.1' );
 		$html = preg_replace(
-			'#\s' . self::get_amp_bind_placeholder_prefix() . '([a-zA-Z0-9_\-]+)#',
+			'#\s' . self::AMP_BIND_DATA_ATTR_PREFIX . '([a-zA-Z0-9_\-]+)#',
 			' [$1]',
 			$html
 		);
@@ -559,8 +566,6 @@ class AMP_DOM_Utils {
 				$html
 			);
 		}
-
-		$html = self::restore_amp_bind_attributes( $html );
 
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
