@@ -71,6 +71,9 @@ describe( 'Story Templates', () => {
 				'//*[contains(@class,"block-editor-block-preview")]'
 			);
 
+			// Wait until the templates are loaded and blocks accessible.
+			await page.waitForSelector( '.block-editor-block-preview .wp-block' );
+
 			// Click on the template including quote and image.
 			await nodes[ 3 ].click();
 
