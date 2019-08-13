@@ -9,6 +9,7 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
  */
 import edit from './edit';
 import save from './save';
+import deprecated from './deprecated';
 import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
@@ -23,10 +24,6 @@ const schema = {
 		source: 'html',
 		selector: 'a',
 	},
-	align: {
-		type: 'string',
-		default: 'center',
-	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
 		type: 'string',
@@ -35,6 +32,14 @@ const schema = {
 	customBackgroundColor: {
 		type: 'string',
 		default: '#32373c',
+	},
+	btnPositionTop: {
+		type: 'number',
+		default: 0,
+	},
+	btnPositionLeft: {
+		type: 'number',
+		default: 30,
 	},
 };
 
@@ -56,14 +61,11 @@ export const settings = {
 
 	attributes: schema,
 
-	supports: {
-		align: true,
-		alignWide: false,
-	},
-
 	edit,
 
 	save,
+
+	deprecated,
 
 	transforms: {
 		from: [
