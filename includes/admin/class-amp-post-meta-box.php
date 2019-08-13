@@ -149,6 +149,8 @@ class AMP_Post_Meta_Box {
 			AMP__VERSION
 		);
 
+		wp_styles()->add_data( self::ASSETS_HANDLE, 'rtl', 'replace' );
+
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
@@ -207,6 +209,8 @@ class AMP_Post_Meta_Box {
 			[],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::BLOCK_ASSET_HANDLE, 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )

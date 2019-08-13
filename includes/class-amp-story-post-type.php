@@ -732,7 +732,8 @@ class AMP_Story_Post_Type {
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', true );
+		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
+		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
 
 		self::enqueue_general_styles();
 	}
@@ -748,6 +749,8 @@ class AMP_Story_Post_Type {
 			[],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
 
 		$fonts = self::get_fonts();
 		foreach ( $fonts as $font ) {
@@ -961,6 +964,9 @@ class AMP_Story_Post_Type {
 			AMP__VERSION,
 			false
 		);
+
+		wp_styles()->add_data( 'amp-stories-frontend', 'rtl', 'replace' );
+		wp_styles()->add_data( self::STORY_CARD_CSS_SLUG, 'rtl', 'replace' );
 
 		// Also enqueue this since it's possible to embed another story into a story.
 		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );

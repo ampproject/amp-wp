@@ -38,10 +38,10 @@ import {
 	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
-import bringForwardIcon from '../../../../images/bring-forward.svg';
-import sendBackwardIcon from '../../../../images/send-backwards.svg';
-import bringFrontIcon from '../../../../images/bring-front.svg';
-import sendBackIcon from '../../../../images/send-back.svg';
+import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
+import sendBackwardIcon from '../../../../images/stories-editor/send-backwards.svg';
+import bringFrontIcon from '../../../../images/stories-editor/bring-front.svg';
+import sendBackIcon from '../../../../images/stories-editor/send-back.svg';
 
 const { getComputedStyle, ampStoriesFonts } = window;
 
