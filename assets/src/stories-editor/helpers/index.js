@@ -1561,6 +1561,7 @@ export const getFirstFrameOfVideo = ( src ) => {
 	video.muted = true;
 	video.crossOrigin = 'anonymous';
 	video.preload = 'metadata';
+	video.currentTime = 0.5; // Needed to seek forward.
 
 	return new Promise( ( resolve, reject ) => {
 		video.addEventListener( 'error', reject );
@@ -1576,7 +1577,7 @@ export const getFirstFrameOfVideo = ( src ) => {
 			canvas.toBlob( resolve, 'image/jpeg' );
 		} );
 
-		video.src = `${ src }#t=0.5`;
+		video.src = src;
 	} );
 };
 
