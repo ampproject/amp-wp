@@ -97,6 +97,7 @@ export const BLOCKS_WITH_RESIZING = [
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const ALLOWED_BLOCKS = [

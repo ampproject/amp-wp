@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import edit from './edit';
-import blockIcon from '../../../../images/call-to-action.svg';
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	postId: {
@@ -15,16 +15,21 @@ const schema = {
 	},
 	title: {
 		type: 'string',
-		source: 'html',
-		selector: 'a',
+		source: 'attribute',
+		selector: 'amp-story-page-attachment',
+		attribute: 'data-title',
 	},
 	text: {
 		type: 'string',
-		source: 'html',
-		selector: 'a',
+		source: 'attribute',
+		selector: 'amp-story-page-attachment',
+		attribute: 'data-cta-text',
 	},
 	theme: {
 		type: 'string',
+		source: 'attribute',
+		selector: 'amp-story-page-attachment',
+		attribute: 'theme',
 		default: 'light',
 	},
 };
