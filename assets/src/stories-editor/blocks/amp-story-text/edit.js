@@ -9,14 +9,13 @@ import { isEqual } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, RawHTML } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	RichText,
 	BlockControls,
 	AlignmentToolbar,
 } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import { ENTER } from '@wordpress/keycodes';
 
 /**
  * Internal dependencies
@@ -24,7 +23,7 @@ import { ENTER } from '@wordpress/keycodes';
 import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
-import {DraggableText, StoryBlockMover} from '../../components';
+import { DraggableText } from '../../components';
 
 class TextBlockEdit extends Component {
 	constructor( ...args ) {
@@ -231,7 +230,7 @@ class TextBlockEdit extends Component {
 					}
 					{ ! isEditing &&
 						<DraggableText
-							blockClass='wp-block-amp-story-text'
+							blockClass="wp-block-amp-story-text"
 							blockElementId={ `block-${ clientId }` }
 							clientId={ clientId }
 							name={ name }

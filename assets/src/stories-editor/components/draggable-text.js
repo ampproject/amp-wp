@@ -106,6 +106,17 @@ const DraggableText = ( props ) => {
 DraggableText.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	name: PropTypes.string.isRequired,
+	blockClass: PropTypes.string,
+	blockElementId: PropTypes.string.isRequired,
+	hasOverlay: PropTypes.bool.isRequired,
+	isDraggable: PropTypes.bool.isRequired,
+	isSelected: PropTypes.bool.isRequired,
+	toggleIsEditing: PropTypes.func.isRequired,
+	toggleOverlay: PropTypes.func.isRequired,
+	text: PropTypes.string.isRequired,
+	textStyle: PropTypes.string.isRequired,
+	textWrapperClass: PropTypes.string.isRequired,
+	placeholder: PropTypes.string.isRequired,
 };
 
 export default DraggableText;
