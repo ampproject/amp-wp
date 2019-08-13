@@ -76,12 +76,16 @@ const EnhancedResizableBox = ( props ) => {
 				height,
 				width,
 			} }
-			// Adding only right and bottom since otherwise it needs to change the top and left position, too.
+			/* @todo Change top and left position when resizing from left/top. */
 			enable={ {
-				top: false,
+				top: true,
 				right: true,
 				bottom: true,
-				left: false,
+				left: true,
+				topRight: true,
+				bottomRight: true,
+				bottomLeft: true,
+				topLeft: true,
 			} }
 			onResizeStop={ ( event, direction ) => {
 				const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
