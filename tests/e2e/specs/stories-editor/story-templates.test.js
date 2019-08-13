@@ -61,5 +61,36 @@ describe( 'Story Templates', () => {
 			const numberOfTemplates = await page.$$eval( '.block-editor-block-preview', ( templates ) => templates.length );
 			expect( numberOfTemplates ).toStrictEqual( 11 ); // 10 default templates plus the empty page.
 		} );
+
+		it( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
+			await openTemplateInserter();
+
+			const nodes = await page.$x(
+				'//*[contains(@class,"block-editor-block-preview")]'
+			);
+
+			// Click on the template including quote and image.
+			await nodes[ 3 ].click();
+
+			const numberOfQuotes = await page.$$eval( '.amp-page-active .wp-block-quote', ( elements ) => elements.length );
+			expect( numberOfQuotes ).toStrictEqual( 1 );
+
+			const numberOfImages = await page.$$eval( '.amp-page-active .wp-block-image', ( elements ) => elements.length );
+			expect( numberOfImages ).toStrictEqual( 1 );
+
+			// Verify that only 2 child blocks were added.
+			const numberOfBlocks = await page.$$eval( '.amp-page-active .wp-block.editor-block-list__block', ( elements ) => elements.length );
+			expect( numberOfBlocks ).toStrictEqual( 2 );
+
+			// Verify that the image is added empty, as placeholder.
+			const placeholderImages = await page.$$eval( '.amp-page-active .wp-block-image.block-editor-media-placeholder', ( elements ) => elements.length );
+			expect( placeholderImages ).toStrictEqual( 1 );
+
+			// Verify that the block is not added with style.
+			const defaultStyledQuote = await page.$$eval( '.amp-page-active .wp-block-quote.is-style-white', ( elements ) => elements.length );
+			expect( defaultStyledQuote ).toStrictEqual( 0 );
+		} );
 	} );
 } );
