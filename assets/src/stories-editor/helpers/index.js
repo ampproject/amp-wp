@@ -1560,11 +1560,10 @@ export const getFirstFrameOfVideo = ( src ) => {
 	const video = document.createElement( 'video' );
 	video.muted = true;
 	video.crossOrigin = 'anonymous';
+	video.preload = 'metadata';
 
 	return new Promise( ( resolve ) => {
-		video.addEventListener( 'loadeddata', () => {
-			video.pause();
-
+		video.addEventListener( 'canplay', () => {
 			const canvas = document.createElement( 'canvas' );
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
@@ -1575,8 +1574,7 @@ export const getFirstFrameOfVideo = ( src ) => {
 			canvas.toBlob( resolve, 'image/jpeg' );
 		} );
 
-		video.src = src;
-		video.play();
+		video.src = `${ src }#t=0.5`;
 	} );
 };
 
