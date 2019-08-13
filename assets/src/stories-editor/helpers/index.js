@@ -1562,7 +1562,9 @@ export const getFirstFrameOfVideo = ( src ) => {
 	video.crossOrigin = 'anonymous';
 	video.preload = 'metadata';
 
-	return new Promise( ( resolve ) => {
+	return new Promise( ( resolve, reject ) => {
+		video.addEventListener( 'error', reject );
+
 		video.addEventListener( 'canplay', () => {
 			const canvas = document.createElement( 'canvas' );
 			canvas.width = video.videoWidth;
