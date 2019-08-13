@@ -1553,8 +1553,6 @@ export const getUniqueId = () => {
 /**
  * Returns an image of the first frame of a given video.
  *
- * @todo Perhaps allow specifying wanted image type.
- *
  * @param {string} src Video src URL.
  * @return {Promise<string>} The extracted image in base64-encoded format.
  */
@@ -1574,7 +1572,7 @@ export const getFirstFrameOfVideo = ( src ) => {
 			const ctx = canvas.getContext( '2d' );
 			ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
 
-			canvas.toBlob( resolve );
+			canvas.toBlob( resolve, 'image/jpeg' );
 		} );
 
 		video.src = src;
