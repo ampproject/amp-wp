@@ -145,6 +145,7 @@ class CallToActionEdit extends Component {
 						) }
 						{ ! isEditing &&
 							<DraggableText
+								blockElementId={ `amp-story-cta-button-${ clientId }` }
 								clientId={ clientId }
 								name={ name }
 								isEditing={ isEditing }

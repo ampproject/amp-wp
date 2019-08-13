@@ -24,7 +24,7 @@ import { ENTER } from '@wordpress/keycodes';
 import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
-import { StoryBlockMover } from '../../components';
+import {DraggableText, StoryBlockMover} from '../../components';
 
 class TextBlockEdit extends Component {
 	constructor( ...args ) {
@@ -230,67 +230,22 @@ class TextBlockEdit extends Component {
 						/>
 					}
 					{ ! isEditing &&
-						<StoryBlockMover
-							clientId={ clientId }
-							blockName={ name }
+						<DraggableText
+							blockClass='wp-block-amp-story-text'
 							blockElementId={ `block-${ clientId }` }
+							clientId={ clientId }
+							name={ name }
+							isEditing={ isEditing }
 							isDraggable={ ! isPartOfMultiSelection }
-							isMovable={ true }
-						>
-							<div
-								role="textbox"
-								tabIndex="-1"
-								className="is-not-editing editor-rich-text block-editor-rich-text wp-block-amp-story-text"
-								onClick={ () => {
-									if ( isSelected ) {
-										this.toggleIsEditing( true );
-									}
-								} }
-								onMouseDown={ ( event ) => {
-									// Prevent text selection on double click.
-									if ( 1 < event.detail ) {
-										event.preventDefault();
-									}
-								} }
-								onKeyDown={ ( event ) => {
-									event.stopPropagation();
-									if ( ENTER === event.keyCode && isSelected ) {
-										this.toggleOverlay( false );
-										this.toggleIsEditing( true );
-									}
-								} }
-							>
-								{ hasOverlay && ( <div
-									role="textbox"
-									tabIndex="-1"
-									className="amp-overlay"
-									onClick={ ( event ) => {
-										this.toggleOverlay( false );
-										event.stopPropagation();
-									} }
-									onKeyDown={ ( event ) => {
-										event.stopPropagation();
-										if ( ENTER === event.keyCode && isSelected ) {
-											this.toggleOverlay( false );
-											this.toggleIsEditing( true );
-										}
-									} }
-								></div>
-								) }
-								<p
-									className={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
-									style={ textStyle }
-								>
-									{ content && content.length ?
-										<RawHTML>{ content }</RawHTML> :
-										(
-											<p className="amp-text-placeholder">
-												{ placeholder || __( 'Write text…', 'amp' ) }
-											</p>
-										) }
-								</p>
-							</div>
-						</StoryBlockMover>
+							isSelected={ isSelected }
+							hasOverlay={ hasOverlay }
+							toggleIsEditing={ this.toggleIsEditing }
+							toggleOverlay={ this.toggleOverlay }
+							text={ content }
+							textStyle={ textStyle }
+							textWrapperClass={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
+							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+						/>
 					}
 				</div>
 			</>
