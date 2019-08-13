@@ -37,6 +37,7 @@
 }
 
 .amp-stories__editor-inserter__results .components-spinner {
+	margin-left: calc(50% - 9px);
 	margin-right: calc(50% - 9px);
 	margin-top: 128px;
 }
