@@ -1430,7 +1430,7 @@ export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
  * @param {Object} event MouseEvent.
  * @param {number} angle Rotation angle.
  * @param {number} lastSeenX Starting X coordinate.
- * @param {number} lastSeenY Starint Y coordinate.
+ * @param {number} lastSeenY Starting Y coordinate.
  * @param {string} direction Direction of resizing.
  * @return {Object} Width and height values.
  */
