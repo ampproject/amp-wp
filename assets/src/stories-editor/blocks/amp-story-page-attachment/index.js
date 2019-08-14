@@ -12,7 +12,7 @@ import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 const schema = {
 	postId: {
 		type: 'number',
-		default: null,
+		default: 1,
 	},
 	title: {
 		type: 'string',

@@ -107,25 +107,13 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 	transform: translateY(-85%);
 }
 
-@keyframes open-attachment-icon {
-
-	0% {
-		transform: translateY(14px);
-	}
-
-	100% {
-		transform: translateY(0);
-	}
-}
-
 .amp-story-page-open-attachment-icon {
 	position: relative;
 	display: block;
 	height: 32px;
 	width: 32px;
 	cursor: pointer;
-	background: white;
-	animation: open-attachment-icon 0.2s cubic-bezier(0.4, 0, 0.2, 1) 2s both;
+	background: #fff;
 	border-radius: 50%;
 }
 

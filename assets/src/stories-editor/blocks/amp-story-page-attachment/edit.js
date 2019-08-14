@@ -9,8 +9,8 @@ import classnames from 'classnames';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component } from '@wordpress/element';
-import { apiFetch } from '@wordpress/api-fetch';
+import { Component, RawHTML } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { decodeEntities } from '@wordpress/html-entities';
 import { InspectorControls, RichText } from '@wordpress/block-editor';
@@ -30,14 +30,14 @@ class PageAttachmentEdit extends Component {
 		this.state = {
 			suggestions: [],
 			showSuggestions: false,
-			selectedSuggestion: null,
+			selectedPost: null,
 			isOpen: false,
 		};
 
 		this.toggleAttachment = this.toggleAttachment.bind( this );
 	}
 
-	async fetchPostSuggestions( search ) {
+	/*async fetchPostSuggestions( search ) {
 		const posts = await apiFetch( {
 			path: addQueryArgs( '/wp/v2/search', {
 				search,
@@ -50,6 +50,30 @@ class PageAttachmentEdit extends Component {
 			id: post.id,
 			title: decodeEntities( post.title ) || __( '(no title)', 'amp' ),
 		} ) );
+	}*/
+
+	componentDidMount() {
+		const { postId } = this.props.attributes;
+		this.isStillMounted = true;
+		const fetchRequest = this.fetchRequest = apiFetch( {
+			path: `/wp/v2/posts/${ postId }`,
+		} ).then(
+			( post ) => {
+				if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+					this.setState( { selectedPost: post } );
+				}
+			}
+		).catch(
+			() => {
+				if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+					this.setState( { selectedPost: null } );
+				}
+			}
+		);
+	}
+
+	componentWillUnmount() {
+		this.isStillMounted = false;
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -77,6 +101,8 @@ class PageAttachmentEdit extends Component {
 			text,
 			title,
 		} = attributes;
+
+		const { selectedPost } = this.state;
 
 		const themeOptions = [
 			{ value: 'light', label: __( 'Light', 'amp' ) },
@@ -123,7 +149,9 @@ class PageAttachmentEdit extends Component {
 								/>
 							</div>
 							<div className="amp-page-attachment-content">
-								Content here!
+								{ selectedPost && selectedPost.content && (
+									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
+								) }
 							</div>
 						</div>
 					</div>
@@ -160,6 +188,7 @@ class PageAttachmentEdit extends Component {
 
 PageAttachmentEdit.propTypes = {
 	attributes: PropTypes.shape( {
+		postId: PropTypes.number,
 		text: PropTypes.string,
 		theme: PropTypes.string,
 		title: PropTypes.string,

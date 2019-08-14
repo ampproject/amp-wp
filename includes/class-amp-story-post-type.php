@@ -1756,7 +1756,7 @@ class AMP_Story_Post_Type {
 				'attributes'      => [
 					'postId' => [
 						'type'    => 'number',
-                        'default' => 1, // For testing only.
+						'default' => 1, // For testing only.
 					],
 					'title'  => [
 						'type'    => 'string',
@@ -1785,23 +1785,26 @@ class AMP_Story_Post_Type {
 	 * @return string $markup The rendered block markup.
 	 */
 	public static function render_block_page_attachment( $attributes ) {
-	    if ( ! isset( $attributes['postId'] ) ) {
-	        return null;
-        }
 
-	    $excerpt = get_the_excerpt( absint( $attributes['postId'] ) );
+		if ( ! isset( $attributes['postId'] ) ) {
+			return null;
+		}
 
-	    if ( empty( $excerpt ) ) {
-	        return null;
-        }
+		$content_post = get_post( absint( $attributes['postId'] ) );
+
+		if ( empty( $content_post ) ) {
+			return null;
+		}
+
+		setup_postdata( $content_post );
 
 		ob_start();
 		?>
-        <amp-story-page-attachment layout="nodisplay" theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
-            <?php echo esc_html( $excerpt ); ?>
-        </amp-story-page-attachment>
+		<amp-story-page-attachment layout="nodisplay" theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+			<?php the_content(); ?>
+		</amp-story-page-attachment>
 		<?php
-
+		wp_reset_postdata();
 		return ob_get_clean();
 	}
 
