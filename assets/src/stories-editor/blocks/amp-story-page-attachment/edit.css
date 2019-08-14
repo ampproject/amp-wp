@@ -5,14 +5,60 @@ div[data-type="amp/amp-story-page-attachment"] {
     height: 15%;
 }
 
-div[data-type="amp/amp-story-page-attachment"] div:not(.editor-block-list__breadcrumb) {
+div[data-type="amp/amp-story-page-attachment"] div:not(.editor-block-list__breadcrumb):not(.attachment-container) {
     width: 100%;
     height: 100%;
 }
 
+.attachment-header {
+    display: flex!important;
+    position: relative!important;
+    height: 40px!important;
+    background: #fff!important;
+    border-radius: 8px 8px 0 0!important;
+    box-shadow: 0 1px 2px 1px rgba(0,0,0,0.12)!important;
+    z-index: 1!important;
+}
+
+.amp-story-page-attachment-title {
+    font-family: Roboto,sans-serif!important;
+    width: calc(100% - 80px)!important;
+    padding-right: 40px!important;
+    color: rgba(0,0,0,0.87)!important;
+    font-size: 16px!important;
+    line-height: 40px!important;
+    overflow: hidden!important;
+    text-align: center!important;
+    text-overflow: ellipsis!important;
+    white-space: nowrap!important;
+}
+
+.amp-story-page-attachment-close-button {
+    display: block!important;
+    margin: 8px!important;
+    height: 24px!important;
+    width: 24px!important;
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 36 36' fill='rgba(0, 0, 0, 0.54)'%3E%3Cpath d='M28.5 9.62L26.38 7.5 18 15.88 9.62 7.5 7.5 9.62 15.88 18 7.5 26.38l2.12 2.12L18 20.12l8.38 8.38 2.12-2.12L20.12 18z'/%3E%3Cpath d='M0 0h36v36H0z' fill='none'/%3E%3C/svg%3E")!important;
+    color: rgba(0,0,0,0.87)!important;
+    cursor: pointer!important;
+}
+
 div[data-type="amp/amp-story-page-attachment"] .open-attachment-wrapper .amp-story-page-attachment__text {
     width: initial;
-    height: initial;
+    padding: 0 32px!important;
+    margin: 12px 0 20px!important;
+    height: 16px!important;
+    max-width: calc(100% - 64px)!important;
+    color: #fff!important;
+    font-family: Roboto,sans-serif!important;
+    font-size: 16px!important;
+    font-weight: 700!important;
+    letter-spacing: 0.3px;
+    line-height: 16px!important;
+    overflow: hidden!important;
+    text-overflow: ellipsis!important;
+    text-shadow: 0px 0px 6px rgba(0,0,0,0.36)!important;
+    white-space: nowrap!important;
 }
 
 div[data-type="amp/amp-story-page-attachment"] .attachment-container {

@@ -76,6 +76,7 @@ class PageAttachmentEdit extends Component {
 			postId,
 			theme,
 			text,
+			title,
 		} = attributes;
 
 		const themeOptions = [
@@ -99,6 +100,21 @@ class PageAttachmentEdit extends Component {
 				</InspectorControls>
 				{ this.state.isOpen &&
 					<div className="attachment-container">
+						<div className="attachment-header">
+							<span
+								onClick={ () => {
+									this.toggleAttachment( false );
+								} }
+								className="amp-story-page-attachment-close-button" role="button"
+							></span>
+							<RichText
+								value={ title }
+								tagName="span"
+								wrapperClassName="amp-story-page-attachment-title"
+								onChange={ ( value ) => setAttributes( { title: value } ) }
+								placeholder={ __( 'Write Title', 'amp' ) }
+							/>
+						</div>
 						<div className="amp-page-attachment-content">
 							Content here!
 						</div>
@@ -120,6 +136,7 @@ class PageAttachmentEdit extends Component {
 						tagName="span"
 						wrapperClassName="amp-story-page-attachment__text"
 						onChange={ ( value ) => setAttributes( { text: value } ) }
+						placeholder={ __( 'Write CTA Text', 'amp' ) }
 					/>
 				</div>
 				}
