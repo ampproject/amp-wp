@@ -15,22 +15,13 @@ const schema = {
 	},
 	title: {
 		type: 'string',
-		source: 'attribute',
-		selector: 'amp-story-page-attachment',
-		attribute: 'data-title',
 	},
 	text: {
 		type: 'string',
-		source: 'attribute',
-		selector: 'amp-story-page-attachment',
-		attribute: 'data-cta-text',
 		default: __( 'Read more', 'amp' ),
 	},
 	theme: {
 		type: 'string',
-		source: 'attribute',
-		selector: 'amp-story-page-attachment',
-		attribute: 'theme',
 		default: 'light',
 	},
 };

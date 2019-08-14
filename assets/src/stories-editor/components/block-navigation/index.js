@@ -119,7 +119,9 @@ export default compose(
 		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 		// Let's get the CTA block to handle it separately.
 		const callToActionBlock = blocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
-		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
+		blocks = blocks.filter( ( { name } ) => {
+			return ALLOWED_MOVABLE_BLOCKS.includes( name ) || 'amp/amp-story-page-attachment' === name;
+		} ).reverse();
 		return {
 			blocks,
 			callToActionBlock,
