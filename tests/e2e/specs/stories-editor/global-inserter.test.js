@@ -11,6 +11,23 @@ import { activateExperience, deactivateExperience, insertBlock } from '../../uti
 const INSERTER_SELECTOR = '#amp-story-inserter';
 const CTA_BLOCK_NAME = 'Call to Action';
 
+/**
+ * Tests that a given block is present in the inserter.
+ *
+ * @param {string} block The name of the block, like 'Image'.
+ */
+const testBlockPresentInInserter = async ( block ) => {
+	// It should be possible to insert the block.
+	await insertBlock( block );
+
+	await page.click( INSERTER_SELECTOR );
+
+	// The block should be present in the inserter.
+	const inserter = await page.$( INSERTER_SELECTOR );
+	await expect( inserter ).toMatch( block );
+	await page.click( INSERTER_SELECTOR );
+};
+
 describe( 'Global Inserter', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
@@ -20,34 +37,33 @@ describe( 'Global Inserter', () => {
 		await deactivateExperience( 'stories' );
 	} );
 
-	describe( 'Blocks Present', () => {
-		it.each( [
-			'Image',
-			'Text',
-			'Video',
-			'Quote',
-			'Story Author',
-			'List',
-			'Story Title',
-			'Story Date',
-			'Custom HTML',
-			'Code',
-			'Preformatted',
-			'Pullquote',
-			'Table',
-			'Verse',
-			'Page',
-			'Embed',
-		] )( 'has an expected block',
-			async ( block ) => {
-				await createNewPost( { postType: 'amp_story' } );
-				await insertBlock( block );
-				await page.click( INSERTER_SELECTOR );
-				const inserter = await page.$( INSERTER_SELECTOR );
-				await expect( inserter ).toMatch( block );
-			}
-		);
-	} );
+	it.each( [
+		'Page',
+		'Image',
+		'Text',
+		'Video',
+		'Quote',
+		'Story Author',
+		'List',
+		'Story Title',
+		'Story Date',
+		'Custom HTML',
+		'Code',
+		'Preformatted',
+		'Pullquote',
+		'Table',
+		'Verse',
+		'Embed',
+	] )( 'has an expected block',
+		async ( block ) => {
+			await createNewPost( { postType: 'amp_story' } );
+			await testBlockPresentInInserter( block );
+
+			// It should still be possible to select the block, even with an Image innerBlock inserted and selected.
+			await insertBlock( 'Image' );
+			await testBlockPresentInInserter( block );
+		}
+	);
 
 	it( 'should only show the CTA block when not on the first page', async () => {
 		await createNewPost( { postType: 'amp_story' } );
