@@ -52,7 +52,6 @@ import {
 } from '../../../common/helpers';
 
 import {
-	ALLOWED_CHILD_BLOCKS,
 	ALLOWED_BACKGROUND_MEDIA_TYPES,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
@@ -68,7 +67,7 @@ import './edit.css';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
-		this.ensureCTABeingLast();
+		this.ensureCorrectBlockOrder();
 		return true;
 	}
 
@@ -231,7 +230,7 @@ class PageEdit extends Component {
 		return backgroundColorSettings;
 	}
 
-	ensureCTABeingLast() {
+	ensureCorrectBlockOrder() {
 		const {
 			getBlockOrder,
 			moveBlockToPosition,
@@ -242,10 +241,20 @@ class PageEdit extends Component {
 			return;
 		}
 		const ctaBlock = getCallToActionBlock( clientId );
+		const attachmentBlock = getPageAttachmentBlock( clientId );
+
+		let blockToMove = null;
+
 		if ( ctaBlock ) {
-			// If the CTA is not the last block, move it there.
-			if ( order[ order.length - 1 ] !== ctaBlock.clientId ) {
-				moveBlockToPosition( ctaBlock.clientId, clientId, clientId, order.length - 1 );
+			blockToMove = ctaBlock;
+		} else if ( attachmentBlock ) {
+			blockToMove = attachmentBlock;
+		}
+
+		if ( blockToMove ) {
+			// If the either CTA or Attachment is not the last block, move it there.
+			if ( order[ order.length - 1 ] !== blockToMove.clientId ) {
+				moveBlockToPosition( blockToMove.clientId, clientId, clientId, order.length - 1 );
 			}
 		}
 	}

@@ -85,11 +85,11 @@ class BlockNavigationItem extends Component {
 
 	render() {
 		const { block, getBlockIndex, isSelected, onClick } = this.props;
-		const isCallToActionBlock = 'amp/amp-story-cta' === block.name;
+		const isUnMovableBlock = 'amp/amp-story-cta' === block.name || 'amp/amp-story-page-attachment' === block.name;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
 
-		if ( isCallToActionBlock ) {
+		if ( isUnMovableBlock ) {
 			return (
 				<div className="editor-block-navigation__item block-editor-block-navigation__item">
 					<Button
