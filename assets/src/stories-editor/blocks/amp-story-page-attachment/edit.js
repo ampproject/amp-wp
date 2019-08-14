@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import { classnames } from 'classnames';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -103,23 +103,25 @@ class PageAttachmentEdit extends Component {
 					<div className={ classnames( 'attachment-container', {
 						'theme-dark': 'dark' === theme,
 					} ) }>
-						<div className="attachment-header">
-							<span
-								onClick={ () => {
-									this.toggleAttachment( false );
-								} }
-								className="amp-story-page-attachment-close-button" role="button"
-							></span>
-							<RichText
-								value={ title }
-								tagName="span"
-								wrapperClassName="amp-story-page-attachment-title"
-								onChange={ ( value ) => setAttributes( { title: value } ) }
-								placeholder={ __( 'Write Title', 'amp' ) }
-							/>
-						</div>
-						<div className="amp-page-attachment-content">
-							Content here!
+						<div className="attachment-wrapper">
+							<div className="attachment-header">
+								<span
+									onClick={ () => {
+										this.toggleAttachment( false );
+									} }
+									className="amp-story-page-attachment-close-button" role="button"
+								></span>
+								<RichText
+									value={ title }
+									tagName="span"
+									wrapperClassName="amp-story-page-attachment-title"
+									onChange={ ( value ) => setAttributes( { title: value } ) }
+									placeholder={ __( 'Write Title', 'amp' ) }
+								/>
+							</div>
+							<div className="amp-page-attachment-content">
+								Content here!
+							</div>
 						</div>
 					</div>
 				}
