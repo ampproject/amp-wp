@@ -41,6 +41,7 @@ import {
 	getTotalAnimationDuration,
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
+	getPageAttachmentBlock,
 	getUniqueId,
 	uploadVideoFrame,
 	getPosterImageFromFileObj,
@@ -532,7 +533,8 @@ export default compose(
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
-		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
+		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId ) && ! getPageAttachmentBlock( clientId );
+		const isPageAttachmentAllowed = ! getCallToActionBlock( clientId ) && ! getPageAttachmentBlock( clientId );
 
 		const { mediaType, mediaId, poster } = attributes;
 
@@ -549,10 +551,25 @@ export default compose(
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
+		let allowedBlocks = ALLOWED_MOVABLE_BLOCKS;
+
+		if ( isCallToActionAllowed ) {
+			allowedBlocks = [
+				...allowedBlocks,
+				'amp/amp-story-cta',
+			];
+		}
+		if ( isPageAttachmentAllowed ) {
+			allowedBlocks = [
+				...allowedBlocks,
+				'amp/amp-story-page-attachment',
+			];
+		}
+
 		return {
 			media,
 			videoFeaturedImage,
-			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : [ ...ALLOWED_MOVABLE_BLOCKS, 'amp/amp-story-page-attachment' ],
+			allowedBlocks,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 		};

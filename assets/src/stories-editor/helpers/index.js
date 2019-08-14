@@ -1538,14 +1538,35 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 };
 
 /**
+ * Get block by Page ID and block name.
+ *
+ * @param {string} pageClientId Root ID.
+ * @param {string} blockName Block name.
+ * @return {Object} Found block.
+ */
+const getPageBlockByName = ( pageClientId, blockName ) => {
+	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+	return innerBlocks.find( ( { name } ) => name === blockName );
+};
+
+/**
  * Get CTA block.
  *
  * @param {Array} pageClientId Root ID.
  * @return {Object} CTA block.
  */
 export const getCallToActionBlock = ( pageClientId ) => {
-	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
-	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+	return getPageBlockByName( pageClientId, 'amp/amp-story-cta' );
+};
+
+/**
+ * Get Page Attachment block.
+ *
+ * @param {Array} pageClientId Root ID.
+ * @return {Object} Page Attachment block.
+ */
+export const getPageAttachmentBlock = ( pageClientId ) => {
+	return getPageBlockByName( pageClientId, 'amp/amp-story-page-attachment' );
 };
 
 /**
