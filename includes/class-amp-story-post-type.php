@@ -1756,7 +1756,7 @@ class AMP_Story_Post_Type {
 				'attributes'      => [
 					'postId' => [
 						'type'    => 'number',
-                        'default' => null,
+                        'default' => 1, // For testing only.
 					],
 					'title'  => [
 						'type'    => 'string',
