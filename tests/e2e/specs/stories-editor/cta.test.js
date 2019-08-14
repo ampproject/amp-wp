@@ -5,7 +5,6 @@ import {
 	visitAdminPage,
 	createNewPost,
 	clickButton,
-	selectBlockByClientId,
 	getAllBlocks,
 } from '@wordpress/e2e-test-utils';
 
@@ -51,15 +50,14 @@ describe( 'Stories Editor Screen', () => {
 	it( 'should display validation error when CTA block is on the first Page', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
+		const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
+
 		await insertBlock( 'Page' );
 
 		await insertBlock( 'Call to Action' );
 		await goToPreviousPage();
 
-		// Select the default page block.
-		await selectBlockByClientId(
-			( await getAllBlocks() )[ 0 ].clientId
-		);
+		await page.waitForSelector( `#block-${ firstPageClientId }.amp-page-active` );
 
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
