@@ -1417,54 +1417,6 @@ export const maybeInitializeAnimations = () => {
 };
 
 /**
- * Get the distance between two points based on pythagorean.
- *
- * @param {number} deltaX Difference between X coordinates.
- * @param {number} deltaY Difference between Y coordinates.
- * @return {number} Difference between the two points.
- */
-const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
-
-/**
- * Converts degrees to radian.
- *
- * @param {number} angle Angle.
- * @return {number} Radian.
- */
-export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
-
-/**
- * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
- *
- * @param {Object} event MouseEvent.
- * @param {number} angle Rotation angle.
- * @param {number} lastSeenX Starting X coordinate.
- * @param {number} lastSeenY Starting Y coordinate.
- * @param {string} direction Direction of resizing.
- * @return {Object} Width and height values.
- */
-export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
-	const deltaY = event.clientY - lastSeenY;
-	const deltaX = event.clientX - lastSeenX;
-	const deltaL = getDelta( deltaX, deltaY );
-
-	// Get the angle between the two points.
-	const alpha = Math.atan2( deltaY, deltaX );
-	// Get the difference with rotation angle.
-	const beta = alpha - getRadianFromDeg( angle );
-
-	const resizedHorizontally = direction.toLowerCase().includes( 'left' ) || direction.toLowerCase().includes( 'right' );
-	const resizedVertically = direction.toLowerCase().includes( 'top' ) || direction.toLowerCase().includes( 'bottom' );
-	const deltaW = resizedHorizontally ? deltaL * Math.cos( beta ) : 0;
-	const deltaH = resizedVertically ? deltaL * Math.sin( beta ) : 0;
-
-	return {
-		deltaW: 'left' === direction ? -deltaW : deltaW,
-		deltaH: 'top' === direction ? -deltaH : deltaH,
-	};
-};
-
-/**
  * Get block's left and top position based on width, height, and radian.
  *
  * @param {number} width Width.

@@ -14,14 +14,17 @@ import { ResizableBox } from '@wordpress/components';
  */
 import './edit.css';
 import {
-	getResizedWidthAndHeight,
 	getPercentageFromPixels,
 	getPixelsFromPercentage,
 	getBlockPositioning,
-	getRadianFromDeg,
 } from '../../helpers';
+import {
+	getResizedWidthAndHeight,
+	getRadianFromDeg,
+	getBlockTextElement,
+} from './helpers';
 
-import { BLOCKS_WITH_TEXT_SETTINGS, TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
+import { TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -54,7 +57,6 @@ const EnhancedResizableBox = ( props ) => {
 	} = props;
 
 	const isImage = 'core/image' === blockName;
-	const isBlockWithText = BLOCKS_WITH_TEXT_SETTINGS.includes( blockName ) || 'core/code' === blockName;
 	const isText = 'amp/amp-story-text' === blockName;
 
 	if ( isText ) {
@@ -120,30 +122,7 @@ const EnhancedResizableBox = ( props ) => {
 				if ( isImage ) {
 					imageWrapper = blockElement.querySelector( 'figure .components-resizable-box__container' );
 				}
-				if ( isBlockWithText && ! ampFitText ) {
-					switch ( blockName ) {
-						case 'amp/amp-story-text':
-							textElement = blockElement.querySelector( '.block-editor-rich-text__editable.editor-rich-text__editable' );
-							break;
-						case 'amp/amp-story-post-title':
-							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-title' );
-							break;
-						case 'amp/amp-story-post-author':
-							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-author' );
-							break;
-						case 'amp/amp-story-post-date':
-							textElement = blockElement.querySelector( '.wp-block-amp-amp-story-post-date' );
-							break;
-						case 'core/code':
-							textElement = blockElement.querySelector( '.wp-block-code' );
-							break;
-
-						default:
-							break;
-					}
-				} else {
-					textElement = null;
-				}
+				textElement = ! ampFitText ? getBlockTextElement( blockName, blockElement ) : null;
 
 				if ( ampFitText && isText ) {
 					textBlockWrapper = blockElement.querySelector( '.with-line-height' );
