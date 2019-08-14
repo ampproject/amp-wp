@@ -12,7 +12,7 @@ import { Component } from '@wordpress/element';
 import { apiFetch } from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { decodeEntities } from '@wordpress/html-entities';
-import { InspectorControls } from '@wordpress/block-editor';
+import { InspectorControls, RichText } from '@wordpress/block-editor';
 import {
 	SelectControl,
 	PanelBody,
@@ -104,18 +104,23 @@ class PageAttachmentEdit extends Component {
 						</div>
 					</div>
 				}
-				{ ! this.state.isOpen && <div className="open-attachment-wrapper"
-					onClick={ () => {
-						this.toggleAttachment( true );
-					} }
-				>
+				{ ! this.state.isOpen &&
+				<div className="open-attachment-wrapper">
 					<span
+						onClick={ () => {
+							this.toggleAttachment( true );
+						} }
 						className="amp-story-page-open-attachment-icon"
 					>
 						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left"></span>
 						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right"></span>
 					</span>
-					<span>{ text }</span>
+					<RichText
+						value={ text }
+						tagName="span"
+						wrapperClassName="amp-story-page-attachment__text"
+						onChange={ ( value ) => setAttributes( { text: value } ) }
+					/>
 				</div>
 				}
 			</>
