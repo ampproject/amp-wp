@@ -1777,10 +1777,8 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Renders the dynamic block Latest Stories.
-	 * Much of this is taken from the Core block Latest Posts.
+	 * Renders the dynamic block Page Attachment.
 	 *
-	 * @see render_block_core_latest_posts()
 	 * @param array $attributes The block attributes.
 	 * @return string $markup The rendered block markup.
 	 */
