@@ -24,6 +24,7 @@ const schema = {
 		source: 'attribute',
 		selector: 'amp-story-page-attachment',
 		attribute: 'data-cta-text',
+		default: __( 'Read more', 'amp' ),
 	},
 	theme: {
 		type: 'string',

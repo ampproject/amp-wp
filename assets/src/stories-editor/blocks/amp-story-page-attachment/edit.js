@@ -18,6 +18,11 @@ import {
 	PanelBody,
 } from '@wordpress/components';
 
+/**
+ * Internal dependencies
+ */
+import './edit.css';
+
 class PageAttachmentEdit extends Component {
 	constructor( props ) {
 		super( props );
@@ -27,6 +32,8 @@ class PageAttachmentEdit extends Component {
 			selectedSuggestion: null,
 			isOpen: false,
 		};
+
+		this.toggleAttachment = this.toggleAttachment.bind( this );
 	}
 
 	async fetchPostSuggestions( search ) {
@@ -44,6 +51,20 @@ class PageAttachmentEdit extends Component {
 		} ) );
 	}
 
+	componentDidUpdate( prevProps ) {
+		const { isSelected } = this.props;
+
+		if ( ! isSelected && prevProps.isSelected ) {
+			this.toggleAttachment( false );
+		}
+	}
+
+	toggleAttachment( open ) {
+		if ( open !== this.state.isOpen ) {
+			this.setState( { isOpen: open } );
+		}
+	}
+
 	render() {
 		const {
 			attributes,
@@ -54,6 +75,7 @@ class PageAttachmentEdit extends Component {
 		const {
 			postId,
 			theme,
+			text,
 		} = attributes;
 
 		const themeOptions = [
@@ -75,12 +97,27 @@ class PageAttachmentEdit extends Component {
 						/>
 					</PanelBody>
 				</InspectorControls>
-				<div>
-					<span className="amp-story-page-open-attachment-icon">
+				{ this.state.isOpen &&
+					<div className="attachment-container">
+						<div className="amp-page-attachment-content">
+							Content here!
+						</div>
+					</div>
+				}
+				{ ! this.state.isOpen && <div className="open-attachment-wrapper"
+					onClick={ () => {
+						this.toggleAttachment( true );
+					} }
+				>
+					<span
+						className="amp-story-page-open-attachment-icon"
+					>
 						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left"></span>
 						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right"></span>
 					</span>
+					<span>{ text }</span>
 				</div>
+				}
 			</>
 		);
 	}

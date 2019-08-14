@@ -552,7 +552,7 @@ export default compose(
 		return {
 			media,
 			videoFeaturedImage,
-			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
+			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : [ ...ALLOWED_MOVABLE_BLOCKS, 'amp/amp-story-page-attachment' ],
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 		};
