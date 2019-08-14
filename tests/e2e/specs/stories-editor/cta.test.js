@@ -1,7 +1,13 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, createNewPost, clickButton } from '@wordpress/e2e-test-utils';
+import {
+	visitAdminPage,
+	createNewPost,
+	clickButton,
+	selectBlockByClientId,
+	getAllBlocks,
+} from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -49,6 +55,12 @@ describe( 'Stories Editor Screen', () => {
 
 		await insertBlock( 'Call to Action' );
 		await goToPreviousPage();
+
+		// Select the default page block.
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
 
