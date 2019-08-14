@@ -80,9 +80,9 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 }
 
 .amp-page-attachment-content {
-    background: lightyellow;
+    background: #fff;
+    overflow-y: auto;
     position: absolute;
-    overflow-y: scroll;
     height:100%;
 
     animation: slide-up 0.5s ease;

@@ -235,6 +235,7 @@ class AMP_Story_Post_Type {
 		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
+		self::register_block_page_attachment();
 
 		register_block_type(
 			'amp/amp-story-post-author',
@@ -1796,7 +1797,7 @@ class AMP_Story_Post_Type {
 
 		ob_start();
 		?>
-        <amp-story-page-attachment layout="nodisplay" data-theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+        <amp-story-page-attachment layout="nodisplay" theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
             <?php echo esc_html( $excerpt ); ?>
         </amp-story-page-attachment>
 		<?php

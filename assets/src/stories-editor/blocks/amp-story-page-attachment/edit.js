@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
+import { classnames } from 'classnames';
 
 /**
  * WordPress dependencies
@@ -99,7 +100,9 @@ class PageAttachmentEdit extends Component {
 					</PanelBody>
 				</InspectorControls>
 				{ this.state.isOpen &&
-					<div className="attachment-container">
+					<div className={ classnames( 'attachment-container', {
+						'theme-dark': 'dark' === theme,
+					} ) }>
 						<div className="attachment-header">
 							<span
 								onClick={ () => {
