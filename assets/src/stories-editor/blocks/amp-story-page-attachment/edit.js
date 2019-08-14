@@ -70,11 +70,9 @@ class PageAttachmentEdit extends Component {
 		const {
 			attributes,
 			setAttributes,
-			isSelected,
 		} = this.props;
 
 		const {
-			postId,
 			theme,
 			text,
 			title,
@@ -109,8 +107,13 @@ class PageAttachmentEdit extends Component {
 									onClick={ () => {
 										this.toggleAttachment( false );
 									} }
-									className="amp-story-page-attachment-close-button" role="button"
-								></span>
+									tabIndex="0"
+									className="amp-story-page-attachment-close-button"
+									role="button"
+									onKeyDown={ () => {
+										// @todo
+									} }
+								/>
 								<RichText
 									value={ title }
 									tagName="span"
@@ -128,13 +131,18 @@ class PageAttachmentEdit extends Component {
 				{ ! this.state.isOpen &&
 				<div className="open-attachment-wrapper">
 					<span
+						role="button"
+						tabIndex="0"
 						onClick={ () => {
 							this.toggleAttachment( true );
 						} }
+						onKeyDown={ () => {
+							// @todo
+						} }
 						className="amp-story-page-open-attachment-icon"
 					>
-						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left"></span>
-						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right"></span>
+						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left" />
+						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right" />
 					</span>
 					<RichText
 						value={ text }
@@ -153,7 +161,11 @@ class PageAttachmentEdit extends Component {
 PageAttachmentEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		text: PropTypes.string,
+		theme: PropTypes.string,
+		title: PropTypes.string,
 	} ).isRequired,
+	setAttributes: PropTypes.func.isRequired,
+	isSelected: PropTypes.bool,
 };
 
 export default PageAttachmentEdit;
