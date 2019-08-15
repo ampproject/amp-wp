@@ -342,7 +342,7 @@ blocks.keys().forEach( ( modulePath ) => {
 
 const formats = require.context( './formats', true, /(?<!test\/)index\.js$/ );
 
-formats.keys().forEach( ( modulePath ) => {
+formats.keys().sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 ).forEach( ( modulePath ) => {
 	const { name, settings } = formats( modulePath );
 	registerFormatType( name, settings );
 } );
