@@ -70,7 +70,12 @@ export default withSelect( ( select, { block, label } ) => {
 
 			break;
 		case 'amp/amp-story-text':
-			content = block.attributes.content.length > 0 ? block.attributes.content.replace( /<[^<>]+>/g, ' ' ).slice( 0, 30 ) : '';
+			if ( block.attributes.content.length > 0 ) {
+				content = block.attributes.content
+					.replace( /<br>/g, ' ' )
+					.replace( /<[^<>]+>/g, '' )
+					.slice( 0, 30 );
+			}
 
 			label = content.length > 0 ? content : blockType.title;
 			break;
