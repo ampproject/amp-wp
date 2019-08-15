@@ -34,7 +34,7 @@ const FormatEdit = ( { isActive, value, onChange } ) => {
 					renderToggle={ ( { isOpen, onToggle } ) => (
 						<IconButton
 							icon={ markerIcon( { width: 16, height: 16, viewBox: '0 0 24 24' } ) }
-							label={ __( 'Highlight Color', 'amp' ) }
+							tooltip={ __( 'Highlight Color', 'amp' ) }
 							onClick={ onToggle }
 							aria-expanded={ isOpen }
 						>
