@@ -23,7 +23,8 @@ const FormatEdit = ( { isActive, value, onChange } ) => {
 
 	if ( isActive ) {
 		const activeFormat = getActiveFormat( value, name );
-		activeColor = activeFormat.attributes[ 'data-text-background-color' ];
+		const style = activeFormat.attributes.style;
+		activeColor = style.replace( new RegExp( `^background-color:\\s*` ), '' );
 	}
 
 	return (
@@ -55,7 +56,7 @@ const FormatEdit = ( { isActive, value, onChange } ) => {
 										onChange( applyFormat( value, {
 											type: name,
 											attributes: {
-												'data-text-background-color': color,
+												style: `background-color:${ color }`,
 											},
 										} ) );
 

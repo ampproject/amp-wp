@@ -17,7 +17,7 @@ export const settings = {
 	tagName: 'span',
 	className: 'amp-background-color',
 	attributes: {
-		'data-text-background-color': 'data-text-background-color',
+		style: 'style',
 	},
 	edit: FormatEdit,
 };
