@@ -92,7 +92,7 @@ jobs:
       install:
         - nvm install
         - composer install
-        - npm run install
+        - npm install
       script:
         - npm run build:js
         - npm run build:css
