@@ -92,11 +92,11 @@ jobs:
       install:
         - nvm install
         - composer install
-        # npm is handled by `npm run env:start`
+        - npm run install
       script:
-        - npm run env:start # also install npm dependencies
         - npm run build:js
         - npm run build:css
+        - npm run env:start
         - npm run env:reset-site
         - npm run test:e2e:ci
         - npm run env:stop
