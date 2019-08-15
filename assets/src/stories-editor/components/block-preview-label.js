@@ -48,7 +48,7 @@ export default withSelect( ( select, { block, label } ) => {
 	const blockType = getBlockType( block.name );
 
 	label = blockType.title;
-	let content;
+	let content = '';
 
 	switch ( block.name ) {
 		case 'core/image':
