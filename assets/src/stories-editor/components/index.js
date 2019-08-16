@@ -3,6 +3,7 @@ export { default as AnimationOrderPicker } from './animation-order-picker';
 export { default as BlockNavigation } from './block-navigation';
 export { default as BlockPreview } from './block-preview';
 export { default as BlockPreviewLabel } from './block-preview-label';
+export { default as DraggableText } from './draggable-text';
 export { default as EditorCarousel } from './editor-carousel';
 export { default as Reorderer } from './reorderer';
 export { default as StoryControls } from './story-controls';
