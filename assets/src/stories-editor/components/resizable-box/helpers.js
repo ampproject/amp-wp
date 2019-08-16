@@ -3,6 +3,18 @@
  */
 import { BLOCKS_WITH_TEXT_SETTINGS } from '../../constants';
 
+export const REVERSE_WIDTH_CALCULATIONS = [
+	'left',
+	'bottomLeft',
+	'topLeft',
+];
+
+export const REVERSE_HEIGHT_CALCULATIONS = [
+	'top',
+	'topRight',
+	'topLeft',
+];
+
 /**
  * Get the distance between two points based on pythagorean.
  *
@@ -45,9 +57,10 @@ export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, di
 	const deltaW = resizedHorizontally ? deltaL * Math.cos( beta ) : 0;
 	const deltaH = resizedVertically ? deltaL * Math.sin( beta ) : 0;
 
+	// When using left or top handles the size of the block is changing reversely to right and bottom.
 	return {
-		deltaW: 'left' === direction ? -deltaW : deltaW,
-		deltaH: 'top' === direction ? -deltaH : deltaH,
+		deltaW: REVERSE_WIDTH_CALCULATIONS.includes( direction ) ? -deltaW : deltaW,
+		deltaH: REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ? -deltaH : deltaH,
 	};
 };
 
