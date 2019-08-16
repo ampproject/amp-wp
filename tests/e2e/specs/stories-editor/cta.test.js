@@ -1,7 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, createNewPost, clickButton } from '@wordpress/e2e-test-utils';
+import {
+	visitAdminPage,
+	createNewPost,
+	clickButton,
+	getAllBlocks,
+} from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -45,10 +50,15 @@ describe( 'Stories Editor Screen', () => {
 	it( 'should display validation error when CTA block is on the first Page', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
+		const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
+
 		await insertBlock( 'Page' );
 
 		await insertBlock( 'Call to Action' );
 		await goToPreviousPage();
+
+		await page.waitForSelector( `#block-${ firstPageClientId }.amp-page-active` );
+
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
 
