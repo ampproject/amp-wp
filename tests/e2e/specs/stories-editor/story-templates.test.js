@@ -71,6 +71,9 @@ describe( 'Story Templates', () => {
 				'//*[contains(@class,"block-editor-block-preview")]'
 			);
 
+			// Wait until the templates are loaded and blocks accessible.
+			await page.waitForSelector( '.block-editor-block-preview .wp-block' );
+
 			// Click on the template including quote and image.
 			await nodes[ 3 ].click();
 
@@ -125,7 +128,7 @@ describe( 'Story Templates', () => {
 			// Fandom CTA.
 			expect( templateContents[ 6 ] ).toContain( '<strong>S</strong>tart Quiz' );
 			// Fandom Fact.
-			expect( templateContents[ 7 ] ).toContain( 'Robb Start made Jon his heir<br data-rich-text-line-break=\"true\">(in books)' );
+			expect( templateContents[ 7 ] ).toContain( 'Robb Start made Jon his heir<br>(in books)' );
 			// Fandom Fact Text.
 			expect( templateContents[ 8 ] ).toContain( 'One of the biggest things missing from the show is the fact that before his death, Robb Start legitimizes Jon Snow as a Stark and makes him his heir.' );
 			// Fandom Intro
