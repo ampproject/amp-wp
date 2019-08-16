@@ -114,7 +114,12 @@ DraggableText.propTypes = {
 	toggleIsEditing: PropTypes.func.isRequired,
 	toggleOverlay: PropTypes.func.isRequired,
 	text: PropTypes.string.isRequired,
-	textStyle: PropTypes.string.isRequired,
+	textStyle: PropTypes.shape( {
+		color: PropTypes.string,
+		fontSize: PropTypes.string,
+		textAlign: PropTypes.string,
+		position: PropTypes.string,
+	} ).isRequired,
 	textWrapperClass: PropTypes.string.isRequired,
 	placeholder: PropTypes.string.isRequired,
 };
