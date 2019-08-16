@@ -54,7 +54,7 @@ describe( 'Global Inserter', () => {
 		'Table',
 		'Verse',
 		'Embed',
-	] )( 'has an expected block',
+	] )( 'contains the block %s',
 		async ( block ) => {
 			await createNewPost( { postType: 'amp_story' } );
 			await testBlockPresentInInserter( block );
