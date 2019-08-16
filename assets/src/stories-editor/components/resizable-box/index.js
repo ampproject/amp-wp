@@ -22,7 +22,7 @@ import {
 	getResizedWidthAndHeight,
 	getRadianFromDeg,
 	getBlockTextElement,
-	REVERSE_HEIGHT_CALCULATIONS,
+	REVERSE_HEIGHT_CALCULATIONS, // @todo Move logic using these to helpers instead later if possible.
 	REVERSE_WIDTH_CALCULATIONS,
 } from './helpers';
 
@@ -204,10 +204,16 @@ const EnhancedResizableBox = ( props ) => {
 						top: resizedPosition.top - initialPosition.top,
 					};
 					// Get new position based on the difference.
-					const originalPos = {
-						left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
-						top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
-					};
+					const originalPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
+						// If we have reverse calculations, correct the width and height as well.
+						{
+							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ) - deltaW,
+							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ) - deltaH,
+						} :
+						{
+							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
+							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
+						};
 
 					// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
 					// @todo Remove this temporary fix.
@@ -216,10 +222,15 @@ const EnhancedResizableBox = ( props ) => {
 						diff.right = diff.right / ( 60 / appliedHeight );
 					}
 
-					const updatedPos = {
-						left: originalPos.left - diff.left,
-						top: originalPos.top + diff.top,
-					};
+					const updatedPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
+						{
+							left: originalPos.left + diff.left,
+							top: originalPos.top - diff.top,
+						} :
+						{
+							left: originalPos.left - diff.left,
+							top: originalPos.top + diff.top,
+						};
 
 					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
