@@ -26,7 +26,7 @@ import {
 	REVERSE_WIDTH_CALCULATIONS,
 } from './helpers';
 
-import { TEXT_BLOCK_BORDER, TEXT_BLOCK_PADDING } from '../../constants';
+import { TEXT_BLOCK_PADDING } from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
@@ -61,14 +61,6 @@ const EnhancedResizableBox = ( props ) => {
 	const isImage = 'core/image' === blockName;
 	const isText = 'amp/amp-story-text' === blockName;
 
-	if ( isText ) {
-		height += TEXT_BLOCK_BORDER * 2;
-		width += TEXT_BLOCK_BORDER * 2;
-	}
-
-	const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
-	const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
-
 	return (
 		<ResizableBox
 			{ ...otherProps }
@@ -96,6 +88,11 @@ const EnhancedResizableBox = ( props ) => {
 				let appliedWidth = width + deltaW;
 				let appliedHeight = height + deltaH;
 
+				// Restore the full height for Text block wrapper.
+				if ( textBlockWrapper ) {
+					textBlockWrapper.style.height = '100%';
+				}
+
 				// Ensure the measures not crossing limits.
 				appliedWidth = appliedWidth < lastWidth ? lastWidth : appliedWidth;
 				appliedHeight = appliedHeight < lastHeight ? lastHeight : appliedHeight;
@@ -103,12 +100,12 @@ const EnhancedResizableBox = ( props ) => {
 				const elementTop = parseFloat( blockElement.style.top );
 				const elementLeft = parseFloat( blockElement.style.left );
 
-				const positionTop = ! isText ? Number( elementTop.toFixed( 2 ) ) : Number( ( elementTop + textBlockBorderInPercentageTop ).toFixed( 2 ) );
-				const positionLeft = ! isText ? Number( elementLeft.toFixed( 2 ) ) : Number( ( elementLeft + textBlockBorderInPercentageLeft ).toFixed( 2 ) );
+				const positionTop = Number( elementTop.toFixed( 2 ) );
+				const positionLeft = Number( elementLeft.toFixed( 2 ) );
 
 				onResizeStop( {
-					width: isText ? parseInt( appliedWidth ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedWidth ),
-					height: isText ? parseInt( appliedHeight ) - ( TEXT_BLOCK_BORDER * 2 ) : parseInt( appliedHeight ),
+					width: parseInt( appliedWidth ),
+					height: parseInt( appliedHeight ),
 					positionTop,
 					positionLeft,
 				} );
@@ -159,8 +156,8 @@ const EnhancedResizableBox = ( props ) => {
 						}
 					}
 
-					const scrollWidth = isText ? textElement.scrollWidth + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollWidth;
-					const scrollHeight = isText ? textElement.scrollHeight + ( TEXT_BLOCK_BORDER * 2 ) : textElement.scrollHeight;
+					const scrollWidth = textElement.scrollWidth;
+					const scrollHeight = textElement.scrollHeight;
 					if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
 						appliedWidth = lastWidth;
 						appliedHeight = lastHeight;
@@ -242,8 +239,12 @@ const EnhancedResizableBox = ( props ) => {
 				lastWidth = appliedWidth;
 				lastHeight = appliedHeight;
 
-				if ( textBlockWrapper && ampFitText ) {
-					textBlockWrapper.style.lineHeight = isText ? appliedHeight - ( TEXT_BLOCK_PADDING * 2 ) + 'px' : appliedHeight + 'px';
+				if ( textBlockWrapper ) {
+					if ( ampFitText ) {
+						textBlockWrapper.style.lineHeight = appliedHeight + 'px';
+					}
+					// Also add the height to the wrapper since the background color is set to the wrapper.
+					textBlockWrapper.style.height = appliedHeight + 'px';
 				}
 
 				// If it's image, let's change the width and height of the image, too.

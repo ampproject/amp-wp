@@ -24,6 +24,8 @@ describe( 'Code Editor', () => {
 
 		await expect( page ).not.toMatchElement( '.block-editor-writing-flow__click-redirect' );
 
+		// Ensure the menu is available before switching mode.
+		await page.waitForSelector( '.edit-post-more-menu [aria-label="More tools & options"]' );
 		await switchEditorModeTo( 'Code' );
 		await page.click( '.edit-post-more-menu [aria-label="More tools & options"]' );
 

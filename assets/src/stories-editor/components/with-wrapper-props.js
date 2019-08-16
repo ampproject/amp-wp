@@ -6,9 +6,8 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS, TEXT_BLOCK_BORDER } from '../constants';
+import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
-import { getPercentageFromPixels } from '../helpers';
 
 const wrapperWithSelect = compose(
 	withAttributes,
@@ -59,20 +58,10 @@ const withWrapperProps = ( BlockListBlock ) => {
 		};
 
 		if ( ALLOWED_CHILD_BLOCKS.includes( blockName ) ) {
-			let style = {};
-			if ( 'amp/amp-story-text' === blockName ) {
-				const textBlockBorderInPercentageTop = getPercentageFromPixels( 'y', TEXT_BLOCK_BORDER );
-				const textBlockBorderInPercentageLeft = getPercentageFromPixels( 'x', TEXT_BLOCK_BORDER );
-				style = {
-					top: `${ parseFloat( attributes.positionTop ) - textBlockBorderInPercentageTop }%`,
-					left: `${ parseFloat( attributes.positionLeft ) - textBlockBorderInPercentageLeft }%`,
-				};
-			} else {
-				style = {
-					top: `${ attributes.positionTop }%`,
-					left: `${ attributes.positionLeft }%`,
-				};
-			}
+			let style = {
+				top: `${ attributes.positionTop }%`,
+				left: `${ attributes.positionLeft }%`,
+			};
 			style.transform = `scale(var(--preview-scale)) translateX(var(--preview-translateX)) translateY(var(--preview-translateY)) rotate(${ attributes.rotationAngle || 0 }deg)`;
 
 			if ( 'amp/amp-story-cta' === blockName ) {
