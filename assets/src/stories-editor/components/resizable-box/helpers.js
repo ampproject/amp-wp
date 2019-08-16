@@ -1,19 +1,11 @@
 /**
  * Internal dependencies
  */
-import { BLOCKS_WITH_TEXT_SETTINGS } from '../../constants';
-
-export const REVERSE_WIDTH_CALCULATIONS = [
-	'left',
-	'bottomLeft',
-	'topLeft',
-];
-
-export const REVERSE_HEIGHT_CALCULATIONS = [
-	'top',
-	'topRight',
-	'topLeft',
-];
+import {
+	BLOCKS_WITH_TEXT_SETTINGS,
+	REVERSE_WIDTH_CALCULATIONS,
+	REVERSE_HEIGHT_CALCULATIONS,
+} from '../../constants';
 
 /**
  * Get the distance between two points based on pythagorean.

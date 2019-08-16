@@ -22,11 +22,13 @@ import {
 	getResizedWidthAndHeight,
 	getRadianFromDeg,
 	getBlockTextElement,
-	REVERSE_HEIGHT_CALCULATIONS, // @todo Move logic using these to helpers instead later if possible.
-	REVERSE_WIDTH_CALCULATIONS,
 } from './helpers';
 
-import { TEXT_BLOCK_PADDING } from '../../constants';
+import {
+	TEXT_BLOCK_PADDING,
+	REVERSE_WIDTH_CALCULATIONS,
+	REVERSE_HEIGHT_CALCULATIONS,
+} from '../../constants';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
