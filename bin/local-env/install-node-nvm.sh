@@ -65,12 +65,14 @@ if [ "$TRAVIS" != "true" ] && [ "$(nvm current)" != "$(nvm version-remote --lts)
 	exit 1
 fi
 
-# Install/update packages
-echo -e $(status_message "Installing and updating NPM packages..." )
-npm install
+if [ "$TRAVIS" != "true" ]; then
+  # Install/update packages
+  echo -e $(status_message "Installing and updating NPM packages..." )
+  npm install
 
-# Make sure npm is up-to-date
-npm install npm -g
+  # Make sure npm is up-to-date
+  npm install npm -g
+fi
 
 # There was a bug in NPM that caused changes in package-lock.json. Handle that.
 if [ "$TRAVIS" != "true" ] && ! git diff --no-ext-diff --exit-code package-lock.json >/dev/null; then
