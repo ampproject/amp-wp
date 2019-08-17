@@ -197,6 +197,37 @@ class AMP_Story_Post_Type {
 
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_custom_stories_styles' ] );
 
+		add_action( 'amp_story_head', 'rel_canonical' );
+		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
+		add_action( 'amp_story_head', 'wp_enqueue_scripts' );
+		add_action( 'amp_story_head', 'rel_canonical' );
+
+		// @todo Create methods/functions for some of these.
+		add_action(
+			'amp_story_head',
+			static function() {
+				// @todo Eliminate in favor of adding via post-processor.
+				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			},
+			PHP_INT_MAX
+		);
+		add_action(
+			'amp_story_head',
+			function() {
+				// See _wp_render_title_tag().
+				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+			}
+		);
+		add_action(
+			'amp_story_head',
+			function() {
+				// @todo Temporary until sanitizer automatically supplies runtime.
+				wp_scripts()->do_items( [ 'amp-runtime' ] ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
+
+				wp_styles()->do_items();
+			}
+		);
+
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
