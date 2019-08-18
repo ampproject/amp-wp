@@ -95,7 +95,7 @@
     "travis-size-report": "1.1.0",
     "uuid": "3.3.2",
     "webpack": "4.39.2",
-    "webpack-cli": "3.3.6",
+    "webpack-cli": "3.3.7",
     "webpackbar": "4.0.0"
   },
   "scripts": {
