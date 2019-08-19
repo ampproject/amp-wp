@@ -371,7 +371,7 @@ function amp_init() {
 			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
 		}
 
-		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation' );
+		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
 	}
 
 	/*
