@@ -141,7 +141,9 @@ class AMP_Story_Media {
 			return $data;
 		}
 
-		if ( is_string( $data['image'] ) ) {
+		if ( empty( $data['image'] ) ) {
+			$data['image'] = [];
+		} elseif ( is_string( $data['image'] ) ) {
 			$data['image'] = [ $data['image'] ];
 		} elseif ( is_array( $data['image'] ) && isset( $data['image']['@type'] ) ) {
 			$data['image'] = [ $data['image'] ];
