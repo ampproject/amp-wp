@@ -32,7 +32,7 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		$wp_styles = null;
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 
-		AMP_Story_Media::init();
+		AMP_Story_Post_Type::register(); // This calls AMP_Story_Media::init().
 	}
 
 	/**
@@ -50,6 +50,61 @@ class AMP_Story_Media_Test extends WP_UnitTestCase {
 		unset( $_SERVER['HTTPS'] );
 		unset( $GLOBALS['current_screen'] );
 		parent::tearDown();
+	}
+
+	/**
+	 * Test filter_schemaorg_metadata_images()
+	 *
+	 * @covers AMP_Story_Media::filter_schemaorg_metadata_images
+	 */
+	public function test_filter_schemaorg_metadata_images() {
+		$this->assertSame( [], AMP_Story_Media::filter_schemaorg_metadata_images( [] ) );
+
+		$post_id = $this->factory()->post->create( [ 'post_type' => AMP_Story_Post_Type::POST_TYPE_SLUG ] );
+		$this->go_to( get_permalink( $post_id ) );
+		$this->assertTrue( is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
+
+		$custom_image_url   = 'https://example.com/foo.jpg';
+		$custom_image_obj   = [
+			'url'   => $custom_image_url,
+			'@type' => 'ImageObject',
+		];
+		$fallback_image_url = amp_get_asset_url( 'images/stories-editor/story-fallback-poster.jpg' );
+
+		$this->assertSame( [ 'image' => [ $fallback_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [] ) );
+		$this->assertSame( [ 'image' => [ $fallback_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [ 'image' => null ] ) );
+		$this->assertSame( [ 'image' => [ $fallback_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [ 'image' => false ] ) );
+		$this->assertSame( [ 'image' => [ $fallback_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [ 'image' => '' ] ) );
+
+		$this->assertSame( [ 'image' => [ $fallback_image_url, $custom_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [ 'image' => $custom_image_url ] ) );
+		$this->assertSame(
+			[
+				'image' => [
+					$fallback_image_url,
+					$custom_image_obj,
+				],
+			],
+			AMP_Story_Media::filter_schemaorg_metadata_images(
+				[
+					'image' => $custom_image_obj,
+				]
+			)
+		);
+		$this->assertSame( [ 'image' => [ $fallback_image_url, $custom_image_url ] ], AMP_Story_Media::filter_schemaorg_metadata_images( [ 'image' => $custom_image_url ] ) );
+		$this->assertSame(
+			[
+				'image' => [
+					$fallback_image_url,
+					$custom_image_obj,
+					$custom_image_obj,
+				],
+			],
+			AMP_Story_Media::filter_schemaorg_metadata_images(
+				[
+					'image' => [ $custom_image_obj, $custom_image_obj ],
+				]
+			)
+		);
 	}
 
 	/**
