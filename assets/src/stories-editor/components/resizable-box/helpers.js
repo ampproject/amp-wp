@@ -102,7 +102,7 @@ export const getBlockPositioning = ( width, height, radian, direction ) => {
 	const y = height / 2;
 
 	let rotatedX, rotatedY;
-	if ( 'topRight' === direction ) {
+	if ( 'topRight' === direction || 'bottomLeft' === direction ) {
 		rotatedX = ( y * -Math.sin( radian ) ) + ( x * Math.cos( radian ) );
 		rotatedY = ( y * Math.cos( radian ) ) - ( x * -Math.sin( radian ) );
 	} else {

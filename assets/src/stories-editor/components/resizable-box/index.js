@@ -210,6 +210,11 @@ const EnhancedResizableBox = ( props ) => {
 							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
 							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ) - deltaH,
 						};
+					} else if ( 'bottomLeft' === direction ) {
+						originalPos = {
+							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ) - deltaW,
+							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
+						};
 					} else {
 						// Get new position based on the difference.
 						originalPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
@@ -236,6 +241,11 @@ const EnhancedResizableBox = ( props ) => {
 						updatedPos = {
 							left: originalPos.left - diff.left,
 							top: originalPos.top - diff.top,
+						};
+					} else if ( 'bottomLeft' === direction ) {
+						updatedPos = {
+							left: originalPos.left + diff.left,
+							top: originalPos.top + diff.top,
 						};
 					} else {
 						updatedPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
