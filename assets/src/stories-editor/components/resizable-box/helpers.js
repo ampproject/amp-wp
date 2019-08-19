@@ -6,6 +6,7 @@ import {
 	REVERSE_WIDTH_CALCULATIONS,
 	REVERSE_HEIGHT_CALCULATIONS,
 } from '../../constants';
+import { getPixelsFromPercentage } from '../../helpers';
 
 /**
  * Get the distance between two points based on pythagorean.
@@ -86,7 +87,79 @@ export const getBlockTextElement = ( blockName, blockElement ) => {
 	}
 };
 
+/**
+ * Get block positioning after resizing, not considering the rotation.
+ *
+ * @param {string} direction Resizing direction.
+ * @param {string} blockElementLeft Original left position before resizing.
+ * @param {string} blockElementTop Original top position before resizing.
+ * @param {number} deltaW Width change with resizing.
+ * @param {number} deltaH Height change with resizing.
+ * @return {{top: number, left: number}} Top and left positioning after resizing, not considering the rotation.
+ */
+export const getResizedBlockPosition = ( direction, blockElementLeft, blockElementTop, deltaW, deltaH ) => {
+	const baseLeftInPixels = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
+	const baseTopInPixels = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
+	switch ( direction ) {
+		case 'topRight':
+			return {
+				left: baseLeftInPixels,
+				top: baseTopInPixels - deltaH,
+			};
+		case 'bottomLeft':
+			return {
+				left: baseLeftInPixels - deltaW,
+				top: baseTopInPixels,
+			};
+		case 'left':
+		case 'topLeft':
+		case 'top':
+			return {
+				left: baseLeftInPixels - deltaW,
+				top: baseTopInPixels - deltaH,
+			};
+		default:
+			return {
+				left: baseLeftInPixels,
+				top: baseTopInPixels,
+			};
+	}
+};
 
+/**
+ * Get block position after resizing, considering the rotation.
+ *
+ * @param {string} direction Resizing direction.
+ * @param {Object} originalPosition Original block position, considering the rotation.
+ * @param {Object} diff Block position difference after resizing.
+ * @return {{top: number, left: number}} Top and left params in pixels.
+ */
+export const getUpdatedBlockPosition = ( direction, originalPosition, diff ) => {
+	switch ( direction ) {
+		case 'topRight':
+			return {
+				left: originalPosition.left - diff.left,
+				top: originalPosition.top - diff.top,
+			};
+		case 'bottomLeft':
+			return {
+				left: originalPosition.left + diff.left,
+				top: originalPosition.top + diff.top,
+			};
+		case 'left':
+		case 'topLeft':
+		case 'top':
+			return {
+				left: originalPosition.left + diff.left,
+				top: originalPosition.top - diff.top,
+			};
+		default:
+			return {
+				left: originalPosition.left - diff.left,
+				top: originalPosition.top + diff.top,
+			};
+	}
+};
 
 /**
  * Get block's left and top position based on width, height, and radian.
@@ -98,10 +171,12 @@ export const getBlockTextElement = ( blockName, blockElement ) => {
  * @return {{top: number, left: number}} Top and left positioning.
  */
 export const getBlockPositioning = ( width, height, radian, direction ) => {
+	// The center point of the block.
 	const x = -width / 2;
 	const y = height / 2;
 
 	let rotatedX, rotatedY;
+	// Get the center point of the rotated block.
 	if ( 'topRight' === direction || 'bottomLeft' === direction ) {
 		rotatedX = ( y * -Math.sin( radian ) ) + ( x * Math.cos( radian ) );
 		rotatedY = ( y * Math.cos( radian ) ) - ( x * -Math.sin( radian ) );
