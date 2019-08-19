@@ -74,7 +74,6 @@ const EnhancedResizableBox = ( props ) => {
 				height,
 				width,
 			} }
-			/* @todo Change top and left position when resizing from left/top. */
 			enable={ {
 				top: true,
 				right: true,
@@ -175,14 +174,16 @@ const EnhancedResizableBox = ( props ) => {
 					}
 				}
 
-				// If the resizing is to left or top then we have to compensate
-				if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
-					const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-					blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - deltaW ) + '%';
-				}
-				if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
-					const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-					blockElement.style.top = getPercentageFromPixels( 'y', topInPx - deltaH ) + '%';
+				if ( ! angle ) {
+					// If the resizing is to left or top then we have to compensate
+					if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
+						const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
+						blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - deltaW ) + '%';
+					}
+					if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
+						const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
+						blockElement.style.top = getPercentageFromPixels( 'y', topInPx - deltaH ) + '%';
+					}
 				}
 
 				if ( angle ) {
@@ -192,27 +193,36 @@ const EnhancedResizableBox = ( props ) => {
 					let initialPosition, resizedPosition;
 					// If it's a text block, we shouldn't consider the added padding for measuring.
 					if ( isText ) {
-						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
-						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle );
+						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
 					} else {
-						initialPosition = getBlockPositioning( width, height, radianAngle );
-						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle );
+						initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
 					}
 					const diff = {
 						left: resizedPosition.left - initialPosition.left,
 						top: resizedPosition.top - initialPosition.top,
 					};
-					// Get new position based on the difference.
-					const originalPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
-						// If we have reverse calculations, correct the width and height as well.
-						{
-							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ) - deltaW,
-							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ) - deltaH,
-						} :
-						{
+
+					let originalPos;
+					if ( 'topRight' === direction ) {
+						originalPos = {
 							left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
-							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
+							top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ) - deltaH,
 						};
+					} else {
+						// Get new position based on the difference.
+						originalPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
+							// If we have reverse calculations, correct the width and height as well.
+							{
+								left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ) - deltaW,
+								top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ) - deltaH,
+							} :
+							{
+								left: getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) ),
+								top: getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) ),
+							};
+					}
 
 					// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
 					// @todo Remove this temporary fix.
@@ -221,15 +231,23 @@ const EnhancedResizableBox = ( props ) => {
 						diff.right = diff.right / ( 60 / appliedHeight );
 					}
 
-					const updatedPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
-						{
-							left: originalPos.left + diff.left,
-							top: originalPos.top - diff.top,
-						} :
-						{
+					let updatedPos;
+					if ( 'topRight' === direction ) {
+						updatedPos = {
 							left: originalPos.left - diff.left,
-							top: originalPos.top + diff.top,
+							top: originalPos.top - diff.top,
 						};
+					} else {
+						updatedPos = REVERSE_WIDTH_CALCULATIONS.includes( direction ) || REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ?
+							{
+								left: originalPos.left + diff.left,
+								top: originalPos.top - diff.top,
+							} :
+							{
+								left: originalPos.left - diff.left,
+								top: originalPos.top + diff.top,
+							};
+					}
 
 					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
