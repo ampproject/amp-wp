@@ -16,9 +16,9 @@ import './edit.css';
 import {
 	getPercentageFromPixels,
 	getPixelsFromPercentage,
-	getBlockPositioning,
 } from '../../helpers';
 import {
+	getBlockPositioning,
 	getResizedWidthAndHeight,
 	getRadianFromDeg,
 	getBlockTextElement,

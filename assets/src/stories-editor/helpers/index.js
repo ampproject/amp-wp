@@ -1417,33 +1417,6 @@ export const maybeInitializeAnimations = () => {
 };
 
 /**
- * Get block's left and top position based on width, height, and radian.
- *
- * @param {number} width Width.
- * @param {number} height Height.
- * @param {number} radian Radian.
- * @return {{top: number, left: number}} Top and left positioning.
- */
-export const getBlockPositioning = ( width, height, radian, direction ) => {
-	const x = -width / 2;
-	const y = height / 2;
-
-	let rotatedX, rotatedY;
-	if ( 'topRight' === direction ) {
-		rotatedX = ( y * -Math.sin( radian ) ) + ( x * Math.cos( radian ) );
-		rotatedY = ( y * Math.cos( radian ) ) - ( x * -Math.sin( radian ) );
-	} else {
-		rotatedX = ( y * Math.sin( radian ) ) + ( x * Math.cos( radian ) );
-		rotatedY = ( y * Math.cos( radian ) ) - ( x * Math.sin( radian ) );
-	}
-
-	return {
-		left: rotatedX - x,
-		top: rotatedY - y,
-	};
-};
-
-/**
  * Return a label for the block order controls depending on block position.
  *
  * @param {string}  type            Block type - in the case of a single block, should
