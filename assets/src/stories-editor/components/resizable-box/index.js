@@ -192,13 +192,17 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
+					// Is minHeight or minWidth has been reached then we should not move the block position either to the relevant side.
+					const hasMinHeight = minHeight === appliedHeight;
+					const hasMinWidth = minWidth === appliedWidth;
+
 					if ( ! angle ) {
 						// If the resizing is to left or top then we have to compensate
-						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
+						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) && ! hasMinWidth ) {
 							const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
 							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - deltaW ) + '%';
 						}
-						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
+						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) && ! hasMinHeight ) {
 							const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
 							blockElement.style.top = getPercentageFromPixels( 'y', topInPx - deltaH ) + '%';
 						}
@@ -231,8 +235,12 @@ class EnhancedResizableBox extends Component {
 
 						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
 
-						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+						if ( ! hasMinWidth ) {
+							blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+						}
+						if ( ! hasMinHeight ) {
+							blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+						}
 					}
 
 					element.style.width = appliedWidth + 'px';
