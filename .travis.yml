@@ -1,8 +1,8 @@
 # Tell Travis CI we're using PHP
 language: php
 
-# Using trusty instead of precise because we don't need PHP 5.2 or 5.3 anymore.
-dist: trusty
+services:
+  - mysql
 
 addons:
   apt:
