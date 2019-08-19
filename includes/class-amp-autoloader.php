@@ -99,7 +99,7 @@ class AMP_Autoloader {
 		'AMP_Validation_Callback_Wrapper'    => 'includes/validation/class-amp-validation-callback-wrapper',
 		'AMP_Validated_URL_Post_Type'        => 'includes/validation/class-amp-validated-url-post-type',
 		'AMP_Validation_Error_Taxonomy'      => 'includes/validation/class-amp-validation-error-taxonomy',
-		'AMP_CLI'                            => 'includes/class-amp-cli',
+		'AMP_CLI'                            => 'includes/cli/class-amp-cli',
 		'AMP_String_Utils'                   => 'includes/utils/class-amp-string-utils',
 		'AMP_WP_Utils'                       => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
