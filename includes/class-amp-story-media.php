@@ -141,12 +141,12 @@ class AMP_Story_Media {
 			return $data;
 		}
 
-		if ( ! isset( $data['image'] ) ) {
+		if ( is_string( $data['image'] ) ) {
+			$data['image'] = [ $data['image'] ];
+		} elseif ( is_array( $data['image'] ) && isset( $data['image']['@type'] ) ) {
+			$data['image'] = [ $data['image'] ];
+		} elseif ( ! is_array( $data['image'] ) ) {
 			$data['image'] = [];
-		} elseif ( is_string( $data['image'] ) ) {
-			$data['image'] = [ $data['image'] ];
-		} elseif ( isset( $data['image']['@type'] ) ) {
-			$data['image'] = [ $data['image'] ];
 		}
 
 		$data['image'] = array_merge(
