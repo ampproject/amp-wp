@@ -1,19 +1,19 @@
 <?php
 /**
- * Class AMP_CLI
+ * Class AMP_CLI_Validation.
+ *
+ * Commands that deal with validation of AMP markup.
  *
  * @package AMP
  */
 
 /**
- * Class AMP_CLI
- *
- * Registers and implements a WP-CLI command to crawl the entire site for AMP validity.
- * To use this, run: wp amp validate-site.
+ * Crawls the site for validation errors or resets the stored validation errors.
  *
  * @since 1.0
+ * @since 1.3.0 Renamed subcommands.
  */
-class AMP_CLI {
+class AMP_CLI_Validation extends WP_CLI_Command {
 
 	/**
 	 * The WP-CLI flag to force validation.
@@ -146,12 +146,12 @@ class AMP_CLI {
 	 *
 	 *     wp amp validate-site --include=is_author,is_tag
 	 *
-	 * @subcommand validate-site
+	 * @subcommand crawl-site
 	 * @param array $args       Positional args.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function validate_site( $args, $assoc_args ) {
+	public function crawl_site( $args, $assoc_args ) {
 		unset( $args );
 		self::$include_conditionals      = array();
 		self::$force_crawl_urls          = false;
@@ -212,7 +212,7 @@ class AMP_CLI {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		self::crawl_site();
+		self::do_crawl_site();
 		self::$wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -271,12 +271,12 @@ class AMP_CLI {
 	 *
 	 *     wp amp reset-site-validation --yes
 	 *
-	 * @subcommand reset-site-validation
+	 * @subcommand reset-site
 	 * @param array $args       Positional args. Unused.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset_site_validation( $args, $assoc_args ) {
+	public function reset_site( $args, $assoc_args ) {
 		unset( $args );
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
@@ -561,7 +561,7 @@ class AMP_CLI {
 	 * This validates one of each type at a time,
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
-	public static function crawl_site() {
+	public static function do_crawl_site() {
 		/*
 		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
 		 * It will not be part of the page validation below.
