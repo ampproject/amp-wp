@@ -40,6 +40,8 @@ let lastSeenX = 0,
 	blockElement = null,
 	blockElementTop,
 	blockElementLeft,
+	lastDeltaW,
+	lastDeltaH,
 	imageWrapper,
 	textBlockWrapper,
 	textElement;
@@ -132,6 +134,8 @@ class EnhancedResizableBox extends Component {
 					lastSeenY = event.clientY;
 					lastWidth = width;
 					lastHeight = height;
+					lastDeltaW = null;
+					lastDeltaH = null;
 					blockElement = element.closest( '.wp-block' );
 					blockElementTop = blockElement.style.top;
 					blockElementLeft = blockElement.style.left;
@@ -177,7 +181,7 @@ class EnhancedResizableBox extends Component {
 
 						const scrollWidth = textElement.scrollWidth;
 						const scrollHeight = textElement.scrollHeight;
-						if ( appliedWidth < scrollWidth || appliedHeight < scrollHeight ) {
+						if ( appliedWidth <= scrollWidth || appliedHeight <= scrollHeight ) {
 							appliedWidth = lastWidth;
 							appliedHeight = lastHeight;
 						}
@@ -192,19 +196,23 @@ class EnhancedResizableBox extends Component {
 						}
 					}
 
-					// Is minHeight or minWidth has been reached then we should not move the block position either to the relevant side.
-					const hasMinHeight = minHeight === appliedHeight;
-					const hasMinWidth = minWidth === appliedWidth;
+					// Is it's not min width / height yet, assign lastDeltaH and lastDeltaW for position calculation.
+					if ( minHeight < appliedHeight ) {
+						lastDeltaH = deltaH;
+					}
+					if ( minWidth < appliedWidth ) {
+						lastDeltaW = deltaW;
+					}
 
 					if ( ! angle ) {
 						// If the resizing is to left or top then we have to compensate
-						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) && ! hasMinWidth ) {
+						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
 							const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - deltaW ) + '%';
+							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
 						}
-						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) && ! hasMinHeight ) {
+						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
 							const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-							blockElement.style.top = getPercentageFromPixels( 'y', topInPx - deltaH ) + '%';
+							blockElement.style.top = getPercentageFromPixels( 'y', topInPx - lastDeltaH ) + '%';
 						}
 					} else {
 						const radianAngle = getRadianFromDeg( angle );
@@ -224,23 +232,11 @@ class EnhancedResizableBox extends Component {
 							top: resizedPosition.top - initialPosition.top,
 						};
 
-						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, deltaW, deltaH );
-
-						// @todo Figure out why calculating the new top / left position doesn't work in case of small height value.
-						// @todo Remove this temporary fix.
-						if ( appliedHeight < 60 ) {
-							diff.left = diff.left / ( 60 / appliedHeight );
-							diff.right = diff.right / ( 60 / appliedHeight );
-						}
-
+						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
 						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
 
-						if ( ! hasMinWidth ) {
-							blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-						}
-						if ( ! hasMinHeight ) {
-							blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
-						}
+						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
 
 					element.style.width = appliedWidth + 'px';
