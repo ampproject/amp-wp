@@ -169,7 +169,6 @@ export default createHigherOrderComponent(
 				clientId,
 				name,
 				attributes,
-				isSelected,
 				isLast,
 				isFirst,
 				currentBlockPosition,
@@ -248,7 +247,6 @@ export default createHigherOrderComponent(
 					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
-							isSelected={ isSelected }
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
