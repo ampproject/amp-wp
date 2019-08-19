@@ -12,7 +12,7 @@
  *
  * @since 1.0
  */
-class AMP_CLI_Validation extends WP_CLI_Command {
+final class AMP_CLI_Validation extends WP_CLI_Command {
 
 	/**
 	 * The WP-CLI flag to force validation.

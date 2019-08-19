@@ -14,6 +14,6 @@ use WP_CLI\Dispatcher\CommandNamespace;
  *
  * @since 1.3.0
  */
-class AMP_CLI_Namespace extends CommandNamespace {
+final class AMP_CLI_Namespace extends CommandNamespace {
 
 }
