@@ -52,14 +52,14 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @see https://make.wordpress.org/cli/handbook/internal-api/wp-cli-utils-make-progress-bar/
 	 * @var \cli\progress\Bar|\WP_CLI\NoOp
 	 */
-	private $wp_cli_progress;
+	public $wp_cli_progress;
 
 	/**
 	 * The total number of validation errors, regardless of whether they were accepted.
 	 *
 	 * @var int
 	 */
-	private $total_errors = 0;
+	public $total_errors = 0;
 
 	/**
 	 * The total number of unaccepted validation errors.
@@ -69,14 +69,14 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @var int
 	 */
-	private $unaccepted_errors = 0;
+	public $unaccepted_errors = 0;
 
 	/**
 	 * The number of URLs crawled, regardless of whether they have validation errors.
 	 *
 	 * @var int
 	 */
-	private $number_crawled = 0;
+	public $number_crawled = 0;
 
 	/**
 	 * Whether to force crawling of URLs.
@@ -88,7 +88,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @var int
 	 */
-	private $force_crawl_urls = false;
+	public $force_crawl_urls = false;
 
 	/**
 	 * A whitelist of conditionals to use for validation.
@@ -99,7 +99,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @var array
 	 */
-	private $include_conditionals = [];
+	public $include_conditionals = [];
 
 	/**
 	 * The maximum number of URLs to validate for each type.
@@ -110,7 +110,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @var int
 	 */
-	private $limit_type_validate_count;
+	public $limit_type_validate_count;
 
 	/**
 	 * The validation counts by type, like template or post type.
@@ -122,7 +122,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *     @type int $total The total number of URLs for this type, valid or invalid.
 	 * }
 	 */
-	private $validity_by_type = [];
+	public $validity_by_type = [];
 
 	/**
 	 * Crawl the entire site to get AMP validation results.
@@ -325,7 +325,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @return int The number of URLs to validate.
 	 */
-	private function count_urls_to_validate() {
+	public function count_urls_to_validate() {
 		/*
 		 * If the homepage is set to 'Your latest posts,' start the $total_count at 1.
 		 * Otherwise, it will probably be counted in the query for pages below.
@@ -385,7 +385,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param array $ids THe post IDs to check for AMP support.
 	 * @return array The post IDs that support AMP, or an empty array.
 	 */
-	private function get_posts_that_support_amp( $ids ) {
+	public function get_posts_that_support_amp( $ids ) {
 		if ( ! $this->is_template_supported( 'is_singular' ) ) {
 			return [];
 		}
@@ -411,7 +411,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param string $taxonomy The taxonomy.
 	 * @return boolean Whether the taxonomy supports AMP.
 	 */
-	private function does_taxonomy_support_amp( $taxonomy ) {
+	public function does_taxonomy_support_amp( $taxonomy ) {
 		if ( 'post_tag' === $taxonomy ) {
 			$taxonomy = 'tag';
 		}
@@ -431,7 +431,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param string $template The template to check.
 	 * @return bool Whether the template is supported.
 	 */
-	private function is_template_supported( $template ) {
+	public function is_template_supported( $template ) {
 		// If the --include argument is present in the WP-CLI command, this template conditional must be present in it.
 		if ( ! empty( $this->include_conditionals ) ) {
 			return in_array( $template, $this->include_conditionals, true );
@@ -454,7 +454,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param int|null $number The number of posts to query for (optional).
 	 * @return int[]   $post_ids The post IDs in an array.
 	 */
-	private function get_posts_by_type( $post_type, $offset = null, $number = null ) {
+	public function get_posts_by_type( $post_type, $offset = null, $number = null ) {
 		$args = [
 			'post_type'      => $post_type,
 			'posts_per_page' => is_int( $number ) ? $number : $this->limit_type_validate_count,
@@ -485,7 +485,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param int        $number The maximum amount of links to get (optional).
 	 * @return string[]  The term links, as an array of strings.
 	 */
-	private function get_taxonomy_links( $taxonomy, $offset = '', $number = 1 ) {
+	public function get_taxonomy_links( $taxonomy, $offset = '', $number = 1 ) {
 		return array_map(
 			'get_term_link',
 			get_terms(
@@ -509,7 +509,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param int|string $number The total number to query for, should be an int if passing an argument.
 	 * @return array The author page URLs, or an empty array.
 	 */
-	private function get_author_page_urls( $offset = '', $number = '' ) {
+	public function get_author_page_urls( $offset = '', $number = '' ) {
 		$author_page_urls = [];
 		if ( ! $this->is_template_supported( 'is_author' ) ) {
 			return $author_page_urls;
@@ -528,7 +528,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
-	private function get_search_page() {
+	public function get_search_page() {
 		if ( ! $this->is_template_supported( 'is_search' ) ) {
 			return null;
 		}
@@ -541,7 +541,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
-	private function get_date_page() {
+	public function get_date_page() {
 		if ( ! $this->is_template_supported( 'is_date' ) ) {
 			return null;
 		}
@@ -556,7 +556,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * This validates one of each type at a time,
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
-	private function do_crawl_site() {
+	public function crawl_site() {
 		/*
 		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
 		 * It will not be part of the page validation below.
@@ -612,7 +612,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
-	private function validate_and_store_url( $url, $type ) {
+	public function validate_and_store_url( $url, $type ) {
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
 		/*
