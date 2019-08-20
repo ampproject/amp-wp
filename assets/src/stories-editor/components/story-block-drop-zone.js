@@ -23,7 +23,6 @@ import { withDispatch } from '@wordpress/data';
 import { getPercentageFromPixels } from '../helpers';
 import {
 	STORY_PAGE_INNER_HEIGHT,
-	TEXT_BLOCK_BORDER,
 } from '../constants';
 
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
@@ -83,8 +82,6 @@ class BlockDropZone extends Component {
 
 		// We will set the new position based on where the clone was moved to, with reference being the wrapper element.
 		// Lets take the % based on the wrapper for top and left.
-		const possibleDelta = 'amp/amp-story-text' === srcBlockName ? TEXT_BLOCK_BORDER : 0;
-
 		const leftPosKey = isCTABlock ? 'btnPositionLeft' : 'positionLeft';
 		const topPosKey = isCTABlock ? 'btnPositionTop' : 'positionTop';
 
@@ -94,8 +91,8 @@ class BlockDropZone extends Component {
 			baseHeight = STORY_PAGE_INNER_HEIGHT / 5;
 		}
 		updateBlockAttributes( srcClientId, {
-			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left + possibleDelta ),
-			[ topPosKey ]: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top + possibleDelta, baseHeight ),
+			[ leftPosKey ]: getPercentageFromPixels( 'x', clonePosition.left - wrapperPosition.left ),
+			[ topPosKey ]: getPercentageFromPixels( 'y', clonePosition.top - wrapperPosition.top, baseHeight ),
 		} );
 	}
 

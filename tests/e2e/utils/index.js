@@ -11,4 +11,5 @@ export { openTemplateInserter } from './open-template-inserter';
 export { searchForBlock } from './search-for-block';
 export { selectBlockByClassName } from './select-block-by-classname';
 export { uploadMedia } from './upload-media';
+export { getBlocksOnPage } from './get-blocks-on-page';
 export { goToPreviousPage } from './go-to-previous-page';

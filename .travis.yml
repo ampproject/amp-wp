@@ -92,26 +92,11 @@ jobs:
       install:
         - nvm install
         - composer install
-        # npm is handled by `npm run env:start`
+        - npm install
       script:
-        - npm run env:start # also install npm dependencies
         - npm run build:js
         - npm run build:css
-        - npm run env:reset-site
-        - npm run test:e2e:ci
-        - npm run env:stop
-
-    - name: E2E tests (Author)
-      php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD= E2E_ROLE=author
-      install:
-        - nvm install
-        - composer install
-        # npm is handled by `npm run env:start`
-      script:
-        - npm run env:start # also install npm dependencies
-        - npm run build:js
-        - npm run build:css
+        - npm run env:start
         - npm run env:reset-site
         - npm run test:e2e:ci
         - npm run env:stop
