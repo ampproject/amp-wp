@@ -144,14 +144,13 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp amp validate-site --include=is_author,is_tag
+	 *     wp amp validation run --include=is_author,is_tag
 	 *
-	 * @subcommand crawl-site
 	 * @param array $args       Positional args.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function crawl_site( $args, $assoc_args ) {
+	public function run( $args, $assoc_args ) {
 		unset( $args );
 		$this->include_conditionals      = array();
 		$this->force_crawl_urls          = false;
@@ -212,7 +211,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		$this->do_crawl_site();
+		$this->crawl_site();
 		$this->wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -269,14 +268,13 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp amp reset-site-validation --yes
+	 *     wp amp validation reset --yes
 	 *
-	 * @subcommand reset-site
 	 * @param array $args       Positional args. Unused.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset_site( $args, $assoc_args ) {
+	public function reset( $args, $assoc_args ) {
 		unset( $args );
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
@@ -429,7 +427,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 	 * Gets whether the template is supported.
 	 *
 	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
-	 * For example, wp amp validate-site --include=is_tag,is_category
+	 * For example, wp amp validation run --include=is_tag,is_category
 	 * would return true only if is_tag() or is_category().
 	 * But passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command overrides this.
 	 *
@@ -561,7 +559,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 	 * This validates one of each type at a time,
 	 * and iterates until it reaches the maximum number of URLs for each type.
 	 */
-	private function do_crawl_site() {
+	private function crawl_site() {
 		/*
 		 * If 'Your homepage displays' is set to 'Your latest posts', validate the homepage.
 		 * It will not be part of the page validation below.
