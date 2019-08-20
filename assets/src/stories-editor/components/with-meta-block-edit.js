@@ -28,7 +28,9 @@ import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
 	componentDidMount() {
-		maybeUpdateFontSize( this.props );
+		if ( this.contentHasLoaded() ) {
+			maybeUpdateFontSize( this.props );
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -48,7 +50,7 @@ class MetaBlockEdit extends Component {
 			prevProps.blockContent !== blockContent
 		);
 
-		if ( checkFontSize ) {
+		if ( checkFontSize && this.contentHasLoaded() ) {
 			maybeUpdateFontSize( this.props );
 		}
 
@@ -62,6 +64,21 @@ class MetaBlockEdit extends Component {
 		if ( checkBlockDimensions ) {
 			maybeUpdateBlockDimensions( this.props );
 		}
+	}
+
+	/**
+	 * Checks if the block's content has loaded, relevant for calculating font size of author block.
+	 *
+	 * @return {boolean} If content has loaded.
+	 */
+	contentHasLoaded() {
+		const { name, blockContent } = this.props;
+		if ( 'amp/amp-story-post-author' !== name ) {
+			return true;
+		}
+
+		const anonymousUserName = __( 'Anonymous', 'amp' );
+		return anonymousUserName.toLowerCase() !== blockContent.toLowerCase();
 	}
 
 	render() {
@@ -139,6 +156,7 @@ MetaBlockEdit.propTypes = {
 	placeholder: PropTypes.string,
 	className: PropTypes.string,
 	tagName: PropTypes.string,
+	name: PropTypes.string,
 	isSelected: PropTypes.bool,
 	isEditable: PropTypes.bool,
 	fontSize: PropTypes.shape( {
