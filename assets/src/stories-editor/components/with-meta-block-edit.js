@@ -28,7 +28,7 @@ import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
 	componentDidMount() {
-		if ( this.contentHasLoaded() ) {
+		if ( ! this.props.isLoading ) {
 			maybeUpdateFontSize( this.props );
 		}
 	}
@@ -50,7 +50,7 @@ class MetaBlockEdit extends Component {
 			prevProps.blockContent !== blockContent
 		);
 
-		if ( checkFontSize && this.contentHasLoaded() ) {
+		if ( checkFontSize && ! this.props.isLoading ) {
 			maybeUpdateFontSize( this.props );
 		}
 
@@ -64,21 +64,6 @@ class MetaBlockEdit extends Component {
 		if ( checkBlockDimensions ) {
 			maybeUpdateBlockDimensions( this.props );
 		}
-	}
-
-	/**
-	 * Checks if the block's content has loaded, relevant for calculating font size of author block.
-	 *
-	 * @return {boolean} If content has loaded.
-	 */
-	contentHasLoaded() {
-		const { name, blockContent } = this.props;
-		if ( 'amp/amp-story-post-author' !== name ) {
-			return true;
-		}
-
-		const anonymousUserName = __( 'Anonymous', 'amp' );
-		return anonymousUserName.toLowerCase() !== blockContent.toLowerCase();
 	}
 
 	render() {
@@ -156,7 +141,7 @@ MetaBlockEdit.propTypes = {
 	placeholder: PropTypes.string,
 	className: PropTypes.string,
 	tagName: PropTypes.string,
-	name: PropTypes.string,
+	isLoading: PropTypes.bool,
 	isSelected: PropTypes.bool,
 	isEditable: PropTypes.bool,
 	fontSize: PropTypes.shape( {
@@ -195,7 +180,8 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 
 			const attributeValue = getEditedPostAttribute( attribute );
 
-			let blockContent;
+			let blockContent,
+				isLoading = false;
 
 			// Todo: Maybe pass callbacks as props instead.
 			switch ( attribute ) {
@@ -211,6 +197,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 					const author = getAuthors().find( ( { id } ) => id === attributeValue );
 
 					blockContent = author ? author.name : __( 'Anonymous', 'amp' );
+					isLoading = ! author;
 
 					break;
 				default:
@@ -223,6 +210,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 				blockContent,
 				placeholder,
 				colors,
+				isLoading,
 			};
 		} ),
 		// @todo: Implement isEditable handling to make this usable.
