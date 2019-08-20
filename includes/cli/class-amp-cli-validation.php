@@ -287,12 +287,12 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 			sprintf( 'Deleting %d amp_validated_url posts...', $count ),
 			$count
 		);
-		while ( $posts->valid() ) {
-			$post_id = $posts->current()->ID;
-			$posts->next();
-			wp_delete_post( $post_id, true );
+
+		foreach( $posts as $post ) {
+			wp_delete_post( $post->ID, true );
 			$progress->tick();
 		}
+
 		$progress->finish();
 
 		// Delete all terms. Note that many terms should get deleted when their post counts go to zero above.
@@ -304,12 +304,12 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 			sprintf( 'Deleting %d amp_taxonomy_error terms...', $count ),
 			$count
 		);
-		while ( $terms->valid() ) {
-			$term_id = $terms->current()->term_id;
-			$terms->next();
-			wp_delete_term( $term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
+
+		foreach( $terms as $term ) {
+			wp_delete_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 			$progress->tick();
 		}
+
 		$progress->finish();
 
 		WP_CLI::success( 'All AMP validation data has been removed.' );
