@@ -335,7 +335,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
+			array( $this, 'does_taxonomy_support_amp' )
 		);
 
 		// Count all public taxonomy terms.
@@ -570,7 +570,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( array( 'public' => true ) ),
-			array( 'AMP_CLI', 'does_taxonomy_support_amp' )
+			array( $this, 'does_taxonomy_support_amp' )
 		);
 		$public_post_types      = get_post_types( array( 'public' => true ), 'names' );
 
