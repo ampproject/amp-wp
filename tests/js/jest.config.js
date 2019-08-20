@@ -7,11 +7,15 @@ module.exports = {
 	setupFiles: [
 		'<rootDir>/tests/js/setup-globals',
 	],
+	testMatch: [
+		'**/__tests__/**/*.js',
+		'**/test/*.js',
+		'**/?(*.)test.js',
+	],
 	testPathIgnorePatterns: [
 		'<rootDir>/.git',
 		'<rootDir>/node_modules',
 		'<rootDir>/build',
-		'.*/e2e/.*',
 	],
 	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/' ],
 	coverageReporters: [ 'lcov' ],
