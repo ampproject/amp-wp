@@ -62,9 +62,10 @@ describe( 'Stories Editor Screen', () => {
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
 
-		const nodes = await page.$x(
-			`//div[contains(@class, "block-editor-warning")]//p[contains(@class, "block-editor-warning__message")]`
-		);
-		expect( nodes.length ).not.toStrictEqual( 0 );
+		const errorSelector = '.wp-block .block-editor-warning__message';
+		await page.waitForSelector( errorSelector );
+		const element = await page.$( errorSelector );
+		const text = await ( await element.getProperty( 'textContent' ) ).jsonValue();
+		expect( text ).toStrictEqual( 'Call to Action: This block can not be used on the first page.' );
 	} );
 } );
