@@ -52,5 +52,24 @@ describe( 'Resizing', () => {
 			width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
 			expect( width ).toStrictEqual( textBlockMinWidth );
 		} );
+
+		it( 'should not change the block position when resizing from left handle and minimum width has been reached', async () => {
+			const defaultWidth = 250;
+			const textBlockMinWidth = 40;
+
+			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
+			await dragAndResize( resizableHandleLeft, { x: defaultWidth - textBlockMinWidth, y: 0 } );
+			const width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
+			expect( width ).toStrictEqual( textBlockMinWidth );
+
+			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			expect( positionLeft ).toContain( '%' );
+
+			// Drag the resizer more.
+			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
+			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			// Verify that that the positionLeft has not changed.
+			expect( positionLeftAfter ).toStrictEqual( positionLeft );
+		} );
 	} );
 } );
