@@ -11,8 +11,9 @@
  * Crawls the site for validation errors or resets the stored validation errors.
  *
  * @since 1.0
+ * @since 1.3.0 Renamed subcommands.
  */
-final class AMP_CLI_Validation extends WP_CLI_Command {
+final class AMP_CLI_Validation_Command {
 
 	/**
 	 * The WP-CLI flag to force validation.
@@ -288,7 +289,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 			$count
 		);
 
-		foreach( $posts as $post ) {
+		foreach ( $posts as $post ) {
 			wp_delete_post( $post->ID, true );
 			$progress->tick();
 		}
@@ -305,7 +306,7 @@ final class AMP_CLI_Validation extends WP_CLI_Command {
 			$count
 		);
 
-		foreach( $terms as $term ) {
+		foreach ( $terms as $term ) {
 			wp_delete_term( $term->term_id, AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG );
 			$progress->tick();
 		}
