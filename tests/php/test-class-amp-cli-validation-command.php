@@ -35,7 +35,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test count_urls_to_validate.
 	 *
-	 * @covers AMP_CLI::count_urls_to_validate()
+	 * @covers AMP_CLI_Validation_Command::count_urls_to_validate()
 	 */
 	public function test_count_urls_to_validate() {
 		// The number of original URLs present before adding these test URLs.
@@ -86,7 +86,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_posts_that_support_amp.
 	 *
-	 * @covers AMP_CLI::get_posts_that_support_amp()
+	 * @covers AMP_CLI_Validation_Command::get_posts_that_support_amp()
 	 */
 	public function test_get_posts_that_support_amp() {
 		$number_of_posts = 20;
@@ -150,7 +150,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test does_taxonomy_support_amp.
 	 *
-	 * @covers AMP_CLI::does_taxonomy_support_amp()
+	 * @covers AMP_CLI_Validation_Command::does_taxonomy_support_amp()
 	 */
 	public function test_does_taxonomy_support_amp() {
 		$custom_taxonomy = 'foo_custom_taxonomy';
@@ -199,7 +199,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test is_template_supported.
 	 *
-	 * @covers AMP_CLI::is_template_supported()
+	 * @covers AMP_CLI_Validation_Command::is_template_supported()
 	 */
 	public function test_is_template_supported() {
 		$author_conditional = 'is_author';
@@ -218,7 +218,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_posts_by_type.
 	 *
-	 * @covers AMP_CLI::get_posts_by_type()
+	 * @covers AMP_CLI_Validation_Command::get_posts_by_type()
 	 */
 	public function test_get_posts_by_type() {
 		$number_posts_each_post_type = 20;
@@ -258,7 +258,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_taxonomy_links.
 	 *
-	 * @covers AMP_CLI::get_taxonomy_links()
+	 * @covers AMP_CLI_Validation_Command::get_taxonomy_links()
 	 */
 	public function test_get_taxonomy_links() {
 		$number_links_each_taxonomy = 20;
@@ -309,7 +309,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_author_page_urls.
 	 *
-	 * @covers AMP_CLI::get_author_page_urls()
+	 * @covers AMP_CLI_Validation_Command::get_author_page_urls()
 	 */
 	public function test_get_author_page_urls() {
 		$this->factory()->user->create();
@@ -341,7 +341,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_search_page.
 	 *
-	 * @covers AMP_CLI::get_search_page()
+	 * @covers AMP_CLI_Validation_Command::get_search_page()
 	 */
 	public function test_get_search_page() {
 		// Normally, this should return a string, unless the user has opted out of the search template.
@@ -360,7 +360,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test get_date_page.
 	 *
-	 * @covers AMP_CLI::get_date_page()
+	 * @covers AMP_CLI_Validation_Command::get_date_page()
 	 */
 	public function test_get_date_page() {
 		$year = date( 'Y' );
@@ -382,7 +382,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test crawl_site.
 	 *
-	 * @covers AMP_CLI::crawl_site()
+	 * @covers AMP_CLI_Validation_Command::crawl_site()
 	 */
 	public function test_crawl_site() {
 		$number_of_posts = 20;
@@ -419,7 +419,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 	/**
 	 * Test validate_and_store_url.
 	 *
-	 * @covers AMP_CLI::validate_and_store_url()
+	 * @covers AMP_CLI_Validation_Command::validate_and_store_url()
 	 */
 	public function test_validate_and_store_url() {
 		$single_post_permalink = get_permalink( $this->factory()->post->create() );

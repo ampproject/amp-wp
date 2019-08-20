@@ -333,7 +333,7 @@ final class AMP_CLI_Validation_Command {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( [ 'public' => true ] ),
-			[ 'AMP_CLI', 'does_taxonomy_support_amp' ]
+			[ $this, 'does_taxonomy_support_amp' ]
 		);
 
 		// Count all public taxonomy terms.
@@ -527,6 +527,7 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
+	public function get_search_page() {
 		if ( ! $this->is_template_supported( 'is_search' ) ) {
 			return null;
 		}
@@ -539,6 +540,7 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
+	public function get_date_page() {
 		if ( ! $this->is_template_supported( 'is_date' ) ) {
 			return null;
 		}
@@ -564,7 +566,7 @@ final class AMP_CLI_Validation_Command {
 
 		$amp_enabled_taxonomies = array_filter(
 			get_taxonomies( [ 'public' => true ] ),
-			[ 'AMP_CLI', 'does_taxonomy_support_amp' ]
+			[ $this, 'does_taxonomy_support_amp' ]
 		);
 		$public_post_types      = get_post_types( [ 'public' => true ], 'names' );
 
@@ -609,6 +611,7 @@ final class AMP_CLI_Validation_Command {
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
+	public function validate_and_store_url( $url, $type ) {
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
 		/*
