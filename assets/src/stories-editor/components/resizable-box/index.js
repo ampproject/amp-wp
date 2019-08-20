@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
+import { Component } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
 
 /**
@@ -31,7 +32,6 @@ import {
 	REVERSE_WIDTH_CALCULATIONS,
 	REVERSE_HEIGHT_CALCULATIONS,
 } from '../../constants';
-import { Component } from 'react';
 
 let lastSeenX = 0,
 	lastSeenY = 0,
