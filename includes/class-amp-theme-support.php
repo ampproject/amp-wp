@@ -976,9 +976,6 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
-		// Let the AMP plugin manage service worker streaming in the PWA plugin.
-		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
-
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
@@ -1848,12 +1845,6 @@ class AMP_Theme_Support {
 			return $response;
 		}
 
-		// Dependencies on the PWA plugin for service worker streaming.
-		$stream_fragment = null;
-		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
-			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
-		}
-
 		/**
 		 * Filters whether response (post-processor) caching is enabled.
 		 *
@@ -1891,7 +1882,6 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
-				'stream_fragment'      => $stream_fragment,
 			],
 			$args,
 			compact( 'enable_response_caching' )
@@ -2046,21 +2036,6 @@ class AMP_Theme_Support {
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
 
-		// Remove scripts that are being added for PWA service worker streaming for restoration later.
-		$stream_combine_script_define_element     = null;
-		$stream_combine_script_define_placeholder = null;
-		$stream_combine_script_invoke_element     = null;
-		$stream_combine_script_invoke_placeholder = null;
-		if ( 'header' === $stream_fragment ) {
-			$stream_combine_script_define_element = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
-			if ( $stream_combine_script_define_element ) {
-				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
-				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
-			}
-		} elseif ( 'body' === $stream_fragment ) {
-			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
-		}
-
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 		if ( $body ) {
@@ -2180,41 +2155,8 @@ class AMP_Theme_Support {
 			]
 		);
 
-		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
-		$truncate_after_comment  = null;
-		$truncate_before_comment = null;
-		if ( $stream_fragment ) {
-			if ( $stream_combine_script_define_placeholder && $stream_combine_script_define_element ) {
-				$stream_combine_script_define_placeholder->parentNode->replaceChild( $stream_combine_script_define_element, $stream_combine_script_define_placeholder );
-				$truncate_after_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_HEADER' );
-				$stream_combine_script_define_element->parentNode->insertBefore( $truncate_after_comment, $stream_combine_script_define_element->nextSibling );
-			}
-			if ( $stream_combine_script_invoke_placeholder ) {
-				$stream_combine_script_invoke_element = WP_Service_Worker_Navigation_Routing_Component::get_header_combine_invoke_script( $dom, false );
-				$stream_combine_script_invoke_placeholder->parentNode->replaceChild( $stream_combine_script_invoke_element, $stream_combine_script_invoke_placeholder );
-				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
-				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
-			}
-		}
-
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-
-		// For service worker streaming, make sure that the header response doesn't contain closing tags, and that the body fragment starts with the required script tag.
-		if ( $truncate_after_comment ) {
-			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
-			$position = strpos( $response, $search );
-			if ( false !== $position ) {
-				$response = substr( $response, 0, $position );
-			}
-		}
-		if ( $truncate_before_comment ) {
-			$search   = sprintf( '<!--%s-->', $truncate_before_comment->nodeValue );
-			$position = strpos( $response, $search );
-			if ( false !== $position ) {
-				$response = substr( $response, $position + strlen( $search ) );
-			}
-		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 
