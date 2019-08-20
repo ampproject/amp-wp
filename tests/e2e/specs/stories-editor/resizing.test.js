@@ -28,9 +28,11 @@ describe( 'Resizing', () => {
 			await selectBlockByClassName( 'wp-block-amp-story-text' );
 		} );
 
+		const defaultWidth = 250;
+		const textBlockMinWidth = 40;
+
 		it( 'it should not resize smaller than the set minimum width and height', async () => {
 			const textBlockMinHeight = 30;
-			const textBlockMinWidth = 40;
 			let height, width;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
@@ -54,9 +56,6 @@ describe( 'Resizing', () => {
 		} );
 
 		it( 'should not change the block position when resizing from left handle and minimum width has been reached', async () => {
-			const defaultWidth = 250;
-			const textBlockMinWidth = 40;
-
 			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( resizableHandleLeft, { x: defaultWidth - textBlockMinWidth, y: 0 } );
 			const width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
@@ -70,6 +69,20 @@ describe( 'Resizing', () => {
 			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
 			// Verify that that the positionLeft has not changed.
 			expect( positionLeftAfter ).toStrictEqual( positionLeft );
+		} );
+
+		it( 'should change the width and height correctly when resizing from topLeft corner', async () => {
+			const resizableHandleTopLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-top' );
+			await dragAndResize( resizableHandleTopLeft, { x: -100, y: -100 } );
+			const { width, height } = await page.evaluate( () => {
+				const el = document.querySelector( '.wp-block.is-selected' );
+				return {
+					width: el.clientWidth,
+					height: el.clientHeight,
+				};
+			} );
+			expect( width ).toStrictEqual( 350 );
+			expect( height ).toStrictEqual( 160 );
 		} );
 	} );
 } );
