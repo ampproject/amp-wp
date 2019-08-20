@@ -611,6 +611,7 @@ class AMP_Story_Post_Type {
 			'amp-story-cta-layer',
 			'amp-img',
 			'amp-video',
+			'img',
 		];
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
@@ -631,6 +632,7 @@ class AMP_Story_Post_Type {
 			$allowed_tag['data-block-name']      = true;
 			$allowed_tag['data-temp-style-hash'] = true;
 			$allowed_tag['layout']               = true;
+			$allowed_tag['object-position']      = true;
 		}
 
 		return $allowed_tags;
