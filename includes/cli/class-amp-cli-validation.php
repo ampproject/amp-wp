@@ -144,14 +144,13 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp amp validate-site --include=is_author,is_tag
+	 *     wp amp validation run --include=is_author,is_tag
 	 *
-	 * @subcommand crawl-site
 	 * @param array $args       Positional args.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function crawl_site( $args, $assoc_args ) {
+	public function run( $args, $assoc_args ) {
 		$this->include_conditionals      = [];
 		$this->force_crawl_urls          = false;
 		$this->limit_type_validate_count = (int) $assoc_args[ self::LIMIT_URLS_ARGUMENT ];
@@ -211,7 +210,7 @@ final class AMP_CLI_Validation_Command {
 			sprintf( 'Validating %d URLs...', $number_urls_to_crawl ),
 			$number_urls_to_crawl
 		);
-		$this->do_crawl_site();
+		$this->crawl_site();
 		$this->wp_cli_progress->finish();
 
 		$key_template_type = 'Template or content type';
@@ -268,14 +267,13 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     wp amp reset-site-validation --yes
+	 *     wp amp validation reset --yes
 	 *
-	 * @subcommand reset-site
 	 * @param array $args       Positional args. Unused.
 	 * @param array $assoc_args Associative args.
 	 * @throws Exception If an error happens.
 	 */
-	public function reset_site( $args, $assoc_args ) {
+	public function reset( $args, $assoc_args ) {
 		global $wpdb;
 		WP_CLI::confirm( 'Are you sure you want to empty all amp_validated_url posts and amp_validation_error taxonomy terms?', $assoc_args );
 
@@ -425,7 +423,7 @@ final class AMP_CLI_Validation_Command {
 	 * Gets whether the template is supported.
 	 *
 	 * If the user has passed an include argument to the WP-CLI command, use that to find if this template supports AMP.
-	 * For example, wp amp validate-site --include=is_tag,is_category
+	 * For example, wp amp validation run --include=is_tag,is_category
 	 * would return true only if is_tag() or is_category().
 	 * But passing the self::FLAG_NAME_FORCE_VALIDATION argument to the WP-CLI command overrides this.
 	 *
@@ -529,7 +527,6 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
-	public function get_search_page() {
 		if ( ! $this->is_template_supported( 'is_search' ) ) {
 			return null;
 		}
@@ -542,7 +539,6 @@ final class AMP_CLI_Validation_Command {
 	 *
 	 * @return string|null An example search page, or null.
 	 */
-	public function get_date_page() {
 		if ( ! $this->is_template_supported( 'is_date' ) ) {
 			return null;
 		}
@@ -613,7 +609,6 @@ final class AMP_CLI_Validation_Command {
 	 * @param string $url  The URL to validate.
 	 * @param string $type The type of template, post, or taxonomy.
 	 */
-	public function validate_and_store_url( $url, $type ) {
 		$validity = AMP_Validation_Manager::validate_url( $url );
 
 		/*
