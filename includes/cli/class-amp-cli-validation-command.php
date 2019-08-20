@@ -395,12 +395,7 @@ final class AMP_CLI_Validation_Command extends WP_CLI_Command {
 			return $ids;
 		}
 
-		return array_filter(
-			$ids,
-			function( $id ) {
-				return post_supports_amp( $id );
-			}
-		);
+		return array_filter( $ids, 'post_supports_amp' );
 	}
 
 	/**
