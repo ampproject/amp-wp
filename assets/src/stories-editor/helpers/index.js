@@ -586,7 +586,7 @@ export const renderStoryComponents = () => {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
 	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
-	if ( editorBlockList ) {
+	if ( editorBlockList && ! document.getElementById( 'amp-story-editor' ) ) {
 		const ampStoryWrapper = document.createElement( 'div' );
 		ampStoryWrapper.id = 'amp-story-editor';
 
@@ -662,6 +662,12 @@ export const renderStoryComponents = () => {
 			<Inserter position="bottom right" />,
 			customInserter
 		);
+	}
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	const writingFlowClickRedirectElement = document.querySelector( '.block-editor-writing-flow__click-redirect' );
+	if ( writingFlowClickRedirectElement ) {
+		writingFlowClickRedirectElement.remove();
 	}
 };
 
@@ -775,33 +781,42 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
  *
  * @param {string} axis       X or Y axis.
  * @param {number} pixelValue Value in pixels.
+ * @param {number} baseValue  Value to compare against to get percentage from.
  *
  * @return {number} Value in percentage.
  */
-export const getPercentageFromPixels = ( axis, pixelValue ) => {
-	if ( 'x' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) );
-	} else if ( 'y' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 ).toFixed( 2 ) );
+export const getPercentageFromPixels = ( axis, pixelValue, baseValue = 0 ) => {
+	if ( ! baseValue ) {
+		if ( 'x' === axis ) {
+			baseValue = STORY_PAGE_INNER_WIDTH;
+		} else if ( 'y' === axis ) {
+			baseValue = STORY_PAGE_INNER_HEIGHT;
+		} else {
+			return 0;
+		}
 	}
-	return 0;
+	return Number( ( ( pixelValue / baseValue ) * 100 ).toFixed( 2 ) );
 };
 
 /**
- * Get pixel value from percentage, based on the full width / height of the page.
+ * Get pixel value from percentage, based on a base value to measure against.
+ * By default the full width / height of the page.
  *
  * @param {string} axis            X or Y axis.
  * @param {number} percentageValue Value in percent.
+ * @param {number} baseValue       Value to compare against to get pixels from.
  *
  * @return {number} Value in percentage.
  */
-export const getPixelsFromPercentage = ( axis, percentageValue ) => {
-	if ( 'x' === axis ) {
-		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_WIDTH );
-	} else if ( 'y' === axis ) {
-		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_HEIGHT );
+export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) => {
+	if ( ! baseValue ) {
+		if ( 'x' === axis ) {
+			baseValue = STORY_PAGE_INNER_WIDTH;
+		} else if ( 'y' === axis ) {
+			baseValue = STORY_PAGE_INNER_HEIGHT;
+		}
 	}
-	return 0;
+	return Math.round( ( percentageValue / 100 ) * baseValue );
 };
 
 /**
@@ -865,7 +880,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'btnPositionTop', 'btnPositionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
@@ -977,7 +992,7 @@ export const getStylesFromBlockAttributes = ( {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
 		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
-		textAlign: align,
+		textAlign: align ? align : undefined,
 	};
 };
 
@@ -1547,8 +1562,6 @@ export const getUniqueId = () => {
 /**
  * Returns an image of the first frame of a given video.
  *
- * @todo Perhaps allow specifying wanted image type.
- *
  * @param {string} src Video src URL.
  * @return {Promise<string>} The extracted image in base64-encoded format.
  */
@@ -1556,10 +1569,13 @@ export const getFirstFrameOfVideo = ( src ) => {
 	const video = document.createElement( 'video' );
 	video.muted = true;
 	video.crossOrigin = 'anonymous';
+	video.preload = 'metadata';
+	video.currentTime = 0.5; // Needed to seek forward.
 
-	return new Promise( ( resolve ) => {
-		video.src = src;
-		video.addEventListener( 'loadeddata', () => {
+	return new Promise( ( resolve, reject ) => {
+		video.addEventListener( 'error', reject );
+
+		video.addEventListener( 'canplay', () => {
 			const canvas = document.createElement( 'canvas' );
 			canvas.width = video.videoWidth;
 			canvas.height = video.videoHeight;
@@ -1567,8 +1583,10 @@ export const getFirstFrameOfVideo = ( src ) => {
 			const ctx = canvas.getContext( '2d' );
 			ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
 
-			canvas.toBlob( resolve );
+			canvas.toBlob( resolve, 'image/jpeg' );
 		} );
+
+		video.src = src;
 	} );
 };
 
@@ -1670,3 +1688,21 @@ export const findClosestSnap = memize( ( number, snap, snapGap ) => {
 
 	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : number;
 } );
+
+/**
+ * Sets input selection to the end for being able to type to the end of the existing text.
+ *
+ * @param {string} inputSelector Text input selector.
+ */
+export const setInputSelectionToEnd = ( inputSelector ) => {
+	const textInput = document.querySelector( inputSelector );
+	// Create selection, collapse it in the end of the content.
+	if ( textInput ) {
+		const range = document.createRange();
+		range.selectNodeContents( textInput );
+		range.collapse( false );
+		const selection = window.getSelection();
+		selection.removeAllRanges();
+		selection.addRange( range );
+	}
+};

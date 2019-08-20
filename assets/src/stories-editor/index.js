@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
+import { registerFormatType } from '@wordpress/rich-text';
 import {
 	getDefaultBlockName,
 	setDefaultBlockName,
@@ -128,9 +129,6 @@ domReady( () => {
 	}
 
 	renderStoryComponents();
-
-	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
 
 	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
 		registerBlockStyle( roundedBlock, {
@@ -340,4 +338,11 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 	registerBlockType( name, settings );
+} );
+
+const formats = require.context( './formats', true, /(?<!test\/)index\.js$/ );
+
+formats.keys().sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 ).forEach( ( modulePath ) => {
+	const { name, settings } = formats( modulePath );
+	registerFormatType( name, settings );
 } );

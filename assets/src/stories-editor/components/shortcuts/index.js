@@ -12,7 +12,7 @@ import { withDispatch, withSelect } from '@wordpress/data';
 import { IconButton } from '@wordpress/components';
 import { compose, ifCondition } from '@wordpress/compose';
 
-const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
+const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
 	const blocks = [
 		'amp/amp-story-text',
 		'core/image',
@@ -34,6 +34,7 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 					onClick={ () => insertBlock( block ) }
 					label={ blockType.title }
 					labelPosition="bottom"
+					disabled={ ! showInserter }
 				/>
 			);
 		} )
@@ -43,6 +44,7 @@ const Shortcuts = ( { insertBlock, canInsertBlockType } ) => {
 Shortcuts.propTypes = {
 	insertBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
+	showInserter: PropTypes.bool.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select ) => {
@@ -57,6 +59,8 @@ const applyWithSelect = withSelect( ( select ) => {
 			const blockSettings = getBlockListSettings( getCurrentPage() );
 			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
 		},
+		// As used in <HeaderToolbar> component
+		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
 	};
 } );
 

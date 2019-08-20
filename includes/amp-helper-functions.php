@@ -400,10 +400,20 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready' ];
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ) );
+			$script_deps_path    = AMP__DIR__ . '/assets/js/' . $handle . '.deps.json';
+			$script_dependencies = file_exists( $script_deps_path )
+				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				: [];
+
+			$wp_scripts->add(
+				$handle,
+				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
+				$script_dependencies,
+				AMP__VERSION
+			);
 		}
 	}
 
@@ -990,7 +1000,7 @@ function amp_get_publisher_logo() {
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
 		if ( $is_amp_story ) {
-			$logo_image_url = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
 		} else {
 			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 		}

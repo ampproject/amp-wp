@@ -2315,6 +2315,7 @@ class AMP_Theme_Support {
 
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), [], AMP__VERSION );
+		wp_styles()->add_data( 'amp-default', 'rtl', 'replace' );
 	}
 
 	/**

@@ -133,7 +133,7 @@ class AMP_Story_Templates {
 				continue;
 			}
 
-			$post_content      = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/story-templates' ), $post_content );
+			$post_content      = str_replace( 'AMP_STORY_TEMPLATES_URL', amp_get_asset_url( 'images/stories-editor/story-templates' ), $post_content );
 			$existing_template = $this->template_exists( $template['name'] );
 			if ( $existing_template > 0 ) {
 				$this->maybe_update_template( $existing_template, $template, $post_content );

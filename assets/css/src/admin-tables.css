@@ -69,3 +69,7 @@ td.column-found_elements_and_attributes div {
 .wrap .wp-heading-inline + .page-title-action {
 	margin-left: 1rem;
 }
+
+.tooltip[hidden] {
+	visibility: hidden;
+}

@@ -46,6 +46,7 @@ before_script:
 
 script:
   - npm run build:js
+  - npm run build:css
   - source "$DEV_LIB_PATH/travis.script.sh"
   - |
     if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
@@ -91,24 +92,11 @@ jobs:
       install:
         - nvm install
         - composer install
-        # npm is handled by `npm run env:start`
+        - npm install
       script:
+        - npm run build:js
+        - npm run build:css
         - npm run env:start
-        - npm run build:js # after npm dependencies have been installed
-        - npm run env:reset-site
-        - npm run test:e2e:ci
-        - npm run env:stop
-
-    - name: E2E tests (Author)
-      php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD= E2E_ROLE=author
-      install:
-        - nvm install
-        - composer install
-        # npm is handled by `npm run env:start`
-      script:
-        - npm run env:start
-        - npm run build:js # after npm dependencies have been installed
         - npm run env:reset-site
         - npm run test:e2e:ci
         - npm run env:stop
@@ -157,6 +145,7 @@ jobs:
         - echo "Running unit tests with code coverage..."
       script:
         - npm run build:js
+        - npm run build:css
         - source "$DEV_LIB_PATH/travis.script.sh"
         - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage
