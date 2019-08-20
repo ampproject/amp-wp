@@ -15,8 +15,6 @@ import {
 
 /**
  * Rotates the selected block from its default position.
- *
- * @return {Promise<void>} Promise.
  */
 async function rotateSelectedBlock() {
 	const rotationHandle = await page.$( '.wp-block.is-selected .rotatable-box-wrap__handle' );
@@ -24,16 +22,33 @@ async function rotateSelectedBlock() {
 }
 
 /**
- * Get selected block top and left position values.
+ * Get selected block's top and left position values.
  *
- * @return {*} Position.
+ * @return {Promise<{positionLeft:number, positionTop:number}>} Block position.
  */
-function getPosition() {
+// eslint-disable-next-line require-await
+async function getSelectedBlockPosition() {
 	return page.evaluate( () => {
 		const el = document.querySelector( '.wp-block.is-selected' );
 		return {
 			positionLeft: el.style.left,
 			positionTop: el.style.top,
+		};
+	} );
+}
+
+/**
+ * Returns the selected block's width and height.
+ *
+ * @returns {Promise<{width: number, height: number}>} Block dimensions.
+ */
+// eslint-disable-next-line require-await
+async function getSelectedBlockDimensions() {
+	return page.evaluate( () => {
+		const el = document.querySelector( '.wp-block.is-selected' );
+		return {
+			width: el.clientWidth,
+			height: el.clientHeight,
 		};
 	} );
 }
@@ -100,13 +115,7 @@ describe( 'Resizing', () => {
 		it( 'should change the width and height correctly when resizing from topLeft corner', async () => {
 			const resizableHandleTopLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-top' );
 			await dragAndResize( resizableHandleTopLeft, { x: -100, y: -100 } );
-			const { width, height } = await page.evaluate( () => {
-				const el = document.querySelector( '.wp-block.is-selected' );
-				return {
-					width: el.clientWidth,
-					height: el.clientHeight,
-				};
-			} );
+			const { width, height } = await getSelectedBlockDimensions();
 			expect( width ).toStrictEqual( 350 );
 			expect( height ).toStrictEqual( 160 );
 		} );
@@ -124,7 +133,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( handle, { x: 100, y: 0 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '9.84%' );
 			expect( positionTop ).toStrictEqual( '7.69%' );
 		} );
@@ -133,7 +142,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-top' );
 			await dragAndResize( handle, { x: 100, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '32.8%' );
 			expect( positionTop ).toStrictEqual( '-2.76%' );
 		} );
@@ -142,7 +151,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
 			await dragAndResize( handle, { x: 0, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '1.07%' );
 			expect( positionTop ).toStrictEqual( '7%' );
 		} );
@@ -151,7 +160,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right.components-resizable-box__handle-top' );
 			await dragAndResize( handle, { x: -100, y: 100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '5%' );
 			expect( positionTop ).toStrictEqual( '10%' );
 		} );
@@ -160,7 +169,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
 			await dragAndResize( handle, { x: -100, y: 0 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '5%' );
 			expect( positionTop ).toStrictEqual( '10%' );
 		} );
@@ -169,7 +178,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right.components-resizable-box__handle-bottom' );
 			await dragAndResize( handle, { x: 100, y: 100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '5%' );
 			expect( positionTop ).toStrictEqual( '10%' );
 		} );
@@ -178,7 +187,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( handle, { x: 0, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '1.07%' );
 			expect( positionTop ).toStrictEqual( '11.68%' );
 		} );
@@ -187,7 +196,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-bottom' );
 			await dragAndResize( handle, { x: -100, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '14.03%' );
 			expect( positionTop ).toStrictEqual( '5.78%' );
 		} );
@@ -206,7 +215,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-bottom' );
 			await dragAndResize( handle, { x: -100, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '15.5%' );
 			expect( positionTop ).toStrictEqual( '15.24%' );
 		} );
@@ -215,7 +224,7 @@ describe( 'Resizing', () => {
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-top' );
 			await dragAndResize( handle, { x: 100, y: -100 } );
 
-			const { positionLeft, positionTop } = await getPosition();
+			const { positionLeft, positionTop } = await getSelectedBlockPosition();
 			expect( positionLeft ).toStrictEqual( '31.32%' );
 			expect( positionTop ).toStrictEqual( '8.04%' );
 		} );
