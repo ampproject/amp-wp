@@ -1776,7 +1776,7 @@ class AMP_Story_Post_Type {
 					],
 					'attachmentClass' => [
 						'type'    => 'string',
-						'default' => '',
+						'default' => 'amp-page-attachment-content',
 					],
 				],
 				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],

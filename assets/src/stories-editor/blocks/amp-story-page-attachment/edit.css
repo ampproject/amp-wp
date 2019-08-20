@@ -34,6 +34,7 @@ div[data-type="amp/amp-story-page-attachment"] div:not(.editor-block-list__bread
 	background: #fff;
 	overflow-y: auto;
 	height: 100%;
+	padding: 10px;
 }
 
 .attachment-header {

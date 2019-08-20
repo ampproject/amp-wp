@@ -29,6 +29,7 @@ const schema = {
 	},
 	attachmentClass: {
 		type: 'string',
+		default: 'amp-page-attachment-content',
 	},
 };
 
