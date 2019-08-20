@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.6';
+	const STORY_TEMPLATES_VERSION = '0.3.7';
 
 	/**
 	 * Slug for templates' taxonomy.
