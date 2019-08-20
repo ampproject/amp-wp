@@ -7,7 +7,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import edit from './edit';
-import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	postId: {
@@ -40,7 +39,7 @@ export const settings = {
 
 	description: __( 'Attach additional content to a story page.', 'amp' ),
 
-	icon: blockIcon,
+	icon: 'media-document',
 
 	category: 'layout',
 
