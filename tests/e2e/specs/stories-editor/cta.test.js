@@ -48,7 +48,6 @@ describe( 'Stories Editor Screen', () => {
 		expect( nodes ).toHaveLength( 1 );
 	} );
 
-	// eslint-disable-next-line jest/no-disabled-tests
 	it( 'should display validation error when CTA block is on the first Page', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
