@@ -77,6 +77,7 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-post-date',
 	'amp/amp-story-post-title',
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const BLOCKS_WITH_RESIZING = [

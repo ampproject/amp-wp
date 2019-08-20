@@ -1754,21 +1754,29 @@ class AMP_Story_Post_Type {
 			'amp/amp-story-page-attachment',
 			[
 				'attributes'      => [
-					'postId' => [
+					'postId'          => [
 						'type'    => 'number',
 						'default' => 1, // For testing only.
 					],
-					'title'  => [
+					'title'           => [
 						'type'    => 'string',
-						'default' => null,
+						'default' => '',
 					],
-					'text'   => [
+					'text'            => [
 						'type'    => 'string',
 						'default' => __( 'Swipe up', 'amp' ),
 					],
-					'theme'  => [
+					'theme'           => [
 						'type'    => 'string',
 						'default' => 'light',
+					],
+					'wrapperStyle'    => [
+						'type'    => 'object',
+						'default' => array(),
+					],
+					'attachmentClass' => [
+						'type'    => 'string',
+						'default' => '',
 					],
 				],
 				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],
@@ -1796,10 +1804,20 @@ class AMP_Story_Post_Type {
 
 		setup_postdata( $content_post );
 
+		$style = '';
+		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+			$style .= 'background-color:' . $attributes['wrapperStyle']['backgroundColor'] . ';';
+		}
+		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+			$style .= 'color:' . $attributes['wrapperStyle']['color'] . ';';
+		}
+
 		ob_start();
 		?>
 		<amp-story-page-attachment layout="nodisplay" theme="<?php echo esc_attr( $attributes['theme'] ); ?>" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
-			<?php the_content(); ?>
+			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
+				<?php the_content(); ?>
+			</div>
 		</amp-story-page-attachment>
 		<?php
 		wp_reset_postdata();

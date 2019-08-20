@@ -14,6 +14,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { decodeEntities } from '@wordpress/html-entities';
 import { InspectorControls, RichText } from '@wordpress/block-editor';
+import { select } from '@wordpress/data';
 import {
 	SelectControl,
 	PanelBody,
@@ -23,6 +24,7 @@ import {
  * Internal dependencies
  */
 import './edit.css';
+import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 
 class PageAttachmentEdit extends Component {
 	constructor( props ) {
@@ -77,10 +79,29 @@ class PageAttachmentEdit extends Component {
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { isSelected } = this.props;
+		const {
+			isSelected,
+			backgroundColor,
+			customBackgroundColor,
+			textColor,
+			setAttributes,
+		} = this.props;
 
 		if ( ! isSelected && prevProps.isSelected ) {
 			this.toggleAttachment( false );
+		}
+
+		if (
+			backgroundColor !== prevProps.backgroundColor ||
+			customBackgroundColor !== prevProps.customBackgroundColor ||
+			textColor !== prevProps.textColor
+		) {
+			const { style, attachmentClass } = this.getWrapperAttributes();
+			const newAttributes = { wrapperStyle: style };
+			if ( textColor !== prevProps.textColor ) {
+				newAttributes.attachmentClass = attachmentClass;
+			}
+			setAttributes( newAttributes );
 		}
 	}
 
@@ -88,6 +109,34 @@ class PageAttachmentEdit extends Component {
 		if ( open !== this.state.isOpen ) {
 			this.setState( { isOpen: open } );
 		}
+	}
+
+	getWrapperAttributes() {
+		const {
+			attributes,
+			backgroundColor,
+			customBackgroundColor,
+			textColor,
+		} = this.props;
+
+		const {
+			opacity,
+		} = attributes;
+		const { colors } = select( 'core/block-editor' ).getSettings();
+		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
+
+		const attachmentClass = classnames( 'amp-page-attachment-content', {
+			'has-text-color': textColor.color,
+			[ textColor.class ]: textColor.class,
+		} );
+		const attachmentStyle = {
+			color: textColor.color,
+			backgroundColor: appliedBackgroundColor,
+		};
+		return {
+			style: attachmentStyle,
+			attachmentClass,
+		};
 	}
 
 	render() {
@@ -100,6 +149,8 @@ class PageAttachmentEdit extends Component {
 			theme,
 			text,
 			title,
+			wrapperStyle,
+			attachmentClass,
 		} = attributes;
 
 		const { selectedPost } = this.state;
@@ -148,7 +199,7 @@ class PageAttachmentEdit extends Component {
 									placeholder={ __( 'Write Title', 'amp' ) }
 								/>
 							</div>
-							<div className="amp-page-attachment-content">
+							<div className={ attachmentClass } style={ wrapperStyle }>
 								{ selectedPost && selectedPost.content && (
 									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
 								) }
@@ -188,13 +239,29 @@ class PageAttachmentEdit extends Component {
 
 PageAttachmentEdit.propTypes = {
 	attributes: PropTypes.shape( {
+		opacity: PropTypes.number,
 		postId: PropTypes.number,
+		wrapperStyle: PropTypes.object,
 		text: PropTypes.string,
 		theme: PropTypes.string,
 		title: PropTypes.string,
+		attachmentClass: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool,
+	backgroundColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
+	customBackgroundColor: PropTypes.string,
+	textColor: PropTypes.shape( {
+		color: PropTypes.string,
+		name: PropTypes.string,
+		slug: PropTypes.string,
+		class: PropTypes.string,
+	} ).isRequired,
 };
 
 export default PageAttachmentEdit;

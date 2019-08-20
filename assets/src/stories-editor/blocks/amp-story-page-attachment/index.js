@@ -25,6 +25,12 @@ const schema = {
 		type: 'string',
 		default: 'light',
 	},
+	wrapperStyle: {
+		default: {},
+	},
+	attachmentClass: {
+		type: 'string',
+	},
 };
 
 export const name = 'amp/amp-story-page-attachment';
