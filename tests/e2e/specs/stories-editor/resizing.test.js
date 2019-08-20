@@ -10,14 +10,15 @@ import {
 	activateExperience,
 	deactivateExperience,
 	selectBlockByClassName,
+	insertBlock,
 } from '../../utils';
 
 /**
- * Rotate Text block 75 degrees from its default position.
+ * Rotates the selected block from its default position.
  *
  * @return {Promise<void>} Promise.
  */
-async function rotateTextBlock() {
+async function rotateSelectedBlock() {
 	const rotationHandle = await page.$( '.wp-block.is-selected .rotatable-box-wrap__handle' );
 	await dragAndResize( rotationHandle, { x: 250, y: 0 } );
 }
@@ -116,7 +117,7 @@ describe( 'Resizing', () => {
 			await createNewPost( { postType: 'amp_story' } );
 			// Select the Text block inserted by default.
 			await selectBlockByClassName( 'wp-block-amp-story-text' );
-			await rotateTextBlock();
+			await rotateSelectedBlock();
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: left', async () => {
@@ -189,6 +190,34 @@ describe( 'Resizing', () => {
 			const { positionLeft, positionTop } = await getPosition();
 			expect( positionLeft ).toStrictEqual( '14.03%' );
 			expect( positionTop ).toStrictEqual( '5.78%' );
+		} );
+	} );
+
+	describe( 'Author block', () => {
+		beforeEach( async () => {
+			await createNewPost( { postType: 'amp_story' } );
+			await insertBlock( 'Author' );
+			// Select the Text block inserted by default.
+			await selectBlockByClassName( 'wp-block-amp-amp-story-post-author' );
+			await rotateSelectedBlock();
+		} );
+
+		it( 'should change the top and left position correctly when resizing a rotated block: bottomLeft', async () => {
+			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-bottom' );
+			await dragAndResize( handle, { x: -100, y: -100 } );
+
+			const { positionLeft, positionTop } = await getPosition();
+			expect( positionLeft ).toStrictEqual( '15.5%' );
+			expect( positionTop ).toStrictEqual( '15.24%' );
+		} );
+
+		it( 'should change the top and left position correctly when resizing a rotated block: topLeft', async () => {
+			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left.components-resizable-box__handle-top' );
+			await dragAndResize( handle, { x: 100, y: -100 } );
+
+			const { positionLeft, positionTop } = await getPosition();
+			expect( positionLeft ).toStrictEqual( '31.32%' );
+			expect( positionTop ).toStrictEqual( '8.04%' );
 		} );
 	} );
 } );
