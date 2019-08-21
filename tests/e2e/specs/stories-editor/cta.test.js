@@ -4,7 +4,6 @@
 import {
 	visitAdminPage,
 	createNewPost,
-	clickButton,
 	getAllBlocks,
 	selectBlockByClientId,
 } from '@wordpress/e2e-test-utils';
