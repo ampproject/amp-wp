@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, clickButton, saveDraft } from '@wordpress/e2e-test-utils';
+import { createNewPost, saveDraft } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience, insertBlock, selectBlockByClassName, openPreviewPage } from '../../utils';
+import { activateExperience, clickButton, deactivateExperience, insertBlock, selectBlockByClassName, openPreviewPage } from '../../utils';
 
 describe( 'Story Animations', () => {
 	beforeAll( async () => {
