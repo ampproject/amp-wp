@@ -315,7 +315,8 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 
 		// Handle case where script is immediately following.
-		$is_embed_script = ( $next_element_sibling
+		$is_embed_script = (
+			$next_element_sibling
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&
