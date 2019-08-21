@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getResizedWidthAndHeight } from '../';
+import { getResizedWidthAndHeight } from '../helpers';
 
 describe( 'getResizedWidthAndHeight', () => {
 	const event = {
