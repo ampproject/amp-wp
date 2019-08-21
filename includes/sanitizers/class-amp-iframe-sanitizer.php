@@ -131,9 +131,12 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			if ( $this->args['add_noscript_fallback'] ) {
 				$node->setAttribute( 'src', $normalized_attributes['src'] );
+
+				// AMP is stricter than HTML5 for this attribute, so make sure we use a normalized value.
 				if ( $node->hasAttribute( 'frameborder' ) ) {
 					$node->setAttribute( 'frameborder', $normalized_attributes['frameborder'] );
 				}
+
 				// Preserve original node in noscript for no-JS environments.
 				$this->append_old_node_noscript( $new_node, $node, $this->dom );
 			}

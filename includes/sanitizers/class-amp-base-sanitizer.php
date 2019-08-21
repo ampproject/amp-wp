@@ -264,14 +264,17 @@ abstract class AMP_Base_Sanitizer {
 	 */
 	public function sanitize_boolean_digit( $value ) {
 
+		// Default to false if the value was forgotten.
 		if ( empty( $value ) ) {
 			return '0';
 		}
 
+		// Default to false if the value has an unexpected type.
 		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
 			return '0';
 		}
 
+		// See: https://github.com/ampproject/amp-wp/issues/2335#issuecomment-493209861
 		switch ( substr( (string) $value, 0, 1 ) ) {
 			case '1':
 			case 'y':
