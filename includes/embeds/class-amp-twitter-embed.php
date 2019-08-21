@@ -228,6 +228,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( ! $tweet_id ) {
 			return;
 		}
+		
 
 		$attributes = [
 			'width'        => $this->DEFAULT_WIDTH,
