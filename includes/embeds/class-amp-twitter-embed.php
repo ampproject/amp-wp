@@ -43,22 +43,6 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 	private $amp_tag = 'amp-twitter';
 
 	/**
-	 * Attributes.
-	 *
-	 * @var array supported attributes of the amp-twitter tag.
-	 */
-	private $supported_data_attributes = [
-		'cards',
-		'conversation',
-		'theme',
-		'link-color',
-		'width',
-		'align',
-		'lang',
-		'dnt',
-	];
-
-	/**
 	 * Registers embed.
 	 */
 	public function register_embed() {
@@ -247,10 +231,14 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		$additional_attributes = [];
 
-		foreach ( $this->supported_data_attributes as $attr ) {
-			$value = $node->getAttribute( 'data-' . $attr );
-			if ( $value ) {
-				$additional_attributes[ 'data-' . $attr ] = $value;
+		if ( $node->hasAttributes() ) {
+			foreach ( $node->attributes as $attr ) {
+				$name  = $attr->nodeName;
+				$value = $attr->nodeValue;
+
+				if ( substr ( $name, 0, 5 ) === 'data-' ) {
+					$additional_attributes[ $name ] = $value;
+				}
 			}
 		}
 
@@ -258,13 +246,13 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			$dom,
 			$this->amp_tag,
 			array_merge(
-				$additional_attributes,
 				[
 					'width'        => $this->DEFAULT_WIDTH,
 					'height'       => $this->DEFAULT_HEIGHT,
 					'layout'       => 'responsive',
 					'data-tweetid' => $tweet_id,
-				]
+				],
+				$additional_attributes
 			)
 		);
 
