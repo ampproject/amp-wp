@@ -1,5 +1,5 @@
 /**
- * This file is based on the core's <Draggable> Component.
+ * This file is based on core's <Draggable> Component.
  **/
 
 /**
@@ -12,15 +12,20 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { withSafeTimeout } from '@wordpress/compose';
+import { compose, withSafeTimeout } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { getPixelsFromPercentage } from '../../helpers';
+import withSnapTargets from '../higher-order/with-snap-targets';
+import {
+	getPixelsFromPercentage,
+	findClosestSnap,
+} from '../../helpers';
 import {
 	STORY_PAGE_INNER_WIDTH,
 	STORY_PAGE_INNER_HEIGHT,
+	BLOCK_DRAGGING_SNAP_GAP,
 } from '../../constants';
 
 const { Image } = window;
@@ -67,12 +72,18 @@ class Draggable extends Component {
 	 * @param {Object} event The non-custom DragEvent.
 	 */
 	onDragEnd( event ) {
-		const { onDragEnd = noop } = this.props;
+		const { onDragEnd = noop, snapLines, hideSnapLines, clearSnapLines } = this.props;
 		if ( event ) {
 			event.preventDefault();
 		}
 
 		this.resetDragState();
+
+		hideSnapLines();
+		if ( snapLines.length ) {
+			clearSnapLines();
+		}
+
 		this.props.setTimeout( onDragEnd );
 	}
 
@@ -82,7 +93,79 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
-		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		const { hasSnapLine, setSnapLines, horizontalSnaps, verticalSnaps } = this.props;
+
+		const newSnapLines = [];
+
+		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+		const originalTop = top;
+		const originalLeft = left;
+		const width = this.cloneWrapper.clientWidth;
+		const height = this.cloneWrapper.clientHeight;
+		const horizontalCenter = left + ( width / 2 );
+		const verticalCenter = top + ( height / 2 );
+
+		const horizontalLeftSnap = findClosestSnap( left, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalRightSnap = findClosestSnap( left + width, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalCenterSnap = findClosestSnap( horizontalCenter, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalTopSnap = findClosestSnap( top, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalBottomSnap = findClosestSnap( top + height, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalCenterSnap = findClosestSnap( verticalCenter, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+
+		if ( horizontalLeftSnap !== left ) {
+			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				left = horizontalLeftSnap;
+			}
+		}
+
+		if ( horizontalRightSnap !== left + width ) {
+			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				left = horizontalRightSnap - width;
+			}
+		}
+
+		if ( horizontalCenterSnap !== horizontalCenter ) {
+			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
+			}
+		}
+
+		if ( verticalTopSnap !== top ) {
+			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				top = verticalTopSnap;
+			}
+		}
+
+		if ( verticalBottomSnap !== top + height ) {
+			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				top = verticalBottomSnap - height;
+			}
+		}
+
+		if ( verticalCenterSnap !== verticalCenter ) {
+			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
+			if ( ! hasSnapLine( snapLine ) ) {
+				newSnapLines.push( snapLine );
+
+				top = originalTop - ( verticalCenter - verticalCenterSnap );
+			}
+		}
 
 		// Don't allow the CTA button to go over its top limit.
 		if ( 'amp/amp-story-cta' === this.props.blockName ) {
@@ -91,12 +174,15 @@ class Draggable extends Component {
 			this.cloneWrapper.style.top = `${ top }px`;
 		}
 
-		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
+		this.cloneWrapper.style.left = `${ left }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+
+		if ( newSnapLines.length ) {
+			setSnapLines( ...newSnapLines );
+		}
 	}
 
 	onDrop( ) {
@@ -115,7 +201,7 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
+		const { blockName, elementId, transferData, onDragStart = noop, snapLines, showSnapLines, clearSnapLines } = this.props;
 		const element = document.getElementById( elementId );
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
@@ -184,6 +270,11 @@ class Draggable extends Component {
 			document.addEventListener( 'drop', this.onDrop );
 		}
 
+		showSnapLines();
+		if ( snapLines.length ) {
+			clearSnapLines();
+		}
+
 		this.props.setTimeout( onDragStart );
 	}
 
@@ -226,6 +317,25 @@ Draggable.propTypes = {
 	onDragEnd: PropTypes.func,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.any.isRequired,
+	horizontalSnaps: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.number ),
+		PropTypes.func,
+	] ).isRequired,
+	verticalSnaps: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.number ),
+		PropTypes.func,
+	] ).isRequired,
+	snapLines: PropTypes.array.isRequired,
+	showSnapLines: PropTypes.func.isRequired,
+	hideSnapLines: PropTypes.func.isRequired,
+	setSnapLines: PropTypes.func.isRequired,
+	clearSnapLines: PropTypes.func.isRequired,
+	hasSnapLine: PropTypes.func.isRequired,
 };
 
-export default withSafeTimeout( Draggable );
+const enhance = compose(
+	withSnapTargets,
+	withSafeTimeout,
+);
+
+export default enhance( Draggable );

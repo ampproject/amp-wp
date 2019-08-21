@@ -255,3 +255,4 @@ export const BLOCK_ROTATION_SNAPS = [ -180, -165, -150, -135, -120, -105, -90, -
 export const BLOCK_ROTATION_SNAP_GAP = 10;
 
 export const BLOCK_RESIZING_SNAP_GAP = 8;
+export const BLOCK_DRAGGING_SNAP_GAP = 8;
