@@ -236,7 +236,7 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 				$name  = $attr->nodeName;
 				$value = $attr->nodeValue;
 
-				if ( substr ( $name, 0, 5 ) === 'data-' ) {
+				if ( substr( $name, 0, 5 ) === 'data-' ) {
 					$additional_attributes[ $name ] = $value;
 				}
 			}
