@@ -13,10 +13,12 @@ import { ResizableBox } from '@wordpress/components';
 /**
  * Internal dependencies
  */
+import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import {
 	getPercentageFromPixels,
 	getPixelsFromPercentage,
+	findClosestSnap,
 } from '../../helpers';
 import {
 	getBlockPositioning,
@@ -28,6 +30,8 @@ import {
 } from './helpers';
 
 import {
+	STORY_PAGE_INNER_HEIGHT,
+	STORY_PAGE_INNER_WIDTH,
 	TEXT_BLOCK_PADDING,
 	REVERSE_WIDTH_CALCULATIONS,
 	REVERSE_HEIGHT_CALCULATIONS,
@@ -77,9 +81,24 @@ class EnhancedResizableBox extends Component {
 		const isImage = 'core/image' === blockName;
 		const isText = 'amp/amp-story-text' === blockName;
 
+		// Ensure that these props are not passed down.
+		const {
+			clientId,
+			snapGap,
+			horizontalSnaps,
+			verticalSnaps,
+			snapLines,
+			showSnapLines,
+			hideSnapLines,
+			setSnapLines,
+			clearSnapLines,
+			hasSnapLine,
+			...childProps
+		} = otherProps;
+
 		return (
 			<ResizableBox
-				{ ...otherProps }
+				{ ...childProps }
 				className={ classnames(
 					'amp-story-resize-container',
 					{
@@ -122,6 +141,11 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: false } );
 
+					hideSnapLines();
+					if ( snapLines.length ) {
+						clearSnapLines();
+					}
+
 					onResizeStop( {
 						width: parseInt( appliedWidth ),
 						height: parseInt( appliedHeight ),
@@ -152,9 +176,16 @@ class EnhancedResizableBox extends Component {
 
 					this.setState( { isResizing: true } );
 
+					showSnapLines();
+					if ( snapLines.length ) {
+						clearSnapLines();
+					}
+
 					onResizeStart();
 				} }
 				onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
+					const newSnapLines = [];
+
 					const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
 					// Handle case where media is inserted from URL.
@@ -162,8 +193,10 @@ class EnhancedResizableBox extends Component {
 						width = blockElement.clientWidth;
 						height = blockElement.clientHeight;
 					}
+
 					let appliedWidth = minWidth <= width + deltaW ? width + deltaW : minWidth;
 					let appliedHeight = minHeight <= height + deltaH ? height + deltaH : minHeight;
+
 					const isReducing = 0 > deltaW || 0 > deltaH;
 
 					if ( textElement && isReducing ) {
@@ -207,18 +240,79 @@ class EnhancedResizableBox extends Component {
 					if ( ! angle ) {
 						// If the resizing is to left or top then we have to compensate
 						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
-							const leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx - lastDeltaW ) + '%';
+							let leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
+							let leftSnap = 0;
+
+							leftInPx = leftInPx - lastDeltaW;
+
+							if ( lastDeltaW ) {
+								leftSnap = findClosestSnap( leftInPx, horizontalSnaps, snapGap );
+
+								if ( leftSnap !== leftInPx ) {
+									const leftSnapLine = [ [ leftSnap, 0 ], [ leftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+									if ( ! hasSnapLine( leftSnapLine ) ) {
+										newSnapLines.push( leftSnapLine );
+									}
+
+									appliedWidth += leftInPx - leftSnap;
+									leftInPx = leftSnap;
+								}
+							}
+
+							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx ) + '%';
+						} else if ( lastDeltaW ) {
+							const widthSnap = findClosestSnap( blockElement.offsetLeft + appliedWidth, horizontalSnaps, snapGap );
+
+							if ( ( widthSnap - blockElement.offsetLeft ) !== appliedWidth ) {
+								const widthSnapLine = [ [ widthSnap, 0 ], [ widthSnap, STORY_PAGE_INNER_HEIGHT ] ];
+								if ( ! hasSnapLine( widthSnapLine ) ) {
+									newSnapLines.push( widthSnapLine );
+								}
+
+								appliedWidth = widthSnap - blockElement.offsetLeft;
+							}
 						}
+
 						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
-							const topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-							blockElement.style.top = getPercentageFromPixels( 'y', topInPx - lastDeltaH ) + '%';
+							let topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
+							let topSnap = 0;
+
+							topInPx = topInPx - lastDeltaH;
+
+							if ( lastDeltaH ) {
+								topSnap = findClosestSnap( topInPx, verticalSnaps, snapGap );
+
+								if ( topSnap !== topInPx ) {
+									const topSnapLine = [ [ 0, topSnap ], [ STORY_PAGE_INNER_WIDTH, topSnap ] ];
+
+									if ( ! hasSnapLine( topSnapLine ) ) {
+										newSnapLines.push( topSnapLine );
+									}
+
+									appliedHeight += topInPx - topSnap;
+									topInPx = topSnap;
+								}
+							}
+
+							blockElement.style.top = getPercentageFromPixels( 'y', topInPx ) + '%';
+						} else if ( lastDeltaH ) {
+							const heightSnap = findClosestSnap( blockElement.offsetTop + appliedHeight, verticalSnaps, snapGap );
+
+							if ( ( heightSnap - blockElement.offsetTop ) !== appliedHeight ) {
+								const heightSnapLine = [ [ 0, heightSnap ], [ STORY_PAGE_INNER_WIDTH, heightSnap ] ];
+								if ( ! hasSnapLine( heightSnapLine ) ) {
+									newSnapLines.push( heightSnapLine );
+								}
+							}
+
+							appliedHeight = heightSnap - blockElement.offsetTop;
 						}
 					} else {
 						const radianAngle = getRadianFromDeg( angle );
 
 						// Compare position between the initial and after resizing.
 						let initialPosition, resizedPosition;
+
 						// If it's a text block, we shouldn't consider the added padding for measuring.
 						if ( isText ) {
 							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
@@ -258,6 +352,10 @@ class EnhancedResizableBox extends Component {
 						imageWrapper.style.width = appliedWidth + 'px';
 						imageWrapper.style.height = appliedHeight + 'px';
 					}
+
+					if ( newSnapLines.length ) {
+						setSnapLines( ...newSnapLines );
+					}
 				} }
 			>
 				{ children }
@@ -266,10 +364,15 @@ class EnhancedResizableBox extends Component {
 	}
 }
 
+EnhancedResizableBox.defaultProps = {
+	snapGap: 0,
+};
+
 EnhancedResizableBox.propTypes = {
 	ampFitText: PropTypes.bool,
 	angle: PropTypes.number,
 	blockName: PropTypes.string,
+	clientId: PropTypes.string,
 	minWidth: PropTypes.number,
 	minHeight: PropTypes.number,
 	onResizeStart: PropTypes.func.isRequired,
@@ -277,6 +380,21 @@ EnhancedResizableBox.propTypes = {
 	children: PropTypes.any.isRequired,
 	width: PropTypes.number,
 	height: PropTypes.number,
+	horizontalSnaps: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.number ),
+		PropTypes.func,
+	] ).isRequired,
+	verticalSnaps: PropTypes.oneOfType( [
+		PropTypes.arrayOf( PropTypes.number ),
+		PropTypes.func,
+	] ).isRequired,
+	snapGap: PropTypes.number.isRequired,
+	snapLines: PropTypes.array.isRequired,
+	showSnapLines: PropTypes.func.isRequired,
+	hideSnapLines: PropTypes.func.isRequired,
+	setSnapLines: PropTypes.func.isRequired,
+	clearSnapLines: PropTypes.func.isRequired,
+	hasSnapLine: PropTypes.func.isRequired,
 };
 
-export default EnhancedResizableBox;
+export default withSnapTargets( EnhancedResizableBox );

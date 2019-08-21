@@ -1602,14 +1602,10 @@ export const maybeAddMissingAnchor = ( clientId ) => {
 };
 
 /**
- * Given a rotation angle, finds the closest angle to snap to.
+ * Given a number, finds the closest snap target.
  *
- * Inspired by the implementation in re-resizable.
- *
- * @see https://github.com/bokuweb/re-resizable
- *
- * @param {number} number
- * @param {Array|function<number>} snap List of snap targets or function that provider
+ * @param {number} number Given number.
+ * @param {Array|function<number>} snap List of snap targets or function that provides them.
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
  * @return {number} New angle.
  */

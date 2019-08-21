@@ -9,7 +9,7 @@ import { compose } from '@wordpress/compose';
 import { ALLOWED_BLOCKS, ALLOWED_CHILD_BLOCKS } from '../constants';
 import { withAttributes, withBlockName, withHasSelectedInnerBlock } from './';
 
-const wrapperWithSelect = compose(
+const enhance = compose(
 	withAttributes,
 	withBlockName,
 	withHasSelectedInnerBlock,
@@ -22,7 +22,7 @@ const wrapperWithSelect = compose(
  * @return {Function} Enhanced component.
  */
 const withWrapperProps = ( BlockListBlock ) => {
-	return wrapperWithSelect( ( props ) => {
+	return enhance( ( props ) => {
 		const { blockName, hasSelectedInnerBlock, attributes } = props;
 
 		// If it's not an allowed block then lets return original;

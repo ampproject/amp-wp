@@ -27,6 +27,10 @@ export default registerStore(
 				order: [],
 				isReordering: false,
 			},
+			snap: {
+				showSnapLines: false,
+				snapLines: [],
+			},
 		},
 	}
 );

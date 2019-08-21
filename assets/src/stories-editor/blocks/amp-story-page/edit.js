@@ -531,7 +531,10 @@ export default compose(
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+		const {
+			getBlockOrder,
+			getBlockRootClientId,
+		} = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;

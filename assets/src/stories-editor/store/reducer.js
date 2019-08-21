@@ -159,4 +159,53 @@ export function blocks( state = {}, action ) {
 	}
 }
 
-export default combineReducers( { animations, currentPage, blocks } );
+/**
+ * Reducer handling block snapping.
+ *
+ * @param {Object} state  Current state.
+ * @param {Object} action Dispatched action.
+ *
+ * @return {Object} Updated state.
+ */
+export function snap( state = {}, action ) {
+	switch ( action.type ) {
+		case 'SHOW_SNAP_LINES':
+			return {
+				...state,
+				showSnapLines: true,
+			};
+
+		case 'HIDE_SNAP_LINES':
+			return {
+				...state,
+				showSnapLines: false,
+			};
+
+		case 'SET_SNAP_LINES':
+			const { snapLines } = action;
+			return {
+				...state,
+				snapLines: [ ...snapLines ],
+			};
+
+		case 'CLEAR_SNAP_LINES':
+			if ( ! state.snapLines.length ) {
+				return state;
+			}
+
+			return {
+				...state,
+				snapLines: [],
+			};
+
+		default:
+			return state;
+	}
+}
+
+export default combineReducers( {
+	animations,
+	currentPage,
+	blocks,
+	snap,
+} );
