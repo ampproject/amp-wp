@@ -62,7 +62,12 @@ describe( 'Stories Editor Screen', () => {
 		await selectBlockByClientId( firstPageClientId );
 
 		await clickButtonByLabel( 'More options' );
-		await clickButton( 'Remove Block' );
+
+		const buttonText = 'Remove Block';
+		const button = await page.waitForXPath( `//button[contains(text(), '${ buttonText }')]` );
+		await page.evaluate( ( btn ) => {
+			btn.click();
+		}, button );
 
 		const errorSelector = '.wp-block .block-editor-warning__message';
 		await page.waitForSelector( errorSelector );
