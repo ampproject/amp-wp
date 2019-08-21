@@ -1810,7 +1810,7 @@ class AMP_Story_Post_Type {
 		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
 			$style .= 'background-color:' . $attributes['wrapperStyle']['backgroundColor'] . ';';
 		}
-		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+		if ( isset( $attributes['wrapperStyle']['color'] ) ) {
 			$style .= 'color:' . $attributes['wrapperStyle']['color'] . ';';
 		}
 

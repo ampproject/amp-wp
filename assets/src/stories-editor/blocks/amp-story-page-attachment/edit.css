@@ -83,6 +83,10 @@ div[data-type="amp/amp-story-page-attachment"] div:not(.editor-block-list__bread
 	color: #fff;
 }
 
+.attachment-container.theme-dark .amp-page-attachment-content {
+	color: rgb(238, 238, 238);
+}
+
 div[data-type="amp/amp-story-page-attachment"] .open-attachment-wrapper .amp-story-page-attachment__text {
 	width: initial !important;
 	padding: 0 32px;
