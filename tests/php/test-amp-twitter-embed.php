@@ -125,7 +125,7 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 
 			'blockquote_embed'                        => [
 				wpautop( '<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"></amp-twitter>'. "\n\n",
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"></amp-twitter>' . "\n\n",
 			],
 
 			'blockquote_embed_with_data_conversation' => [
