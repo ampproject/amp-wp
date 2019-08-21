@@ -331,7 +331,8 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			&&
 			'script' === strtolower( $next_element_sibling->nodeName )
 			&&
-			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src ) );
+			false !== strpos( $next_element_sibling->getAttribute( 'src' ), $script_src )
+		);
 		if ( $is_embed_script ) {
 			$next_element_sibling->parentNode->removeChild( $next_element_sibling );
 		}
