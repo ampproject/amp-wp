@@ -18,6 +18,7 @@ const textItem = {
 	category: 'common',
 	isDisabled: false,
 	utility: 1,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const advancedTextItem = {
@@ -28,6 +29,7 @@ const advancedTextItem = {
 	category: 'common',
 	isDisabled: false,
 	utility: 1,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const someOtherItem = {
@@ -38,6 +40,7 @@ const someOtherItem = {
 	category: 'common',
 	isDisabled: false,
 	utility: 1,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const moreItem = {
@@ -48,6 +51,7 @@ const moreItem = {
 	category: 'layout',
 	isDisabled: true,
 	utility: 0,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const youtubeItem = {
@@ -59,6 +63,7 @@ const youtubeItem = {
 	keywords: [ 'google' ],
 	isDisabled: false,
 	utility: 0,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const textEmbedItem = {
@@ -69,6 +74,7 @@ const textEmbedItem = {
 	category: 'embed',
 	isDisabled: false,
 	utility: 0,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const reusableItem = {
@@ -79,6 +85,7 @@ const reusableItem = {
 	category: 'reusable',
 	isDisabled: false,
 	utility: 0,
+	hasChildBlocksWithInserterSupport: false,
 };
 
 const items = [
@@ -92,11 +99,16 @@ const items = [
 ];
 
 const DEFAULT_PROPS = {
+	instanceId: 1,
 	position: 'top center',
 	items,
+	onSelect: noop,
 	debouncedSpeak: noop,
 	fetchReusableBlocks: noop,
 	setTimeout: noop,
+	showInsertionPoint: noop,
+	hideInsertionPoint: noop,
+	rootChildBlocks: [],
 };
 
 const getWrapperForProps = ( propOverrides ) => {
