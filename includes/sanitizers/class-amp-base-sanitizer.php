@@ -255,6 +255,34 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
+	 *
+	 * @param string $value A boolean character to sanitize. If a string containing more than a single
+	 *                      character is provided, only the first character is taken into account.
+	 *
+	 * @return string Returns either '0' or '1'.
+	 */
+	public function sanitize_boolean_digit( $value ) {
+
+		if ( empty( $value ) ) {
+			return '0';
+		}
+
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '0';
+		}
+
+		switch ( substr( (string) $value, 0, 1 ) ) {
+			case '1':
+			case 'y':
+			case 'Y':
+				return '1';
+		}
+
+		return '0';
+	}
+
+	/**
 	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
 	 * @param string[] $attributes {

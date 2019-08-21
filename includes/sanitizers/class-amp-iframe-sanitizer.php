@@ -131,7 +131,9 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 
 			if ( $this->args['add_noscript_fallback'] ) {
 				$node->setAttribute( 'src', $normalized_attributes['src'] );
-
+				if ( $node->hasAttribute( 'frameborder' ) ) {
+					$node->setAttribute( 'frameborder', $normalized_attributes['frameborder'] );
+				}
 				// Preserve original node in noscript for no-JS environments.
 				$this->append_old_node_noscript( $new_node, $node, $this->dom );
 			}
@@ -155,7 +157,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
 	 * }
-	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
 		$out = [];
@@ -189,10 +191,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'frameborder':
-					if ( '0' !== $value && '1' !== $value ) {
-						$value = '0';
-					}
-					$out[ $name ] = $value;
+					$out[ $name ] = $this->sanitize_boolean_digit( $value );
 					break;
 
 				case 'allowfullscreen':
