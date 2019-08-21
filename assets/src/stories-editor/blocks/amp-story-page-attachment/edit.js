@@ -197,6 +197,7 @@ class PageAttachmentEdit extends Component {
 									wrapperClassName="amp-story-page-attachment-title"
 									onChange={ ( value ) => setAttributes( { title: value } ) }
 									placeholder={ __( 'Write Title', 'amp' ) }
+									onClick={ ( event ) => event.stopPropagation() }
 								/>
 							</div>
 							<div className={ attachmentClass } style={ wrapperStyle }>
