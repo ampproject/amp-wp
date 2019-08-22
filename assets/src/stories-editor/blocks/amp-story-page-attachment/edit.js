@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import { map } from 'lodash';
 import classnames from 'classnames';
 
 /**
@@ -11,8 +10,6 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { Component, RawHTML } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { addQueryArgs } from '@wordpress/url';
-import { decodeEntities } from '@wordpress/html-entities';
 import { InspectorControls, RichText } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
 import {
@@ -31,50 +28,16 @@ class PageAttachmentEdit extends Component {
 	constructor( props ) {
 		super( props );
 		this.state = {
-			suggestions: [],
-			showSuggestions: false,
 			selectedPost: null,
 			isOpen: false,
+			searchValue: '',
 		};
 
 		this.toggleAttachment = this.toggleAttachment.bind( this );
 	}
 
-	/*async fetchPostSuggestions( search ) {
-		const posts = await apiFetch( {
-			path: addQueryArgs( '/wp/v2/search', {
-				search,
-				per_page: 20,
-				type: 'post',
-			} ),
-		} );
-
-		return map( posts, ( post ) => ( {
-			id: post.id,
-			title: decodeEntities( post.title ) || __( '(no title)', 'amp' ),
-		} ) );
-	}*/
-
 	componentDidMount() {
-		const { postId } = this.props.attributes;
-		this.isStillMounted = true;
-		if ( postId ) {
-			const fetchRequest = this.fetchRequest = apiFetch( {
-				path: `/wp/v2/posts/${ postId }`,
-			} ).then(
-				( post ) => {
-					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-						this.setState( { selectedPost: post } );
-					}
-				}
-			).catch(
-				() => {
-					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-						this.setState( { selectedPost: null } );
-					}
-				}
-			);
-		}
+		this.fetchSelectedPost();
 	}
 
 	componentWillUnmount() {
@@ -83,12 +46,21 @@ class PageAttachmentEdit extends Component {
 
 	componentDidUpdate( prevProps ) {
 		const {
+			attributes,
 			isSelected,
 			backgroundColor,
 			customBackgroundColor,
 			textColor,
 			setAttributes,
 		} = this.props;
+
+		if ( attributes.postId ) {
+			debugger;
+		}
+
+		if ( attributes.postId !== prevProps.attributes.postId ) {
+			this.fetchSelectedPost();
+		}
 
 		if ( ! isSelected && prevProps.isSelected ) {
 			this.toggleAttachment( false );
@@ -105,6 +77,28 @@ class PageAttachmentEdit extends Component {
 				newAttributes.attachmentClass = attachmentClass;
 			}
 			setAttributes( newAttributes );
+		}
+	}
+
+	fetchSelectedPost() {
+		const { postId } = this.props.attributes;
+		this.isStillMounted = true;
+		if ( postId ) {
+			const fetchRequest = this.fetchRequest = apiFetch( {
+				path: `/wp/v2/posts/${ postId }`,
+			} ).then(
+				( post ) => {
+					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+						this.setState( { selectedPost: post } );
+					}
+				}
+			).catch(
+				( err ) => {
+					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+						this.setState( { selectedPost: null } );
+					}
+				}
+			);
 		}
 	}
 
@@ -157,7 +151,7 @@ class PageAttachmentEdit extends Component {
 			postId,
 		} = attributes;
 
-		const { selectedPost } = this.state;
+		const { selectedPost, searchValue } = this.state;
 
 		const themeOptions = [
 			{ value: 'light', label: __( 'Light', 'amp' ) },
@@ -208,10 +202,14 @@ class PageAttachmentEdit extends Component {
 								{ selectedPost && selectedPost.content && (
 									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
 								) }
-								{ ! selectedPost && (
+								{ ! postId && (
 									<PostSelector
-										value={ postId }
-										onChange={ ( value ) => setAttributes( { postId: value } ) }
+										value={ searchValue }
+										onSelect={ ( value ) => {
+											setAttributes( { postId: value } );
+											this.setState( { searchValue: '' } );
+										} }
+										onChange={ ( value ) => this.setState( { searchValue: value } ) }
 									/>
 								) }
 							</div>
