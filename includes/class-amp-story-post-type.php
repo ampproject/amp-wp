@@ -213,9 +213,6 @@ class AMP_Story_Post_Type {
 		add_action(
 			'amp_story_head',
 			function() {
-				// @todo Temporary until sanitizer automatically supplies runtime.
-				wp_scripts()->do_items( [ 'amp-runtime' ] ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
-
 				wp_styles()->do_items();
 			}
 		);

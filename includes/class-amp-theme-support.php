@@ -1643,8 +1643,12 @@ class AMP_Theme_Support {
 
 		// "5. Load the AMP runtime."
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
-			// @todo What if not present?
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
+		} else {
+			$script = $dom->createElement( 'script' );
+			$script->setAttribute( 'async', '' );
+			$script->setAttribute( 'src', $runtime_src );
+			$ordered_scripts['amp-runtime'] = $script;
 		}
 
 		/*
@@ -2279,8 +2283,6 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		wp_enqueue_script( 'amp-runtime' );
-
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), [], AMP__VERSION );
 		wp_styles()->add_data( 'amp-default', 'rtl', 'replace' );
