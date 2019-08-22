@@ -25,6 +25,7 @@ import {
  */
 import './edit.css';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
+import { PostSelector } from '../../components';
 
 class PageAttachmentEdit extends Component {
 	constructor( props ) {
@@ -57,21 +58,23 @@ class PageAttachmentEdit extends Component {
 	componentDidMount() {
 		const { postId } = this.props.attributes;
 		this.isStillMounted = true;
-		const fetchRequest = this.fetchRequest = apiFetch( {
-			path: `/wp/v2/posts/${ postId }`,
-		} ).then(
-			( post ) => {
-				if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-					this.setState( { selectedPost: post } );
+		if ( postId ) {
+			const fetchRequest = this.fetchRequest = apiFetch( {
+				path: `/wp/v2/posts/${ postId }`,
+			} ).then(
+				( post ) => {
+					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+						this.setState( { selectedPost: post } );
+					}
 				}
-			}
-		).catch(
-			() => {
-				if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-					this.setState( { selectedPost: null } );
+			).catch(
+				() => {
+					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
+						this.setState( { selectedPost: null } );
+					}
 				}
-			}
-		);
+			);
+		}
 	}
 
 	componentWillUnmount() {
@@ -151,6 +154,7 @@ class PageAttachmentEdit extends Component {
 			title,
 			wrapperStyle,
 			attachmentClass,
+			postId,
 		} = attributes;
 
 		const { selectedPost } = this.state;
@@ -203,6 +207,12 @@ class PageAttachmentEdit extends Component {
 							<div className={ attachmentClass } style={ wrapperStyle }>
 								{ selectedPost && selectedPost.content && (
 									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
+								) }
+								{ ! selectedPost && (
+									<PostSelector
+										value={ postId }
+										onChange={ ( value ) => setAttributes( { postId: value } ) }
+									/>
 								) }
 							</div>
 						</div>

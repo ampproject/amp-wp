@@ -5,6 +5,7 @@ export { default as BlockPreview } from './block-preview';
 export { default as BlockPreviewLabel } from './block-preview-label';
 export { default as DraggableText } from './draggable-text';
 export { default as EditorCarousel } from './editor-carousel';
+export { default as PostSelector } from './post-selector';
 export { default as Reorderer } from './reorderer';
 export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';

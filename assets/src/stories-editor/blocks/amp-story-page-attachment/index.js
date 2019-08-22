@@ -11,7 +11,6 @@ import edit from './edit';
 const schema = {
 	postId: {
 		type: 'number',
-		default: 1,
 	},
 	title: {
 		type: 'string',
