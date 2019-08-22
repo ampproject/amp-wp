@@ -194,7 +194,7 @@ describe( 'reducers', () => {
 		it( 'should add snap lines', () => {
 			const state = snap( undefined, {
 				type: 'SET_SNAP_LINES',
-				items: [ [ [ 0, 0 ], [ 100, 100 ] ] ],
+				snapLines: [ [ [ 0, 0 ], [ 100, 100 ] ] ],
 			} );
 
 			expect( state.snapLines ).toHaveLength( 1 );

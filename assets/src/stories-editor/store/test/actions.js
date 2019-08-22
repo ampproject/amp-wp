@@ -143,7 +143,7 @@ describe( 'actions', () => {
 
 			expect( result ).toStrictEqual( {
 				type: 'SET_SNAP_LINES',
-				items: [ 1, 2, 3 ],
+				snapLines: [ 1, 2, 3 ],
 			} );
 		} );
 	} );
