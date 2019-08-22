@@ -273,4 +273,34 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		return $placeholder_node;
 	}
 
+	/**
+	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
+	 *
+	 * @param string $value A boolean character to sanitize. If a string containing more than a single
+	 *                      character is provided, only the first character is taken into account.
+	 *
+	 * @return string Returns either '0' or '1'.
+	 */
+	private function sanitize_boolean_digit( $value ) {
+
+		// Default to false if the value was forgotten.
+		if ( empty( $value ) ) {
+			return '0';
+		}
+
+		// Default to false if the value has an unexpected type.
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '0';
+		}
+
+		// See: https://github.com/ampproject/amp-wp/issues/2335#issuecomment-493209861.
+		switch ( substr( (string) $value, 0, 1 ) ) {
+			case '1':
+			case 'y':
+			case 'Y':
+				return '1';
+		}
+
+		return '0';
+	}
 }
