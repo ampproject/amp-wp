@@ -205,14 +205,6 @@ class AMP_Story_Post_Type {
 		// @todo Create methods/functions for some of these.
 		add_action(
 			'amp_story_head',
-			static function() {
-				// @todo Eliminate in favor of adding via post-processor.
-				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			PHP_INT_MAX
-		);
-		add_action(
-			'amp_story_head',
 			function() {
 				// See _wp_render_title_tag().
 				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";

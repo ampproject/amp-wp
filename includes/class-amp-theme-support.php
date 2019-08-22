@@ -1016,34 +1016,6 @@ class AMP_Theme_Support {
 			1
 		);
 
-		/*
-		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
-		 * in their head tag." {@link https://www.ampproject.org/docs/fundamentals/spec#required-markup AMP Required markup}
-		 *
-		 * After "Specify the <link> tag for your favicon.", then
-		 * "Specify any custom styles by using the <style amp-custom> tag."
-		 *
-		 * Note that the boilerplate is added at the very end because:
-		 * "Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles from accidentally
-		 * overriding the boilerplate css rules." {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
-		 *
-		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
-		 */
-		add_action(
-			'wp_head',
-			static function() {
-				echo '<style amp-custom></style>';
-			},
-			0
-		);
-		add_action(
-			'wp_head',
-			static function() {
-				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			PHP_INT_MAX
-		);
-
 		add_action( 'admin_bar_init', [ __CLASS__, 'init_admin_bar' ] );
 		add_action( 'wp_head', 'amp_add_generator_metadata', 20 );
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ], 0 ); // Enqueue before theme's styles.
@@ -1434,7 +1406,7 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @link https://www.ampproject.org/docs/reference/spec#required-markup
-	 * @link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos
+	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
 	 *
 	 * @param DOMDocument $dom            Document.
@@ -1447,6 +1419,8 @@ class AMP_Theme_Support {
 		 * @var DOMElement $meta
 		 * @var DOMElement $script
 		 * @var DOMElement $link
+		 * @var DOMElement $style
+		 * @var DOMElement $noscript
 		 */
 
 		$xpath = new DOMXPath( $dom );
@@ -1496,9 +1470,9 @@ class AMP_Theme_Support {
 		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
 		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
 		 *
-		 * "The first tag should be the meta charset tag, followed by any remaining meta tags."
+		 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
 		 *
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
 		$meta_charset  = null;
 		$meta_viewport = null;
@@ -1606,10 +1580,10 @@ class AMP_Theme_Support {
 
 		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		 *
-		 * "Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
+		 * "2. Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
 		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
 		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
 		$prioritized_preloads = [];
 		if ( ! isset( $links['preload'] ) ) {
@@ -1626,6 +1600,10 @@ class AMP_Theme_Support {
 			]
 		);
 
+		/*
+		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
+		 * preload those extensions as they're required by the AMP runtime for rendering the page."
+		 */
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, $render_delaying_extensions, true ) ) {
@@ -1643,6 +1621,12 @@ class AMP_Theme_Support {
 		}
 		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
 
+		/*
+		 * "4. Use preconnect to speedup the connection to other origin where the full resource URL is not known ahead of time,
+		 * for example, when using Google Fonts."
+		 *
+		 * Note that \AMP_Style_Sanitizer::process_link_element() will ensure preconnect links for Google Fonts are present.
+		 */
 		$link_relations = [ 'preconnect', 'dns-prefetch', 'preload', 'prerender', 'prefetch' ];
 		foreach ( $link_relations as $rel ) {
 			if ( ! isset( $links[ $rel ] ) ) {
@@ -1657,15 +1641,17 @@ class AMP_Theme_Support {
 			}
 		}
 
-		/*
-		 * "Specify the <script> tags for render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, and amp-story)."
-		 * "Specify the <script> tags for remaining extensions (e.g., amp-bind, ...). These extensions are not render-delaying and therefore
-		 * should not be preloaded because they might take away important bandwidth for the initial render."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
-		 */
+		// "5. Load the AMP runtime."
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
+			// @todo What if not present?
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
 		}
+
+		/*
+		 * "6. Specify the <script> tags for render-delaying extensions (e.g., amp-experiment amp-dynamic-css-classes and amp-story"
+		 *
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ AMP Hosting Guide}
+		 */
 		foreach ( $render_delaying_extensions as $extension ) {
 			if ( isset( $amp_scripts[ $extension ] ) ) {
 				$ordered_scripts[ $extension ] = $amp_scripts[ $extension ];
@@ -1673,6 +1659,10 @@ class AMP_Theme_Support {
 			}
 		}
 
+		/*
+		 * "7. Specify the <script> tags for remaining extensions (e.g., amp-bind ...). These extensions are not render-delaying
+		 * and therefore should not be preloaded as they might take away important bandwidth for the initial render."
+		 */
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
 			$head->insertBefore( $ordered_script, $previous_node->nextSibling );
@@ -1680,18 +1670,54 @@ class AMP_Theme_Support {
 		}
 
 		/*
-		 * "Specify the <link> tag for your favicon."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
+		 * "8. Specify any custom styles by using the <style amp-custom> tag."
 		 */
-		if ( isset( $links['icon'] ) ) {
-			foreach ( $links['icon'] as $link ) {
-				$link->parentNode->removeChild( $link ); // So we can move it.
-				$head->insertBefore( $link, $previous_node->nextSibling );
-				$previous_node = $link;
+		$style = $xpath->query( './style[ @amp-custom ]', $head )->item( 0 );
+		if ( $style ) {
+			// Ensure the CSS manifest comment remains before style[amp-custom].
+			if ( $style->previousSibling instanceof DOMComment ) {
+				$comment = $style->previousSibling;
+				$comment->parentNode->removeChild( $comment );
+				$head->insertBefore( $comment, $previous_node->nextSibling );
+				$previous_node = $comment;
 			}
+
+			$style->parentNode->removeChild( $style );
+			$head->insertBefore( $style, $previous_node->nextSibling );
+			$previous_node = $style;
 		}
 
-		// Note the style[amp-custom] and style[amp-boilerplate] are output in the add_hooks() method.
+		/*
+		 * "9. Add any other tags allowed in the <head> section. In particular, any external fonts should go last since
+		 * they block rendering."
+		 */
+
+		/*
+		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
+		 * from accidentally overriding the boilerplate css rules."
+		 */
+		$style = $xpath->query( './style[ @amp-boilerplate ]', $head )->item( 0 );
+		if ( ! $style ) {
+			$style = $dom->createElement( 'style' );
+			$style->setAttribute( 'amp-boilerplate', '' );
+			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[0] ) );
+		} else {
+			$style->parentNode->removeChild( $style ); // So we can move it.
+		}
+		$head->appendChild( $style );
+
+		$noscript = $xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $head )->item( 0 );
+		if ( ! $noscript ) {
+			$noscript = $dom->createElement( 'noscript' );
+			$style    = $dom->createElement( 'style' );
+			$style->setAttribute( 'amp-boilerplate', '' );
+			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[1] ) );
+			$noscript->appendChild( $style );
+		} else {
+			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
+		}
+		$head->appendChild( $noscript );
+
 		unset( $previous_node );
 	}
 
