@@ -32,6 +32,7 @@ const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockEle
 			transferData={ transferData }
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
+			clientId={ clientId }
 		>
 			{
 				( { onDraggableStart, onDraggableEnd } ) => {

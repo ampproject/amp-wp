@@ -321,6 +321,7 @@ class Draggable extends Component {
 }
 
 Draggable.propTypes = {
+	clientId: PropTypes.string.isRequired,
 	blockName: PropTypes.string,
 	elementId: PropTypes.string,
 	transferData: PropTypes.object,
