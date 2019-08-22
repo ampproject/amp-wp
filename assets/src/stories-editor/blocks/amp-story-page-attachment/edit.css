@@ -155,7 +155,9 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 	bottom: 0;
 	left: 0;
 	width: 100%;
+	/* stylelint-disable */
 	background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent);
+	/* stylelint-enable */
 	z-index: 3;
 }
 
