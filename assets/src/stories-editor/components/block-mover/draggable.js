@@ -35,6 +35,9 @@ const cloneWrapperClass = 'components-draggable__clone';
 const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
+let lastX;
+let lastY;
+
 class Draggable extends Component {
 	constructor( ...args ) {
 		super( ...args );
@@ -99,6 +102,14 @@ class Draggable extends Component {
 
 		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+
+		if ( top === lastY && left === lastX ) {
+			return;
+		}
+
+		lastY = top;
+		lastX = left;
+
 		const originalTop = top;
 		const originalLeft = left;
 		const width = this.cloneWrapper.clientWidth;
