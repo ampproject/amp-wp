@@ -1,0 +1,97 @@
+/* The front-end styling for the AMP Latest Stories block */
+.amp-block-latest-stories {
+	overflow-x: scroll;
+	overflow-y: hidden;
+	position: relative;
+}
+
+.latest-stories-carousel::-webkit-scrollbar {
+	display: none;
+}
+
+/* The ul is needed in ul.latest-stories-carousel to override Gutenberg styling. */
+div.amp-block-latest-stories > ul.latest-stories-carousel {
+	list-style: none;
+}
+
+.latest-stories__slide {
+	margin-right: 0.5rem;
+	margin-left: 0.5rem;
+	border-radius: 0.5rem;
+	position: relative;
+}
+
+.latest_stories__link {
+	width: 348px;
+	display: block;
+	position: relative;
+	border-radius: 0.5rem;
+	overflow-x: hidden;
+}
+
+.amp-story-embed .latest_stories__link:hover {
+	box-shadow: none;
+	-webkit-box-shadow: none;
+}
+
+/* Applies the darker gradient background, to allow the white text to display even against a white featured image. */
+.latest_stories__link::after {
+	display: block;
+	position: absolute;
+	border-radius: 0.5rem;
+	top: 0;
+	right: 0;
+	content: "\020";
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0), 70%, rgba(0, 0, 0, 0.9));
+}
+
+.latest-stories__featured-img {
+	border-radius: 0.5rem;
+	object-fit: cover; /* For non-AMP. */
+}
+
+amp-img.latest-stories__featured-img > img {
+	object-fit: cover;
+}
+
+.latest-stories__title {
+	white-space: normal; /* Override an AMP style rule of white-space: nowrap */
+	position: absolute;
+	bottom: 5rem;
+	right: 1rem;
+	margin-left: 1rem;
+	color: #fff;
+	z-index: 10;
+}
+
+.latest-stories__meta {
+	width: 100%;
+	position: absolute;
+	bottom: 0;
+	border-radius: 0 0 0.5rem 0.5rem;
+	padding: 0.6rem 1rem 1rem 1rem;
+	background-color: #333;
+	z-index: 10;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+}
+
+.latest-stories__meta .latest-stories__avatar {
+	height: 24px;
+	width: 24px;
+	border-radius: 50%;
+	box-shadow: none;
+	-webkit-box-shadow: none;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+.latest-stories__meta .latest-stories__author {
+	margin-right: 0.5rem;
+	border-bottom: 0;
+	vertical-align: middle;
+	color: #d3d3d3;
+}
