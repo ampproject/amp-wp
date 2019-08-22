@@ -1,6 +1,6 @@
 <?php
 /**
- * Class AMP_CLI_Validation.
+ * Class AMP_CLI_Validation_Command.
  *
  * Commands that deal with validation of AMP markup.
  *
