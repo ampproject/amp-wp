@@ -66,6 +66,6 @@ describe( 'getBackgroundColorWithOpacity', () => {
 	} );
 
 	it( 'should return nothing if no color is passed at all', () => {
-		expect( getBackgroundColorWithOpacity( [], undefined, undefined ) ).toBe( undefined );
+		expect( getBackgroundColorWithOpacity( [], undefined, undefined ) ).toBeUndefined( );
 	} );
 } );

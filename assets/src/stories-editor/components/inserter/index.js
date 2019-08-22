@@ -24,12 +24,13 @@ import { withSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import InserterMenu from './menu';
+import InserterMenu from './menu'; // eslint-disable-line import/no-named-as-default
+import './edit.css';
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
 	<IconButton
 		icon="insert"
-		label={ __( 'Add block', 'amp' ) }
+		label={ __( 'Add element', 'amp' ) }
 		labelPosition="bottom"
 		onClick={ onToggle }
 		className="editor-inserter__toggle block-editor-inserter__toggle"
@@ -46,8 +47,8 @@ defaultRenderToggle.propTypes = {
 };
 
 class Inserter extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onToggle = this.onToggle.bind( this );
 		this.renderToggle = this.renderToggle.bind( this );
@@ -112,7 +113,7 @@ class Inserter extends Component {
 				position={ position }
 				onToggle={ this.onToggle }
 				expandOnMobile
-				headerTitle={ __( 'Add a block', 'amp' ) }
+				headerTitle={ __( 'Add element', 'amp' ) }
 				renderToggle={ this.renderToggle }
 				renderContent={ this.renderContent }
 			/>
@@ -128,13 +129,18 @@ Inserter.propTypes = {
 	rootClientId: PropTypes.string,
 	clientId: PropTypes.string,
 	isAppender: PropTypes.bool,
+	showInserter: PropTypes.bool,
 };
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { isReordering } = select( 'amp/story' );
 
+	// As used in <HeaderToolbar> component
+	const showInserter = select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled;
+
 	return {
 		isReordering: isReordering(),
+		disabled: ! showInserter,
 	};
 } );
 

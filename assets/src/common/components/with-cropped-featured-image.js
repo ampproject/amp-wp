@@ -12,8 +12,9 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import FeaturedImageSelectMediaFrame from './featured-image-select-media-frame';
+import { FeaturedImageToolbarSelect, getSelectMediaFrame } from './select-media-frame';
 import FeaturedImageCropper from './featured-image-cropper';
+import { getAspectRatioType } from '../helpers';
 
 const { wp } = window;
 
@@ -23,13 +24,19 @@ const { wp } = window;
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
  * Mostly copied from customize-controls.js.
+ * The optional alternateMinImageDimensions are used for the crop size when they are the same aspect ratio type as the actual image dimensions.
+ * For example, if the selected image has a portrait aspect ratio, and the alternateMinImageDimensions are also portrait,
+ * this will use the alternate dimensions as long as the selected image is big enough.
+ * Otherwise, this will use the minImageDimensions.
  *
- * @param {Function} InitialMediaUpload The MediaUpload component, passed from the filter.
- * @param {Object}   minImageDimensions Minimum required image dimensions.
+ * @param {Function} InitialMediaUpload          The MediaUpload component, passed from the filter.
+ * @param {Object}   minImageDimensions          Minimum required image dimensions.
+ * @param {Object}   alternateMinImageDimensions Alternate required image dimensions, like portrait dimensions (optional).
  * @return {Function} The wrapped component.
  */
-export default ( InitialMediaUpload, minImageDimensions ) => {
+export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimensions = {} ) => {
 	const { width: EXPECTED_WIDTH, height: EXPECTED_HEIGHT } = minImageDimensions;
+	const { width: ALTERNATE_EXPECTED_WIDTH, height: ALTERNATE_EXPECTED_HEIGHT } = alternateMinImageDimensions;
 
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
@@ -40,14 +47,14 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		/**
 		 * Constructs the class.
 		 */
-		constructor() {
-			super( ...arguments );
+		constructor( ...args ) {
+			super( ...args );
 
 			// @todo This should be a different event.
 			// This class should only be present in the MediaUpload for the Featured Image.
-			if ( this.props.modalClass && 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
-				this.init = this.init.bind( this );
-				this.init();
+			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
+				this.initFeaturedImage = this.initFeaturedImage.bind( this );
+				this.initFeaturedImage();
 			}
 		}
 
@@ -61,8 +68,10 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
-		init() {
+		initFeaturedImage() {
+			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
 			this.frame = new FeaturedImageSelectMediaFrame( {
+				allowedTypes: this.props.allowedTypes,
 				button: {
 					text: __( 'Select', 'amp' ),
 					close: false,
@@ -92,7 +101,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			this.frame.on( 'cropped', this.onCropped, this );
 			this.frame.on( 'skippedcrop', this.onSkippedCrop, this );
 			this.frame.on( 'close', () => {
-				this.init();
+				this.initFeaturedImage();
 			}, this );
 		}
 
@@ -111,8 +120,20 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			const realWidth = attachment.get( 'width' ),
 				realHeight = attachment.get( 'height' );
 
-			let xInit = parseInt( EXPECTED_WIDTH, 10 ),
-				yInit = parseInt( EXPECTED_HEIGHT, 10 );
+			/*
+			 * Only use the alternate dimensions if the image is big enough, and if they have the same aspect ratio type.
+			 * For example, if they are portrait dimensions, the real image must also have portrait dimensions.
+			 * This allows having an alternative crop size, for example, a portrait crop in addition to a landscape crop.
+			 */
+			const shouldUseAlternateWidthAndHeight = (
+				ALTERNATE_EXPECTED_WIDTH &&
+				realWidth >= ALTERNATE_EXPECTED_WIDTH &&
+				realHeight >= ALTERNATE_EXPECTED_HEIGHT &&
+				getAspectRatioType( realWidth, realHeight ) === getAspectRatioType( ALTERNATE_EXPECTED_WIDTH, ALTERNATE_EXPECTED_HEIGHT )
+			);
+
+			let xInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_WIDTH ) : parseInt( EXPECTED_WIDTH ),
+				yInit = shouldUseAlternateWidthAndHeight ? parseInt( ALTERNATE_EXPECTED_HEIGHT ) : parseInt( EXPECTED_HEIGHT );
 
 			const ratio = xInit / yInit,
 				xImg = xInit,
@@ -121,10 +142,10 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 			// Allow cropping to be skipped because the image is at least the required dimensions, so skipping crop will auto crop.
 			controller.set( 'canSkipCrop', true );
 
-			if ( realWidth / realHeight > ratio ) {
+			if ( realWidth / realHeight > ratio ) { // This is wider than the expected ratio.
 				yInit = realHeight;
 				xInit = yInit * ratio;
-			} else {
+			} else { // This is either the expected ratio or taller.
 				xInit = realWidth;
 				yInit = xInit / ratio;
 			}
@@ -157,7 +178,10 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 */
 		onSelectImage() {
 			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
-			if ( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) {
+			if (
+				( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) ||
+				( ALTERNATE_EXPECTED_WIDTH && ALTERNATE_EXPECTED_WIDTH === attachment.width && ALTERNATE_EXPECTED_HEIGHT === attachment.height )
+			) {
 				this.setImageFromURL( attachment.url, attachment.id, attachment.width, attachment.height );
 				this.frame.close();
 			} else {

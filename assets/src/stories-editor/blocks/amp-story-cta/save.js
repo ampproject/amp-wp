@@ -11,19 +11,25 @@ import { RichText } from '@wordpress/block-editor';
 /**
  * Internal dependencies
  */
-import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes } from '../../helpers';
+import { getClassNameFromBlockAttributes, getStylesFromBlockAttributes, getUniqueId } from '../../helpers';
 
-const CallToActionEdit = ( { attributes } ) => {
+const CallToActionSave = ( { attributes } ) => {
 	const {
-		url,
+		anchor,
+		btnPositionLeft,
+		btnPositionTop,
 		text,
+		url,
 	} = attributes;
 
 	const className = getClassNameFromBlockAttributes( { ...attributes, className: 'amp-block-story-cta__link' } );
 	const styles = getStylesFromBlockAttributes( attributes );
 
+	styles.top = btnPositionTop ? `${ btnPositionTop }%` : undefined;
+	styles.left = btnPositionLeft ? `${ btnPositionLeft }%` : undefined;
+
 	return (
-		<amp-story-cta-layer>
+		<amp-story-cta-layer id={ anchor ? anchor : getUniqueId() }>
 			<RichText.Content
 				tagName="a"
 				className={ className }
@@ -35,10 +41,13 @@ const CallToActionEdit = ( { attributes } ) => {
 	);
 };
 
-CallToActionEdit.propTypes = {
+CallToActionSave.propTypes = {
 	attributes: PropTypes.shape( {
+		anchor: PropTypes.string,
 		url: PropTypes.string,
 		text: PropTypes.string,
+		btnPositionLeft: PropTypes.number,
+		btnPositionTop: PropTypes.number,
 		backgroundColor: PropTypes.shape( {
 			color: PropTypes.string,
 			name: PropTypes.string,
@@ -63,4 +72,4 @@ CallToActionEdit.propTypes = {
 	} ).isRequired,
 };
 
-export default CallToActionEdit;
+export default CallToActionSave;

@@ -39,7 +39,7 @@ const BlockEdit = ( props ) => {
 	const ampLayoutOptions = [
 		{ value: '', label: __( 'Responsive', 'amp' ) },
 		{ value: 'fixed', label: __( 'Fixed', 'amp' ) },
-		{ value: 'fixed-height', label: __( 'Fixed height', 'amp' ) },
+		{ value: 'fixed-height', label: __( 'Fixed Height', 'amp' ) },
 	];
 
 	return (
@@ -49,7 +49,7 @@ const BlockEdit = ( props ) => {
 					<DateTimePicker
 						locale="en"
 						currentDate={ dateTime || moment() }
-						onChange={ value => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) } // eslint-disable-line
+						onChange={ ( value ) => ( setAttributes( { dateTime: moment( value, moment.ISO_8601, true ).format() } ) ) }
 					/>
 					<LayoutControls { ...props } ampLayoutOptions={ ampLayoutOptions } />
 					<TextControl

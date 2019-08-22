@@ -37,7 +37,7 @@ const BlockEdit = ( props ) => {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Ooyala settings', 'amp' ) }>
+				<PanelBody title={ __( 'Ooyala Settings', 'amp' ) }>
 					<TextControl
 						label={ __( 'Video embed code (required)', 'amp' ) }
 						value={ dataEmbedCode }

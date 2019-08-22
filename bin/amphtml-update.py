@@ -313,9 +313,6 @@ def ParseRules(out_dir):
 
 	specfile='%s/validator.protoascii' % out_dir
 
-	validator_pb2=validator_pb2
-	text_format=text_format
-
 	# Merge specfile with message buffers.
 	rules = validator_pb2.ValidatorRules()
 	text_format.Merge(open(specfile).read(), rules)
@@ -580,8 +577,14 @@ def GetAttrs(attrs):
 		value_dict = GetValues(attr_spec)
 
 		if value_dict is not None:
+
+			# Normalize bracketed amp-bind attribute syntax to data-amp-bind-* syntax.
+			name = attr_spec.name
+			if name[0] == '[':
+				name = 'data-amp-bind-' + name.strip( '[]' )
+
 			# Add attribute name and alternative_names
-			attr_dict[UnicodeEscape(attr_spec.name)] = value_dict
+			attr_dict[UnicodeEscape(name)] = value_dict
 
 	logging.info('... done')
 	return attr_dict

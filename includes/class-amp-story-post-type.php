@@ -25,48 +25,6 @@ class AMP_Story_Post_Type {
 	const REQUIRED_GUTENBERG_VERSION = '5.8';
 
 	/**
-	 * The image size for the AMP story card, used in an embed and the Latest Stories block.
-	 *
-	 * @var string
-	 */
-	const STORY_CARD_IMAGE_SIZE = 'amp-story-poster-portrait';
-
-	/**
-	 * The image size for the poster-landscape-src.
-	 *
-	 * @var string
-	 */
-	const STORY_LANDSCAPE_IMAGE_SIZE = 'amp-story-poster-landscape';
-
-	/**
-	 * The image size for the poster-square-src.
-	 *
-	 * @var string
-	 */
-	const STORY_SQUARE_IMAGE_SIZE = 'amp-story-poster-square';
-
-	/**
-	 * The slug of the largest image size allowed in an AMP Story page.
-	 *
-	 * @var string
-	 */
-	const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
-
-	/**
-	 * The large dimension of the AMP Story poster images.
-	 *
-	 * @var int
-	 */
-	const STORY_LARGE_IMAGE_DIMENSION = 928;
-
-	/**
-	 * The small dimension of the AMP Story poster images.
-	 *
-	 * @var int
-	 */
-	const STORY_SMALL_IMAGE_DIMENSION = 696;
-
-	/**
 	 * The slug of the story card CSS file.
 	 *
 	 * @var string
@@ -102,6 +60,27 @@ class AMP_Story_Post_Type {
 	const AMP_STORIES_EDITOR_STYLE_HANDLE = 'amp-stories-editor';
 
 	/**
+	 * AMP Stories Ajax action.
+	 *
+	 * @var string
+	 */
+	const AMP_STORIES_AJAX_ACTION = 'amp-story-export';
+
+	/**
+	 * Story page inner width in the editor.
+	 *
+	 * @var number
+	 */
+	const STORY_PAGE_INNER_WIDTH = 328;
+
+	/**
+	 * Story page inner height in the editor.
+	 *
+	 * @var number
+	 */
+	const STORY_PAGE_INNER_HEIGHT = 553;
+
+	/**
 	 * Check if the required version of block capabilities available.
 	 *
 	 * Note that Gutenberg requires WordPress 5.0, so this check also accounts for that.
@@ -133,8 +112,8 @@ class AMP_Story_Post_Type {
 
 		register_post_type(
 			self::POST_TYPE_SLUG,
-			array(
-				'labels'       => array(
+			[
+				'labels'       => [
 					'name'                     => _x( 'Stories', 'post type general name', 'amp' ),
 					'singular_name'            => _x( 'Story', 'post type singular name', 'amp' ),
 					'add_new'                  => _x( 'New', 'story', 'amp' ),
@@ -159,148 +138,130 @@ class AMP_Story_Post_Type {
 					'items_list_navigation'    => __( 'Stories list navigation', 'amp' ),
 					'items_list'               => __( 'Stories list', 'amp' ),
 					'item_published'           => __( 'Story published.', 'amp' ),
-					'item_published_privately' => __( 'SStory published privately.', 'amp' ),
+					'item_published_privately' => __( 'Story published privately.', 'amp' ),
 					'item_reverted_to_draft'   => __( 'Story reverted to draft.', 'amp' ),
 					'item_scheduled'           => __( 'Story scheduled', 'amp' ),
 					'item_updated'             => __( 'Story updated.', 'amp' ),
 					'menu_name'                => _x( 'Stories', 'admin menu', 'amp' ),
 					'name_admin_bar'           => _x( 'Story', 'add new on admin bar', 'amp' ),
-				),
+				],
 				'menu_icon'    => 'dashicons-book',
-				'taxonomies'   => array(
+				'taxonomies'   => [
 					'post_tag',
 					'category',
-				),
-				'supports'     => array(
+				],
+				'supports'     => [
 					'title', // Used for amp-story[title].
 					'author', // Used for the amp/amp-story-post-author block.
 					'editor',
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
-				),
-				'rewrite'      => array(
+				],
+				'rewrite'      => [
 					'slug' => self::REWRITE_SLUG,
-				),
+				],
 				'public'       => true,
 				'show_ui'      => true,
 				'show_in_rest' => true,
-				'template'     => array(
-					array(
+				'template'     => [
+					[
 						'amp/amp-story-page',
-						array(),
-						array(
-							array(
+						[],
+						[
+							[
 								'amp/amp-story-text',
-								array(
+								[
 									'placeholder' => __( 'Write text…', 'amp' ),
-								),
-							),
-						),
-					),
-				),
-			)
+								],
+							],
+						],
+					],
+				],
+			]
 		);
 
-		add_filter( 'post_row_actions', array( __CLASS__, 'remove_classic_editor_link' ), 11, 2 );
+		add_filter( 'post_row_actions', [ __CLASS__, 'remove_classic_editor_link' ], 11, 2 );
 
-		add_filter( 'wp_kses_allowed_html', array( __CLASS__, 'filter_kses_allowed_html' ), 10, 2 );
+		add_filter( 'wp_kses_allowed_html', [ __CLASS__, 'filter_kses_allowed_html' ], 10, 2 );
 
-		add_action( 'wp_default_styles', array( __CLASS__, 'register_story_card_styling' ) );
+		add_filter( 'rest_request_before_callbacks', [ __CLASS__, 'filter_rest_request_for_kses' ], 100, 3 );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_styles' ) );
+		add_action( 'wp_default_styles', [ __CLASS__, 'register_story_card_styling' ] );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'enqueue_block_editor_scripts' ) );
+		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_editor_styles' ] );
 
-		add_action( 'enqueue_block_editor_assets', array( __CLASS__, 'export_latest_stories_block_editor_data' ), 100 );
+		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'enqueue_block_editor_scripts' ] );
 
-		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'add_custom_stories_styles' ) );
+		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'export_latest_stories_block_editor_data' ], 100 );
+
+		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_custom_stories_styles' ] );
 
 		// Remove unnecessary settings.
-		add_filter( 'block_editor_settings', array( __CLASS__, 'filter_block_editor_settings' ), 10, 2 );
-
-		// Used for amp-story[publisher-logo-src]: The publisher's logo in square format (1x1 aspect ratio). This will be supplied by the custom logo or else site icon.
-		add_image_size( 'amp-publisher-logo', 100, 100, true );
-
-		// Used for amp-story[poster-portrait-src]: The story poster in portrait format (3x4 aspect ratio).
-		add_image_size( self::STORY_CARD_IMAGE_SIZE, self::STORY_SMALL_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
-
-		// Used for amp-story[poster-square-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_SQUARE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_LARGE_IMAGE_DIMENSION, true );
-
-		// Used for amp-story[poster-landscape-src]: The story poster in square format (1x1 aspect ratio).
-		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
-
-		// The default image size for AMP Story image block and background media image.
-		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
-
-		// In case there is no featured image for the poster-portrait-src, add a fallback image.
-		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'poster_portrait_fallback' ), 10, 3 );
-
-		// If the image is for a poster-square-src or poster-landscape-src, this ensures that it's not too small.
-		add_filter( 'wp_get_attachment_image_src', array( __CLASS__, 'ensure_correct_poster_size' ), 10, 3 );
+		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
 		// Limit the styles that are printed in a story.
-		add_filter( 'print_styles_array', array( __CLASS__, 'filter_frontend_print_styles_array' ) );
-		add_filter( 'print_styles_array', array( __CLASS__, 'filter_editor_print_styles_array' ) );
+		add_filter( 'print_styles_array', [ __CLASS__, 'filter_frontend_print_styles_array' ] );
+		add_filter( 'print_styles_array', [ __CLASS__, 'filter_editor_print_styles_array' ] );
 
 		// Select the single-amp_story.php template for AMP Stories.
-		add_filter( 'template_include', array( __CLASS__, 'filter_template_include' ) );
+		add_filter( 'template_include', [ __CLASS__, 'filter_template_include' ] );
 
 		// Get an embed template for this post type.
-		add_filter( 'embed_template', array( __CLASS__, 'get_embed_template' ), 10, 3 );
+		add_filter( 'embed_template', [ __CLASS__, 'get_embed_template' ], 10, 3 );
 
 		// Enqueue the styling for the /embed endpoint.
-		add_action( 'embed_footer', array( __CLASS__, 'enqueue_embed_styling' ) );
+		add_action( 'embed_footer', [ __CLASS__, 'enqueue_embed_styling' ] );
 
 		// In the block editor, remove the title from above the AMP Stories embed.
-		add_filter( 'embed_html', array( __CLASS__, 'remove_title_from_embed' ), 10, 2 );
+		add_filter( 'embed_html', [ __CLASS__, 'remove_title_from_embed' ], 10, 2 );
 
 		// Change some attributes for the AMP story embed.
-		add_filter( 'embed_html', array( __CLASS__, 'change_embed_iframe_attributes' ), 10, 2 );
+		add_filter( 'embed_html', [ __CLASS__, 'change_embed_iframe_attributes' ], 10, 2 );
 
 		// Override the render_callback for AMP story embeds.
-		add_filter( 'pre_render_block', array( __CLASS__, 'override_story_embed_callback' ), 10, 2 );
+		add_filter( 'pre_render_block', [ __CLASS__, 'override_story_embed_callback' ], 10, 2 );
 
-		// The AJAX handler for when an image is cropped and sent via POST.
-		add_action( 'wp_ajax_custom-header-crop', array( __CLASS__, 'crop_featured_image' ) );
+		// The AJAX handler for exporting an AMP story.
+		add_action( 'wp_ajax_' . self::AMP_STORIES_AJAX_ACTION, [ __CLASS__, 'handle_export' ] );
 
 		// Register render callback for just-in-time inclusion of dependent Google Font styles.
-		add_filter( 'render_block', array( __CLASS__, 'render_block_with_google_fonts' ), 10, 2 );
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_google_fonts' ], 10, 2 );
 
-		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'use_block_editor_for_story_post_type' ), PHP_INT_MAX, 2 );
-		add_filter( 'classic_editor_enabled_editors_for_post_type', array( __CLASS__, 'filter_enabled_editors_for_story_post_type' ), PHP_INT_MAX, 2 );
+		// Wrap each movable inner block in amp-story-grid-layer.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
 
-		add_filter( 'image_size_names_choose', array( __CLASS__, 'add_new_max_image_size' ) );
+		add_filter( 'use_block_editor_for_post_type', [ __CLASS__, 'use_block_editor_for_story_post_type' ], PHP_INT_MAX, 2 );
+		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
 
 		register_block_type(
 			'amp/amp-story-post-author',
-			array(
-				'render_callback' => array( __CLASS__, 'render_post_author_block' ),
-			)
+			[
+				'render_callback' => [ __CLASS__, 'render_post_author_block' ],
+			]
 		);
 
 		register_block_type(
 			'amp/amp-story-post-date',
-			array(
-				'render_callback' => array( __CLASS__, 'render_post_date_block' ),
-			)
+			[
+				'render_callback' => [ __CLASS__, 'render_post_date_block' ],
+			]
 		);
 
 		register_block_type(
 			'amp/amp-story-post-title',
-			array(
-				'render_callback' => array( __CLASS__, 'render_post_title_block' ),
-			)
+			[
+				'render_callback' => [ __CLASS__, 'render_post_title_block' ],
+			]
 		);
 
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
-					$sanitizers['AMP_Story_Sanitizer'] = array();
+					$sanitizers['AMP_Story_Sanitizer'] = [];
 
 					// Disable noscript fallbacks since not allowed in AMP Stories.
 					$sanitizers['AMP_Img_Sanitizer']['add_noscript_fallback']    = false;
@@ -315,7 +276,7 @@ class AMP_Story_Post_Type {
 		// Omit the core theme sanitizer for the story template.
 		add_filter(
 			'amp_content_sanitizers',
-			function( $sanitizers ) {
+			static function( $sanitizers ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					unset( $sanitizers['AMP_Core_Theme_Sanitizer'] );
 				}
@@ -323,7 +284,25 @@ class AMP_Story_Post_Type {
 			}
 		);
 
-		add_action( 'wp_head', array( __CLASS__, 'print_feed_link' ) );
+		add_filter(
+			'amp_content_sanitizers',
+			static function( $sanitizers ) {
+				if ( self::can_export() ) {
+					$post = get_queried_object();
+					$slug = sanitize_title( $post->post_title, $post->ID );
+
+					$sanitizers['AMP_Story_Export_Sanitizer'] = self::get_export_args( $slug );
+
+					$sanitizers['AMP_Style_Sanitizer']['include_manifest_comment'] = 'never';
+				}
+				return $sanitizers;
+			},
+			100 // Run sanitizer after the others (but before style sanitizer and validating sanitizer).
+		);
+
+		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
+
+		AMP_Story_Media::init();
 	}
 
 	/**
@@ -341,17 +320,299 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Filter the allowed tags for Kses to allow for amp-story children.
+	 * Filters an inline style attribute and removes disallowed rules.
+	 *
+	 * This is equivalent to the WordPress core function of the same name,
+	 * except that this does not remove CSS with parentheses in it.
+	 *
+	 * Also, it adds a few more allowed attributes.
+	 *
+	 * @see safecss_filter_attr()
+	 *
+	 * @param string $css A string of CSS rules.
+	 *
+	 * @return string Filtered string of CSS rules.
+	 */
+	private static function safecss_filter_attr( $css ) {
+		$css = wp_kses_no_null( $css );
+		$css = str_replace( [ "\n", "\r", "\t" ], '', $css );
+
+		$allowed_protocols = wp_allowed_protocols();
+
+		$css_array = explode( ';', trim( $css ) );
+
+		/** This filter is documented in wp-includes/kses.php */
+		$allowed_attr = apply_filters(
+			'safe_style_css',
+			[
+				'background',
+				'background-color',
+				'background-image',
+				'background-position',
+
+				'border',
+				'border-width',
+				'border-color',
+				'border-style',
+				'border-right',
+				'border-right-color',
+				'border-right-style',
+				'border-right-width',
+				'border-bottom',
+				'border-bottom-color',
+				'border-bottom-style',
+				'border-bottom-width',
+				'border-left',
+				'border-left-color',
+				'border-left-style',
+				'border-left-width',
+				'border-top',
+				'border-top-color',
+				'border-top-style',
+				'border-top-width',
+
+				'border-spacing',
+				'border-collapse',
+				'caption-side',
+
+				'color',
+				'font',
+				'font-family',
+				'font-size',
+				'font-style',
+				'font-variant',
+				'font-weight',
+				'letter-spacing',
+				'line-height',
+				'text-align',
+				'text-decoration',
+				'text-indent',
+				'text-transform',
+
+				'height',
+				'min-height',
+				'max-height',
+
+				'width',
+				'min-width',
+				'max-width',
+
+				'margin',
+				'margin-right',
+				'margin-bottom',
+				'margin-left',
+				'margin-top',
+
+				'padding',
+				'padding-right',
+				'padding-bottom',
+				'padding-left',
+				'padding-top',
+
+				'flex',
+				'flex-grow',
+				'flex-shrink',
+				'flex-basis',
+
+				'clear',
+				'cursor',
+				'direction',
+				'float',
+				'overflow',
+				'vertical-align',
+				'list-style-type',
+				'grid-template-columns',
+			]
+		);
+
+		// Add some more allowed attributes.
+		$allowed_attr[] = 'display';
+		$allowed_attr[] = 'opacity';
+		$allowed_attr[] = 'object-position';
+		$allowed_attr[] = 'position';
+		$allowed_attr[] = 'top';
+		$allowed_attr[] = 'left';
+		$allowed_attr[] = 'transform';
+
+		/*
+		 * CSS attributes that accept URL data types.
+		 *
+		 * This is in accordance to the CSS spec and unrelated to
+		 * the sub-set of supported attributes above.
+		 *
+		 * See: https://developer.mozilla.org/en-US/docs/Web/CSS/url
+		 */
+		$css_url_data_types = [
+			'background',
+			'background-image',
+
+			'cursor',
+
+			'list-style',
+			'list-style-image',
+		];
+
+		if ( empty( $allowed_attr ) ) {
+			return $css;
+		}
+
+		$css = '';
+		foreach ( $css_array as $css_item ) {
+			if ( '' === $css_item ) {
+				continue;
+			}
+
+			$css_item        = trim( $css_item );
+			$css_test_string = $css_item;
+			$found           = false;
+			$url_attr        = false;
+
+			if ( strpos( $css_item, ':' ) === false ) {
+				$found = true;
+			} else {
+				$parts        = explode( ':', $css_item, 2 );
+				$css_selector = trim( $parts[0] );
+
+				if ( in_array( $css_selector, $allowed_attr, true ) ) {
+					$found    = true;
+					$url_attr = in_array( $css_selector, $css_url_data_types, true );
+				}
+			}
+
+			if ( $found && $url_attr ) {
+				// Simplified: matches the sequence `url(*)`.
+				preg_match_all( '/url\([^)]+\)/', $parts[1], $url_matches );
+
+				foreach ( $url_matches[0] as $url_match ) {
+					// Clean up the URL from each of the matches above.
+					preg_match( '/^url\(\s*([\'\"]?)(.*)(\g1)\s*\)$/', $url_match, $url_pieces );
+
+					if ( empty( $url_pieces[2] ) ) {
+						$found = false;
+						break;
+					}
+
+					$url = trim( $url_pieces[2] );
+
+					if ( empty( $url ) || wp_kses_bad_protocol( $url, $allowed_protocols ) !== $url ) {
+						$found = false;
+						break;
+					} else {
+						// Remove the whole `url(*)` bit that was matched above from the CSS.
+						$css_test_string = str_replace( $url_match, '', $css_test_string );
+					}
+				}
+			}
+
+			if ( $found ) {
+				if ( '' !== $css ) {
+					$css .= ';';
+				}
+
+				$css .= $css_item;
+			}
+		}
+
+		return $css;
+	}
+
+	/**
+	 * Filters the response before executing any REST API callbacks.
+	 *
+	 * Temporarily modifies post content during saving in a way that KSES
+	 * does not strip actually valid CSS from post content, making block content invalid.
+	 *
+	 * @todo Remove once core has better CSS parsing.
+	 *
+	 * @link https://core.trac.wordpress.org/ticket/37134
+	 *
+	 * @param WP_HTTP_Response|WP_Error $response Result to send to the client. Usually a WP_REST_Response or WP_Error.
+	 * @param array                     $handler  Route handler used for the request.
+	 * @param WP_REST_Request           $request  Request used to generate the response.
+	 *
+	 * @return WP_HTTP_Response|WP_Error The filtered response.
+	 */
+	public static function filter_rest_request_for_kses( $response, $handler, $request ) {
+
+		// Short-circuit since this is relevant only for users without unfiltered_html capability.
+		if ( current_user_can( 'unfiltered_html' ) ) {
+			return $response;
+		}
+
+		if ( is_wp_error( $response ) ) {
+			return $response;
+		}
+
+		$obj  = get_post_type_object( self::POST_TYPE_SLUG );
+		$slug = ! empty( $obj->rest_base ) ? $obj->rest_base : $obj->name;
+
+		$editable_request_methods = array_map( 'trim', explode( ',', WP_REST_Server::EDITABLE ) );
+
+		if ( ! in_array( $request->get_method(), $editable_request_methods, true ) || ! preg_match( "#^/wp/v2/{$slug}/#s", $request->get_route() ) ) {
+			return $response;
+		}
+
+		if ( ! current_user_can( 'edit_post', $request['id'] ) ) {
+			return $response;
+		}
+
+		$style_attr_values = [];
+
+		// Replace inline styles with temporary data-temp-style-hash attribute before KSES...
+		add_filter(
+			'content_save_pre',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				$post_content = preg_replace_callback(
+					'|(?P<before><\w+(?:-\w+)*\s[^>]*?)style=\\\"(?P<styles>[^"]*)\\\"(?P<after>([^>]+?)*>)|', // Extra slashes appear here because $post_content is pre-slashed..
+					static function ( $matches ) use ( &$style_attr_values ) {
+						$hash                       = md5( $matches['styles'] );
+						$style_attr_values[ $hash ] = self::safecss_filter_attr( wp_unslash( $matches['styles'] ) );
+
+						// Replaces the complete style attribute value with its hashed version.
+						return $matches['before'] . sprintf( ' data-temp-style-hash="%s" ', $hash ) . $matches['after'];
+					},
+					$post_content
+				);
+
+				return $post_content;
+			},
+			0
+		);
+
+		// ...And bring it back afterwards.
+		add_filter(
+			'content_save_pre',
+			static function ( $post_content ) use ( &$style_attr_values ) {
+				// Replaces hashed style attribute value with the original value again.
+				return preg_replace_callback(
+					'/ data-temp-style-hash=\\\"(?P<hash>[0-9a-f]+)\\\"/',
+					static function ( $matches ) use ( $style_attr_values ) {
+						return isset( $style_attr_values[ $matches['hash'] ] ) ? sprintf( ' style="%s"', esc_attr( wp_slash( $style_attr_values[ $matches['hash'] ] ) ) ) : '';
+					},
+					$post_content
+				);
+			},
+			20
+		);
+
+		return $response;
+	}
+
+	/**
+	 * Filter the allowed tags for KSES to allow for amp-story children.
 	 *
 	 * @param array $allowed_tags Allowed tags.
 	 * @return array Allowed tags.
 	 */
 	public static function filter_kses_allowed_html( $allowed_tags ) {
-		$story_components = array(
+		$story_components = [
 			'amp-story-page',
 			'amp-story-grid-layer',
 			'amp-story-cta-layer',
-		);
+			'amp-img',
+			'amp-video',
+			'img',
+		];
 		foreach ( $story_components as $story_component ) {
 			$attributes = array_fill_keys( array_keys( AMP_Allowed_Tags_Generated::get_allowed_attributes() ), true );
 			$rule_specs = AMP_Allowed_Tags_Generated::get_allowed_tag( $story_component );
@@ -363,11 +624,15 @@ class AMP_Story_Post_Type {
 
 		// @todo This perhaps should not be allowed if user does not have capability.
 		foreach ( $allowed_tags as &$allowed_tag ) {
-			$allowed_tag['animate-in']          = true;
-			$allowed_tag['animate-in-duration'] = true;
-			$allowed_tag['animate-in-delay']    = true;
-			$allowed_tag['animate-in-after']    = true;
-			$allowed_tag['data-font-family']    = true;
+			$allowed_tag['animate-in']           = true;
+			$allowed_tag['animate-in-duration']  = true;
+			$allowed_tag['animate-in-delay']     = true;
+			$allowed_tag['animate-in-after']     = true;
+			$allowed_tag['data-font-family']     = true;
+			$allowed_tag['data-block-name']      = true;
+			$allowed_tag['data-temp-style-hash'] = true;
+			$allowed_tag['layout']               = true;
+			$allowed_tag['object-position']      = true;
 		}
 
 		return $allowed_tags;
@@ -391,7 +656,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -424,7 +689,7 @@ class AMP_Story_Post_Type {
 
 		return array_filter(
 			$handles,
-			function( $handle ) {
+			static function( $handle ) {
 				if ( ! isset( wp_styles()->registered[ $handle ] ) ) {
 					return false;
 				}
@@ -458,18 +723,19 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
 			amp_get_asset_url( 'css/amp-stories-editor.css' ),
-			array( 'wp-edit-blocks' ),
+			[ 'wp-edit-blocks' ],
 			AMP__VERSION
 		);
 
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled',
 			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
-			array( 'wp-edit-blocks', 'amp-stories' ),
+			[ 'wp-edit-blocks', 'amp-stories' ],
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', true );
+		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
+		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
 
 		self::enqueue_general_styles();
 	}
@@ -482,9 +748,11 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			self::AMP_STORIES_STYLE_HANDLE,
 			amp_get_asset_url( 'css/amp-stories.css' ),
-			array(),
+			[],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::AMP_STORIES_STYLE_HANDLE, 'rtl', 'replace' );
 
 		$fonts = self::get_fonts();
 		foreach ( $fonts as $font ) {
@@ -551,51 +819,6 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * If there's no featured image for the poster-portrait-src, this adds a fallback.
-	 *
-	 * @param array|false  $image The featured image, or false.
-	 * @param int          $attachment_id The ID of the image.
-	 * @param string|array $size The size of the image.
-	 * @return array|false The featured image, or false.
-	 */
-	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
-		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
-			return array(
-				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
-				self::STORY_LARGE_IMAGE_DIMENSION,
-				self::STORY_SMALL_IMAGE_DIMENSION,
-			);
-		}
-
-		return $image;
-	}
-
-	/**
-	 * Helps to ensure that the poster-square-src and poster-landscape-src images aren't too small.
-	 *
-	 * These values come from the featured image.
-	 * But the featured image is often cropped down to 696 x 928.
-	 * So from that, it's not possible to get a 928 x 928 image, for example.
-	 * So instead, use the source image that was cropped, instead of the cropped image.
-	 * This is more likely to produce the right size image.
-	 *
-	 * @param array|false  $image The featured image, or false.
-	 * @param int          $attachment_id The ID of the image.
-	 * @param string|array $size The size of the image.
-	 * @return array|false The featured image, or false.
-	 */
-	public static function ensure_correct_poster_size( $image, $attachment_id, $size ) {
-		if ( self::STORY_LANDSCAPE_IMAGE_SIZE === $size || self::STORY_SQUARE_IMAGE_SIZE === $size ) {
-			$attachment_meta = wp_get_attachment_metadata( $attachment_id );
-			// The source image that was cropped.
-			if ( ! empty( $attachment_meta['attachment_parent'] ) ) {
-				return wp_get_attachment_image_src( $attachment_meta['attachment_parent'], $size );
-			}
-		}
-		return $image;
-	}
-
-	/**
 	 * Registers the story card styling.
 	 *
 	 * This can't take place on the 'wp_enqueue_scripts' hook, as the /embed endpoint doesn't trigger that.
@@ -607,7 +830,7 @@ class AMP_Story_Post_Type {
 		$wp_styles->add(
 			self::STORY_CARD_CSS_SLUG,
 			amp_get_asset_url( '/css/' . self::STORY_CARD_CSS_SLUG . '.css' ),
-			array(),
+			[],
 			AMP__VERSION
 		);
 	}
@@ -634,9 +857,9 @@ class AMP_Story_Post_Type {
 			sprintf(
 				'var ampLatestStoriesBlockData = %s;',
 				wp_json_encode(
-					array(
+					[
 						'storyCardStyleURL' => $url,
-					)
+					]
 				)
 			),
 			'before'
@@ -654,7 +877,7 @@ class AMP_Story_Post_Type {
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::AMP_STORIES_SCRIPT_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
 			? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-			: array();
+			: [];
 
 		wp_enqueue_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
@@ -681,6 +904,16 @@ class AMP_Story_Post_Type {
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
 			self::get_fonts()
+		);
+
+		wp_localize_script(
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			'ampStoriesExport',
+			[
+				'action'  => self::AMP_STORIES_AJAX_ACTION,
+				'nonce'   => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
+				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
+			]
 		);
 	}
 
@@ -729,10 +962,13 @@ class AMP_Story_Post_Type {
 		wp_enqueue_style(
 			'amp-stories-frontend',
 			amp_get_asset_url( 'css/amp-stories-frontend.css' ),
-			array( self::AMP_STORIES_STYLE_HANDLE ),
+			[ self::AMP_STORIES_STYLE_HANDLE ],
 			AMP__VERSION,
 			false
 		);
+
+		wp_styles()->add_data( 'amp-stories-frontend', 'rtl', 'replace' );
+		wp_styles()->add_data( self::STORY_CARD_CSS_SLUG, 'rtl', 'replace' );
 
 		// Also enqueue this since it's possible to embed another story into a story.
 		wp_enqueue_style( self::STORY_CARD_CSS_SLUG );
@@ -751,187 +987,187 @@ class AMP_Story_Post_Type {
 			return $fonts;
 		}
 
-		$fonts = array(
-			array(
+		$fonts = [
+			[
 				'name'      => 'Arial',
-				'fallbacks' => array( 'Helvetica Neue', 'Helvetica', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Arial Black',
-				'fallbacks' => array( 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Arial Narrow',
-				'fallbacks' => array( 'Arial', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Arial', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Arimo',
 				'gfont'     => 'Arimo:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Baskerville',
-				'fallbacks' => array( 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ],
+			],
+			[
 				'name'      => 'Brush Script MT',
-				'fallbacks' => array( 'cursive' ),
-			),
-			array(
+				'fallbacks' => [ 'cursive' ],
+			],
+			[
 				'name'      => 'Copperplate',
-				'fallbacks' => array( 'Copperplate Gothic Light', 'fantasy' ),
-			),
-			array(
+				'fallbacks' => [ 'Copperplate Gothic Light', 'fantasy' ],
+			],
+			[
 				'name'      => 'Courier New',
-				'fallbacks' => array( 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ),
-			),
-			array(
+				'fallbacks' => [ 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ],
+			],
+			[
 				'name'      => 'Century Gothic',
-				'fallbacks' => array( 'CenturyGothic', 'AppleGothic', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'CenturyGothic', 'AppleGothic', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Garamond',
-				'fallbacks' => array( 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ],
+			],
+			[
 				'name'      => 'Georgia',
-				'fallbacks' => array( 'Times', 'Times New Roman', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Times', 'Times New Roman', 'serif' ],
+			],
+			[
 				'name'      => 'Gill Sans',
-				'fallbacks' => array( 'Gill Sans MT', 'Calibri', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Lato',
 				'gfont'     => 'Lato:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Lora',
 				'gfont'     => 'Lora:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'Lucida Bright',
-				'fallbacks' => array( 'Georgia', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Georgia', 'serif' ],
+			],
+			[
 				'name'      => 'Lucida Sans Typewriter',
-				'fallbacks' => array( 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ),
-			),
-			array(
+				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
+			],
+			[
 				'name'      => 'Merriweather',
 				'gfont'     => 'Merriweather:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'Montserrat',
 				'gfont'     => 'Montserrat:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Noto Sans',
 				'gfont'     => 'Noto Sans:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Open Sans',
 				'gfont'     => 'Open Sans:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Open Sans Condensed',
 				'gfont'     => 'Open Sans Condensed:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Oswald',
 				'gfont'     => 'Oswald:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Palatino',
-				'fallbacks' => array( 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
+			],
+			[
 				'name'      => 'Papyrus',
-				'fallbacks' => array( 'fantasy' ),
-			),
-			array(
+				'fallbacks' => [ 'fantasy' ],
+			],
+			[
 				'name'      => 'Playfair Display',
 				'gfont'     => 'Playfair Display:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'PT Sans',
 				'gfont'     => 'PT Sans:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'PT Sans Narrow',
 				'gfont'     => 'PT Sans Narrow:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'PT Serif',
 				'gfont'     => 'PT Serif:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'Raleway',
 				'gfont'     => 'Raleway:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Roboto',
 				'gfont'     => 'Roboto:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Roboto Condensed',
 				'gfont'     => 'Roboto Condensed:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Roboto Slab',
 				'gfont'     => 'Roboto Slab:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'Slabo 27px',
 				'gfont'     => 'Slabo 27px:400,700',
-				'fallbacks' => array( 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'serif' ],
+			],
+			[
 				'name'      => 'Source Sans Pro',
 				'gfont'     => 'Source Sans Pro:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Tahoma',
-				'fallbacks' => array( 'Verdana', 'Segoe', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Verdana', 'Segoe', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Times New Roman',
-				'fallbacks' => array( 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ],
+			],
+			[
 				'name'      => 'Trebuchet MS',
-				'fallbacks' => array( 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
+			],
+			[
 				'name'      => 'Ubuntu',
 				'gfont'     => 'Ubuntu:400,700',
-				'fallbacks' => array( 'sans-serif' ),
-			),
-			array(
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
 				'name'      => 'Verdana',
-				'fallbacks' => array( 'Geneva', 'sans-serif' ),
-			),
-		);
+				'fallbacks' => [ 'Geneva', 'sans-serif' ],
+			],
+		];
 
 		$fonts_url = 'https://fonts.googleapis.com/css';
-		$subsets   = array( 'latin', 'latin-ext' );
+		$subsets   = [ 'latin', 'latin-ext' ];
 
 		/*
 		 * Translators: To add an additional character subset specific to your language,
@@ -952,16 +1188,16 @@ class AMP_Story_Post_Type {
 		}
 
 		$fonts = array_map(
-			function ( $font ) use ( $fonts_url, $subsets ) {
+			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
 				if ( isset( $font['gfont'] ) ) {
 					$font['handle'] = sprintf( '%s-font', $font['slug'] );
 					$font['src']    = add_query_arg(
-						array(
+						[
 							'family' => rawurlencode( $font['gfont'] ),
 							'subset' => rawurlencode( implode( ',', $subsets ) ),
-						),
+						],
 						$fonts_url
 					);
 				}
@@ -983,7 +1219,7 @@ class AMP_Story_Post_Type {
 	public static function get_font( $name ) {
 		$fonts = array_filter(
 			self::get_fonts(),
-			function ( $font ) use ( $name ) {
+			static function ( $font ) use ( $name ) {
 				return $font['name'] === $name;
 			}
 		);
@@ -1047,7 +1283,7 @@ class AMP_Story_Post_Type {
 		}
 
 		if ( ! wp_style_is( $font['handle'], 'registered' ) ) {
-			wp_register_style( $font['handle'], $font['src'], array(), null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+			wp_register_style( $font['handle'], $font['src'], [], null, 'all' ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 		}
 
 		wp_enqueue_style( $font['handle'] );
@@ -1057,6 +1293,156 @@ class AMP_Story_Post_Type {
 		);
 
 		return $block_content;
+	}
+
+	/**
+	 * Converts pixel to percentage based on the editor page sizes.
+	 *
+	 * @param string $axis Axis: x or y.
+	 * @param number $pixels Pixel value.
+	 *
+	 * @return int|string Percentage value compared to AMP Story editor page.
+	 */
+	public static function get_percentage_from_pixels( $axis, $pixels ) {
+		if ( 'x' === $axis ) {
+			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_WIDTH ) * 100 ), 2 );
+		} elseif ( 'y' === $axis ) {
+			return number_format( ( ( $pixels / self::STORY_PAGE_INNER_HEIGHT ) * 100 ), 2 );
+		}
+		return 0;
+	}
+
+	/**
+	 * Get default height by block name.
+	 *
+	 * @param string $block Block name.
+	 *
+	 * @return int Height in pixels.
+	 */
+	protected static function get_blocks_default_height( $block ) {
+		switch ( $block ) {
+			case 'core/quote':
+			case 'core/video':
+			case 'core/embed':
+				return 200;
+
+			case 'core/pullquote':
+				return 250;
+
+			case 'core/table':
+				return 100;
+
+			case 'amp/amp-story-post-author':
+			case 'amp/amp-story-post-date':
+				return 50;
+
+			case 'amp/amp-story-post-title':
+				return 100;
+
+			default:
+				return 60;
+		}
+	}
+
+	/**
+	 * Wraps each movable block into amp-story-grid-layer and animation wrapper with necessary attributes.
+	 *
+	 * @param string $block_content The block content about to be appended.
+	 * @param array  $block         The full block, including name and attributes.
+	 *
+	 * @return string Modified content.
+	 */
+	public static function render_block_with_grid_layer( $block_content, $block ) {
+
+		$post = get_post();
+		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+			return $block_content;
+		}
+
+		// If the block content already includes amp-story-grid-layer, stop.
+		if ( false !== strpos( $block_content, 'amp-story-grid-layer' ) ) {
+			return $block_content;
+		}
+
+		$movable_blocks = [
+			'core/code',
+			'core/embed',
+			'core/image',
+			'core/list',
+			'core/preformatted',
+			'core/pullquote',
+			'core/quote',
+			'core/table',
+			'core/verse',
+			'core/video',
+			'amp/amp-story-text',
+			'amp/amp-story-post-author',
+			'amp/amp-story-post-date',
+			'amp/amp-story-post-title',
+			'core/html',
+			'core/block', // Reusable blocks.
+			'core/template', // Reusable blocks.
+		];
+
+		$name = $block['blockName'];
+
+		// If the block is not movable, it doesn't need the wrapper.
+		if ( ! in_array( $name, $movable_blocks, true ) ) {
+			return $block_content;
+		}
+
+		$atts         = $block['attrs'];
+		$wrapper_atts = [];
+
+		$style = [
+			'position' => 'absolute',
+		];
+
+		// Set default values if missing.
+		$width  = isset( $atts['width'] ) ? $atts['width'] : 250;
+		$height = isset( $atts['height'] ) ? $atts['height'] : self::get_blocks_default_height( $name );
+
+		// Set passed attributes or default values (0, 5) for top and left.
+		$style['top']    = empty( $atts['positionTop'] ) ? '0%' : $atts['positionTop'] . '%';
+		$style['left']   = empty( $atts['positionLeft'] ) ? '5%' : $atts['positionLeft'] . '%';
+		$style['width']  = self::get_percentage_from_pixels( 'x', $width ) . '%';
+		$style['height'] = self::get_percentage_from_pixels( 'y', $height ) . '%';
+
+		$wrapper_style = isset( $atts['style'] ) ? $atts['style'] : '';
+
+		foreach ( $style as $att => $value ) {
+			$wrapper_style .= "$att:$value;";
+		}
+
+		if ( ! empty( $wrapper_style ) ) {
+			$wrapper_atts['style'] = $wrapper_style;
+		}
+
+		if ( ! empty( $atts['ampAnimationType'] ) ) {
+			$wrapper_atts['animate-in'] = $atts['ampAnimationType'];
+			if ( ! empty( $atts['ampAnimationDelay'] ) ) {
+				$wrapper_atts['animate-in-delay'] = $atts['ampAnimationDelay'];
+			}
+			if ( ! empty( $atts['ampAnimationDuration'] ) ) {
+				$wrapper_atts['animate-in-duration'] = $atts['ampAnimationDuration'];
+			}
+			if ( ! empty( $atts['ampAnimationAfter'] ) ) {
+				$wrapper_atts['animate-in-after'] = $atts['ampAnimationAfter'];
+			}
+		}
+
+		if ( isset( $atts['anchor'] ) ) {
+			$wrapper_atts['id'] = $atts['anchor'];
+		}
+
+		$before = '<amp-story-grid-layer template="vertical"><div class="amp-story-block-wrapper"';
+		foreach ( $wrapper_atts as $att => $value ) {
+			$before .= ' ' . $att . '="' . esc_attr( $value ) . '"';
+		}
+		$before .= '>';
+		$after   = '</div></amp-story-grid-layer>';
+
+		return $before . $block_content . $after;
 	}
 
 	/**
@@ -1132,11 +1518,11 @@ class AMP_Story_Post_Type {
 	public static function the_single_story_card( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'post'         => null,
 				'size'         => 'full',
 				'disable_link' => false,
-			)
+			]
 		);
 
 		$post = get_post( $args['post'] );
@@ -1157,9 +1543,9 @@ class AMP_Story_Post_Type {
 			24,
 			'',
 			'',
-			array(
+			[
 				'class' => 'latest-stories__avatar',
-			)
+			]
 		);
 		if ( ! $args['disable_link'] ) {
 			$href = sprintf(
@@ -1175,8 +1561,8 @@ class AMP_Story_Post_Type {
 			printf(
 				'<img src="%s" width="%d" height="%d" alt="%s" class="latest-stories__featured-img" data-amp-layout="fixed">',
 				esc_url( $url ),
-				esc_attr( self::STORY_SMALL_IMAGE_DIMENSION / 2 ),
-				esc_attr( self::STORY_LARGE_IMAGE_DIMENSION / 2 ),
+				esc_attr( AMP_Story_Media::STORY_SMALL_IMAGE_DIMENSION / 2 ),
+				esc_attr( AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 ),
 				esc_attr( get_the_title( $post ) )
 			);
 			?>
@@ -1219,7 +1605,7 @@ class AMP_Story_Post_Type {
 	 * @return string|null $rendered_markup The rendered markup, or null to not override the existing render_callback.
 	 */
 	public static function override_story_embed_callback( $pre_render, $block ) {
-		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || ! in_array( $block['blockName'], array( 'core-embed/wordpress', 'core/embed' ), true ) ) {
+		if ( ! isset( $block['attrs']['url'], $block['blockName'] ) || ! in_array( $block['blockName'], [ 'core-embed/wordpress', 'core/embed' ], true ) ) {
 			return $pre_render;
 		}
 
@@ -1251,10 +1637,10 @@ class AMP_Story_Post_Type {
 		<div class="amp-story-embed">
 			<?php
 			self::the_single_story_card(
-				array(
+				[
 					'post' => $post,
-					'size' => self::STORY_CARD_IMAGE_SIZE,
-				)
+					'size' => AMP_Story_Media::STORY_CARD_IMAGE_SIZE,
+				]
 			);
 			?>
 		</div>
@@ -1271,30 +1657,30 @@ class AMP_Story_Post_Type {
 	public static function register_block_latest_stories() {
 		register_block_type(
 			'amp/amp-latest-stories',
-			array(
-				'attributes'      => array(
-					'className'     => array(
+			[
+				'attributes'      => [
+					'className'     => [
 						'type' => 'string',
-					),
-					'storiesToShow' => array(
+					],
+					'storiesToShow' => [
 						'type'    => 'number',
 						'default' => 5,
-					),
-					'order'         => array(
+					],
+					'order'         => [
 						'type'    => 'string',
 						'default' => 'desc',
-					),
-					'orderBy'       => array(
+					],
+					'orderBy'       => [
 						'type'    => 'string',
 						'default' => 'date',
-					),
-					'useCarousel'   => array(
+					],
+					'useCarousel'   => [
 						'type'    => 'boolean',
 						'default' => ! is_admin(),
-					),
-				),
-				'render_callback' => array( __CLASS__, 'render_block_latest_stories' ),
-			)
+					],
+				],
+				'render_callback' => [ __CLASS__, 'render_block_latest_stories' ],
+			]
 		);
 	}
 
@@ -1308,7 +1694,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function render_block_latest_stories( $attributes ) {
 		$is_amp_carousel = ! empty( $attributes['useCarousel'] );
-		$args            = array(
+		$args            = [
 			'post_type'        => self::POST_TYPE_SLUG,
 			'posts_per_page'   => $attributes['storiesToShow'],
 			'post_status'      => 'publish',
@@ -1316,15 +1702,15 @@ class AMP_Story_Post_Type {
 			'orderby'          => $attributes['orderBy'],
 			'suppress_filters' => false,
 			'meta_key'         => '_thumbnail_id',
-		);
+		];
 		$story_query     = new WP_Query( $args );
 		$class           = 'amp-block-latest-stories';
 		if ( isset( $attributes['className'] ) ) {
 			$class .= ' ' . $attributes['className'];
 		}
-		$size        = self::STORY_CARD_IMAGE_SIZE;
+		$size        = AMP_Story_Media::STORY_CARD_IMAGE_SIZE;
 		$meta_height = 76;
-		$min_height  = self::STORY_LARGE_IMAGE_DIMENSION / 2 + $meta_height;
+		$min_height  = AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 + $meta_height;
 
 		ob_start();
 		?>
@@ -1338,11 +1724,11 @@ class AMP_Story_Post_Type {
 					<<?php echo $is_amp_carousel ? 'div' : 'li'; ?> class="slide latest-stories__slide">
 						<?php
 						self::the_single_story_card(
-							array(
+							[
 								'post'         => $post,
 								'size'         => $size,
 								'disable_link' => ! $is_amp_carousel,
-							)
+							]
 						);
 						?>
 					</<?php echo $is_amp_carousel ? 'div' : 'li'; ?>>
@@ -1382,112 +1768,6 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Crops the image and returns the object as JSON.
-	 *
-	 * Forked from Custom_Image_Header::ajax_header_crop().
-	 */
-	public static function crop_featured_image() {
-		check_ajax_referer( 'image_editor-' . $_POST['id'], 'nonce' );
-
-		if ( ! current_user_can( 'edit_posts' ) ) {
-			wp_send_json_error();
-		}
-
-		$crop_details = $_POST['cropDetails'];
-
-		$dimensions = array(
-			'dst_width'  => self::STORY_SMALL_IMAGE_DIMENSION,
-			'dst_height' => self::STORY_LARGE_IMAGE_DIMENSION,
-		);
-
-		$attachment_id = absint( $_POST['id'] );
-
-		$cropped = wp_crop_image(
-			$attachment_id,
-			intval( $crop_details['x1'] ),
-			intval( $crop_details['y1'] ),
-			intval( $crop_details['width'] ),
-			intval( $crop_details['height'] ),
-			intval( $dimensions['dst_width'] ),
-			intval( $dimensions['dst_height'] )
-		);
-
-		if ( ! $cropped || is_wp_error( $cropped ) ) {
-			wp_send_json_error( array( 'message' => __( 'Image could not be processed. Please go back and try again.', 'default' ) ) );
-		}
-
-		/** This filter is documented in wp-admin/custom-header.php */
-		$cropped = apply_filters( 'wp_create_file_in_uploads', $cropped, $attachment_id ); // For replication.
-		$object  = self::create_attachment_object( $cropped, $attachment_id );
-		unset( $object['ID'] );
-
-		$new_attachment_id       = self::insert_attachment( $object, $cropped );
-		$object['attachment_id'] = $new_attachment_id;
-		$object['url']           = wp_get_attachment_url( $new_attachment_id );
-		$object['width']         = $dimensions['dst_width'];
-		$object['height']        = $dimensions['dst_height'];
-
-		wp_send_json_success( $object );
-	}
-
-	/**
-	 * Create an attachment 'object'.
-	 *
-	 * Forked from Custom_Image_Header::create_attachment_object() in Core.
-	 *
-	 * @param string $cropped Cropped image URL.
-	 * @param int    $parent_attachment_id Attachment ID of parent image.
-	 * @return array Attachment object.
-	 */
-	public static function create_attachment_object( $cropped, $parent_attachment_id ) {
-		$parent     = get_post( $parent_attachment_id );
-		$parent_url = wp_get_attachment_url( $parent->ID );
-		$url        = str_replace( basename( $parent_url ), basename( $cropped ), $parent_url );
-		try {
-			$size = getimagesize( $cropped );
-		} catch ( Exception $error ) {
-			unset( $error );
-		}
-
-		$image_type = ( $size ) ? $size['mime'] : 'image/jpeg';
-		$object     = array(
-			'ID'             => $parent_attachment_id,
-			'post_title'     => basename( $cropped ),
-			'post_mime_type' => $image_type,
-			'guid'           => $url,
-			'context'        => 'amp-story-poster',
-			'post_parent'    => $parent_attachment_id,
-		);
-
-		return $object;
-	}
-
-	/**
-	 * Insert an attachment and its metadata.
-	 *
-	 * Forked from Custom_Image_Header::insert_attachment() in Core.
-	 *
-	 * @param array  $object  Attachment object.
-	 * @param string $cropped Cropped image URL.
-	 * @return int Attachment ID.
-	 */
-	public static function insert_attachment( $object, $cropped ) {
-		$parent_id = isset( $object['post_parent'] ) ? $object['post_parent'] : null;
-		unset( $object['post_parent'] );
-
-		$attachment_id = wp_insert_attachment( $object, $cropped );
-		$metadata      = wp_generate_attachment_metadata( $attachment_id, $cropped );
-
-		// If this is a crop, save the original attachment ID as metadata.
-		if ( $parent_id ) {
-			$metadata['attachment_parent'] = $parent_id;
-		}
-		wp_update_attachment_metadata( $attachment_id, $metadata );
-
-		return $attachment_id;
-	}
-
-	/**
 	 * For amp_story embeds, removes the title from above the <iframe>.
 	 *
 	 * @param string  $output The output to filter.
@@ -1518,7 +1798,7 @@ class AMP_Story_Post_Type {
 		}
 
 		// Add 4px more height, as the <iframe> needs that to display the full image.
-		$new_height = strval( ( self::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
+		$new_height = (string) ( ( AMP_Story_Media::STORY_LARGE_IMAGE_DIMENSION / 2 ) + 4 );
 		return preg_replace(
 			'/(<iframe sandbox="allow-scripts"[^>]*\sheight=")(\w+)("[^>]*>)/',
 			sprintf( '${1}%s${3}', $new_height ),
@@ -1527,30 +1807,227 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Adds a new max image size to the images sizes available.
+	 * Checks for `story_export` and valid Ajax nonce.
 	 *
-	 * In the AMP story editor, when selecting Background Media,
-	 * it will use this custom image size.
-	 * This filter will also make it available in the Image block's 'Image Size' <select> element.
-	 *
-	 * @param array $image_sizes {
-	 *     An associative array of image sizes.
-	 *
-	 *     @type string $slug Image size slug, like 'medium'.
-	 *     @type string $name Image size name, like 'Medium'.
-	 * }
-	 * @return array $image_sizes The filtered image sizes.
+	 * @return bool
 	 */
-	public static function add_new_max_image_size( $image_sizes ) {
-		$full_size_name = __( 'AMP Story Max Size', 'amp' );
+	public static function can_export() {
+		return is_singular( self::POST_TYPE_SLUG ) && isset( $_GET['story_export'] ) && check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce', false );
+	}
 
-		if ( isset( $_POST['action'] ) && 'query-attachments' === $_POST['action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
-		} elseif ( get_post_type() && self::POST_TYPE_SLUG === get_post_type() ) {
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
-			unset( $image_sizes['full'] );
+	/**
+	 * Get the args used during a story export.
+	 *
+	 * @param string $slug The slug used to build the new `canonical_url`.
+	 *
+	 * @return array
+	 */
+	public static function get_export_args( $slug = '' ) {
+		$base_url = untrailingslashit( AMP_Options_Manager::get_option( 'story_export_base_url' ) );
+
+		return [
+			'base_url'      => esc_url( $base_url ),
+			'canonical_url' => ( $base_url && $slug ) ? esc_url( trailingslashit( $base_url ) . $slug ) : false,
+		];
+	}
+
+	/**
+	 * Returns an asset basename where the date directory structure is retained to avoid filename collisions.
+	 *
+	 * This means that an asset like `https://sample.org/wp-content/uploads/2019/07/sample.jpg`
+	 * returns the basename `2019-07-sample.jpg` instead of `sample.jpg`.
+	 *
+	 * @param string $asset The URL of the export asset.
+	 *
+	 * @return string
+	 */
+	public static function export_image_basename( $asset ) {
+		$asset = preg_replace_callback(
+			'/uploads\/(.*)/',
+			static function( $matches ) {
+				return str_replace( '/', '-', $matches[1] );
+			},
+			$asset
+		);
+
+		return basename( $asset );
+	}
+
+	/**
+	 * Ajax handler to export the story ZIP archive.
+	 *
+	 * This method returns an error as JSON and the binary data on success.
+	 */
+	public static function handle_export() {
+		check_ajax_referer( self::AMP_STORIES_AJAX_ACTION, 'nonce' );
+
+		// Get the post ID.
+		$post_id = isset( $_POST['post_ID'] ) ? absint( wp_unslash( $_POST['post_ID'] ) ) : 0;
+
+		// The user must have the correct permissions.
+		if ( ! current_user_can( 'publish_post', $post_id ) ) {
+			wp_send_json_error(
+				[
+					'errorMessage' => esc_html__( 'You do not have the required permissions to export stories.', 'amp' ),
+				],
+				403
+			);
 		}
 
-		return $image_sizes;
+		// We need the ZipArchive class to make this work.
+		if ( ! class_exists( 'ZipArchive', false ) ) {
+			wp_send_json_error(
+				[
+					/* translators: %s is the ZipArchive class name. */
+					'errorMessage' => sprintf( esc_html__( 'The %s class is required to export stories.', 'amp' ), 'ZipArchive' ),
+				],
+				400
+			);
+		}
+
+		// Bail if the user has not saved the story yet.
+		if ( 'auto-draft' === get_post_status( $post_id ) ) {
+			wp_send_json_error(
+				[
+					'errorMessage' => esc_html__( 'Save the story before exporting.', 'amp' ),
+				],
+				401
+			);
+		}
+
+		// Generate and export the archive.
+		$export = self::generate_export( $post_id );
+
+		// Export failed.
+		if ( is_wp_error( $export ) ) {
+			$error_data = $export->get_error_data();
+
+			if ( is_array( $error_data ) && isset( $error_data['status'] ) ) {
+				$status = $error_data['status'];
+			} else {
+				$status = 500;
+			}
+
+			wp_send_json_error(
+				[
+					'errorMessage' => $export->get_error_message(),
+				],
+				$status
+			);
+		}
+
+		// Failed to export for an unknown reason not related to generating the archive.
+		wp_send_json_error(
+			[
+				'errorMessage' => esc_html__( 'Could not generate the story archive.', 'amp' ),
+			],
+			500
+		);
+	}
+
+	/**
+	 * Generates a Zip archive from the AMP Story.
+	 *
+	 * @param int $post_id The post ID of the AMP Story.
+	 * @return WP_Error
+	 */
+	private static function generate_export( $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( ! $post ) {
+			return new WP_Error( 'amp_story_export_invalid_post', esc_html__( 'The story does not exist.', 'amp' ) );
+		}
+
+		$slug = sanitize_title( $post->post_title, $post->ID );
+		$file = wp_tempnam( $slug );
+
+		$zip = new ZipArchive();
+		$res = $zip->open( $file, ZipArchive::CREATE | ZipArchive::OVERWRITE );
+
+		if ( true !== $res ) {
+			/* translators: %s is the ZipArchive error code. */
+			return new WP_Error( 'amp_story_zip_archive_error', sprintf( esc_html__( 'There was an error generating the ZIP archive. Error code: %s', 'amp' ), $res ) );
+		}
+
+		// Passed to `get_preview_post_link()` for nonce access and to sanitize the output.
+		$query_args = [
+			'story_export' => true,
+			'_wpnonce'     => wp_create_nonce( self::AMP_STORIES_AJAX_ACTION ),
+		];
+
+		// Passed to `wp_remote_get()`.
+		$args = [
+			'cookies'     => wp_unslash( $_COOKIE ), // Pass along cookies so private pages and drafts can be accessed.
+			'timeout'     => 20, // Increase from default of 5 to give extra time for the plugin to process story for exporting.
+			'sslverify'   => false,
+			'redirection' => 0, // Because we're in a loop for redirection.
+			'headers'     => [
+				'Cache-Control' => 'no-cache',
+			],
+		];
+
+		// Get the preview URL.
+		$response = wp_remote_get( get_preview_post_link( $post, $query_args ), $args );
+
+		// Ensure we have the required data.
+		if ( ! ( is_array( $response ) && isset( $response['body'] ) ) ) {
+			return new WP_Error( 'amp_story_export_response', esc_html__( 'Could not retrieve story HTML.', 'amp' ) );
+		}
+
+		// Get the HTML from the response body.
+		$html   = $response['body'];
+		$assets = [];
+		$regex  = '<!--\s*AMP_EXPORT_ASSETS\s*:\s*(\[.*?\])\s*-->';
+
+		// Get the assets from the AMP_EXPORT_ASSETS comment.
+		if ( preg_match( '#</body>.*?' . $regex . '#s', $html, $matches ) ) {
+			$assets = json_decode( $matches[1], true );
+
+			// Remove the comment.
+			$html = preg_replace( '/' . $regex . '/s', '', $html );
+		}
+
+		// Create the zip directory.
+		$zip->addEmptyDir( $slug );
+
+		// Add README.txt file.
+		$zip->addFromString(
+			$slug . '/README.txt',
+			file_get_contents( AMP__DIR__ . '/includes/story-export/readme.txt' ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		);
+
+		// Add index.html file.
+		$zip->addFromString( $slug . '/index.html', $html );
+
+		// Add the assets.
+		if ( ! empty( $assets ) ) {
+
+			// Create the empty assets directory.
+			$zip->addEmptyDir( $slug . '/assets' );
+
+			foreach ( $assets as $asset ) {
+				$response = wp_remote_get( $asset, [ 'sslverify' => false ] );
+				if ( is_array( $response ) && ! empty( $response['body'] ) ) {
+					$zip->addFromString( $slug . '/assets/' . self::export_image_basename( $asset ), $response['body'] );
+				}
+			}
+		}
+
+		// Close the active archive.
+		$zip->close();
+
+		// Read the file.
+		$fo = @fopen( $file, 'r' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_read_fopen, WordPress.PHP.NoSilencedErrors.Discouraged
+
+		if ( ! $fo ) {
+			return new WP_Error( 'amp_story_export_file_open', esc_html__( 'Could not open the generated ZIP archive.', 'amp' ) );
+		}
+
+		header( 'Content-type: application/octet-stream' );
+		header( 'Content-Disposition: attachment; filename="' . sprintf( '%s.zip', $slug ) . '"' );
+		header( 'Content-length: ' . filesize( $file ) );
+		fpassthru( $fo );
+		unlink( $file );
+		die();
 	}
 }

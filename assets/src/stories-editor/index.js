@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
+import { registerFormatType } from '@wordpress/rich-text';
 import {
 	getDefaultBlockName,
 	setDefaultBlockName,
@@ -26,17 +27,19 @@ import {
  */
 import {
 	withCroppedFeaturedImage,
+	withEnforcedFileType,
 } from '../common/components';
 import {
 	withAmpStorySettings,
 	withPageNumber,
 	withEditFeaturedImage,
+	withCustomVideoBlockEdit,
 	withStoryFeaturedImageNotice,
 	withWrapperProps,
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
-	withVideoPosterImageNotice,
+	withEnforcedVideoUploadType,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -45,16 +48,19 @@ import {
 	filterBlockTransforms,
 	addAMPAttributes,
 	addAMPExtraProps,
+	deprecateCoreBlocks,
 	getTotalAnimationDuration,
 	renderStoryComponents,
 	maybeInitializeAnimations,
-	maybeRemoveImageCaption,
+	maybeRemoveMediaCaption,
 	maybeSetInitialPositioning,
 	maybeSetInitialSize,
 	maybeSetTagName,
 	maybeUpdateAutoAdvanceAfterMedia,
+	maybeRemoveDeprecatedSetting,
 	wrapBlocksInGridLayer,
 	getMinimumStoryPosterDimensions,
+	maybeAddMissingAnchor,
 } from './helpers';
 
 import { ALLOWED_BLOCKS } from './constants';
@@ -114,6 +120,7 @@ domReady( () => {
 		if ( block.attributes.ampFontFamily ) {
 			maybeEnqueueFontStyle( block.attributes.ampFontFamily );
 		}
+		maybeRemoveDeprecatedSetting( block );
 	}
 
 	// Enforce fixed toolbar.
@@ -122,9 +129,6 @@ domReady( () => {
 	}
 
 	renderStoryComponents();
-
-	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
-	document.querySelector( '.block-editor-writing-flow__click-redirect' ).remove();
 
 	for ( const roundedBlock of [ 'amp/amp-story-text', 'amp/amp-story-post-author', 'amp/amp-story-post-date', 'amp/amp-story-post-title' ] ) {
 		registerBlockStyle( roundedBlock, {
@@ -206,7 +210,7 @@ subscribe( async () => {
 
 	for ( const block of allBlocksWithChildren ) {
 		maybeSetInitialPositioning( block );
-		maybeRemoveImageCaption( block );
+		maybeRemoveMediaCaption( block );
 		maybeUpdateAutoAdvanceAfterMedia( block );
 		maybeSetTagName( block );
 		maybeSetInitialSize( block );
@@ -218,7 +222,7 @@ subscribe( async () => {
 	const newEditorMode = getEditorMode();
 	if ( 'visual' === newEditorMode && newEditorMode !== editorMode ) {
 		while ( ! document.querySelector( '.editor-block-list__layout' ) ) {
-			await new Promise( ( r ) => setTimeout( r, 200 ) );
+			await new Promise( ( r ) => setTimeout( r, 200 ) ); // eslint-disable-line no-await-in-loop
 		}
 
 		renderStoryComponents();
@@ -265,6 +269,8 @@ store.subscribe( () => {
 		for ( const item of animatedBlocksPerPage ) {
 			const { id, parent, animationType, duration, delay } = item;
 
+			// If the parent block wasn't saved previously it doesn't have an anchor and we have to set it.
+			maybeAddMissingAnchor( parent );
 			const parentBlock = parent ? getBlock( parent ) : undefined;
 
 			updateBlockAttributes( id, {
@@ -309,14 +315,17 @@ plugins.keys().forEach( ( modulePath ) => {
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/setBlockParent', setBlockParent );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/addAttributes', addAMPAttributes );
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransforms', filterBlockTransforms );
+addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
+addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', withActivePageState );
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
+addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
-addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addPosterImageNotice', withVideoPosterImageNotice );
+addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addEnforcedVideoUploadType', withEnforcedVideoUploadType );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
@@ -329,4 +338,11 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 	registerBlockType( name, settings );
+} );
+
+const formats = require.context( './formats', true, /(?<!test\/)index\.js$/ );
+
+formats.keys().sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 ).forEach( ( modulePath ) => {
+	const { name, settings } = formats( modulePath );
+	registerFormatType( name, settings );
 } );

@@ -45,9 +45,9 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'add_noscript_fallback' => true,
-	);
+	];
 
 	/**
 	 * Animation extension.
@@ -62,12 +62,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'img' => array(
+		return [
+			'img' => [
 				'amp-img',
 				'amp-anim',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -83,7 +83,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		 * @var DOMNodeList $node
 		 */
 		$nodes           = $this->dom->getElementsByTagName( self::$tag );
-		$need_dimensions = array();
+		$need_dimensions = [];
 
 		$num_nodes = $nodes->length;
 
@@ -136,7 +136,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				(
 					( ! $has_width || ! $has_height )
 					&&
-					in_array( $layout, array( 'fixed', 'responsive', 'intrinsic' ), true )
+					in_array( $layout, [ 'fixed', 'responsive', 'intrinsic' ], true )
 				)
 			);
 			if ( $missing_dimensions ) {
@@ -186,7 +186,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; removes any not specifically declared above from input.
 	 */
 	private function filter_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
@@ -233,6 +233,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$class = '';
 				}
 				if ( ! $dimensions ) {
+					$node->setAttribute( 'object-fit', 'contain' );
 					$class .= ' amp-wp-unknown-size';
 				}
 
@@ -248,8 +249,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! is_numeric( $node->getAttribute( 'width' ) ) ) {
 
 					// Let width have the right aspect ratio based on the height attribute.
-					if ( is_numeric( $node->getAttribute( 'height' ) ) && isset( $dimensions['height'] ) && isset( $dimensions['width'] ) ) {
-						$width = ( floatval( $node->getAttribute( 'height' ) ) * $dimensions['width'] ) / $dimensions['height'];
+					if ( is_numeric( $node->getAttribute( 'height' ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+						$width = ( (float) $node->getAttribute( 'height' ) * $dimensions['width'] ) / $dimensions['height'];
 					}
 
 					$node->setAttribute( 'width', $width );
@@ -260,8 +261,8 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				if ( ! is_numeric( $node->getAttribute( 'height' ) ) ) {
 
 					// Let height have the right aspect ratio based on the width attribute.
-					if ( is_numeric( $node->getAttribute( 'width' ) ) && isset( $dimensions['width'] ) && isset( $dimensions['height'] ) ) {
-						$height = ( floatval( $node->getAttribute( 'width' ) ) * $dimensions['height'] ) / $dimensions['width'];
+					if ( is_numeric( $node->getAttribute( 'width' ) ) && isset( $dimensions['height'], $dimensions['width'] ) ) {
+						$height = ( (float) $node->getAttribute( 'width' ) * $dimensions['height'] ) / $dimensions['width'];
 					}
 
 					$node->setAttribute( 'height', $height );
@@ -336,7 +337,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		if ( $img_node->hasAttribute( 'style' ) ) {
 			$layout = $img_node->getAttribute( 'layout' );
-			if ( in_array( $layout, array( 'fixed-height', 'responsive', 'fill', 'flex-item' ), true ) ) {
+			if ( in_array( $layout, [ 'fixed-height', 'responsive', 'fill', 'flex-item' ], true ) ) {
 				$required_display = 'block';
 			} elseif ( 'nodisplay' === $layout ) {
 				$required_display = 'none';

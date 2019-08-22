@@ -48,7 +48,7 @@ export default withSelect( ( select, { block, label } ) => {
 	const blockType = getBlockType( block.name );
 
 	label = blockType.title;
-	let content;
+	let content = '';
 
 	switch ( block.name ) {
 		case 'core/image':
@@ -70,7 +70,12 @@ export default withSelect( ( select, { block, label } ) => {
 
 			break;
 		case 'amp/amp-story-text':
-			content = block.attributes.content.length > 0 ? block.attributes.content.replace( /<[^<>]+>/g, ' ' ).slice( 0, 30 ) : '';
+			if ( block.attributes.content.length > 0 ) {
+				content = block.attributes.content
+					.replace( /<br>/g, ' ' )
+					.replace( /<[^<>]+>/g, '' )
+					.slice( 0, 30 );
+			}
 
 			label = content.length > 0 ? content : blockType.title;
 			break;
@@ -92,6 +97,9 @@ export default withSelect( ( select, { block, label } ) => {
 
 		case 'amp/amp-story-post-title':
 			label = getEditedPostAttribute( 'title' ) || blockType.title;
+			break;
+
+		default:
 			break;
 	}
 

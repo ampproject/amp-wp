@@ -22,10 +22,10 @@ class AMP_Options_Menu {
 	 */
 	public function init() {
 		add_action( 'admin_post_amp_analytics_options', 'AMP_Options_Manager::handle_analytics_submit' );
-		add_action( 'admin_menu', array( $this, 'add_menu_items' ), 9 );
+		add_action( 'admin_menu', [ $this, 'add_menu_items' ], 9 );
 
 		$plugin_file = preg_replace( '#.+/(?=.+?/.+?)#', '', AMP__FILE__ );
-		add_filter( "plugin_action_links_{$plugin_file}", array( $this, 'add_plugin_action_links' ) );
+		add_filter( "plugin_action_links_{$plugin_file}", [ $this, 'add_plugin_action_links' ] );
 	}
 
 	/**
@@ -36,13 +36,13 @@ class AMP_Options_Menu {
 	 */
 	public function add_plugin_action_links( $links ) {
 		return array_merge(
-			array(
+			[
 				'settings' => sprintf(
 					'<a href="%1$s">%2$s</a>',
 					esc_url( add_query_arg( 'page', AMP_Options_Manager::OPTION_NAME, admin_url( 'admin.php' ) ) ),
 					__( 'Settings', 'amp' )
 				),
-			),
+			],
 			$links
 		);
 	}
@@ -51,13 +51,16 @@ class AMP_Options_Menu {
 	 * Add menu.
 	 */
 	public function add_menu_items() {
-
+		/*
+		 * Note that the admin items for Validated URLs and Validation Errors will also be placed under this admin menu
+		 * page when the current user can manage_options.
+		 */
 		add_menu_page(
 			__( 'AMP Options', 'amp' ),
 			__( 'AMP', 'amp' ),
-			'edit_posts',
+			'manage_options',
 			AMP_Options_Manager::OPTION_NAME,
-			array( $this, 'render_screen' ),
+			[ $this, 'render_screen' ],
 			self::ICON_BASE64_SVG
 		);
 
@@ -65,7 +68,7 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::OPTION_NAME,
 			__( 'AMP Settings', 'amp' ),
 			__( 'General', 'amp' ),
-			'edit_posts',
+			'manage_options',
 			AMP_Options_Manager::OPTION_NAME
 		);
 
@@ -79,45 +82,56 @@ class AMP_Options_Menu {
 		add_settings_field(
 			'experiences',
 			__( 'Experiences', 'amp' ),
-			array( $this, 'render_experiences' ),
+			[ $this, 'render_experiences' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
-			array(
+			[
 				'class' => 'experiences',
-			)
+			]
 		);
 
 		add_settings_field(
 			'theme_support',
 			__( 'Website Mode', 'amp' ),
-			array( $this, 'render_theme_support' ),
+			[ $this, 'render_theme_support' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
-			array(
+			[
 				'class' => 'amp-website-mode',
-			)
+			]
 		);
 
 		add_settings_field(
 			'validation',
 			__( 'Validation Handling', 'amp' ),
-			array( $this, 'render_validation_handling' ),
+			[ $this, 'render_validation_handling' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
-			array(
+			[
 				'class' => 'amp-validation-field',
-			)
+			]
 		);
 
 		add_settings_field(
 			'supported_templates',
 			__( 'Supported Templates', 'amp' ),
-			array( $this, 'render_supported_templates' ),
+			[ $this, 'render_supported_templates' ],
 			AMP_Options_Manager::OPTION_NAME,
 			'general',
-			array(
+			[
 				'class' => 'amp-template-support-field',
-			)
+			]
+		);
+
+		add_settings_field(
+			'stories_export',
+			__( 'Stories Export', 'amp' ),
+			[ $this, 'render_stories_export' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			[
+				'class' => 'amp-stories-export-field',
+			]
 		);
 
 		add_action(
@@ -130,6 +144,9 @@ class AMP_Options_Menu {
 					body:not(.amp-experience-website) .amp-validation-field {
 						display: none;
 					}
+					body:not(.amp-experience-stories) .amp-stories-export-field {
+						display: none;
+					}
 				</style>
 				<?php
 			}
@@ -139,18 +156,18 @@ class AMP_Options_Menu {
 			add_settings_field(
 				'caching',
 				__( 'Caching', 'amp' ),
-				array( $this, 'render_caching' ),
+				[ $this, 'render_caching' ],
 				AMP_Options_Manager::OPTION_NAME,
 				'general',
-				array(
+				[
 					'class' => 'amp-caching-field',
-				)
+				]
 			);
 		}
 
-		$submenus = array(
+		$submenus = [
 			new AMP_Analytics_Options_Submenu( AMP_Options_Manager::OPTION_NAME ),
-		);
+		];
 
 		// Create submenu items and calls on the Submenu Page object to render the actual contents of the page.
 		foreach ( $submenus as $submenu ) {
@@ -285,12 +302,12 @@ class AMP_Options_Menu {
 		$transitional_description = sprintf( __( 'The active theme’s templates are used to generate non-AMP and AMP versions of your content, allowing for each canonical URL to have a corresponding (paired) AMP URL. This mode is useful to progressively transition towards a fully AMP-first site. Depending on your theme/plugins, a varying level of <a href="%s">development work</a> may be required.', 'amp' ), esc_url( 'https://amp-wp.org/documentation/developing-wordpress-amp-sites/' ) );
 		$reader_description       = __( 'Formerly called the <b>classic mode</b>, this mode generates paired AMP content using simplified templates which may not match the look-and-feel of your site. Only posts/pages can be served as AMP in Reader mode. No redirection is performed for mobile visitors; AMP pages are served by AMP consumption platforms.', 'amp' );
 		/* translators: %s: URL to the ecosystem page. */
-		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
+		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
 
 		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
 		?>
 
-		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+		<fieldset>
 			<?php if ( AMP_Theme_Support::READER_MODE_SLUG === AMP_Theme_Support::get_support_mode() ) : ?>
 				<?php if ( AMP_Theme_Support::STANDARD_MODE_SLUG === AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
 					<div class="notice notice-success notice-alt inline">
@@ -354,10 +371,10 @@ class AMP_Options_Menu {
 											'<a href="%s">%s</a>',
 											esc_url(
 												add_query_arg(
-													array(
+													[
 														'taxonomy' => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 														'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-													),
+													],
 													admin_url( 'edit-tags.php' )
 												)
 											),
@@ -390,12 +407,12 @@ class AMP_Options_Menu {
 	 */
 	public function render_validation_handling() {
 		?>
-		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+		<fieldset>
 			<?php
 			$auto_sanitization = AMP_Validation_Error_Taxonomy::get_validation_error_sanitization(
-				array(
+				[
 					'code' => 'non_existent',
-				)
+				]
 			);
 
 			$forced_sanitization = 'with_filter' === $auto_sanitization['forced'];
@@ -426,10 +443,10 @@ class AMP_Options_Menu {
 								__( 'Existing validation errors which you have already rejected will not be modified (you may want to consider <a href="%s">bulk-accepting them</a>).', 'amp' ),
 								esc_url(
 									add_query_arg(
-										array(
+										[
 											'taxonomy'  => AMP_Validation_Error_Taxonomy::TAXONOMY_SLUG,
 											'post_type' => AMP_Validated_URL_Post_Type::POST_TYPE_SLUG,
-										),
+										],
 										admin_url( 'edit-tags.php' )
 									)
 								)
@@ -480,7 +497,7 @@ class AMP_Options_Menu {
 		?>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="all_templates_supported_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+			<fieldset id="all_templates_supported_fieldset">
 				<?php if ( isset( $theme_support_args['templates_supported'] ) && 'all' === $theme_support_args['templates_supported'] ) : ?>
 					<div class="notice notice-info notice-alt inline">
 						<p>
@@ -513,7 +530,7 @@ class AMP_Options_Menu {
 			</div>
 		<?php endif; ?>
 
-		<fieldset id="supported_post_types_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+		<fieldset id="supported_post_types_fieldset">
 			<?php
 			$element_name         = AMP_Options_Manager::OPTION_NAME . '[supported_post_types][]';
 			$supported_post_types = AMP_Options_Manager::get_option( 'supported_post_types' );
@@ -549,7 +566,7 @@ class AMP_Options_Menu {
 		</fieldset>
 
 		<?php if ( ! isset( $theme_support_args['available_callback'] ) ) : ?>
-			<fieldset id="supported_templates_fieldset" <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+			<fieldset id="supported_templates_fieldset">
 				<style>
 					#supported_templates_fieldset ul ul {
 						margin-left: 40px;
@@ -557,7 +574,7 @@ class AMP_Options_Menu {
 				</style>
 				<h4 class="title"><?php esc_html_e( 'Templates', 'amp' ); ?></h4>
 				<?php
-				self::list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
+				$this->list_template_conditional_options( AMP_Theme_Support::get_supportable_templates() );
 				?>
 				<script>
 					// Let clicks on parent items automatically cause the children checkboxes to have same checked state applied.
@@ -614,7 +631,7 @@ class AMP_Options_Menu {
 	 */
 	public function render_caching() {
 		?>
-		<fieldset <?php disabled( ! current_user_can( 'manage_options' ) ); ?>>
+		<fieldset>
 			<?php if ( AMP_Options_Manager::show_response_cache_disabled_notice() ) : ?>
 				<div class="notice notice-info notice-alt inline">
 					<p><?php esc_html_e( 'The post-processor cache was disabled due to detecting randomly generated content found on', 'amp' ); ?> <a href="<?php echo esc_url( get_option( AMP_Theme_Support::CACHE_MISS_URL_OPTION, '' ) ); ?>"><?php esc_html_e( 'on this web page.', 'amp' ); ?></a></p>
@@ -629,6 +646,26 @@ class AMP_Options_Menu {
 				</label>
 			</p>
 			<p class="description"><?php esc_html_e( 'This will enable post-processor caching to speed up processing an AMP response after WordPress renders a template.', 'amp' ); ?></p>
+		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render the stories export settings section.
+	 *
+	 * @since 1.2
+	 */
+	public function render_stories_export() {
+		?>
+		<fieldset <?php disabled( ! current_user_can( 'publish_posts' ) ); ?>>
+			<p>
+				<label for="story_export_base_url">
+					<strong><?php echo esc_html__( 'Base URL for exported stories.', 'amp' ); ?></strong>
+				</label>
+				<br />
+				<input id="story_export_base_url" type="text" placeholder="https://" class="regular-text code" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[story_export_base_url]' ); ?>" value="<?php echo esc_url( AMP_Options_Manager::get_option( 'story_export_base_url' ) ); ?>" />
+			</p>
+			<p class="description"><?php esc_html_e( 'AMP requires most asset URLs to be absolute as opposed to relative. In order to export stories with the desired absolute URLs, you can provide the required URL base here. This base URL will be used for the uploaded files, as well as, links to other stories. If left empty, the default URLs will be used. Meaning, uploaded images and videos will be referenced from the WordPress install. Remember that the provided URL should be HTTPS.', 'amp' ); ?></p>
 		</fieldset>
 		<?php
 	}
@@ -703,11 +740,6 @@ class AMP_Options_Menu {
 			AMP_Options_Manager::check_supported_post_type_update_errors();
 		}
 		?>
-		<?php if ( ! current_user_can( 'manage_options' ) ) : ?>
-			<div class="notice notice-info">
-				<p><?php esc_html_e( 'You do not have permission to modify these settings. They are shown here for your reference. Please contact your administrator to make changes.', 'amp' ); ?></p>
-			</div>
-		<?php endif; ?>
 		<div class="wrap">
 			<h1><?php echo esc_html( get_admin_page_title() ); ?></h1>
 			<?php settings_errors(); ?>

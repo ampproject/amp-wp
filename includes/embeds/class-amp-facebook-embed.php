@@ -43,7 +43,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * Registers embed.
 	 */
 	public function register_embed() {
-		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+		wp_embed_register_handler( $this->amp_tag, self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 	}
 
 	/**
@@ -63,7 +63,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string HTML markup for rendered embed.
 	 */
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url ) );
+		return $this->render( [ 'url' => $url ] );
 	}
 
 	/**
@@ -75,9 +75,9 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['url'] ) ) {
@@ -88,12 +88,12 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		return AMP_HTML_Utils::build_tag(
 			$this->amp_tag,
-			array(
+			[
 				'data-href' => $args['url'],
 				'layout'    => 'responsive',
 				'width'     => $this->args['width'],
 				'height'    => $this->args['height'],
-			)
+			]
 		);
 	}
 
@@ -136,7 +136,7 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 		$fb_root = $dom->getElementById( 'fb-root' );
 		if ( $fb_root ) {
 			$xpath   = new DOMXPath( $dom );
-			$scripts = array();
+			$scripts = [];
 			foreach ( $xpath->query( '//script[ starts-with( @src, "https://connect.facebook.net" ) and contains( @src, "sdk.js" ) ]' ) as $script ) {
 				$scripts[] = $script;
 			}
@@ -161,15 +161,25 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 
 		if ( false !== strpos( $class_attr, 'fb-post' ) ) {
 			return 'post';
-		} elseif ( false !== strpos( $class_attr, 'fb-video' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-video' ) ) {
 			return 'video';
-		} elseif ( false !== strpos( $class_attr, 'fb-page' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-page' ) ) {
 			return 'page';
-		} elseif ( false !== strpos( $class_attr, 'fb-like' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-like' ) ) {
 			return 'like';
-		} elseif ( false !== strpos( $class_attr, 'fb-comments' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comments' ) ) {
 			return 'comments';
-		} elseif ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
+		}
+
+		if ( false !== strpos( $class_attr, 'fb-comment-embed' ) ) {
 			return 'comment';
 		}
 
@@ -185,11 +195,15 @@ class AMP_Facebook_Embed_Handler extends AMP_Base_Embed_Handler {
 	 */
 	private function create_amp_facebook_and_replace_node( $dom, $node, $embed_type ) {
 
-		$attributes = array(
+		$attributes = [
 			'layout' => 'responsive',
 			'width'  => $node->hasAttribute( 'data-width' ) ? $node->getAttribute( 'data-width' ) : $this->DEFAULT_WIDTH,
 			'height' => $node->hasAttribute( 'data-height' ) ? $node->getAttribute( 'data-height' ) : $this->DEFAULT_HEIGHT,
-		);
+		];
+		if ( '100%' === $attributes['width'] ) {
+			$attributes['layout'] = 'fixed-height';
+			$attributes['width']  = 'auto';
+		}
 
 		$node->removeAttribute( 'data-width' );
 		$node->removeAttribute( 'data-height' );

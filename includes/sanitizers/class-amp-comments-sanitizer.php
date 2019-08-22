@@ -19,9 +19,9 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'comment_live_list' => false,
-	);
+	];
 
 	/**
 	 * Pre-process the comment form and comment list for AMP.
@@ -74,7 +74,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		 *
 		 * @var DOMElement[][] $form_fields
 		 */
-		$form_fields = array();
+		$form_fields = [];
 		foreach ( $comment_form->getElementsByTagName( 'input' ) as $element ) {
 			$name = $element->getAttribute( 'name' );
 			if ( $name ) {
@@ -94,11 +94,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		$post_id  = (int) $form_fields['comment_post_ID'][0]->getAttribute( 'value' );
 		$state_id = AMP_Theme_Support::get_comment_form_state_id( $post_id );
 
-		$form_state = array(
-			'values'      => array(),
+		$form_state = [
+			'values'      => [],
 			'submitting'  => false,
 			'replyToName' => '',
-		);
+		];
 
 		if ( ! empty( $form_fields['comment_parent'] ) ) {
 			$comment_id = (int) $form_fields['comment_parent'][0]->getAttribute( 'value' );
@@ -110,12 +110,12 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$amp_bind_attr_format = AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . '%s';
+		$amp_bind_attr_format = AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . '%s';
 		foreach ( $form_fields as $name => $form_field ) {
 			foreach ( $form_field as $element ) {
 
 				// @todo Radio and checkbox inputs are not supported yet.
-				if ( in_array( strtolower( $element->getAttribute( 'type' ) ), array( 'checkbox', 'radio' ), true ) ) {
+				if ( in_array( strtolower( $element->getAttribute( 'type' ) ), [ 'checkbox', 'radio' ], true ) ) {
 					continue;
 				}
 
@@ -157,7 +157,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			$form_reset_state['values']['email'],
 			$form_reset_state['values']['url']
 		);
-		$on = array(
+		$on = [
 			// Disable the form when submitting.
 			sprintf(
 				'submit:AMP.setState( { %s: { submitting: true } } )',
@@ -174,7 +174,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 				$state_id,
 				wp_json_encode( $form_reset_state, JSON_UNESCAPED_UNICODE )
 			),
-		);
+		];
 		$comment_form->setAttribute( 'on', implode( ';', $on ) );
 	}
 
@@ -203,11 +203,11 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Ensure the top-level data-update-time reflects the max time of the comments in the thread.
 		$children = $comment_object->get_children(
-			array(
+			[
 				'format'       => 'flat',
 				'hierarchical' => 'flat',
 				'orderby'      => 'none',
-			)
+			]
 		);
 		foreach ( $children as $child_comment ) {
 			$update_time = max( strtotime( $child_comment->comment_date ), $update_time );

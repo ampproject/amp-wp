@@ -14,9 +14,10 @@
 
 .wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author:not(.is-amp-fit-text) {
 	display: block;
+	font-size: 16px;
 }
 
-.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-amp-fit-text.is-measuring-fontsize {
+.wp-block[data-type="amp/amp-story-post-author"] .wp-block-amp-amp-story-post-author.is-measuring {
 	height: initial !important;
 	width: initial !important;
 	position: absolute !important;

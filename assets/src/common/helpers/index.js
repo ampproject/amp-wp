@@ -1,8 +1,22 @@
 /**
+ * External dependencies
+ */
+import { get, has, includes, reduce, template } from 'lodash';
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
+/**
+ * Internal dependencies
+ */
+import {
+	FILE_SIZE_ERROR_VIEW,
+	FILE_TYPE_ERROR_VIEW,
+	MEGABYTE_IN_BYTES,
+	MINIMUM_FEATURED_IMAGE_WIDTH,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+} from '../constants';
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -46,9 +60,22 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
  * @return {Object} Minimum dimensions including width and height.
  */
 export const getMinimumFeaturedImageDimensions = () => {
-	const width = 1200;
+	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
 
 	const height = width * ( 9 / 16 );
+
+	return { width, height };
+};
+
+/**
+ * Get minimum dimensions for a portrait featured image, but not for an AMP Story.
+ *
+ * @return {Object} Minimum dimensions including width and height.
+ */
+export const getMinimumPortraitFeaturedImageDimensions = () => {
+	const width = MINIMUM_FEATURED_IMAGE_WIDTH;
+
+	const height = Math.floor( width * ( 16 / 9 ) );
 
 	return { width, height };
 };
@@ -159,4 +186,209 @@ export const getBackgroundColorWithOpacity = ( colors, backgroundColor, customBa
 	}
 
 	return undefined;
+};
+
+/**
+ * Gets The aspect ratio type, either 'landscape', 'portrait', or 'square'.
+ *
+ * @param {number} width  The image width.
+ * @param {number} height The image height.
+ * @return {string|null} The aspect ratio type: 'landscape', 'portrait', or 'square'.
+ */
+export const getAspectRatioType = ( width, height ) => {
+	if ( ! width || ! height ) {
+		return null;
+	}
+
+	if ( width > height ) {
+		return 'landscape';
+	} else if ( height > width ) {
+		return 'portrait';
+	}
+
+	return 'square';
+};
+
+/**
+ * Gets the compiled template for a given notice message.
+ *
+ * @param {string} message The message to display in the template.
+ * @return {Function} compiledTemplate A function accepting the data, which creates a compiled template.
+ */
+export const getNoticeTemplate = ( message ) => {
+	const errorTemplate = template(
+		`<p>${ message }</p>`,
+		{
+			evaluate: /<#([\s\S]+?)#>/g,
+			interpolate: /\{\{\{([\s\S]+?)\}\}\}/g,
+			escape: /\{\{([^\}]+?)\}\}(?!\})/g,
+		}
+	);
+
+	return ( data ) => {
+		return errorTemplate( data );
+	};
+};
+
+/**
+ * Gets whether the file type is allowed.
+ *
+ * For videos, only 'video/mp4' mime types should be allowed.
+ * But the allowedTypes property only has 'video', and it can accidentally allow mime types like 'video/quicktime'.
+ * So this returns false for videos with mime types other than 'video/mp4'.
+ *
+ * @param {Object} attachment   The file to evaluate.
+ * @param {Array}  allowedTypes The allowed file types.
+ * @return {boolean} Whether the file type is allowed.
+ */
+export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
+	const fileType = attachment.get( 'type' );
+	const mimeType = attachment.get( 'mime' );
+
+	if ( ! includes( allowedTypes, fileType ) && ! includes( allowedTypes, mimeType ) ) {
+		return false;
+	}
+
+	if ( 'video' === fileType && 'video/mp4' !== mimeType ) {
+		return false;
+	}
+
+	return true;
+};
+
+/**
+ * If the attachment has the wrong file type, this displays a notice in the Media Library and disables the 'Select' button.
+ *
+ * This is not an arrow function so that it can be called with enforceFileType.call( this, foo, bar ).
+ *
+ * @param {Object} attachment The selected attachment.
+ * @param {Object} SelectionError The error to display.
+ */
+export const enforceFileType = function( attachment, SelectionError ) {
+	if ( ! attachment ) {
+		return;
+	}
+
+	const allowedTypes = get( this, [ 'options', 'allowedTypes' ], null );
+	const selectButton = this.get( 'select' );
+
+	// If the file type isn't allowed, display a notice and disable the 'Select' button.
+	if ( allowedTypes && attachment.get( 'type' ) && ! isFileTypeAllowed( attachment, allowedTypes ) ) {
+		this.secondary.set(
+			FILE_TYPE_ERROR_VIEW,
+			new SelectionError( { mimeType: attachment.get( 'mime' ) } )
+		);
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', true ); // Disable the button to select the file.
+		}
+	} else {
+		this.secondary.unset( FILE_TYPE_ERROR_VIEW );
+		if ( selectButton && selectButton.model ) {
+			selectButton.model.set( 'disabled', false ); // Enable the button to select the file.
+		}
+	}
+};
+
+/**
+ * If the attachment has the wrong file size, this displays a notice in the Media Library and disables the 'Select' button.
+ *
+ * This is not an arrow function so that it can be called with enforceFileSize.call( this, foo, bar ).
+ *
+ * @param {Object} attachment The selected attachment.
+ * @param {Object} SelectionError The error to display.
+ */
+export const enforceFileSize = function( attachment, SelectionError ) {
+	if ( ! attachment ) {
+		return;
+	}
+
+	const isVideo = 'video' === get( attachment, [ 'media_type' ], null ) || 'video' === get( attachment, [ 'attributes', 'type' ], null );
+
+	// If the file type is 'video' and its size is over the limit, display a notice in the Media Library.
+	if ( isVideo && isVideoSizeExcessive( getVideoBytesPerSecond( attachment ) ) ) {
+		this.secondary.set(
+			FILE_SIZE_ERROR_VIEW,
+			new SelectionError( {
+				actualVideoMegabytesPerSecond: Math.round( getVideoBytesPerSecond( attachment ) / MEGABYTE_IN_BYTES ),
+				maxVideoMegabytesPerSecond: VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+			} )
+		);
+	} else {
+		this.secondary.unset( FILE_SIZE_ERROR_VIEW );
+	}
+};
+
+/**
+ * Gets whether the Media Library has two notices.
+ *
+ * It's possible to have a notice that the file type and size are wrong.
+ * In that case, this will need different styling, so the notices don't overlap the media.
+ *
+ * @return {boolean} Whether the Media Library has two notices.
+ */
+export const mediaLibraryHasTwoNotices = function() {
+	return Boolean( this.secondary.get( FILE_TYPE_ERROR_VIEW ) ) && Boolean( this.secondary.get( FILE_SIZE_ERROR_VIEW ) );
+};
+
+/**
+ * Gets the number of megabytes per second for the video.
+ *
+ * @param {Object} media The media object of the video.
+ * @return {?number} Number of megabytes per second, or null if media details unavailable.
+ */
+export const getVideoBytesPerSecond = ( media ) => {
+	if ( has( media, [ 'media_details', 'filesize' ] ) && has( media, [ 'media_details', 'length' ] ) ) {
+		return media.media_details.filesize / media.media_details.length;
+	} else if ( has( media, [ 'attributes', 'filesizeInBytes' ] ) && has( media, [ 'attributes', 'fileLength' ] ) ) {
+		return media.attributes.filesizeInBytes / getSecondsFromTime( media.attributes.fileLength );
+	}
+
+	return null;
+};
+
+/**
+ * Gets whether the video file size is over a certain amount of bytes per second.
+ *
+ * @param {number} videoSize Video size per second, in bytes.
+ * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
+ */
+export const isVideoSizeExcessive = ( videoSize ) => {
+	return videoSize > VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
+};
+
+/**
+ * Gets the number of seconds in a colon-separated time string, like '01:10'.
+ *
+ * @param {string} time A colon-separated time, like '0:12'.
+ * @return {number} seconds The number of seconds in the time, like 12.
+ */
+export const getSecondsFromTime = ( time ) => {
+	const minuteInSeconds = 60;
+	const splitTime = time.split( ':' );
+
+	return reduce(
+		splitTime,
+		( totalSeconds, timeSection, index ) => {
+			const parsedTimeSection = isNaN( parseInt( timeSection ) ) ? 0 : parseInt( timeSection );
+			const distanceFromRight = splitTime.length - 1 - index;
+			const multiple = Math.pow( minuteInSeconds, distanceFromRight ); // This should be 1 for seconds, 60 for minutes, 360 for hours...
+			return totalSeconds + ( multiple * parsedTimeSection );
+		},
+		0
+	);
+};
+
+/**
+ * Given a URL, returns file size in bytes.
+ *
+ * @param {string} url URL to a file.
+ * @return {Promise<number>} File size in bytes.
+ */
+export const getContentLengthFromUrl = async ( url ) => {
+	const { fetch } = window;
+
+	const response = await fetch( url, {
+		method: 'head',
+	} );
+	return Number( response.headers.get( 'content-length' ) );
 };

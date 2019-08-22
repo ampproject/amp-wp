@@ -17,7 +17,6 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { BlockPreviewLabel } from '../';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 /**
  * Parses drag & drop events to ensure the event contains valid transfer data.
@@ -46,8 +45,8 @@ const parseDropEvent = ( event ) => {
 };
 
 class BlockNavigationItem extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.state = {
 			isDragging: false,
@@ -63,6 +62,8 @@ class BlockNavigationItem extends Component {
 			const index = getBlockIndex( clientId );
 			return position.y === 'top' ? index : index + 1;
 		}
+
+		return undefined;
 	}
 
 	onDrop( event, position ) {
@@ -84,8 +85,32 @@ class BlockNavigationItem extends Component {
 
 	render() {
 		const { block, getBlockIndex, isSelected, onClick } = this.props;
+		const isCallToActionBlock = 'amp/amp-story-cta' === block.name;
 		const { clientId } = block;
 		const blockElementId = `block-navigation-item-${ clientId }`;
+
+		if ( isCallToActionBlock ) {
+			return (
+				<div className="editor-block-navigation__item block-editor-block-navigation__item">
+					<Button
+						className={ classnames(
+							'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
+							{
+								'is-selected': isSelected,
+							}
+						) }
+						onClick={ onClick }
+						id={ blockElementId }
+					>
+						<BlockPreviewLabel
+							block={ block }
+							accessibilityText={ isSelected && __( '(selected block)', 'amp' ) }
+						/>
+					</Button>
+				</div>
+			);
+		}
+
 		const transferData = {
 			type: 'block',
 			srcIndex: getBlockIndex( clientId ),
@@ -112,6 +137,7 @@ class BlockNavigationItem extends Component {
 									className={ this.state.isDragging ? 'is-dragging-block' : undefined }
 									onDrop={ this.onDrop }
 								/>
+								<div className="block-navigation__placeholder"></div>
 								<Button
 									className={ classnames(
 										'components-button editor-block-navigation__item-button block-editor-block-navigation__item-button',
@@ -143,6 +169,7 @@ BlockNavigationItem.propTypes = {
 	getBlockIndex: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
 	block: PropTypes.shape( {
+		name: PropTypes.string.isRequired,
 		clientId: PropTypes.string.isRequired,
 	} ),
 	isSelected: PropTypes.bool,
@@ -154,8 +181,8 @@ const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {
 
 	const blockOrder = getBlockOrder( getBlockRootClientId( clientId ) );
 
-	// Need to reverse the list and exclude CTA blocks just like BlockNavigation does.
-	const blocks = getBlocksByClientId( blockOrder ).filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).map( ( { clientId: id } ) => id ).reverse();
+	// Need to reverse the list just like BlockNavigation does.
+	const blocks = getBlocksByClientId( blockOrder ).map( ( { clientId: id } ) => id ).reverse();
 
 	return {
 		getBlockIndex: ( blockClientId ) => {

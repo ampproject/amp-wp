@@ -4,11 +4,11 @@
 ![Banner](wp-assets/banner-1544x500.png)
 Enable AMP on your WordPress site, the WordPress way.
 
-**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [swissspidy](https://profiles.wordpress.org/swissspidy), [stubgo](https://profiles.wordpress.org/stubgo), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry)  
+**Contributors:** [google](https://profiles.wordpress.org/google), [xwp](https://profiles.wordpress.org/xwp), [automattic](https://profiles.wordpress.org/automattic), [westonruter](https://profiles.wordpress.org/westonruter), [swissspidy](https://profiles.wordpress.org/swissspidy), [miinasikk](https://profiles.wordpress.org/miinasikk), [ryankienstra](https://profiles.wordpress.org/ryankienstra), [albertomedina](https://profiles.wordpress.org/albertomedina), [tweetythierry](https://profiles.wordpress.org/tweetythierry)  
 **Tags:** [amp](https://wordpress.org/plugins/tags/amp), [framework](https://wordpress.org/plugins/tags/framework), [components](https://wordpress.org/plugins/tags/components), [performance](https://wordpress.org/plugins/tags/performance), [mobile](https://wordpress.org/plugins/tags/mobile), [stories](https://wordpress.org/plugins/tags/stories)  
 **Requires at least:** 4.9  
 **Tested up to:** 5.2  
-**Stable tag:** 1.2.0  
+**Stable tag:** 1.2.1  
 **License:** [GPLv2 or later](http://www.gnu.org/licenses/gpl-2.0.html)  
 **Requires PHP:** 5.4  
 

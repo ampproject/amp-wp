@@ -104,8 +104,8 @@ export const normalizeTerm = ( term ) => {
 };
 
 export class InserterMenu extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 		this.state = {
 			childItems: [],
 			filterValue: '',
@@ -171,7 +171,6 @@ export class InserterMenu extends Component {
 
 				this.props.setTimeout( () => {
 					// We need a generic way to access the panel's container
-					// eslint-disable-next-line react/no-find-dom-node
 					scrollIntoView( this.panels[ panel ], this.inserterResults.current, {
 						alignWithTop: true,
 					} );
@@ -275,31 +274,31 @@ export class InserterMenu extends Component {
 		/* eslint-disable jsx-a11y/no-autofocus, jsx-a11y/no-static-element-interactions */
 		return (
 			<div
-				className="editor-inserter__menu block-editor-inserter__menu"
+				className="editor-inserter__menu block-editor-inserter__menu amp__block-editor-inserter__menu"
 				onKeyPress={ stopKeyPropagation }
 				onKeyDown={ this.onKeyDown }
 			>
 				<label htmlFor={ `block-editor-inserter__search-${ instanceId }` } className="screen-reader-text">
-					{ __( 'Search for a block', 'amp' ) }
+					{ __( 'Search for an element', 'amp' ) }
 				</label>
 				<input
 					id={ `block-editor-inserter__search-${ instanceId }` }
 					type="search"
-					placeholder={ __( 'Search for a block', 'amp' ) }
-					className="editor-inserter__search block-editor-inserter__search"
+					placeholder={ __( 'Search for an element', 'amp' ) }
+					className="editor-inserter__search block-editor-inserter__search amp__block-editor-inserter__search"
 					autoFocus
 					onChange={ this.onChangeSearchInput }
 				/>
 
 				<div
-					className="editor-inserter__results block-editor-inserter__results"
+					className="editor-inserter__results amp__block-editor-inserter__results block-editor-inserter__results"
 					ref={ this.inserterResults }
 					tabIndex="0"
 					role="region"
 					aria-label={ __( 'Available block types', 'amp' ) }
 				>
 
-					{ !! suggestedItems.length &&
+					{ Boolean( suggestedItems.length ) &&
 						<PanelBody
 							title={ _x( 'Most Used', 'blocks', 'amp' ) }
 							opened={ isPanelOpen( 'suggested' ) }
@@ -329,7 +328,7 @@ export class InserterMenu extends Component {
 						);
 					} ) }
 
-					{ !! reusableItems.length && (
+					{ Boolean( reusableItems.length ) && (
 						<PanelBody
 							className="editor-inserter__reusable-blocks-panel block-editor-inserter__reusable-blocks-panel"
 							title={ __( 'Reusable', 'amp' ) }
@@ -357,7 +356,7 @@ export class InserterMenu extends Component {
 				}
 			</div>
 		);
-		/* eslint-enable jsx-a11y/no-autofocus, jsx-a11y/no-noninteractive-element-interactions */
+		/* eslint-enable jsx-a11y/no-autofocus, jsx-a11y/no-static-element-interactions */
 	}
 }
 
@@ -429,7 +428,6 @@ export default compose(
 		// This breaks the withDispatch not containing any logic rule.
 		// Since it's a function only called when the event handlers are called,
 		// it's fine to extract it.
-		// eslint-disable-next-line no-restricted-syntax
 		function getInsertionIndex( name ) {
 			const {
 				getBlockIndex,

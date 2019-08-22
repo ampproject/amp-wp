@@ -18,6 +18,10 @@ import { withSafeTimeout } from '@wordpress/compose';
  * Internal dependencies
  */
 import { getPixelsFromPercentage } from '../../helpers';
+import {
+	STORY_PAGE_INNER_WIDTH,
+	STORY_PAGE_INNER_HEIGHT,
+} from '../../constants';
 
 const { Image } = window;
 
@@ -27,8 +31,8 @@ const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onDragStart = this.onDragStart.bind( this );
 		this.onDragOver = this.onDragOver.bind( this );
@@ -78,10 +82,17 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) {
-		this.cloneWrapper.style.top =
-			`${ parseInt( this.cloneWrapper.style.top, 10 ) + event.clientY - this.cursorTop }px`;
+		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+
+		// Don't allow the CTA button to go over its top limit.
+		if ( 'amp/amp-story-cta' === this.props.blockName ) {
+			this.cloneWrapper.style.top = top >= 0 ? `${ top }px` : '0px';
+		} else {
+			this.cloneWrapper.style.top = `${ top }px`;
+		}
+
 		this.cloneWrapper.style.left =
-			`${ parseInt( this.cloneWrapper.style.left, 10 ) + event.clientX - this.cursorLeft }px`;
+			`${ parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft }px`;
 
 		// Update cursor coordinates.
 		this.cursorLeft = event.clientX;
@@ -104,8 +115,9 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { elementId, transferData, onDragStart = noop } = this.props;
+		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
 		const element = document.getElementById( elementId );
+		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {
 			event.preventDefault();
@@ -136,9 +148,12 @@ class Draggable extends Component {
 		const clone = element.cloneNode( true );
 		this.cloneWrapper.style.transform = clone.style.transform;
 
+		// 20% of the full value in case of CTA block.
+		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
+
 		// Position clone over the original element.
-		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ) ) }px`;
-		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ) ) }px`;
+		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
+		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
 
 		clone.id = `clone-${ elementId }`;
 		clone.style.top = 0;
@@ -204,6 +219,7 @@ class Draggable extends Component {
 }
 
 Draggable.propTypes = {
+	blockName: PropTypes.string,
 	elementId: PropTypes.string,
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,

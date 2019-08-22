@@ -18,15 +18,15 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
 /**
  * Internal dependencies
  */
-import { BlockPreview } from '../';
-import pageIcon from '../../../../images/add-page-inserter.svg';
-import addTemplateIcon from '../../../../images/add-template.svg';
+import TemplatePreview from './template-preview';
+import pageIcon from '../../../../images/stories-editor/add-page-inserter.svg';
+import addTemplateIcon from '../../../../images/stories-editor/add-template.svg';
 import './edit.css';
 import { createSkeletonTemplate, maybeEnqueueFontStyle } from '../../helpers';
 
 class TemplateInserter extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
 
 		this.onToggle = this.onToggle.bind( this );
 
@@ -119,7 +119,8 @@ class TemplateInserter extends Component {
 										/>
 									</div>
 									{ this.state.storyTemplates.map( ( item ) => (
-										<a // eslint-disable-line jsx-a11y/anchor-is-valid, see https://github.com/ampproject/amp-wp/issues/2165
+										// see https://github.com/ampproject/amp-wp/issues/2165
+										<a // eslint-disable-line jsx-a11y/anchor-is-valid
 											key={ `template-preview-${ item.id }` }
 											role="button"
 											tabIndex="0"
@@ -133,9 +134,8 @@ class TemplateInserter extends Component {
 											} }
 											className="components-button block-editor-block-preview"
 										>
-											<BlockPreview
-												name="core/block"
-												attributes={ { ref: item.id } }
+											<TemplatePreview
+												item={ item }
 											/>
 										</a>
 									) ) }

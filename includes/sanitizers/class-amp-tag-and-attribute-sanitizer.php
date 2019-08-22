@@ -58,14 +58,14 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 0.7
 	 * @var array
 	 */
-	protected $rev_alternate_attr_name_lookup = array();
+	protected $rev_alternate_attr_name_lookup = [];
 
 	/**
 	 * Mapping of JSON-serialized tag spec to the number of instances encountered in the document.
 	 *
 	 * @var array
 	 */
-	protected $visited_unique_tag_specs = array();
+	protected $visited_unique_tag_specs = [];
 
 	/**
 	 * Stack.
@@ -74,7 +74,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var DOMElement[]
 	 */
-	private $stack = array();
+	private $stack = [];
 
 	/**
 	 * Default args.
@@ -83,21 +83,21 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array();
+	protected $DEFAULT_ARGS = [];
 
 	/**
 	 * AMP script components that are discovered being required through sanitization.
 	 *
 	 * @var string[]
 	 */
-	protected $script_components = array();
+	protected $script_components = [];
 
 	/**
 	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
 	 *
 	 * @var array
 	 */
-	protected $should_not_replace_nodes = array();
+	protected $should_not_replace_nodes = [];
 
 	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
@@ -107,73 +107,72 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
-		$this->DEFAULT_ARGS = array(
+	public function __construct( $dom, $args = [] ) {
+		$this->DEFAULT_ARGS = [
 			'amp_allowed_tags'                => AMP_Allowed_Tags_Generated::get_allowed_tags(),
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
-			'amp_bind_placeholder_prefix'     => AMP_DOM_Utils::get_amp_bind_placeholder_prefix(),
-		);
+		];
 
 		parent::__construct( $dom, $args );
 
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 
 			// Allow style attribute on all elements.
-			$this->args['amp_globally_allowed_attributes']['style'] = array();
+			$this->args['amp_globally_allowed_attributes']['style'] = [];
 
 			// Allow style elements.
-			$this->args['amp_allowed_tags']['style'][] = array(
-				'attr_spec_list' => array(
-					'type' => array(
+			$this->args['amp_allowed_tags']['style'][] = [
+				'attr_spec_list' => [
+					'type' => [
 						'value_casei' => 'text/css',
-					),
-				),
-				'cdata'          => array(),
-				'tag_spec'       => array(
+					],
+				],
+				'cdata'          => [],
+				'tag_spec'       => [
 					'spec_name' => 'style for Customizer preview',
-				),
-			);
+				],
+			];
 
 			// Allow stylesheet links.
-			$this->args['amp_allowed_tags']['link'][] = array(
-				'attr_spec_list' => array(
-					'async'       => array(),
-					'crossorigin' => array(),
-					'href'        => array(
+			$this->args['amp_allowed_tags']['link'][] = [
+				'attr_spec_list' => [
+					'async'       => [],
+					'crossorigin' => [],
+					'href'        => [
 						'mandatory' => true,
-					),
-					'integrity'   => array(),
-					'media'       => array(),
-					'rel'         => array(
+					],
+					'integrity'   => [],
+					'media'       => [],
+					'rel'         => [
 						'dispatch_key' => 2,
 						'mandatory'    => true,
 						'value_casei'  => 'stylesheet',
-					),
-					'type'        => array(
+					],
+					'type'        => [
 						'value_casei' => 'text/css',
-					),
-				),
-				'tag_spec'       => array(
+					],
+				],
+				'tag_spec'       => [
 					'spec_name' => 'link rel=stylesheet for Customizer preview', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
-				),
-			);
+				],
+			];
 		}
 
 		// Allow scripts if requested.
 		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
-			$this->args['amp_allowed_tags']['script'][] = array(
-				'attr_spec_list' => array(
-					'type'  => array(),
-					'src'   => array(),
-					'async' => array(),
-					'defer' => array(),
-				),
-				'cdata'          => array(),
-				'tag_spec'       => array(
+			$this->args['amp_allowed_tags']['script'][] = [
+				'attr_spec_list' => [
+					'type'  => [],
+					'src'   => [],
+					'async' => [],
+					'defer' => [],
+				],
+				'cdata'          => [],
+				'tag_spec'       => [
 					'spec_name' => 'scripts for Customizer preview',
-				),
-			);
+				],
+			];
 		}
 
 		// Prepare whitelists.
@@ -187,6 +186,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->allowed_tags['html'] as &$rule_spec ) {
 				unset( $rule_spec[ AMP_Rule_Spec::TAG_SPEC ][ AMP_Rule_Spec::MANDATORY_PARENT ] );
 			}
+
+			unset( $rule_spec );
 		}
 
 		foreach ( $this->allowed_tags as &$tag_specs ) {
@@ -195,7 +196,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					$tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] = $this->process_alternate_names( $tag_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
 				}
 			}
+
+			unset( $tag_spec );
 		}
+
+		unset( $tag_specs );
+
 		$this->globally_allowed_attributes = $this->process_alternate_names( $this->args['amp_globally_allowed_attributes'] );
 		$this->layout_allowed_attributes   = $this->process_alternate_names( $this->args['amp_layout_allowed_attributes'] );
 	}
@@ -228,14 +234,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function process_alternate_names( $attr_spec_list ) {
 		foreach ( $attr_spec_list as $attr_name => &$attr_spec ) {
-			if ( '[' === $attr_name[0] ) {
-				$placeholder_attr_name = $this->args['amp_bind_placeholder_prefix'] . trim( $attr_name, '[]' );
-				if ( ! isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
-					$attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] = array();
-				}
-				$attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ][] = $placeholder_attr_name;
-			}
-
 			// Save all alternative names in lookup to improve performance.
 			if ( isset( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
@@ -299,29 +297,29 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$extension_spec = $rule_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec'];
 			$custom_attr    = 'amp-mustache' === $extension_spec['name'] ? 'custom-template' : 'custom-element';
 
-			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = array(
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $custom_attr ] = [
 				AMP_Rule_Spec::VALUE     => $extension_spec['name'],
 				AMP_Rule_Spec::MANDATORY => true,
-			);
+			];
 
 			$versions = array_unique(
 				array_merge(
-					isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : array(),
-					isset( $extension_spec['version'] ) ? $extension_spec['version'] : array()
+					isset( $extension_spec['allowed_versions'] ) ? $extension_spec['allowed_versions'] : [],
+					isset( $extension_spec['version'] ) ? $extension_spec['version'] : []
 				)
 			);
 
-			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = array(
+			$rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ]['src'] = [
 				AMP_Rule_Spec::VALUE_REGEX => implode(
 					'',
-					array(
+					[
 						'^',
 						preg_quote( 'https://cdn.ampproject.org/v0/' . $extension_spec['name'] . '-' ), // phpcs:ignore WordPress.PHP.PregQuoteDelimiter.Missing
 						'(' . implode( '|', $versions ) . ')',
 						'\.js$',
-					)
+					]
 				),
-			);
+			];
 		}
 
 		// Augment the attribute list according to the parent's reference points, if it has them.
@@ -396,8 +394,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * Compile a list of rule_specs to validate for this node
 		 * based on tag name of the node.
 		 */
-		$rule_spec_list_to_validate = array();
-		$rule_spec_list             = array();
+		$rule_spec_list_to_validate = [];
+		$rule_spec_list             = [];
 		if ( isset( $this->allowed_tags[ $node->nodeName ] ) ) {
 			$rule_spec_list = $this->allowed_tags[ $node->nodeName ];
 		}
@@ -414,9 +412,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// The remaining validations all have to do with attributes.
-		$attr_spec_list = array();
-		$tag_spec       = array();
-		$cdata          = array();
+		$attr_spec_list = [];
+		$tag_spec       = [];
+		$cdata          = [];
 
 		/*
 		 * If we have exactly one rule_spec, use it's attr_spec_list
@@ -440,7 +438,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * Get a score from each attr_spec_list by seeing how many
 			 * attributes and values match the node.
 			 */
-			$attr_spec_scores = array();
+			$attr_spec_scores = [];
 			foreach ( $rule_spec_list_to_validate as $spec_id => $rule_spec ) {
 				$attr_spec_scores[ $spec_id ] = $this->validate_attr_spec_list_for_node( $node, $rule_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ] );
 			}
@@ -525,7 +523,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( ! empty( $this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] ) ) {
 				$removed = $this->remove_invalid_child(
 					$node,
-					array( 'code' => 'duplicate_element' )
+					[ 'code' => 'duplicate_element' ]
 				);
 			}
 			$this->visited_unique_tag_specs[ $node->nodeName ][ $tag_spec_key ] = true;
@@ -552,9 +550,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * Capture all element attributes up front so that differing validation errors result when
 			 * one invalid attribute is accepted but the others are still rejected.
 			 */
-			$validation_error = array(
-				'element_attributes' => array(),
-			);
+			$validation_error = [
+				'element_attributes' => [],
+			];
 			foreach ( $node->attributes as $attribute ) {
 				$validation_error['element_attributes'][ $attribute->nodeName ] = $attribute->nodeValue;
 			}
@@ -587,12 +585,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// Check if element needs amp-bind component.
 			if ( $node instanceof DOMElement && ! in_array( 'amp-bind', $this->script_components, true ) ) {
 				foreach ( $node->attributes as $name => $value ) {
-					$is_bind_attribute = (
-						'[' === $name[0]
-						||
-						( isset( $this->rev_alternate_attr_name_lookup[ $name ] ) && '[' === $this->rev_alternate_attr_name_lookup[ $name ][0] )
-					);
-					if ( $is_bind_attribute ) {
+					if ( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX === substr( $name, 0, 14 ) ) {
 						$this->script_components[] = 'amp-bind';
 						break;
 					}
@@ -703,11 +696,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) ) {
-			return false;
-		}
-
-		return true;
+		return ! ( ! empty( $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) && ! $this->check_valid_children( $node, $tag_spec[ AMP_Rule_Spec::CHILD_TAGS ] ) );
 	}
 
 	/**
@@ -953,7 +942,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 * If $node is only a DOMNode and not a DOMElement we can't
 			 * remove an attribute from it anyway.  So bail out now.
 			 */
-			return array();
+			return [];
 		}
 
 		/*
@@ -961,7 +950,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * breaking the iteration. So we keep track of the attributes to
 		 * remove in the first loop, then remove them in the second loop.
 		 */
-		$attrs_to_remove = array();
+		$attrs_to_remove = [];
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 			if ( ! $this->is_amp_allowed_attribute( $attr_node, $attr_spec_list ) ) {
 				$attrs_to_remove[] = $attr_node;
@@ -1012,7 +1001,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return DOMAttr[]|false Attributes to remove, or false if the element itself should be removed.
 	 */
 	private function delegated_sanitize_disallowed_attribute_values_in_node( $node, $attr_spec_list, $attributes_pending_removal ) {
-		$attrs_to_remove = array();
+		$attrs_to_remove = [];
 
 		foreach ( $attr_spec_list as $attr_name => $attr_val ) {
 			if ( isset( $attr_spec_list[ $attr_name ][ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
@@ -1106,20 +1095,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *      - AMP_Rule_Spec::NOT_APPLICABLE - $attr_name is not mandatory
 	 */
 	private function check_attr_spec_rule_mandatory( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) && ( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) && $attr_spec_rule[ AMP_Rule_Spec::MANDATORY ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				// Check if an alternative name list is specified.
-				if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
-					foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alt_name ) {
-						if ( $node->hasAttribute( $alt_name ) ) {
-							return AMP_Rule_Spec::PASS;
-						}
+			}
+
+			// Check if an alternative name list is specified.
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alt_name ) {
+					if ( $node->hasAttribute( $alt_name ) ) {
+						return AMP_Rule_Spec::PASS;
 					}
 				}
-				return AMP_Rule_Spec::FAIL;
 			}
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1144,17 +1133,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $attr_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 					return AMP_Rule_Spec::PASS;
-				} else {
-					return AMP_Rule_Spec::FAIL;
 				}
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+
+				return AMP_Rule_Spec::FAIL;
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						if ( $this->check_matching_attribute_value( $attr_name, $node->getAttribute( $alternative_name ), $attr_spec_rule[ AMP_Rule_Spec::VALUE ] ) ) {
 							return AMP_Rule_Spec::PASS;
-						} else {
-							return AMP_Rule_Spec::FAIL;
 						}
+
+						return AMP_Rule_Spec::FAIL;
 					}
 				}
 			}
@@ -1223,20 +1214,20 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			$rule_value = strtolower( $rule_value );
 			if ( $node->hasAttribute( $attr_name ) ) {
 				$attr_value = strtolower( $node->getAttribute( $attr_name ) );
-				if ( $attr_value === (string) $rule_value ) {
+				if ( $attr_value === $rule_value ) {
 					return AMP_Rule_Spec::PASS;
-				} else {
-					$result = AMP_Rule_Spec::FAIL;
 				}
+
+				$result = AMP_Rule_Spec::FAIL;
 			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$attr_value = strtolower( $node->getAttribute( $alternative_name ) );
-						if ( $attr_value === (string) $rule_value ) {
+						if ( $attr_value === $rule_value ) {
 							return AMP_Rule_Spec::PASS;
-						} else {
-							$result = AMP_Rule_Spec::FAIL;
 						}
+
+						$result = AMP_Rule_Spec::FAIL;
 					}
 				}
 			}
@@ -1271,9 +1262,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			if ( preg_match( '/^(' . $rule_value . ')$/u', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				return AMP_Rule_Spec::FAIL;
 			}
+
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1302,9 +1293,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			// See note above regarding the '^' and '$' that are added here.
 			if ( preg_match( '/^(' . $rule_value . ')$/ui', $node->getAttribute( $attr_name ) ) ) {
 				return AMP_Rule_Spec::PASS;
-			} else {
-				return AMP_Rule_Spec::FAIL;
 			}
+
+			return AMP_Rule_Spec::FAIL;
 		}
 		return AMP_Rule_Spec::NOT_APPLICABLE;
 	}
@@ -1325,29 +1316,27 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_valid_url( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) ) {
-			if ( $node->hasAttribute( $attr_name ) ) {
-				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
-					$url = urldecode( $url );
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ] ) && $node->hasAttribute( $attr_name ) ) {
+			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
+				$url = urldecode( $url );
 
-					// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
-					$protocol = $this->parse_protocol( $url );
-					if ( isset( $protocol ) ) {
-						if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
-							return AMP_Rule_Spec::FAIL;
-						}
-						$url = substr( $url, strlen( $protocol ) + 1 );
-					}
-
-					// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
-					$host = wp_parse_url( $url, PHP_URL_HOST );
-					if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
+				// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
+				$protocol = $this->parse_protocol( $url );
+				if ( isset( $protocol ) ) {
+					if ( ! preg_match( '/^[a-zA-Z0-9\+-]+/i', $protocol ) ) {
 						return AMP_Rule_Spec::FAIL;
 					}
+					$url = substr( $url, strlen( $protocol ) + 1 );
 				}
 
-				return AMP_Rule_Spec::PASS;
+				// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
+				$host = wp_parse_url( $url, PHP_URL_HOST );
+				if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
+					return AMP_Rule_Spec::FAIL;
+				}
 			}
+
+			return AMP_Rule_Spec::PASS;
 		}
 
 		return AMP_Rule_Spec::NOT_APPLICABLE;
@@ -1392,7 +1381,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				return AMP_Rule_Spec::PASS;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
@@ -1426,16 +1417,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 'srcset' === $attribute_node->nodeName || 'srcset' === $spec_attr_name ) {
 			return array_filter(
 				array_map(
-					function ( $srcset_part ) {
+					static function ( $srcset_part ) {
 						// Remove descriptors for width and pixel density.
 						return preg_replace( '/\s.*$/', '', trim( $srcset_part ) );
 					},
 					preg_split( '/\s*,\s*/', $attribute_node->nodeValue )
 				)
 			);
-		} else {
-			return array( $attribute_node->nodeValue );
 		}
+
+		return [ $attribute_node->nodeValue ];
 	}
 
 	/**
@@ -1452,7 +1443,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_relative( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_RELATIVE ] ) {
 			if ( $node->hasAttribute( $attr_name ) ) {
 				foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 					$parsed_url = wp_parse_url( $url );
@@ -1469,7 +1460,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 					}
 				}
 				return AMP_Rule_Spec::PASS;
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+			}
+
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $alternative_name ), $attr_name ) as $url ) {
@@ -1500,7 +1493,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 *                                        is no rule for this attribute.
 	 */
 	private function check_attr_spec_rule_disallowed_empty( $node, $attr_name, $attr_spec_rule ) {
-		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! ( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && $node->hasAttribute( $attr_name ) ) {
+		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) && ! $attr_spec_rule[ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] && $node->hasAttribute( $attr_name ) ) {
 			$attr_value = $node->getAttribute( $attr_name );
 			if ( empty( $attr_value ) ) {
 				return AMP_Rule_Spec::FAIL;
@@ -1563,18 +1556,19 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				$attr_value = $node->getAttribute( $attr_name );
 				if ( preg_match( $pattern, $attr_value ) ) {
 					return AMP_Rule_Spec::FAIL;
-				} else {
-					return AMP_Rule_Spec::PASS;
 				}
-			} elseif ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
+
+				return AMP_Rule_Spec::PASS;
+			}
+			if ( isset( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] ) ) {
 				foreach ( $attr_spec_rule[ AMP_Rule_Spec::ALTERNATIVE_NAMES ] as $alternative_name ) {
 					if ( $node->hasAttribute( $alternative_name ) ) {
 						$attr_value = $node->getAttribute( $alternative_name );
 						if ( preg_match( $pattern, $attr_value ) ) {
 							return AMP_Rule_Spec::FAIL;
-						} else {
-							return AMP_Rule_Spec::PASS;
 						}
+
+						return AMP_Rule_Spec::PASS;
 					}
 				}
 			}
@@ -1599,13 +1593,13 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function check_attr_spec_rule_value_properties( $node, $attr_name, $attr_spec_rule ) {
 		if ( isset( $attr_spec_rule[ AMP_Rule_Spec::VALUE_PROPERTIES ] ) && $node->hasAttribute( $attr_name ) ) {
-			$properties = array();
+			$properties = [];
 			foreach ( explode( ',', $node->getAttribute( $attr_name ) ) as $pair ) {
 				$pair_parts = explode( '=', $pair, 2 );
 				if ( 2 !== count( $pair_parts ) ) {
 					return 0;
 				}
-				$properties[ trim( strtolower( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
+				$properties[ strtolower( trim( $pair_parts[0] ) ) ] = trim( $pair_parts[1] );
 			}
 
 			// Fail if there are unrecognized properties.
@@ -1657,19 +1651,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		if (
 			isset( $attr_spec_list[ $attr_name ] )
 			||
-			'data-' === substr( $attr_name, 0, 5 )
+			( 'data-' === substr( $attr_name, 0, 5 ) && AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX !== substr( $attr_name, 0, 14 ) )
 			||
 			// Allow the 'amp' or '⚡' attribute in <html>, like <html ⚡>.
-			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, array( 'amp', '⚡' ), true ) )
+			( 'html' === $attr_node->parentNode->nodeName && in_array( $attr_node->nodeName, [ 'amp', '⚡' ], true ) )
 		) {
 			return true;
 		}
 
-		$is_allowed_alt_name_attr = (
-			isset( $this->rev_alternate_attr_name_lookup[ $attr_name ] )
-			&&
-			isset( $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] )
-		);
+		$is_allowed_alt_name_attr = isset( $this->rev_alternate_attr_name_lookup[ $attr_name ], $attr_spec_list[ $this->rev_alternate_attr_name_lookup[ $attr_name ] ] );
 		if ( $is_allowed_alt_name_attr ) {
 			return true;
 		}
@@ -1682,10 +1672,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * unique reference point, see:
 		 * https://github.com/ampproject/amphtml/blob/1526498116488/extensions/amp-selector/validator-amp-selector.protoascii#L81-L91
 		 */
-		$descendant_reference_points = array(
+		$descendant_reference_points = [
 			'amp-selector'         => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-SELECTOR option' ),
 			'amp-story-grid-layer' => AMP_Allowed_Tags_Generated::get_reference_point_spec( 'AMP-STORY-GRID-LAYER default' ), // @todo Consider the more restrictive 'AMP-STORY-GRID-LAYER animate-in'.
-		);
+		];
 		foreach ( $descendant_reference_points as $ancestor_name => $reference_point_spec ) {
 			if ( isset( $reference_point_spec[ AMP_Rule_Spec::ATTR_SPEC_LIST ][ $attr_name ] ) ) {
 				$parent = $attr_node->parentNode;
@@ -1782,12 +1772,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Tag name and attributes.
 	 */
 	private function parse_tag_and_attributes_from_spec_name( $spec_name ) {
-		static $parsed_specs = array();
+		static $parsed_specs = [];
 		if ( isset( $parsed_specs[ $spec_name ] ) ) {
 			return $parsed_specs[ $spec_name ];
 		}
 
-		$attributes = array();
+		$attributes = [];
 
 		/*
 		 * This matches spec names like:
@@ -1828,7 +1818,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			return;
 		}
 
-		$child_elements = array();
+		$child_elements = [];
 		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
 			$child = $node->childNodes->item( $i );
 			if ( $child instanceof DOMElement ) {
@@ -1846,7 +1836,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
-	 * Loop through node's children and remove the ones that are not whitelisted.
+	 * Check whether the node validates the constraints for children.
 	 *
 	 * @param DOMNode $node Node.
 	 * @param array   $child_tags {
@@ -1860,7 +1850,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return bool Whether the element satisfies the requirements, or else it should be removed.
 	 */
 	private function check_valid_children( $node, $child_tags ) {
-		$child_elements = array();
+		$child_elements = [];
 		for ( $i = 0; $i < $node->childNodes->length; $i++ ) {
 			$child = $node->childNodes->item( $i );
 			if ( $child instanceof DOMElement ) {
@@ -1874,24 +1864,22 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Verify that all of the child are among the set of allowed elements.
-		$removed_count = 0;
 		if ( isset( $child_tags['child_tag_name_oneof'] ) ) {
 			foreach ( $child_elements as $child_element ) {
 				if ( ! in_array( $child_element->nodeName, $child_tags['child_tag_name_oneof'], true ) ) {
-					$removed_count++;
-					$this->remove_invalid_child( $child_element );
+					return false;
 				}
 			}
 		}
 
 		// If there aren't the exact number of elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_num_child_tags'] ) ) {
-			return ( count( $child_elements ) - $removed_count ) === $child_tags['mandatory_num_child_tags'];
+			return count( $child_elements ) === $child_tags['mandatory_num_child_tags'];
 		}
 
 		// If there aren't enough elements, then mark this $node as being invalid.
 		if ( isset( $child_tags['mandatory_min_num_child_tags'] ) ) {
-			return ( count( $child_elements ) - $removed_count ) >= $child_tags['mandatory_min_num_child_tags'];
+			return count( $child_elements ) >= $child_tags['mandatory_min_num_child_tags'];
 		}
 
 		return true;
@@ -1973,7 +1961,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Replace node with fragment.
-		$should_replace = $this->should_sanitize_validation_error( array(), compact( 'node' ) );
+		$should_replace = $this->should_sanitize_validation_error( [], compact( 'node' ) );
 		if ( $should_replace ) {
 			$node->parentNode->replaceChild( $fragment, $node );
 		} else {

@@ -1,17 +1,21 @@
 module.exports = {
-	rootDir: '../../',
 	...require( '@wordpress/scripts/config/jest-e2e.config' ),
 	transform: {
-		'^.+\\.[jt]sx?$': '<rootDir>/node_modules/@wordpress/scripts/config/babel-transform',
+		'^.+\\.[jt]sx?$': '<rootDir>/../../node_modules/@wordpress/scripts/config/babel-transform',
 	},
+	transformIgnorePatterns: [
+		'node_modules',
+	],
 	setupFilesAfterEnv: [
-		'<rootDir>/node_modules/@wordpress/jest-preset-default/scripts/setup-test-framework.js',
+		'<rootDir>/config/bootstrap.js',
 		'expect-puppeteer',
 	],
+	testMatch: [
+		'**/specs/**/*.js',
+		'**/?(*.)spec.js',
+	],
 	testPathIgnorePatterns: [
-		'<rootDir>/.git',
-		'<rootDir>/node_modules',
-		'<rootDir>/build',
-		'.*/e2e/.*',
+		'.git',
+		'node_modules',
 	],
 };

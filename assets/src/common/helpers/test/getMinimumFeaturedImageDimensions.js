@@ -4,7 +4,7 @@
 import { getMinimumFeaturedImageDimensions } from '../';
 
 describe( 'getMinimumFeaturedImageDimensions', () => {
-	it( 'should return size with correct aspect ration', () => {
-		expect( getMinimumFeaturedImageDimensions() ).toEqual( { width: 1200, height: 675 } );
+	it( 'should return size with correct aspect ratio', () => {
+		expect( getMinimumFeaturedImageDimensions() ).toStrictEqual( { width: 1200, height: 675 } );
 	} );
 } );

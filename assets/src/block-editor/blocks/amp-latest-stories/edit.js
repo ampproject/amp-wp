@@ -16,9 +16,9 @@ import {
 	PanelBody,
 	Placeholder,
 	QueryControls,
-	ServerSideRender,
 	Spinner,
 } from '@wordpress/components';
+import ServerSideRender from '@wordpress/server-side-render';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls } from '@wordpress/block-editor';
 import { withSelect } from '@wordpress/data';
@@ -50,47 +50,45 @@ class LatestStoriesEdit extends Component {
 		const { attributes, setAttributes, latestStories } = this.props;
 		const { order, orderBy, storiesToShow } = attributes;
 
-		const inspectorControls = (
-			<InspectorControls>
-				<PanelBody title={ __( 'Latest Stories Settings', 'amp' ) }>
-					<QueryControls
-						{ ...{ order, orderBy } }
-						numberOfItems={ storiesToShow }
-						onOrderChange={ ( value ) => setAttributes( { order: value } ) }
-						onOrderByChange={ ( value ) => setAttributes( { orderBy: value } ) }
-						onNumberOfItemsChange={ ( value ) => setAttributes( { storiesToShow: value } ) }
-					/>
-				</PanelBody>
-			</InspectorControls>
-		);
+		const isLoading = ! Array.isArray( latestStories );
+		const storiesWithFeaturedImages = ( latestStories || [] ).filter( ( { featured_media: image } ) => image > 0 );
+		const hasStories = storiesWithFeaturedImages.length > 0;
 
-		const hasStories = Array.isArray( latestStories ) && latestStories.length;
-		if ( ! hasStories ) {
-			return (
-				<>
-					{ inspectorControls }
+		const serverSideAttributes = {
+			...attributes,
+			useCarousel: false,
+		};
+
+		return (
+			<>
+				<InspectorControls>
+					<PanelBody title={ __( 'Latest Stories Settings', 'amp' ) }>
+						<QueryControls
+							{ ...{ order, orderBy } }
+							numberOfItems={ storiesToShow }
+							onOrderChange={ ( value ) => setAttributes( { order: value } ) }
+							onOrderByChange={ ( value ) => setAttributes( { orderBy: value } ) }
+							onNumberOfItemsChange={ ( value ) => setAttributes( { storiesToShow: value } ) }
+						/>
+					</PanelBody>
+				</InspectorControls>
+				{ ( isLoading || ! hasStories ) && (
 					<Placeholder
 						icon="admin-post"
 						label={ __( 'Latest Stories', 'amp' ) }
 					>
-						{ ! Array.isArray( latestStories ) ?
+						{ isLoading ?
 							<Spinner /> :
 							__( 'No stories found.', 'amp' )
 						}
 					</Placeholder>
-				</>
-			);
-		}
-
-		const serverSideAttributes = Object.assign( {}, attributes, { useCarousel: false } );
-
-		return (
-			<>
-				{ inspectorControls }
-				<ServerSideRender
-					block={ blockName }
-					attributes={ serverSideAttributes }
-				/>
+				) }
+				{ hasStories && (
+					<ServerSideRender
+						block={ blockName }
+						attributes={ serverSideAttributes }
+					/>
+				) }
 			</>
 		);
 	}
@@ -103,7 +101,7 @@ LatestStoriesEdit.propTypes = {
 		storiesToShow: PropTypes.number,
 	} ),
 	setAttributes: PropTypes.func.isRequired,
-	latestStories: PropTypes.array.isRequired,
+	latestStories: PropTypes.array,
 };
 
 export default withSelect( ( select, props ) => {
@@ -114,6 +112,7 @@ export default withSelect( ( select, props ) => {
 		orderby: orderBy,
 		per_page: storiesToShow,
 	}, ( value ) => ! isUndefined( value ) );
+
 	return {
 		latestStories: getEntityRecords( 'postType', 'amp_story', latestStoriesQuery ),
 	};

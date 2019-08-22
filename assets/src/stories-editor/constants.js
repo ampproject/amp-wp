@@ -6,26 +6,26 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import Arimo from '../../images/font-names/arimo.svg';
-import Lato from '../../images/font-names/lato.svg';
-import Lora from '../../images/font-names/lora.svg';
-import Merriweather from '../../images/font-names/merriweather.svg';
-import Montserrat from '../../images/font-names/montserrat.svg';
-import NotoSans from '../../images/font-names/noto-sans.svg';
-import OpenSans from '../../images/font-names/open-sans.svg';
-import OpenSansCondensed from '../../images/font-names/open-sans-condensed.svg';
-import Oswald from '../../images/font-names/oswald.svg';
-import PlayfairDisplay from '../../images/font-names/playfair-display.svg';
-import PtSans from '../../images/font-names/pt-sans.svg';
-import PtSansNarrow from '../../images/font-names/pt-sans-narrow.svg';
-import PtSerif from '../../images/font-names/pt-serif.svg';
-import Raleway from '../../images/font-names/raleway.svg';
-import Roboto from '../../images/font-names/roboto.svg';
-import RobotoCondensed from '../../images/font-names/roboto-condensed.svg';
-import RobotoSlab from '../../images/font-names/roboto-slab.svg';
-import Slabo27 from '../../images/font-names/slabo-27.svg';
-import SourceSansPro from '../../images/font-names/source-sans-pro.svg';
-import Ubuntu from '../../images/font-names/ubuntu.svg';
+import Arimo from '../../images/stories-editor/font-names/arimo.svg';
+import Lato from '../../images/stories-editor/font-names/lato.svg';
+import Lora from '../../images/stories-editor/font-names/lora.svg';
+import Merriweather from '../../images/stories-editor/font-names/merriweather.svg';
+import Montserrat from '../../images/stories-editor/font-names/montserrat.svg';
+import NotoSans from '../../images/stories-editor/font-names/noto-sans.svg';
+import OpenSans from '../../images/stories-editor/font-names/open-sans.svg';
+import OpenSansCondensed from '../../images/stories-editor/font-names/open-sans-condensed.svg';
+import Oswald from '../../images/stories-editor/font-names/oswald.svg';
+import PlayfairDisplay from '../../images/stories-editor/font-names/playfair-display.svg';
+import PtSans from '../../images/stories-editor/font-names/pt-sans.svg';
+import PtSansNarrow from '../../images/stories-editor/font-names/pt-sans-narrow.svg';
+import PtSerif from '../../images/stories-editor/font-names/pt-serif.svg';
+import Raleway from '../../images/stories-editor/font-names/raleway.svg';
+import Roboto from '../../images/stories-editor/font-names/roboto.svg';
+import RobotoCondensed from '../../images/stories-editor/font-names/roboto-condensed.svg';
+import RobotoSlab from '../../images/stories-editor/font-names/roboto-slab.svg';
+import Slabo27 from '../../images/stories-editor/font-names/slabo-27.svg';
+import SourceSansPro from '../../images/stories-editor/font-names/source-sans-pro.svg';
+import Ubuntu from '../../images/stories-editor/font-names/ubuntu.svg';
 
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
@@ -106,12 +106,13 @@ export const ALLOWED_BLOCKS = [
 
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
-export const ALLOWED_MEDIA_TYPES = [ 'image', 'video/mp4' ];
-export const POSTER_ALLOWED_MEDIA_TYPES = [ 'image' ];
+
+export const ALLOWED_VIDEO_TYPES = [ 'video/mp4' ];
+export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ALLOWED_VIDEO_TYPES ];
+export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
+
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
 export const MAX_IMAGE_SIZE_SLUG = 'amp_story_page';
-export const MEGABYTE_IN_BYTES = 1000000;
-export const VIDEO_ALLOWED_MEGABYTES_PER_SECOND = 1;
 
 export const ANIMATION_DURATION_DEFAULTS = {
 	drop: 1600,
@@ -236,5 +237,19 @@ export const AMP_STORY_FONT_IMAGES = {
 	Ubuntu,
 };
 
-export const TEXT_BLOCK_BORDER = 5;
+export const REVERSE_WIDTH_CALCULATIONS = [
+	'left',
+	'bottomLeft',
+	'topLeft',
+];
+
+export const REVERSE_HEIGHT_CALCULATIONS = [
+	'top',
+	'topRight',
+	'topLeft',
+];
+
 export const TEXT_BLOCK_PADDING = 7;
+
+export const BLOCK_ROTATION_SNAPS = [ -180, -165, -150, -135, -120, -105, -90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 ];
+export const BLOCK_ROTATION_SNAP_GAP = 10;

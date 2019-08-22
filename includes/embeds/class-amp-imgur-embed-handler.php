@@ -24,9 +24,9 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
 
 			// Before 4.9 the embedding Imgur is not working properly, register embed for that case.
-			wp_embed_register_handler( 'amp-imgur', self::URL_PATTERN, array( $this, 'oembed' ), -1 );
+			wp_embed_register_handler( 'amp-imgur', self::URL_PATTERN, [ $this, 'oembed' ], -1 );
 		} else {
-			add_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10, 3 );
+			add_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10, 3 );
 		}
 	}
 
@@ -37,7 +37,7 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 		if ( version_compare( strtok( get_bloginfo( 'version' ), '-' ), '4.9', '<' ) ) {
 			wp_embed_unregister_handler( 'amp-imgur', -1 );
 		} else {
-			remove_filter( 'embed_oembed_html', array( $this, 'filter_embed_oembed_html' ), 10 );
+			remove_filter( 'embed_oembed_html', [ $this, 'filter_embed_oembed_html' ], 10 );
 		}
 	}
 
@@ -51,7 +51,7 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	 * @return string Embed.
 	 */
 	public function oembed( $matches, $attr, $url, $rawattr ) {
-		return $this->render( array( 'url' => $url ) );
+		return $this->render( [ 'url' => $url ] );
 	}
 
 	/**
@@ -63,9 +63,9 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 	public function render( $args ) {
 		$args = wp_parse_args(
 			$args,
-			array(
+			[
 				'url' => false,
-			)
+			]
 		);
 
 		if ( empty( $args['url'] ) ) {
@@ -80,11 +80,11 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 		}
 		return AMP_HTML_Utils::build_tag(
 			'amp-imgur',
-			array(
+			[
 				'width'         => $this->args['width'],
 				'height'        => $this->args['height'],
 				'data-imgur-id' => $id,
-			)
+			]
 		);
 	}
 
@@ -110,7 +110,7 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 				return $return;
 			}
 
-			$attributes = wp_array_slice_assoc( $attr, array( 'width', 'height' ) );
+			$attributes = wp_array_slice_assoc( $attr, [ 'width', 'height' ] );
 
 			if ( empty( $attr['width'] ) ) {
 				$attributes['layout'] = 'fixed-height';
@@ -144,8 +144,8 @@ class AMP_Imgur_Embed_Handler extends AMP_Base_Embed_Handler {
 				return false;
 			}
 			return $matches[1];
-		} else {
-			return $pieces[1];
 		}
+
+		return $pieces[1];
 	}
 }

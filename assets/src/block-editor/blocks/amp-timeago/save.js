@@ -31,6 +31,9 @@ const BlockSave = ( { attributes } ) => {
 					timeagoProps.layout = ampLayout;
 				}
 				break;
+
+			default:
+				break;
 		}
 	}
 	return (

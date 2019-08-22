@@ -18,7 +18,7 @@ class AMP_Customizer_Settings {
 	 * @return array Associative array of $setting => $value pairs.
 	 */
 	private static function get_stored_options() {
-		return get_option( 'amp_customizer', array() );
+		return get_option( 'amp_customizer', [] );
 	}
 
 	/**

@@ -18,14 +18,15 @@
   },
   "require-dev": {
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-    "phpcompatibility/php-compatibility": "9.1.1",
+    "phpcompatibility/php-compatibility": "9.2.0",
     "wp-coding-standards/wpcs": "2.1.1",
-    "xwp/wp-dev-lib": "1.1.2"
+    "xwp/wp-dev-lib": "1.2.2"
   },
   "suggest": {
     "ext-intl": "Enables use of idn_to_utf8() to convert punycode domains to UTF-8 for use with an AMP Cache.",
     "ext-json": "Provides native implementation of json_encode()/json_decode().",
-    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets."
+    "ext-mbstring": "Used by PHP-CSS-Parser when working with stylesheets.",
+    "ext-zip": "Enables the use of ZipArchive to export AMP Stories."
   },
   "config": {
     "platform": {

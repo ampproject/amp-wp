@@ -186,7 +186,7 @@ class AMP_Analytics_Options_Submenu_Page {
 	public function render() {
 		$this->render_styles();
 
-		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+		$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
 
 		$this->render_title( ! empty( $analytics_entries ) );
 

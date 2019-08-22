@@ -48,7 +48,7 @@ const ampLayoutOptions = [
 	},
 	{
 		value: 'fixed-height',
-		label: __( 'Fixed height', 'amp' ),
+		label: __( 'Fixed Height', 'amp' ),
 		notAvailable: [],
 	},
 	{
@@ -171,7 +171,7 @@ export const addAMPAttributes = ( settings, name ) => {
  *
  * @return {Object} Output element.
  */
-export const filterBlocksSave = ( element, blockType, attributes ) => {
+export const filterBlocksSave = ( element, blockType, attributes ) => { // eslint-disable-line complexity
 	let text = attributes.text || '',
 		content = '';
 
@@ -245,8 +245,10 @@ export const filterBlocksSave = ( element, blockType, attributes ) => {
 			let ampFitTextContent = '<amp-fit-text';
 
 			for ( const att in fitTextProps ) {
-				const value = fitTextProps[ att ];
-				ampFitTextContent += ' ' + att + '="' + value + '"';
+				if ( fitTextProps.hasOwnProperty( att ) ) {
+					const value = fitTextProps[ att ];
+					ampFitTextContent += ' ' + att + '="' + value + '"';
+				}
 			}
 
 			ampFitTextContent += '>' + getAmpFitTextContent( attributes.content ) + '</amp-fit-text>';
@@ -451,6 +453,9 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
 				setAttributes( { width: DEFAULT_WIDTH } );
 			}
 			break;
+
+		default:
+			break;
 	}
 };
 
@@ -594,9 +599,9 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 	const label = __( 'Automatically fit text to container', 'amp' );
 
 	if ( ampFitText ) {
-		maxFont = parseInt( maxFont, 10 );
-		height = parseInt( height, 10 );
-		minFont = parseInt( minFont, 10 );
+		maxFont = parseInt( maxFont );
+		height = parseInt( height );
+		minFont = parseInt( minFont );
 	}
 
 	return (
@@ -639,7 +644,7 @@ const setUpTextBlocksInspectorControls = ( props ) => {
 									nextMinFont = MIN_FONT_SIZE; // @todo Supplying fallbackFontSize should be done automatically by the component?
 								}
 
-								if ( parseInt( nextMinFont, 10 ) <= maxFont ) {
+								if ( parseInt( nextMinFont ) <= maxFont ) {
 									setAttributes( { minFont: nextMinFont } );
 								}
 							} }

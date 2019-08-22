@@ -2,14 +2,15 @@
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import edit from './edit';
 import save from './save';
-import blockIcon from '../../../../images/call-to-action.svg';
-import { createBlock, getBlockAttributes } from '@wordpress/blocks';
+import deprecated from './deprecated';
+import blockIcon from '../../../../images/stories-editor/call-to-action.svg';
 
 const schema = {
 	url: {
@@ -23,10 +24,6 @@ const schema = {
 		source: 'html',
 		selector: 'a',
 	},
-	align: {
-		type: 'string',
-		default: 'center',
-	},
 	// The rest of the color attributes are added by addAMPAttributes()
 	customTextColor: {
 		type: 'string',
@@ -35,6 +32,14 @@ const schema = {
 	customBackgroundColor: {
 		type: 'string',
 		default: '#32373c',
+	},
+	btnPositionTop: {
+		type: 'number',
+		default: 0,
+	},
+	btnPositionLeft: {
+		type: 'number',
+		default: 30,
 	},
 };
 
@@ -49,18 +54,18 @@ export const settings = {
 
 	category: 'layout',
 
-	keywords: [ __( 'call to action', 'amp' ), __( 'cta', 'amp' ), __( 'button', 'amp' ) ],
+	keywords: [
+		__( 'cta', 'amp' ),
+		__( 'button', 'amp' ),
+	],
 
 	attributes: schema,
-
-	supports: {
-		align: true,
-		alignWide: false,
-	},
 
 	edit,
 
 	save,
+
+	deprecated,
 
 	transforms: {
 		from: [

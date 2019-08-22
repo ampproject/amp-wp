@@ -27,9 +27,9 @@ class AMP_Service_Worker {
 		}
 
 		// Shim support for service worker installation from PWA feature plugin.
-		add_filter( 'query_vars', array( __CLASS__, 'add_query_var' ) );
-		add_action( 'parse_request', array( __CLASS__, 'handle_service_worker_iframe_install' ) );
-		add_action( 'wp', array( __CLASS__, 'add_install_hooks' ) );
+		add_filter( 'query_vars', [ __CLASS__, 'add_query_var' ] );
+		add_action( 'parse_request', [ __CLASS__, 'handle_service_worker_iframe_install' ] );
+		add_action( 'wp', [ __CLASS__, 'add_install_hooks' ] );
 
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
 		if ( isset( $theme_support['service_worker'] ) && false === $theme_support['service_worker'] ) {
@@ -40,11 +40,11 @@ class AMP_Service_Worker {
 		 * The default-enabled options reflect which features are not commented-out in the AMP-by-Example service worker.
 		 * See <https://github.com/ampproject/amp-by-example/blob/e093edb401b1617859b5365e80b639d81b06f058/boilerplate-generator/templates/files/serviceworkerJs.js>.
 		 */
-		$enabled_options = array(
+		$enabled_options = [
 			'cdn_script_caching'   => true,
 			'image_caching'        => false,
 			'google_fonts_caching' => false,
-		);
+		];
 		if ( isset( $theme_support['service_worker'] ) && is_array( $theme_support['service_worker'] ) ) {
 			$enabled_options = array_merge(
 				$enabled_options,
@@ -53,13 +53,13 @@ class AMP_Service_Worker {
 		}
 
 		if ( $enabled_options['cdn_script_caching'] ) {
-			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_cdn_script_caching' ) );
+			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_cdn_script_caching' ] );
 		}
 		if ( $enabled_options['image_caching'] ) {
-			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_image_caching' ) );
+			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_image_caching' ] );
 		}
 		if ( $enabled_options['google_fonts_caching'] ) {
-			add_action( 'wp_front_service_worker', array( __CLASS__, 'add_google_fonts_caching' ) );
+			add_action( 'wp_front_service_worker', [ __CLASS__, 'add_google_fonts_caching' ] );
 		}
 	}
 
@@ -91,7 +91,7 @@ class AMP_Service_Worker {
 		// Add AMP scripts to runtime cache which will then get stale-while-revalidate strategy.
 		$service_workers->register(
 			'amp-cdn-runtime-caching',
-			function() {
+			static function() {
 				$urls = AMP_Service_Worker::get_precached_script_cdn_urls();
 				if ( empty( $urls ) ) {
 					return '';
@@ -111,9 +111,9 @@ class AMP_Service_Worker {
 		// Serve the AMP Runtime from cache and check for an updated version in the background. See <https://github.com/ampproject/amp-by-example/blob/4593af61609898043302a101826ddafe7206bfd9/boilerplate-generator/templates/files/serviceworkerJs.js#L54-L58>.
 		$service_workers->caching_routes()->register(
 			'^https:\/\/cdn\.ampproject\.org\/.*',
-			array(
+			[
 				'strategy' => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
-			)
+			]
 		);
 	}
 
@@ -132,19 +132,19 @@ class AMP_Service_Worker {
 
 		$service_workers->caching_routes()->register(
 			'^' . preg_quote( set_url_scheme( content_url( '/' ), 'https' ), '/' ) . '[^\?]+?\.(?:png|gif|jpg|jpeg|svg|webp)(\?.*)?$',
-			array(
+			[
 				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 				'cacheName' => 'images',
-				'plugins'   => array(
-					'cacheableResponse' => array(
-						'statuses' => array( 0, 200 ),
-					),
-					'expiration'        => array(
+				'plugins'   => [
+					'cacheableResponse' => [
+						'statuses' => [ 0, 200 ],
+					],
+					'expiration'        => [
 						'maxEntries'    => 60,
 						'maxAgeSeconds' => MONTH_IN_SECONDS,
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 	}
 
@@ -171,28 +171,28 @@ class AMP_Service_Worker {
 		// Cache the Google Fonts stylesheets with a stale while revalidate strategy.
 		$service_workers->caching_routes()->register(
 			'^https:\/\/fonts\.googleapis\.com',
-			array(
+			[
 				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_STALE_WHILE_REVALIDATE,
 				'cacheName' => 'google-fonts-stylesheets',
-			)
+			]
 		);
 
 		// Cache the Google Fonts webfont files with a cache first strategy for 1 year.
 		$service_workers->caching_routes()->register(
 			'^https:\/\/fonts\.gstatic\.com',
-			array(
+			[
 				'strategy'  => WP_Service_Worker_Caching_Routes::STRATEGY_CACHE_FIRST,
 				'cacheName' => 'google-fonts-webfonts',
-				'plugins'   => array(
-					'cacheableResponse' => array(
-						'statuses' => array( 0, 200 ),
-					),
-					'expiration'        => array(
+				'plugins'   => [
+					'cacheableResponse' => [
+						'statuses' => [ 0, 200 ],
+					],
+					'expiration'        => [
 						'maxAgeSeconds' => YEAR_IN_SECONDS,
 						'maxEntries'    => 30,
-					),
-				),
-			)
+					],
+				],
+			]
 		);
 	}
 
@@ -211,12 +211,12 @@ class AMP_Service_Worker {
 	public static function get_precached_script_cdn_urls() {
 
 		// List of AMP scripts that we know will be used in WordPress always.
-		$precached_handles = array(
+		$precached_handles = [
 			'amp-runtime',
 			'amp-bind', // Used by comments.
 			'amp-form', // Used by comments.
 			'amp-install-serviceworker',
-		);
+		];
 
 		$theme_support = AMP_Theme_Support::get_theme_support_args();
 		if ( ! empty( $theme_support['comments_live_list'] ) ) {
@@ -227,7 +227,7 @@ class AMP_Service_Worker {
 			$precached_handles[] = 'amp-analytics';
 		}
 
-		$urls = array();
+		$urls = [];
 		foreach ( $precached_handles as $handle ) {
 			if ( wp_script_is( $handle, 'registered' ) ) {
 				$urls[] = wp_scripts()->registered[ $handle ]->src;
@@ -242,20 +242,22 @@ class AMP_Service_Worker {
 	 */
 	public static function add_install_hooks() {
 		if ( current_theme_supports( 'amp' ) && is_amp_endpoint() ) {
-			add_action( 'wp_footer', array( __CLASS__, 'install_service_worker' ) );
+			add_action( 'wp_footer', [ __CLASS__, 'install_service_worker' ] );
 
 			// Prevent validation error due to the script that installs the service worker on non-AMP pages.
-			$priority = has_action( 'wp_print_scripts', 'wp_print_service_workers' );
-			if ( false !== $priority ) {
-				remove_action( 'wp_print_scripts', 'wp_print_service_workers', $priority );
+			foreach ( [ 'wp_print_scripts', 'wp_print_footer_scripts' ] as $action ) {
+				$priority = has_action( $action, 'wp_print_service_workers' );
+				if ( false !== $priority ) {
+					remove_action( $action, 'wp_print_service_workers', $priority );
+				}
 			}
 		}
 
 		// Reader mode integration.
-		add_action( 'amp_post_template_footer', array( __CLASS__, 'install_service_worker' ) );
+		add_action( 'amp_post_template_footer', [ __CLASS__, 'install_service_worker' ] );
 		add_filter(
 			'amp_post_template_data',
-			function ( $data ) {
+			static function ( $data ) {
 				$data['amp_component_scripts']['amp-install-serviceworker'] = true;
 				return $data;
 			}
@@ -301,12 +303,12 @@ class AMP_Service_Worker {
 			return;
 		}
 
-		$scope = intval( $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ] );
+		$scope = (int) $GLOBALS['wp']->query_vars[ self::INSTALL_SERVICE_WORKER_IFRAME_QUERY_VAR ];
 		if ( WP_Service_Workers::SCOPE_ADMIN !== $scope && WP_Service_Workers::SCOPE_FRONT !== $scope ) {
 			wp_die(
 				esc_html__( 'No service workers registered for the requested scope.', 'amp' ),
 				esc_html__( 'Service Worker Installation', 'amp' ),
-				array( 'response' => 404 )
+				[ 'response' => 404 ]
 			);
 		}
 
@@ -325,7 +327,7 @@ class AMP_Service_Worker {
 				printf(
 					'<script>navigator.serviceWorker.register( %s, %s );</script>',
 					wp_json_encode( wp_get_service_worker_url( $scope ) ),
-					wp_json_encode( array( 'scope' => $front_scope ) )
+					wp_json_encode( [ 'scope' => $front_scope ] )
 				);
 				?>
 			</body>
@@ -335,8 +337,8 @@ class AMP_Service_Worker {
 		// Die in a way that can be unit tested.
 		add_filter(
 			'wp_die_handler',
-			function() {
-				return function() {
+			static function() {
+				return static function() {
 					die();
 				};
 			},

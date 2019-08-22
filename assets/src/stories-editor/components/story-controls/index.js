@@ -20,7 +20,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import { TemplateInserter } from '../';
-import reorderIcon from '../../../../images/reorder.svg';
+import reorderIcon from '../../../../images/stories-editor/reorder.svg';
 import './edit.css';
 
 function StoryControls( { isReordering, startReordering, saveOrder, resetOrder } ) {
@@ -69,22 +69,24 @@ StoryControls.propTypes = {
 export default compose(
 	withSelect( ( select ) => {
 		const { isReordering } = select( 'amp/story' );
+		const { getBlockOrder } = select( 'core/block-editor' );
 
 		return {
 			isReordering: isReordering(),
+			blockOrder: getBlockOrder(),
 		};
 	} ),
-	withDispatch( ( dispatch ) => {
+	withDispatch( ( dispatch, { blockOrder } ) => {
 		const { clearSelectedBlock } = dispatch( 'core/block-editor' );
 		const { startReordering, saveOrder, resetOrder } = dispatch( 'amp/story' );
 
 		return {
 			startReordering: () => {
 				clearSelectedBlock();
-				startReordering();
+				startReordering( blockOrder );
 			},
 			saveOrder,
-			resetOrder,
+			resetOrder: () => resetOrder( blockOrder ),
 		};
 	} )
 )( StoryControls );

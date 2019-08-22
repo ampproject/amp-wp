@@ -20,7 +20,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @since 1.1.0
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'nav_container_id'           => '',
 		'nav_container_xpath'        => '', // Alternative for 'nav_container_id', if no ID available.
 		'menu_button_id'             => '',
@@ -28,7 +28,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		'nav_container_toggle_class' => '',
 		'menu_button_toggle_class'   => '', // Optional.
 		'nav_menu_toggle_state_id'   => 'navMenuToggledOn',
-	);
+	];
 
 	/**
 	 * XPath.
@@ -46,7 +46,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMDocument $dom  DOM.
 	 * @param array       $args Args.
 	 */
-	public function __construct( $dom, $args = array() ) {
+	public function __construct( $dom, $args = [] ) {
 		parent::__construct( $dom, $args );
 
 		// Ensure the state ID is always set.
@@ -85,7 +85,7 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 
 		if ( ! empty( $this->args['nav_container_toggle_class'] ) ) {
 			$nav_el->setAttribute(
-				AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
+				AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class',
 				sprintf(
 					"%s + ( $state_id ? %s : '' )",
 					wp_json_encode( $nav_el->getAttribute( 'class' ) ),
@@ -112,10 +112,10 @@ class AMP_Nav_Menu_Toggle_Sanitizer extends AMP_Base_Sanitizer {
 		$button_on = sprintf( "tap:AMP.setState({ $state_id: ! $state_id })" );
 		$button_el->setAttribute( 'on', $button_on );
 		$button_el->setAttribute( 'aria-expanded', 'false' );
-		$button_el->setAttribute( AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'aria-expanded', "$state_id ? 'true' : 'false'" );
+		$button_el->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$state_id ? 'true' : 'false'" );
 		if ( ! empty( $this->args['menu_button_toggle_class'] ) ) {
 			$button_el->setAttribute(
-				AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class',
+				AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class',
 				sprintf( "%s + ( $state_id ? %s : '' )", wp_json_encode( $button_el->getAttribute( 'class' ) ), wp_json_encode( ' ' . $this->args['menu_button_toggle_class'] ) )
 			);
 		}

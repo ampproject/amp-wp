@@ -19,12 +19,12 @@ import { Component } from '@wordpress/element';
  * Internal dependencies
  */
 import { BlockDragArea } from './block-drag-area';
-import IgnoreNestedEvents from './ignore-nested-events';
+import IgnoreNestedEvents from './ignore-nested-events'; // eslint-disable-line import/no-named-as-default
 import './edit.css';
 
 export class BlockMover extends Component {
 	render() {
-		const { children, isDraggable, isMovable, onDragStart, clientId, blockElementId } = this.props;
+		const { children, blockName, isDraggable, isMovable, onDragStart, clientId, blockElementId } = this.props;
 
 		if ( ! isMovable || ! isDraggable ) {
 			return children;
@@ -41,6 +41,7 @@ export class BlockMover extends Component {
 						children={ children }
 						clientId={ clientId }
 						blockElementId={ blockElementId }
+						blockName={ blockName }
 						onDragStart={ onDragStart }
 					/>
 				</div>
@@ -55,6 +56,7 @@ BlockMover.propTypes = {
 	onDragStart: PropTypes.func,
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
+	blockName: PropTypes.string,
 	children: PropTypes.any.isRequired,
 };
 

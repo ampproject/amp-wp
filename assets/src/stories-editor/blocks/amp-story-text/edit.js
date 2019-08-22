@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -19,38 +20,72 @@ import { select } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { maybeUpdateFontSize } from '../../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import './edit.css';
+import { DraggableText } from '../../components';
 
 class TextBlockEdit extends Component {
-	constructor() {
-		super( ...arguments );
+	constructor( ...args ) {
+		super( ...args );
+
+		this.state = {
+			isEditing: false,
+			hasOverlay: true,
+		};
 
 		this.onReplace = this.onReplace.bind( this );
+		this.toggleIsEditing = this.toggleIsEditing.bind( this );
+		this.toggleOverlay = this.toggleOverlay.bind( this );
 	}
 
 	componentDidMount() {
 		maybeUpdateFontSize( this.props );
 	}
 
-	componentDidUpdate( prevProps ) {
-		const { attributes } = this.props;
+	componentDidUpdate( prevProps, prevState ) {
+		const { attributes, fontSize, isSelected } = this.props;
 		const {
 			height,
 			width,
 			content,
+			ampFitText,
+			ampFontFamily,
 		} = attributes;
 
-		if (
-			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width &&
-			prevProps.attributes.content === content
-		) {
-			return;
+		// If the block was unselected, make sure that it's not editing anymore.
+		if ( ! isSelected && prevProps.isSelected ) {
+			this.toggleIsEditing( false );
+			this.toggleOverlay( true );
 		}
 
-		maybeUpdateFontSize( this.props );
+		const checkFontSize = ampFitText && (
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.attributes.width !== width ||
+			prevProps.attributes.height !== height ||
+			prevProps.attributes.content !== content
+		);
+
+		if ( checkFontSize ) {
+			maybeUpdateFontSize( this.props );
+		}
+
+		const checkBlockDimensions = ! ampFitText && (
+			! isEqual( prevProps.fontSize, fontSize ) ||
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.attributes.content !== content
+		);
+
+		if ( checkBlockDimensions ) {
+			maybeUpdateBlockDimensions( this.props );
+		}
+
+		// If the state changed to editing, focus on the text.
+		if ( this.state.isEditing && ! prevState.isEditing ) {
+			setInputSelectionToEnd( '.is-selected .wp-block-amp-amp-story-text' );
+		}
 	}
 
 	onReplace( blocks ) {
@@ -72,15 +107,37 @@ class TextBlockEdit extends Component {
 		) ) );
 	}
 
+	toggleIsEditing( enable ) {
+		if ( enable !== this.state.isEditing ) {
+			this.setState( {
+				isEditing: ! this.state.isEditing,
+			} );
+		}
+	}
+
+	toggleOverlay( add ) {
+		if ( add !== this.state.hasOverlay ) {
+			this.setState( {
+				hasOverlay: ! this.state.hasOverlay,
+			} );
+		}
+	}
+
 	render() {
+		const { isEditing, hasOverlay } = this.state;
+
 		const {
 			attributes,
 			setAttributes,
 			className,
+			clientId,
 			fontSize,
+			isPartOfMultiSelection,
+			isSelected,
 			backgroundColor,
 			customBackgroundColor,
 			textColor,
+			name,
 		} = this.props;
 
 		const {
@@ -90,18 +147,10 @@ class TextBlockEdit extends Component {
 			ampFitText,
 			autoFontSize,
 			height,
-			tagName,
 			opacity,
 		} = attributes;
 
-		let userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
-		if ( undefined === userFontSize ) {
-			if ( 'h1' === tagName ) {
-				userFontSize = 2 + 'rem';
-			} else if ( 'h2' === tagName ) {
-				userFontSize = 1.5 + 'rem';
-			}
-		}
+		const userFontSize = fontSize && fontSize.size ? fontSize.size + 'px' : undefined;
 
 		const { colors } = select( 'core/block-editor' ).getSettings();
 		const appliedBackgroundColor = getBackgroundColorWithOpacity( colors, backgroundColor, customBackgroundColor, opacity );
@@ -128,6 +177,21 @@ class TextBlockEdit extends Component {
 			wrapperClass += ' ' + styleClasses.join( ' ' );
 		}
 
+		const textWrapperClassName = 'wp-block-amp-story-text';
+		const textClassNames = {
+			'has-text-color': textColor.color,
+			[ textColor.class ]: textColor.class,
+			[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
+			'is-amp-fit-text': ampFitText,
+		};
+		const textStyle = {
+			color: textColor.color,
+			fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
+			textAlign: align,
+			position: ampFitText && content.length ? 'static' : undefined,
+		};
+
+		// StoryBlockMover is added here to the Text block since it depends on isEditing state.
 		return (
 			<>
 				<BlockControls>
@@ -138,30 +202,41 @@ class TextBlockEdit extends Component {
 				</BlockControls>
 				<div className={ classnames( wrapperClass, {
 					'with-line-height': ampFitText,
+					'is-empty-draggable-text': ! isEditing && ! content.length,
 				} ) } style={ wrapperStyle } >
-					<RichText
-						wrapperClassName="wp-block-amp-story-text"
-						tagName="p"
-						// Ensure line breaks are normalised to HTML.
-						value={ content }
-						onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
-						// The 2 following lines are necessary for pasting to work.
-						onReplace={ this.onReplace }
-						onSplit={ () => {} }
-						style={ {
-							color: textColor.color,
-							fontSize: ampFitText ? autoFontSize + 'px' : userFontSize,
-							textAlign: align,
-							position: ampFitText && content.length ? 'static' : undefined,
-						} }
-						className={ classnames( className, {
-							'has-text-color': textColor.color,
-							[ textColor.class ]: textColor.class,
-							[ fontSize.class ]: ampFitText ? undefined : fontSize.class,
-							'is-amp-fit-text': ampFitText,
-						} ) }
-						placeholder={ placeholder || __( 'Write text…', 'amp' ) }
-					/>
+					{ isEditing &&
+						<RichText
+							wrapperClassName={ textWrapperClassName }
+							tagName="p"
+							// Ensure line breaks are normalised to HTML.
+							value={ content }
+							onChange={ ( nextContent ) => setAttributes( { content: nextContent } ) }
+							// The 2 following lines are necessary for pasting to work.
+							onReplace={ this.onReplace }
+							onSplit={ () => {} }
+							style={ textStyle }
+							className={ classnames( className, textClassNames ) }
+							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+						/>
+					}
+					{ ! isEditing &&
+						<DraggableText
+							blockClass="wp-block-amp-story-text"
+							blockElementId={ `block-${ clientId }` }
+							clientId={ clientId }
+							name={ name }
+							isEditing={ isEditing }
+							isDraggable={ ! isPartOfMultiSelection }
+							isSelected={ isSelected }
+							hasOverlay={ hasOverlay }
+							toggleIsEditing={ this.toggleIsEditing }
+							toggleOverlay={ this.toggleOverlay }
+							text={ content }
+							textStyle={ textStyle }
+							textWrapperClass={ classnames( className + ' block-editor-rich-text__editable editor-rich-text__editable', textClassNames ) }
+							placeholder={ placeholder || __( 'Write text…', 'amp' ) }
+						/>
+					}
 				</div>
 			</>
 		);
@@ -179,8 +254,12 @@ TextBlockEdit.propTypes = {
 		autoFontSize: PropTypes.number,
 		tagName: PropTypes.string,
 		opacity: PropTypes.number,
+		className: PropTypes.string,
+		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
+	clientId: PropTypes.string.isRequired,
+	isPartOfMultiSelection: PropTypes.bool,
 	onReplace: PropTypes.func.isRequired,
 	name: PropTypes.string.isRequired,
 	setAttributes: PropTypes.func.isRequired,
@@ -190,6 +269,7 @@ TextBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,

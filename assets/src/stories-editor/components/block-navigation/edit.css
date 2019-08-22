@@ -4,16 +4,38 @@
 	left: 45px;
 	top: 75px;
 	width: 300px;
+	min-width: 115px;
 	z-index: 80;
 	list-style-type: none;
 	padding: 0;
 	margin: 0;
 }
 
+@media (max-width: 1200px) {
+
+	.is-sidebar-opened #amp-story-block-navigation {
+		left: 0;
+	}
+}
+
+@media (min-width: 1001px) and (max-width: 1100px) {
+
+	.is-sidebar-opened .editor-block-list__layout {
+		margin-right: -100px;
+	}
+}
+
 @media (min-width: 961px) {
 
 	#amp-story-block-navigation {
 		display: block;
+	}
+}
+
+@media (min-width: 961px) and (max-width: 1000px) {
+
+	.is-sidebar-opened #amp-story-block-navigation {
+		display: none;
 	}
 }
 
@@ -34,6 +56,12 @@
 
 #amp-story-block-navigation .block-editor-block-navigation__list {
 	list-style-type: none;
+	margin-bottom: 15px;
+}
+
+#amp-story-block-navigation .editor-block-navigation__list__static {
+	margin: 0;
+	padding: 0;
 }
 
 #amp-story-block-navigation .components-icon-button .dashicon {
@@ -142,6 +170,11 @@
 	}
 }
 
+/* Hide default block navigation icon in toolbar */
+.edit-post-header-toolbar .components-icon-button.block-editor-block-navigation {
+	display: none;
+}
+
 @media (min-width: 961px) {
 
 	.edit-post-header-toolbar #amp-story-shortcuts {
@@ -151,10 +184,6 @@
 	.edit-post-visual-editor .editor-post-title__block {
 		margin-left: 0;
 		margin-right: 0;
-	}
-
-	.components-icon-button.block-editor-block-navigation {
-		display: none;
 	}
 
 	.block-editor-block-navigation__container {
@@ -200,18 +229,27 @@
 	display: none;
 }
 
-.block-editor-block-navigation__list .block-editor-block-navigation__item .components-drop-zone.is-close-to-bottom {
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone {
 	background: none;
-	border-bottom: 3px solid #0071a1;
 }
 
-.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
-	background: none;
-	border: none;
+.block-editor-block-navigation__list li .block-navigation__placeholder {
+	transition: height 0.3s ease;
+	height: 0;
 }
 
-.block-editor-block-navigation__list li:first-child .block-editor-block-navigation__item .components-drop-zone.is-close-to-top {
-	background: none;
-	border-top: 3px solid #0071a1;
-	border-bottom: none;
+/* When dragging near the top of a drop zone, display the placeholder so there is a space between this and the button above. */
+.block-editor-block-navigation__list li .block-editor-block-navigation__item .components-drop-zone.is-close-to-top + .block-navigation__placeholder {
+	visibility: hidden;
+	height: 36px;
+}
+
+/* Allow dropping below the last <button> by doubling the height of the drop zone. */
+.block-editor-block-navigation__list li:nth-last-child(1) .components-drop-zone:not(.is-close-to-top) {
+	height: 72px;
+}
+
+/* Hide the dragged <button>, as there will be a clone. */
+.block-editor-block-navigation__item-is-dragging > .editor-block-navigation__item-button {
+	display: none;
 }

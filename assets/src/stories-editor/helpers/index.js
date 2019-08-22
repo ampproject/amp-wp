@@ -3,7 +3,8 @@
  */
 import uuid from 'uuid/v4';
 import classnames from 'classnames';
-import { every, isEqual, has } from 'lodash';
+import { every, has, isEqual } from 'lodash';
+import memize from 'memize';
 
 /**
  * WordPress dependencies
@@ -14,6 +15,7 @@ import { __, _x, sprintf } from '@wordpress/i18n';
 import { select, dispatch } from '@wordpress/data';
 import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 import { getColorClassName, getColorObjectByAttributeValues, getFontSize } from '@wordpress/block-editor';
+import { isBlobURL } from '@wordpress/blob';
 
 /**
  * Internal dependencies
@@ -37,15 +39,20 @@ import {
 	MEDIA_INNER_BLOCKS,
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
-	MEGABYTE_IN_BYTES,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-	TEXT_BLOCK_BORDER,
+	MAX_IMAGE_SIZE_SLUG,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
 	MIN_FONT_SIZE,
 } from '../../common/constants';
 import { getMinimumFeaturedImageDimensions, getBackgroundColorWithOpacity } from '../../common/helpers';
+import { coreDeprecations } from '../deprecations/core-blocks';
+import {
+	addAMPExtraPropsDeprecations,
+	wrapBlockInGridLayerDeprecations,
+	addAMPAttributesDeprecations,
+} from '../deprecations/filters';
+import { default as MetaBlockDeprecated } from '../deprecations/story-meta-block';
 
 const { ampStoriesFonts } = window;
 
@@ -55,7 +62,10 @@ const {
 	getBlockOrder,
 	getBlock,
 	getClientIdsWithDescendants,
+	getSettings,
 } = select( 'core/block-editor' );
+
+const { getAnimatedBlocks } = select( 'amp/story' );
 
 const {
 	addAnimation,
@@ -64,13 +74,8 @@ const {
 	changeAnimationDelay,
 } = dispatch( 'amp/story' );
 
-const {
-	getAnimatedBlocks,
-} = select( 'amp/story' );
-
-const {
-	updateBlockAttributes,
-} = dispatch( 'core/block-editor' );
+const { saveMedia } = dispatch( 'core' );
+const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
@@ -148,7 +153,7 @@ export const setBlockParent = ( props ) => {
  *
  * @return {number} Block height in pixels.
  */
-const getDefaultMinimumBlockHeight = ( name ) => {
+export const getDefaultMinimumBlockHeight = ( name ) => {
 	switch ( name ) {
 		case 'core/quote':
 		case 'core/video':
@@ -188,30 +193,27 @@ export const addAMPAttributes = ( settings, name ) => {
 		return settings;
 	}
 
+	if ( settings.attributes.deprecated && addAMPAttributesDeprecations[ settings.attributes.deprecated.default ] ) {
+		const deprecateAMPAttributes = addAMPAttributesDeprecations[ settings.attributes.deprecated.default ];
+		if ( 'function' === typeof deprecateAMPAttributes ) {
+			return deprecateAMPAttributes( settings, name );
+		}
+	}
+
 	const isImageBlock = 'core/image' === name;
 	const isVideoBlock = 'core/video' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
 
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
-	// Image block already has width and heigh.
+
+	// Image block already has width and height.
 	const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
 
 	const addedAttributes = {
-		anchor: {
-			type: 'string',
-			source: 'attribute',
-			attribute: 'id',
-			selector: 'amp-story-grid-layer .amp-story-block-wrapper > *, amp-story-cta-layer',
-		},
-		ampAnimationType: {
-			type: 'string',
-		},
 		addedAttributes: {
 			type: 'number',
 			default: 0,
-		},
-		ampAnimationAfter: {
-			type: 'string',
 		},
 		fontSize: {
 			type: 'string',
@@ -251,7 +253,20 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
+	if ( isCTABlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+			source: 'attribute',
+			attribute: 'id',
+			selector: 'amp-story-cta-layer',
+		};
+	}
+
 	if ( isMovableBlock ) {
+		addedAttributes.anchor = {
+			type: 'string',
+		};
+
 		addedAttributes.positionTop = {
 			default: 0,
 			type: 'number',
@@ -280,26 +295,16 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 
 		addedAttributes.ampAnimationType = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in',
+			type: 'string',
 		};
 		addedAttributes.ampAnimationDelay = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-delay',
 			default: 0,
 		};
 		addedAttributes.ampAnimationDuration = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-duration',
 			default: 0,
 		};
 		addedAttributes.ampAnimationAfter = {
-			source: 'attribute',
-			selector: '.amp-story-block-wrapper',
-			attribute: 'animate-in-after',
+			type: 'string',
 		};
 	}
 
@@ -311,6 +316,11 @@ export const addAMPAttributes = ( settings, name ) => {
 	}
 
 	if ( isVideoBlock ) {
+		addedAttributes.ampShowCaption = {
+			type: 'boolean',
+			default: false,
+		};
+
 		// Required defaults for AMP validity.
 		addedAttributes.autoplay = {
 			...settings.attributes.autoplay,
@@ -354,6 +364,26 @@ export const addAMPAttributes = ( settings, name ) => {
 			anchor: false,
 		},
 	};
+};
+
+export const deprecateCoreBlocks = ( settings, name ) => {
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return settings;
+	}
+
+	let deprecated = settings.deprecated ? settings.deprecated : [];
+	const blockDeprecation = coreDeprecations[ name ] || undefined;
+	if ( blockDeprecation ) {
+		deprecated = [ ...deprecated, ...blockDeprecation ];
+		return {
+			...settings,
+			deprecated,
+		};
+	}
+
+	return settings;
 };
 
 /**
@@ -436,13 +466,15 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 		return props;
 	}
 
-	const newProps = { ...props };
-
-	// Always add anchor ID regardless of block support. Needed for animations.
-	newProps.id = attributes.anchor || getUniqueId();
+	if ( attributes.deprecated && addAMPExtraPropsDeprecations[ attributes.deprecated ] ) {
+		const deprecatedExtraProps = addAMPExtraPropsDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecatedExtraProps ) {
+			return deprecatedExtraProps( props, blockType, attributes );
+		}
+	}
 
 	if ( attributes.rotationAngle ) {
-		let style = ! newProps.style ? {} : newProps.style;
+		let style = ! props.style ? {} : props.style;
 		style = {
 			...style,
 			transform: `rotate(${ parseInt( attributes.rotationAngle ) }deg)`,
@@ -455,7 +487,7 @@ export const addAMPExtraProps = ( props, blockType, attributes ) => {
 	}
 
 	return {
-		...newProps,
+		...props,
 		...ampAttributes,
 	};
 };
@@ -507,63 +539,13 @@ export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 		return element;
 	}
 
-	const {
-		ampAnimationType,
-		ampAnimationDelay,
-		ampAnimationDuration,
-		ampAnimationAfter,
-		positionTop,
-		positionLeft,
-		width,
-		height,
-	} = attributes;
-
-	let style = {};
-
-	if ( 'undefined' !== typeof positionTop && 'undefined' !== typeof positionLeft ) {
-		style = {
-			...style,
-			position: 'absolute',
-			top: `${ positionTop || 0 }%`,
-			left: `${ positionLeft || 0 }%`,
-		};
-	}
-
-	// If the block has width and height set, set responsive values. Exclude text blocks since these already have it handled.
-	if ( 'undefined' !== typeof width && 'undefined' !== typeof height ) {
-		style = {
-			...style,
-			width: width ? `${ getPercentageFromPixels( 'x', width ) }%` : '0%',
-			height: height ? `${ getPercentageFromPixels( 'y', height ) }%` : '0%',
-		};
-	}
-
-	const animationAtts = {};
-
-	// Add animation if necessary.
-	if ( ampAnimationType ) {
-		animationAtts[ 'animate-in' ] = ampAnimationType;
-
-		if ( ampAnimationDelay ) {
-			animationAtts[ 'animate-in-delay' ] = parseInt( ampAnimationDelay ) + 'ms';
-		}
-
-		if ( ampAnimationDuration ) {
-			animationAtts[ 'animate-in-duration' ] = parseInt( ampAnimationDuration ) + 'ms';
-		}
-
-		if ( ampAnimationAfter ) {
-			animationAtts[ 'animate-in-after' ] = ampAnimationAfter;
+	if ( attributes.deprecated && wrapBlockInGridLayerDeprecations[ attributes.deprecated ] ) {
+		const deprecateWrapBlocksInGridLayer = wrapBlockInGridLayerDeprecations[ attributes.deprecated ];
+		if ( 'function' === typeof deprecateWrapBlocksInGridLayer ) {
+			return deprecateWrapBlocksInGridLayer( element, blockType, attributes );
 		}
 	}
-
-	return (
-		<amp-story-grid-layer template="vertical" data-block-name={ blockType.name }>
-			<div className="amp-story-block-wrapper" style={ style } { ...animationAtts }>
-				{ element }
-			</div>
-		</amp-story-grid-layer>
-	);
+	return element;
 };
 
 /**
@@ -604,7 +586,7 @@ export const renderStoryComponents = () => {
 	const editorBlockList = document.querySelector( '.editor-block-list__layout' );
 	const editorBlockNavigation = document.querySelector( '.editor-block-navigation' );
 
-	if ( editorBlockList ) {
+	if ( editorBlockList && ! document.getElementById( 'amp-story-editor' ) ) {
 		const ampStoryWrapper = document.createElement( 'div' );
 		ampStoryWrapper.id = 'amp-story-editor';
 
@@ -680,6 +662,12 @@ export const renderStoryComponents = () => {
 			<Inserter position="bottom right" />,
 			customInserter
 		);
+	}
+
+	// Prevent WritingFlow component from focusing on last text field when clicking below the carousel.
+	const writingFlowClickRedirectElement = document.querySelector( '.block-editor-writing-flow__click-redirect' );
+	if ( writingFlowClickRedirectElement ) {
+		writingFlowClickRedirectElement.remove();
 	}
 };
 
@@ -763,7 +751,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	if ( ! measurer.offsetHeight || ! measurer.offsetWidth ) {
 		return false;
 	}
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	maxFontSize++;
 
@@ -783,7 +771,7 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
 	// Let's restore the correct font size, too.
 	measurer.style.fontSize = minFontSize + 'px';
 
-	measurer.classList.toggle( 'is-measuring-fontsize' );
+	measurer.classList.toggle( 'is-measuring' );
 
 	return minFontSize;
 };
@@ -793,33 +781,42 @@ export const calculateFontSize = ( measurer, expectedHeight, expectedWidth, maxF
  *
  * @param {string} axis       X or Y axis.
  * @param {number} pixelValue Value in pixels.
+ * @param {number} baseValue  Value to compare against to get percentage from.
  *
  * @return {number} Value in percentage.
  */
-export const getPercentageFromPixels = ( axis, pixelValue ) => {
-	if ( 'x' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_WIDTH ) * 100 ).toFixed( 2 ) );
-	} else if ( 'y' === axis ) {
-		return Number( ( ( pixelValue / STORY_PAGE_INNER_HEIGHT ) * 100 ).toFixed( 2 ) );
+export const getPercentageFromPixels = ( axis, pixelValue, baseValue = 0 ) => {
+	if ( ! baseValue ) {
+		if ( 'x' === axis ) {
+			baseValue = STORY_PAGE_INNER_WIDTH;
+		} else if ( 'y' === axis ) {
+			baseValue = STORY_PAGE_INNER_HEIGHT;
+		} else {
+			return 0;
+		}
 	}
-	return 0;
+	return Number( ( ( pixelValue / baseValue ) * 100 ).toFixed( 2 ) );
 };
 
 /**
- * Get pixel value from percentage, based on the full width / height of the page.
+ * Get pixel value from percentage, based on a base value to measure against.
+ * By default the full width / height of the page.
  *
  * @param {string} axis            X or Y axis.
  * @param {number} percentageValue Value in percent.
+ * @param {number} baseValue       Value to compare against to get pixels from.
  *
  * @return {number} Value in percentage.
  */
-export const getPixelsFromPercentage = ( axis, percentageValue ) => {
-	if ( 'x' === axis ) {
-		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_WIDTH );
-	} else if ( 'y' === axis ) {
-		return Math.round( ( percentageValue / 100 ) * STORY_PAGE_INNER_HEIGHT );
+export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) => {
+	if ( ! baseValue ) {
+		if ( 'x' === axis ) {
+			baseValue = STORY_PAGE_INNER_WIDTH;
+		} else if ( 'y' === axis ) {
+			baseValue = STORY_PAGE_INNER_HEIGHT;
+		}
 	}
-	return 0;
+	return Math.round( ( percentageValue / 100 ) * baseValue );
 };
 
 /**
@@ -883,7 +880,7 @@ export const addBackgroundColorToOverlay = ( overlayStyle, backgroundColors ) =>
  */
 const resetBlockAttributes = ( block ) => {
 	const attributes = {};
-	const attributesToKeep = [ 'positionTop', 'positionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
+	const attributesToKeep = [ 'positionTop', 'positionLeft', 'btnPositionTop', 'btnPositionLeft', 'width', 'height', 'tagName', 'align', 'content', 'text', 'value', 'citation', 'autoFontSize', 'rotationAngle' ];
 
 	for ( const key in block.attributes ) {
 		if ( block.attributes.hasOwnProperty( key ) && attributesToKeep.includes( key ) ) {
@@ -995,7 +992,7 @@ export const getStylesFromBlockAttributes = ( {
 		backgroundColor: appliedBackgroundColor,
 		color: textClass ? undefined : customTextColor,
 		fontSize: ! ampFitText ? fontSizeResponsive : undefined,
-		textAlign: align,
+		textAlign: align ? align : undefined,
 	};
 };
 
@@ -1026,25 +1023,37 @@ export const getMetaBlockSettings = ( { attribute, placeholder, tagName = 'p', i
 		attributes: schema,
 		save: withMetaBlockSave( { tagName } ),
 		edit: withMetaBlockEdit( { attribute, placeholder, tagName, isEditable } ),
+		deprecated: MetaBlockDeprecated( { tagName } ),
 	};
 };
 
 /**
- * Removes a pre-set caption from image block.
+ * Removes a pre-set caption from image and video block.
  *
  * @param {string} clientId Block ID.
  */
-export const maybeRemoveImageCaption = ( clientId ) => {
+export const maybeRemoveMediaCaption = ( clientId ) => {
 	const block = getBlock( clientId );
 
-	if ( ! block || 'core/image' !== block.name ) {
+	if ( ! block ) {
+		return;
+	}
+
+	const isImage = 'core/image' === block.name;
+	const isVideo = 'core/video' === block.name;
+
+	if ( ! isImage && ! isVideo ) {
 		return;
 	}
 
 	const { attributes } = block;
 
-	// If we have an image with pre-set caption we should remove the caption.
-	if ( ! attributes.ampShowImageCaption && attributes.caption && 0 !== attributes.caption.length ) {
+	// If we have an image or video with pre-set caption we should remove the caption.
+	if (
+		( ( ! attributes.ampShowImageCaption && isImage ) || ( ! attributes.ampShowCaption && isVideo ) ) &&
+			attributes.caption &&
+			0 !== attributes.caption.length
+	) {
 		updateBlockAttributes( clientId, { caption: '' } );
 	}
 };
@@ -1137,16 +1146,17 @@ const getBlockInnerTextElement = ( block ) => {
 
 	switch ( name ) {
 		case 'amp/amp-story-text':
-			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable.is-amp-fit-text` );
+			return document.querySelector( `#block-${ clientId } .block-editor-rich-text__editable` );
 
 		case 'amp/amp-story-post-title':
 		case 'amp/amp-story-post-author':
 		case 'amp/amp-story-post-date':
 			const slug = name.replace( '/', '-' );
 			return document.querySelector( `#block-${ clientId } .wp-block-${ slug }` );
-	}
 
-	return null;
+		default:
+			return null;
+	}
 };
 
 /**
@@ -1174,7 +1184,7 @@ export const maybeUpdateFontSize = ( block ) => {
 			const element = getBlockInnerTextElement( block );
 
 			if ( element && content.length ) {
-				const fitFontSize = calculateFontSize( element, height + TEXT_BLOCK_BORDER, width + TEXT_BLOCK_BORDER, MAX_FONT_SIZE, MIN_FONT_SIZE );
+				const fitFontSize = calculateFontSize( element, height, width, MAX_FONT_SIZE, MIN_FONT_SIZE );
 
 				if ( fitFontSize && autoFontSize !== fitFontSize ) {
 					updateBlockAttributes( clientId, { autoFontSize: fitFontSize } );
@@ -1196,6 +1206,91 @@ export const maybeUpdateFontSize = ( block ) => {
 			}
 
 			break;
+
+		default:
+			break;
+	}
+};
+
+/**
+ * Updates a block's width and height in case it doesn't use amp-fit-text and the font size has changed.
+ *
+ * @param {Object}  block                         Block object.
+ * @param {string}  block.clientId                Block client ID.
+ * @param {Object}  block.attributes              Block attributes.
+ * @param {number}  block.attributes.width        Block width in pixels.
+ * @param {number}  block.attributes.height       Block height in pixels.
+ * @param {string}  block.attributes.content      Block inner content.
+ * @param {boolean} block.attributes.ampFitText   Whether amp-fit-text should be used or not.
+ * @param {number}  block.attributes.autoFontSize Automatically determined font size for amp-fit-text blocks.
+ */
+export const maybeUpdateBlockDimensions = ( block ) => {
+	const { name, clientId, attributes } = block;
+	const { width, height, ampFitText, content } = attributes;
+
+	if ( ampFitText ) {
+		return;
+	}
+
+	switch ( name ) {
+		case 'amp/amp-story-text':
+			const element = getBlockInnerTextElement( block );
+
+			if ( element && content.length ) {
+				if ( element.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: element.offsetHeight } );
+				}
+
+				if ( element.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: element.offsetWidth } );
+				}
+			}
+
+			break;
+
+		case 'amp/amp-story-post-title':
+		case 'amp/amp-story-post-author':
+		case 'amp/amp-story-post-date':
+			const metaBlockElement = getBlockInnerTextElement( block );
+
+			if ( metaBlockElement ) {
+				metaBlockElement.classList.toggle( 'is-measuring' );
+
+				if ( metaBlockElement.offsetHeight > height ) {
+					updateBlockAttributes( clientId, { height: metaBlockElement.offsetHeight } );
+				}
+
+				if ( metaBlockElement.offsetWidth > width ) {
+					updateBlockAttributes( clientId, { width: metaBlockElement.offsetWidth } );
+				}
+
+				metaBlockElement.classList.toggle( 'is-measuring' );
+			}
+
+			break;
+
+		default:
+			break;
+	}
+};
+
+/**
+ * Remove deprecated attribute if the block was just migrated.
+ *
+ * @param {Object} block Block.
+ */
+export const maybeRemoveDeprecatedSetting = ( block ) => {
+	if ( ! block ) {
+		return;
+	}
+
+	const { attributes } = block;
+
+	// If the block was just migrated, update the block to initiate unsaved state.
+	if ( attributes.deprecated && 'migrated' === attributes.deprecated ) {
+		updateBlockAttributes( block.clientId, {
+			deprecated: null,
+		} );
 	}
 };
 
@@ -1273,6 +1368,33 @@ export const maybeSetTagName = ( clientId ) => {
 };
 
 /**
+ * Initialize animation making sure that the predecessor animation has been initialized at first.
+ *
+ * @param {Object} block Animated block.
+ * @param {Object} page Parent page.
+ * @param {Object} allBlocks All blocks.
+ */
+const initializeAnimation = ( block, page, allBlocks ) => {
+	const { ampAnimationAfter } = block.attributes;
+	let predecessor;
+	if ( ampAnimationAfter ) {
+		predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
+	}
+
+	if ( predecessor ) {
+		const animations = getAnimatedBlocks();
+		const pageAnimationOrder = animations[ page ] || [];
+		const predecessorEntry = pageAnimationOrder.find( ( { id } ) => id === predecessor.clientId );
+
+		// We need to initialize the predecessor first.
+		if ( ! predecessorEntry ) {
+			initializeAnimation( predecessor, page, allBlocks );
+		}
+	}
+	addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+};
+
+/**
  * Initializes the animations if it hasn't been done yet.
  */
 export const maybeInitializeAnimations = () => {
@@ -1283,81 +1405,15 @@ export const maybeInitializeAnimations = () => {
 			const page = getBlockRootClientId( block.clientId );
 
 			if ( page ) {
-				const { ampAnimationType, ampAnimationAfter, ampAnimationDuration, ampAnimationDelay } = block.attributes;
-				const predecessor = allBlocks.find( ( b ) => b.attributes.anchor === ampAnimationAfter );
-
-				addAnimation( page, block.clientId, predecessor ? predecessor.clientId : undefined );
+				const { ampAnimationType, ampAnimationDuration, ampAnimationDelay } = block.attributes;
+				initializeAnimation( block, page, allBlocks );
 
 				changeAnimationType( page, block.clientId, ampAnimationType );
-				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( ampAnimationDuration.replace( 'ms', '' ) ) : undefined );
-				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( ampAnimationDelay.replace( 'ms', '' ) ) : undefined );
+				changeAnimationDuration( page, block.clientId, ampAnimationDuration ? parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) ) : undefined );
+				changeAnimationDelay( page, block.clientId, ampAnimationDelay ? parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) ) : undefined );
 			}
 		}
 	}
-};
-
-/**
- * Get the distance between two points based on pythagorean.
- *
- * @param {number} deltaX Difference between X coordinates.
- * @param {number} deltaY Difference between Y coordinates.
- * @return {number} Difference between the two points.
- */
-const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
-
-/**
- * Converts degrees to radian.
- *
- * @param {number} angle Angle.
- * @return {number} Radian.
- */
-export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
-
-/**
- * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
- *
- * @param {Object} event MouseEvent.
- * @param {number} angle Rotation angle.
- * @param {number} lastSeenX Starting X coordinate.
- * @param {number} lastSeenY Starint Y coordinate.
- * @param {string} direction Direction of resizing.
- * @return {Object} Width and height values.
- */
-export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
-	const deltaY = event.clientY - lastSeenY;
-	const deltaX = event.clientX - lastSeenX;
-	const deltaL = getDelta( deltaX, deltaY );
-
-	// Get the angle between the two points.
-	const alpha = Math.atan2( deltaY, deltaX );
-	// Get the difference with rotation angle.
-	const beta = alpha - getRadianFromDeg( angle );
-	const deltaW = 'right' === direction ? deltaL * Math.cos( beta ) : 0;
-	const deltaH = 'bottom' === direction ? deltaL * Math.sin( beta ) : 0;
-
-	return {
-		deltaW,
-		deltaH,
-	};
-};
-
-/**
- * Get block's left and top position based on width, height, and radian.
- *
- * @param {number} width Width.
- * @param {number} height Height.
- * @param {number} radian Radian.
- * @return {{top: number, left: number}} Top and left positioning.
- */
-export const getBlockPositioning = ( width, height, radian ) => {
-	const x = -width / 2;
-	const y = height / 2;
-	const rotatedX = ( y * Math.sin( radian ) ) + ( x * Math.cos( radian ) );
-	const rotatedY = ( y * Math.cos( radian ) ) - ( x * Math.sin( radian ) );
-	return {
-		left: rotatedX - x,
-		top: rotatedY - y,
-	};
 };
 
 /**
@@ -1413,6 +1469,8 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 		// translators: %s: Type of block (i.e. Text, Image etc)
 		return sprintf( __( 'Block %s is at the beginning of the content and can’t be moved up', 'amp' ), type );
 	}
+
+	return undefined;
 };
 
 /**
@@ -1427,33 +1485,6 @@ export const getCallToActionBlock = ( pageClientId ) => {
 };
 
 /**
- * Gets the number of megabytes per second for the video.
- *
- * @param {Object} media The media object of the video.
- * @return {number|null} Number of megabytes per second, or null if media details unavailable.
- */
-export const getVideoBytesPerSecond = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return null;
-	}
-	return media.media_details.filesize / media.media_details.length;
-};
-
-/**
- * Gets whether the video file size is over a certain amount of MB per second.
- *
- * @param {Object} media The media object of the video.
- * @return {boolean} Whether the file size is more than a certain amount of MB per second, or null of the data isn't available.
- */
-export const isVideoSizeExcessive = ( media ) => {
-	if ( ! has( media, [ 'media_details', 'filesize' ] ) || ! has( media, [ 'media_details', 'length' ] ) ) {
-		return false;
-	}
-
-	return media.media_details.filesize > media.media_details.length * VIDEO_ALLOWED_MEGABYTES_PER_SECOND * MEGABYTE_IN_BYTES;
-};
-
-/**
  * Returns a unique ID that is guaranteed to not start with a number.
  *
  * Useful for using in HTML attributes.
@@ -1462,4 +1493,152 @@ export const isVideoSizeExcessive = ( media ) => {
  */
 export const getUniqueId = () => {
 	return uuid().replace( /^\d/, 'a' );
+};
+
+/**
+ * Returns an image of the first frame of a given video.
+ *
+ * @param {string} src Video src URL.
+ * @return {Promise<string>} The extracted image in base64-encoded format.
+ */
+export const getFirstFrameOfVideo = ( src ) => {
+	const video = document.createElement( 'video' );
+	video.muted = true;
+	video.crossOrigin = 'anonymous';
+	video.preload = 'metadata';
+	video.currentTime = 0.5; // Needed to seek forward.
+
+	return new Promise( ( resolve, reject ) => {
+		video.addEventListener( 'error', reject );
+
+		video.addEventListener( 'canplay', () => {
+			const canvas = document.createElement( 'canvas' );
+			canvas.width = video.videoWidth;
+			canvas.height = video.videoHeight;
+
+			const ctx = canvas.getContext( '2d' );
+			ctx.drawImage( video, 0, 0, canvas.width, canvas.height );
+
+			canvas.toBlob( resolve, 'image/jpeg' );
+		} );
+
+		video.src = src;
+	} );
+};
+
+/**
+ * Uploads the video's first frame as an attachment.
+ *
+ * @param {number} id  Video ID.
+ * @param {string} src Video URL.
+ */
+export const uploadVideoFrame = async ( { id: videoId, src } ) => {
+	const { __experimentalMediaUpload: mediaUpload } = getSettings();
+
+	const img = await getFirstFrameOfVideo( src );
+
+	return new Promise( ( resolve, reject ) => {
+		mediaUpload( {
+			filesList: [ img ],
+			onFileChange: ( [ fileObj ] ) => {
+				const { id: posterId, url: posterUrl } = fileObj;
+
+				if ( videoId && posterId ) {
+					saveMedia( {
+						id: videoId,
+						featured_media: posterId,
+					} );
+
+					saveMedia( {
+						id: posterId,
+						meta: {
+							amp_is_poster: true,
+						},
+					} );
+				}
+
+				if ( ! isBlobURL( posterUrl ) ) {
+					resolve( fileObj );
+				}
+			},
+			onError: reject,
+		} );
+	} );
+};
+
+/**
+ * Given a media object, returns a suitable poster image URL.
+ *
+ * @param {Object} fileObj Media object.
+ * @return {string} Poster image URL.
+ */
+export const getPosterImageFromFileObj = ( fileObj ) => {
+	const { url } = fileObj;
+
+	let newPoster = url;
+
+	if ( has( fileObj, [ 'media_details', 'sizes', MAX_IMAGE_SIZE_SLUG, 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes[ MAX_IMAGE_SIZE_SLUG ].source_url;
+	} else if ( has( fileObj, [ 'media_details', 'sizes', 'large', 'source_url' ] ) ) {
+		newPoster = fileObj.media_details.sizes.large.source_url;
+	}
+
+	return newPoster;
+};
+
+/**
+ * Add anchor for a block if it's missing.
+ *
+ * @param {string} clientId Block ID.
+ */
+export const maybeAddMissingAnchor = ( clientId ) => {
+	const block = getBlock( clientId );
+	if ( ! block ) {
+		return;
+	}
+	if ( ! block.attributes.anchor ) {
+		updateBlockAttributes( block.clientId, { anchor: getUniqueId() } );
+	}
+};
+
+/**
+ * Given a rotation angle, finds the closest angle to snap to.
+ *
+ * Inspired by the implementation in re-resizable.
+ *
+ * @see https://github.com/bokuweb/re-resizable
+ *
+ * @param {number} number
+ * @param {Array|function<number>} snap List of snap targets or function that provider
+ * @param {number} snapGap Minimum gap required in order to move to the next snapping target
+ * @return {number} New angle.
+ */
+export const findClosestSnap = memize( ( number, snap, snapGap ) => {
+	const snapArray = typeof snap === 'function' ? snap( number ) : snap;
+
+	const closestGapIndex = snapArray.reduce(
+		( prev, curr, index ) => ( Math.abs( curr - number ) < Math.abs( snapArray[ prev ] - number ) ? index : prev ),
+		0,
+	);
+	const gap = Math.abs( snapArray[ closestGapIndex ] - number );
+
+	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : number;
+} );
+
+/**
+ * Sets input selection to the end for being able to type to the end of the existing text.
+ *
+ * @param {string} inputSelector Text input selector.
+ */
+export const setInputSelectionToEnd = ( inputSelector ) => {
+	const textInput = document.querySelector( inputSelector );
+	// Create selection, collapse it in the end of the content.
+	if ( textInput ) {
+		const range = document.createRange();
+		range.selectNodeContents( textInput );
+		range.collapse( false );
+		const selection = window.getSelection();
+		selection.removeAllRanges();
+		selection.addRange( range );
+	}
 };

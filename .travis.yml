@@ -18,6 +18,7 @@ notifications:
 cache:
   directories:
     - $HOME/.composer/cache
+    - $HOME/.jest-cache
     - $HOME/.npm
     - $HOME/.nvm/.cache
     - $HOME/phpunit-bin
@@ -29,12 +30,15 @@ branches:
     - develop
     - /^\d+\.\d+$/
 
-env: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+env:
+  global:
+    - PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 install:
   - nvm install
   - composer install
   - export DEV_LIB_PATH=vendor/xwp/wp-dev-lib/scripts
+  - export DIFF_HEAD=HEAD
   - source "$DEV_LIB_PATH/travis.install.sh"
 
 before_script:
@@ -42,7 +46,13 @@ before_script:
 
 script:
   - npm run build:js
+  - npm run build:css
   - source "$DEV_LIB_PATH/travis.script.sh"
+  - |
+    if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
+      echo "Running phpunit group $PHPUNIT_EXTRA_GROUP"
+      phpunit --group $PHPUNIT_EXTRA_GROUP
+    fi
 
 after_script:
   - source "$DEV_LIB_PATH/travis.after_script.sh"
@@ -64,6 +74,9 @@ jobs:
         - composer validate --no-check-all
         - composer normalize --dry-run
         - npm run lint
+        - npm run build:js
+      after_success:
+        - npx sizereport --config
 
     - stage: test
       name: JavaScript unit tests
@@ -71,11 +84,26 @@ jobs:
       env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit
       script:
         - source "$DEV_LIB_PATH/travis.script.sh"
-        - npm run test:js -- --ci
+        - npm run test:js -- --ci --cacheDirectory="$HOME/.jest-cache"
 
-    - name: PHP unit tests (7.3, WordPress latest)
+    - name: E2E tests
       php: "7.3"
-      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1
+      env: WP_VERSION=latest DEV_LIB_SKIP=phpcs,eslint,xmllint,phpsyntax,phpunit PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=
+      install:
+        - nvm install
+        - composer install
+        - npm install
+      script:
+        - npm run build:js
+        - npm run build:css
+        - npm run env:start
+        - npm run env:reset-site
+        - npm run test:e2e:ci
+        - npm run env:stop
+
+    - name: PHP unit tests w/ external-http (7.3, WordPress latest)
+      php: "7.3"
+      env: WP_VERSION=latest DEV_LIB_ONLY=phpunit                                INSTALL_PWA_PLUGIN=1 PHPUNIT_EXTRA_GROUP=external-http
 
     - name: PHP unit tests (7.2, WordPress latest)
       php: "7.2"
@@ -101,9 +129,9 @@ jobs:
       php: "5.5"
       env: WP_VERSION=5.0    DEV_LIB_ONLY=phpunit,phpsyntax
 
-    - name: PHP unit tests (5.4, WordPress 4.9)
+    - name: PHP unit tests w/ external-http (5.4, WordPress 4.9)
       php: "5.4"
-      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax
+      env: WP_VERSION=4.9    DEV_LIB_ONLY=phpunit,phpsyntax                     PHPUNIT_EXTRA_GROUP=external-http
 
     - name: PHP unit tests (7.3, WordPress trunk)
       php: "7.3"
@@ -117,6 +145,7 @@ jobs:
         - echo "Running unit tests with code coverage..."
       script:
         - npm run build:js
+        - npm run build:css
         - source "$DEV_LIB_PATH/travis.script.sh"
         - bash <(curl -s https://codecov.io/bash) -cF php -f /tmp/wordpress/src/wp-content/plugins/amp/build/logs/clover.xml
         - npm run test:js -- --collectCoverage

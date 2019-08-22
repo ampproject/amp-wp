@@ -9,7 +9,10 @@
 
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" value="amp,default" />
+			<property name="text_domain" type="array">
+				<element value="amp"/>
+				<element value="default"/>
+			</property>
 		</properties>
 	</rule>
 
@@ -77,6 +80,10 @@
 	<config name="testVersion" value="5.4-99.0"/>
 	<rule ref="PHPCompatibility">
 		<exclude-pattern>bin/*</exclude-pattern>
+	</rule>
+
+	<rule ref="Generic.Arrays.DisallowLongArraySyntax.Found">
+		<exclude-pattern>amp.php</exclude-pattern>
 	</rule>
 
 	<arg value="s"/>

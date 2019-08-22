@@ -63,9 +63,9 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 *
 	 * @var array
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'carousel_required' => false,
-	);
+	];
 
 	/**
 	 * Sanitize the gallery block contained by <ul> element where necessary.
@@ -107,7 +107,7 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$images = array();
+			$images = [];
 
 			// If it's not AMP lightbox, look for links first.
 			if ( ! $is_amp_lightbox ) {
@@ -133,12 +133,12 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 			$amp_carousel = AMP_DOM_Utils::create_node(
 				$this->dom,
 				'amp-carousel',
-				array(
+				[
 					'width'  => $width,
 					'height' => $height,
 					'type'   => 'slides',
 					'layout' => 'responsive',
-				)
+				]
 			);
 			foreach ( $images as $image ) {
 				$amp_carousel->appendChild( $image );
@@ -161,30 +161,37 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 	 * }
 	 */
 	protected function get_carousel_dimensions( $element ) {
+		/**
+		 * Elements.
+		 *
+		 * @var DOMElement $image
+		 */
 		$images     = $element->getElementsByTagName( 'amp-img' );
 		$num_images = $images->length;
-		$max_height = 0;
-		$max_width  = 0;
+
+		$max_aspect_ratio = 0;
+		$carousel_width   = 0;
+		$carousel_height  = 0;
+
 		if ( 0 === $num_images ) {
-			return array( self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT );
+			return [ self::FALLBACK_WIDTH, self::FALLBACK_HEIGHT ];
 		}
 		foreach ( $images as $image ) {
-			/**
-			 * Image.
-			 *
-			 * @var DOMElement $image
-			 */
-			$image_height = $image->getAttribute( 'height' );
-			if ( is_numeric( $image_height ) ) {
-				$max_height = max( $max_height, $image_height );
+			if ( ! is_numeric( $image->getAttribute( 'width' ) ) || ! is_numeric( $image->getAttribute( 'height' ) ) ) {
+				continue;
 			}
-			$image_width = $image->getAttribute( 'width' );
-			if ( is_numeric( $image_width ) ) {
-				$max_width = max( $max_width, $image_width );
+			$width  = (float) $image->getAttribute( 'width' );
+			$height = (float) $image->getAttribute( 'height' );
+
+			$this_aspect_ratio = $width / $height;
+			if ( $this_aspect_ratio > $max_aspect_ratio ) {
+				$max_aspect_ratio = $this_aspect_ratio;
+				$carousel_width   = $width;
+				$carousel_height  = $height;
 			}
 		}
 
-		return array( $max_width, $max_height );
+		return [ $carousel_width, $carousel_height ];
 	}
 
 	/**
@@ -198,12 +205,12 @@ class AMP_Gallery_Block_Sanitizer extends AMP_Base_Sanitizer {
 		if ( 0 === $num_images ) {
 			return;
 		}
-		$attributes = array(
+		$attributes = [
 			'data-amp-lightbox' => '',
 			'on'                => 'tap:' . self::AMP_IMAGE_LIGHTBOX_ID,
 			'role'              => 'button',
 			'tabindex'          => 0,
-		);
+		];
 
 		for ( $j = $num_images - 1; $j >= 0; $j-- ) {
 			$image_node = $images->item( $j );

@@ -12,12 +12,12 @@ export const name = 'amp/amp-latest-stories';
 
 export const settings = {
 	title: __( 'Latest Stories', 'amp' ),
-	description: __( 'See the latest AMP stories', 'amp' ),
+	description: __( 'Display your most recent stories.', 'amp' ),
 	icon: 'list-view',
 	category: 'widgets',
 	keywords: [
-		__( 'Recent stories', 'amp' ),
-		__( 'AMP stories', 'amp' ),
+		__( 'recent stories', 'amp' ),
+		__( 'AMP Stories', 'amp' ),
 	],
 
 	supports: {

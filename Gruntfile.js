@@ -1,5 +1,4 @@
 /* eslint-env node */
-/* eslint-disable camelcase, no-console, no-param-reassign */
 
 module.exports = function( grunt ) {
 	'use strict';
@@ -88,7 +87,7 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|postcss\.config\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/src|docker-compose\.yml|babel\.config\.js|codecov\.yml)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml)/.test( file );
 			} );
 
 			paths.push( 'vendor/autoload.php' );
@@ -116,7 +115,7 @@ module.exports = function( grunt ) {
 								matches = content.match( versionRegex );
 								if ( matches ) {
 									version = matches[ 2 ] + '-' + versionAppend;
-									console.log( 'Updating version in amp.php to ' + version );
+									console.log( 'Updating version in amp.php to ' + version ); // eslint-disable-line no-console
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}

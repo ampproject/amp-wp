@@ -1,0 +1,67 @@
+/**
+* 1.0 AMP preview.
+*
+* Submit box preview buttons.
+*/
+
+/* Core preview button */
+.wp-core-ui #preview-action.has-amp-preview #post-preview {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+	float: none;
+}
+
+/* AMP preview button */
+.wp-core-ui #amp-post-preview.preview {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+	text-indent: -9999px;
+	padding-right: 14px;
+	padding-left: 14px;
+	position: relative;
+}
+
+.wp-core-ui #amp-post-preview.preview::after {
+	content: "icon";
+	background: no-repeat center url("../images/amp-icon.svg");
+	background-size: 14px !important;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	display: block;
+	position: absolute;
+}
+
+.wp-core-ui #amp-post-preview.preview.disabled::after {
+	opacity: 0.6;
+}
+
+/* AMP status */
+.misc-amp-status .amp-icon {
+	float: left;
+	background: transparent url("../images/amp-icon.svg") no-repeat left;
+	background-size: 17px;
+	width: 17px;
+	height: 17px;
+	margin: 0 8px 0 1px;
+}
+
+#amp-status-select fieldset {
+	margin: 7px 0 0 1px;
+}
+
+#amp-status-select .notice {
+	margin: 10px 0 -5px 3px;
+}
+
+.amp-status-actions {
+	margin-top: 10px;
+}
+
+@media screen and ( max-width: 782px ) {
+
+	#amp-status-select {
+		line-height: 2.8;
+	}
+}

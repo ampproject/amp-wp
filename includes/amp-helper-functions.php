@@ -181,12 +181,10 @@ function amp_add_amphtml_link() {
 		if ( AMP_Theme_Support::is_paired_available() ) {
 			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 		}
+	} elseif ( is_singular() ) {
+		$amp_url = amp_get_permalink( get_queried_object_id() );
 	} else {
-		if ( is_singular() ) {
-			$amp_url = amp_get_permalink( get_queried_object_id() );
-		} else {
-			$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
-		}
+		$amp_url = add_query_arg( amp_get_slug(), '', $current_url );
 	}
 
 	if ( ! $amp_url ) {
@@ -196,7 +194,7 @@ function amp_add_amphtml_link() {
 
 	// Check to see if there are known unaccepted validation errors for this URL.
 	if ( current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, array( 'ignore_accepted' => true ) );
+		$validation_errors = AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( $current_url, [ 'ignore_accepted' => true ] );
 		$error_count       = count( $validation_errors );
 		if ( $error_count > 0 ) {
 			echo "<!--\n";
@@ -252,7 +250,7 @@ function post_supports_amp( $post ) {
 function is_amp_endpoint() {
 	global $pagenow, $wp_query;
 
-	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, array( 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ), true ) ) {
+	if ( is_admin() || is_embed() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || in_array( $pagenow, [ 'wp-login.php', 'wp-signup.php', 'wp-activate.php' ], true ) ) {
 		return false;
 	}
 
@@ -402,10 +400,20 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = array( 'wp-i18n', 'wp-dom-ready' );
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ) );
+			$script_deps_path    = AMP__DIR__ . '/assets/js/' . $handle . '.deps.json';
+			$script_dependencies = file_exists( $script_deps_path )
+				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				: [];
+
+			$wp_scripts->add(
+				$handle,
+				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
+				$script_dependencies,
+				AMP__VERSION
+			);
 		}
 	}
 
@@ -414,15 +422,15 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$wp_scripts->add(
 		$handle,
 		'https://cdn.ampproject.org/v0.js',
-		array(),
+		[],
 		null
 	);
 	$wp_scripts->add_data(
 		$handle,
 		'amp_script_attributes',
-		array(
+		[
 			'async' => true,
-		)
+		]
 	);
 
 	// Shadow AMP API.
@@ -430,19 +438,19 @@ function amp_register_default_scripts( $wp_scripts ) {
 	$wp_scripts->add(
 		$handle,
 		'https://cdn.ampproject.org/shadow-v0.js',
-		array(),
+		[],
 		null
 	);
 	$wp_scripts->add_data(
 		$handle,
 		'amp_script_attributes',
-		array(
+		[
 			'async' => true,
-		)
+		]
 	);
 
 	// Get all AMP components as defined in the spec.
-	$extensions = array();
+	$extensions = [];
 	foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'script' ) as $script_spec ) {
 		if ( isset( $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'], $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'] ) ) {
 			$versions = $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['version'];
@@ -461,7 +469,7 @@ function amp_register_default_scripts( $wp_scripts ) {
 		$wp_scripts->add(
 			$extension,
 			$src,
-			array( 'amp-runtime' ),
+			[ 'amp-runtime' ],
 			null
 		);
 	}
@@ -535,9 +543,9 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
 	 * All scripts from AMP CDN should be loaded async.
 	 * See <https://www.ampproject.org/docs/integration/pwa-amp/amp-in-pwa#include-"shadow-amp"-in-your-progressive-web-app>.
 	 */
-	$attributes = array(
+	$attributes = [
 		'async' => true,
-	);
+	];
 
 	// Add custom-template and custom-element attributes. All component scripts look like https://cdn.ampproject.org/v0/:name-:version.js.
 	if ( 'v0' === strtok( substr( $src, strlen( $prefix ) ), '/' ) ) {
@@ -597,7 +605,6 @@ function amp_filter_script_loader_tag( $tag, $handle ) {
  */
 function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $handle, $href ) {
 	static $allowed_font_src_regex = null;
-	unset( $handle );
 	if ( ! $allowed_font_src_regex ) {
 		$spec_name = 'link rel=stylesheet for fonts'; // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'link' ) as $spec_rule ) {
@@ -625,8 +632,8 @@ function amp_filter_font_style_loader_tag_with_crossorigin_anonymous( $tag, $han
  * @param array $analytics Analytics entries.
  * @return array Analytics.
  */
-function amp_get_analytics( $analytics = array() ) {
-	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', array() );
+function amp_get_analytics( $analytics = [] ) {
+	$analytics_entries = AMP_Options_Manager::get_option( 'analytics', [] );
 
 	/**
 	 * Add amp-analytics tags.
@@ -645,11 +652,11 @@ function amp_get_analytics( $analytics = array() ) {
 	}
 
 	foreach ( $analytics_entries as $entry_id => $entry ) {
-		$analytics[ $entry_id ] = array(
+		$analytics[ $entry_id ] = [
 			'type'        => $entry['type'],
-			'attributes'  => array(),
+			'attributes'  => [],
 			'config_data' => json_decode( $entry['config'] ),
-		);
+		];
 	}
 
 	return $analytics;
@@ -664,7 +671,7 @@ function amp_get_analytics( $analytics = array() ) {
  */
 function amp_print_analytics( $analytics ) {
 	if ( '' === $analytics ) {
-		$analytics = array();
+		$analytics = [];
 	}
 	$analytics_entries = amp_get_analytics( $analytics );
 
@@ -692,17 +699,17 @@ function amp_print_analytics( $analytics ) {
 		}
 		$script_element = AMP_HTML_Utils::build_tag(
 			'script',
-			array(
+			[
 				'type' => 'application/json',
-			),
+			],
 			wp_json_encode( $analytics_entry['config_data'] )
 		);
 
 		$amp_analytics_attr = array_merge(
-			array(
+			[
 				'id'   => $id,
 				'type' => $analytics_entry['type'],
-			),
+			],
 			$analytics_entry['attributes']
 		);
 
@@ -744,28 +751,28 @@ function amp_get_content_embed_handlers( $post = null ) {
 	 */
 	return apply_filters(
 		'amp_content_embed_handlers',
-		array(
-			'AMP_Core_Block_Handler'        => array(),
-			'AMP_Twitter_Embed_Handler'     => array(),
-			'AMP_YouTube_Embed_Handler'     => array(),
-			'AMP_Crowdsignal_Embed_Handler' => array(),
-			'AMP_DailyMotion_Embed_Handler' => array(),
-			'AMP_Vimeo_Embed_Handler'       => array(),
-			'AMP_SoundCloud_Embed_Handler'  => array(),
-			'AMP_Instagram_Embed_Handler'   => array(),
-			'AMP_Issuu_Embed_Handler'       => array(),
-			'AMP_Meetup_Embed_Handler'      => array(),
-			'AMP_Vine_Embed_Handler'        => array(),
-			'AMP_Facebook_Embed_Handler'    => array(),
-			'AMP_Pinterest_Embed_Handler'   => array(),
-			'AMP_Playlist_Embed_Handler'    => array(),
-			'AMP_Reddit_Embed_Handler'      => array(),
-			'AMP_Tumblr_Embed_Handler'      => array(),
-			'AMP_Gallery_Embed_Handler'     => array(),
-			'AMP_Gfycat_Embed_Handler'      => array(),
-			'AMP_Hulu_Embed_Handler'        => array(),
-			'AMP_Imgur_Embed_Handler'       => array(),
-		),
+		[
+			'AMP_Core_Block_Handler'        => [],
+			'AMP_Twitter_Embed_Handler'     => [],
+			'AMP_YouTube_Embed_Handler'     => [],
+			'AMP_Crowdsignal_Embed_Handler' => [],
+			'AMP_DailyMotion_Embed_Handler' => [],
+			'AMP_Vimeo_Embed_Handler'       => [],
+			'AMP_SoundCloud_Embed_Handler'  => [],
+			'AMP_Instagram_Embed_Handler'   => [],
+			'AMP_Issuu_Embed_Handler'       => [],
+			'AMP_Meetup_Embed_Handler'      => [],
+			'AMP_Vine_Embed_Handler'        => [],
+			'AMP_Facebook_Embed_Handler'    => [],
+			'AMP_Pinterest_Embed_Handler'   => [],
+			'AMP_Playlist_Embed_Handler'    => [],
+			'AMP_Reddit_Embed_Handler'      => [],
+			'AMP_Tumblr_Embed_Handler'      => [],
+			'AMP_Gallery_Embed_Handler'     => [],
+			'AMP_Gfycat_Embed_Handler'      => [],
+			'AMP_Hulu_Embed_Handler'        => [],
+			'AMP_Imgur_Embed_Handler'       => [],
+		],
 		$post
 	);
 }
@@ -796,36 +803,43 @@ function amp_get_content_sanitizers( $post = null ) {
 		$post = null;
 	}
 
-	$sanitizers = array(
-		'AMP_Core_Theme_Sanitizer'        => array(
+	$parsed_home_url = wp_parse_url( get_home_url() );
+	$current_origin  = $parsed_home_url['scheme'] . '://' . $parsed_home_url['host'];
+	if ( isset( $parsed_home_url['port'] ) ) {
+		$current_origin .= ':' . $parsed_home_url['port'];
+	}
+
+	$sanitizers = [
+		'AMP_Core_Theme_Sanitizer'        => [
 			'template'   => get_template(),
 			'stylesheet' => get_stylesheet(),
-		),
-		'AMP_Img_Sanitizer'               => array(
+		],
+		'AMP_Img_Sanitizer'               => [
 			'align_wide_support' => current_theme_supports( 'align-wide' ),
-		),
-		'AMP_Form_Sanitizer'              => array(),
-		'AMP_Comments_Sanitizer'          => array(
+		],
+		'AMP_Form_Sanitizer'              => [],
+		'AMP_Comments_Sanitizer'          => [
 			'comments_live_list' => ! empty( $theme_support_args['comments_live_list'] ),
-		),
-		'AMP_Video_Sanitizer'             => array(),
-		'AMP_O2_Player_Sanitizer'         => array(),
-		'AMP_Audio_Sanitizer'             => array(),
-		'AMP_Playbuzz_Sanitizer'          => array(),
-		'AMP_Embed_Sanitizer'             => array(),
-		'AMP_Iframe_Sanitizer'            => array(
+		],
+		'AMP_Video_Sanitizer'             => [],
+		'AMP_O2_Player_Sanitizer'         => [],
+		'AMP_Audio_Sanitizer'             => [],
+		'AMP_Playbuzz_Sanitizer'          => [],
+		'AMP_Embed_Sanitizer'             => [],
+		'AMP_Iframe_Sanitizer'            => [
 			'add_placeholder' => true,
-		),
-		'AMP_Gallery_Block_Sanitizer'     => array( // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
+			'current_origin'  => $current_origin,
+		],
+		'AMP_Gallery_Block_Sanitizer'     => [ // Note: Gallery block sanitizer must come after image sanitizers since itś logic is using the already sanitized images.
 			'carousel_required' => ! is_array( $theme_support_args ), // For back-compat.
-		),
-		'AMP_Block_Sanitizer'             => array(), // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
-		'AMP_Script_Sanitizer'            => array(),
-		'AMP_Style_Sanitizer'             => array(
+		],
+		'AMP_Block_Sanitizer'             => [], // Note: Block sanitizer must come after embed / media sanitizers since its logic is using the already sanitized content.
+		'AMP_Script_Sanitizer'            => [],
+		'AMP_Style_Sanitizer'             => [
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
-		),
-		'AMP_Tag_And_Attribute_Sanitizer' => array(), // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
-	);
+		],
+		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
+	];
 
 	if ( ! empty( $theme_support_args['nav_menu_toggle'] ) ) {
 		$sanitizers['AMP_Nav_Menu_Toggle_Sanitizer'] = $theme_support_args['nav_menu_toggle'];
@@ -847,7 +861,7 @@ function amp_get_content_sanitizers( $post = null ) {
 	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
-	foreach ( array( 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ) as $class_name ) {
+	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
 		if ( isset( $sanitizers[ $class_name ] ) ) {
 			$sanitizer = $sanitizers[ $class_name ];
 			unset( $sanitizers[ $class_name ] );
@@ -881,7 +895,7 @@ function amp_get_post_image_metadata( $post = null ) {
 		$post_image_id = $post->ID;
 	} else {
 		$attached_image_ids = get_posts(
-			array(
+			[
 				'post_parent'      => $post->ID,
 				'post_type'        => 'attachment',
 				'post_mime_type'   => 'image',
@@ -890,7 +904,7 @@ function amp_get_post_image_metadata( $post = null ) {
 				'order'            => 'ASC',
 				'fields'           => 'ids',
 				'suppress_filters' => false,
-			)
+			]
 		);
 
 		if ( ! empty( $attached_image_ids ) ) {
@@ -905,70 +919,70 @@ function amp_get_post_image_metadata( $post = null ) {
 	$post_image_src = wp_get_attachment_image_src( $post_image_id, 'full' );
 
 	if ( is_array( $post_image_src ) ) {
-		$post_image_meta = array(
+		$post_image_meta = [
 			'@type'  => 'ImageObject',
 			'url'    => $post_image_src[0],
 			'width'  => $post_image_src[1],
 			'height' => $post_image_src[2],
-		);
+		];
 	}
 
 	return $post_image_meta;
 }
 
 /**
- * Get schema.org metadata for the current query.
+ * Get the publisher logo.
  *
- * @since 0.7
- * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
+ * "The following guidelines apply to logos used for general AMP pages, not AMP stories. There
+ * are different logo requirements for AMP stories."
  *
- * @return array $metadata All schema.org metadata for the post.
+ * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
+ * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
+ * would not be acceptable, even though it fits in the 600x60px rectangle."
+ *
+ * For AMP Stories: "The logo shape should be a square, not a rectangle. … The logo should be at least 96x96 pixels."
+ *
+ * @since 1.2.1
+ * @link https://developers.google.com/search/docs/data-types/article#logo-guidelines
+ * @link https://amp.dev/documentation/components/amp-story/#publisher-logo-src-guidelines
+ *
+ * @return string Publisher logo image URL. WordPress logo if no site icon or custom logo defined, and no logo provided via 'amp_site_icon_url' filter.
  */
-function amp_get_schemaorg_metadata() {
-	$metadata = array(
-		'@context'  => 'http://schema.org',
-		'publisher' => array(
-			'@type' => 'Organization',
-			'name'  => get_bloginfo( 'name' ),
-		),
-	);
+function amp_get_publisher_logo() {
+	$logo_image_url = null;
 
-	/*
-	 * "The logo should be a rectangle, not a square. The logo should fit in a 60x600px rectangle.,
-	 * and either be exactly 60px high (preferred), or exactly 600px wide. For example, 450x45px
-	 * would not be acceptable, even though it fits in the 600x60px rectangle."
-	 * See <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
-	 */
-	$max_logo_width  = 600;
-	$max_logo_height = 60;
-	$custom_logo_id  = get_theme_mod( 'custom_logo' );
-	$schema_img      = array();
+	$is_amp_story = is_singular( AMP_Story_Post_Type::POST_TYPE_SLUG );
+	if ( $is_amp_story ) {
+		// This should be square, at least 96px in width/height. The 512 is used because the site icon would have this size generated.
+		$logo_width  = 512;
+		$logo_height = 512;
+	} else {
+		/*
+		 * This should be 60x600px rectangle. It *can* be larger than this, contrary to the current documentation.
+		 * Only minimum size and ratio matters. So height should be at least 60px and width a minimum of 200px.
+		 * An aspect ratio between 200/60 (10/3) and 600:60 (10/1) should be used. A square image still be used,
+		 * but it is not preferred; a landscape logo should be provided if possible.
+		 */
+		$logo_width  = 600;
+		$logo_height = 60;
+	}
 
+	// Use the Custom Logo if set, but only for Stories if it is square.
+	$custom_logo_id = get_theme_mod( 'custom_logo' );
 	if ( has_custom_logo() && $custom_logo_id ) {
-		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, array( $max_logo_width, $max_logo_height ), false );
-		if ( $custom_logo_img ) {
-			// @todo Warning: The width/height returned may not actually be physically the $max_logo_width and $max_logo_height for the image returned.
-			$schema_img = array(
-				'url'    => $custom_logo_img[0],
-				'width'  => $custom_logo_img[1],
-				'height' => $custom_logo_img[2],
-			);
+		$custom_logo_img = wp_get_attachment_image_src( $custom_logo_id, [ $logo_width, $logo_height ], false );
+		if ( $custom_logo_img && ( ! $is_amp_story || $custom_logo_img[2] === $custom_logo_img[1] ) ) {
+			$logo_image_url = $custom_logo_img[0];
 		}
 	}
 
-	// Try Site Icon, though it is not ideal because "The logo should be a rectangle, not a square." per <https://developers.google.com/search/docs/data-types/article#logo-guidelines>.
-	if ( empty( $schema_img['url'] ) ) {
-		/*
-		 * Note that AMP_Post_Template::SITE_ICON_SIZE is used and not $max_logo_height because 32px is the largest
-		 * size that is defined in \WP_Site_Icon::$site_icon_sizes which is less than 60px. It may be a good idea
-		 * to add a site_icon_image_sizes filter which appends 60 to the list of sizes, but this will only help
-		 * when adding a new site icon and it would be irrelevant when a custom logo is present, per above.
-		 */
-		$schema_img = array(
-			'url'    => get_site_icon_url( AMP_Post_Template::SITE_ICON_SIZE ),
-			'width'  => AMP_Post_Template::SITE_ICON_SIZE,
-			'height' => AMP_Post_Template::SITE_ICON_SIZE,
-		);
+	// Try Site Icon, though it is not ideal for non-Story because it should be square.
+	$site_icon_id = get_option( 'site_icon' );
+	if ( empty( $logo_image_url ) && $site_icon_id ) {
+		$site_icon_src = wp_get_attachment_image_src( $site_icon_id, [ $logo_width, $logo_height ], false );
+		if ( ! empty( $site_icon_src ) ) {
+			$logo_image_url = $site_icon_src[0];
+		}
 	}
 
 	/**
@@ -981,45 +995,66 @@ function amp_get_schemaorg_metadata() {
 	 *
 	 * @param string $schema_img_url URL of the publisher logo, either the Custom Logo or the Site Icon.
 	 */
-	$filtered_schema_img_url = apply_filters( 'amp_site_icon_url', $schema_img['url'] );
-	if ( $filtered_schema_img_url !== $schema_img['url'] ) {
-		$schema_img['url'] = $filtered_schema_img_url;
-		unset( $schema_img['width'], $schema_img['height'] ); // Clear width/height since now unknown, and not required.
+	$logo_image_url = apply_filters( 'amp_site_icon_url', $logo_image_url );
+
+	// Fallback to serving the WordPress logo.
+	if ( empty( $logo_image_url ) ) {
+		if ( $is_amp_story ) {
+			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
+		} else {
+			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
+		}
 	}
 
-	if ( ! empty( $schema_img['url'] ) ) {
-		$metadata['publisher']['logo'] = array_merge(
-			array(
-				'@type' => 'ImageObject',
-			),
-			$schema_img
-		);
+	return $logo_image_url;
+}
+
+/**
+ * Get schema.org metadata for the current query.
+ *
+ * @since 0.7
+ * @see AMP_Post_Template::build_post_data() Where the logic in this function originally existed.
+ *
+ * @return array $metadata All schema.org metadata for the post.
+ */
+function amp_get_schemaorg_metadata() {
+	$metadata = [
+		'@context'  => 'http://schema.org',
+		'publisher' => [
+			'@type' => 'Organization',
+			'name'  => get_bloginfo( 'name' ),
+		],
+	];
+
+	$publisher_logo = amp_get_publisher_logo();
+	if ( $publisher_logo ) {
+		$metadata['publisher']['logo'] = $publisher_logo;
 	}
 
 	$post = get_queried_object();
 	if ( $post instanceof WP_Post ) {
 		$metadata = array_merge(
 			$metadata,
-			array(
+			[
 				'@type'            => is_page() ? 'WebPage' : 'BlogPosting',
 				'mainEntityOfPage' => get_permalink(),
 				'headline'         => get_the_title(),
 				'datePublished'    => mysql2date( 'c', $post->post_date_gmt, false ),
 				'dateModified'     => mysql2date( 'c', $post->post_modified_gmt, false ),
-			)
+			]
 		);
 
 		$post_author = get_userdata( $post->post_author );
 		if ( $post_author ) {
-			$metadata['author'] = array(
+			$metadata['author'] = [
 				'@type' => 'Person',
 				'name'  => html_entity_decode( $post_author->display_name, ENT_QUOTES, get_bloginfo( 'charset' ) ),
-			);
+			];
 		}
 
 		$image_metadata = amp_get_post_image_metadata( $post );
 		if ( $image_metadata ) {
-			$metadata['image'] = $image_metadata;
+			$metadata['image'] = $image_metadata['url'];
 		}
 
 		/**
@@ -1077,8 +1112,8 @@ function amp_print_schemaorg_metadata() {
  * @return string HTML markup with tags allowed by amp-mustache.
  */
 function amp_wp_kses_mustache( $markup ) {
-	$amp_mustache_allowed_html_tags = array( 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' );
-	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, array() ) );
+	$amp_mustache_allowed_html_tags = [ 'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark', 'del', 'ins', 'sup', 'sub' ];
+	return wp_kses( $markup, array_fill_keys( $amp_mustache_allowed_html_tags, [] ) );
 }
 
 /**
@@ -1110,23 +1145,21 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 	}
 
 	// Show nothing if there are rejected validation errors for this URL.
-	if ( ! is_amp_endpoint() && count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), array( 'ignore_accepted' => true ) ) ) > 0 ) {
+	if ( ! is_amp_endpoint() && count( AMP_Validated_URL_Post_Type::get_invalid_url_validation_errors( amp_get_current_url(), [ 'ignore_accepted' => true ] ) ) > 0 ) {
 		return;
 	}
 
 	if ( is_amp_endpoint() ) {
 		$href = amp_remove_endpoint( amp_get_current_url() );
+	} elseif ( is_singular() ) {
+		$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
 	} else {
-		if ( is_singular() ) {
-			$href = amp_get_permalink( get_queried_object_id() ); // For sake of Reader mode.
-		} else {
-			$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
-		}
+		$href = add_query_arg( amp_get_slug(), '', amp_get_current_url() );
 	}
 
 	$icon = '&#x1F517;'; // LINK SYMBOL.
 
-	$parent = array(
+	$parent = [
 		'id'    => 'amp',
 		'title' => sprintf(
 			'<span id="amp-admin-bar-item-status-icon">%s</span> %s',
@@ -1134,7 +1167,7 @@ function amp_add_admin_bar_view_link( $wp_admin_bar ) {
 			esc_html( is_amp_endpoint() ? __( 'Non-AMP', 'amp' ) : __( 'AMP', 'amp' ) )
 		),
 		'href'  => esc_url( $href ),
-	);
+	];
 
 	$wp_admin_bar->add_menu( $parent );
 }
@@ -1153,7 +1186,7 @@ function amp_print_story_auto_ads() {
 	 * @param array   $data Story ads configuration data.
 	 * @param WP_Post $post The current story's post object.
 	 */
-	$data = apply_filters( 'amp_story_auto_ads_configuration', array(), get_post() );
+	$data = apply_filters( 'amp_story_auto_ads_configuration', [], get_post() );
 
 	if ( empty( $data ) ) {
 		return;
@@ -1161,11 +1194,11 @@ function amp_print_story_auto_ads() {
 
 	$script_element = AMP_HTML_Utils::build_tag(
 		'script',
-		array(
+		[
 			'type' => 'application/json',
-		),
+		],
 		wp_json_encode( $data )
 	);
 
-	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', array(), $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+	echo AMP_HTML_Utils::build_tag( 'amp-story-auto-ads', [], $script_element ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 }

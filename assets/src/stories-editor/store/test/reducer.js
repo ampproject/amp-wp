@@ -1,7 +1,6 @@
 /**
  * WordPress dependencies
  */
-import { select } from '@wordpress/data';
 import '@wordpress/block-editor';
 
 /**
@@ -27,7 +26,7 @@ describe( 'reducers', () => {
 				predecessor,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -45,7 +44,7 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -77,28 +76,29 @@ describe( 'reducers', () => {
 				predecessor: item2,
 			} );
 
-			expect( state ).toEqual( {
+			expect( state ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 					{ id: item2, parent: item },
 				],
 			} );
 		} );
+
+		it.todo( 'should add an entry when animation type changes' );
+
+		it.todo( 'should update an entry when animation type changes' );
+
+		it.todo( 'should remove an entry when animation type changes' );
+
+		it.todo( 'should update successors when animation type changes' );
+
+		it.todo( 'should update an entry when animation duration changes' );
+
+		it.todo( 'should update an entry when animation delay changes' );
 	} );
 
 	describe( 'currentPage()', () => {
-		it( 'should return undefined by default', () => {
-			const state = currentPage( undefined, {
-				type: 'SET_CURRENT_PAGE',
-				page: 'core/invalid-block',
-			} );
-
-			expect( state ).toBeUndefined();
-		} );
-
-		it.skip( 'should change page if it exists', () => { // eslint-disable-line jest/no-disabled-tests
-			select( 'core/block-editor' ).getBlock = jest.fn().mockReturnValue( true );
-
+		it( 'should change page to whatever was passed', () => {
 			const page = 'foo';
 
 			const state = currentPage( undefined, {
@@ -106,32 +106,7 @@ describe( 'reducers', () => {
 				page,
 			} );
 
-			expect( state ).toEqual( page );
-
-			select( 'core/block-editor' ).getBlock.mockRestore();
-		} );
-
-		it.skip( 'should not change state for invalid block', () => { // eslint-disable-line jest/no-disabled-tests
-			select( 'core/block-editor' ).getBlock = jest.fn().mockReturnValue( true );
-
-			const page = 'foo';
-			const newPage = 'bar';
-
-			const originalState = currentPage( undefined, {
-				type: 'SET_CURRENT_PAGE',
-				page,
-			} );
-
-			select( 'core/block-editor' ).getBlock = jest.fn().mockReturnValue( false );
-
-			const state = currentPage( originalState, {
-				type: 'SET_CURRENT_PAGE',
-				page: newPage,
-			} );
-
-			expect( state ).toEqual( page );
-
-			select( 'core/block-editor' ).getBlock.mockRestore();
+			expect( state ).toStrictEqual( page );
 		} );
 	} );
 
@@ -139,85 +114,61 @@ describe( 'reducers', () => {
 		it( 'should start reordering', () => {
 			const state = blocks( undefined, {
 				type: 'START_REORDERING',
+				order: [ 'page-1', 'page-2' ],
 			} );
 
-			expect( state ).toEqual( {
-				order: [],
+			expect( state ).toStrictEqual( {
+				order: [ 'page-1', 'page-2' ],
 				isReordering: true,
 			} );
 		} );
 
-		it.skip( 'should stop reordering', () => { // eslint-disable-line jest/no-disabled-tests
-			const state = blocks( undefined, {
+		it( 'should stop reordering', () => {
+			const originalState = {
+				order: [ 'page-1', 'page-2' ],
+				isReordering: true,
+			};
+
+			const state = blocks( originalState, {
 				type: 'STOP_REORDERING',
 			} );
 
-			expect( state ).toEqual( {
-				order: [],
+			expect( state ).toStrictEqual( {
+				order: [ 'page-1', 'page-2' ],
 				isReordering: false,
 			} );
 		} );
 
-		describe( 'move pages', () => {
-			beforeAll( () => {
-				select( 'core/block-editor' ).getBlockOrder = jest.fn().mockReturnValue( [ 'page-1', 'page-2' ] );
+		it( 'should change block order', () => {
+			const originalState = blocks( undefined, {
+				type: 'START_REORDERING',
+				order: [ 'page-1', 'page-2' ],
 			} );
 
-			afterAll( () => {
-				select( 'core/block-editor' ).getBlockOrder.mockRestore();
+			expect( originalState ).toStrictEqual( {
+				order: [ 'page-1', 'page-2' ],
+				isReordering: true,
 			} );
 
-			it.skip( 'should change block order', () => { // eslint-disable-line jest/no-disabled-tests
-				const originalState = blocks( undefined, {
-					type: 'START_REORDERING',
-				} );
-
-				expect( originalState ).toEqual( {
-					order: [ 'page-1', 'page-2' ],
-					isReordering: true,
-				} );
-
-				const state = blocks( originalState, {
-					type: 'MOVE_PAGE',
-					page: 'page-1',
-					index: 1,
-				} );
-
-				expect( state ).toEqual( {
-					order: [ 'page-2', 'page-1' ],
-					isReordering: true,
-				} );
-			} );
-		} );
-
-		describe( 'reset order', () => {
-			beforeAll( () => {
-				select( 'core/block-editor' ).getBlockOrder = jest.fn().mockReturnValue( [ 'page-1', 'page-2' ] );
+			let state = blocks( originalState, {
+				type: 'MOVE_PAGE',
+				page: 'page-1',
+				index: 1,
 			} );
 
-			afterAll( () => {
-				select( 'core/block-editor' ).getBlockOrder.mockRestore();
+			expect( state ).toStrictEqual( {
+				order: [ 'page-2', 'page-1' ],
+				isReordering: true,
 			} );
 
-			it.skip( 'should reset block order', () => { // eslint-disable-line jest/no-disabled-tests
-				let originalState = blocks( undefined, {
-					type: 'START_REORDERING',
-				} );
+			state = blocks( originalState, {
+				type: 'RESET_ORDER',
+				order: [ 'page-1', 'page-2' ],
+			} );
 
-				originalState = blocks( originalState, {
-					type: 'MOVE_PAGE',
-					page: 'page-1',
-					index: 1,
-				} );
-
-				const state = blocks( originalState, {
-					type: 'RESET_ORDER',
-				} );
-
-				expect( state ).toEqual( {
-					order: [ 'page-1', 'page-2' ],
-					isReordering: false,
-				} );
+			expect( state ).toStrictEqual( {
+				order: [ 'page-1', 'page-2' ],
+				isReordering: false,
 			} );
 		} );
 	} );

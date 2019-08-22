@@ -13,6 +13,14 @@
 class AMP_DOM_Utils {
 
 	/**
+	 * Attribute prefix for AMP-bind data attributes.
+	 *
+	 * @since 1.2.1
+	 * @var string
+	 */
+	const AMP_BIND_DATA_ATTR_PREFIX = 'data-amp-bind-';
+
+	/**
 	 * HTML elements that are self-closing.
 	 *
 	 * Not all are valid AMP, but we include them for completeness.
@@ -21,7 +29,7 @@ class AMP_DOM_Utils {
 	 * @link https://www.w3.org/TR/html5/syntax.html#serializing-html-fragments
 	 * @var array
 	 */
-	private static $self_closing_tags = array(
+	private static $self_closing_tags = [
 		'area',
 		'base',
 		'basefont',
@@ -40,7 +48,7 @@ class AMP_DOM_Utils {
 		'source',
 		'track',
 		'wbr',
-	);
+	];
 
 	/**
 	 * List of elements allowed in head.
@@ -49,7 +57,7 @@ class AMP_DOM_Utils {
 	 * @link https://www.w3.org/TR/html5/document-metadata.html
 	 * @var array
 	 */
-	private static $elements_allowed_in_head = array(
+	private static $elements_allowed_in_head = [
 		'title',
 		'base',
 		'link',
@@ -57,7 +65,7 @@ class AMP_DOM_Utils {
 		'style',
 		'noscript',
 		'script',
-	);
+	];
 
 	/**
 	 * Stored noscript/comment replacements for libxml<2.8.
@@ -65,7 +73,7 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @var array
 	 */
-	public static $noscript_placeholder_comments = array();
+	public static $noscript_placeholder_comments = [];
 
 	/**
 	 * Return a valid DOMDocument representing HTML document passed as a parameter.
@@ -105,10 +113,10 @@ class AMP_DOM_Utils {
 			 */
 			$document = preg_replace_callback(
 				'#^.+?(?=<body)#is',
-				function( $head_matches ) {
+				static function( $head_matches ) {
 					return preg_replace_callback(
 						'#<noscript[^>]*>.*?</noscript>#si',
-						function( $noscript_matches ) {
+						static function( $noscript_matches ) {
 							$placeholder = sprintf( '<!--noscript:%s-->', (string) wp_rand() );
 							AMP_DOM_Utils::$noscript_placeholder_comments[ $placeholder ] = $noscript_matches[0];
 							return $placeholder;
@@ -118,21 +126,22 @@ class AMP_DOM_Utils {
 				},
 				$document
 			);
+		}
 
-			/*
-			 * Add a pre-HTML5-style declaration of the encoding since libxml<2.8 doesn't recognize
-			 * HTML5's meta charset. See <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
-			 */
-			$document = preg_replace(
-				'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
-				'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
-				$document,
-				1,
-				$count
-			);
-			if ( 1 === $count ) {
-				$added_back_compat_meta_content_type = true;
-			}
+		/*
+		 * Add a pre-HTML5-style declaration of the encoding since libxml doesn't always recognize
+		 * HTML5's meta charset. In libxml<2.8 it never does, see <https://bugzilla.gnome.org/show_bug.cgi?id=655218>.
+		 * In libxml>=2.8, if the meta charset does not appear at the beginning of the head then it fails to be understood.
+		 */
+		$document = preg_replace(
+			'#(?=<meta\s+charset=["\']?([a-z0-9_-]+))#i',
+			'<meta http-equiv="Content-Type" content="text/html; charset=$1" id="meta-http-equiv-content-type">',
+			$document,
+			1,
+			$count
+		);
+		if ( 1 === $count ) {
+			$added_back_compat_meta_content_type = true;
 		}
 
 		/*
@@ -206,9 +215,9 @@ class AMP_DOM_Utils {
 	 */
 	public static function is_valid_head_node( DOMNode $node ) {
 		return (
-			$node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true )
+			( $node instanceof DOMElement && in_array( $node->nodeName, self::$elements_allowed_in_head, true ) )
 			||
-			$node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) // Whitespace text nodes are OK.
+			( $node instanceof DOMText && preg_match( '/^\s*$/', $node->nodeValue ) ) // Whitespace text nodes are OK.
 			||
 			$node instanceof DOMComment
 		);
@@ -223,16 +232,14 @@ class AMP_DOM_Utils {
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
 	 * @see \AMP_DOM_Utils::restore_amp_bind_attributes()
+	 * @deprecated Use AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX alone.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @return string HTML5 data-* attribute name prefix for AMP binding attributes.
 	 */
 	public static function get_amp_bind_placeholder_prefix() {
-		static $attribute_prefix;
-		if ( ! isset( $attribute_prefix ) ) {
-			$attribute_prefix = sprintf( 'amp-binding-%s-', md5( wp_rand() ) );
-		}
-		return $attribute_prefix;
+		_deprecated_function( __METHOD__, '1.2.1' );
+		return self::AMP_BIND_DATA_ATTR_PREFIX;
 	}
 
 	/**
@@ -249,7 +256,7 @@ class AMP_DOM_Utils {
 			$salt = wp_rand();
 
 			// Note: The order of these tokens is important, as it determines the order of the order of the replacements.
-			$tokens       = array(
+			$tokens       = [
 				'{{{',
 				'}}}',
 				'{{#',
@@ -258,8 +265,8 @@ class AMP_DOM_Utils {
 				'{{/',
 				'{{',
 				'}}',
-			);
-			$placeholders = array();
+			];
+			$placeholders = [];
 			foreach ( $tokens as $token ) {
 				$placeholders[ $token ] = '_amp_mustache_' . md5( $salt . $token );
 			}
@@ -283,7 +290,6 @@ class AMP_DOM_Utils {
 	 * @return string HTML with AMP binding attributes replaced with HTML5 data-* attributes.
 	 */
 	public static function convert_amp_bind_attributes( $html ) {
-		$amp_bind_attr_prefix = self::get_amp_bind_placeholder_prefix();
 
 		// Pattern for HTML attribute accounting for binding attr name, boolean attribute, single/double-quoted attribute value, and unquoted attribute values.
 		$attr_regex = '#^\s+(?P<name>\[?[a-zA-Z0-9_\-]+\]?)(?P<value>=(?:"[^"]*+"|\'[^\']*+\'|[^\'"\s]+))?#';
@@ -294,15 +300,20 @@ class AMP_DOM_Utils {
 		 * @param array $tag_matches Tag matches.
 		 * @return string Replacement.
 		 */
-		$replace_callback = function( $tag_matches ) use ( $amp_bind_attr_prefix, $attr_regex ) {
-			$old_attrs = rtrim( $tag_matches['attrs'] );
+		$replace_callback = static function( $tag_matches ) use ( $attr_regex ) {
+
+			// Strip the self-closing slash as long as it is not an attribute value, like for the href attribute (<a href=/>).
+			$old_attrs = preg_replace( '#(?<!=)/$#', '', $tag_matches['attrs'] );
+
+			$old_attrs = rtrim( $old_attrs );
+
 			$new_attrs = '';
 			$offset    = 0;
 			while ( preg_match( $attr_regex, substr( $old_attrs, $offset ), $attr_matches ) ) {
 				$offset += strlen( $attr_matches[0] );
 
 				if ( '[' === $attr_matches['name'][0] ) {
-					$new_attrs .= ' ' . $amp_bind_attr_prefix . trim( $attr_matches['name'], '[]' );
+					$new_attrs .= ' ' . self::AMP_BIND_DATA_ATTR_PREFIX . trim( $attr_matches['name'], '[]' );
 					if ( isset( $attr_matches['value'] ) ) {
 						$new_attrs .= $attr_matches['value'];
 					}
@@ -320,9 +331,9 @@ class AMP_DOM_Utils {
 		};
 
 		// Match all start tags that contain a binding attribute.
-		$pattern   = join(
+		$pattern   = implode(
 			'',
-			array(
+			[
 				'#<',
 				'(?P<name>[a-zA-Z0-9_\-]+)',               // Tag name.
 				'(?P<attrs>\s',                            // Attributes.
@@ -330,7 +341,7 @@ class AMP_DOM_Utils {
 				'\[[a-zA-Z0-9_\-]+\]',                     // One binding attribute key.
 				'(?:[^>"\']+|"[^"]*+"|\'[^\']*+\')*+',     // Any attribute tokens, including binding ones.
 				')>#s',
-			)
+			]
 		);
 		$converted = preg_replace_callback(
 			$pattern,
@@ -347,7 +358,7 @@ class AMP_DOM_Utils {
 		 * See https://github.com/ampproject/amp-wp/issues/993 for additional context on this issue.
 		 * See http://php.net/manual/en/pcre.constants.php for additional info on PCRE errors.
 		 */
-		return ( ! is_null( $converted ) ) ? $converted : $html;
+		return ( null !== $converted ) ? $converted : $html;
 	}
 
 	/**
@@ -357,14 +368,16 @@ class AMP_DOM_Utils {
 	 *
 	 * @since 0.7
 	 * @see \AMP_DOM_Utils::convert_amp_bind_attributes()
+	 * @deprecated Allow the data-amp-bind-* attributes to be used instead.
 	 * @link https://www.ampproject.org/docs/reference/components/amp-bind
 	 *
 	 * @param string $html HTML with amp-bind attributes converted.
 	 * @return string HTML with amp-bind attributes restored.
 	 */
 	public static function restore_amp_bind_attributes( $html ) {
+		_deprecated_function( __METHOD__, '1.2.1' );
 		$html = preg_replace(
-			'#\s' . self::get_amp_bind_placeholder_prefix() . '([a-zA-Z0-9_\-]+)#',
+			'#\s' . self::AMP_BIND_DATA_ATTR_PREFIX . '([a-zA-Z0-9_\-]+)#',
 			' [$1]',
 			$html
 		);
@@ -413,7 +426,7 @@ class AMP_DOM_Utils {
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
 
 		// The DOMDocument may contain no body. In which case return nothing.
-		if ( is_null( $body ) ) {
+		if ( null === $body ) {
 			return '';
 		}
 
@@ -504,7 +517,7 @@ class AMP_DOM_Utils {
 				$meta_charset->setAttribute( 'content', sprintf( 'text/html; charset=%s', $meta_charset->getAttribute( 'charset' ) ) );
 			}
 
-			$boundary       = 'fragment_boundary:' . (string) wp_rand();
+			$boundary       = 'fragment_boundary:' . wp_rand();
 			$start_boundary = $boundary . ':start';
 			$end_boundary   = $boundary . ':end';
 			$comment_start  = $dom->createComment( $start_boundary );
@@ -554,8 +567,6 @@ class AMP_DOM_Utils {
 			);
 		}
 
-		$html = self::restore_amp_bind_attributes( $html );
-
 		/*
 		 * Travis w/PHP 7.1 generates <br></br> and <hr></hr> vs. <br/> and <hr/>, respectively.
 		 * Travis w/PHP 7.x generates <source ...></source> vs. <source ... />.  Etc.
@@ -596,7 +607,7 @@ class AMP_DOM_Utils {
 	 *                  empty array if it has no attributes.
 	 */
 	public static function get_node_attributes_as_assoc_array( $node ) {
-		$attributes = array();
+		$attributes = [];
 		if ( ! $node->hasAttributes() ) {
 			return $attributes;
 		}
@@ -618,7 +629,16 @@ class AMP_DOM_Utils {
 	 */
 	public static function add_attributes_to_node( $node, $attributes ) {
 		foreach ( $attributes as $name => $value ) {
-			$node->setAttribute( $name, $value );
+			try {
+				$node->setAttribute( $name, $value );
+			} catch ( DOMException $e ) {
+				/*
+				 * Catch a "Invalid Character Error" when libxml is able to parse attributes with invalid characters,
+				 * but it throws error when attempting to set them via DOM methods. For example, '...this' can be parsed
+				 * as an attribute but it will throw an exception when attempting to setAttribute().
+				 */
+				continue;
+			}
 		}
 	}
 
@@ -649,7 +669,7 @@ class AMP_DOM_Utils {
 	public static function recursive_force_closing_tags( $dom, $node = null ) {
 		_deprecated_function( __METHOD__, '0.7' );
 
-		if ( is_null( $node ) ) {
+		if ( null === $node ) {
 			$node = $dom->getElementsByTagName( 'body' )->item( 0 );
 		}
 

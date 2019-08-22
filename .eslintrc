@@ -1,6 +1,11 @@
 {
   "root": true,
-  "extends": [ "plugin:@wordpress/eslint-plugin/recommended", "plugin:jest/recommended" ],
+  "extends": [
+    "plugin:@wordpress/eslint-plugin/recommended",
+    "plugin:jest/all",
+    "plugin:import/recommended",
+    "plugin:eslint-comments/recommended"
+  ],
   "settings": {
     "react": {
       "pragma": "wp",
@@ -9,11 +14,68 @@
   },
   "globals": {
     "browser": true,
-    "page": true,
     "wp": true,
     "Set": true
   },
   "rules": {
-    "react/prop-types": 2
-  }
+    "block-scoped-var": "error",
+    "complexity": ["error", { "max": 20 } ],
+    "consistent-return": "error",
+    "default-case": "error",
+    "guard-for-in": "error",
+    "no-await-in-loop": "error",
+    "no-extra-bind": "error",
+    "no-extra-label": "error",
+    "no-floating-decimal": "error",
+    "no-implicit-coercion": "error",
+    "no-implicit-globals": "error",
+    "no-implied-eval": "error",
+    "no-loop-func": "error",
+    "no-new": "error",
+    "no-new-func": "error",
+    "no-new-wrappers": "error",
+    "no-restricted-properties": "error",
+    "no-return-assign": "error",
+    "no-return-await": "error",
+    "no-sequences": "error",
+    "no-shadow": "error",
+    "no-template-curly-in-string": "error",
+    "no-throw-literal": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-useless-call": "error",
+    "no-useless-concat": "error",
+    "prefer-object-spread": "error",
+    "prefer-promise-reject-errors": "error",
+    "prefer-rest-params": "error",
+    "prefer-spread": "error",
+    "radix": [ "error", "as-needed" ],
+    "require-await": "error",
+    "rest-spread-spacing": [ "error", "never" ],
+    "jest/lowercase-name": [
+      "error",
+      {
+        "ignore": [ "describe" ]
+      }
+    ],
+    "jest/no-hooks": "off",
+    "jest/prefer-expect-assertions": "off",
+    "jest/prefer-inline-snapshots": "off",
+    "react/prop-types": "error",
+    "import/no-unresolved": [ "error", {
+      "ignore": [ "jquery", "amp-block-editor-data" ]
+    } ]
+  },
+  "overrides": [
+    {
+      "files": [ "tests/e2e/**/*.js" ],
+      "env": {
+        "browser": true
+      },
+      "globals": {
+        "browser": true,
+        "page": true,
+        "wp": true
+      }
+    }
+  ]
 }

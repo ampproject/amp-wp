@@ -1,14 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { select, combineReducers } from '@wordpress/data';
+import { combineReducers } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
-
-const { getBlock, getBlockOrder } = select( 'core/block-editor' );
 
 /**
  * Reducer handling animation state changes.
@@ -50,9 +48,12 @@ export function animations( state = {}, action ) {
 				// If animation was disabled, update all successors.
 				if ( ! animationType ) {
 					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+					const itemSuccessors = pageAnimationOrder.filter( ( { parent: p } ) => p === item );
 
-					for ( const successor in pageAnimationOrder.filter( ( { parent: p } ) => p === item ) ) {
-						pageAnimationOrder[ successor ].parent = itemPredecessor.parent;
+					for ( const successor in itemSuccessors ) {
+						if ( entryIndex( successor ) !== -1 ) {
+							pageAnimationOrder[ entryIndex( successor ) ].parent = itemPredecessor.parent;
+						}
 					}
 				}
 			} else {
@@ -83,9 +84,10 @@ export function animations( state = {}, action ) {
 				...newAnimationOrder,
 				[ page ]: pageAnimationOrder,
 			};
-	}
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 /**
@@ -101,10 +103,11 @@ export function currentPage( state = undefined, action ) {
 
 	switch ( action.type ) {
 		case 'SET_CURRENT_PAGE':
-			return getBlock( page ) ? page : state;
-	}
+			return page;
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 /**
@@ -116,11 +119,13 @@ export function currentPage( state = undefined, action ) {
  * @return {Object} Updated state.
  */
 export function blocks( state = {}, action ) {
+	const { order } = action;
+
 	switch ( action.type ) {
 		case 'START_REORDERING':
 			return {
 				...state,
-				order: getBlockOrder(),
+				order,
 				isReordering: true,
 			};
 
@@ -145,12 +150,13 @@ export function blocks( state = {}, action ) {
 		case 'RESET_ORDER':
 			return {
 				...state,
-				order: getBlockOrder(),
+				order,
 				isReordering: false,
 			};
-	}
 
-	return state;
+		default:
+			return state;
+	}
 }
 
 export default combineReducers( { animations, currentPage, blocks } );

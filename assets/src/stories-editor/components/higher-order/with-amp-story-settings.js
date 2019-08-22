@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { get } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import {
@@ -16,7 +11,7 @@ import {
 } from '@wordpress/block-editor';
 import { getBlockType } from '@wordpress/blocks';
 import { withDispatch, withSelect } from '@wordpress/data';
-import { compose, createHigherOrderComponent, withSafeTimeout } from '@wordpress/compose';
+import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import {
 	IconButton,
 	PanelBody,
@@ -39,12 +34,14 @@ import {
 	MIN_BLOCK_WIDTH,
 	MIN_BLOCK_HEIGHTS,
 	BLOCKS_WITH_RESIZING,
+	BLOCK_ROTATION_SNAPS,
+	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
 import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
-import bringForwardIcon from '../../../../images/bring-forward.svg';
-import sendBackwardIcon from '../../../../images/send-backwards.svg';
-import bringFrontIcon from '../../../../images/bring-front.svg';
-import sendBackIcon from '../../../../images/send-back.svg';
+import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
+import sendBackwardIcon from '../../../../images/stories-editor/send-backwards.svg';
+import bringFrontIcon from '../../../../images/stories-editor/bring-front.svg';
+import sendBackIcon from '../../../../images/stories-editor/send-back.svg';
 
 const { getComputedStyle, ampStoriesFonts } = window;
 
@@ -63,7 +60,6 @@ const applyFallbackStyles = withFallbackStyles( ( node, ownProps ) => {
 const applyWithSelect = withSelect( ( select, props ) => {
 	const { getSelectedBlockClientId, getBlockRootClientId, getBlock, getBlockOrder, getBlockIndex } = select( 'core/block-editor' );
 	const { getAnimatedBlocks, isValidAnimationPredecessor } = select( 'amp/story' );
-	const { getMedia } = select( 'core' );
 
 	const currentBlock = getSelectedBlockClientId();
 	const page = getBlockRootClientId( currentBlock );
@@ -74,16 +70,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 
 	const blockClientIds = getBlockOrder( parentBlockId );
 	const blockIndex = getBlockIndex( props.clientId, parentBlockId );
-
-	const isVideoBlock = 'core/video' === props.name;
-	let videoFeaturedImage;
-
-	// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
-	if ( isVideoBlock && props.attributes.id && ! props.attributes.poster ) {
-		const media = getMedia( props.attributes.id );
-		const featuredImage = media && get( media, [ '_links', 'wp:featuredmedia', 0, 'href' ], null );
-		videoFeaturedImage = featuredImage && getMedia( Number( featuredImage.split( '/' ).pop() ) );
-	}
 
 	const reversedIndex = blockClientIds.length - 1 - blockIndex;
 
@@ -116,7 +102,6 @@ const applyWithSelect = withSelect( ( select, props ) => {
 					};
 				} );
 		},
-		videoFeaturedImage,
 	};
 } );
 
@@ -175,17 +160,15 @@ const enhance = compose(
 	applyFallbackStyles,
 	applyWithSelect,
 	applyWithDispatch,
-	withSafeTimeout,
 );
 
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return enhance( ( props ) => {
+		return enhance( ( props ) => { // eslint-disable-line complexity
 			const {
 				clientId,
 				name,
 				attributes,
-				isSelected,
 				isLast,
 				isFirst,
 				currentBlockPosition,
@@ -205,14 +188,12 @@ export default createHigherOrderComponent(
 				onAnimationDelayChange,
 				getAnimatedBlocks,
 				animationAfter,
-				videoFeaturedImage,
 				startBlockActions,
 				stopBlockActions,
 				bringForward,
 				sendBackward,
 				moveFront,
 				moveBack,
-				setTimeout,
 			} = props;
 
 			const isChildBlock = ALLOWED_CHILD_BLOCKS.includes( name );
@@ -238,19 +219,11 @@ export default createHigherOrderComponent(
 				width,
 				opacity,
 				type: textBlockTextType,
-				ampShowImageCaption,
 				ampAnimationType,
 				ampAnimationDuration,
 				ampAnimationDelay,
 				rotationAngle,
 			} = attributes;
-
-			// If we have a video set from an attachment but there is no poster, use the featured image of the video if available.
-			if ( isVideoBlock && videoFeaturedImage ) {
-				setTimeout( () => {
-					setAttributes( { poster: videoFeaturedImage.source_url } );
-				}, 100 );
-			}
 
 			const isEmptyImageBlock = isImageBlock && ( ! attributes.url || ! attributes.url.length );
 			// In case of table, the min height depends on the number of rows, each row takes 45px.
@@ -268,12 +241,12 @@ export default createHigherOrderComponent(
 				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 			}
 
+			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 			return (
 				<>
-					{ ( ! isMovableBlock || isEmptyImageBlock ) && ( <BlockEdit { ...props } /> ) }
+					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
-							isSelected={ isSelected }
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
@@ -304,20 +277,27 @@ export default createHigherOrderComponent(
 
 									stopBlockActions();
 								} }
+								snap={ BLOCK_ROTATION_SNAPS }
+								snapGap={ BLOCK_ROTATION_SNAP_GAP }
 							>
-								<StoryBlockMover
-									clientId={ props.clientId }
-									blockName={ name }
-									blockElementId={ `block-${ props.clientId }` }
-									isDraggable={ ! props.isPartOfMultiSelection }
-									isMovable={ isMovableBlock }
-								>
+								{ isTextBlock && (
 									<BlockEdit { ...props } />
-								</StoryBlockMover>
+								) }
+								{ ! isTextBlock && (
+									<StoryBlockMover
+										clientId={ props.clientId }
+										blockName={ name }
+										blockElementId={ `block-${ props.clientId }` }
+										isDraggable={ ! props.isPartOfMultiSelection }
+										isMovable={ isMovableBlock }
+									>
+										<BlockEdit { ...props } />
+									</StoryBlockMover>
+								) }
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBlock && ! needsResizing && (
+					{ isMovableBlock && ( ! needsResizing || isEmptyImageBlock ) && (
 						<RotatableBox
 							blockElementId={ `block-${ clientId }` }
 							initialAngle={ rotationAngle }
@@ -333,6 +313,8 @@ export default createHigherOrderComponent(
 
 								stopBlockActions();
 							} }
+							snap={ BLOCK_ROTATION_SNAPS }
+							snapGap={ BLOCK_ROTATION_SNAP_GAP }
 						>
 							<StoryBlockMover
 								clientId={ props.clientId }
@@ -512,7 +494,7 @@ export default createHigherOrderComponent(
 									} }
 								/>
 								<RangeControl
-									label={ __( 'Background Opacity', 'amp' ) }
+									label={ __( 'Opacity', 'amp' ) }
 									value={ opacity }
 									onChange={ ( value ) => setAttributes( { opacity: value } ) }
 									min={ 5 }
@@ -541,23 +523,23 @@ export default createHigherOrderComponent(
 							</PanelBody>
 						</InspectorControls>
 					) }
-					{ isImageBlock && (
+					{ ( isImageBlock || isVideoBlock ) && (
 						<InspectorControls>
 							<PanelBody
 								title={ __( 'Story Settings', 'amp' ) }
 							>
 								<ToggleControl
-									label={ __( 'Show or hide the caption', 'amp' ) }
-									checked={ ampShowImageCaption }
+									label={ __( 'Display Caption', 'amp' ) }
+									checked={ attributes[ captionAttribute ] }
 									onChange={
 										function() {
-											props.setAttributes( { ampShowImageCaption: ! attributes.ampShowImageCaption } );
-											if ( ! attributes.ampShowImageCaption ) {
+											props.setAttributes( { [ captionAttribute ]: ! attributes[ captionAttribute ] } );
+											if ( ! attributes[ captionAttribute ] ) {
 												props.setAttributes( { caption: '' } );
 											}
 										}
 									}
-									help={ __( 'Toggle on to show image caption. If you turn this off the current caption text will be deleted.', 'amp' ) }
+									help={ __( 'Note: If you turn this off, the current caption text will be removed.', 'amp' ) }
 								/>
 							</PanelBody>
 						</InspectorControls>

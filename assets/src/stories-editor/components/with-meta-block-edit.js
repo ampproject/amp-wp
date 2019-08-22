@@ -3,6 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
+import { isEqual } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -21,32 +22,48 @@ import { dateI18n, __experimentalGetSettings as getDateSettings } from '@wordpre
  * Internal dependencies
  */
 import { getBackgroundColorWithOpacity } from '../../common/helpers';
-import { maybeUpdateFontSize } from '../helpers';
+import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 
 // @todo: Use minimal <RichText> when props.isEditable is true.
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
 	componentDidMount() {
-		maybeUpdateFontSize( this.props );
+		if ( ! this.props.isLoading ) {
+			maybeUpdateFontSize( this.props );
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
-		const { attributes, isSelected } = this.props;
+		const { attributes, fontSize, blockContent } = this.props;
 		const {
 			height,
 			width,
+			ampFitText,
+			ampFontFamily,
 		} = attributes;
 
-		// If not selected, only proceed if height or width has changed.
-		if (
-			! isSelected &&
-			prevProps.attributes.height === height &&
-			prevProps.attributes.width === width
-		) {
-			return;
+		const checkFontSize = ampFitText && (
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.attributes.width !== width ||
+			prevProps.attributes.height !== height ||
+			prevProps.blockContent !== blockContent
+		);
+
+		if ( checkFontSize && ! this.props.isLoading ) {
+			maybeUpdateFontSize( this.props );
 		}
 
-		maybeUpdateFontSize( this.props );
+		const checkBlockDimensions = ! ampFitText && (
+			! isEqual( prevProps.fontSize, fontSize ) ||
+			prevProps.attributes.ampFitText !== ampFitText ||
+			prevProps.attributes.ampFontFamily !== ampFontFamily ||
+			prevProps.blockContent !== blockContent
+		);
+
+		if ( checkBlockDimensions ) {
+			maybeUpdateBlockDimensions( this.props );
+		}
 	}
 
 	render() {
@@ -114,12 +131,17 @@ MetaBlockEdit.propTypes = {
 		ampFitText: PropTypes.bool,
 		width: PropTypes.number,
 		height: PropTypes.number,
+		align: PropTypes.string,
+		opacity: PropTypes.number,
+		autoFontSize: PropTypes.number,
+		ampFontFamily: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	blockContent: PropTypes.string,
 	placeholder: PropTypes.string,
 	className: PropTypes.string,
 	tagName: PropTypes.string,
+	isLoading: PropTypes.bool,
 	isSelected: PropTypes.bool,
 	isEditable: PropTypes.bool,
 	fontSize: PropTypes.shape( {
@@ -127,6 +149,7 @@ MetaBlockEdit.propTypes = {
 		shortName: PropTypes.string,
 		size: PropTypes.number,
 		slug: PropTypes.string,
+		class: PropTypes.string,
 	} ).isRequired,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,
@@ -157,7 +180,8 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 
 			const attributeValue = getEditedPostAttribute( attribute );
 
-			let blockContent;
+			let blockContent,
+				isLoading = false;
 
 			// Todo: Maybe pass callbacks as props instead.
 			switch ( attribute ) {
@@ -173,6 +197,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 					const author = getAuthors().find( ( { id } ) => id === attributeValue );
 
 					blockContent = author ? author.name : __( 'Anonymous', 'amp' );
+					isLoading = ! author;
 
 					break;
 				default:
@@ -185,6 +210,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 				blockContent,
 				placeholder,
 				colors,
+				isLoading,
 			};
 		} ),
 		// @todo: Implement isEditable handling to make this usable.

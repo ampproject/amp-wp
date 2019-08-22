@@ -34,12 +34,21 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	/**
 	 * Default args.
 	 *
-	 * @var array
+	 * @var array {
+	 *     Default args.
+	 *
+	 *     @type bool   $add_placeholder       Whether to add a placeholder element.
+	 *     @type bool   $add_noscript_fallback Whether to add a noscript fallback.
+	 *     @type string $current_origin        The current origin serving the page. Normally this will be the $_SERVER[HTTP_HOST].
+	 *     @type string $alias_origin          An alternative origin which can be supplied which is used when encountering same-origin iframes.
+	 * }
 	 */
-	protected $DEFAULT_ARGS = array(
+	protected $DEFAULT_ARGS = [
 		'add_placeholder'       => false,
 		'add_noscript_fallback' => true,
-	);
+		'current_origin'        => null,
+		'alias_origin'          => null,
+	];
 
 	/**
 	 * Get mapping of HTML selectors to the AMP component selectors which they may be converted into.
@@ -47,11 +56,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Mapping.
 	 */
 	public function get_selector_conversion_mapping() {
-		return array(
-			'iframe' => array(
+		return [
+			'iframe' => [
 				'amp-iframe',
-			),
-		);
+			],
+		];
 	}
 
 	/**
@@ -70,7 +79,18 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$this->initialize_noscript_allowed_attributes( self::$tag );
 		}
 
+		// Ensure origins are normalized.
+		$this->args['current_origin'] = $this->get_origin_from_url( $this->args['current_origin'] );
+		if ( ! empty( $this->args['alias_origin'] ) ) {
+			$this->args['alias_origin'] = $this->get_origin_from_url( $this->args['alias_origin'] );
+		}
+
 		for ( $i = $num_nodes - 1; $i >= 0; $i-- ) {
+			/**
+			 * Iframe element.
+			 *
+			 * @var DOMElement $node
+			 */
 			$node = $nodes->item( $i );
 
 			// Skip element if already inside of an AMP element as a noscript fallback.
@@ -78,13 +98,15 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			$normalized_attributes = $this->normalize_attributes( AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node ) );
+			$normalized_attributes = AMP_DOM_Utils::get_node_attributes_as_assoc_array( $node );
+			$normalized_attributes = $this->set_layout( $normalized_attributes );
+			$normalized_attributes = $this->normalize_attributes( $normalized_attributes );
 
 			/**
 			 * If the src doesn't exist, remove the node. Either it never
 			 * existed or was invalidated while filtering attributes above.
 			 *
-			 * @todo: add a filter to allow for a fallback element in this instance.
+			 * @todo: add an arg to allow for a fallback element in this instance (note that filter cannot be used inside a sanitizer).
 			 * @see: https://github.com/ampproject/amphtml/issues/2261
 			 */
 			if ( empty( $normalized_attributes['src'] ) ) {
@@ -93,7 +115,6 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			}
 
 			$this->did_convert_elements = true;
-			$normalized_attributes      = $this->set_layout( $normalized_attributes );
 			if ( empty( $normalized_attributes['layout'] ) && ! empty( $normalized_attributes['width'] ) && ! empty( $normalized_attributes['height'] ) ) {
 				$normalized_attributes['layout'] = 'intrinsic';
 				$this->add_or_append_attribute( $normalized_attributes, 'class', 'amp-wp-enforced-sizes' );
@@ -137,12 +158,29 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
-		$out = array();
+		$out = [];
 
+		$remove_allow_same_origin = false;
 		foreach ( $attributes as $name => $value ) {
 			switch ( $name ) {
 				case 'src':
-					$out[ $name ] = $this->maybe_enforce_https_src( $value, true );
+					// Make the URL absolute since relative URLs are not allowed in amp-iframe.
+					if ( '/' === substr( $value, 0, 1 ) && '/' !== substr( $value, 1, 1 ) ) {
+						$value = untrailingslashit( $this->args['current_origin'] ) . $value;
+					}
+
+					$value = $this->maybe_enforce_https_src( $value, true );
+
+					// Handle case where iframe source origin is the same as the host page's origin.
+					if ( $this->get_origin_from_url( $value ) === $this->args['current_origin'] ) {
+						if ( ! empty( $this->args['alias_origin'] ) ) {
+							$value = preg_replace( '#^\w+://[^/]+#', $this->args['alias_origin'], $value );
+						} else {
+							$remove_allow_same_origin = true;
+						}
+					}
+
+					$out[ $name ] = $value;
 					break;
 
 				case 'width':
@@ -174,7 +212,34 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			$out['sandbox'] = self::SANDBOX_DEFAULTS;
 		}
 
+		// Remove allow-same-origin from sandbox if required.
+		if ( $remove_allow_same_origin ) {
+			$out['sandbox'] = trim( preg_replace( '/(^|\s)allow-same-origin(\s|$)/', ' ', $out['sandbox'] ) );
+		}
+
 		return $out;
+	}
+
+	/**
+	 * Obtain the origin part of a given URL (scheme, host, port).
+	 *
+	 * @param string $url URL.
+	 * @return string|null Origin URL or null if parse failed.
+	 */
+	private function get_origin_from_url( $url ) {
+		$parsed_url = wp_parse_url( $url );
+		if ( ! isset( $parsed_url['host'] ) ) {
+			return null;
+		}
+		if ( ! isset( $parsed_url['scheme'] ) ) {
+			$parsed_url['scheme'] = wp_parse_url( $this->args['current_origin'], PHP_URL_SCHEME );
+		}
+		$origin  = $parsed_url['scheme'] . '://';
+		$origin .= $parsed_url['host'];
+		if ( isset( $parsed_url['port'] ) ) {
+			$origin .= ':' . $parsed_url['port'];
+		}
+		return $origin;
 	}
 
 	/**
@@ -197,10 +262,10 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		$placeholder_node = AMP_DOM_Utils::create_node(
 			$this->dom,
 			'span',
-			array(
+			[
 				'placeholder' => '',
 				'class'       => 'amp-wp-iframe-placeholder',
-			)
+			]
 		);
 
 		return $placeholder_node;

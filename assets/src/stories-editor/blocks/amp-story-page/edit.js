@@ -8,7 +8,7 @@ import { has } from 'lodash';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	PanelColorSettings,
@@ -41,21 +41,28 @@ import {
 	getTotalAnimationDuration,
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
-	isVideoSizeExcessive,
-	getVideoBytesPerSecond,
 	getUniqueId,
+	uploadVideoFrame,
+	getPosterImageFromFileObj,
 } from '../../helpers';
 import {
+	getVideoBytesPerSecond,
+	isVideoSizeExcessive,
+} from '../../../common/helpers';
+
+import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_MEDIA_TYPES,
+	ALLOWED_BACKGROUND_MEDIA_TYPES,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
 	POSTER_ALLOWED_MEDIA_TYPES,
 	MAX_IMAGE_SIZE_SLUG,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-	MEGABYTE_IN_BYTES,
 } from '../../constants';
+import {
+	MEGABYTE_IN_BYTES,
+	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
+} from '../../../common/constants';
 import './edit.css';
 
 class PageEdit extends Component {
@@ -65,11 +72,15 @@ class PageEdit extends Component {
 	}
 
 	constructor( props ) {
-		super( ...arguments );
+		super( props );
 
 		if ( ! props.attributes.anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
+
+		this.state = {
+			extractingPoster: false,
+		};
 
 		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
@@ -88,12 +99,15 @@ class PageEdit extends Component {
 	 * @param {string} media.image.src  Media image URL
 	 */
 	onSelectMedia( media ) {
+		const { setAttributes } = this.props;
+
 		if ( ! media || ! media.url ) {
-			this.props.setAttributes(
+			setAttributes(
 				{
 					mediaUrl: undefined,
 					mediaId: undefined,
 					mediaType: undefined,
+					mediaAlt: undefined,
 					poster: undefined,
 				}
 			);
@@ -121,23 +135,52 @@ class PageEdit extends Component {
 			mediaType = media.type;
 		}
 
-		const mediaUrl = has( media, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? media.sizes[ MAX_IMAGE_SIZE_SLUG ].url : media.url;
+		const mediaAlt = media.alt || media.title;
+		const mediaUrl = media.url;
+		const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
 
 		this.props.setAttributes( {
 			mediaUrl,
 			mediaId: media.id,
 			mediaType,
-			poster: VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined,
+			mediaAlt,
+			poster,
 		} );
 	}
 
 	componentDidUpdate( prevProps ) {
-		if (
-			VIDEO_BACKGROUND_TYPE === this.props.attributes.mediaType &&
-			this.props.attributes.mediaUrl !== prevProps.attributes.mediaUrl &&
-			this.videoPlayer.current
-		) {
+		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
+		const { mediaType, mediaUrl, mediaId, poster } = attributes;
+
+		if ( VIDEO_BACKGROUND_TYPE !== mediaType ) {
+			return;
+		}
+
+		if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
+		}
+
+		if ( poster ) {
+			return;
+		}
+
+		if ( videoFeaturedImage ) {
+			setAttributes( { poster: videoFeaturedImage.source_url } );
+		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
+			/*
+			 * The video has changed, and its media object has been loaded already.
+			 *
+			 * Since it's clear that the video does not have a featured (poster) image,
+			 * one can be generated now.
+			 */
+			this.setState( { extractingPoster: true } );
+
+			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
+				.then( ( fileObj ) => {
+					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
+					this.setState( { extractingPoster: false } );
+				} )
+				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 	}
 
@@ -209,14 +252,14 @@ class PageEdit extends Component {
 		}
 	}
 
-	render() {
+	render() { // eslint-disable-line complexity
 		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
 
 		const {
 			mediaId,
 			mediaType,
 			mediaUrl,
-			focalPoint = { x: .5, y: .5 },
+			focalPoint = { x: 0.5, y: 0.5 },
 			overlayOpacity,
 			poster,
 			autoAdvanceAfter,
@@ -263,7 +306,7 @@ class PageEdit extends Component {
 		overlayStyle.opacity = overlayOpacity / 100;
 
 		const colorSettings = this.getOverlayColorSettings();
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( media );
+		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
@@ -326,24 +369,23 @@ class PageEdit extends Component {
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
 										onSelect={ this.onSelectMedia }
-										allowedTypes={ ALLOWED_MEDIA_TYPES }
+										allowedTypes={ ALLOWED_BACKGROUND_MEDIA_TYPES }
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
 												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
 											</Button>
 										) }
+										id="story-background-media"
 									/>
+									{ mediaUrl && (
+										<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
+											{ _x( 'Remove', 'background media', 'amp' ) }
+										</Button>
+									) }
 								</MediaUploadCheck>
-								{ !! mediaId &&
-								<MediaUploadCheck>
-									<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-										{ VIDEO_BACKGROUND_TYPE === mediaType ? __( 'Remove Video', 'amp' ) : __( 'Remove image', 'amp' ) }
-									</Button>
-								</MediaUploadCheck>
-								}
 							</BaseControl>
-							{ VIDEO_BACKGROUND_TYPE === mediaType && (
+							{ VIDEO_BACKGROUND_TYPE === mediaType && ( ! this.state.extractingPoster || poster ) && (
 								<MediaUploadCheck>
 									<BaseControl
 										id="editor-amp-story-page-poster"
@@ -372,6 +414,7 @@ class PageEdit extends Component {
 											modalClass="editor-amp-story-background-video-poster__media-modal"
 											render={ ( { open } ) => (
 												<Button
+													id="editor-amp-story-page-poster"
 													className={ classnames(
 														'editor-amp-story-page-background',
 														{
@@ -396,28 +439,16 @@ class PageEdit extends Component {
 												</Button>
 											) }
 										/>
-										{
-											poster && (
-												<Button onClick={ () => setAttributes( { poster: undefined } ) } isLink isDestructive>
-													{ __( 'Remove Poster Image', 'amp' ) }
-												</Button>
-											)
-										}
 									</BaseControl>
 								</MediaUploadCheck>
 							) }
-							{ mediaUrl && (
-								<>
-									{ /* Note: FocalPointPicker is only available in Gutenberg 5.1+ */ }
-									{ IMAGE_BACKGROUND_TYPE === mediaType && FocalPointPicker && (
-										<FocalPointPicker
-											label={ __( 'Focal Point Picker', 'amp' ) }
-											url={ mediaUrl }
-											value={ focalPoint }
-											onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
-										/>
-									) }
-								</>
+							{ IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl && FocalPointPicker && (
+								<FocalPointPicker
+									label={ __( 'Focal Point Picker', 'amp' ) }
+									url={ mediaUrl }
+									value={ focalPoint }
+									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
+								/>
 							) }
 						</>
 					</PanelBody>
@@ -439,7 +470,7 @@ class PageEdit extends Component {
 								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
 								min={ Math.max( totalAnimationDuration, 1 ) }
 								initialPosition={ totalAnimationDuration }
-								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page', 'amp' ) : undefined }
+								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page.', 'amp' ) : undefined }
 							/>
 						) }
 					</PanelBody>
@@ -486,18 +517,35 @@ PageEdit.propTypes = {
 	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
+	videoFeaturedImage: PropTypes.shape( {
+		source_url: PropTypes.string,
+	} ),
 };
 
 export default compose(
+	withDispatch( () => {
+		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
+		return {
+			moveBlockToPosition,
+		};
+	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
 		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
-		const { getAnimatedBlocks } = select( 'amp/story' );
 
-		const { mediaId } = attributes;
+		const { mediaType, mediaId, poster } = attributes;
+
+		const media = mediaId ? getMedia( mediaId ) : undefined;
+
+		let videoFeaturedImage;
+
+		if ( VIDEO_BACKGROUND_TYPE === mediaType && media && media.featured_media && ! poster ) {
+			videoFeaturedImage = getMedia( media.featured_media );
+		}
 
 		const animatedBlocks = getAnimatedBlocks();
 		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
@@ -505,18 +553,11 @@ export default compose(
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 		return {
-			media: mediaId ? getMedia( mediaId ) : null,
+			media,
+			videoFeaturedImage,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 		};
 	} ),
-	withDispatch( () => {
-		const {
-			moveBlockToPosition,
-		} = dispatch( 'core/block-editor' );
-		return {
-			moveBlockToPosition,
-		};
-	} )
 )( PageEdit );
