@@ -22,6 +22,11 @@ import { addQueryArgs } from '@wordpress/url';
 import { decodeEntities } from '@wordpress/html-entities';
 import PropTypes from 'prop-types';
 
+/**
+ * Internal dependencies
+ */
+import './edit.css';
+
 const stopEventPropagation = ( event ) => event.stopPropagation();
 
 class PostSelector extends Component {
@@ -235,12 +240,12 @@ class PostSelector extends Component {
 		const { autoFocus = true, value = '', instanceId, className, id, placeholder } = this.props;
 		const { showSuggestions, suggestions, selectedSuggestion, loading } = this.state;
 
-		const suggestionsListboxId = `block-editor-url-input-suggestions-${ instanceId }`;
-		const suggestionOptionIdPrefix = `block-editor-url-input-suggestion-${ instanceId }`;
+		const suggestionsListboxId = `block-editor-post-input-suggestions-${ instanceId }`;
+		const suggestionOptionIdPrefix = `block-editor-post-input-suggestion-${ instanceId }`;
 
 		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
-			<div className={ classnames( 'editor-url-input block-editor-url-input', className ) }>
+			<div className={ classnames( 'editor-post-input block-editor-post-input', className ) }>
 				<input
 					id={ id }
 					type="text"
@@ -271,8 +276,8 @@ class PostSelector extends Component {
 				>
 					<div
 						className={ classnames(
-							'editor-url-input__suggestions',
-							'block-editor-url-input__suggestions',
+							'editor-post-input__suggestions',
+							'block-editor-post-input__suggestions',
 							`${ className }__suggestions`
 						) }
 						id={ suggestionsListboxId }
@@ -286,7 +291,7 @@ class PostSelector extends Component {
 								tabIndex="-1"
 								id={ `${ suggestionOptionIdPrefix }-${ index }` }
 								ref={ this.bindSuggestionNode( index ) }
-								className={ classnames( 'editor-url-input__suggestion block-editor-url-input__suggestion', {
+								className={ classnames( 'editor-post-input__suggestion block-editor-post-input__suggestion', {
 									'is-selected': index === selectedSuggestion,
 								} ) }
 								onClick={ () => this.handleOnClick( suggestion ) }

@@ -148,7 +148,6 @@ class PageAttachmentEdit extends Component {
 		const {
 			attributes,
 			setAttributes,
-			isSelected,
 		} = this.props;
 
 		const {
@@ -206,7 +205,7 @@ class PageAttachmentEdit extends Component {
 									placeholder={ __( 'Write Title', 'amp' ) }
 									onClick={ ( event ) => event.stopPropagation() }
 								/>
-								{ postId && isSelected && (
+								{ postId && (
 									<Button
 										className="remove-attachment-post"
 										onClick={ ( event ) => {
@@ -284,7 +283,6 @@ PageAttachmentEdit.propTypes = {
 		attachmentClass: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
-	isSelected: PropTypes.bool,
 	backgroundColor: PropTypes.shape( {
 		color: PropTypes.string,
 		name: PropTypes.string,
