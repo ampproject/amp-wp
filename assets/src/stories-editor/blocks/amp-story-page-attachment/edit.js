@@ -34,6 +34,7 @@ class PageAttachmentEdit extends Component {
 		};
 
 		this.toggleAttachment = this.toggleAttachment.bind( this );
+		this.removePost = this.removePost.bind( this );
 	}
 
 	componentDidMount() {
@@ -132,6 +133,11 @@ class PageAttachmentEdit extends Component {
 		};
 	}
 
+	removePost() {
+		this.props.setAttributes( { postId: null } );
+		this.setState( { selectedPost: null } );
+	}
+
 	render() {
 		const {
 			attributes,
@@ -193,6 +199,18 @@ class PageAttachmentEdit extends Component {
 									placeholder={ __( 'Write Title', 'amp' ) }
 									onClick={ ( event ) => event.stopPropagation() }
 								/>
+								{ postId && (
+									<Button
+										className="remove-attachment-post"
+										onClick={ ( event ) => {
+											event.stopPropagation();
+											this.removePost();
+										} }
+										isLink
+										isDestructive>
+										{ __( 'Remove Post', 'amp' ) }
+									</Button>
+								) }
 							</div>
 							<div className={ attachmentClass } style={ wrapperStyle }>
 								{ selectedPost && selectedPost.content && (
@@ -200,6 +218,7 @@ class PageAttachmentEdit extends Component {
 								) }
 								{ ! postId && (
 									<PostSelector
+										placeholder={ __( 'Search & select a post to embed content.', 'amp' ) }
 										value={ searchValue }
 										onSelect={ ( value ) => {
 											setAttributes( { postId: value } );

@@ -232,7 +232,7 @@ class PostSelector extends Component {
 	}
 
 	render() {
-		const { value = '', instanceId, className, id } = this.props;
+		const { autoFocus = true, value = '', instanceId, className, id, placeholder } = this.props;
 		const { showSuggestions, suggestions, selectedSuggestion, loading } = this.state;
 
 		const suggestionsListboxId = `block-editor-url-input-suggestions-${ instanceId }`;
@@ -249,7 +249,7 @@ class PostSelector extends Component {
 					onChange={ this.onChange }
 					onInput={ stopEventPropagation }
 					onClick={ stopEventPropagation }
-					placeholder={ __( 'Type to search', 'amp' ) }
+					placeholder={ placeholder || __( 'Type to search', 'amp' ) }
 					onKeyDown={ this.onKeyDown }
 					role="combobox"
 					aria-expanded={ showSuggestions }
@@ -257,6 +257,7 @@ class PostSelector extends Component {
 					aria-owns={ suggestionsListboxId }
 					aria-activedescendant={ selectedSuggestion !== null ? `${ suggestionOptionIdPrefix }-${ selectedSuggestion }` : undefined }
 					ref={ this.inputRef }
+					autoFocus={ autoFocus }
 				/>
 
 				{ ( loading ) && <Spinner /> }

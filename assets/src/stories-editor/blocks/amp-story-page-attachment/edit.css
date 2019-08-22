@@ -158,3 +158,9 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 	background: linear-gradient(0, rgba(0, 0, 0, 0.15), transparent);
 	z-index: 3;
 }
+
+.remove-attachment-post {
+	position: absolute;
+	right: 10px;
+	top: 10px;
+}
