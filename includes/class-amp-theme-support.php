@@ -2055,12 +2055,21 @@ class AMP_Theme_Support {
 		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
 		 */
 		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $response, 0, 1024 ) ) ) {
+			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
+
 			$response = preg_replace(
 				'/(<head[^>]*>)/i',
-				'$1' . sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) ),
+				'$1' . $meta_charset,
 				$response,
-				1
+				1,
+				$count
 			);
+
+			// Ensure charset is added for document fragments.
+			// @todo Should not the absense of a <head> indicate that this is not intended to be an AMP page in the first place? Similar to checking for JSON response?
+			if ( 0 === $count ) {
+				$response = $meta_charset . $response;
+			}
 		}
 
 		$dom  = AMP_DOM_Utils::get_dom( $response );
