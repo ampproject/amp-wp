@@ -238,6 +238,7 @@ class PostSelector extends Component {
 		const suggestionsListboxId = `block-editor-url-input-suggestions-${ instanceId }`;
 		const suggestionOptionIdPrefix = `block-editor-url-input-suggestion-${ instanceId }`;
 
+		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
 			<div className={ classnames( 'editor-url-input block-editor-url-input', className ) }>
 				<input
@@ -299,14 +300,17 @@ class PostSelector extends Component {
 				}
 			</div>
 		);
+		/* eslint-enable jsx-a11y/no-autofocus */
 	}
 }
 
 PostSelector.propTypes = {
 	autocompleteRef: PropTypes.object,
+	autoFocus: PropTypes.bool,
 	setTimeout: PropTypes.func,
 	searchablePostTypes: PropTypes.array,
 	debouncedSpeak: PropTypes.func,
+	placeholder: PropTypes.string,
 	onChange: PropTypes.func.isRequired,
 	onSelect: PropTypes.func.isRequired,
 	speak: PropTypes.func,

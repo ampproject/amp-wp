@@ -15,6 +15,7 @@ import { select } from '@wordpress/data';
 import {
 	SelectControl,
 	PanelBody,
+	Button,
 } from '@wordpress/components';
 
 /**
@@ -31,6 +32,7 @@ class PageAttachmentEdit extends Component {
 			selectedPost: null,
 			isOpen: false,
 			searchValue: '',
+			failedToFetch: false,
 		};
 
 		this.toggleAttachment = this.toggleAttachment.bind( this );
@@ -48,7 +50,6 @@ class PageAttachmentEdit extends Component {
 	componentDidUpdate( prevProps ) {
 		const {
 			attributes,
-			isSelected,
 			backgroundColor,
 			customBackgroundColor,
 			textColor,
@@ -57,10 +58,6 @@ class PageAttachmentEdit extends Component {
 
 		if ( attributes.postId !== prevProps.attributes.postId ) {
 			this.fetchSelectedPost();
-		}
-
-		if ( ! isSelected && prevProps.isSelected ) {
-			this.toggleAttachment( false );
 		}
 
 		if (
@@ -86,13 +83,19 @@ class PageAttachmentEdit extends Component {
 			} ).then(
 				( post ) => {
 					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-						this.setState( { selectedPost: post } );
+						this.setState( {
+							selectedPost: post,
+							failedToFetch: false,
+						} );
 					}
 				}
 			).catch(
 				() => {
 					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
-						this.setState( { selectedPost: null } );
+						this.setState( {
+							selectedPost: null,
+							failedToFetch: true,
+						} );
 					}
 				}
 			);
@@ -135,13 +138,17 @@ class PageAttachmentEdit extends Component {
 
 	removePost() {
 		this.props.setAttributes( { postId: null } );
-		this.setState( { selectedPost: null } );
+		this.setState( {
+			selectedPost: null,
+			failedToFetch: false,
+		} );
 	}
 
 	render() {
 		const {
 			attributes,
 			setAttributes,
+			isSelected,
 		} = this.props;
 
 		const {
@@ -153,7 +160,7 @@ class PageAttachmentEdit extends Component {
 			postId,
 		} = attributes;
 
-		const { selectedPost, searchValue } = this.state;
+		const { selectedPost, searchValue, failedToFetch } = this.state;
 
 		const themeOptions = [
 			{ value: 'light', label: __( 'Light', 'amp' ) },
@@ -199,7 +206,7 @@ class PageAttachmentEdit extends Component {
 									placeholder={ __( 'Write Title', 'amp' ) }
 									onClick={ ( event ) => event.stopPropagation() }
 								/>
-								{ postId && (
+								{ postId && isSelected && (
 									<Button
 										className="remove-attachment-post"
 										onClick={ ( event ) => {
@@ -216,16 +223,21 @@ class PageAttachmentEdit extends Component {
 								{ selectedPost && selectedPost.content && (
 									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
 								) }
-								{ ! postId && (
-									<PostSelector
-										placeholder={ __( 'Search & select a post to embed content.', 'amp' ) }
-										value={ searchValue }
-										onSelect={ ( value ) => {
-											setAttributes( { postId: value } );
-											this.setState( { searchValue: '' } );
-										} }
-										onChange={ ( value ) => this.setState( { searchValue: value } ) }
-									/>
+								{ ( ! postId || failedToFetch ) && (
+									<>
+										{ failedToFetch && (
+											<span>{ __( 'The selected post failed to load, please select a new post', 'amp' ) }</span>
+										) }
+										<PostSelector
+											placeholder={ __( 'Search & select a post to embed content.', 'amp' ) }
+											value={ searchValue }
+											onSelect={ ( value ) => {
+												setAttributes( { postId: value } );
+												this.setState( { searchValue: '' } );
+											} }
+											onChange={ ( value ) => this.setState( { searchValue: value } ) }
+										/>
+									</>
 								) }
 							</div>
 						</div>
