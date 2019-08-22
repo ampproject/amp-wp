@@ -1,11 +1,3 @@
 .amp__block-editor-inserter__menu.block-editor-inserter__menu {
-	display: block;
-}
-
-.amp__block-editor-inserter__search.block-editor-inserter__search {
-	width: 90%;
-}
-
-.amp__block-editor-inserter__results.block-editor-inserter__results {
-	height: 360px;
+	flex-direction: column;
 }
