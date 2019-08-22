@@ -479,7 +479,7 @@ class Test_AMP_CLI_Validation_Command extends \WP_UnitTestCase {
 		);
 
 		return array_map(
-			function( $post ) {
+			static function( $post ) {
 				return remove_query_arg( 'amp', AMP_Validated_URL_Post_Type::get_url_from_post( $post ) );
 			},
 			$query->posts
