@@ -1903,12 +1903,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::enqueue_assets()
 	 */
 	public function test_enqueue_assets() {
-		$script_slug = 'amp-runtime';
-		$style_slug  = 'amp-default';
-		wp_dequeue_script( $script_slug );
+		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertContains( $script_slug, wp_scripts()->queue );
 		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
