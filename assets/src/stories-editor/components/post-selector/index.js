@@ -1,4 +1,8 @@
 /**
+ * PostSelector component, largely based on the logic of the Upstream URLInput.
+ */
+
+/**
  * External dependencies
  */
 import { map, throttle } from 'lodash';
@@ -16,10 +20,8 @@ import { withInstanceId, withSafeTimeout, compose } from '@wordpress/compose';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 import { decodeEntities } from '@wordpress/html-entities';
+import PropTypes from 'prop-types';
 
-// Since URLInput is rendered in the context of other inputs, but should be
-// considered a separate modal node, prevent keyboard events from propagating
-// as being considered from the input.
 const stopEventPropagation = ( event ) => event.stopPropagation();
 
 class PostSelector extends Component {
@@ -44,8 +46,6 @@ class PostSelector extends Component {
 
 	componentDidUpdate() {
 		const { showSuggestions, selectedSuggestion } = this.state;
-		// only have to worry about scrolling selected suggestion into view
-		// when already expanded
 		if ( showSuggestions && selectedSuggestion !== null && ! this.scrollingIntoView ) {
 			this.scrollingIntoView = true;
 			scrollIntoView( this.suggestionNodes[ selectedSuggestion ], this.autocompleteRef.current, {
@@ -60,6 +60,11 @@ class PostSelector extends Component {
 
 	componentWillUnmount() {
 		delete this.suggestionsRequest;
+		this.isStillMounted = false;
+	}
+
+	componentDidMount() {
+		this.isStillMounted = true;
 	}
 
 	bindSuggestionNode( index ) {
@@ -68,26 +73,49 @@ class PostSelector extends Component {
 		};
 	}
 
-	async fetchPostSuggestions( search ) {
+	fetchPostSuggestions( search ) {
 		const searchablePostTypes = this.props.searchablePostTypes || [ 'post' ];
-		const posts = await apiFetch( {
+		const suggestionsRequest = this.suggestionsRequest = apiFetch( {
 			path: addQueryArgs( '/wp/v2/search', {
 				search,
 				per_page: 20,
 				subtype: searchablePostTypes.join( ',' ),
 			} ),
-		} );
+		} ).then(
+			( suggestions ) => {
+				if ( this.isStillMounted && this.suggestionsRequest === suggestionsRequest ) {
+					this.setState( {
+						suggestions: map( suggestions, ( post ) => ( {
+							id: post.id,
+							title: decodeEntities( post.title ) || __( '(no title)', 'amp' ),
+						} ) ),
+						loading: false,
+					} );
 
-		return map( posts, ( post ) => ( {
-			id: post.id,
-			title: decodeEntities( post.title ) || __( '(no title)', 'amp' ),
-		} ) );
+					if ( Boolean( suggestions.length ) ) {
+						this.props.debouncedSpeak( sprintf( _n(
+							'%d result found, use up and down arrow keys to navigate.',
+							'%d results found, use up and down arrow keys to navigate.',
+							suggestions.length, 'amp'
+						), suggestions.length ), 'assertive' );
+					} else {
+						this.props.debouncedSpeak( __( 'No results.', 'amp' ), 'assertive' );
+					}
+				}
+			}
+		).catch(
+			() => {
+				if ( this.isStillMounted && this.suggestionsRequest === suggestionsRequest ) {
+					this.setState( {
+						loading: false,
+					} );
+				}
+			}
+		);
 	}
 
 	updateSuggestions( value ) {
-
-		// Show the suggestions after typing at least 2 characters
-		// and also for URLs
+		// Show the suggestions after typing at least 2 characters.
 		if ( value.length < 2 ) {
 			this.setState( {
 				showSuggestions: false,
@@ -104,39 +132,7 @@ class PostSelector extends Component {
 			loading: true,
 		} );
 
-		const request = this.fetchPostSuggestions( value );
-
-		request.then( ( suggestions ) => {
-			// A fetch Promise doesn't have an abort option. It's mimicked by
-			// comparing the request reference in on the instance, which is
-			// reset or deleted on subsequent requests or unmounting.
-			if ( this.suggestionsRequest !== request ) {
-				return;
-			}
-
-			this.setState( {
-				suggestions,
-				loading: false,
-			} );
-
-			if ( !! suggestions.length ) {
-				this.props.debouncedSpeak( sprintf( _n(
-					'%d result found, use up and down arrow keys to navigate.',
-					'%d results found, use up and down arrow keys to navigate.',
-					suggestions.length
-				), suggestions.length ), 'assertive' );
-			} else {
-				this.props.debouncedSpeak( __( 'No results.' ), 'assertive' );
-			}
-		} ).catch( () => {
-			if ( this.suggestionsRequest === request ) {
-				this.setState( {
-					loading: false,
-				} );
-			}
-		} );
-
-		this.suggestionsRequest = request;
+		this.fetchPostSuggestions( value );
 	}
 
 	onChange( event ) {
@@ -147,14 +143,8 @@ class PostSelector extends Component {
 
 	onKeyDown( event ) {
 		const { showSuggestions, selectedSuggestion, suggestions, loading } = this.state;
-		// If the suggestions are not shown or loading, we shouldn't handle the arrow keys
-		// We shouldn't preventDefault to allow block arrow keys navigation
+		// If the suggestions are not shown or loading, we shouldn't handle the arrow keys.
 		if ( ! showSuggestions || ! suggestions.length || loading ) {
-			// In the Windows version of Firefox the up and down arrows don't move the caret
-			// within an input field like they do for Mac Firefox/Chrome/Safari. This causes
-			// a form of focus trapping that is disruptive to the user experience. This disruption
-			// only happens if the caret is not in the first or last position in the text input.
-			// See: https://github.com/WordPress/gutenberg/issues/5693#issuecomment-436684747
 			switch ( event.keyCode ) {
 				// When UP is pressed, if the caret is at the start of the text, move it to the 0
 				// position.
@@ -180,6 +170,8 @@ class PostSelector extends Component {
 					}
 					break;
 				}
+				default:
+					break;
 			}
 
 			return;
@@ -209,8 +201,7 @@ class PostSelector extends Component {
 			case TAB: {
 				if ( this.state.selectedSuggestion !== null ) {
 					this.selectPost( suggestion );
-					// Announce a link has been selected when tabbing away from the input field.
-					this.props.speak( __( 'Link selected.' ) );
+					this.props.speak( __( 'Post selected.', 'amp' ) );
 				}
 				break;
 			}
@@ -221,6 +212,8 @@ class PostSelector extends Component {
 				}
 				break;
 			}
+			default:
+				break;
 		}
 	}
 
@@ -239,28 +232,24 @@ class PostSelector extends Component {
 	}
 
 	render() {
-		const { value = '', autoFocus = true, instanceId, className, id, isFullWidth, hasBorder } = this.props;
+		const { value = '', instanceId, className, id } = this.props;
 		const { showSuggestions, suggestions, selectedSuggestion, loading } = this.state;
 
 		const suggestionsListboxId = `block-editor-url-input-suggestions-${ instanceId }`;
 		const suggestionOptionIdPrefix = `block-editor-url-input-suggestion-${ instanceId }`;
 
-		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
-			<div className={ classnames( 'editor-url-input block-editor-url-input', className, {
-				'is-full-width': isFullWidth,
-				'has-border': hasBorder,
-			} ) }>
+			<div className={ classnames( 'editor-url-input block-editor-url-input', className ) }>
 				<input
 					id={ id }
-					autoFocus={ autoFocus }
 					type="text"
-					aria-label={ __( 'Post search' ) }
+					aria-label={ __( 'Post search', 'amp' ) }
 					required
 					value={ value }
 					onChange={ this.onChange }
 					onInput={ stopEventPropagation }
-					placeholder={ __( 'Type to search' ) }
+					onClick={ stopEventPropagation }
+					placeholder={ __( 'Type to search', 'amp' ) }
 					onKeyDown={ this.onKeyDown }
 					role="combobox"
 					aria-expanded={ showSuggestions }
@@ -272,7 +261,7 @@ class PostSelector extends Component {
 
 				{ ( loading ) && <Spinner /> }
 
-				{ showSuggestions && !! suggestions.length &&
+				{ showSuggestions && Boolean( suggestions.length ) &&
 				<Popover
 					position="bottom"
 					noArrow
@@ -309,9 +298,22 @@ class PostSelector extends Component {
 				}
 			</div>
 		);
-		/* eslint-enable jsx-a11y/no-autofocus */
 	}
 }
+
+PostSelector.propTypes = {
+	autocompleteRef: PropTypes.object,
+	setTimeout: PropTypes.func,
+	searchablePostTypes: PropTypes.array,
+	debouncedSpeak: PropTypes.func,
+	onChange: PropTypes.func.isRequired,
+	onSelect: PropTypes.func.isRequired,
+	speak: PropTypes.func,
+	value: PropTypes.string.isRequired,
+	instanceId: PropTypes.string.isRequired,
+	className: PropTypes.string,
+	id: PropTypes.string,
+};
 
 export default compose(
 	withSafeTimeout,

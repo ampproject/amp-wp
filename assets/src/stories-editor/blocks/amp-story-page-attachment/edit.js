@@ -54,10 +54,6 @@ class PageAttachmentEdit extends Component {
 			setAttributes,
 		} = this.props;
 
-		if ( attributes.postId ) {
-			debugger;
-		}
-
 		if ( attributes.postId !== prevProps.attributes.postId ) {
 			this.fetchSelectedPost();
 		}
@@ -93,7 +89,7 @@ class PageAttachmentEdit extends Component {
 					}
 				}
 			).catch(
-				( err ) => {
+				() => {
 					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
 						this.setState( { selectedPost: null } );
 					}
