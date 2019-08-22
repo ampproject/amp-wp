@@ -124,7 +124,7 @@ class Draggable extends Component {
 		const verticalBottomSnap = findClosestSnap( top + height, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const verticalCenterSnap = findClosestSnap( verticalCenter, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 
-		if ( horizontalLeftSnap !== left ) {
+		if ( horizontalLeftSnap !== originalLeft ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -133,8 +133,8 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( horizontalRightSnap !== left + width ) {
-			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+		if ( horizontalRightSnap !== originalLeft + width ) {
+			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
 
@@ -151,7 +151,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( verticalTopSnap !== top ) {
+		if ( verticalTopSnap !== originalTop ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -160,7 +160,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( verticalBottomSnap !== top + height ) {
+		if ( verticalBottomSnap !== originalTop + height ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
