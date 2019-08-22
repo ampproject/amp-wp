@@ -1427,15 +1427,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
 
+			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
+
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
-
-			'#<style amp-custom>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
-			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
-			'<style amp-boilerplate>',
-			'<noscript><style amp-boilerplate>',
 			'<script type="application/ld+json">{"@context"',
 			'<link rel="canonical" href="',
+
+			'#<style amp-boilerplate(="")?>#',
+			'#<noscript><style amp-boilerplate(="")?>#',
 			'</head>',
 		];
 
@@ -1654,7 +1655,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'wp_enqueue_scripts',
 			static function() {
 				wp_enqueue_script( 'amp-list' );
-			wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
+				wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
 			}
 		);
 		add_action(
@@ -1681,7 +1682,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			static function() {
 				wp_print_scripts( 'amp-mathml' );
 				?>
-			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+				<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
 				<?php
 			},
 			1
