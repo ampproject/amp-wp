@@ -33,6 +33,7 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
+import { pasteHandler } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -83,6 +84,9 @@ class PageEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
+		this.onSelectMedia = this.onSelectMedia.bind( this );
+		this.onPaste = this.onPaste.bind( this );
+		this.handlePaste = this.handlePaste.bind( this );
 	}
 
 	/**
@@ -137,6 +141,66 @@ class PageEdit extends Component {
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
+	}
+
+	handlePaste( { html, plainText } ) {
+		debugger;
+		const { onReplace, tagName, canUserUseUnfilteredHTML } = this.props; // @todo check about the canUseruse ... prop
+
+		const mode = 'BLOCKS';
+
+		const content = pasteHandler( {
+			HTML: html,
+			plainText,
+			mode,
+			tagName,
+			canUserUseUnfilteredHTML,
+		} );
+
+		if ( content.length > 0 ) {
+			// Insert inner blocks @todo
+			onReplace( content );
+		}
+	}
+
+	onPaste( event ) {
+		const { isSelected } = this.props;
+		// Ignore if the Page is not the selected page.
+		if ( ! isSelected ) {
+			return;
+		}
+		const clipboardData = event.clipboardData;
+
+		let plainText = '';
+		let html = '';
+
+		// IE11 only supports `Text` as an argument for `getData` and will
+		// otherwise throw an invalid argument error, so we try the standard
+		// arguments first, then fallback to `Text` if they fail.
+		try {
+			plainText = clipboardData.getData( 'text/plain' );
+			html = clipboardData.getData( 'text/html' );
+		} catch ( error1 ) {
+			try {
+				html = clipboardData.getData( 'Text' );
+			} catch ( error2 ) {
+				// Some browsers like UC Browser paste plain text by default and
+				// don't support clipboardData at all, so allow default
+				// behaviour.
+				return;
+			}
+		}
+
+		event.preventDefault();
+
+		// Allows us to ask for this information when we get a report.
+		window.console.log( 'Received HTML:\n\n', html );
+		window.console.log( 'Received plain text:\n\n', plainText );
+
+		this.handlePaste( {
+			html,
+			plainText,
+		} );
 	}
 
 	removeBackgroundColor( index ) {
@@ -208,8 +272,14 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks, allowedBackgroundMediaTypes } = this.props;
-
+		const {
+			attributes,
+			media,
+			setAttributes,
+			totalAnimationDuration,
+			allowedBlocks,
+			allowedBackgroundMediaTypes,
+		} = this.props;
 		const {
 			mediaId,
 			mediaType,
@@ -429,7 +499,10 @@ class PageEdit extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<div style={ style }>
+				<div
+					style={ style }
+					onPaste={ this.onPaste }
+				>
 					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
