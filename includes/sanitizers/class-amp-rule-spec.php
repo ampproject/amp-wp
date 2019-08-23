@@ -54,6 +54,13 @@ abstract class AMP_Rule_Spec {
 	const VALUE_PROPERTIES        = 'value_properties';
 	const VALUE_URL               = 'value_url';
 
+	/**
+	 * Attribute name for AMP dev mode.
+	 *
+	 * @since 1.2.2
+	 * @link https://github.com/ampproject/amphtml/issues/20974
+	 * @var string
+	 */
 	const DEV_MODE_ATTRIBUTE = 'data-ampdevmode';
 
 	/**

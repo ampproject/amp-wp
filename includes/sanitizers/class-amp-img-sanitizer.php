@@ -231,9 +231,17 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				$out['width']  = $matches['width'];
 				$out['height'] = $matches['height'];
 			} elseif ( isset( $out['width'] ) && ! isset( $out['height'] ) ) {
-				$out['height'] = (string) ( (float) $out['width'] * ( (float) $matches['height'] / (float) $matches['width'] ) );
+				$out['height'] = (string) (
+					(float) $out['width'] * (
+						(float) $matches['height'] / (float) $matches['width']
+					)
+				);
 			} elseif ( isset( $out['height'] ) && ! isset( $out['width'] ) ) {
-				$out['width'] = (string) ( (float) $out['height'] * ( (float) $matches['width'] / (float) $matches['height'] ) );
+				$out['width'] = (string) (
+					(float) $out['height'] * (
+						(float) $matches['width'] / (float) $matches['height']
+					)
+				);
 			}
 		}
 
