@@ -25,6 +25,7 @@ import { withSelect } from '@wordpress/data';
  * Internal dependencies
  */
 import InserterMenu from './menu'; // eslint-disable-line import/no-named-as-default
+import './edit.css';
 
 const defaultRenderToggle = ( { onToggle, disabled, isOpen } ) => (
 	<IconButton

@@ -4,8 +4,8 @@
 import {
 	visitAdminPage,
 	createNewPost,
-	clickButton,
 	getAllBlocks,
+	selectBlockByClientId,
 } from '@wordpress/e2e-test-utils';
 
 /**
@@ -13,6 +13,7 @@ import {
  */
 import {
 	activateExperience,
+	clickButton,
 	clickButtonByLabel,
 	goToPreviousPage,
 	deactivateExperience,
@@ -47,9 +48,7 @@ describe( 'Stories Editor Screen', () => {
 		expect( nodes ).toHaveLength( 1 );
 	} );
 
-	// Disable reason: Test is flaky in headless mode - needs to be investigated.
-	// eslint-disable-next-line jest/no-disabled-tests
-	it.skip( 'should display validation error when CTA block is on the first Page', async () => {
+	it( 'should display validation error when CTA block is on the first Page', async () => {
 		await createNewPost( { postType: 'amp_story' } );
 
 		const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
@@ -60,6 +59,7 @@ describe( 'Stories Editor Screen', () => {
 		await goToPreviousPage();
 
 		await page.waitForSelector( `#block-${ firstPageClientId }.amp-page-active` );
+		await selectBlockByClientId( firstPageClientId );
 
 		await clickButtonByLabel( 'More options' );
 		await clickButton( 'Remove Block' );
