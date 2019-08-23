@@ -358,6 +358,8 @@ class EnhancedResizableBox extends Component {
 
 					if ( newSnapLines.length ) {
 						setSnapLines( ...newSnapLines );
+					} else if ( snapLines.length ) {
+						clearSnapLines();
 					}
 				} }
 			>

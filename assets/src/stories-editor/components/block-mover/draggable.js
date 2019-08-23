@@ -95,8 +95,8 @@ class Draggable extends Component {
 	 *
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
-	onDragOver( event ) {
-		const { hasSnapLine, setSnapLines, horizontalSnaps, verticalSnaps } = this.props;
+	onDragOver( event ) { // eslint-disable-line complexity
+		const { snapLines, clearSnapLines, hasSnapLine, setSnapLines, horizontalSnaps, verticalSnaps } = this.props;
 
 		const newSnapLines = [];
 
@@ -199,6 +199,8 @@ class Draggable extends Component {
 
 		if ( newSnapLines.length ) {
 			setSnapLines( ...newSnapLines );
+		} else if ( snapLines.length ) {
+			clearSnapLines();
 		}
 	}
 
