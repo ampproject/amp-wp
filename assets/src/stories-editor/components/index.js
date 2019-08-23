@@ -15,6 +15,7 @@ export { default as FontFamilyPicker } from './font-family-picker';
 export { default as RotatableBox } from './rotatable-box';
 export { default as PreviewPicker } from './preview-picker';
 export { default as Inserter } from './inserter';
+export { default as MediaInsider } from './media-inserter';
 export { default as ResizableBox } from './resizable-box';
 export { default as withMetaBlockEdit } from './with-meta-block-edit';
 export { default as withMetaBlockSave } from './with-meta-block-save';

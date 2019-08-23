@@ -26,6 +26,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
+	MediaInsider,
 	withMetaBlockEdit,
 	withMetaBlockSave,
 	Inserter,
@@ -649,6 +650,18 @@ export const renderStoryComponents = () => {
 			render(
 				<Shortcuts />,
 				shortcuts
+			);
+		}
+
+		if ( ! document.getElementById( 'amp-story-media-inserter' ) ) {
+			const mediaInserter = document.createElement( 'div' );
+			mediaInserter.id = 'amp-story-media-inserter';
+
+			editorBlockNavigation.parentNode.parentNode.insertBefore( mediaInserter, editorBlockNavigation.parentNode.nextSibling );
+
+			render(
+				<MediaInsider />,
+         	mediaInserter
 			);
 		}
 
