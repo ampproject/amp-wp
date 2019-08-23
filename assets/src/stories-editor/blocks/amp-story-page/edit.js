@@ -142,6 +142,13 @@ class PageEdit extends Component {
 		}
 	}
 
+	ensureAllowedBlocksOnPaste( content ) {
+		// If the content has CTA block.
+		// If it already exists, remove from content
+		// If first page, remove from content.
+		return content;
+	}
+
 	onPaste( event ) {
 		const {
 			clientId,
@@ -190,7 +197,7 @@ class PageEdit extends Component {
 		} );
 
 		if ( content.length > 0 ) {
-			insertBlocks( content, null, clientId );
+			insertBlocks( this.ensureAllowedBlocksOnPaste( content ), null, clientId );
 		}
 	}
 
