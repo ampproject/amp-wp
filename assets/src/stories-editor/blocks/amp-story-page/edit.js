@@ -86,7 +86,6 @@ class PageEdit extends Component {
 		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 		this.onPaste = this.onPaste.bind( this );
-		this.handlePaste = this.handlePaste.bind( this );
 	}
 
 	/**
@@ -143,28 +142,15 @@ class PageEdit extends Component {
 		}
 	}
 
-	handlePaste( { html, plainText } ) {
-		debugger;
-		const { onReplace, tagName, canUserUseUnfilteredHTML } = this.props; // @todo check about the canUseruse ... prop
-
-		const mode = 'BLOCKS';
-
-		const content = pasteHandler( {
-			HTML: html,
-			plainText,
-			mode,
+	onPaste( event ) {
+		const {
+			clientId,
+			insertBlocks,
+			isSelected,
 			tagName,
 			canUserUseUnfilteredHTML,
-		} );
+		} = this.props;
 
-		if ( content.length > 0 ) {
-			// Insert inner blocks @todo
-			onReplace( content );
-		}
-	}
-
-	onPaste( event ) {
-		const { isSelected } = this.props;
 		// Ignore if the Page is not the selected page.
 		if ( ! isSelected ) {
 			return;
@@ -193,14 +179,19 @@ class PageEdit extends Component {
 
 		event.preventDefault();
 
-		// Allows us to ask for this information when we get a report.
-		window.console.log( 'Received HTML:\n\n', html );
-		window.console.log( 'Received plain text:\n\n', plainText );
+		const mode = 'BLOCKS';
 
-		this.handlePaste( {
-			html,
+		const content = pasteHandler( {
+			HTML: html,
 			plainText,
+			mode,
+			tagName,
+			canUserUseUnfilteredHTML,
 		} );
+
+		if ( content.length > 0 ) {
+			insertBlocks( content, null, clientId );
+		}
 	}
 
 	removeBackgroundColor( index ) {
@@ -538,12 +529,16 @@ PageEdit.propTypes = {
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ).isRequired,
+	canUserUseUnfilteredHTML: PropTypes.bool,
+	insertBlocks: PropTypes.func.isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
+	tagName: PropTypes.string.func,
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
@@ -552,18 +547,21 @@ PageEdit.propTypes = {
 
 export default compose(
 	withDispatch( () => {
-		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
+		const { insertBlocks, moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
+			insertBlocks,
 			moveBlockToPosition,
 		};
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
-		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
+		const { getBlockOrder, getBlockRootClientId, getSettings } = select( 'core/block-editor' );
+		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
+
+		const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 
 		const { mediaType, mediaId, poster } = attributes;
 
@@ -589,6 +587,7 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
+			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
 		};
 	} ),
 )( PageEdit );
