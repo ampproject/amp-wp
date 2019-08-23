@@ -263,7 +263,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Add root of content to the stack.
 		$this->stack[] = $this->root_element;
 
-		$this->dev_mode = $this->root_element->hasAttribute( 'data-ampdevmode' );
+		$this->dev_mode = $this->root_element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
 
 		/**
 		 * This loop traverses through the DOM tree iteratively.
@@ -386,7 +386,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Skip validating element with data-ampdevmode attribute when document is in dev mode.
-		if ( $this->dev_mode && $node instanceof DOMElement && $node->hasAttribute( 'data-ampdevmode' ) ) {
+		if ( $this->dev_mode && $node instanceof DOMElement && $node->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ) ) {
 			return;
 		}
 

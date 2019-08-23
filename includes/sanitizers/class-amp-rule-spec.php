@@ -54,6 +54,8 @@ abstract class AMP_Rule_Spec {
 	const VALUE_PROPERTIES        = 'value_properties';
 	const VALUE_URL               = 'value_url';
 
+	const DEV_MODE_ATTRIBUTE = 'data-ampdevmode';
+
 	/**
 	 * Supported layout values.
 	 *
