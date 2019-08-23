@@ -1744,6 +1744,55 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 		];
 
+		$bad_dev_mode_document = sprintf(
+			'
+				<html amp data-ampdevmode>
+					<head>
+						<meta charset="utf-8">
+						<style amp-custom data-ampdevmode>%s</style>
+					</head>
+					<body>
+						<amp-state id="something">
+							<script type="application/json" data-ampdevmode>%s</script>
+						</amp-state>
+						<button data-ampdevmode onclick="alert(\'Hello!\')"></button>
+						<script data-ampdevmode>document.write("Hello World!")</script>
+					</body>
+				</html>
+				',
+			'button::before { content:"' . str_repeat( 'a', 50001 ) . '";"}',
+			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
+		);
+
+		$data['dev_mode_test'] = [
+			$bad_dev_mode_document,
+			null,
+			[ 'amp-bind' ],
+			[], // All validation errors suppressed.
+		];
+
+		$data['bad_document_without_dev_mode'] = [
+			str_replace( 'data-ampdevmode', '', $bad_dev_mode_document ),
+			'
+			<html amp>
+				<head>
+					<meta charset="utf-8">
+				</head>
+				<body>
+					<amp-state id="something"></amp-state>
+					<button></button>
+				</body>
+			</html>
+			',
+			[ 'amp-bind' ],
+			[
+				'invalid_attribute',
+				'invalid_element',
+				'invalid_element',
+				'invalid_element',
+			],
+		];
+
 		// Also include the body tests.
 		$html_doc_format = '<html amp><head><meta charset="utf-8"></head><body><!-- before -->%s<!-- after --></body></html>';
 		foreach ( $this->get_body_data() as $body_test ) {

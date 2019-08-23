@@ -93,6 +93,15 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $script_components = [];
 
 	/**
+	 * Whether or not the HTML element has the `data-ampdevmode` attribute.
+	 *
+	 * When this is present, any element in the document that also has this attribute will have its validation errors ignored.
+	 *
+	 * @var bool
+	 */
+	protected $dev_mode = false;
+
+	/**
 	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
 	 *
 	 * @var array
@@ -254,6 +263,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Add root of content to the stack.
 		$this->stack[] = $this->root_element;
 
+		$this->dev_mode = $this->root_element->hasAttribute( 'data-ampdevmode' );
+
 		/**
 		 * This loop traverses through the DOM tree iteratively.
 		 */
@@ -371,6 +382,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Don't process text or comment nodes.
 		if ( XML_TEXT_NODE === $node->nodeType || XML_COMMENT_NODE === $node->nodeType || XML_CDATA_SECTION_NODE === $node->nodeType ) {
+			return;
+		}
+
+		// Skip validating element with data-ampdevmode attribute when document is in dev mode.
+		if ( $this->dev_mode && $node instanceof DOMElement && $node->hasAttribute( 'data-ampdevmode' ) ) {
 			return;
 		}
 
@@ -639,6 +655,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return true|WP_Error True when valid or error when invalid.
 	 */
 	private function validate_cdata_for_node( $element, $cdata_spec ) {
+		if ( isset( $cdata_spec['max_bytes'] ) ) {
+			$length = function_exists( 'mb_strlen' ) ? mb_strlen( $element->textContent, $this->dom->encoding ? $this->dom->encoding : 'utf-8' ) : strlen( $element->textContent );
+			if ( $length > $cdata_spec['max_bytes'] ) {
+				return new WP_Error( 'excessive_bytes' );
+			}
+		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
 				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
