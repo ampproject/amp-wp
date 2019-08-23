@@ -26,11 +26,13 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 			horizontalSnaps: [],
 			verticalSnaps: [],
 			snapLines: [],
+			parentBlockOffsetTop: 0,
+			parentBlockOffsetLeft: 0,
 		};
 	}
 
 	const parentBlockElement = getBlockInnerElement( getBlock( parentBlock ) );
-	const { left: parentBLockOffsetLeft = 0, top: parentBlockOffsetTop = 0 } = parentBlockElement ? parentBlockElement.getBoundingClientRect() : {};
+	const { left: parentBlockOffsetLeft = 0, top: parentBlockOffsetTop = 0 } = parentBlockElement ? parentBlockElement.getBoundingClientRect() : {};
 
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
 		.filter( ( { clientId: blockId } ) => blockId !== clientId );
@@ -52,7 +54,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 					}
 
 					const { left, right } = blockElement.getBoundingClientRect();
-					return [ Math.round( left - parentBLockOffsetLeft ), Math.round( right - parentBLockOffsetLeft ) ];
+					return [ Math.round( left - parentBlockOffsetLeft ), Math.round( right - parentBlockOffsetLeft ) ];
 				} )
 				.reduce( ( result, snaps ) => {
 					for ( const snap of snaps ) {
@@ -101,6 +103,8 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 			return [ ...pageSnaps, ...blockSnaps ];
 		},
 		snapLines: getSnapLines(),
+		parentBlockOffsetTop,
+		parentBlockOffsetLeft,
 	};
 } );
 

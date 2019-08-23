@@ -97,7 +97,15 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) { // eslint-disable-line complexity
-		const { snapLines, clearSnapLines, setSnapLines, setTimeout, clearTimeout } = this.props;
+		const {
+			snapLines,
+			clearSnapLines,
+			setSnapLines,
+			setTimeout,
+			clearTimeout,
+			parentBlockOffsetTop,
+			parentBlockOffsetLeft,
+		} = this.props;
 
 		const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
@@ -105,47 +113,51 @@ class Draggable extends Component {
 
 		const newSnapLines = [];
 
-		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
-		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		const left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
 
 		if ( top === lastY && left === lastX ) {
 			return;
 		}
 
-		const width = this.cloneWrapper.clientWidth;
-		const height = this.cloneWrapper.clientHeight;
-		const originalTop = top;
-		const originalLeft = left;
-		const originalBottom = originalTop + height;
-		const originalRight = originalLeft + width;
-		const horizontalCenter = originalLeft + ( width / 2 );
-		const verticalCenter = originalTop + ( height / 2 );
+		const originalTop = top; // eslint-disable-line no-unused-vars
+		const originalLeft = left; // eslint-disable-line no-unused-vars
 
-		// @todo Fix slowness.
+		// We calculate with the block's actual dimensions relative to the page it's on.
+		let { top: actualTop, right: actualRight, bottom: actualBottom, left: actualLeft } = this.cloneWrapper.getBoundingClientRect();
+		actualTop -= parentBlockOffsetTop;
+		actualRight -= parentBlockOffsetLeft;
+		actualBottom -= parentBlockOffsetTop;
+		actualLeft -= parentBlockOffsetLeft;
 
-		const horizontalLeftSnap = findClosestSnap( originalLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const horizontalRightSnap = findClosestSnap( originalLeft + width, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
+		const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
+
+		const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalTopSnap = findClosestSnap( originalTop, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalBottomSnap = findClosestSnap( originalTop + height, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 
-		if ( horizontalLeftSnap !== originalLeft ) {
+		// @todo: Fix top / left calculation when snapping.
+
+		if ( horizontalLeftSnap !== actualLeft ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
 			}
 
-			left = horizontalLeftSnap;
+			//left = originalLeft - ( actualLeft - horizontalLeftSnap );
 		}
 
-		if ( horizontalRightSnap !== originalRight ) {
+		if ( horizontalRightSnap !== actualRight ) {
 			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
 			}
 
-			left = horizontalRightSnap - width;
+			//left = originalLeft - ( actualRight - horizontalRightSnap );
 		}
 
 		if ( horizontalCenterSnap !== horizontalCenter ) {
@@ -154,25 +166,25 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
+			//left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
 		}
 
-		if ( verticalTopSnap !== originalTop ) {
+		if ( verticalTopSnap !== actualTop ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
 			}
 
-			top = verticalTopSnap;
+			//top = originalTop - ( verticalTopSnap - actualTop );
 		}
 
-		if ( verticalBottomSnap !== originalBottom ) {
+		if ( verticalBottomSnap !== actualBottom ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
 			}
 
-			top = verticalBottomSnap - height;
+			//top = originalTop - ( verticalBottomSnap - actualBottom );
 		}
 
 		if ( verticalCenterSnap !== verticalCenter ) {
@@ -181,7 +193,7 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			top = originalTop - ( verticalCenter - verticalCenterSnap );
+			//top = originalTop - ( verticalCenter - verticalCenterSnap );
 		}
 
 		if ( top === lastY && left === lastX ) {
@@ -380,6 +392,8 @@ Draggable.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
+	parentBlockOffsetTop: PropTypes.number.isRequired,
+	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
 const enhance = compose(

@@ -93,6 +93,8 @@ class EnhancedResizableBox extends Component {
 			hideSnapLines,
 			setSnapLines,
 			clearSnapLines,
+			parentBlockOffsetTop,
+			parentBlockOffsetLeft,
 			...childProps
 		} = otherProps;
 
@@ -400,6 +402,8 @@ EnhancedResizableBox.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
+	parentBlockOffsetTop: PropTypes.number.isRequired,
+	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
 export default withSnapTargets( EnhancedResizableBox );
