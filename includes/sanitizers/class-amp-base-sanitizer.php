@@ -339,6 +339,24 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Check whether the element (and the document) has dev mode.
+	 *
+	 * @param DOMElement $element Element.
+	 * @return bool In dev mode.
+	 */
+	protected function has_dev_mode_exemption( $element ) {
+		return (
+			$element->ownerDocument
+			&&
+			$element->ownerDocument->documentElement->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE )
+			&&
+			$element instanceof DOMElement
+			&&
+			$element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE )
+		);
+	}
+
+	/**
 	 * Removes an invalid child of a node.
 	 *
 	 * Also, calls the mutation callback for it.
@@ -351,6 +369,9 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
+		if ( $this->has_dev_mode_exemption( $node ) ) {
+			return false;
+		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
 		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
@@ -380,6 +401,10 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $validation_error = [] ) {
+		if ( $this->has_dev_mode_exemption( $element ) ) {
+			return false;
+		}
+
 		if ( is_string( $attribute ) ) {
 			$node = $element->getAttributeNode( $attribute );
 		} else {
