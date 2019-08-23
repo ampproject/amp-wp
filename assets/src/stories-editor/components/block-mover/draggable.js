@@ -114,6 +114,8 @@ class Draggable extends Component {
 		const horizontalCenter = left + ( width / 2 );
 		const verticalCenter = top + ( height / 2 );
 
+		// @todo Fix slowness.
+
 		const horizontalLeftSnap = findClosestSnap( left, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const horizontalRightSnap = findClosestSnap( left + width, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const horizontalCenterSnap = findClosestSnap( horizontalCenter, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );

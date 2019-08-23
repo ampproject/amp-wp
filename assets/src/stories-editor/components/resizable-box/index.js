@@ -329,6 +329,9 @@ class EnhancedResizableBox extends Component {
 						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
 						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
 
+						// @todo: Get outermost left position and calculate snap.
+						// @todo: Get outermost top position and calculate snap.
+
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 					}
