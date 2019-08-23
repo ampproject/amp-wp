@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
  */
 import { Component } from '@wordpress/element';
 import { ResizableBox } from '@wordpress/components';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -92,7 +93,6 @@ class EnhancedResizableBox extends Component {
 			hideSnapLines,
 			setSnapLines,
 			clearSnapLines,
-			hasSnapLine,
 			...childProps
 		} = otherProps;
 
@@ -185,6 +185,7 @@ class EnhancedResizableBox extends Component {
 				} }
 				onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
 					const newSnapLines = [];
+					const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
 					const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
@@ -399,7 +400,6 @@ EnhancedResizableBox.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
-	hasSnapLine: PropTypes.func.isRequired,
 };
 
 export default withSnapTargets( EnhancedResizableBox );

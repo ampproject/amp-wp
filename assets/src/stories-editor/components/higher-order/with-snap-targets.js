@@ -3,7 +3,6 @@
  */
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -27,7 +26,6 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 			horizontalSnaps: [],
 			verticalSnaps: [],
 			snapLines: [],
-			hasSnapLine: () => false,
 		};
 	}
 
@@ -36,9 +34,6 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
 		.filter( ( { clientId: blockId } ) => blockId !== clientId );
-
-	const snapLines = getSnapLines();
-	const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
 	return {
 		horizontalSnaps: () => {
@@ -57,7 +52,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 					}
 
 					const { left, right } = blockElement.getBoundingClientRect();
-					return [ left - parentBLockOffsetLeft, right - parentBLockOffsetLeft ];
+					return [ Math.round( left - parentBLockOffsetLeft ), Math.round( right - parentBLockOffsetLeft ) ];
 				} )
 				.reduce( ( result, snaps ) => {
 					for ( const snap of snaps ) {
@@ -89,7 +84,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 					}
 
 					const { top, bottom } = blockElement.getBoundingClientRect();
-					return [ top - parentBlockOffsetTop, bottom - parentBlockOffsetTop ];
+					return [ Math.round( top - parentBlockOffsetTop ), Math.round( bottom - parentBlockOffsetTop ) ];
 				} )
 				.reduce( ( result, snaps ) => {
 					for ( const snap of snaps ) {
@@ -105,8 +100,7 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 			return [ ...pageSnaps, ...blockSnaps ];
 		},
-		snapLines,
-		hasSnapLine,
+		snapLines: getSnapLines(),
 	};
 } );
 

@@ -7,6 +7,7 @@ import { combineReducers } from '@wordpress/data';
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Reducer handling animation state changes.
@@ -182,7 +183,15 @@ export function snap( state = {}, action ) {
 			};
 
 		case 'SET_SNAP_LINES':
-			const { snapLines } = action;
+			const { snapLines = [] } = action;
+
+			if ( snapLines.length === state.snapLines.length ) {
+				const hasSnapLine = ( item ) => state.snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+				if ( snapLines.every( hasSnapLine ) ) {
+					return state;
+				}
+			}
+
 			return {
 				...state,
 				snapLines: [ ...snapLines ],

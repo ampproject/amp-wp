@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
  */
 import { Component } from '@wordpress/element';
 import { compose, withSafeTimeout } from '@wordpress/compose';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -96,7 +97,11 @@ class Draggable extends Component {
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
 	onDragOver( event ) { // eslint-disable-line complexity
-		const { snapLines, clearSnapLines, hasSnapLine, setSnapLines, horizontalSnaps, verticalSnaps } = this.props;
+		const { snapLines, clearSnapLines, setSnapLines, setTimeout, clearTimeout } = this.props;
+
+		const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+
+		clearTimeout();
 
 		const newSnapLines = [];
 
@@ -107,74 +112,76 @@ class Draggable extends Component {
 			return;
 		}
 
-		const originalTop = top;
-		const originalLeft = left;
 		const width = this.cloneWrapper.clientWidth;
 		const height = this.cloneWrapper.clientHeight;
-		const horizontalCenter = left + ( width / 2 );
-		const verticalCenter = top + ( height / 2 );
+		const originalTop = top;
+		const originalLeft = left;
+		const originalBottom = originalTop + height;
+		const originalRight = originalLeft + width;
+		const horizontalCenter = originalLeft + ( width / 2 );
+		const verticalCenter = originalTop + ( height / 2 );
 
 		// @todo Fix slowness.
 
-		const horizontalLeftSnap = findClosestSnap( left, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const horizontalRightSnap = findClosestSnap( left + width, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const horizontalCenterSnap = findClosestSnap( horizontalCenter, horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalTopSnap = findClosestSnap( top, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalBottomSnap = findClosestSnap( top + height, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalCenterSnap = findClosestSnap( verticalCenter, verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalLeftSnap = findClosestSnap( originalLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalRightSnap = findClosestSnap( originalLeft + width, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalTopSnap = findClosestSnap( originalTop, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalBottomSnap = findClosestSnap( originalTop + height, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 
 		if ( horizontalLeftSnap !== originalLeft ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				left = horizontalLeftSnap;
 			}
+
+			left = horizontalLeftSnap;
 		}
 
-		if ( horizontalRightSnap !== originalLeft + width ) {
+		if ( horizontalRightSnap !== originalRight ) {
 			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				left = horizontalRightSnap - width;
 			}
+
+			left = horizontalRightSnap - width;
 		}
 
 		if ( horizontalCenterSnap !== horizontalCenter ) {
 			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
 			}
+
+			left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
 		}
 
 		if ( verticalTopSnap !== originalTop ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				top = verticalTopSnap;
 			}
+
+			top = verticalTopSnap;
 		}
 
-		if ( verticalBottomSnap !== originalTop + height ) {
+		if ( verticalBottomSnap !== originalBottom ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				top = verticalBottomSnap - height;
 			}
+
+			top = verticalBottomSnap - height;
 		}
 
 		if ( verticalCenterSnap !== verticalCenter ) {
 			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
-
-				top = originalTop - ( verticalCenter - verticalCenterSnap );
 			}
+
+			top = originalTop - ( verticalCenter - verticalCenterSnap );
 		}
 
 		if ( top === lastY && left === lastX ) {
@@ -197,11 +204,20 @@ class Draggable extends Component {
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
 
-		if ( newSnapLines.length ) {
-			setSnapLines( ...newSnapLines );
-		} else if ( snapLines.length ) {
-			clearSnapLines();
-		}
+		clearTimeout( this.timeoutId );
+		this.timeoutId = setTimeout( () => {
+			if ( snapLines.length === newSnapLines.length ) {
+				if ( newSnapLines.every( hasSnapLine ) ) {
+					return;
+				}
+			}
+
+			if ( newSnapLines.length ) {
+				setSnapLines( ...newSnapLines );
+			} else if ( snapLines.length ) {
+				clearSnapLines();
+			}
+		}, 50 );
 	}
 
 	onDrop( ) {
@@ -220,7 +236,17 @@ class Draggable extends Component {
 	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
 	 */
 	onDragStart( event ) {
-		const { blockName, elementId, transferData, onDragStart = noop, snapLines, showSnapLines, clearSnapLines } = this.props;
+		const {
+			blockName,
+			elementId,
+			transferData,
+			onDragStart = noop,
+			snapLines,
+			showSnapLines,
+			clearSnapLines,
+			horizontalSnaps,
+			verticalSnaps,
+		} = this.props;
 		const element = document.getElementById( elementId );
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
@@ -294,6 +320,9 @@ class Draggable extends Component {
 			clearSnapLines();
 		}
 
+		this.horizontalSnaps = horizontalSnaps();
+		this.verticalSnaps = verticalSnaps();
+
 		this.props.setTimeout( onDragStart );
 	}
 
@@ -335,6 +364,7 @@ Draggable.propTypes = {
 	transferData: PropTypes.object,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
+	clearTimeout: PropTypes.func.isRequired,
 	setTimeout: PropTypes.func.isRequired,
 	children: PropTypes.any.isRequired,
 	horizontalSnaps: PropTypes.oneOfType( [
@@ -350,7 +380,6 @@ Draggable.propTypes = {
 	hideSnapLines: PropTypes.func.isRequired,
 	setSnapLines: PropTypes.func.isRequired,
 	clearSnapLines: PropTypes.func.isRequired,
-	hasSnapLine: PropTypes.func.isRequired,
 };
 
 const enhance = compose(
