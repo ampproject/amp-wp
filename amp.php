@@ -370,7 +370,11 @@ function amp_init() {
 	add_action( 'wp_loaded', 'amp_story_templates' );
 
 	if ( defined( 'WP_CLI' ) && WP_CLI ) {
-		WP_CLI::add_command( 'amp', new AMP_CLI() );
+		if ( class_exists( 'WP_CLI\Dispatcher\CommandNamespace' ) ) {
+			WP_CLI::add_command( 'amp', 'AMP_CLI_Namespace' );
+		}
+
+		WP_CLI::add_command( 'amp validation', 'AMP_CLI_Validation_Command' );
 	}
 
 	/*
