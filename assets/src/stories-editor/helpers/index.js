@@ -1160,6 +1160,30 @@ const getBlockInnerTextElement = ( block ) => {
 };
 
 /**
+ * Returns a movable block's inner element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+export const getBlockInnerElement = ( block ) => {
+	const { name, clientId } = block;
+	const isPage = 'amp/amp-story-page' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
+
+	if ( isPage ) {
+		return document.querySelector( `[data-block="${ clientId }"]` );
+	}
+
+	if ( isCTABlock ) {
+		// Not the block itself is movable, only the button within.
+		return document.querySelector( `amp-story-cta-button-${ clientId }` );
+	}
+
+	return document.querySelector( `#block-${ clientId }` );
+};
+
+/**
  * Updates a block's font size in case it uses amp-fit-text and the content has changed.
  *
  * @param {Object}  block                         Block object.

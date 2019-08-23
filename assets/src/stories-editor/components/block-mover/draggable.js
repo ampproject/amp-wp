@@ -107,9 +107,6 @@ class Draggable extends Component {
 			return;
 		}
 
-		lastY = top;
-		lastX = left;
-
 		const originalTop = top;
 		const originalLeft = left;
 		const width = this.cloneWrapper.clientWidth;
@@ -177,6 +174,13 @@ class Draggable extends Component {
 				top = originalTop - ( verticalCenter - verticalCenterSnap );
 			}
 		}
+
+		if ( top === lastY && left === lastX ) {
+			return;
+		}
+
+		lastY = top;
+		lastX = left;
 
 		// Don't allow the CTA button to go over its top limit.
 		if ( 'amp/amp-story-cta' === this.props.blockName ) {

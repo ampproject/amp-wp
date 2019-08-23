@@ -9,31 +9,39 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  * Internal dependencies
  */
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
-import { getPixelsFromPercentage } from '../../helpers';
+import { getBlockInnerElement } from '../../helpers';
 
-const applyWithSelect = withSelect( ( select, { clientId, angle } ) => {
+const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const {
 		getBlocksByClientId,
 		getBlockRootClientId,
+		getBlock,
 		getBlockOrder,
 	} = select( 'core/block-editor' );
-	const { getSnapLines } = select( 'amp/story' );
+	const { getCurrentPage, getSnapLines } = select( 'amp/story' );
 
 	const parentBlock = getBlockRootClientId( clientId );
+
+	if ( getCurrentPage() !== parentBlock ) {
+		return {
+			horizontalSnaps: [],
+			verticalSnaps: [],
+			snapLines: [],
+			hasSnapLine: () => false,
+		};
+	}
+
+	const parentBlockElement = getBlockInnerElement( getBlock( parentBlock ) );
+	const { left: parentBLockOffsetLeft = 0, top: parentBlockOffsetTop = 0 } = parentBlockElement ? parentBlockElement.getBoundingClientRect() : {};
+
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
-		.filter( ( { clientId: blockId } ) => blockId !== clientId )
-		.filter( ( { attributes } ) => ! attributes.rotationAngle );
+		.filter( ( { clientId: blockId } ) => blockId !== clientId );
 
 	const snapLines = getSnapLines();
 	const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
 	return {
 		horizontalSnaps: () => {
-			// @todo: Support snapping for a rotated block that is being resized.
-			if ( angle ) {
-				return [];
-			}
-
 			const pageSnaps = [
 				0,
 				STORY_PAGE_INNER_WIDTH / 2,
@@ -41,16 +49,23 @@ const applyWithSelect = withSelect( ( select, { clientId, angle } ) => {
 			];
 
 			const blockSnaps = siblings
-				.map( ( { attributes } ) => {
-					const { positionLeft, width } = attributes;
-					const positionInPx = getPixelsFromPercentage( 'x', positionLeft );
-					return [ positionInPx, positionInPx + width ];
+				.map( ( block ) => {
+					const blockElement = getBlockInnerElement( block );
+
+					if ( ! blockElement ) {
+						return [];
+					}
+
+					const { left, right } = blockElement.getBoundingClientRect();
+					return [ left - parentBLockOffsetLeft, right - parentBLockOffsetLeft ];
 				} )
 				.reduce( ( result, snaps ) => {
 					for ( const snap of snaps ) {
-						if ( ! result.includes( snap ) && ! pageSnaps.includes( snap ) ) {
-							result.push( snap );
+						if ( snap < 0 || snap > STORY_PAGE_INNER_WIDTH || result.includes( snap ) || pageSnaps.includes( snap ) ) {
+							continue;
 						}
+
+						result.push( snap );
 					}
 
 					return result;
@@ -59,11 +74,6 @@ const applyWithSelect = withSelect( ( select, { clientId, angle } ) => {
 			return [ ...pageSnaps, ...blockSnaps ];
 		},
 		verticalSnaps: () => {
-			// @todo: Support snapping for a rotated block that is being resized.
-			if ( angle ) {
-				return [];
-			}
-
 			const pageSnaps = [
 				0,
 				STORY_PAGE_INNER_HEIGHT / 2,
@@ -71,16 +81,23 @@ const applyWithSelect = withSelect( ( select, { clientId, angle } ) => {
 			];
 
 			const blockSnaps = siblings
-				.map( ( { attributes } ) => {
-					const { positionTop, height } = attributes;
-					const positionInPx = getPixelsFromPercentage( 'y', positionTop );
-					return [ positionInPx, positionInPx + height ];
+				.map( ( block ) => {
+					const blockElement = getBlockInnerElement( block );
+
+					if ( ! blockElement ) {
+						return [];
+					}
+
+					const { top, bottom } = blockElement.getBoundingClientRect();
+					return [ top - parentBlockOffsetTop, bottom - parentBlockOffsetTop ];
 				} )
 				.reduce( ( result, snaps ) => {
 					for ( const snap of snaps ) {
-						if ( ! result.includes( snap ) && ! pageSnaps.includes( snap ) ) {
-							result.push( snap );
+						if ( snap < 0 || snap > STORY_PAGE_INNER_HEIGHT || result.includes( snap ) || pageSnaps.includes( snap ) ) {
+							continue;
 						}
+
+						result.push( snap );
 					}
 
 					return result;
