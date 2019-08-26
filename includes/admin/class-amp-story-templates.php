@@ -32,20 +32,21 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		// Hide story templates even when the stories feature is not active.
+		// Always hide the story templates.
 		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
+
+		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
+		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
+
+		// We need to register the taxonomy even if AMP Stories is disabled for tax_query.
+		$this->register_taxonomy();
 
 		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
-		add_filter( 'rest_wp_block_query', [ $this, 'filter_rest_wp_block_query' ], 10, 2 );
 		add_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 
-		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
-		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
-
-		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
 	}
 
