@@ -240,6 +240,8 @@ class EnhancedResizableBox extends Component {
 						lastDeltaW = deltaW;
 					}
 
+					const snappingEnabled = ! event.getModifierState( 'Alt' );
+
 					if ( ! angle ) {
 						// If the resizing is to left or top then we have to compensate
 						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
@@ -257,8 +259,10 @@ class EnhancedResizableBox extends Component {
 										newSnapLines.push( leftSnapLine );
 									}
 
-									appliedWidth += leftInPx - leftSnap;
-									leftInPx = leftSnap;
+									if ( snappingEnabled ) {
+										appliedWidth += leftInPx - leftSnap;
+										leftInPx = leftSnap;
+									}
 								}
 							}
 
@@ -272,7 +276,9 @@ class EnhancedResizableBox extends Component {
 									newSnapLines.push( widthSnapLine );
 								}
 
-								appliedWidth = widthSnap - blockElement.offsetLeft;
+								if ( snappingEnabled ) {
+									appliedWidth = widthSnap - blockElement.offsetLeft;
+								}
 							}
 						}
 
@@ -292,8 +298,10 @@ class EnhancedResizableBox extends Component {
 										newSnapLines.push( topSnapLine );
 									}
 
-									appliedHeight += topInPx - topSnap;
-									topInPx = topSnap;
+									if ( snappingEnabled ) {
+										appliedHeight += topInPx - topSnap;
+										topInPx = topSnap;
+									}
 								}
 							}
 
@@ -306,9 +314,11 @@ class EnhancedResizableBox extends Component {
 								if ( ! hasSnapLine( heightSnapLine ) ) {
 									newSnapLines.push( heightSnapLine );
 								}
-							}
 
-							appliedHeight = heightSnap - blockElement.offsetTop;
+								if ( snappingEnabled ) {
+									appliedHeight = heightSnap - blockElement.offsetTop;
+								}
+							}
 						}
 					} else {
 						const radianAngle = getRadianFromDeg( angle );
