@@ -34,11 +34,6 @@ describe( 'Story Page', () => {
 	} );
 
 	it( 'should be possible to add background color to Page', async () => {
-		const panelTitle = 'Background Color';
-		const colorToggle = await getSidebarPanelToggleByTitle( panelTitle );
-
-		await colorToggle.click();
-
 		await clickButtonByLabel( 'Color: Vivid red' );
 
 		await saveDraft();
@@ -53,10 +48,6 @@ describe( 'Story Page', () => {
 	} );
 
 	it( 'should allow adding gradient', async () => {
-		const panelTitle = 'Background Color';
-		const colorToggle = await getSidebarPanelToggleByTitle( panelTitle );
-
-		await colorToggle.click();
 		await clickButtonByLabel( 'Color: Vivid red' );
 		await clickButton( 'Add Gradient' );
 
@@ -72,10 +63,6 @@ describe( 'Story Page', () => {
 	} );
 
 	it( 'should allow adding opacity', async () => {
-		const panelTitle = 'Background Color';
-		const colorToggle = await getSidebarPanelToggleByTitle( panelTitle );
-
-		await colorToggle.click();
 		const opacitySelector = '.components-range-control__number[aria-label="Opacity"]';
 		await page.waitForSelector( opacitySelector );
 
