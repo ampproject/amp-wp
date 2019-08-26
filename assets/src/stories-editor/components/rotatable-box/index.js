@@ -128,7 +128,11 @@ class RotatableBox extends Component {
 		const rad2deg = ( 180 / Math.PI );
 		let angle = Math.ceil( -( rad2deg * Math.atan2( x, y ) ) );
 
-		angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
+		const snappingEnabled = ! e.getModifierState( 'Alt' );
+
+		if ( snappingEnabled ) {
+			angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
+		}
 
 		if ( this.state.angle === angle ) {
 			return;

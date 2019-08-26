@@ -113,8 +113,8 @@ class Draggable extends Component {
 
 		const newSnapLines = [];
 
-		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
-		const left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
+		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
 
 		if ( top === lastY && left === lastX ) {
 			return;
@@ -123,15 +123,32 @@ class Draggable extends Component {
 		const originalTop = top; // eslint-disable-line no-unused-vars
 		const originalLeft = left; // eslint-disable-line no-unused-vars
 
+		const dimensions = this.cloneWrapper.getBoundingClientRect();
+
 		// We calculate with the block's actual dimensions relative to the page it's on.
-		let { top: actualTop, right: actualRight, bottom: actualBottom, left: actualLeft } = this.cloneWrapper.getBoundingClientRect();
+		let {
+			top: actualTop,
+			right: actualRight,
+			bottom: actualBottom,
+			left: actualLeft,
+		} = dimensions;
+
 		actualTop -= parentBlockOffsetTop;
 		actualRight -= parentBlockOffsetLeft;
 		actualBottom -= parentBlockOffsetTop;
 		actualLeft -= parentBlockOffsetLeft;
 
+		const {
+			width: actualWidth,
+			height: actualHeight,
+		} = dimensions;
+
 		const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 		const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
+
+		// The difference in width/height caused by rotation.
+		const rotatedWidthDiff = ( this.cloneWrapper.offsetWidth - actualWidth ) / 2;
+		const rotatedHeightDiff = ( this.cloneWrapper.offsetHeight - actualHeight ) / 2;
 
 		const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
@@ -140,7 +157,7 @@ class Draggable extends Component {
 		const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 		const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
 
-		// @todo: Fix top / left calculation when snapping.
+		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 		if ( horizontalLeftSnap !== actualLeft ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
@@ -148,7 +165,9 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//left = originalLeft - ( actualLeft - horizontalLeftSnap );
+			if ( snappingEnabled ) {
+				left = horizontalLeftSnap - rotatedWidthDiff;
+			}
 		}
 
 		if ( horizontalRightSnap !== actualRight ) {
@@ -157,7 +176,9 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//left = originalLeft - ( actualRight - horizontalRightSnap );
+			if ( snappingEnabled ) {
+				left = originalLeft - ( actualRight - horizontalRightSnap );
+			}
 		}
 
 		if ( horizontalCenterSnap !== horizontalCenter ) {
@@ -166,7 +187,10 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
+			if ( snappingEnabled ) {
+				// @todo Fix calculation.
+				left = horizontalCenterSnap - ( ( actualWidth / 2 ) - rotatedWidthDiff );
+			}
 		}
 
 		if ( verticalTopSnap !== actualTop ) {
@@ -175,7 +199,9 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//top = originalTop - ( verticalTopSnap - actualTop );
+			if ( snappingEnabled ) {
+				top = verticalTopSnap - rotatedHeightDiff;
+			}
 		}
 
 		if ( verticalBottomSnap !== actualBottom ) {
@@ -184,7 +210,9 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//top = originalTop - ( verticalBottomSnap - actualBottom );
+			if ( snappingEnabled ) {
+				top = originalTop - ( actualBottom - verticalBottomSnap );
+			}
 		}
 
 		if ( verticalCenterSnap !== verticalCenter ) {
@@ -193,7 +221,10 @@ class Draggable extends Component {
 				newSnapLines.push( snapLine );
 			}
 
-			//top = originalTop - ( verticalCenter - verticalCenterSnap );
+			if ( snappingEnabled ) {
+				// @todo Fix calculation.
+				top = verticalCenterSnap - ( ( actualHeight / 2 ) - rotatedHeightDiff );
+			}
 		}
 
 		if ( top === lastY && left === lastX ) {
