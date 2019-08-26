@@ -9,6 +9,7 @@ import { visitAdminPage, insertBlock, createNewPost, searchForBlock } from '@wor
 import {
 	activateExperience,
 	clickButtonByLabel,
+	clickOnMoreMenuItem,
 	deactivateExperience,
 	openTemplateInserter,
 	searchForBlock as searchForStoryBlock,
@@ -34,7 +35,14 @@ describe( 'Story Templates', () => {
 			beforeAll( async () => {
 				await createNewPost();
 
-				// Remove all blocks from the post so that we're working with a clean slate
+				const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
+					return layout.classList.contains( 'has-fixed-toolbar' );
+				} );
+				if ( ! isTopToolbarEnabled ) {
+					await clickOnMoreMenuItem( 'Top Toolbar' );
+				}
+
+				// Remove all blocks from the post so that we're working with a clean slate.
 				await page.evaluate( () => {
 					const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
 					const clientIds = blocks.map( ( block ) => block.clientId );
@@ -43,13 +51,6 @@ describe( 'Story Templates', () => {
 
 				// Insert a paragraph block
 				await insertBlock( 'Paragraph' );
-
-				const pSelector = '.wp-block-paragraph';
-				await page.waitForSelector( pSelector );
-				await page.click( pSelector );
-				await page.evaluate( () => {
-					document.querySelector( '.wp-block-paragraph' ).click();
-				} );
 				await page.keyboard.type( 'Reusable block!' );
 
 				await clickButtonByLabel( 'More options' );

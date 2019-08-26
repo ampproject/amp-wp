@@ -4,6 +4,7 @@ export { activateExperience } from './activate-experience';
 export { deactivateExperience } from './deactivate-experience';
 export { clickButton } from './click-button';
 export { clickButtonByLabel } from './click-button-by-label';
+export { clickOnMoreMenuItem } from './click-on-more-menu-item';
 export { getSidebarPanelToggleByTitle } from './get-sidebar-panel-toggle-by-title';
 export { insertBlock } from './insert-block';
 export { openGlobalBlockInserter } from './open-global-block-inserter';
