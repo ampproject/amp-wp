@@ -23,10 +23,6 @@ const schema = {
 		type: 'string',
 		default: __( 'Swipe Up', 'amp' ),
 	},
-	theme: {
-		type: 'string',
-		default: 'light',
-	},
 	wrapperStyle: {
 		default: {},
 	},

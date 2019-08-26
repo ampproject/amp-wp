@@ -10,13 +10,9 @@ import classnames from 'classnames';
 import { __ } from '@wordpress/i18n';
 import { Component, RawHTML } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
-import { InspectorControls, RichText } from '@wordpress/block-editor';
+import { RichText } from '@wordpress/block-editor';
 import { select } from '@wordpress/data';
-import {
-	SelectControl,
-	PanelBody,
-	Button,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -151,7 +147,6 @@ class PageAttachmentEdit extends Component {
 		} = this.props;
 
 		const {
-			theme,
 			text,
 			title,
 			wrapperStyle,
@@ -161,29 +156,10 @@ class PageAttachmentEdit extends Component {
 
 		const { selectedPost, searchValue, failedToFetch } = this.state;
 
-		const themeOptions = [
-			{ value: 'light', label: __( 'Light', 'amp' ) },
-			{ value: 'dark', label: __( 'Dark', 'amp' ) },
-		];
-
 		return (
 			<>
-				<InspectorControls>
-					<PanelBody title={ __( 'Page Attachment Settings', 'amp' ) }>
-						<SelectControl
-							label={ __( 'Theme', 'amp' ) }
-							value={ theme }
-							options={ themeOptions }
-							onChange={ ( value ) => {
-								setAttributes( { theme: value } );
-							} }
-						/>
-					</PanelBody>
-				</InspectorControls>
 				{ this.state.isOpen &&
-					<div className={ classnames( 'attachment-container', {
-						'theme-dark': 'dark' === theme,
-					} ) }>
+					<div className="attachment-container">
 						<div className="attachment-wrapper">
 							<div className="attachment-header">
 								<span
@@ -288,7 +264,6 @@ PageAttachmentEdit.propTypes = {
 		postType: PropTypes.string.isRequired,
 		wrapperStyle: PropTypes.object,
 		text: PropTypes.string,
-		theme: PropTypes.string,
 		title: PropTypes.string,
 		attachmentClass: PropTypes.string,
 	} ).isRequired,

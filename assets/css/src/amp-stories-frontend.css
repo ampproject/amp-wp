@@ -143,7 +143,3 @@ amp-story-grid-layer .wp-block-quote {
 .amp-page-attachment-content {
 	padding: 10px;
 }
-
-amp-story-page-attachment[theme="dark"] .amp-page-attachment-content {
-	color: rgb(238, 238, 238);
-}
