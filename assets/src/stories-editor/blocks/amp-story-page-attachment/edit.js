@@ -220,7 +220,9 @@ class PageAttachmentEdit extends Component {
 							</div>
 							<div className={ attachmentClass } style={ wrapperStyle }>
 								{ selectedPost && selectedPost.content && (
-									<RawHTML>{ selectedPost.content.rendered }</RawHTML>
+									<RawHTML>
+										{ `<h2>${ selectedPost.title.rendered }</h2>${ selectedPost.content.rendered }` }
+									</RawHTML>
 								) }
 								{ ( ! postId || failedToFetch ) && (
 									<>
