@@ -241,11 +241,15 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 			'amp_analytics_entries',
 			static function( $analytics ) use ( $key ) {
 				$analytics[ $key ]['type'] = 'test';
+				$analytics[ $key ]['attributes']['data-include'] = '_till_responded';
+				$analytics[ $key ]['attributes']['data-block-on-consent'] = 'credentials';
 				return $analytics;
 			}
 		);
 		$analytics = amp_get_analytics();
 		$this->assertEquals( 'test', $analytics[ $key ]['type'] );
+		$this->assertEquals( '_till_responded', $analytics[ $key ]['data-include'] );
+		$this->assertEquals( 'credentials', $analytics[ $key ]['data-block-on-consent'] );
 	}
 
 	/**
@@ -276,6 +280,21 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );
+
+		add_filter(
+			'amp_analytics_entries',
+			static function( $analytics ) use ( $key ) {
+				$analytics[ $key ]['attributes']['data-include'] = '_till_responded';
+				$analytics[ $key ]['attributes']['data-block-on-consent'] = 'credentials';
+				return $analytics;
+			}
+		);
+
+		$analytics = amp_get_analytics();
+
+		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
+
+		$this->assertContains( 'data-include="_till_responded"', $output );
 	}
 
 	/**
