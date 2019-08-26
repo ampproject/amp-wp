@@ -1773,7 +1773,7 @@ class AMP_Story_Post_Type {
 					],
 					'wrapperStyle'    => [
 						'type'    => 'object',
-						'default' => array(),
+						'default' => [],
 					],
 					'attachmentClass' => [
 						'type'    => 'string',
