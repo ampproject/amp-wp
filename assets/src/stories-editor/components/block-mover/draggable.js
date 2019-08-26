@@ -225,6 +225,7 @@ class Draggable extends Component {
 			}
 		}
 
+		// @todo Prevent block from being stuck in snapping position.
 		if ( top === lastY && left === lastX ) {
 			return;
 		}
