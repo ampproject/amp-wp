@@ -75,11 +75,11 @@ class PageAttachmentEdit extends Component {
 	}
 
 	fetchSelectedPost() {
-		const { postId } = this.props.attributes;
+		const { postId, postType } = this.props.attributes;
 		this.isStillMounted = true;
 		if ( postId ) {
 			const fetchRequest = this.fetchRequest = apiFetch( {
-				path: `/wp/v2/posts/${ postId }`,
+				path: `/wp/v2/${ postType }s/${ postId }`,
 			} ).then(
 				( post ) => {
 					if ( this.isStillMounted && this.fetchRequest === fetchRequest ) {
@@ -228,13 +228,20 @@ class PageAttachmentEdit extends Component {
 											<span>{ __( 'The selected post failed to load, please select a new post', 'amp' ) }</span>
 										) }
 										<PostSelector
-											placeholder={ __( 'Search & select a post to embed content.', 'amp' ) }
+											placeholder={ __( 'Search & select a post or page to embed content.', 'amp' ) }
 											value={ searchValue }
-											onSelect={ ( value ) => {
-												setAttributes( { postId: value } );
+											onSelect={ ( id, postType ) => {
+												setAttributes( {
+													postId: id,
+													postType,
+												} );
 												this.setState( { searchValue: '' } );
 											} }
 											onChange={ ( value ) => this.setState( { searchValue: value } ) }
+											searchablePostTypes={ [
+												'page',
+												'post',
+											] }
 										/>
 									</>
 								) }
@@ -276,6 +283,7 @@ PageAttachmentEdit.propTypes = {
 	attributes: PropTypes.shape( {
 		opacity: PropTypes.number,
 		postId: PropTypes.number,
+		postType: PropTypes.string.isRequired,
 		wrapperStyle: PropTypes.object,
 		text: PropTypes.string,
 		theme: PropTypes.string,

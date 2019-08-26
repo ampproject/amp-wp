@@ -93,6 +93,7 @@ class PostSelector extends Component {
 						suggestions: map( suggestions, ( post ) => ( {
 							id: post.id,
 							title: decodeEntities( post.title ) || __( '(no title)', 'amp' ),
+							postType: post.subtype,
 						} ) ),
 						loading: false,
 					} );
@@ -223,7 +224,7 @@ class PostSelector extends Component {
 	}
 
 	selectPost( suggestion ) {
-		this.props.onSelect( suggestion.id );
+		this.props.onSelect( suggestion.id, suggestion.postType );
 		this.setState( {
 			selectedSuggestion: null,
 			showSuggestions: false,

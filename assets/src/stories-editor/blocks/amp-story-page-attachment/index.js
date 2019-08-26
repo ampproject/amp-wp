@@ -12,6 +12,10 @@ const schema = {
 	postId: {
 		type: 'number',
 	},
+	postType: {
+		type: 'string',
+		default: 'post',
+	},
 	title: {
 		type: 'string',
 	},
