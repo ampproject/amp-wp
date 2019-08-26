@@ -8,7 +8,7 @@ import { first } from 'lodash';
  *
  * @param {string} buttonLabel Aria label.
  */
-export async function clickOnMoreMenuItem( buttonLabel) {
+export async function clickOnMoreMenuItem( buttonLabel ) {
 	await page.click( '.edit-post-more-menu [aria-label="More tools & options"]' );
 	const moreMenuContainerSelector =
 		'//*[contains(concat(" ", @class, " "), " edit-post-more-menu__content ")]';
