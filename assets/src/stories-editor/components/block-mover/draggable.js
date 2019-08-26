@@ -188,8 +188,7 @@ class Draggable extends Component {
 			}
 
 			if ( snappingEnabled ) {
-				// @todo Fix calculation.
-				left = horizontalCenterSnap - ( ( actualWidth / 2 ) - rotatedWidthDiff );
+				left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
 			}
 		}
 
@@ -222,8 +221,7 @@ class Draggable extends Component {
 			}
 
 			if ( snappingEnabled ) {
-				// @todo Fix calculation.
-				top = verticalCenterSnap - ( ( actualHeight / 2 ) - rotatedHeightDiff );
+				top = originalTop - ( verticalCenter - verticalCenterSnap );
 			}
 		}
 
