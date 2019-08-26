@@ -21,18 +21,25 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 	const parentBlock = getBlockRootClientId( clientId );
 
+	const defaultData = {
+		horizontalSnaps: [],
+		verticalSnaps: [],
+		snapLines: [],
+		parentBlockOffsetTop: 0,
+		parentBlockOffsetLeft: 0,
+	};
+
 	if ( getCurrentPage() !== parentBlock ) {
-		return {
-			horizontalSnaps: [],
-			verticalSnaps: [],
-			snapLines: [],
-			parentBlockOffsetTop: 0,
-			parentBlockOffsetLeft: 0,
-		};
+		return defaultData;
 	}
 
 	const parentBlockElement = getBlockInnerElement( getBlock( parentBlock ) );
-	const { left: parentBlockOffsetLeft = 0, top: parentBlockOffsetTop = 0 } = parentBlockElement ? parentBlockElement.getBoundingClientRect() : {};
+
+	if ( ! parentBlockElement ) {
+		return defaultData;
+	}
+
+	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
 
 	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
 		.filter( ( { clientId: blockId } ) => blockId !== clientId );
