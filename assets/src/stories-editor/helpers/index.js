@@ -26,7 +26,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
-	MediaInsider,
+	MediaInserter,
 	withMetaBlockEdit,
 	withMetaBlockSave,
 	Inserter,
@@ -660,7 +660,7 @@ export const renderStoryComponents = () => {
 			editorBlockNavigation.parentNode.parentNode.insertBefore( mediaInserter, editorBlockNavigation.parentNode.nextSibling );
 
 			render(
-				<MediaInsider />,
+				<MediaInserter />,
 				mediaInserter
 			);
 		}

@@ -17,7 +17,7 @@ import { __, sprintf } from '@wordpress/i18n';
  */
 import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
 
-const MediaInsider = ( { insertBlock, updateBlock, canInsertBlockType, showInserter } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
@@ -67,7 +67,7 @@ const MediaInsider = ( { insertBlock, updateBlock, canInsertBlockType, showInser
 	);
 };
 
-MediaInsider.propTypes = {
+MediaInserter.propTypes = {
 	insertBlock: PropTypes.func.isRequired,
 	updateBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
@@ -189,4 +189,4 @@ export default compose(
 	applyWithSelect,
 	applyWithDispatch,
 	ifCondition( ( { isReordering } ) => ! isReordering ),
-)( MediaInsider );
+)( MediaInserter );
