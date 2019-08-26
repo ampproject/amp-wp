@@ -30,7 +30,7 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		describe( 'With non-tempale Reusable block', () => {
+		describe( 'With non-template Reusable block', () => {
 			// Add Reusable block.
 			beforeAll( async () => {
 				await createNewPost();
@@ -62,6 +62,7 @@ describe( 'Story Templates', () => {
 			afterAll( async () => {
 				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
 
+				// Delete all reusable blocks to restore clean state.
 				const selector = '#cb-select-all-1';
 				const actionsSelector = '#bulk-action-selector-top';
 

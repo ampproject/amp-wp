@@ -5,6 +5,7 @@ import { first } from 'lodash';
 
 /**
  * Clicks on More Tools & options menu item by label.
+ * This is almost identical to the upstream clickOnMoreMenuItem but uses the more reliable page.evaluate for clicking.
  *
  * @param {string} buttonLabel Aria label.
  */
