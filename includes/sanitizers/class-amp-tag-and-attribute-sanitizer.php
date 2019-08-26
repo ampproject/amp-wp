@@ -93,15 +93,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $script_components = [];
 
 	/**
-	 * Whether or not the HTML element has the `data-ampdevmode` attribute.
-	 *
-	 * When this is present, any element in the document that also has this attribute will have its validation errors ignored.
-	 *
-	 * @var bool
-	 */
-	protected $dev_mode = false;
-
-	/**
 	 * Keep track of nodes that should not be replaced to prevent duplicated validation errors since sanitization is rejected.
 	 *
 	 * @var array
@@ -263,8 +254,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		// Add root of content to the stack.
 		$this->stack[] = $this->root_element;
 
-		$this->dev_mode = $this->root_element->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
-
 		/**
 		 * This loop traverses through the DOM tree iteratively.
 		 */
@@ -382,11 +371,6 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Don't process text or comment nodes.
 		if ( XML_TEXT_NODE === $node->nodeType || XML_COMMENT_NODE === $node->nodeType || XML_CDATA_SECTION_NODE === $node->nodeType ) {
-			return;
-		}
-
-		// Skip validating element with data-ampdevmode attribute when document is in dev mode.
-		if ( $this->dev_mode && $node instanceof DOMElement && $node->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE ) ) {
 			return;
 		}
 
