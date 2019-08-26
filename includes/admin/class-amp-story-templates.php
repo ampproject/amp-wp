@@ -298,44 +298,6 @@ class AMP_Story_Templates {
 	}
 
 	/**
-	 * Filter REST request for reusable blocks to not display templates under Reusable Blocks within other posts.
-	 *
-	 * @param array           $args Original args.
-	 * @param WP_REST_Request $request WP REST Request object.
-	 * @return array Args.
-	 */
-	public function filter_rest_wp_block_query( $args, $request ) {
-		$headers = $request->get_headers();
-		if ( ! isset( $headers['referer'][0] ) ) {
-			return $args;
-		}
-
-		$parts = wp_parse_url( $headers['referer'][0] );
-		if ( ! isset( $parts['query'] ) ) {
-			return $args;
-		}
-		parse_str( $parts['query'], $params );
-		if ( ! isset( $params['post'], $params['action'] ) ) {
-			return $args;
-		}
-
-		$edited_post = get_post( absint( $params['post'] ) );
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== $edited_post->post_type ) {
-			if ( ! isset( $args['tax_query'] ) ) {
-				$args['tax_query'] = [];
-			}
-			$args['tax_query'][] = [
-				'taxonomy' => self::TEMPLATES_TAXONOMY,
-				'field'    => 'slug',
-				'terms'    => [ self::TEMPLATES_TERM ],
-				'operator' => 'NOT IN',
-			];
-		}
-
-		return $args;
-	}
-
-	/**
 	 * Flag template as modified when it's being saved.
 	 *
 	 * @todo Confirm if tracking this is necessary, maybe the templates will be static.
