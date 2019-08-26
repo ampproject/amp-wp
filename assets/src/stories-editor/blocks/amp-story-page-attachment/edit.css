@@ -154,3 +154,63 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 	right: 10px;
 	top: 10px;
 }
+
+/* Block styles applied in the FE for the embedded post */
+
+.amp-page-attachment-content .wp-block-columns {
+	display: flex;
+	margin-bottom: 28px;
+	flex-wrap: wrap;
+}
+
+@media (min-width: 782px) {
+
+	.amp-page-attachment-content .wp-block-columns {
+		flex-wrap: nowrap;
+	}
+}
+
+.amp-page-attachment-content .wp-block-column {
+	margin-bottom: 1em;
+	flex-grow: 1;
+	min-width: 0;
+	word-break: break-word;
+	overflow-wrap: break-word;
+}
+
+@media (max-width: 599px) {
+
+	.amp-page-attachment-content .wp-block-column {
+		flex-basis: 100% !important;
+	}
+}
+
+/**
+ * All Columns Alignment
+ */
+.amp-page-attachment-content .wp-block-columns.are-vertically-aligned-top {
+	align-items: flex-start;
+}
+
+.amp-page-attachment-content .wp-block-columns.are-vertically-aligned-center {
+	align-items: center;
+}
+
+.amp-page-attachment-content .wp-block-columns.are-vertically-aligned-bottom {
+	align-items: flex-end;
+}
+
+/**
+ * Individual Column Alignment
+ */
+.amp-page-attachment-content .wp-block-column.is-vertically-aligned-top {
+	align-self: flex-start;
+}
+
+.amp-page-attachment-content .wp-block-column.is-vertically-aligned-center {
+	align-self: center;
+}
+
+.amp-page-attachment-content .wp-block-column.is-vertically-aligned-bottom {
+	align-self: flex-end;
+}
