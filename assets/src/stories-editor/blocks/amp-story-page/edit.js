@@ -314,7 +314,6 @@ class PageEdit extends Component {
 				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
-						initialOpen={ false }
 						colorSettings={ colorSettings }
 					>
 						<p>
