@@ -1803,6 +1803,9 @@ class AMP_Story_Post_Type {
 			return null;
 		}
 
+		// Remove filter for not adding grid layer to blocks within the attachment content.
+		remove_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10 );
+
 		setup_postdata( $content_post );
 
 		$style = '';
@@ -1823,6 +1826,9 @@ class AMP_Story_Post_Type {
 		</amp-story-page-attachment>
 		<?php
 		wp_reset_postdata();
+
+		// Add filter back.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
 		return ob_get_clean();
 	}
 
