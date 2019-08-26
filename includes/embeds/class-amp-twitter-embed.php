@@ -229,15 +229,23 @@ class AMP_Twitter_Embed_Handler extends AMP_Base_Embed_Handler {
 			return;
 		}
 
+		$attributes = [
+			'width'        => $this->DEFAULT_WIDTH,
+			'height'       => $this->DEFAULT_HEIGHT,
+			'layout'       => 'responsive',
+			'data-tweetid' => $tweet_id,
+		];
+
+		if ( $node->hasAttributes() ) {
+			foreach ( $node->attributes as $attr ) {
+				$attributes[ $attr->nodeName ] = $attr->nodeValue;
+			}
+		}
+
 		$new_node = AMP_DOM_Utils::create_node(
 			$dom,
 			$this->amp_tag,
-			[
-				'width'        => $this->DEFAULT_WIDTH,
-				'height'       => $this->DEFAULT_HEIGHT,
-				'layout'       => 'responsive',
-				'data-tweetid' => $tweet_id,
-			]
+			$attributes
 		);
 
 		$this->sanitize_embed_script( $node );

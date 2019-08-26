@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { clickButton, createNewPost, getAllBlocks, selectBlockByClientId } from '@wordpress/e2e-test-utils';
+import { createNewPost, getAllBlocks, selectBlockByClientId } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience, insertBlock, uploadMedia } from '../../utils';
+import { activateExperience, clickButton, deactivateExperience, insertBlock, uploadMedia } from '../../utils';
 
 const FEATURED_IMAGE_NOTICE_TEXT = 'Selecting a featured image is required.';
 const LARGE_IMAGE = 'large-image-36521.jpg';

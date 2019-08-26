@@ -1,12 +1,12 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, switchEditorModeTo } from '@wordpress/e2e-test-utils';
+import { createNewPost } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience } from '../../utils';
+import { activateExperience, deactivateExperience, switchEditorModeTo } from '../../utils';
 
 describe( 'Code Editor', () => {
 	beforeAll( async () => {
