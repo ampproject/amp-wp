@@ -10,7 +10,6 @@ import {
 	activateExperience,
 	deactivateExperience,
 	clickButtonByLabel,
-	getSidebarPanelToggleByTitle,
 	uploadMedia,
 	openPreviewPage,
 	insertBlock,
