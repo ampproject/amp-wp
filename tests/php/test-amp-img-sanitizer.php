@@ -54,32 +54,8 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			],
 
 			'image_with_new_platform_attributes'       => [
-				'<img src="https://placehold.it/150x300" importance="low" intrinsicsize="150x300" loading="lazy">',
-				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
-				[
-					'add_noscript_fallback' => true,
-				],
-			],
-
-			'image_with_intrinsicsize_and_only_width'  => [
-				'<img src="https://placehold.it/150x300" intrinsicsize="150x300" width="75">',
-				'<amp-img src="https://placehold.it/150x300" width="75" height="150" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" intrinsicsize="150x300" width="75"></noscript></amp-img>',
-				[
-					'add_noscript_fallback' => true,
-				],
-			],
-
-			'image_with_intrinsicsize_and_only_height' => [
-				'<img src="https://placehold.it/150x300" intrinsicsize="150x300" height="100">',
-				'<amp-img src="https://placehold.it/150x300" height="100" width="50" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" intrinsicsize="150x300" height="100"></noscript></amp-img>',
-				[
-					'add_noscript_fallback' => true,
-				],
-			],
-
-			'image_with_intrinsicsize_and_both_dimes'  => [
-				'<img src="https://placehold.it/150x300" intrinsicsize="150x300" width="100" height="200">',
-				'<amp-img src="https://placehold.it/150x300" width="100" height="200" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" intrinsicsize="150x300" width="100" height="200"></noscript></amp-img>',
+				'<img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy">',
+				'<amp-img src="https://placehold.it/150x300" width="150" height="300" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/150x300" width="150" height="300" importance="low" intrinsicsize="150x300" loading="lazy"></noscript></amp-img>',
 				[
 					'add_noscript_fallback' => true,
 				],

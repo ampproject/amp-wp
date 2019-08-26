@@ -131,16 +131,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 			// Determine which images need their dimensions determined/extracted.
 			$missing_dimensions = (
-				! $node->hasAttribute( 'intrinsicsize' )
-				&&
+				( ! $has_height && 'fixed-height' === $layout )
+				||
 				(
-					( ! $has_height && 'fixed-height' === $layout )
-					||
-					(
-						( ! $has_width || ! $has_height )
-						&&
-						in_array( $layout, [ 'fixed', 'responsive', 'intrinsic' ], true )
-					)
+					( ! $has_width || ! $has_height )
+					&&
+					in_array( $layout, [ 'fixed', 'responsive', 'intrinsic' ], true )
 				)
 			);
 			if ( $missing_dimensions ) {
@@ -210,38 +206,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
 				case 'importance': // Not supported by AMP.
 				case 'loading': // Lazy-loading handled by amp-img natively.
-				case 'intrinsicsize': // Handled below.
+				case 'intrinsicsize': // Responsive images handled by amp-img directly.
 					break;
 
 				default:
 					$out[ $name ] = $value;
 					break;
-			}
-		}
-
-		/*
-		 * Convert intrinsicsize <https://github.com/WICG/intrinsicsize-attribute> into amp-img, overriding whatever currently may be specified on the img.
-		 *
-		 * - "If no width/height are otherwise set, then the image dimensions are those specified by 'intrinsicsize'."
-		 * - "If the width attribute is set on the image, then intrinsicsize would set the height to maintain the aspect ratio."
-		 * - "If width and height attributes are both on the image, then intrinsicsize attribute’s value only affects the values of naturalWidth/naturalHeight, but not the rendered size of the image."
-		 */
-		if ( isset( $attributes['intrinsicsize'] ) && preg_match( '/^\s*(?P<width>\d+(?:\.\d+)?)x(?P<height>\d+(?:\.\d+)?)\s*$/', $attributes['intrinsicsize'], $matches ) ) {
-			if ( ! isset( $out['width'] ) && ! isset( $out['height'] ) ) {
-				$out['width']  = $matches['width'];
-				$out['height'] = $matches['height'];
-			} elseif ( isset( $out['width'] ) && ! isset( $out['height'] ) ) {
-				$out['height'] = (string) (
-					(float) $out['width'] * (
-						(float) $matches['height'] / (float) $matches['width']
-					)
-				);
-			} elseif ( isset( $out['height'] ) && ! isset( $out['width'] ) ) {
-				$out['width'] = (string) (
-					(float) $out['height'] * (
-						(float) $matches['width'] / (float) $matches['height']
-					)
-				);
 			}
 		}
 
