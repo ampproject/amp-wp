@@ -1,12 +1,19 @@
 /**
  * WordPress dependencies
  */
-import { visitAdminPage, createNewPost, searchForBlock } from '@wordpress/e2e-test-utils';
+import { visitAdminPage, insertBlock, createNewPost, searchForBlock } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience, openTemplateInserter, searchForBlock as searchForStoryBlock } from '../../utils';
+import {
+	activateExperience,
+	clickButtonByLabel,
+	clickOnMoreMenuItem,
+	deactivateExperience,
+	openTemplateInserter,
+	searchForBlock as searchForStoryBlock,
+} from '../../utils';
 
 describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
@@ -21,6 +28,67 @@ describe( 'Story Templates', () => {
 			await searchForBlock( 'Template' );
 
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
+		} );
+
+		describe( 'With non-template Reusable block', () => {
+			// Add Reusable block.
+			beforeAll( async () => {
+				await createNewPost();
+
+				const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
+					return layout.classList.contains( 'has-fixed-toolbar' );
+				} );
+				if ( ! isTopToolbarEnabled ) {
+					await clickOnMoreMenuItem( 'Top Toolbar' );
+				}
+
+				// Remove all blocks from the post so that we're working with a clean slate.
+				await page.evaluate( () => {
+					const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
+					const clientIds = blocks.map( ( block ) => block.clientId );
+					wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
+				} );
+
+				// Insert a paragraph block
+				await insertBlock( 'Paragraph' );
+				await page.keyboard.type( 'Reusable block!' );
+
+				await clickButtonByLabel( 'More options' );
+
+				const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
+				await convertButton.click();
+			} );
+
+			afterAll( async () => {
+				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+
+				// Delete all reusable blocks to restore clean state.
+				const selector = '#cb-select-all-1';
+				const actionsSelector = '#bulk-action-selector-top';
+
+				await page.click( selector );
+				await page.select( actionsSelector, 'trash' );
+				await page.click( '#doaction' );
+				await page.waitForNavigation();
+			} );
+
+			it( 'should display non-template reusable blocks in the reusable blocks management screen', async () => {
+				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+
+				// Check that it is untitled
+				const title = await page.$eval(
+					'.page-title .row-title',
+					( element ) => element.innerText
+				);
+				expect( title ).toBe( 'Untitled Reusable Block' );
+			} );
+
+			it( 'should display non-template reusable blocks in the regular block editor', async () => {
+				await createNewPost();
+				await searchForBlock( 'Reusable' );
+
+				await expect( page ).not.toMatchElement( '.block-editor-inserter__no-results' );
+			} );
 		} );
 	} );
 
