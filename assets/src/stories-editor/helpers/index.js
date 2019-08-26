@@ -661,7 +661,7 @@ export const renderStoryComponents = () => {
 
 			render(
 				<MediaInsider />,
-         	mediaInserter
+				mediaInserter
 			);
 		}
 
