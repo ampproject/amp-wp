@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, saveDraft, clickButton, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
+import { createNewPost, saveDraft, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -9,6 +9,7 @@ import { createNewPost, saveDraft, clickButton, selectBlockByClientId, getAllBlo
 import {
 	activateExperience,
 	deactivateExperience,
+	clickButton,
 	clickButtonByLabel,
 	uploadMedia,
 	openPreviewPage,
