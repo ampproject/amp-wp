@@ -292,6 +292,16 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		<?php
 	}
 
+	/**
+	 * Add lightbox attribute to a provided attachment.
+	 *
+	 * @param array        $attr       Attributes for the image markup.
+	 * @param WP_Post      $attachment Image attachment post.
+	 * @param string|array $size       Requested size. Image size or array of
+	 *                                 width and height values (in that order).
+	 *                                 Default 'thumbnail'.
+	 * @return array Modified attributes for the image markup.
+	 */
 	public function add_lightbox_attribute( $attr, $attachment, $size ) {
 		$attr['lightbox'] = '';
 		return $attr;
