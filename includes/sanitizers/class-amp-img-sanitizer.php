@@ -384,7 +384,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		// Account for blocks that include alignment.
 		// In that case, the structure changes from figure.wp-block-image > img
 		// to div.wp-block-image > figure > img and the amp-lightbox attribute
-		// can be found on thr wrapping div instead of the figure element.
+		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
 		if ( $grand_parent instanceof DOMElement
 			&& ! empty ( $grand_parent->getAttribute( 'class' ) ) ) {
