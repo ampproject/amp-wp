@@ -1693,6 +1693,58 @@ class AMP_Tag_And_Attribute_Sanitizer_Attr_Spec_Rules_Test extends WP_UnitTestCa
 		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
 	}
 
+	public function get_check_attr_spec_rule_valid_url() {
+		return [
+			'valid_without_protocol' => [
+				[
+					'source'         => '<div url="example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'url',
+					'attr_spec_rule' => [
+						'value_url' => [],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+			],
+			'valid_with_protocol' => [
+				[
+					'source'         => '<div url="http://example.com"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'url',
+					'attr_spec_rule' => [
+						'value_url' => [],
+					],
+				],
+				AMP_Rule_Spec::PASS,
+			],
+			'invalid_char' => [
+				[
+					'source'         => '<div url="foo@"></div>',
+					'node_tag_name'  => 'div',
+					'attr_name'      => 'url',
+					'attr_spec_rule' => [
+						'value_url' => [],
+					],
+				],
+				AMP_Rule_Spec::FAIL,
+			],
+		];
+	}
+
+	/**
+	 * @dataProvider get_check_attr_spec_rule_valid_url
+	 * @group allowed-tags-private-methods
+	 */
+	public function test_check_attr_spec_rule_valid_url( $data, $expected ) {
+		$dom       = AMP_DOM_Utils::get_dom_from_content( $data['source'] );
+		$node      = $dom->getElementsByTagName( $data['node_tag_name'] )->item( 0 );
+		$sanitizer = new AMP_Tag_And_Attribute_Sanitizer( $dom );
+
+		$got = $this->invoke_method( $sanitizer, 'check_attr_spec_rule_valid_url', [ $node, $data['attr_name'], $data['attr_spec_rule'] ] );
+
+		$this->assertEquals( $expected, $got, sprintf( "using source: %s\n%s", $data['source'], wp_json_encode( $data ) ) );
+	}
+
 	/**
 	 * Use this to call private methods.
 	 *
