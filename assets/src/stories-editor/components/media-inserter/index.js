@@ -38,9 +38,9 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 		},
 	];
 
-	blocks.map( ( block ) => {
+	for ( const block of blocks ) {
 		if ( ! canInsertBlockType( block ) ) {
-			return null;
+			continue;
 		}
 
 		const blockType = getBlockType( block );
@@ -50,9 +50,9 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 			disabled: ! showInserter,
 			icon: <BlockIcon icon={ blockType.icon } />,
 		};
+
 		dropDownOptions.unshift( item );
-		return null;
-	} );
+	}
 
 	return (
 		<DropdownMenu
