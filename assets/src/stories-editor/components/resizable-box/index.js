@@ -8,6 +8,8 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
+import { withSelect } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
 import { ResizableBox } from '@wordpress/components';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
@@ -20,6 +22,7 @@ import {
 	getPercentageFromPixels,
 	getPixelsFromPercentage,
 	findClosestSnap,
+	getBlockInnerElement,
 } from '../../helpers';
 import {
 	getBlockPositioning,
@@ -415,4 +418,64 @@ EnhancedResizableBox.propTypes = {
 	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
-export default withSnapTargets( EnhancedResizableBox );
+const withResizingSnapTargets = withSelect( ( select, ownProps ) => {
+	const { getBlock } = select( 'core/block-editor' );
+
+	const {
+		clientId,
+		horizontalSnaps,
+		verticalSnaps,
+		parentBlockOffsetTop,
+		parentBlockOffsetLeft,
+	} = ownProps;
+
+	return {
+		horizontalSnaps: () => {
+			const blockInnerElement = getBlockInnerElement( getBlock( clientId ) );
+
+			if ( ! blockInnerElement ) {
+				return horizontalSnaps();
+			}
+
+			const dimensions = blockInnerElement.getBoundingClientRect();
+
+			// We calculate with the block's actual dimensions relative to the page it's on.
+			let { right: actualRight, left: actualLeft } = dimensions;
+
+			actualRight -= parentBlockOffsetLeft;
+			actualLeft -= parentBlockOffsetLeft;
+
+			return [
+				...horizontalSnaps(),
+				...[ STORY_PAGE_INNER_WIDTH - actualLeft, STORY_PAGE_INNER_WIDTH - actualRight ],
+			];
+		},
+		verticalSnaps: () => {
+			const blockInnerElement = getBlockInnerElement( getBlock( clientId ) );
+
+			if ( ! blockInnerElement ) {
+				return horizontalSnaps();
+			}
+
+			const dimensions = blockInnerElement.getBoundingClientRect();
+
+			// We calculate with the block's actual dimensions relative to the page it's on.
+			let { top: actualTop, bottom: actualBottom } = dimensions;
+
+			actualTop -= parentBlockOffsetTop;
+			actualBottom -= parentBlockOffsetTop;
+
+			return [
+				...verticalSnaps(),
+				...[ STORY_PAGE_INNER_HEIGHT - actualTop, STORY_PAGE_INNER_HEIGHT - actualBottom ],
+			];
+		},
+	};
+} );
+
+const enhance = compose(
+	withSnapTargets,
+	withResizingSnapTargets,
+);
+
+export default enhance( EnhancedResizableBox );
