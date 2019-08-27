@@ -246,12 +246,11 @@ class EnhancedResizableBox extends Component {
 						// If the resizing is to left or top then we have to compensate
 						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
 							let leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
-							let leftSnap = 0;
 
 							leftInPx = leftInPx - lastDeltaW;
 
 							if ( lastDeltaW ) {
-								leftSnap = findClosestSnap( leftInPx, horizontalSnaps, snapGap );
+								const leftSnap = findClosestSnap( leftInPx, horizontalSnaps, snapGap );
 
 								if ( leftSnap !== leftInPx ) {
 									const leftSnapLine = [ [ leftSnap, 0 ], [ leftSnap, STORY_PAGE_INNER_HEIGHT ] ];
