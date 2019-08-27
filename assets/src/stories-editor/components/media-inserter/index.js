@@ -15,7 +15,11 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { IMAGE_BACKGROUND_TYPE, VIDEO_BACKGROUND_TYPE } from '../../constants';
+import { processMedia } from '../../helpers';
+
+const POPOVER_PROPS = {
+	position: 'bottom right',
+};
 
 const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter } ) => {
 	const blocks = [
@@ -61,6 +65,7 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 			className="amp-story-media-inserter-dropdown"
 			controls={ dropDownOptions }
 			hasArrowIndicator={ true }
+			popoverProps={ POPOVER_PROPS }
 			toggleProps={
 				{ labelPosition: 'bottom' }
 			}
@@ -138,50 +143,8 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 				return;
 			}
 
-			if ( ! media || ! media.url ) {
-				updateBlockAttributes( clientId,
-					{
-						mediaUrl: undefined,
-						mediaId: undefined,
-						mediaType: undefined,
-						mediaAlt: undefined,
-						poster: undefined,
-					}
-				);
-				return;
-			}
-
-			let mediaType;
-
-			// For media selections originated from a file upload.
-			if ( media.media_type ) {
-				if ( media.media_type === VIDEO_BACKGROUND_TYPE ) {
-					mediaType = VIDEO_BACKGROUND_TYPE;
-				} else {
-					mediaType = IMAGE_BACKGROUND_TYPE;
-				}
-			} else {
-				// For media selections originated from existing files in the media library.
-				if (
-					media.type !== IMAGE_BACKGROUND_TYPE &&
-					media.type !== VIDEO_BACKGROUND_TYPE
-				) {
-					return;
-				}
-
-				mediaType = media.type;
-			}
-
-			const mediaAlt = media.alt || media.title;
-			const mediaUrl = media.url;
-			const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
-			updateBlockAttributes( clientId, {
-				mediaUrl,
-				mediaId: media.id,
-				mediaType,
-				mediaAlt,
-				poster,
-			} );
+			const processed = processMedia( media );
+			updateBlockAttributes( clientId, processed );
 			selectBlock( clientId );
 		},
 	};
