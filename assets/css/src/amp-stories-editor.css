@@ -242,3 +242,37 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 .video-block__poster-image.editor-post-featured-image__preview img {
 	object-fit: cover;
 }
+
+/* Animations */
+
+@keyframes story-animation-pulse {
+	0%   { transform: scale(1); }
+	25%  { transform: scale(0.95); }
+	75%  { transform: scale(1.05); }
+	100% { transform: scale(1); }
+}
+
+.story-animation-pulse {
+	--animation-duration: 400ms;
+	--animation-delay: 0ms;
+
+	animation-name: story-animation-pulse;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+	animation-delay: var(--animation-delay);
+}
+
+@keyframes story-animation-fade-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.story-animation-fade-in {
+	--animation-duration: 400ms;
+	--animation-delay: 0ms;
+
+	animation-name: story-animation-fade-in;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: cubic-bezier(0.0, 0.0, 0.2, 1);
+	animation-delay: var(--animation-delay);
+}

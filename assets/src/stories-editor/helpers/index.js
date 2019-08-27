@@ -1175,6 +1175,24 @@ const getBlockInnerTextElement = ( block ) => {
 };
 
 /**
+ * Returns a movable block's inner element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+export const getBlockInnerElementForAnimation = ( block ) => {
+	const { name, clientId } = block;
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return null;
+	}
+
+	return document.querySelector( `[data-block="${ clientId }"]` );
+};
+
+/**
  * Updates a block's font size in case it uses amp-fit-text and the content has changed.
  *
  * @param {Object}  block                         Block object.

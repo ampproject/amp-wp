@@ -6,14 +6,16 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { withSelect } from '@wordpress/data';
-import { RangeControl, SelectControl } from '@wordpress/components';
+import { withDispatch, withSelect } from '@wordpress/data';
+import { compose } from '@wordpress/compose';
+import { RangeControl, SelectControl, IconButton } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../constants';
+import { getBlockInnerElementForAnimation } from '../helpers';
 import { AnimationOrderPicker } from './';
 
 /**
@@ -32,10 +34,11 @@ const AnimationControls = ( {
 	animationDelay,
 	animationAfter,
 	selectedBlock,
+	playAnimation,
 } ) => {
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
-	const isImageBlock = 'core/image' === selectedBlock;
+	const isImageBlock = selectedBlock && 'core/image' === selectedBlock.name;
 
 	// pan- animations are only really meant for images.
 	const animationTypeOptions = AMP_ANIMATION_TYPE_OPTIONS.filter( ( { value } ) => {
@@ -79,6 +82,12 @@ const AnimationControls = ( {
 						options={ animatedBlocks() }
 						onChange={ onAnimationAfterChange }
 					/>
+					<IconButton
+						icon="controls-play"
+						onClick={ () => playAnimation( animationType, animationDuration, animationDelay ) }
+					>
+						{ __( 'Play Animation', 'amp' ) }
+					</IconButton>
 				</>
 			) }
 		</>
@@ -91,19 +100,56 @@ AnimationControls.propTypes = {
 	onAnimationDurationChange: PropTypes.func.isRequired,
 	onAnimationDelayChange: PropTypes.func.isRequired,
 	onAnimationAfterChange: PropTypes.func.isRequired,
+	playAnimation: PropTypes.func.isRequired,
 	animationType: PropTypes.string,
-	animationDuration: PropTypes.string,
+	animationDuration: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
 	animationDelay: PropTypes.string,
 	animationAfter: PropTypes.string,
-	selectedBlock: PropTypes.string,
+	selectedBlock: PropTypes.object,
 };
 
-export default withSelect( ( select ) => {
+const withSelectedBlock = withSelect( ( select ) => {
 	const { getSelectedBlock } = select( 'core/block-editor' );
 
 	const selectedBlock = getSelectedBlock();
 
 	return {
-		selectedBlock: selectedBlock ? selectedBlock.name : null,
+		selectedBlock,
 	};
-} )( AnimationControls );
+} );
+
+const withAnimationPlayer = withDispatch( ( dispatch, { selectedBlock } ) => {
+	return {
+		// @todo: Perhaps unselect block before starting the animation.
+		playAnimation: ( animationType, animationDuration, animationDelay = 0 ) => {
+			if ( ! selectedBlock ) {
+				return;
+			}
+
+			const blockElement = getBlockInnerElementForAnimation( selectedBlock );
+
+			if ( ! blockElement ) {
+				return;
+			}
+
+			const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+			const animationName = `story-animation-${ animationType }`;
+
+			blockElement.classList.remove( animationName );
+
+			blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
+			blockElement.style.setProperty( '--animation-delay', `${ animationDelay }ms` );
+
+			blockElement.classList.add( animationName );
+
+			blockElement.addEventListener( 'animationend', () => blockElement.classList.remove( animationName ), { once: true } );
+		},
+	};
+} );
+
+const enhance = compose(
+	withSelectedBlock,
+	withAnimationPlayer,
+);
+
+export default enhance( AnimationControls );
