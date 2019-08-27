@@ -186,11 +186,13 @@ class EnhancedResizableBox extends Component {
 						clearSnapLines();
 					}
 
+					this.horizontalSnaps = horizontalSnaps();
+					this.verticalSnaps = verticalSnaps();
+
 					onResizeStart();
 				} }
 				onResize={ ( event, direction, element ) => { // eslint-disable-line complexity
 					const newSnapLines = [];
-					const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
 					const { deltaW, deltaH } = getResizedWidthAndHeight( event, angle, lastSeenX, lastSeenY, direction );
 
@@ -253,72 +255,62 @@ class EnhancedResizableBox extends Component {
 							leftInPx = leftInPx - lastDeltaW;
 
 							if ( lastDeltaW ) {
-								const leftSnap = findClosestSnap( leftInPx, horizontalSnaps, snapGap );
+								const horizontalLeftSnap = findClosestSnap( leftInPx, this.horizontalSnaps, snapGap );
 
-								if ( leftSnap !== leftInPx ) {
-									const leftSnapLine = [ [ leftSnap, 0 ], [ leftSnap, STORY_PAGE_INNER_HEIGHT ] ];
-									if ( ! hasSnapLine( leftSnapLine ) ) {
-										newSnapLines.push( leftSnapLine );
-									}
+								if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
+									const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+									newSnapLines.push( snapLine );
 
 									if ( snappingEnabled ) {
-										appliedWidth += leftInPx - leftSnap;
-										leftInPx = leftSnap;
+										appliedWidth += leftInPx - horizontalLeftSnap;
+										leftInPx = horizontalLeftSnap;
 									}
 								}
 							}
 
 							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx ) + '%';
 						} else if ( lastDeltaW ) {
-							const widthSnap = findClosestSnap( blockElement.offsetLeft + appliedWidth, horizontalSnaps, snapGap );
+							const horizontalRightSnap = findClosestSnap( blockElement.offsetLeft + appliedWidth, this.horizontalSnaps, snapGap );
 
-							if ( ( widthSnap - blockElement.offsetLeft ) !== appliedWidth ) {
-								const widthSnapLine = [ [ widthSnap, 0 ], [ widthSnap, STORY_PAGE_INNER_HEIGHT ] ];
-								if ( ! hasSnapLine( widthSnapLine ) ) {
-									newSnapLines.push( widthSnapLine );
-								}
+							if ( this.horizontalSnaps.includes( horizontalRightSnap ) ) {
+								const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
+								newSnapLines.push( snapLine );
 
 								if ( snappingEnabled ) {
-									appliedWidth = widthSnap - blockElement.offsetLeft;
+									appliedWidth = horizontalRightSnap - blockElement.offsetLeft;
 								}
 							}
 						}
 
 						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
 							let topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-							let topSnap = 0;
 
 							topInPx = topInPx - lastDeltaH;
 
 							if ( lastDeltaH ) {
-								topSnap = findClosestSnap( topInPx, verticalSnaps, snapGap );
+								const verticalTopSnap = findClosestSnap( topInPx, this.verticalSnaps, snapGap );
 
-								if ( topSnap !== topInPx ) {
-									const topSnapLine = [ [ 0, topSnap ], [ STORY_PAGE_INNER_WIDTH, topSnap ] ];
-
-									if ( ! hasSnapLine( topSnapLine ) ) {
-										newSnapLines.push( topSnapLine );
-									}
+								if ( this.verticalSnaps.includes( verticalTopSnap ) ) {
+									const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
+									newSnapLines.push( snapLine );
 
 									if ( snappingEnabled ) {
-										appliedHeight += topInPx - topSnap;
-										topInPx = topSnap;
+										appliedHeight += topInPx - verticalTopSnap;
+										topInPx = verticalTopSnap;
 									}
 								}
 							}
 
 							blockElement.style.top = getPercentageFromPixels( 'y', topInPx ) + '%';
 						} else if ( lastDeltaH ) {
-							const heightSnap = findClosestSnap( blockElement.offsetTop + appliedHeight, verticalSnaps, snapGap );
+							const verticalBottomSnap = findClosestSnap( blockElement.offsetTop + appliedHeight, this.verticalSnaps, snapGap );
 
-							if ( ( heightSnap - blockElement.offsetTop ) !== appliedHeight ) {
-								const heightSnapLine = [ [ 0, heightSnap ], [ STORY_PAGE_INNER_WIDTH, heightSnap ] ];
-								if ( ! hasSnapLine( heightSnapLine ) ) {
-									newSnapLines.push( heightSnapLine );
-								}
+							if ( this.verticalSnaps.includes( verticalBottomSnap ) ) {
+								const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
+								newSnapLines.push( snapLine );
 
 								if ( snappingEnabled ) {
-									appliedHeight = heightSnap - blockElement.offsetTop;
+									appliedHeight = verticalBottomSnap - blockElement.offsetTop;
 								}
 							}
 						}
@@ -371,8 +363,12 @@ class EnhancedResizableBox extends Component {
 						imageWrapper.style.height = appliedHeight + 'px';
 					}
 
+					const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+
 					if ( newSnapLines.length ) {
-						setSnapLines( ...newSnapLines );
+						if ( ! newSnapLines.every( hasSnapLine ) ) {
+							setSnapLines( ...newSnapLines );
+						}
 					} else if ( snapLines.length ) {
 						clearSnapLines();
 					}
