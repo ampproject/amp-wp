@@ -386,8 +386,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		// to div.wp-block-image > figure > img and the amp-lightbox attribute
 		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
-		if ( $grand_parent instanceof DOMElement
-			&& ! empty ( $grand_parent->getAttribute( 'class' ) ) ) {
+		if ( $grand_parent instanceof DOMElement ) {
 			$classes = explode( ' ', $grand_parent->getAttribute( 'class' ) );
 			if ( in_array( 'wp-block-image', $classes, true ) ) {
 				$parent_node = $grand_parent;
