@@ -184,7 +184,7 @@ class Draggable extends Component {
 
 			if ( snappingEnabled ) {
 				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith + actualWidth - horizontalRightSnap ) ) {
-					left = originalLeft - ( actualRight - horizontalRightSnap );
+					left = horizontalRightSnap - actualWidth;
 				}
 			}
 		}
