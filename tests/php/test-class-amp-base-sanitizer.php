@@ -275,7 +275,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * Tests remove_invalid_child.
 	 *
 	 * @covers AMP_Base_Sanitizer::remove_invalid_child()
-	 * @covers AMP_Base_Sanitizer::has_dev_mode_exemption()
+	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_child_dev_mode() {
 		$html = '<div></div>';
@@ -386,7 +386,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * Tests remove_invalid_attribute in dev mode.
 	 *
 	 * @covers AMP_Base_Sanitizer::remove_invalid_attribute()
-	 * @covers AMP_Base_Sanitizer::has_dev_mode_exemption()
+	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_attribute_dev_mode() {
 		$html = '<div data-bad="yes"></div>';
