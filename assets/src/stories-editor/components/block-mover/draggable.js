@@ -38,6 +38,10 @@ const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).query
 
 let lastX;
 let lastY;
+let originalX;
+let originalY;
+let initialBlockX;
+let initialBlockY;
 
 class Draggable extends Component {
 	constructor( ...args ) {
@@ -158,12 +162,19 @@ class Draggable extends Component {
 
 		// @todo: Rely on withSnapTargets to provide the data for the snapping lines so this isn't a concern of this component.
 
+		// What the cursor has moved since the beginning.
+		const leftDiff = event.clientX - originalX;
+		// Where the original block would be positioned based on that.
+		const leftToCompareWith = initialBlockX + leftDiff;
+
 		if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				left = horizontalLeftSnap - rotatedWidthDiff;
+				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith - horizontalLeftSnap ) ) {
+					left = horizontalLeftSnap - rotatedWidthDiff;
+				}
 			}
 		}
 
@@ -172,7 +183,9 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				left = originalLeft - ( actualRight - horizontalRightSnap );
+				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith + actualWidth - horizontalRightSnap ) ) {
+					left = originalLeft - ( actualRight - horizontalRightSnap );
+				}
 			}
 		}
 
@@ -181,7 +194,9 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
+				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith + ( actualWidth / 2 ) - horizontalCenterSnap ) ) {
+					left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
+				}
 			}
 		}
 
@@ -298,6 +313,7 @@ class Draggable extends Component {
 		// 20% of the full value in case of CTA block.
 		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 
+		initialBlockX = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
 		// Position clone over the original element.
 		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
 		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
@@ -316,6 +332,8 @@ class Draggable extends Component {
 		// Mark the current cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
+		originalX = event.clientX;
+		originalY = event.clientY;
 		// Update cursor to 'grabbing', document wide.
 		document.body.classList.add( 'is-dragging-components-draggable' );
 		document.addEventListener( 'dragover', this.onDragOver );
