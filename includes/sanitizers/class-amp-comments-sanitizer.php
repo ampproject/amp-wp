@@ -8,7 +8,7 @@
 /**
  * Class AMP_Comments_Sanitizer
  *
- * Strips and corrects attributes in forms.
+ * Strips and corrects attributes in comments.
  */
 class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
@@ -45,12 +45,18 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		if ( ! empty( $this->args['comments_live_list'] ) ) {
-			$xpath    = new DOMXPath( $this->dom );
-			$comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
+		$xpath = new DOMXPath( $this->dom );
 
-			foreach ( $comments as $comment ) {
-				$this->add_amp_live_list_comment_attributes( $comment );
+		$comments = $xpath->query( '//*[ contains( @class, "comment-list" ) ]/*[ starts-with( @id, "comment-" ) ]' );
+		foreach ( $comments as $comment ) {
+			$this->sanitize_comment_fields( $comment, $xpath );
+		}
+
+		if ( ! empty( $this->args['comments_live_list'] ) ) {
+			$live_comments = $xpath->query( '//amp-live-list/*[ @items ]/*[ starts-with( @id, "comment-" ) ]' );
+
+			foreach ( $live_comments as $live_comment ) {
+				$this->add_amp_live_list_comment_attributes( $live_comment );
 			}
 		}
 	}
@@ -214,5 +220,27 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$comment_element->setAttribute( 'data-update-time', $update_time );
+	}
+
+	/**
+	 * Sanitize the comment fields to avoid validation errors for invalid field content.
+	 *
+	 * @param DOMElement $comment Comment to sanitize.
+	 * @param DOMXPath   $xpath   XPath object for the document.
+	 */
+	protected function sanitize_comment_fields( DOMElement $comment, DOMXPath $xpath ) {
+		$links = $xpath->query( './/*[ @class="url" ]', $comment );
+
+		foreach ( $links as $link ) {
+			/**
+			 * Single link within the comment entry.
+			 *
+			 * @var DOMElement $link
+			 */
+			$url = $link->getAttribute( 'href' );
+			if ( false === wp_parse_url( $url ) ) {
+				$link->removeAttribute( 'href' );
+			}
+		}
 	}
 }
