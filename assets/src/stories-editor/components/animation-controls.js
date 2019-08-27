@@ -103,7 +103,7 @@ AnimationControls.propTypes = {
 	playAnimation: PropTypes.func.isRequired,
 	animationType: PropTypes.string,
 	animationDuration: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
-	animationDelay: PropTypes.string,
+	animationDelay: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
 	animationAfter: PropTypes.string,
 	selectedBlock: PropTypes.object,
 };
