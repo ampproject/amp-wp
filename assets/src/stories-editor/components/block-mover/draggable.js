@@ -101,27 +101,24 @@ class Draggable extends Component {
 			snapLines,
 			clearSnapLines,
 			setSnapLines,
-			setTimeout,
-			clearTimeout,
 			parentBlockOffsetTop,
 			parentBlockOffsetLeft,
 		} = this.props;
-
-		const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-
-		clearTimeout();
 
 		const newSnapLines = [];
 
 		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
 		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
 
+		const originalTop = top;
+		const originalLeft = left;
+
 		if ( top === lastY && left === lastX ) {
 			return;
 		}
 
-		const originalTop = top; // eslint-disable-line no-unused-vars
-		const originalLeft = left; // eslint-disable-line no-unused-vars
+		lastY = top;
+		lastX = left;
 
 		const dimensions = this.cloneWrapper.getBoundingClientRect();
 
@@ -163,9 +160,7 @@ class Draggable extends Component {
 
 		if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				left = horizontalLeftSnap - rotatedWidthDiff;
@@ -174,9 +169,7 @@ class Draggable extends Component {
 
 		if ( this.horizontalSnaps.includes( horizontalRightSnap ) ) {
 			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				left = originalLeft - ( actualRight - horizontalRightSnap );
@@ -185,9 +178,7 @@ class Draggable extends Component {
 
 		if ( this.horizontalSnaps.includes( horizontalCenterSnap ) ) {
 			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
@@ -196,9 +187,7 @@ class Draggable extends Component {
 
 		if ( this.verticalSnaps.includes( verticalTopSnap ) ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				top = verticalTopSnap - rotatedHeightDiff;
@@ -207,9 +196,7 @@ class Draggable extends Component {
 
 		if ( this.verticalSnaps.includes( verticalBottomSnap ) ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				top = originalTop - ( actualBottom - verticalBottomSnap );
@@ -218,22 +205,12 @@ class Draggable extends Component {
 
 		if ( this.verticalSnaps.includes( verticalCenterSnap ) ) {
 			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
-			if ( ! hasSnapLine( snapLine ) ) {
-				newSnapLines.push( snapLine );
-			}
+			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
 				top = originalTop - ( verticalCenter - verticalCenterSnap );
 			}
 		}
-
-		// @todo Prevent block from being stuck in snapping position.
-		if ( top === lastY && left === lastX ) {
-			return;
-		}
-
-		lastY = top;
-		lastX = left;
 
 		// Don't allow the CTA button to go over its top limit.
 		if ( 'amp/amp-story-cta' === this.props.blockName ) {
@@ -248,20 +225,15 @@ class Draggable extends Component {
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
 
-		clearTimeout( this.timeoutId );
-		this.timeoutId = setTimeout( () => {
-			if ( snapLines.length === newSnapLines.length ) {
-				if ( newSnapLines.every( hasSnapLine ) ) {
-					return;
-				}
-			}
+		const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
 
-			if ( newSnapLines.length ) {
+		if ( newSnapLines.length ) {
+			if ( ! newSnapLines.every( hasSnapLine ) ) {
 				setSnapLines( ...newSnapLines );
-			} else if ( snapLines.length ) {
-				clearSnapLines();
 			}
-		}, 50 );
+		} else if ( snapLines.length ) {
+			clearSnapLines();
+		}
 	}
 
 	onDrop( ) {
