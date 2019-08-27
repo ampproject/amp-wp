@@ -159,6 +159,8 @@ class Draggable extends Component {
 
 		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
+		// @todo: Rely on withSnapTargets to provide the data for the snapping lines so this isn't a concern of this component.
+
 		if ( horizontalLeftSnap !== actualLeft ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {

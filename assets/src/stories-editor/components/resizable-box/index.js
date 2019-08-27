@@ -418,6 +418,13 @@ EnhancedResizableBox.propTypes = {
 	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
+/**
+ * Enhances the default snap targets specifically for resizing.
+ *
+ * This allows resizing a block so that it can be nicely centered.
+ *
+ * @type {Component}
+ */
 const withResizingSnapTargets = withSelect( ( select, ownProps ) => {
 	const { getBlock } = select( 'core/block-editor' );
 

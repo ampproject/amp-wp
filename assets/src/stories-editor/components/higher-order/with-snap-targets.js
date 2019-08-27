@@ -10,6 +10,19 @@ import { compose, createHigherOrderComponent } from '@wordpress/compose';
 import { STORY_PAGE_INNER_HEIGHT, STORY_PAGE_INNER_WIDTH } from '../../constants';
 import { getBlockInnerElement } from '../../helpers';
 
+/**
+ * Higher-order component that returns snap targets for the current block.
+ *
+ * Snap targets are divided into horizontal and vertical ones, and are based on the following data:
+ *
+ * - The page's width / height constraints and center.
+ * - The block's position in relation to its siblings.
+ *
+ * @todo Update horizontalSnaps() and verticalSnaps() to return a map of snap targets -> snap lines
+ *       in order to allow showing multiple snap lines for a single snapping point that can differ from the actual target.
+ *
+ * @type {Component}
+ */
 const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const {
 		getBlocksByClientId,
