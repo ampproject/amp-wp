@@ -58,6 +58,7 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 		<DropdownMenu
 			icon="admin-media"
 			label={ __( 'Insert Media', 'amp' ) }
+			className="amp-story-media-inserter-dropdown"
 			controls={ dropDownOptions }
 			hasArrowIndicator={ true }
 			toggleProps={
@@ -131,7 +132,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 		},
 		updateBlock: ( media ) => {
 			const clientId = getCurrentPage();
-			const { updateBlockAttributes } = dispatch( 'core/block-editor' );
+			const { updateBlockAttributes, selectBlock } = dispatch( 'core/block-editor' );
 
 			if ( ! clientId ) {
 				return;
@@ -181,6 +182,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props, { select } ) => {
 				mediaAlt,
 				poster,
 			} );
+			selectBlock( clientId );
 		},
 	};
 } );
