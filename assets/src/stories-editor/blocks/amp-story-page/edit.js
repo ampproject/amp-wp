@@ -43,7 +43,8 @@ import {
 	getCallToActionBlock,
 	getUniqueId,
 	uploadVideoFrame,
-	getPosterImageFromFileObj, processMedia,
+	getPosterImageFromFileObj,
+	processMedia,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
