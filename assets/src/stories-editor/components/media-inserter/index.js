@@ -26,13 +26,13 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 	const dropDownOptions = [
 		{
 			title: __( 'Insert Background Image', 'amp' ),
-			icon: 'format-image',
+			icon: <BlockIcon icon={'format-image'} />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'image', updateBlock ),
 			disabled: ! showInserter,
 		},
 		{
 			title: __( 'Insert Background Video', 'amp' ),
-			icon: 'media-video',
+			icon: <BlockIcon icon={'media-video'} />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'video', updateBlock ),
 			disabled: ! showInserter,
 		},
