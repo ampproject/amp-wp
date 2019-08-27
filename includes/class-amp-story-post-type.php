@@ -954,8 +954,7 @@ class AMP_Story_Post_Type {
 	 * @see /assets/css/amp-stories.css
 	 */
 	public static function add_custom_stories_styles() {
-		$post = get_post();
-		if ( ! $post || self::POST_TYPE_SLUG !== $post->post_type ) {
+		if ( ! is_singular( self::POST_TYPE_SLUG ) ) {
 			return;
 		}
 
