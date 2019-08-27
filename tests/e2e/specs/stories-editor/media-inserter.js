@@ -3,7 +3,6 @@
  */
 import {
 	createNewPost,
-	clickButton,
 	saveDraft,
 } from '@wordpress/e2e-test-utils';
 
@@ -15,6 +14,7 @@ import {
 	deactivateExperience,
 	uploadMedia,
 	openPreviewPage,
+	clickButton,
 } from '../../utils';
 
 const LARGE_IMAGE = 'large-image-36521.jpg';
