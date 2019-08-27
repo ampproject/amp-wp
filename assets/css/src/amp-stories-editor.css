@@ -245,6 +245,11 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 
 /* Animations */
 
+.editor-styles-wrapper #amp-story-editor [data-block][class*="story-animation-"] .rotatable-box-wrap,
+.editor-styles-wrapper #amp-story-editor [data-block][class*="story-animation-"] .amp-story-resize-container .components-resizable-box__handle {
+	opacity: 0;
+}
+
 @keyframes story-animation-pulse {
 
 	0% {
