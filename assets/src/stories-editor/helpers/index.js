@@ -43,6 +43,7 @@ import {
 	MAX_IMAGE_SIZE_SLUG,
 	VIDEO_BACKGROUND_TYPE,
 	IMAGE_BACKGROUND_TYPE,
+	ANIMATION_DURATION_DEFAULTS,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1732,4 +1733,73 @@ export const processMedia = ( media ) => {
 		mediaAlt,
 		poster,
 	};
+};
+
+/**
+ * Plays the block's animation in the editor.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @param {number} animationDuration Animation duration.
+ * @param {number} [animationDelay] Animation delay.
+ */
+export const playAnimation = ( block, animationType, animationDuration, animationDelay = 0 ) => {
+	const blockElement = getBlockInnerElementForAnimation( block );
+	const parentBlock = getBlockRootClientId( block.clientId );
+	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
+
+	if ( ! blockElement || ! parentBlock || ! parentBlockElement ) {
+		return;
+	}
+
+	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+	const animationName = `story-animation-${ animationType }`;
+
+	blockElement.classList.remove( animationName );
+
+	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
+	blockElement.style.setProperty( '--animation-delay', `${ animationDelay }ms` );
+
+	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
+	const { top, left, width, height } = blockElement.getBoundingClientRect();
+
+	// We calculate with the block's actual dimensions relative to the page it's on.
+	const actualTop = top - parentBlockOffsetTop;
+	const actualLeft = left - parentBlockOffsetLeft;
+
+	let offsetX;
+	let offsetY;
+
+	// @todo Verify this.
+	switch ( animationType ) {
+		case 'fly-in-left':
+		case 'rotate-in-left':
+		case 'whoosh-in-left':
+			offsetX = -( actualLeft + width );
+			break;
+		case 'fly-in-right':
+		case 'rotate-in-right':
+		case 'whoosh-in-right':
+			offsetX = STORY_PAGE_INNER_WIDTH + actualLeft + width;
+			break;
+		case 'fly-in-top':
+			offsetY = -( actualTop + height );
+			break;
+		case 'fly-in-bottom':
+			// const offsetY = dimensions.pageHeight - dimensions.targetY;
+			offsetY = STORY_PAGE_INNER_HEIGHT + actualTop + height;
+			break;
+		case 'drop':
+			offsetY = Math.max( 160, ( actualTop + height ) );
+			break;
+		default:
+			offsetX = 0;
+	}
+
+	blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
+	blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+
+	blockElement.classList.add( animationName );
+
+	blockElement.addEventListener( 'animationend', () => blockElement.classList.remove( animationName ), { once: true } );
 };
