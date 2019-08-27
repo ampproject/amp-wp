@@ -25,15 +25,15 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 
 	const dropDownOptions = [
 		{
-			title: __( 'Insert background image', 'amp' ),
+			title: __( 'Insert Background Image', 'amp' ),
 			icon: 'format-image',
-			onClick: () => mediaPicker( __( 'Select background image', 'amp' ), 'image', updateBlock ),
+			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'image', updateBlock ),
 			disabled: ! showInserter,
 		},
 		{
-			title: __( 'Insert background video', 'amp' ),
+			title: __( 'Insert Background Video', 'amp' ),
 			icon: 'media-video',
-			onClick: () => mediaPicker( __( 'Select background video', 'amp' ), 'video', updateBlock ),
+			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'video', updateBlock ),
 			disabled: ! showInserter,
 		},
 	];
@@ -57,7 +57,7 @@ const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInse
 	return (
 		<DropdownMenu
 			icon="admin-media"
-			label={ __( 'Select media', 'amp' ) }
+			label={ __( 'Insert Media', 'amp' ) }
 			controls={ dropDownOptions }
 			hasArrowIndicator={ true }
 			toggleProps={
@@ -79,7 +79,7 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 	const fileFrame = wp.media( {
 		title: dialogTitle,
 		button: {
-			text: __( 'Use as background', 'amp' ),
+			text: __( 'Select', 'amp' ),
 		},
 		multiple: false,
 		library: {
