@@ -161,7 +161,7 @@ class Draggable extends Component {
 
 		// @todo: Rely on withSnapTargets to provide the data for the snapping lines so this isn't a concern of this component.
 
-		if ( horizontalLeftSnap !== actualLeft ) {
+		if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -172,7 +172,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( horizontalRightSnap !== actualRight ) {
+		if ( this.horizontalSnaps.includes( horizontalRightSnap ) ) {
 			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -183,7 +183,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( horizontalCenterSnap !== horizontalCenter ) {
+		if ( this.horizontalSnaps.includes( horizontalCenterSnap ) ) {
 			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -194,7 +194,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( verticalTopSnap !== actualTop ) {
+		if ( this.verticalSnaps.includes( verticalTopSnap ) ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -205,7 +205,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( verticalBottomSnap !== actualBottom ) {
+		if ( this.verticalSnaps.includes( verticalBottomSnap ) ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
@@ -216,7 +216,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( verticalCenterSnap !== verticalCenter ) {
+		if ( this.verticalSnaps.includes( verticalCenterSnap ) ) {
 			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
 			if ( ! hasSnapLine( snapLine ) ) {
 				newSnapLines.push( snapLine );
