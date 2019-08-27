@@ -143,3 +143,7 @@ amp-story-grid-layer .wp-block-quote {
 .amp-page-attachment-content {
 	padding: 10px;
 }
+
+.amp-page-attachment-content .wp-block-quote {
+	background: none;
+}
