@@ -9,15 +9,15 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 
 	public function get_conversion_data() {
 		return [
-			'shortcode_with_invalid_id'                            => [
+			'shortcode_with_invalid_id'               => [
 				'[gallery ids=1]',
 				'',
 			],
-			'shortcode_with_valid_id'                              => [
+			'shortcode_with_valid_id'                 => [
 				'[gallery ids={{id1}}]',
 				'<amp-carousel width="50" height="50" type="slides" layout="responsive"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img></amp-carousel>',
 			],
-			'shortcode_with_multiple_ids'                          => [
+			'shortcode_with_multiple_ids'             => [
 				'[gallery ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img>' .
@@ -25,7 +25,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img>' .
 				'</amp-carousel>',
 			],
-			'shortcode_linking_to_file'                            => [
+			'shortcode_linking_to_file'               => [
 				'[gallery link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img></a>' .
@@ -33,7 +33,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img></a>' .
 				'</amp-carousel>',
 			],
-			'shortcode_with_carousel'                              => [
+			'shortcode_with_carousel'                 => [
 				'[gallery amp-lightbox=false amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img>' .
@@ -41,7 +41,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img>' .
 				'</amp-carousel>',
 			],
-			'shortcode_with_carousel_linking_to_file'              => [
+			'shortcode_with_carousel_linking_to_file' => [
 				'[gallery amp-lightbox=false amp-carousel=true link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img></a>' .
@@ -49,7 +49,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img></a>' .
 				'</amp-carousel>',
 			],
-			'shortcode_with_lightbox'                              => [
+			'shortcode_with_lightbox'                 => [
 				'[gallery amp-lightbox=true amp-carousel=false ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img>' .
@@ -57,7 +57,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img>' .
 				'</amp-carousel>',
 			],
-			'shortcode_with_lightbox_linking_to_file'              => [
+			'shortcode_with_lightbox_linking_to_file' => [
 				'[gallery amp-lightbox=true amp-carousel=false link="file" ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img></a>' .
@@ -65,7 +65,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 					'<a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img></a>' .
 				'</amp-carousel>',
 			],
-			'shortcode_with_lightbox_and_carousel'                 => [
+			'shortcode_with_lightbox_and_carousel'    => [
 				'[gallery amp-lightbox=true amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
 				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
 					'<amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text" lightbox on="tap:amp-image-lightbox" role="button" tabindex="0"></amp-img>' .
