@@ -47,7 +47,7 @@ class AMP_Comments_Sanitizer extends AMP_Base_Sanitizer {
 
 		$xpath = new DOMXPath( $this->dom );
 
-		$comments = $xpath->query( '//*[ contains( @class, "comment-list" ) ]/*[ starts-with( @id, "comment-" ) ]' );
+		$comments = $xpath->query( '//*[ starts-with( @id, "comment-" ) ]' );
 		foreach ( $comments as $comment ) {
 			$this->sanitize_comment_fields( $comment, $xpath );
 		}

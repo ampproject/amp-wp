@@ -158,6 +158,30 @@ class Test_AMP_Comments_Sanitizer extends WP_UnitTestCase {
 		}
 	}
 
+	public function test_comment_website_url_sanitization() {
+		$instance = new AMP_Comments_Sanitizer( $this->dom );
+
+		$valid_comment = self::factory()->comment->create_and_get(
+			[ 'comment_author_url' => 'http://example.com/' ]
+		);
+
+		$invalid_comment = self::factory()->comment->create_and_get(
+			[ 'comment_author_url' => 'http://foo@' ]
+		);
+
+		$html = wp_list_comments(
+			[ 'echo' => false ],
+			[ $valid_comment, $invalid_comment ]
+		);
+
+		$this->dom->loadHTML( $html );
+
+		$instance->sanitize();
+		$sanitized_html = $this->dom->saveHTML();
+		$this->assertNotFalse( strpos( $sanitized_html, 'href="http://example.com/"' ) );
+		$this->assertFalse( strpos( $sanitized_html, 'href="http://foo@"' ) );
+	}
+
 	/**
 	 * Creates a form for testing.
 	 *
