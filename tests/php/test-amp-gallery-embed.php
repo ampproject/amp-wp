@@ -101,7 +101,8 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 		// this, and str-replace the dynamic portions into the expected and
 		// actual output after the fact.
 
-		$ids = $files = [];
+		$ids   = [];
+		$files = [];
 
 		foreach ( $source_files as $index => $source_file ) {
 			$ids[ $index ] = self::factory()->attachment
