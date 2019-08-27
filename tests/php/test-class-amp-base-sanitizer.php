@@ -278,17 +278,13 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_child_dev_mode() {
-		$html = '<div></div>';
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $element
-		 */
+		$id   = 'target';
+		$html = sprintf( '<div id="%s"></div>', esc_attr( $id ) );
 
 		// Ensure element is not removed when it and document are in dev mode.
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-		$element = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertFalse( $sanitizer->remove_invalid_child( $element ) );
@@ -296,7 +292,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Ensure invalid element when it has dev-mode attribute but document does not.
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $html );
-		$element = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_child( $element ) );
@@ -305,7 +301,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-		$element   = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element   = $dom->getElementById( $id );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_child( $element ) );
 		$this->assertEmpty( $element->parentNode );
@@ -389,18 +385,14 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Base_Sanitizer::is_exempt_from_validation()
 	 */
 	public function test_remove_invalid_attribute_dev_mode() {
-		$html = '<div data-bad="yes"></div>';
+		$id   = 'target';
 		$attr = 'data-bad';
-		/**
-		 * Element.
-		 *
-		 * @var DOMElement $element
-		 */
+		$html = sprintf( '<div id="%s" data-bad="%s"></div>', esc_attr( $id ), esc_attr( $attr ) );
 
 		// Ensure element is not removed when it and document are in dev mode.
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-		$element = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertFalse( $sanitizer->remove_invalid_attribute( $element, $attr ) );
@@ -408,7 +400,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 
 		// Ensure invalid element when it has dev-mode attribute but document does not.
 		$dom     = AMP_DOM_Utils::get_dom_from_content( $html );
-		$element = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element = $dom->getElementById( $id );
 		$element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
@@ -417,7 +409,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 		// Ensure element is removed when document is in dev mode but the element lacks the attribute.
 		$dom = AMP_DOM_Utils::get_dom_from_content( $html );
 		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-		$element   = $dom->getElementsByTagName( 'div' )->item( 0 );
+		$element   = $dom->getElementById( $id );
 		$sanitizer = new AMP_Audio_Sanitizer( $dom );
 		$this->assertTrue( $sanitizer->remove_invalid_attribute( $element, $attr ) );
 		$this->assertFalse( $element->hasAttribute( $attr ) );

@@ -788,8 +788,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-sidebar' ],
 			],
 
-			'amp_sidebar_in_div_with_div_inside_nav'       => [
+			'amp_sidebar_inside_and_outside_div'           => [
 				'
+				<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="left">
+					<nav><a href="/">Home!</a></nav>
+				</amp-sidebar>
 				<div>
 					<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="right">
 						<nav>
@@ -1426,6 +1429,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							</amp-list-load-more>
 							<div fetch-error align="center">
 								Fetch error!
+							</div>
+							<div placeholder>
+								Placeholder!
+							</div>
+							<div fallback>
+								Fallback!
 							</div>
 						</amp-list>
 					'
