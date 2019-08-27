@@ -164,15 +164,17 @@ class Draggable extends Component {
 
 		// What the cursor has moved since the beginning.
 		const leftDiff = event.clientX - originalX;
+		const topDiff = event.clientY - originalY;
 		// Where the original block would be positioned based on that.
 		const leftToCompareWith = initialBlockX + leftDiff;
+		const topToCompareWith = initialBlockY + topDiff;
 
 		if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith - horizontalLeftSnap ) ) {
+				if ( Math.abs( leftToCompareWith - horizontalLeftSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
 					left = horizontalLeftSnap - rotatedWidthDiff;
 				}
 			}
@@ -183,7 +185,7 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith + actualWidth - horizontalRightSnap ) ) {
+				if ( Math.abs( leftToCompareWith + actualWidth - horizontalRightSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
 					left = horizontalRightSnap - actualWidth;
 				}
 			}
@@ -194,7 +196,7 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				if ( BLOCK_DRAGGING_SNAP_GAP > Math.abs( leftToCompareWith + ( actualWidth / 2 ) - horizontalCenterSnap ) ) {
+				if ( Math.abs( leftToCompareWith + ( actualWidth / 2 ) - horizontalCenterSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
 					left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
 				}
 			}
@@ -205,7 +207,9 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				top = verticalTopSnap - rotatedHeightDiff;
+				if ( Math.abs( topToCompareWith - verticalTopSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
+					top = verticalTopSnap - rotatedHeightDiff;
+				}
 			}
 		}
 
@@ -214,7 +218,9 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				top = originalTop - ( actualBottom - verticalBottomSnap );
+				if ( Math.abs( topToCompareWith + actualHeight - verticalBottomSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
+					top = originalTop - ( actualBottom - verticalBottomSnap );
+				}
 			}
 		}
 
@@ -223,7 +229,9 @@ class Draggable extends Component {
 			newSnapLines.push( snapLine );
 
 			if ( snappingEnabled ) {
-				top = originalTop - ( verticalCenter - verticalCenterSnap );
+				if ( Math.abs( topToCompareWith + ( actualHeight / 2 ) - verticalCenterSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
+					top = originalTop - ( verticalCenter - verticalCenterSnap );
+				}
 			}
 		}
 
@@ -308,12 +316,14 @@ class Draggable extends Component {
 		this.cloneWrapper.style.height = `${ element.clientHeight }px`;
 
 		const clone = element.cloneNode( true );
+		initialBlockX = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
+		initialBlockY = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), STORY_PAGE_INNER_HEIGHT );
+
 		this.cloneWrapper.style.transform = clone.style.transform;
 
 		// 20% of the full value in case of CTA block.
 		const baseHeight = isCTABlock ? STORY_PAGE_INNER_HEIGHT / 5 : STORY_PAGE_INNER_HEIGHT;
 
-		initialBlockX = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
 		// Position clone over the original element.
 		this.cloneWrapper.style.top = `${ getPixelsFromPercentage( 'y', parseInt( clone.style.top ), baseHeight ) }px`;
 		this.cloneWrapper.style.left = `${ getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH ) }px`;
