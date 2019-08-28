@@ -47,7 +47,14 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-
+		http: {
+			google_fonts: {
+				options: {
+					url: 'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBcMwx87RYvnlSYsQMub-hcdjOaPGHmvPM',
+				},
+				dest: 'includes/data/fonts.json'
+			}
+		},
 	} );
 
 	// Load tasks.
@@ -55,6 +62,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
+	grunt.loadNpmTasks( 'grunt-http' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
@@ -151,6 +159,10 @@ module.exports = function( grunt ) {
 
 		doNext();
 	} );
+
+	grunt.registerTask( 'download-fonts', [
+		'http',
+	] );
 
 	grunt.registerTask( 'create-build-zip', [
 		'shell:create_build_zip',
