@@ -62,10 +62,9 @@ import {
 	getMinimumStoryPosterDimensions,
 	maybeAddMissingAnchor,
 } from './helpers';
-
 import { ALLOWED_BLOCKS } from './constants';
-
 import store from './store';
+import './style.css';
 
 const {
 	getSelectedBlock,
