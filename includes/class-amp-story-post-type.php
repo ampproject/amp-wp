@@ -986,9 +986,9 @@ class AMP_Story_Post_Type {
 			return $fonts;
 		}
 
-		$file_content = file_get_contents( __DIR__ . '/data/fonts.json' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$google_fonts = json_decode( $file_content, true );
-		$fonts = [
+		$file_content   = file_get_contents( __DIR__ . '/data/fonts.json' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$google_fonts   = json_decode( $file_content, true );
+		$fonts          = [
 			[
 				'name'      => 'Arial',
 				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
@@ -1185,7 +1185,7 @@ class AMP_Story_Post_Type {
 			];
 		}
 
-		$columns = array_column( $fonts, 'name' );
+		$columns = wp_list_pluck( $fonts, 'name' );
 		array_multisort( $columns, SORT_ASC, $fonts );
 
 		$fonts_url = 'https://fonts.googleapis.com/css';
