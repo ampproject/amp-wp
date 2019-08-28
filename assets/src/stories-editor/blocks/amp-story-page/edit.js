@@ -15,7 +15,9 @@ import {
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
+	BlockIcon,
 } from '@wordpress/block-editor';
+import { getBlockType } from '@wordpress/blocks';
 import { Component, createRef } from '@wordpress/element';
 import {
 	PanelBody,
@@ -26,6 +28,8 @@ import {
 	SelectControl,
 	RangeControl,
 	ResponsiveWrapper,
+	Placeholder,
+	IconButton,
 } from '@wordpress/components';
 import {
 	withSelect,
@@ -50,6 +54,7 @@ import {
 	getVideoBytesPerSecond,
 	isVideoSizeExcessive,
 } from '../../../common/helpers';
+import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
 
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -75,12 +80,19 @@ class PageEdit extends Component {
 	constructor( props ) {
 		super( props );
 
-		if ( ! props.attributes.anchor ) {
+		const { isFirstPage, hasInnerBlocks, media, attributes } = props;
+		const { anchor, backgroundColors } = attributes;
+		const colors = JSON.parse( backgroundColors );
+
+		if ( ! anchor ) {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
+		const showPlaceholder = isFirstPage && ! hasInnerBlocks && ! media && ! colors.length;
+
 		this.state = {
 			extractingPoster: false,
+			showPlaceholder,
 		};
 
 		this.videoPlayer = createRef();
@@ -210,7 +222,7 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks, isFirstPage, hasInnerBlocks } = this.props;
 
 		const {
 			mediaId,
@@ -265,6 +277,11 @@ class PageEdit extends Component {
 		const colorSettings = this.getOverlayColorSettings();
 		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
+
+		const showPlaceholder = this.state.showPlaceholder && isFirstPage && ! hasInnerBlocks && ! media && ! backgroundColors.length;
+		const placeholderInstructions = __( 'Choose a background, or start writing some content.', 'amp' );
+
+		const textBlock = getBlockType( 'amp/amp-story-text' );
 
 		return (
 			<>
@@ -431,20 +448,75 @@ class PageEdit extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<div style={ style }>
-					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
-								<source src={ mediaUrl } type={ media.mime_type } />
-							</video>
-						</div>
-					) }
-					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle } />
-					) }
-					<InnerBlocks allowedBlocks={ allowedBlocks } />
-				</div>
+				{ showPlaceholder && (
+					<div style={ style }>
+						<Placeholder
+							icon={ blockIcon( { width: 24, height: 24 } ) }
+							label={ __( 'Get Started', 'amp' ) }
+							instructions={ placeholderInstructions }
+							className="editor-amp-story-page-placeholder"
+						>
+							{
+								/*
+								* Disable reason: The `list` ARIA role is redundant but
+								* Safari+VoiceOver won't announce the list otherwise.
+								*/
+								/* eslint-disable jsx-a11y/no-redundant-roles */
+							}
+							<ul className="editor-amp-story-page-placeholder-options" role="list">
+								<li key="background-image" >
+									<IconButton
+										isLarge
+										icon="format-image"
+										className="editor-amp-story-page-placeholder-option"
+										label={ __( 'Insert Background Image', 'amp' ) }
+									/>
+								</li>
+								<li key="background-video" >
+									<IconButton
+										isLarge
+										icon="media-video"
+										className="editor-amp-story-page-placeholder-option"
+										label={ __( 'Insert Background Video', 'amp' ) }
+									/>
+								</li>
+								<li key="text-block" >
+									<IconButton
+										isLarge
+										icon={ <BlockIcon icon={ textBlock.icon } /> }
+										className="editor-amp-story-page-placeholder-option"
+										label={ __( 'Insert Text', 'amp' ) }
+									/>
+								</li>
+							</ul>
+							{ /* eslint-enable jsx-a11y/no-redundant-roles */ }
+							<div className="editor-amp-story-page-placeholder-skip">
+								<Button
+									isLink
+									onClick={ () => this.setState( { showPlaceholder: false } ) }
+								>
+									{ __( 'Skip', 'amp' ) }
+								</Button>
+							</div>
+						</Placeholder>
+					</div>
+				) }
+				{ ! showPlaceholder && (
+					<div style={ style }>
+						{ /* todo: show poster image as background-image instead */ }
+						{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+							<div className="editor-amp-story-page-video-wrap">
+								<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
+									<source src={ mediaUrl } type={ media.mime_type } />
+								</video>
+							</div>
+						) }
+						{ backgroundColors.length > 0 && (
+							<div style={ overlayStyle } />
+						) }
+						<InnerBlocks allowedBlocks={ allowedBlocks } />
+					</div>
+				) }
 			</>
 		);
 	}
@@ -476,6 +548,8 @@ PageEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	isFirstPage: PropTypes.bool.isRequired,
+	hasInnerBlocks: PropTypes.bool.isRequired,
 };
 
 export default compose(
@@ -487,7 +561,7 @@ export default compose(
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+		const { getBlockOrder, getBlockRootClientId, getBlock } = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
@@ -508,12 +582,16 @@ export default compose(
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
+		const block = getBlock( clientId );
+
 		return {
 			media,
 			videoFeaturedImage,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
+			isFirstPage,
+			hasInnerBlocks: Boolean( block && block.innerBlocks.length ),
 		};
 	} ),
 )( PageEdit );
