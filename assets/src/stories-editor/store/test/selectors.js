@@ -3,6 +3,7 @@
  */
 import {
 	getAnimatedBlocks,
+	isPlayingAnimation,
 	isValidAnimationPredecessor,
 	getCurrentPage,
 	getBlockOrder,
@@ -16,6 +17,14 @@ describe( 'actions', () => {
 			const state = {};
 
 			expect( getAnimatedBlocks( state ) ).toStrictEqual( {} );
+		} );
+	} );
+
+	describe( 'isPlayingAnimation', () => {
+		it( 'should return false if state is empty', () => {
+			const state = {};
+
+			expect( isPlayingAnimation( state ) ).toBe( false );
 		} );
 	} );
 

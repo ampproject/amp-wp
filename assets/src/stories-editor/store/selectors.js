@@ -17,7 +17,7 @@ export function getAnimatedBlocks( state ) {
  * @return {Array} Whether an animation is currently playing.
  */
 export function isPlayingAnimation( state ) {
-	return state.animations.isPlayingAnimation;
+	return state.animations.isPlayingAnimation || false;
 }
 
 /**
