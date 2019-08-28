@@ -7,6 +7,7 @@ import { castArray } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { cloneBlock } from '@wordpress/blocks';
 import { useEffect, useState } from '@wordpress/element';
 import {
 	MenuGroup,
@@ -14,7 +15,7 @@ import {
 	NavigableMenu,
 	Popover,
 } from '@wordpress/components';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
 /**
@@ -27,7 +28,7 @@ const POPOVER_PROPS = {
 	position: 'top left',
 };
 
-const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock } ) => {
+const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock, duplicateBlock } ) => {
 	const [ isOpen, setIsOpen ] = useState( true );
 
 	useEffect( () => {
@@ -44,6 +45,11 @@ const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock } ) => {
 	const onRemove = () => {
 		onClose();
 		removeBlock( firstBlockClientId );
+	};
+
+	const onDuplicate = () => {
+		onClose();
+		duplicateBlock( firstBlockClientId );
 	};
 
 	return (
@@ -63,9 +69,7 @@ const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock } ) => {
 						<MenuGroup>
 							<MenuItem
 								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-								onClick={ () => {
-									onClose();
-								} }
+								onClick={ onDuplicate }
 								icon="admin-page"
 							>
 								{ __( 'Duplicate', 'amp' ) }
@@ -87,13 +91,43 @@ const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock } ) => {
 	);
 };
 
-const applyDispatch = withDispatch( ( dispatch ) => {
-	const { removeBlock } = dispatch( 'core/block-editor' );
+const applySelect = withSelect( ( select ) => {
+	const {
+		getBlock,
+		getBlockRootClientId,
+	} = select( 'core/block-editor' );
+
+	return {
+		getBlock,
+		getBlockRootClientId,
+	};
+} );
+
+const applyDispatch = withDispatch( ( dispatch, props ) => {
+	const {
+		getBlock,
+		getBlockRootClientId,
+	} = props;
+	const {
+		removeBlock,
+		insertBlock,
+	} = dispatch( 'core/block-editor' );
 	return {
 		removeBlock,
+		duplicateBlock( clientId ) {
+			const block = getBlock( clientId );
+			if ( 'amp/amp-story-cta' === block.name ) {
+				return;
+			}
+
+			const rootClientId = getBlockRootClientId( clientId );
+			const clonedBlock = cloneBlock( block );
+			insertBlock( clonedBlock, null, rootClientId );
+		},
 	};
 } );
 
 export default compose(
+	applySelect,
 	applyDispatch,
 )( RightClickMenu );
