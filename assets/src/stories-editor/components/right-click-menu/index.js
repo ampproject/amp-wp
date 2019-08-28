@@ -25,7 +25,7 @@ import './edit.css';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
-	position: 'top left',
+	position: 'bottom left',
 };
 
 const RightClickMenu = ( props ) => {
@@ -38,7 +38,7 @@ const RightClickMenu = ( props ) => {
 
 	const blockClientIds = castArray( clientIds );
 
-	// @todo Make sure it's the innser block that's taken.
+	// @todo Make sure it's the inner block that's taken, not the Page.
 	const firstBlockClientId = blockClientIds[ 0 ];
 
 	const onClose = () => {
