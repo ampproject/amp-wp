@@ -197,25 +197,29 @@ class AMP_Story_Post_Type {
 
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_custom_stories_styles' ] );
 
+		add_action(
+			'amp_story_head',
+			function() {
+				// Theme support for title-tag is implied for stories. See _wp_render_title_tag().
+				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+			},
+			1
+		);
+		add_action( 'amp_story_head', 'wp_enqueue_scripts', 1 );
+		add_action(
+			'amp_story_head',
+			function() {
+				/*
+				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
+				 * can use to output arbitrary styling. Styling is constrained in story template via the
+				 * \AMP_Story_Post_Type::filter_frontend_print_styles_array() method.
+				 */
+				wp_styles()->do_items();
+			},
+			8
+		);
 		add_action( 'amp_story_head', 'rel_canonical' );
 		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
-		add_action( 'amp_story_head', 'wp_enqueue_scripts' );
-		add_action( 'amp_story_head', 'rel_canonical' );
-
-		// @todo Create methods/functions for some of these.
-		add_action(
-			'amp_story_head',
-			function() {
-				// See _wp_render_title_tag().
-				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
-			}
-		);
-		add_action(
-			'amp_story_head',
-			function() {
-				wp_styles()->do_items();
-			}
-		);
 
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
