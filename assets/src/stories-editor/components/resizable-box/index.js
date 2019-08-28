@@ -39,6 +39,7 @@ import {
 	TEXT_BLOCK_PADDING,
 	REVERSE_WIDTH_CALCULATIONS,
 	REVERSE_HEIGHT_CALCULATIONS,
+	BLOCK_DRAGGING_SNAP_GAP,
 } from '../../constants';
 
 let lastSeenX = 0,
@@ -247,6 +248,61 @@ class EnhancedResizableBox extends Component {
 
 					const snappingEnabled = ! event.getModifierState( 'Alt' );
 
+					const dimensions = blockElement.getBoundingClientRect();
+
+					// We calculate with the block's actual dimensions relative to the page it's on.
+					let {
+						top: actualTop,
+						right: actualRight,
+						bottom: actualBottom,
+						left: actualLeft,
+					} = dimensions;
+
+					actualTop -= parentBlockOffsetTop;
+					actualRight -= parentBlockOffsetLeft;
+					actualBottom -= parentBlockOffsetTop;
+					actualLeft -= parentBlockOffsetLeft;
+
+					const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
+					const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
+
+					const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+					const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+					const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+					const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+					const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+					const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+
+					if ( horizontalLeftSnap !== null ) {
+						const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
+						newSnapLines.push( snapLine );
+					}
+
+					if ( horizontalRightSnap !== null ) {
+						const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
+						newSnapLines.push( snapLine );
+					}
+
+					if ( horizontalCenterSnap !== null ) {
+						const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
+						newSnapLines.push( snapLine );
+					}
+
+					if ( verticalTopSnap !== null ) {
+						const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
+						newSnapLines.push( snapLine );
+					}
+
+					if ( verticalBottomSnap !== null ) {
+						const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
+						newSnapLines.push( snapLine );
+					}
+
+					if ( verticalCenterSnap !== null ) {
+						const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
+						newSnapLines.push( snapLine );
+					}
+
 					if ( ! angle ) {
 						// If the resizing is to left or top then we have to compensate
 						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
@@ -255,30 +311,16 @@ class EnhancedResizableBox extends Component {
 							leftInPx = leftInPx - lastDeltaW;
 
 							if ( lastDeltaW ) {
-								const horizontalLeftSnap = findClosestSnap( leftInPx, this.horizontalSnaps, snapGap );
-
-								if ( horizontalLeftSnap !== null ) {
-									const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
-									newSnapLines.push( snapLine );
-
-									if ( snappingEnabled ) {
-										appliedWidth += leftInPx - horizontalLeftSnap;
-										leftInPx = horizontalLeftSnap;
-									}
+								if ( horizontalLeftSnap !== null && snappingEnabled ) {
+									appliedWidth += leftInPx - horizontalLeftSnap;
+									leftInPx = horizontalLeftSnap;
 								}
 							}
 
 							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx ) + '%';
 						} else if ( lastDeltaW ) {
-							const horizontalRightSnap = findClosestSnap( blockElement.offsetLeft + appliedWidth, this.horizontalSnaps, snapGap );
-
-							if ( horizontalRightSnap !== null ) {
-								const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
-								newSnapLines.push( snapLine );
-
-								if ( snappingEnabled ) {
-									appliedWidth = horizontalRightSnap - blockElement.offsetLeft;
-								}
+							if ( horizontalRightSnap !== null && snappingEnabled ) {
+								appliedWidth = horizontalRightSnap - blockElement.offsetLeft;
 							}
 						}
 
@@ -288,30 +330,16 @@ class EnhancedResizableBox extends Component {
 							topInPx = topInPx - lastDeltaH;
 
 							if ( lastDeltaH ) {
-								const verticalTopSnap = findClosestSnap( topInPx, this.verticalSnaps, snapGap );
-
-								if ( verticalTopSnap !== null ) {
-									const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
-									newSnapLines.push( snapLine );
-
-									if ( snappingEnabled ) {
-										appliedHeight += topInPx - verticalTopSnap;
-										topInPx = verticalTopSnap;
-									}
+								if ( verticalTopSnap !== null && snappingEnabled ) {
+									appliedHeight += topInPx - verticalTopSnap;
+									topInPx = verticalTopSnap;
 								}
 							}
 
 							blockElement.style.top = getPercentageFromPixels( 'y', topInPx ) + '%';
 						} else if ( lastDeltaH ) {
-							const verticalBottomSnap = findClosestSnap( blockElement.offsetTop + appliedHeight, this.verticalSnaps, snapGap );
-
-							if ( verticalBottomSnap !== null ) {
-								const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
-								newSnapLines.push( snapLine );
-
-								if ( snappingEnabled ) {
-									appliedHeight = verticalBottomSnap - blockElement.offsetTop;
-								}
+							if ( verticalBottomSnap !== null && snappingEnabled ) {
+								appliedHeight = verticalBottomSnap - blockElement.offsetTop;
 							}
 						}
 					} else {
@@ -336,8 +364,7 @@ class EnhancedResizableBox extends Component {
 						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
 						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
 
-						// @todo: Get outermost left position and calculate snap.
-						// @todo: Get outermost top position and calculate snap.
+						// @todo: Do actual snapping.
 
 						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
 						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
