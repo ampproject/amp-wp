@@ -14,10 +14,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../constants';
-import { AnimationOrderPicker } from './';
-import withSelectedBlock from './higher-order/with-selected-block';
-import { playAnimation } from '../helpers';
+import AnimationOrderPicker from './animation-order-picker';
+import withSelectedBlock from '../higher-order/with-selected-block';
+import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../../constants';
+import { playAnimation } from '../../helpers';
 
 /**
  * Animation controls for AMP Story layout blocks'.
