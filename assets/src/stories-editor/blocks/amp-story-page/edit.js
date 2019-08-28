@@ -205,7 +205,9 @@ class PageEdit extends Component {
 					allowedBlocks.push( block );
 					break;
 				default:
-					allowedBlocks.push( block );
+					if ( ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+						allowedBlocks.push( block );
+					}
 					break;
 			}
 		} );
