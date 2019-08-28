@@ -28,7 +28,8 @@ const POPOVER_PROPS = {
 	position: 'top left',
 };
 
-const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock, duplicateBlock } ) => {
+const RightClickMenu = ( props ) => {
+	const { clientIds, clientX, clientY, removeBlock, duplicateBlock } = props;
 	const [ isOpen, setIsOpen ] = useState( true );
 
 	useEffect( () => {
@@ -60,7 +61,6 @@ const RightClickMenu = ( { clientIds, clientX, clientY, removeBlock, duplicateBl
 					position={ POPOVER_PROPS.position }
 					onClose={ onClose }
 					onFocusOutside={ onClose }
-					headerTitle={ 'Hello' }
 					focusOnMount={ true }
 				>
 					<NavigableMenu
