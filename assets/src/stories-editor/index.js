@@ -39,6 +39,8 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withEnforcedVideoUploadType,
+	withRightClickHandler,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -317,6 +319,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/rightClickHandler', withRightClickHandler );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );
@@ -324,6 +327,7 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
+addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addEnforcedVideoUploadType', withEnforcedVideoUploadType );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );

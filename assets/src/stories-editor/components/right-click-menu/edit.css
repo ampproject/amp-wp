@@ -1,0 +1,9 @@
+#amp-story-right-click-menu {
+	position: absolute;
+}
+
+#amp-story-right-click-menu .amp-story-right-click-menu__popover {
+	position: absolute;
+	top: 0 !important;
+	left: 0 !important;
+}
