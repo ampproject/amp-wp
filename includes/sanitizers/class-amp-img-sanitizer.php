@@ -203,6 +203,12 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 					$out['noloading'] = $value;
 					break;
 
+				// Skip directly copying new web platform attributes from img to amp-img which are largely handled by AMP already.
+				case 'importance': // Not supported by AMP.
+				case 'loading': // Lazy-loading handled by amp-img natively.
+				case 'intrinsicsize': // Responsive images handled by amp-img directly.
+					break;
+
 				default:
 					$out[ $name ] = $value;
 					break;
