@@ -105,7 +105,7 @@ export const name = 'amp-story-export';
 const renderPlugin = ( { postId, createErrorNotice, createSuccessNotice, removeNotice } ) => {
 	return (
 		<PluginMoreMenuItem
-			icon={ 'media-archive' }
+			icon="media-archive"
 			onClick={ () => {
 				handleExport( { postId, createErrorNotice, createSuccessNotice, removeNotice } );
 			} }
