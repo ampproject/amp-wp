@@ -545,7 +545,113 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-delay: var(--animation-delay);
 }
 
-/* @todo: pan-left, pan-right, pan-up, pan-down */
+@keyframes story-animation-pan-left {
+
+	0% {
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+		transform-origin: left top;
+	}
+
+	100% {
+		transform: translate(0, var(--animation-offset-y)) scale(var(--animation-scale-end));
+		transform-origin: left top;
+	}
+}
+
+.story-animation-pan-left {
+	--animation-duration: 1000ms;
+	--animation-delay: 0ms;
+	--animation-scale-start: 1;
+	--animation-scale-end: 1;
+	--animation-offset-x: 0;
+	--animation-offset-y: 0;
+
+	animation-name: story-animation-pan-left;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: linear;
+	animation-delay: var(--animation-delay);
+}
+
+@keyframes story-animation-pan-right {
+
+	0% {
+		transform: translate(0, var(--animation-offset-y)) scale(var(--animation-scale-start));
+		transform-origin: left top;
+	}
+
+	100% {
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-end));
+		transform-origin: left top;
+	}
+}
+
+.story-animation-pan-right {
+	--animation-duration: 1000ms;
+	--animation-delay: 0ms;
+	--animation-scale-start: 1.25;
+	--animation-scale-end: 1.25;
+	--animation-offset-x: 0;
+	--animation-offset-y: 0;
+
+	animation-name: story-animation-pan-right;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: linear;
+	animation-delay: var(--animation-delay);
+}
+
+@keyframes story-animation-pan-down {
+
+	0% {
+		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
+		transform-origin: left top;
+	}
+
+	100% {
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-end));
+		transform-origin: left top;
+	}
+}
+
+.story-animation-pan-down {
+	--animation-duration: 1000ms;
+	--animation-delay: 0ms;
+	--animation-scale-start: 1.25;
+	--animation-scale-end: 1.25;
+	--animation-offset-x: 0;
+	--animation-offset-y: 0;
+
+	animation-name: story-animation-pan-down;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: linear;
+	animation-delay: var(--animation-delay);
+}
+
+@keyframes story-animation-pan-up {
+
+	0% {
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+		transform-origin: left top;
+	}
+
+	100% {
+		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-end));
+		transform-origin: left top;
+	}
+}
+
+.story-animation-pan-up {
+	--animation-duration: 1000ms;
+	--animation-delay: 0ms;
+	--animation-scale-start: 1.25;
+	--animation-scale-end: 1.25;
+	--animation-offset-x: 0;
+	--animation-offset-y: 0;
+
+	animation-name: story-animation-pan-up;
+	animation-duration: var(--animation-duration);
+	animation-timing-function: linear;
+	animation-delay: var(--animation-delay);
+}
 
 @keyframes story-animation-zoom-in {
 

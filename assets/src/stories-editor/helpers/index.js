@@ -1736,6 +1736,30 @@ export const processMedia = ( media ) => {
 };
 
 /**
+ * Calculate target scaling factor so that it is at least 25% larger than the
+ * page.
+ *
+ * @param {number} width Target width.
+ * @param {number} height Target height.
+ *
+ * @return {number} Target scaling factor.
+ */
+const calculateTargetScalingFactor = ( width, height ) => {
+	const targetFitsWithinPage = width <= STORY_PAGE_INNER_WIDTH || height <= STORY_PAGE_INNER_HEIGHT;
+
+	if ( targetFitsWithinPage ) {
+		const scalingFactor = 1.25;
+
+		const widthFactor = STORY_PAGE_INNER_WIDTH > width ? STORY_PAGE_INNER_WIDTH / width : 1;
+		const heightFactor = STORY_PAGE_INNER_HEIGHT > height ? STORY_PAGE_INNER_HEIGHT / height : 1;
+
+		return Math.max( widthFactor, heightFactor ) * scalingFactor;
+	}
+
+	return 1;
+};
+
+/**
  * Plays the block's animation in the editor.
  *
  * @param {Object} block Block object.
@@ -1762,6 +1786,7 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 
 	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
 	const { top, left, width, height } = blockElement.getBoundingClientRect();
+	const scalingFactor = calculateTargetScalingFactor( width, height );
 
 	// We calculate with the block's actual dimensions relative to the page it's on.
 	const actualTop = top - parentBlockOffsetTop;
@@ -1791,6 +1816,20 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 			break;
 		case 'drop':
 			offsetY = Math.max( 160, ( actualTop + height ) );
+			break;
+		case 'pan-left':
+		case 'pan-right':
+			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
+			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
+			blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+			blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
+			break;
+		case 'pan-down':
+		case 'pan-up':
+			offsetX = -width / 2;
+			offsetY = STORY_PAGE_INNER_HEIGHT - height;
+			blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+			blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
 			break;
 		default:
 			offsetX = 0;
