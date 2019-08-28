@@ -131,7 +131,10 @@ class RotatableBox extends Component {
 		const snappingEnabled = ! e.getModifierState( 'Alt' );
 
 		if ( snappingEnabled ) {
-			angle = findClosestSnap( angle, this.props.snap, this.props.snapGap );
+			const angleSnap = findClosestSnap( angle, this.props.snap, this.props.snapGap );
+			if ( angleSnap !== null ) {
+				angle = angleSnap;
+			}
 		}
 
 		if ( this.state.angle === angle ) {

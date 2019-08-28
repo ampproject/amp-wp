@@ -1631,7 +1631,7 @@ export const maybeAddMissingAnchor = ( clientId ) => {
  * @param {number} number Given number.
  * @param {Array|function<number>} snap List of snap targets or function that provides them.
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
- * @return {number} Snap target if found, or the given number.
+ * @return {?number} Snap target if found.
  */
 export const findClosestSnap = memize( ( number, snap, snapGap ) => {
 	const snapArray = typeof snap === 'function' ? snap( number ) : snap;
@@ -1642,7 +1642,7 @@ export const findClosestSnap = memize( ( number, snap, snapGap ) => {
 	);
 	const gap = Math.abs( snapArray[ closestGapIndex ] - number );
 
-	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : number;
+	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : null;
 } );
 
 /**

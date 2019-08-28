@@ -257,7 +257,7 @@ class EnhancedResizableBox extends Component {
 							if ( lastDeltaW ) {
 								const horizontalLeftSnap = findClosestSnap( leftInPx, this.horizontalSnaps, snapGap );
 
-								if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
+								if ( horizontalLeftSnap !== null ) {
 									const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 									newSnapLines.push( snapLine );
 
@@ -272,7 +272,7 @@ class EnhancedResizableBox extends Component {
 						} else if ( lastDeltaW ) {
 							const horizontalRightSnap = findClosestSnap( blockElement.offsetLeft + appliedWidth, this.horizontalSnaps, snapGap );
 
-							if ( this.horizontalSnaps.includes( horizontalRightSnap ) ) {
+							if ( horizontalRightSnap !== null ) {
 								const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 								newSnapLines.push( snapLine );
 
@@ -290,7 +290,7 @@ class EnhancedResizableBox extends Component {
 							if ( lastDeltaH ) {
 								const verticalTopSnap = findClosestSnap( topInPx, this.verticalSnaps, snapGap );
 
-								if ( this.verticalSnaps.includes( verticalTopSnap ) ) {
+								if ( verticalTopSnap !== null ) {
 									const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 									newSnapLines.push( snapLine );
 
@@ -305,7 +305,7 @@ class EnhancedResizableBox extends Component {
 						} else if ( lastDeltaH ) {
 							const verticalBottomSnap = findClosestSnap( blockElement.offsetTop + appliedHeight, this.verticalSnaps, snapGap );
 
-							if ( this.verticalSnaps.includes( verticalBottomSnap ) ) {
+							if ( verticalBottomSnap !== null ) {
 								const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 								newSnapLines.push( snapLine );
 

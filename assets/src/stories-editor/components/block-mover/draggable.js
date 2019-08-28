@@ -169,7 +169,7 @@ class Draggable extends Component {
 		const leftToCompareWith = initialBlockX + leftDiff;
 		const topToCompareWith = initialBlockY + topDiff;
 
-		if ( this.horizontalSnaps.includes( horizontalLeftSnap ) ) {
+		if ( horizontalLeftSnap !== null ) {
 			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			newSnapLines.push( snapLine );
 
@@ -180,7 +180,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( this.horizontalSnaps.includes( horizontalRightSnap ) ) {
+		if ( horizontalRightSnap !== null ) {
 			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			newSnapLines.push( snapLine );
 
@@ -191,7 +191,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( this.horizontalSnaps.includes( horizontalCenterSnap ) ) {
+		if ( horizontalCenterSnap !== null ) {
 			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
 			newSnapLines.push( snapLine );
 
@@ -202,7 +202,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( this.verticalSnaps.includes( verticalTopSnap ) ) {
+		if ( verticalTopSnap !== null ) {
 			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
 			newSnapLines.push( snapLine );
 
@@ -213,7 +213,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( this.verticalSnaps.includes( verticalBottomSnap ) ) {
+		if ( verticalBottomSnap !== null ) {
 			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
 			newSnapLines.push( snapLine );
 
@@ -224,7 +224,7 @@ class Draggable extends Component {
 			}
 		}
 
-		if ( this.verticalSnaps.includes( verticalCenterSnap ) ) {
+		if ( verticalCenterSnap !== null ) {
 			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
 			newSnapLines.push( snapLine );
 
