@@ -21,21 +21,35 @@ const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, getCurrentPageAttributes } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
 	];
+	const currentBlock = getCurrentPageAttributes();
+
+	let imageTitle = __( 'Insert Background Image', 'amp' );
+	let videoTitle = __( 'Insert Background Video', 'amp' );
+	if ( currentBlock.mediaId ) {
+		switch ( currentBlock.mediaType ) {
+			case 'image':
+				imageTitle = __( 'Update Background Image', 'amp' );
+				break;
+			case 'video':
+				videoTitle = __( 'Update Background Video', 'amp' );
+				break;
+		}
+	}
 
 	const dropDownOptions = [
 		{
-			title: __( 'Insert Background Image', 'amp' ),
+			title: imageTitle,
 			icon: <BlockIcon icon={ 'format-image' } />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'image', updateBlock ),
 			disabled: ! showInserter,
 		},
 		{
-			title: __( 'Insert Background Video', 'amp' ),
+			title: videoTitle,
 			icon: <BlockIcon icon={ 'media-video' } />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'video', updateBlock ),
 			disabled: ! showInserter,
@@ -78,6 +92,7 @@ MediaInserter.propTypes = {
 	updateBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
 	showInserter: PropTypes.bool.isRequired,
+	getCurrentPageAttributes: PropTypes.bool.isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -118,6 +133,14 @@ const applyWithSelect = withSelect( ( select ) => {
 		},
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
+		getCurrentPageAttributes: () => {
+			const clientId = getCurrentPage();
+			const block = select( 'core/block-editor' ).getBlocksByClientId( clientId );
+			if ( ! block ) {
+				return {};
+			}
+			return block[ 0 ].attributes;
+		},
 	};
 } );
 

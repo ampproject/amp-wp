@@ -68,6 +68,28 @@ describe( 'Stories Editor Screen', () => {
 		expect( src ).toContain( 'wp-content/uploads' );
 	} );
 
+	it( 'should be possible to update Background Image', async () => {
+		// Click the media selection button.
+		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
+		await page.click( '.amp-story-media-inserter-dropdown' );
+		await clickButton( 'Insert Background Image' );
+		await uploadMedia( LARGE_IMAGE );
+
+		// Insert the image.
+		await page.click( '.media-modal button.media-button-select' );
+
+		// Wait for media to be inserted.
+		await page.waitForSelector( '.components-focal-point-picker-wrapper' );
+
+		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
+		await page.click( '.amp-story-media-inserter-dropdown' );
+
+		const nodes = await page.$x(
+			`//button[contains(text(), 'Update Background Image')]`
+		);
+		expect( nodes ).toHaveLength( 1 );
+	} );
+
 	it( 'should be possible to add Background Video', async () => {
 		// Click the media selection button.
 		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
