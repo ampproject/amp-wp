@@ -6,7 +6,7 @@
  * @return {Array} Animation order.
  */
 export function getAnimatedBlocks( state ) {
-	return state.animations ? state.animations.animationOrder : {};
+	return state.animations && state.animations.animationOrder ? state.animations.animationOrder : {};
 }
 
 /**
@@ -17,7 +17,7 @@ export function getAnimatedBlocks( state ) {
  * @return {Array} Whether an animation is currently playing.
  */
 export function isPlayingAnimation( state ) {
-	return state.animations.isPlayingAnimation || false;
+	return state.animations && state.animations.isPlayingAnimation ? state.animations.isPlayingAnimation : false;
 }
 
 /**

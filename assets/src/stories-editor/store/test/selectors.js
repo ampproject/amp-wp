@@ -53,9 +53,11 @@ describe( 'actions', () => {
 
 			const state = {
 				animations: {
-					[ page ]: [
-						{ id: item, parent: undefined },
-					],
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined },
+						],
+					},
 				},
 			};
 
@@ -69,10 +71,12 @@ describe( 'actions', () => {
 
 			const state = {
 				animations: {
-					[ page ]: [
-						{ id: item, parent: undefined },
-						{ id: item2, parent: item },
-					],
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined },
+							{ id: item2, parent: item },
+						],
+					},
 				},
 			};
 
