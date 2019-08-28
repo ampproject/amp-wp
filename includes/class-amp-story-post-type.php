@@ -168,14 +168,7 @@ class AMP_Story_Post_Type {
 					[
 						'amp/amp-story-page',
 						[],
-						[
-							[
-								'amp/amp-story-text',
-								[
-									'placeholder' => __( 'Write text…', 'amp' ),
-								],
-							],
-						],
+						[],
 					],
 				],
 			]
