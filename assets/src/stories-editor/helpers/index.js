@@ -1765,14 +1765,19 @@ const calculateTargetScalingFactor = ( width, height ) => {
  * @param {Object} block Block object.
  * @param {string} animationType Animation type.
  * @param {number} animationDuration Animation duration.
- * @param {number} [animationDelay] Animation delay.
+ * @param {number} animationDelay Animation delay.
+ * @param {function} callback Callback for when animation has stopped.
  */
-export const playAnimation = ( block, animationType, animationDuration, animationDelay = 0 ) => {
+export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback ) => {
 	const blockElement = getBlockInnerElementForAnimation( block );
 	const parentBlock = getBlockRootClientId( block.clientId );
 	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
 
 	if ( ! blockElement || ! parentBlock || ! parentBlockElement ) {
+		if ( callback ) {
+			callback();
+		}
+
 		return;
 	}
 
@@ -1840,5 +1845,10 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 
 	blockElement.classList.add( animationName );
 
-	blockElement.addEventListener( 'animationend', () => blockElement.classList.remove( animationName ), { once: true } );
+	blockElement.addEventListener( 'animationend', () => {
+		blockElement.classList.remove( animationName );
+		if ( callback ) {
+			callback();
+		}
+	}, { once: true } );
 };

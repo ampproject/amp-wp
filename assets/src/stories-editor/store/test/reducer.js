@@ -26,7 +26,7 @@ describe( 'reducers', () => {
 				predecessor,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -44,7 +44,7 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 				],
@@ -69,6 +69,13 @@ describe( 'reducers', () => {
 				predecessor: item,
 			} );
 
+			expect( originalState.animationOrder ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined },
+					{ id: item2, parent: item },
+				],
+			} );
+
 			const state = animations( originalState, {
 				type: 'ADD_ANIMATION',
 				page,
@@ -76,7 +83,7 @@ describe( 'reducers', () => {
 				predecessor: item2,
 			} );
 
-			expect( state ).toStrictEqual( {
+			expect( state.animationOrder ).toStrictEqual( {
 				[ page ]: [
 					{ id: item, parent: undefined },
 					{ id: item2, parent: item },
@@ -95,6 +102,24 @@ describe( 'reducers', () => {
 		it.todo( 'should update an entry when animation duration changes' );
 
 		it.todo( 'should update an entry when animation delay changes' );
+
+		it( 'should start and stop animation', () => {
+			let state = animations( undefined, {
+				type: 'START_ANIMATION',
+			} );
+
+			expect( state ).toStrictEqual( {
+				isPlayingAnimation: true,
+			} );
+
+			state = animations( undefined, {
+				type: 'STOP_ANIMATION',
+			} );
+
+			expect( state ).toStrictEqual( {
+				isPlayingAnimation: false,
+			} );
+		} );
 	} );
 
 	describe( 'currentPage()', () => {

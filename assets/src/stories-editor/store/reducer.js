@@ -20,9 +20,9 @@ import { isValidAnimationPredecessor } from './selectors';
  * @return {Object} Updated state.
  */
 export function animations( state = {}, action ) {
-	const newAnimationOrder = { ...state };
+	const animationOrder = { ...state.animationOrder };
 	const { page, item, predecessor, animationType, duration, delay } = action;
-	const pageAnimationOrder = newAnimationOrder[ page ] || [];
+	const pageAnimationOrder = animationOrder[ page ] || [];
 
 	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
 
@@ -37,8 +37,11 @@ export function animations( state = {}, action ) {
 			}
 
 			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
+				...state,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
 			};
 
 		case 'CHANGE_ANIMATION_TYPE':
@@ -61,8 +64,11 @@ export function animations( state = {}, action ) {
 			}
 
 			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
+				...state,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
 			};
 
 		case 'CHANGE_ANIMATION_DURATION':
@@ -71,8 +77,11 @@ export function animations( state = {}, action ) {
 			}
 
 			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
+				...state,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
 			};
 
 		case 'CHANGE_ANIMATION_DELAY':
@@ -81,8 +90,23 @@ export function animations( state = {}, action ) {
 			}
 
 			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
+				...state,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
+			};
+
+		case 'START_ANIMATION':
+			return {
+				...state,
+				isPlayingAnimation: true,
+			};
+
+		case 'STOP_ANIMATION':
+			return {
+				...state,
+				isPlayingAnimation: false,
 			};
 
 		default:

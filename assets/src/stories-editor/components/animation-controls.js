@@ -7,6 +7,8 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { RangeControl, SelectControl, IconButton } from '@wordpress/components';
+import { compose } from '@wordpress/compose';
+import { withDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -33,6 +35,8 @@ const AnimationControls = ( {
 	animationDelay,
 	animationAfter,
 	selectedBlock,
+	onAnimationStart,
+	onAnimationStop,
 } ) => {
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
@@ -82,7 +86,10 @@ const AnimationControls = ( {
 					/>
 					<IconButton
 						icon="controls-play"
-						onClick={ () => playAnimation( selectedBlock, animationType, animationDuration, animationDelay ) }
+						onClick={ () => {
+							onAnimationStart();
+							playAnimation( selectedBlock, animationType, animationDuration, animationDelay, onAnimationStop );
+						} }
 					>
 						{ __( 'Play Animation', 'amp' ) }
 					</IconButton>
@@ -103,6 +110,22 @@ AnimationControls.propTypes = {
 	animationDelay: PropTypes.oneOfType( [ PropTypes.string, PropTypes.number ] ),
 	animationAfter: PropTypes.string,
 	selectedBlock: PropTypes.object,
+	onAnimationStart: PropTypes.func.isRequired,
+	onAnimationStop: PropTypes.func.isRequired,
 };
 
-export default withSelectedBlock( AnimationControls );
+const withAnimationPlayback = withDispatch( ( dispatch ) => {
+	const { startAnimation, stopAnimation } = dispatch( 'amp/story' );
+
+	return {
+		onAnimationStart: startAnimation,
+		onAnimationStop: stopAnimation,
+	};
+} );
+
+const enhance = compose(
+	withSelectedBlock,
+	withAnimationPlayback
+);
+
+export default enhance( AnimationControls );

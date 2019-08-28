@@ -140,3 +140,25 @@ export function resetOrder( order ) {
 		order,
 	};
 }
+
+/**
+ * Returns an action object in signalling that animation has been started.
+ *
+ * @return {Object} Action object.
+ */
+export function startAnimation() {
+	return {
+		type: 'START_ANIMATION',
+	};
+}
+
+/**
+ * Returns an action object in signalling that animation has been stopped.
+ *
+ * @return {Object} Action object.
+ */
+export function stopAnimation() {
+	return {
+		type: 'STOP_ANIMATION',
+	};
+}

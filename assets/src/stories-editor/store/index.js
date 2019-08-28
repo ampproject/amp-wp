@@ -22,7 +22,10 @@ export default registerStore(
 		selectors,
 		actions,
 		initialState: {
-			animations: {},
+			animations: {
+				animationOrder: {},
+				isPlayingAnimation: false,
+			},
 			blocks: {
 				order: [],
 				isReordering: false,

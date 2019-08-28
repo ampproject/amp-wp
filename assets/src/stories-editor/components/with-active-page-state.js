@@ -12,14 +12,17 @@ import { withSelect, dispatch } from '@wordpress/data';
 const withActivePageState = ( BlockListBlock ) => {
 	return withSelect( ( select, { clientId } ) => {
 		const { getBlockRootClientId } = select( 'core/block-editor' );
-		const { getCurrentPage } = select( 'amp/story' );
+		const { getCurrentPage, isPlayingAnimation } = select( 'amp/story' );
+
+		const isActivePage = getCurrentPage() === clientId;
 
 		return {
-			isActivePage: getCurrentPage() === clientId,
+			isActivePage,
 			isTopLevelBlock: '' === getBlockRootClientId( clientId ),
+			isPlayingAnimation: isActivePage && isPlayingAnimation(),
 		};
 	} )( ( props ) => {
-		const { isTopLevelBlock, isActivePage } = props;
+		const { isTopLevelBlock, isActivePage, isPlayingAnimation } = props;
 
 		// If it's not an allowed block then lets return original;
 		if ( ! isTopLevelBlock ) {
@@ -32,6 +35,7 @@ const withActivePageState = ( BlockListBlock ) => {
 				...props.className,
 				'amp-page-active': isTopLevelBlock && isActivePage,
 				'amp-page-inactive': isTopLevelBlock && ! isActivePage,
+				'amp-page-is-animating': isPlayingAnimation,
 			},
 			isLocked: ! isActivePage,
 		};

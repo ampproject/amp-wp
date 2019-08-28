@@ -6,7 +6,18 @@
  * @return {Array} Animation order.
  */
 export function getAnimatedBlocks( state ) {
-	return state.animations || {};
+	return state.animations ? state.animations.animationOrder : {};
+}
+
+/**
+ * Returns whether an animation is currently playing or not.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {Array} Whether an animation is currently playing.
+ */
+export function isPlayingAnimation( state ) {
+	return state.animations.isPlayingAnimation;
 }
 
 /**
@@ -22,11 +33,11 @@ export function getAnimatedBlocks( state ) {
  * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
 export function isValidAnimationPredecessor( state, page, item, predecessor ) {
-	if ( undefined === predecessor || ! state.animations ) {
+	if ( undefined === predecessor || ! state.animations || ! state.animations.animationOrder ) {
 		return true;
 	}
 
-	const pageAnimationOrder = state.animations[ page ] || [];
+	const pageAnimationOrder = state.animations.animationOrder[ page ] || [];
 
 	const findEntry = ( entryId ) => pageAnimationOrder.find( ( { id } ) => id === entryId );
 

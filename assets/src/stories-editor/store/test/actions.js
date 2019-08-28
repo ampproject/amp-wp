@@ -11,6 +11,8 @@ import {
 	movePageToPosition,
 	saveOrder,
 	resetOrder,
+	startAnimation,
+	stopAnimation,
 } from '../actions';
 
 describe( 'actions', () => {
@@ -74,6 +76,24 @@ describe( 'actions', () => {
 				page,
 				item,
 				delay,
+			} );
+		} );
+	} );
+
+	describe( 'startAnimation', () => {
+		it( 'should return the START_ANIMATION action', () => {
+			const result = startAnimation();
+			expect( result ).toStrictEqual( {
+				type: 'START_ANIMATION',
+			} );
+		} );
+	} );
+
+	describe( 'stopAnimation', () => {
+		it( 'should return the STOP_ANIMATION action', () => {
+			const result = stopAnimation();
+			expect( result ).toStrictEqual( {
+				type: 'STOP_ANIMATION',
 			} );
 		} );
 	} );
