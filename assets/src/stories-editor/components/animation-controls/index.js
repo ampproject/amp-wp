@@ -86,6 +86,7 @@ const AnimationControls = ( {
 					/>
 					<IconButton
 						icon="controls-play"
+						className="is-button is-default"
 						onClick={ () => {
 							onAnimationStart();
 							playAnimation( selectedBlock, animationType, animationDuration, animationDelay, onAnimationStop );
