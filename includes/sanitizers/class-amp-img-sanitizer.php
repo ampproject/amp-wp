@@ -387,7 +387,7 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 		// can be found on the wrapping div instead of the figure element.
 		$grand_parent = $parent_node->parentNode;
 		if ( $grand_parent instanceof DOMElement ) {
-			$classes = explode( ' ', $grand_parent->getAttribute( 'class' ) );
+			$classes = preg_split( '/\s+/', $grand_parent->getAttribute( 'class' ) );
 			if ( in_array( 'wp-block-image', $classes, true ) ) {
 				$parent_node = $grand_parent;
 			}
