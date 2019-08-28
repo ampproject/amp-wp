@@ -988,8 +988,191 @@ class AMP_Story_Post_Type {
 
 		$file_content = file_get_contents( __DIR__ . '/data/fonts.json' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$google_fonts = json_decode( $file_content, true );
-		$fonts        = [];
+		$fonts = [
+			[
+				'name'      => 'Arial',
+				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Arial Black',
+				'fallbacks' => [ 'Arial Black', 'Arial Bold', 'Gadget', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Arial Narrow',
+				'fallbacks' => [ 'Arial', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Arimo',
+				'gfont'     => 'Arimo:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Baskerville',
+				'fallbacks' => [ 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ],
+			],
+			[
+				'name'      => 'Brush Script MT',
+				'fallbacks' => [ 'cursive' ],
+			],
+			[
+				'name'      => 'Copperplate',
+				'fallbacks' => [ 'Copperplate Gothic Light', 'fantasy' ],
+			],
+			[
+				'name'      => 'Courier New',
+				'fallbacks' => [ 'Courier', 'Lucida Sans Typewriter', 'Lucida Typewriter', 'monospace' ],
+			],
+			[
+				'name'      => 'Century Gothic',
+				'fallbacks' => [ 'CenturyGothic', 'AppleGothic', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Garamond',
+				'fallbacks' => [ 'Baskerville', 'Baskerville Old Face', 'Hoefler Text', 'Times New Roman', 'serif' ],
+			],
+			[
+				'name'      => 'Georgia',
+				'fallbacks' => [ 'Times', 'Times New Roman', 'serif' ],
+			],
+			[
+				'name'      => 'Gill Sans',
+				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Lato',
+				'gfont'     => 'Lato:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Lora',
+				'gfont'     => 'Lora:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'Lucida Bright',
+				'fallbacks' => [ 'Georgia', 'serif' ],
+			],
+			[
+				'name'      => 'Lucida Sans Typewriter',
+				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
+			],
+			[
+				'name'      => 'Merriweather',
+				'gfont'     => 'Merriweather:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'Montserrat',
+				'gfont'     => 'Montserrat:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Noto Sans',
+				'gfont'     => 'Noto Sans:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Open Sans',
+				'gfont'     => 'Open Sans:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Open Sans Condensed',
+				'gfont'     => 'Open Sans Condensed:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Oswald',
+				'gfont'     => 'Oswald:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Palatino',
+				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
+			],
+			[
+				'name'      => 'Papyrus',
+				'fallbacks' => [ 'fantasy' ],
+			],
+			[
+				'name'      => 'Playfair Display',
+				'gfont'     => 'Playfair Display:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'PT Sans',
+				'gfont'     => 'PT Sans:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'PT Sans Narrow',
+				'gfont'     => 'PT Sans Narrow:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'PT Serif',
+				'gfont'     => 'PT Serif:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'Raleway',
+				'gfont'     => 'Raleway:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Roboto',
+				'gfont'     => 'Roboto:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Roboto Condensed',
+				'gfont'     => 'Roboto Condensed:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Roboto Slab',
+				'gfont'     => 'Roboto Slab:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'Slabo 27px',
+				'gfont'     => 'Slabo 27px:400,700',
+				'fallbacks' => [ 'serif' ],
+			],
+			[
+				'name'      => 'Source Sans Pro',
+				'gfont'     => 'Source Sans Pro:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Tahoma',
+				'fallbacks' => [ 'Verdana', 'Segoe', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Times New Roman',
+				'fallbacks' => [ 'Times New Roman', 'Times', 'Baskerville', 'Georgia', 'serif' ],
+			],
+			[
+				'name'      => 'Trebuchet MS',
+				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
+			],
+			[
+				'name'      => 'Ubuntu',
+				'gfont'     => 'Ubuntu:400,700',
+				'fallbacks' => [ 'sans-serif' ],
+			],
+			[
+				'name'      => 'Verdana',
+				'fallbacks' => [ 'Geneva', 'sans-serif' ],
+			],
+		];
+		$existing_fonts = wp_list_pluck( $fonts, 'name' );
+
 		foreach ( $google_fonts['items'] as $font ) {
+			// If font already defined, then don't load from the google fonts list.
+			if ( in_array( $font['family'], $existing_fonts, true ) ) {
+				continue;
+			}
 			$gfont    = '';
 			$variants = array_diff( $font['variants'], [ 'regular' ] );
 			if ( $variants ) {
@@ -1001,6 +1184,9 @@ class AMP_Story_Post_Type {
 				'gfont'     => $gfont,
 			];
 		}
+
+		$columns = array_column( $fonts, 'name' );
+		array_multisort( $columns, SORT_ASC, $fonts );
 
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = [ 'latin', 'latin-ext' ];
