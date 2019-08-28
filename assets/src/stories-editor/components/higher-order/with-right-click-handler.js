@@ -37,12 +37,12 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 		}
 
 		if ( ! document.getElementById( 'amp-story-right-click-menu' ) ) {
-			const editorBlockList = document.querySelector( '.editor-block-list__layout' );
+			const editLayout = document.querySelector( '.edit-post-layout' );
 
 			const menuWrapper = document.createElement( 'div' );
 			menuWrapper.id = 'amp-story-right-click-menu';
 
-			editorBlockList.appendChild( menuWrapper );
+			editLayout.appendChild( menuWrapper );
 		}
 
 		render(
