@@ -217,12 +217,14 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
-				'srcset' => $props['srcset'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
 				'alt'    => $props['alt'],
 			];
+			if ( ! empty( $props['srcset'] ) ) {
+				$image_atts['srcset'] = $props['srcset'];
+			}
 
 			$this_aspect_ratio = $props['width'] / $props['height'];
 			if ( $this_aspect_ratio > $max_aspect_ratio ) {
