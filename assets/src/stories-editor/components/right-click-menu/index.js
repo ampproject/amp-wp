@@ -8,7 +8,7 @@ import { castArray } from 'lodash';
  */
 import { __ } from '@wordpress/i18n';
 import { cloneBlock } from '@wordpress/blocks';
-import { useEffect, useState } from '@wordpress/element';
+import { createRef, useEffect, useState } from '@wordpress/element';
 import {
 	MenuGroup,
 	MenuItem,
@@ -37,6 +37,8 @@ const RightClickMenu = ( props ) => {
 	}, [ clientIds, clientX, clientY ] );
 
 	const blockClientIds = castArray( clientIds );
+
+	// @todo Make sure it's the innser block that's taken.
 	const firstBlockClientId = blockClientIds[ 0 ];
 
 	const onClose = () => {
@@ -53,8 +55,15 @@ const RightClickMenu = ( props ) => {
 		duplicateBlock( firstBlockClientId );
 	};
 
+	// @todo Calculate the exact position based on the wrapper and event click.
+	// @todo Move this to with-right-click-handler.
+	const position = {
+		top: clientY - 100,
+		left: clientX - 160,
+	};
+
 	return (
-		<>
+		<div className="amp-right-click-menu__container" style={ position }>
 			{ isOpen && (
 				<Popover
 					className={ POPOVER_PROPS.className }
@@ -87,7 +96,7 @@ const RightClickMenu = ( props ) => {
 					</NavigableMenu>
 				</Popover>
 			) }
-		</>
+		</div>
 	);
 };
 
