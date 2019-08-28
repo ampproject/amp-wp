@@ -21,25 +21,15 @@ const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, getCurrentPageAttributes } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, getCurrentPageBackgroundType } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
 	];
-	const currentBlock = getCurrentPageAttributes();
+	const mediaType = getCurrentPageBackgroundType();
 
-	let imageTitle = __( 'Insert Background Image', 'amp' );
-	let videoTitle = __( 'Insert Background Video', 'amp' );
-	if ( currentBlock.mediaId ) {
-		switch ( currentBlock.mediaType ) {
-			case 'image':
-				imageTitle = __( 'Update Background Image', 'amp' );
-				break;
-			case 'video':
-				videoTitle = __( 'Update Background Video', 'amp' );
-				break;
-		}
-	}
+	const imageTitle = 'image' === mediaType ? __( 'Update Background Image', 'amp' ) : __( 'Insert Background Image', 'amp' );
+	const videoTitle = 'video' === mediaType ? __( 'Update Background Video', 'amp' ) : __( 'Insert Background Video', 'amp' );
 
 	const dropDownOptions = [
 		{
@@ -92,7 +82,7 @@ MediaInserter.propTypes = {
 	updateBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
 	showInserter: PropTypes.bool.isRequired,
-	getCurrentPageAttributes: PropTypes.bool.isRequired,
+	getCurrentPageBackgroundType: PropTypes.func.isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -133,13 +123,15 @@ const applyWithSelect = withSelect( ( select ) => {
 		},
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
-		getCurrentPageAttributes: () => {
+		getCurrentPageBackgroundType: () => {
 			const clientId = getCurrentPage();
-			const block = select( 'core/block-editor' ).getBlocksByClientId( clientId );
-			if ( ! block ) {
-				return {};
+			const blocks = select( 'core/block-editor' ).getBlocksByClientId( clientId );
+			if ( ! blocks ) {
+				return '';
 			}
-			return block[ 0 ].attributes;
+			const block = blocks.shift();
+			const mediaType = ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
+			return mediaType;
 		},
 	};
 } );
