@@ -51,19 +51,35 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 			],
 			'shortcode_with_lightbox'                 => [
 				'[gallery amp-lightbox=true amp-carousel=false ids={{id1}},{{id2}},{{id3}}]',
-				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img>' .
-					'<amp-img src="{{file2}}.jpg" width="600" height="450" layout="responsive" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w"></amp-img>' .
-					'<amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img>' .
-				'</amp-carousel>',
+				'<style type=\'text/css\'> #gallery-8 { margin: auto; } #gallery-8 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-8 img { border: 2px solid #cfcfcf; } #gallery-8 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
+				<div id=\'gallery-8\' class=\'gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail\'>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<br style="clear: both" />
+				</div>',
 			],
 			'shortcode_with_lightbox_linking_to_file' => [
 				'[gallery amp-lightbox=true amp-carousel=false link="file" ids={{id1}},{{id2}},{{id3}}]',
-				'<amp-carousel width="600" height="450" type="slides" layout="responsive">' .
-					'<a href="{{file1}}.jpg"><amp-img src="{{file1}}.jpg" width="50" height="50" layout="responsive" alt="Alt text"></amp-img></a>' .
-					'<a href="{{file2}}.jpg"><amp-img src="{{file2}}.jpg" width="600" height="450" layout="responsive" alt="Alt text" srcset="{{file2}}.jpg 640w, {{file2}}-300x225.jpg 300w"></amp-img></a>' .
-					'<a href="{{file3}}.jpg"><amp-img src="{{file3}}.jpg" width="100" height="100" layout="responsive" alt="Alt text"></amp-img></a>' .
-				'</amp-carousel>',
+				'<style type=\'text/css\'> #gallery-10 { margin: auto; } #gallery-10 .gallery-item { float: left; margin-top: 10px; text-align: center; width: 33%; } #gallery-10 img { border: 2px solid #cfcfcf; } #gallery-10 .gallery-caption { margin-left: 0; } /* see gallery_shortcode() in wp-includes/media.php */ </style>
+				<div id=\'gallery-10\' class=\'gallery galleryid-0 gallery-columns-3 gallery-size-thumbnail\'>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="50" height="50" src="{{file1}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="150" height="150" src="{{file2}}-150x150.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<dl class=\'gallery-item\'><dt class=\'gallery-icon landscape\'>
+						<img width="100" height="100" src="{{file3}}.jpg" class="attachment-thumbnail size-thumbnail" alt="Alt text" lightbox="" />
+					</dt></dl>
+					<br style="clear: both" />
+				</div>',
 			],
 			'shortcode_with_lightbox_and_carousel'    => [
 				'[gallery amp-lightbox=true amp-carousel=true ids={{id1}},{{id2}},{{id3}}]',
@@ -151,6 +167,7 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 			'{{file2}}' => $files[1],
 			'{{file3}}' => $files[2],
 			"\n"        => '', // Make tests ignore new lines.
+			'> <'       => '><', // Remove left-over space between elements.
 		];
 	}
 
@@ -162,6 +179,11 @@ class AMP_Gallery_Embed_Test extends WP_UnitTestCase {
 	 * @return string|array Normalized content.
 	 */
 	private function normalize( $content ) {
+		// We start by turning multiple whitespaces into one space, as the default WP gallery code
+		// creates a mess with lots of spaces.
+		$content = trim( preg_replace( '/\s+/', ' ', $content ) );
+
+		// Then we go through all previously defined replacements.
 		return str_replace(
 			array_keys( $this->replacements ),
 			$this->replacements,
