@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { cloneBlock, serialize } from '@wordpress/blocks';
+import { cloneBlock, pasteHandler, serialize } from '@wordpress/blocks';
 import { useEffect, useState } from '@wordpress/element';
 import {
 	MenuGroup,
@@ -23,7 +23,10 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import './edit.css';
-import { copyTextToClipBoard } from '../../helpers';
+import {
+	copyTextToClipBoard,
+	ensureAllowedBlocksOnPaste,
+} from '../../helpers';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
@@ -31,17 +34,28 @@ const POPOVER_PROPS = {
 };
 
 const RightClickMenu = ( props ) => {
-	const { clientIds, clientX, clientY, copyBlock, cutBlock, removeBlock, duplicateBlock } = props;
+	const {
+		clientIds,
+		clientX,
+		clientY,
+		copyBlock,
+		cutBlock,
+		getBlock,
+		removeBlock,
+		duplicateBlock,
+		pasteBlock,
+	} = props;
 	const [ isOpen, setIsOpen ] = useState( true );
+	const [ copiedBlock, setCopiedBlock ] = useState( '' );
 
 	useEffect( () => {
 		setIsOpen( true );
 	}, [ clientIds, clientX, clientY ] );
 
 	const blockClientIds = castArray( clientIds );
-
-	// @todo Make sure it's the inner block that's taken, not the Page.
 	const firstBlockClientId = blockClientIds[ 0 ];
+	const block = getBlock( firstBlockClientId );
+	const isPageBlock = block ? 'amp/amp-story-page' === block.name : false;
 
 	const onClose = () => {
 		setIsOpen( false );
@@ -49,12 +63,12 @@ const RightClickMenu = ( props ) => {
 
 	const onCopy = () => {
 		onClose();
-		copyBlock( firstBlockClientId );
+		copyBlock( firstBlockClientId, setCopiedBlock );
 	};
 
 	const onCut = () => {
 		onClose();
-		cutBlock( firstBlockClientId );
+		cutBlock( firstBlockClientId, setCopiedBlock );
 	};
 
 	const onRemove = () => {
@@ -67,6 +81,11 @@ const RightClickMenu = ( props ) => {
 		duplicateBlock( firstBlockClientId );
 	};
 
+	const onPaste = () => {
+		pasteBlock( copiedBlock, firstBlockClientId );
+		onClose();
+	};
+
 	// @todo Calculate the exact position based on the wrapper and event click.
 	// @todo Move this to with-right-click-handler.
 	const position = {
@@ -74,24 +93,48 @@ const RightClickMenu = ( props ) => {
 		left: clientX - 160,
 	};
 
-	const blockActions = [
-		{
-			name: __( 'Copy Block', 'amp' ),
-			blockAction: onCopy,
-		},
-		{
-			name: __( 'Cut Block', 'amp' ),
-			blockAction: onCut,
-		},
-		{
-			name: __( 'Duplicate Block', 'amp' ),
-			blockAction: onDuplicate,
-		},
-		{
-			name: __( 'Remove Block', 'amp' ),
-			blockAction: onRemove,
-		},
-	];
+	let blockActions = [];
+
+	// Don't allow any actions other than pasting with Page.
+	if ( ! isPageBlock ) {
+		blockActions = [
+			{
+				name: __( 'Copy Block', 'amp' ),
+				blockAction: onCopy,
+				icon: 'admin-page',
+			},
+			{
+				name: __( 'Cut Block', 'amp' ),
+				blockAction: onCut,
+				icon: 'clipboard',
+			},
+			{
+				name: __( 'Duplicate Block', 'amp' ),
+				blockAction: onDuplicate,
+				icon: 'admin-page',
+			},
+			{
+				name: __( 'Remove Block', 'amp' ),
+				blockAction: onRemove,
+				icon: 'trash',
+			},
+		];
+	}
+
+	// If it's Page block and clipboard is empty, don't display anything.
+	if ( ! copiedBlock.length && isPageBlock ) {
+		return '';
+	}
+
+	if ( copiedBlock.length ) {
+		blockActions.push(
+			{
+				name: __( 'Paste Last Copied Block', 'amp' ),
+				blockAction: onPaste,
+				icon: 'pressthis',
+			}
+		);
+	}
 
 	return (
 		<div className="amp-right-click-menu__container" style={ position }>
@@ -111,7 +154,7 @@ const RightClickMenu = ( props ) => {
 								<MenuItem
 									className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
 									onClick={ action.blockAction }
-									icon="admin-page"
+									icon={ action.icon }
 								>
 									{ action.name }
 								</MenuItem>
@@ -130,35 +173,49 @@ RightClickMenu.propTypes = {
 	clientY: PropTypes.number.isRequired,
 	copyBlock: PropTypes.func.isRequired,
 	cutBlock: PropTypes.func.isRequired,
+	getBlock: PropTypes.func.isRequired,
 	removeBlock: PropTypes.func.isRequired,
 	duplicateBlock: PropTypes.func.isRequired,
+	pasteBlock: PropTypes.func.isRequired,
 };
 
 const applyWithSelect = withSelect( ( select ) => {
 	const {
 		getBlock,
+		getBlockOrder,
 		getBlockRootClientId,
+		getSettings,
 	} = select( 'core/block-editor' );
 
 	return {
 		getBlock,
+		getBlockOrder,
 		getBlockRootClientId,
+		getSettings,
 	};
 } );
 
 const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 	const {
 		getBlock,
+		getBlockOrder,
 		getBlockRootClientId,
+		getSettings,
 	} = props;
 	const {
 		removeBlock,
 		insertBlock,
+		insertBlocks,
 	} = dispatch( 'core/block-editor' );
 
-	const copyBlock = ( clientId ) => {
+	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
+
+	const copyBlock = ( clientId, setCopiedBlock ) => {
 		const block = getBlock( clientId );
 		const serialized = serialize( block );
+
+		// Set the copied block to component state for being able to Paste.
+		setCopiedBlock( serialized );
 		copyTextToClipBoard( serialized );
 	};
 
@@ -175,9 +232,35 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 			insertBlock( clonedBlock, null, rootClientId );
 		},
 		copyBlock,
-		cutBlock( clientId ) {
-			copyBlock( clientId );
+		cutBlock( clientId, setCopiedBlock ) {
+			copyBlock( clientId, setCopiedBlock );
 			removeBlock( clientId );
+		},
+		pasteBlock( text, clientId ) {
+			const mode = 'BLOCKS';
+
+			const content = pasteHandler( {
+				HTML: '',
+				plainText: text,
+				mode,
+				tagName: null,
+				canUserUseUnfilteredHTML,
+			} );
+
+			const clickedBlock = getBlock( clientId );
+			let pageClientId;
+			if ( 'amp/amp-story-page' === clickedBlock.name ) {
+				pageClientId = clickedBlock.clientId;
+			} else {
+				pageClientId = getBlockRootClientId( clientId );
+			}
+
+			if ( ! pageClientId || ! content.length ) {
+				return;
+			}
+
+			const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
+			insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId );
 		},
 	};
 } );

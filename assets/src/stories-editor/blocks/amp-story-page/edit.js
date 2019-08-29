@@ -46,6 +46,7 @@ import {
 	uploadVideoFrame,
 	getPosterImageFromFileObj,
 	processMedia,
+	ensureAllowedBlocksOnPaste,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -86,7 +87,6 @@ class PageEdit extends Component {
 		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 		this.onPaste = this.onPaste.bind( this );
-		this.ensureAllowedBlocksOnPaste = this.ensureAllowedBlocksOnPaste.bind( this );
 	}
 
 	/**
@@ -143,33 +143,6 @@ class PageEdit extends Component {
 		}
 	}
 
-	ensureAllowedBlocksOnPaste( blocks ) {
-		const { clientId, name, isFirstPage } = this.props;
-		const allowedBlocks = [];
-		// @todo This will need handling for Page Attachment once it's available.
-		blocks.forEach( ( block ) => {
-			switch ( block.name ) {
-				// Skip copying Page.
-				case name:
-					return;
-				case 'amp/amp-story-cta':
-					// If the content has CTA block or it's the first page, don't add it.
-					const ctaBlock = getCallToActionBlock( clientId );
-					if ( ctaBlock || isFirstPage ) {
-						return;
-					}
-					allowedBlocks.push( block );
-					break;
-				default:
-					if ( ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
-						allowedBlocks.push( block );
-					}
-					break;
-			}
-		} );
-		return allowedBlocks;
-	}
-
 	onPaste( event ) {
 		const {
 			clientId,
@@ -218,7 +191,7 @@ class PageEdit extends Component {
 		} );
 
 		if ( content.length > 0 ) {
-			insertBlocks( this.ensureAllowedBlocksOnPaste( content ), null, clientId );
+			insertBlocks( ensureAllowedBlocksOnPaste( content ), null, clientId );
 		}
 	}
 
@@ -559,7 +532,6 @@ PageEdit.propTypes = {
 	} ).isRequired,
 	canUserUseUnfilteredHTML: PropTypes.bool,
 	insertBlocks: PropTypes.func.isRequired,
-	isFirstPage: PropTypes.bool.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
@@ -618,7 +590,6 @@ export default compose(
 			getBlockOrder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
-			isFirstPage,
 		};
 	} ),
 )( PageEdit );

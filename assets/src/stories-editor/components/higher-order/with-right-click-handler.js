@@ -72,9 +72,10 @@ export default createHigherOrderComponent(
 	( BlockEdit ) => {
 		return enhanced( ( props ) => {
 			const { name, onContextMenu, isReordering } = props;
+			const isPageBlock = 'amp/amp-story-page' === name;
 
-			// Not a valid top level block.
-			if ( ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
+			// Add for page block and inner blocks.
+			if ( ! isPageBlock && ! ALLOWED_CHILD_BLOCKS.includes( name ) ) {
 				return <BlockEdit { ...props } />;
 			}
 
