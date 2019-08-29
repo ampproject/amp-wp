@@ -23,13 +23,15 @@ import '../block-editor/store';
 const { isEditedPostDirty } = select( 'core/editor' );
 
 subscribe( () => {
-	if ( ! isEditedPostDirty() ) {
-		if ( ! isAMPEnabled() ) {
-			maybeResetValidationErrors();
-		} else {
-			updateValidationErrors();
+	try {
+		if ( ! isEditedPostDirty() ) {
+			if ( ! isAMPEnabled() ) {
+				maybeResetValidationErrors();
+			} else {
+				updateValidationErrors();
+			}
 		}
-	}
+	} catch ( err ) {}
 } );
 
 addFilter( 'editor.BlockEdit', 'amp/add-notice', withValidationErrorNotice, 99 );
