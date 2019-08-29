@@ -2,7 +2,7 @@
 
 module.exports = function( grunt ) {
 	'use strict';
-
+	require('dotenv').config();
 	grunt.initConfig( {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -50,7 +50,7 @@ module.exports = function( grunt ) {
 		http: {
 			google_fonts: {
 				options: {
-					url: 'https://www.googleapis.com/webfonts/v1/webfonts?key=AIzaSyBcMwx87RYvnlSYsQMub-hcdjOaPGHmvPM',
+					url: 'https://www.googleapis.com/webfonts/v1/webfonts?key=' + process.env.GOOGLE_FONT_API,
 				},
 				dest: 'includes/data/fonts.json'
 			}

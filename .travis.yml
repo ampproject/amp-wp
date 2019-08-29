@@ -47,6 +47,7 @@ before_script:
 script:
   - npm run build:js
   - npm run build:css
+  - npm run build:download-fonts
   - source "$DEV_LIB_PATH/travis.script.sh"
   - |
     if [[ ! -z "$PHPUNIT_EXTRA_GROUP" ]]; then
