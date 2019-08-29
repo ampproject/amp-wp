@@ -130,7 +130,7 @@ const RightClickMenu = ( props ) => {
 	if ( getCopiedMarkup().length ) {
 		blockActions.push(
 			{
-				name: __( 'Paste Last Copied Block', 'amp' ),
+				name: __( 'Paste', 'amp' ),
 				blockAction: onPaste,
 				icon: 'pressthis',
 			}
@@ -273,16 +273,21 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 			removeBlock( clientId );
 		},
 		pasteBlock( clientId ) {
-			// We have to ask permissions for being able to read from clipboard.
-			navigator.clipboard.readText().
-				then( ( clipBoardText ) => {
-					// If got permission, paste from clipboard.
-					processTextToPaste( clipBoardText, clientId );
-				} ).catch( () => {
-					// If forbidden, use the markup from state instead.
-					const text = getCopiedMarkup();
-					processTextToPaste( text, clientId );
-				} );
+			if ( navigator.clipboard ) {
+				// We have to ask permissions for being able to read from clipboard.
+				navigator.clipboard.readText().
+					then( ( clipBoardText ) => {
+						// If got permission, paste from clipboard.
+						processTextToPaste( clipBoardText, clientId );
+					} ).catch( () => {
+						// If forbidden, use the markup from state instead.
+						const text = getCopiedMarkup();
+						processTextToPaste( text, clientId );
+					} );
+			} else {
+				const text = getCopiedMarkup();
+				processTextToPaste( text, clientId );
+			}
 		},
 	};
 } );
