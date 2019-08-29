@@ -7,7 +7,7 @@ import { castArray } from 'lodash';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { cloneBlock } from '@wordpress/blocks';
+import { cloneBlock, serialize } from '@wordpress/blocks';
 import { createRef, useEffect, useState } from '@wordpress/element';
 import {
 	MenuGroup,
@@ -22,6 +22,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import './edit.css';
+import { copyTextToClipBoard } from '../../helpers';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
@@ -29,7 +30,7 @@ const POPOVER_PROPS = {
 };
 
 const RightClickMenu = ( props ) => {
-	const { clientIds, clientX, clientY, removeBlock, duplicateBlock } = props;
+	const { clientIds, clientX, clientY, copyBlock, removeBlock, duplicateBlock } = props;
 	const [ isOpen, setIsOpen ] = useState( true );
 
 	useEffect( () => {
@@ -43,6 +44,11 @@ const RightClickMenu = ( props ) => {
 
 	const onClose = () => {
 		setIsOpen( false );
+	};
+
+	const onCopy = () => {
+		onClose();
+		copyBlock( firstBlockClientId );
 	};
 
 	const onRemove = () => {
@@ -75,6 +81,15 @@ const RightClickMenu = ( props ) => {
 					<NavigableMenu
 						role="menu"
 					>
+						<MenuGroup>
+							<MenuItem
+								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
+								onClick={ onCopy }
+								icon="admin-page"
+							>
+								{ __( 'Copy', 'amp' ) }
+							</MenuItem>
+						</MenuGroup>
 						<MenuGroup>
 							<MenuItem
 								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
@@ -132,6 +147,11 @@ const applyDispatch = withDispatch( ( dispatch, props ) => {
 			const rootClientId = getBlockRootClientId( clientId );
 			const clonedBlock = cloneBlock( block );
 			insertBlock( clonedBlock, null, rootClientId );
+		},
+		copyBlock( clientId ) {
+			const block = getBlock( clientId );
+			const serialized = serialize( block );
+			copyTextToClipBoard( serialized );
 		},
 	};
 } );
