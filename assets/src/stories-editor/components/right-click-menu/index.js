@@ -2,13 +2,14 @@
  * External dependencies
  */
 import { castArray } from 'lodash';
+import PropTypes from 'prop-types';
 
 /**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { cloneBlock, serialize } from '@wordpress/blocks';
-import { createRef, useEffect, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import {
 	MenuGroup,
 	MenuItem,
@@ -73,6 +74,25 @@ const RightClickMenu = ( props ) => {
 		left: clientX - 160,
 	};
 
+	const blockActions = [
+		{
+			name: __( 'Copy Block', 'amp' ),
+			blockAction: onCopy,
+		},
+		{
+			name: __( 'Cut Block', 'amp' ),
+			blockAction: onCut,
+		},
+		{
+			name: __( 'Duplicate Block', 'amp' ),
+			blockAction: onDuplicate,
+		},
+		{
+			name: __( 'Remove Block', 'amp' ),
+			blockAction: onRemove,
+		},
+	];
+
 	return (
 		<div className="amp-right-click-menu__container" style={ position }>
 			{ isOpen && (
@@ -86,42 +106,17 @@ const RightClickMenu = ( props ) => {
 					<NavigableMenu
 						role="menu"
 					>
-						<MenuGroup>
-							<MenuItem
-								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-								onClick={ onCopy }
-								icon="admin-page"
-							>
-								{ __( 'Copy', 'amp' ) }
-							</MenuItem>
-						</MenuGroup>
-						<MenuGroup>
-							<MenuItem
-								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-								onClick={ onCut }
-								icon="admin-page"
-							>
-								{ __( 'Cut', 'amp' ) }
-							</MenuItem>
-						</MenuGroup>
-						<MenuGroup>
-							<MenuItem
-								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-								onClick={ onDuplicate }
-								icon="admin-page"
-							>
-								{ __( 'Duplicate', 'amp' ) }
-							</MenuItem>
-						</MenuGroup>
-						<MenuGroup>
-							<MenuItem
-								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-								onClick={ onRemove }
-								icon="trash"
-							>
-								{ __( 'Remove Block', 'amp' ) }
-							</MenuItem>
-						</MenuGroup>
+						{ blockActions.map( ( action ) => (
+							<MenuGroup key={ `action-${ action.name }` } >
+								<MenuItem
+									className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
+									onClick={ action.blockAction }
+									icon="admin-page"
+								>
+									{ action.name }
+								</MenuItem>
+							</MenuGroup>
+						) ) }
 					</NavigableMenu>
 				</Popover>
 			) }
@@ -129,7 +124,17 @@ const RightClickMenu = ( props ) => {
 	);
 };
 
-const applySelect = withSelect( ( select ) => {
+RightClickMenu.propTypes = {
+	clientIds: PropTypes.array.isRequired,
+	clientX: PropTypes.number.isRequired,
+	clientY: PropTypes.number.isRequired,
+	copyBlock: PropTypes.func.isRequired,
+	cutBlock: PropTypes.func.isRequired,
+	removeBlock: PropTypes.func.isRequired,
+	duplicateBlock: PropTypes.func.isRequired,
+};
+
+const applyWithSelect = withSelect( ( select ) => {
 	const {
 		getBlock,
 		getBlockRootClientId,
@@ -141,7 +146,7 @@ const applySelect = withSelect( ( select ) => {
 	};
 } );
 
-const applyDispatch = withDispatch( ( dispatch, props ) => {
+const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 	const {
 		getBlock,
 		getBlockRootClientId,
@@ -178,6 +183,6 @@ const applyDispatch = withDispatch( ( dispatch, props ) => {
 } );
 
 export default compose(
-	applySelect,
-	applyDispatch,
+	applyWithSelect,
+	applyWithDispatch,
 )( RightClickMenu );
