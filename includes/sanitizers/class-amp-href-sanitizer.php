@@ -20,6 +20,20 @@ final class AMP_Href_Sanitizer extends AMP_Base_Sanitizer {
 	const XPATH_SELECTOR = '//*[@href]';
 
 	/**
+	 * Array of attribute names that should be removed for invalid hrefs.
+	 *
+	 * @var array<string>
+	 */
+	private static $attributes_tied_to_href = [
+		'target',
+		'download',
+		'rel',
+		'rev',
+		'hreflang',
+		'type',
+	];
+
+	/**
 	 * Sanitize the HTML contained in the DOMDocument received by the
 	 * constructor
 	 *
@@ -47,14 +61,7 @@ final class AMP_Href_Sanitizer extends AMP_Base_Sanitizer {
 				 * if the href attribute is not present."
 				 * See: https://www.w3.org/TR/2016/REC-html51-20161101/textlevel-semantics.html#the-a-element
 				 */
-				foreach ( [
-					'target',
-					'download',
-					'rel',
-					'rev',
-					'hreflang',
-					'type',
-				] as $attribute ) {
+				foreach ( self::$attributes_tied_to_href as $attribute ) {
 					if ( $node->hasAttribute( $attribute ) ) {
 						$node->removeAttribute( $attribute );
 					}
