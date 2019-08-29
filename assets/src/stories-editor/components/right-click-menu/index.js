@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
  */
 import { __ } from '@wordpress/i18n';
 import { cloneBlock, pasteHandler, serialize } from '@wordpress/blocks';
-import { useEffect, useState } from '@wordpress/element';
+import { useEffect, useState, useRef } from '@wordpress/element';
 import {
 	MenuGroup,
 	MenuItem,
@@ -33,6 +33,30 @@ const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
 	position: 'bottom left',
 };
+
+function useOutsideClickChecker( ref, onClose ) {
+	/**
+	 * Close the Popover if outside click was detected.
+	 *
+	 * @param {Object} event Click event.
+	 */
+	function handleClickOutside( event ) {
+		if ( ref.current && ! ref.current.contains( event.target ) ) {
+			onClose();
+		}
+	}
+
+	useEffect( () => {
+		// Handle click outside only if the the menu has been added.
+		if ( ref.current && ref.current.innerHTML ) {
+			document.addEventListener( 'mousedown', handleClickOutside );
+		}
+		return () => {
+			// Unbind when cleaning up.
+			document.removeEventListener( 'mousedown', handleClickOutside );
+		};
+	} );
+}
 
 const RightClickMenu = ( props ) => {
 	const {
@@ -61,6 +85,9 @@ const RightClickMenu = ( props ) => {
 	const onClose = () => {
 		setIsOpen( false );
 	};
+
+	const containerRef = useRef( null );
+	useOutsideClickChecker( containerRef, onClose );
 
 	const onCopy = () => {
 		onClose();
@@ -136,13 +163,12 @@ const RightClickMenu = ( props ) => {
 	}
 
 	return (
-		<div className="amp-right-click-menu__container" style={ position }>
+		<div ref={ containerRef } className="amp-right-click-menu__container" style={ position }>
 			{ isOpen && (
 				<Popover
 					className={ POPOVER_PROPS.className }
 					position={ POPOVER_PROPS.position }
 					onClose={ onClose }
-					onFocusOutside={ onClose }
 					focusOnMount={ true }
 				>
 					<NavigableMenu
