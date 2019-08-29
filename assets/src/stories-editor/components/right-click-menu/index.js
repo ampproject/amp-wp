@@ -30,7 +30,7 @@ const POPOVER_PROPS = {
 };
 
 const RightClickMenu = ( props ) => {
-	const { clientIds, clientX, clientY, copyBlock, removeBlock, duplicateBlock } = props;
+	const { clientIds, clientX, clientY, copyBlock, cutBlock, removeBlock, duplicateBlock } = props;
 	const [ isOpen, setIsOpen ] = useState( true );
 
 	useEffect( () => {
@@ -49,6 +49,11 @@ const RightClickMenu = ( props ) => {
 	const onCopy = () => {
 		onClose();
 		copyBlock( firstBlockClientId );
+	};
+
+	const onCut = () => {
+		onClose();
+		cutBlock( firstBlockClientId );
 	};
 
 	const onRemove = () => {
@@ -88,6 +93,15 @@ const RightClickMenu = ( props ) => {
 								icon="admin-page"
 							>
 								{ __( 'Copy', 'amp' ) }
+							</MenuItem>
+						</MenuGroup>
+						<MenuGroup>
+							<MenuItem
+								className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
+								onClick={ onCut }
+								icon="admin-page"
+							>
+								{ __( 'Cut', 'amp' ) }
 							</MenuItem>
 						</MenuGroup>
 						<MenuGroup>
@@ -136,6 +150,13 @@ const applyDispatch = withDispatch( ( dispatch, props ) => {
 		removeBlock,
 		insertBlock,
 	} = dispatch( 'core/block-editor' );
+
+	const copyBlock = ( clientId ) => {
+		const block = getBlock( clientId );
+		const serialized = serialize( block );
+		copyTextToClipBoard( serialized );
+	};
+
 	return {
 		removeBlock,
 		duplicateBlock( clientId ) {
@@ -148,10 +169,10 @@ const applyDispatch = withDispatch( ( dispatch, props ) => {
 			const clonedBlock = cloneBlock( block );
 			insertBlock( clonedBlock, null, rootClientId );
 		},
-		copyBlock( clientId ) {
-			const block = getBlock( clientId );
-			const serialized = serialize( block );
-			copyTextToClipBoard( serialized );
+		copyBlock,
+		cutBlock( clientId ) {
+			copyBlock( clientId );
+			removeBlock( clientId );
 		},
 	};
 } );
