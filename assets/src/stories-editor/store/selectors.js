@@ -98,3 +98,13 @@ export function getBlockIndex( state, page ) {
 export function isReordering( state ) {
 	return state.blocks.isReordering || false;
 }
+
+/**
+ * Returns copied markup for pasting workaround.
+ *
+ * @param {Object} state Editor state.
+ * @return {string} Markup.
+ */
+export function getCopiedMarkup( state ) {
+	return state.copiedMarkup || '';
+}
