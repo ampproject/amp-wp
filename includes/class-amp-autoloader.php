@@ -72,6 +72,7 @@ class AMP_Autoloader {
 		'AMP_Blacklist_Sanitizer'            => 'includes/sanitizers/class-amp-blacklist-sanitizer',
 		'AMP_Block_Sanitizer'                => 'includes/sanitizers/class-amp-block-sanitizer',
 		'AMP_Gallery_Block_Sanitizer'        => 'includes/sanitizers/class-amp-gallery-block-sanitizer',
+		'AMP_Href_Sanitizer'                 => 'includes/sanitizers/class-amp-href-sanitizer',
 		'AMP_Iframe_Sanitizer'               => 'includes/sanitizers/class-amp-iframe-sanitizer',
 		'AMP_Img_Sanitizer'                  => 'includes/sanitizers/class-amp-img-sanitizer',
 		'AMP_Nav_Menu_Toggle_Sanitizer'      => 'includes/sanitizers/class-amp-nav-menu-toggle-sanitizer',
