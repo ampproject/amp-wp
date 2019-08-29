@@ -159,4 +159,22 @@ export function blocks( state = {}, action ) {
 	}
 }
 
-export default combineReducers( { animations, currentPage, blocks } );
+export function copiedMarkup( state = {}, action ) {
+	switch ( action.type ) {
+		case 'SET_COPIED_MARKUP':
+			const { markup } = action;
+			return markup;
+
+		case 'CLEAR_COPIED_MARKUP':
+			if ( ! state.length ) {
+				return state;
+			}
+
+			return '';
+
+		default:
+			return state;
+	}
+}
+
+export default combineReducers( { animations, currentPage, blocks, copiedMarkup } );

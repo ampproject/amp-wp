@@ -266,6 +266,7 @@ class PageEdit extends Component {
 	render() { // eslint-disable-line complexity
 		const {
 			attributes,
+			clearCopiedMarkup,
 			media,
 			setAttributes,
 			totalAnimationDuration,
@@ -493,6 +494,8 @@ class PageEdit extends Component {
 				</InspectorControls>
 				<div
 					style={ style }
+					// Clear copied markup from state to ensure it doesn't have "expired" data in.
+					onCopy={ clearCopiedMarkup }
 					onPaste={ this.onPaste }
 				>
 					{ /* todo: show poster image as background-image instead */ }
@@ -531,6 +534,7 @@ PageEdit.propTypes = {
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ).isRequired,
 	canUserUseUnfilteredHTML: PropTypes.bool,
+	clearCopiedMarkup: PropTypes.func.isRequired,
 	insertBlocks: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
@@ -550,7 +554,9 @@ PageEdit.propTypes = {
 export default compose(
 	withDispatch( () => {
 		const { insertBlocks, moveBlockToPosition } = dispatch( 'core/block-editor' );
+		const { clearCopiedMarkup } = dispatch( 'amp/story' );
 		return {
+			clearCopiedMarkup,
 			insertBlocks,
 			moveBlockToPosition,
 		};

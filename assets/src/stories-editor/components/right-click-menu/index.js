@@ -41,12 +41,12 @@ const RightClickMenu = ( props ) => {
 		copyBlock,
 		cutBlock,
 		getBlock,
+		getCopiedMarkup,
 		removeBlock,
 		duplicateBlock,
 		pasteBlock,
 	} = props;
 	const [ isOpen, setIsOpen ] = useState( true );
-	const [ copiedBlock, setCopiedBlock ] = useState( '' );
 
 	useEffect( () => {
 		setIsOpen( true );
@@ -63,12 +63,12 @@ const RightClickMenu = ( props ) => {
 
 	const onCopy = () => {
 		onClose();
-		copyBlock( firstBlockClientId, setCopiedBlock );
+		copyBlock( firstBlockClientId );
 	};
 
 	const onCut = () => {
 		onClose();
-		cutBlock( firstBlockClientId, setCopiedBlock );
+		cutBlock( firstBlockClientId );
 	};
 
 	const onRemove = () => {
@@ -82,7 +82,7 @@ const RightClickMenu = ( props ) => {
 	};
 
 	const onPaste = () => {
-		pasteBlock( copiedBlock, firstBlockClientId );
+		pasteBlock( firstBlockClientId );
 		onClose();
 	};
 
@@ -122,11 +122,11 @@ const RightClickMenu = ( props ) => {
 	}
 
 	// If it's Page block and clipboard is empty, don't display anything.
-	if ( ! copiedBlock.length && isPageBlock ) {
+	if ( ! getCopiedMarkup().length && isPageBlock ) {
 		return '';
 	}
 
-	if ( copiedBlock.length ) {
+	if ( getCopiedMarkup().length ) {
 		blockActions.push(
 			{
 				name: __( 'Paste Last Copied Block', 'amp' ),
@@ -174,6 +174,7 @@ RightClickMenu.propTypes = {
 	copyBlock: PropTypes.func.isRequired,
 	cutBlock: PropTypes.func.isRequired,
 	getBlock: PropTypes.func.isRequired,
+	getCopiedMarkup: PropTypes.func.isRequired,
 	removeBlock: PropTypes.func.isRequired,
 	duplicateBlock: PropTypes.func.isRequired,
 	pasteBlock: PropTypes.func.isRequired,
@@ -187,11 +188,14 @@ const applyWithSelect = withSelect( ( select ) => {
 		getSettings,
 	} = select( 'core/block-editor' );
 
+	const { getCopiedMarkup } = select( 'amp/story' );
+
 	return {
 		getBlock,
 		getBlockOrder,
 		getBlockRootClientId,
 		getSettings,
+		getCopiedMarkup,
 	};
 } );
 
@@ -200,6 +204,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		getBlock,
 		getBlockOrder,
 		getBlockRootClientId,
+		getCopiedMarkup,
 		getSettings,
 	} = props;
 	const {
@@ -208,14 +213,16 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		insertBlocks,
 	} = dispatch( 'core/block-editor' );
 
+	const { setCopiedMarkup } = dispatch( 'amp/story' );
+
 	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
 
-	const copyBlock = ( clientId, setCopiedBlock ) => {
+	const copyBlock = ( clientId ) => {
 		const block = getBlock( clientId );
 		const serialized = serialize( block );
 
 		// Set the copied block to component state for being able to Paste.
-		setCopiedBlock( serialized );
+		setCopiedMarkup( serialized );
 		copyTextToClipBoard( serialized );
 	};
 
@@ -232,12 +239,13 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 			insertBlock( clonedBlock, null, rootClientId );
 		},
 		copyBlock,
-		cutBlock( clientId, setCopiedBlock ) {
-			copyBlock( clientId, setCopiedBlock );
+		cutBlock( clientId ) {
+			copyBlock( clientId );
 			removeBlock( clientId );
 		},
-		pasteBlock( text, clientId ) {
+		pasteBlock( clientId ) {
 			const mode = 'BLOCKS';
+			const text = getCopiedMarkup();
 
 			const content = pasteHandler( {
 				HTML: '',

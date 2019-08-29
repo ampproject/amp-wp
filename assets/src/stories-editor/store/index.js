@@ -30,6 +30,7 @@ export default registerStore(
 				order: [],
 				isReordering: false,
 			},
+			copiedMarkup: '',
 		},
 	}
 );
