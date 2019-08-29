@@ -47,7 +47,15 @@ class AMP_Href_Sanitizer_Test extends WP_UnitTestCase {
 			'anchor_links_are_valid' => [
 				'<a href="#section-a">Valid Link</a>',
 				'<a href="#section-a">Valid Link</a>',
-			]
+			],
+			'unwanted_additional_attributes_are_kept_for_valid_urls' => [
+				'<a id="this-is-kept" href="http://example.com/" target="_blank" download rel="nofollow" rev="nofollow" hreflang="en" type="text/html" class="this-stays">Invalid Link</a>',
+				'<a id="this-is-kept" href="http://example.com/" target="_blank" download rel="nofollow" rev="nofollow" hreflang="en" type="text/html" class="this-stays">Invalid Link</a>',
+			],
+			'unwanted_additional_attributes_are_omitted_for_invalid_urls' => [
+				'<a id="this-is-kept" href="http://foo@" target="_blank" download rel="nofollow" rev="nofollow" hreflang="en" type="text/html" class="this-stays">Invalid Link</a>',
+				'<a id="this-is-kept" class="this-stays">Invalid Link</a>',
+			],
 		];
 	}
 
