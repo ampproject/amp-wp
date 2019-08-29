@@ -322,6 +322,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 									<p>More text and a YouTube video!</p>
 									<amp-youtube data-videoid="b4Vhdr8jtx0" layout="responsive" width="480" height="270">
 									</amp-youtube>
+									<amp-video src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4" width="300" height="300" controls=""></amp-video>
 									<p>And a tweet!</p>
 									<amp-twitter data-tweetid="885634330868850689" layout="responsive" width="480" height="270">
 									</amp-twitter>
@@ -336,7 +337,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 					return [
 						$html,
 						preg_replace( '#<\w+[^>]*>bad</\w+>#', '', $html ),
-						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube' ],
+						[ 'amp-story', 'amp-analytics', 'amp-twitter', 'amp-youtube', 'amp-video' ],
 					];
 				}
 			),
@@ -787,18 +788,23 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-sidebar' ],
 			],
 
-			'amp_sidebar_with_div_inside_nav'              => [
+			'amp_sidebar_inside_and_outside_div'           => [
 				'
-				<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="right">
-					<nav>
-						<ul>
-							<li><a href="https://example.com/"></a></li>
-						</ul>
-						<div class="some-div">
-							...
-						</div>
-					</nav>
+				<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="left">
+					<nav><a href="/">Home!</a></nav>
 				</amp-sidebar>
+				<div>
+					<amp-sidebar id="mobile-sidebar" layout="nodisplay" side="right">
+						<nav>
+							<ul>
+								<li><a href="https://example.com/"></a></li>
+							</ul>
+							<div class="some-div">
+								...
+							</div>
+						</nav>
+					</amp-sidebar>
+				</div>
 				',
 				null,
 				[ 'amp-sidebar' ],
@@ -1377,6 +1383,17 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-date-display', 'amp-mustache' ],
 			],
 
+			'amp_date_display_template'                    => [
+				'
+				<amp-date-display template="dateTime" locale="pt-br" datetime="now" layout="flex-item"> </amp-date-display>
+				<template type="amp-mustache" id="dateTime">
+					{{day}} de {{monthName}} {{year}}<small class="fg-muted block">{{hourTwoDigit}}:{{minuteTwoDigit}}</small>
+				</template>
+				',
+				null, // No change.
+				[ 'amp-date-display', 'amp-mustache' ],
+			],
+
 			'amp-list'                                     => [
 				'<amp-list credentials="include" src="https://example.com/json/product.json?clientId=CLIENT_ID(myCookieId)"><template type="amp-mustache">Your personal offer: ${{price}}</template></amp-list>',
 				null,
@@ -1410,6 +1427,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							<amp-list-load-more load-more-end>
 								Congratulations! You reached the end.
 							</amp-list-load-more>
+							<div fetch-error align="center">
+								Fetch error!
+							</div>
+							<div placeholder>
+								Placeholder!
+							</div>
+							<div fallback>
+								Fallback!
+							</div>
 						</amp-list>
 					'
 				),
@@ -1505,6 +1531,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[ 'amp-script' ],
 			],
 
+			'amp-script-with-canvas'                       => [
+				'
+					<amp-script src="https://example.com/examples/amp-script/empty.js">
+						<canvas width="100" height="100"></canvas>
+					</amp-script>
+				',
+				null,
+				[ 'amp-script' ],
+			],
+
 			'amp_img_with_object_fit_position'             => [
 				'<amp-img src="http://placehold.it/400x500" width="300" height="300" object-fit="none" object-position="right top" layout="intrinsic"></amp-img>',
 				null,
@@ -1534,6 +1570,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 							</script>
 						</amp-autocomplete>
 					</form>
+					<amp-autocomplete id="autocomplete2" filter="substring" min-characters="0">
+						<input type="text" id="input2">
+						<script type="application/json" id="script">
+						{ "items" : ["red", "green", "blue"] }
+						</script>
+					</amp-autocomplete>
 				',
 				null,
 				[ 'amp-form', 'amp-autocomplete' ],
@@ -1704,6 +1746,59 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,minimum-scale=1"></head><body><p>Content</p></body></html>',
 				[],
 				[ 'duplicate_element' ],
+			],
+			'meta_amp_script_src'                     => [
+				'<html amp><head><meta charset="utf-8"><meta name="amp-script-src" content="sha384-abc123 sha384-def456"></head><body></body></html>',
+				null, // No change.
+			],
+		];
+
+		$bad_dev_mode_document = sprintf(
+			'
+				<html amp data-ampdevmode>
+					<head>
+						<meta charset="utf-8">
+						<style amp-custom data-ampdevmode>%s</style>
+					</head>
+					<body>
+						<amp-state id="something">
+							<script type="application/json" data-ampdevmode>%s</script>
+						</amp-state>
+						<button data-ampdevmode onclick="alert(\'Hello!\')"></button>
+						<script data-ampdevmode>document.write("Hello World!")</script>
+					</body>
+				</html>
+				',
+			'button::before { content:"' . str_repeat( 'a', 50001 ) . '";"}',
+			'{"foo":"' . str_repeat( 'b', 100001 ) . '"}'
+		);
+
+		$data['dev_mode_test'] = [
+			$bad_dev_mode_document,
+			null,
+			[ 'amp-bind' ],
+			[], // All validation errors suppressed.
+		];
+
+		$data['bad_document_without_dev_mode'] = [
+			str_replace( 'data-ampdevmode', '', $bad_dev_mode_document ),
+			'
+			<html amp>
+				<head>
+					<meta charset="utf-8">
+				</head>
+				<body>
+					<amp-state id="something"></amp-state>
+					<button></button>
+				</body>
+			</html>
+			',
+			[ 'amp-bind' ],
+			[
+				'invalid_attribute',
+				'invalid_element',
+				'invalid_element',
+				'invalid_element',
 			],
 		];
 

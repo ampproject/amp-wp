@@ -177,6 +177,7 @@
 
 @media (min-width: 961px) {
 
+	.edit-post-header-toolbar #amp-story-media-inserter,
 	.edit-post-header-toolbar #amp-story-shortcuts {
 		display: flex;
 	}

@@ -45,6 +45,7 @@ import {
 	getUniqueId,
 	uploadVideoFrame,
 	getPosterImageFromFileObj,
+	processMedia,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -100,52 +101,8 @@ class PageEdit extends Component {
 	 */
 	onSelectMedia( media ) {
 		const { setAttributes } = this.props;
-
-		if ( ! media || ! media.url ) {
-			setAttributes(
-				{
-					mediaUrl: undefined,
-					mediaId: undefined,
-					mediaType: undefined,
-					mediaAlt: undefined,
-					poster: undefined,
-				}
-			);
-			return;
-		}
-
-		let mediaType;
-
-		// For media selections originated from a file upload.
-		if ( media.media_type ) {
-			if ( media.media_type === VIDEO_BACKGROUND_TYPE ) {
-				mediaType = VIDEO_BACKGROUND_TYPE;
-			} else {
-				mediaType = IMAGE_BACKGROUND_TYPE;
-			}
-		} else {
-			// For media selections originated from existing files in the media library.
-			if (
-				media.type !== IMAGE_BACKGROUND_TYPE &&
-				media.type !== VIDEO_BACKGROUND_TYPE
-			) {
-				return;
-			}
-
-			mediaType = media.type;
-		}
-
-		const mediaAlt = media.alt || media.title;
-		const mediaUrl = media.url;
-		const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
-
-		this.props.setAttributes( {
-			mediaUrl,
-			mediaId: media.id,
-			mediaType,
-			mediaAlt,
-			poster,
-		} );
+		const processed = processMedia( media );
+		setAttributes( processed );
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -324,7 +281,6 @@ class PageEdit extends Component {
 				<InspectorControls>
 					<PanelColorSettings
 						title={ __( 'Background Color', 'amp' ) }
-						initialOpen={ false }
 						colorSettings={ colorSettings }
 					>
 						<p>
