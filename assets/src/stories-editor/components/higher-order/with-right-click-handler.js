@@ -36,17 +36,27 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 			return;
 		}
 
+		const editLayout = document.querySelector( '.edit-post-layout' );
 		if ( ! document.getElementById( 'amp-story-right-click-menu' ) ) {
-			const editLayout = document.querySelector( '.edit-post-layout' );
-
 			const menuWrapper = document.createElement( 'div' );
 			menuWrapper.id = 'amp-story-right-click-menu';
 
 			editLayout.appendChild( menuWrapper );
 		}
 
+		// Calculate the position to display the right click menu.
+		const wrapperDimensions = editLayout.getBoundingClientRect();
+		const toolBar = document.querySelector( '.edit-post-header' );
+
+		// If Toolbar is available then consider that as well.
+		let toolBarHeight = 0;
+		if ( toolBar ) {
+			toolBarHeight = toolBar.clientHeight;
+		}
+		const relativePositionX = event.clientX - wrapperDimensions.left;
+		const relativePositionY = event.clientY - wrapperDimensions.top - toolBarHeight;
 		render(
-			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ event.clientX } clientY={ event.clientY } />,
+			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } />,
 			document.getElementById( 'amp-story-right-click-menu' )
 		);
 

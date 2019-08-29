@@ -87,11 +87,9 @@ const RightClickMenu = ( props ) => {
 		onClose();
 	};
 
-	// @todo Calculate the exact position based on the wrapper and event click.
-	// @todo Move this to with-right-click-handler.
 	const position = {
-		top: clientY - 100,
-		left: clientX - 160,
+		top: clientY,
+		left: clientX,
 	};
 
 	let blockActions = [];
