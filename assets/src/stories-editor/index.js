@@ -25,6 +25,7 @@ import {
 /**
  * Internal dependencies
  */
+import './style.css'; // This way the general editor styles are loaded before all the component styles.
 import {
 	withCroppedFeaturedImage,
 	withEnforcedFileType,
@@ -64,7 +65,6 @@ import {
 } from './helpers';
 import { ALLOWED_BLOCKS } from './constants';
 import store from './store';
-import './style.css';
 
 const {
 	getSelectedBlock,
