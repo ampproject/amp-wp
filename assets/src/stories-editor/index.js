@@ -275,8 +275,8 @@ store.subscribe( () => {
 			updateBlockAttributes( id, {
 				ampAnimationAfter: parentBlock ? parentBlock.attributes.anchor : undefined,
 				ampAnimationType: animationType,
-				ampAnimationDuration: duration,
-				ampAnimationDelay: delay,
+				ampAnimationDuration: `${ duration }ms`,
+				ampAnimationDelay: `${ delay }ms`,
 			} );
 		}
 	}

@@ -241,6 +241,9 @@ export default createHigherOrderComponent(
 				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 			}
 
+			const animationDuration = parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) );
+			const animationDelay = parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) );
+
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 			return (
 				<>
@@ -512,8 +515,8 @@ export default createHigherOrderComponent(
 								<AnimationControls
 									animatedBlocks={ getAnimatedBlocks }
 									animationType={ ampAnimationType }
-									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+									animationDuration={ animationDuration }
+									animationDelay={ animationDelay }
 									animationAfter={ animationAfter }
 									onAnimationTypeChange={ onAnimationTypeChange }
 									onAnimationDurationChange={ onAnimationDurationChange }
