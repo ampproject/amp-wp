@@ -157,30 +157,42 @@ describe( 'Resizing', () => {
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: topRight', async () => {
+			const { positionLeft: positionLeftBefore, positionTop: positionTopBefore } = await getSelectedBlockPosition();
+			expect( positionLeftBefore ).toStrictEqual( '5%' );
+			expect( positionTopBefore ).toStrictEqual( '10%' );
+
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right.components-resizable-box__handle-top' );
 			await dragAndResize( handle, { x: -100, y: 100 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '8.3%' );
+			expect( positionTop ).toStrictEqual( '12.59%' );
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: right', async () => {
+			const { positionLeft: positionLeftBefore, positionTop: positionTopBefore } = await getSelectedBlockPosition();
+			expect( positionLeftBefore ).toStrictEqual( '5%' );
+			expect( positionTopBefore ).toStrictEqual( '10%' );
+
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
 			await dragAndResize( handle, { x: -100, y: 0 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '7.8%' );
+			expect( positionTop ).toStrictEqual( '12.21%' );
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: bottomRight', async () => {
+			const { positionLeft: positionLeftBefore, positionTop: positionTopBefore } = await getSelectedBlockPosition();
+			expect( positionLeftBefore ).toStrictEqual( '5%' );
+			expect( positionTopBefore ).toStrictEqual( '10%' );
+
 			const handle = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right.components-resizable-box__handle-bottom' );
 			await dragAndResize( handle, { x: 100, y: 100 } );
 
 			const { positionLeft, positionTop } = await getSelectedBlockPosition();
-			expect( positionLeft ).toStrictEqual( '5%' );
-			expect( positionTop ).toStrictEqual( '10%' );
+			expect( positionLeft ).toStrictEqual( '30.9%' );
+			expect( positionTop ).toStrictEqual( '7.91%' );
 		} );
 
 		it( 'should change the top and left position correctly when resizing a rotated block: bottom', async () => {
