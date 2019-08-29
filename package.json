@@ -34,7 +34,7 @@
     "@wordpress/block-editor": "3.0.0",
     "@wordpress/blocks": "6.5.0",
     "@wordpress/browserslist-config": "2.6.0",
-    "@wordpress/components": "8.1.0",
+    "@wordpress/components": "8.2.0",
     "@wordpress/compose": "3.6.0",
     "@wordpress/data": "4.8.0",
     "@wordpress/date": "3.5.0",
