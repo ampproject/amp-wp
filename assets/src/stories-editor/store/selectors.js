@@ -33,7 +33,9 @@ export function isPlayingAnimation( state ) {
  * @return {boolean} True if the animation predecessor is valid, false otherwise.
  */
 export function isValidAnimationPredecessor( state, page, item, predecessor ) {
-	if ( undefined === predecessor || ! state.animations || ! state.animations.animationOrder ) {
+	state.animations = state.animations || {};
+	state.animations.animationOrder = state.animations.animationOrder || {};
+	if ( undefined === predecessor ) {
 		return true;
 	}
 

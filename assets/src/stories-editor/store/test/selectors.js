@@ -29,15 +29,6 @@ describe( 'actions', () => {
 	} );
 
 	describe( 'isValidAnimationPredecessor', () => {
-		it( 'should return true if there are no animated blocks yet', () => {
-			const state = {};
-			const page = 'foo';
-			const item = 'bar';
-			const predecessor = 'baz';
-
-			expect( isValidAnimationPredecessor( state, page, item, predecessor ) ).toBe( true );
-		} );
-
 		it( 'should return true if item has no predecessor', () => {
 			const state = {};
 			const page = 'foo';
