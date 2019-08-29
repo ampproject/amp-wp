@@ -1083,6 +1083,7 @@ class AMP_Story_Post_Type {
 					'700italic',
 				]
 			);
+
 			$variants = array_map(
 				function ( $variant ) {
 					$variant = str_replace( '0italic', '0i', $variant );
@@ -1092,6 +1093,7 @@ class AMP_Story_Post_Type {
 				},
 				$variants
 			);
+
 			if ( $variants ) {
 				$gfont = $font['family'] . ':' . implode( ',', $variants );
 			}
