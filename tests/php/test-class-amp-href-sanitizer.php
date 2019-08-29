@@ -40,6 +40,14 @@ class AMP_Href_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="https://example.com/">Valid Link</a><a href="https://foo@">Invalid Link</a>',
 				'<a href="https://example.com/">Valid Link</a><a>Invalid Link</a>',
 			],
+			'relative_urls_are_valid' => [
+				'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
+				'<link rel="dns-prefetch" href="//cdn.ampproject.org">',
+			],
+			'anchor_links_are_valid' => [
+				'<a href="#section-a">Valid Link</a>',
+				'<a href="#section-a">Valid Link</a>',
+			]
 		];
 	}
 
