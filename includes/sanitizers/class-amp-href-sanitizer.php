@@ -48,7 +48,12 @@ final class AMP_Href_Sanitizer extends AMP_Base_Sanitizer {
 				 * See: https://www.w3.org/TR/2016/REC-html51-20161101/textlevel-semantics.html#the-a-element
 				 */
 				foreach ( [
-					'target', 'download', 'rel', 'rev', 'hreflang', 'type'
+					'target',
+					'download',
+					'rel',
+					'rev',
+					'hreflang',
+					'type',
 				] as $attribute ) {
 					if ( $node->hasAttribute( $attribute ) ) {
 						$node->removeAttribute( $attribute );
