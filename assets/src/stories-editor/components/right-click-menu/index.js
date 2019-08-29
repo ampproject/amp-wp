@@ -169,7 +169,7 @@ const RightClickMenu = ( props ) => {
 					className={ POPOVER_PROPS.className }
 					position={ POPOVER_PROPS.position }
 					onClose={ onClose }
-					focusOnMount={ true }
+					focusOnMount="firstElement"
 				>
 					<NavigableMenu
 						role="menu"
