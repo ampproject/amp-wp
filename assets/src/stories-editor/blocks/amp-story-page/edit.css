@@ -127,6 +127,8 @@
 	overflow: hidden;
 }
 
+.block-editor-block-list__block.amp-page-is-animating .block-editor-inner-blocks  .rotatable-box-wrap,
+.block-editor-block-list__block.amp-page-is-animating .block-editor-inner-blocks  .amp-story-resize-container .components-resizable-box__handle,
 .block-editor-block-list__block.amp-page-is-animating .block-editor-inner-blocks .block-editor-block-list__block-edit::before {
 	content: none;
 	visibility: hidden;
