@@ -33,7 +33,8 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { pasteHandler } from '@wordpress/blocks';
+import { pasteHandler, serialize } from '@wordpress/blocks';
+import { documentHasSelection } from '@wordpress/dom';
 
 /**
  * Internal dependencies
@@ -87,6 +88,7 @@ class PageEdit extends Component {
 		this.videoPlayer = createRef();
 		this.onSelectMedia = this.onSelectMedia.bind( this );
 		this.onPaste = this.onPaste.bind( this );
+		this.onCopy = this.onCopy.bind( this );
 	}
 
 	/**
@@ -185,6 +187,35 @@ class PageEdit extends Component {
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
+	}
+
+	/**
+	 * Copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
+	 * If it's not a block that's being copied, let's clear the copiedMarkup.
+	 * Otherwise, let's set the copied markup.
+	 */
+	onCopy() {
+		const {
+			clearCopiedMarkup,
+			setCopiedMarkup,
+			getBlocksByClientId,
+			getSelectedBlockClientIds,
+			hasMultiSelection,
+		} = this.props;
+		const selectedBlockClientIds = getSelectedBlockClientIds();
+
+		if ( selectedBlockClientIds.length === 0 ) {
+			clearCopiedMarkup();
+			return;
+		}
+
+		// Let native copy behaviour take over in input fields.
+		if ( ! hasMultiSelection() && documentHasSelection() ) {
+			clearCopiedMarkup();
+			return;
+		}
+		const serialized = serialize( getBlocksByClientId( selectedBlockClientIds ) );
+		setCopiedMarkup( serialized );
 	}
 
 	onPaste( event ) {
@@ -310,7 +341,6 @@ class PageEdit extends Component {
 	render() { // eslint-disable-line complexity
 		const {
 			attributes,
-			clearCopiedMarkup,
 			media,
 			setAttributes,
 			totalAnimationDuration,
@@ -540,7 +570,7 @@ class PageEdit extends Component {
 				<div
 					style={ style }
 					// Clear copied markup from state to ensure it doesn't have "expired" data in.
-					onCopy={ clearCopiedMarkup }
+					onCopy={ this.onCopy }
 					onPaste={ this.onPaste }
 				>
 					{ /* todo: show poster image as background-image instead */ }
@@ -583,6 +613,10 @@ PageEdit.propTypes = {
 	insertBlocks: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
+	setCopiedMarkup: PropTypes.func.isRequired,
+	getBlocksByClientId: PropTypes.func.isRequired,
+	getSelectedBlockClientIds: PropTypes.func.isRequired,
+	hasMultiSelection: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	name: PropTypes.string.isRequired,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
@@ -598,16 +632,24 @@ PageEdit.propTypes = {
 export default compose(
 	withDispatch( () => {
 		const { insertBlocks, moveBlockToPosition } = dispatch( 'core/block-editor' );
-		const { clearCopiedMarkup } = dispatch( 'amp/story' );
+		const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
 		return {
 			clearCopiedMarkup,
 			insertBlocks,
 			moveBlockToPosition,
+			setCopiedMarkup,
 		};
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId, getSettings } = select( 'core/block-editor' );
+		const {
+			getBlockOrder,
+			getBlockRootClientId,
+			getSettings,
+			getBlocksByClientId,
+			getSelectedBlockClientIds,
+			hasMultiSelection,
+		} = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
@@ -637,6 +679,9 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
+			getBlocksByClientId,
+			getSelectedBlockClientIds,
+			hasMultiSelection,
 		};
 	} ),
 )( PageEdit );

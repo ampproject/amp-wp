@@ -1,3 +1,4 @@
+/* global navigator */
 /**
  * External dependencies
  */
@@ -226,6 +227,33 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		copyTextToClipBoard( serialized );
 	};
 
+	const processTextToPaste = ( text, clientId ) => {
+		const mode = 'BLOCKS';
+		const content = pasteHandler( {
+			HTML: '',
+			plainText: text,
+			mode,
+			tagName: null,
+			canUserUseUnfilteredHTML,
+		} );
+
+		const clickedBlock = getBlock( clientId );
+		// Get the page client ID to paste to.
+		let pageClientId;
+		if ( 'amp/amp-story-page' === clickedBlock.name ) {
+			pageClientId = clickedBlock.clientId;
+		} else {
+			pageClientId = getBlockRootClientId( clientId );
+		}
+
+		if ( ! pageClientId || ! content.length ) {
+			return;
+		}
+
+		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
+		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId );
+	};
+
 	return {
 		removeBlock,
 		duplicateBlock( clientId ) {
@@ -240,35 +268,21 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		},
 		copyBlock,
 		cutBlock( clientId ) {
+			// First copy block and then remove it.
 			copyBlock( clientId );
 			removeBlock( clientId );
 		},
 		pasteBlock( clientId ) {
-			const mode = 'BLOCKS';
-			const text = getCopiedMarkup();
-
-			const content = pasteHandler( {
-				HTML: '',
-				plainText: text,
-				mode,
-				tagName: null,
-				canUserUseUnfilteredHTML,
-			} );
-
-			const clickedBlock = getBlock( clientId );
-			let pageClientId;
-			if ( 'amp/amp-story-page' === clickedBlock.name ) {
-				pageClientId = clickedBlock.clientId;
-			} else {
-				pageClientId = getBlockRootClientId( clientId );
-			}
-
-			if ( ! pageClientId || ! content.length ) {
-				return;
-			}
-
-			const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-			insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId );
+			// We have to ask permissions for being able to read from clipboard.
+			navigator.clipboard.readText().
+				then( ( clipBoardText ) => {
+					// If got permission, paste from clipboard.
+					processTextToPaste( clipBoardText, clientId );
+				} ).catch( () => {
+					// If forbidden, use the markup from state instead.
+					const text = getCopiedMarkup();
+					processTextToPaste( text, clientId );
+				} );
 		},
 	};
 } );
