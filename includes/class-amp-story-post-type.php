@@ -1002,11 +1002,6 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Arial', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Arimo',
-				'gfont'     => 'Arimo:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Baskerville',
 				'fallbacks' => [ 'Baskerville Old Face', 'Hoefler Text', 'Garamond', 'Times New Roman', 'serif' ],
 			],
@@ -1039,16 +1034,6 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Lato',
-				'gfont'     => 'Lato:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Lora',
-				'gfont'     => 'Lora:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
 				'name'      => 'Lucida Bright',
 				'fallbacks' => [ 'Georgia', 'serif' ],
 			],
@@ -1057,92 +1042,12 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
 			],
 			[
-				'name'      => 'Merriweather',
-				'gfont'     => 'Merriweather:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Montserrat',
-				'gfont'     => 'Montserrat:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Noto Sans',
-				'gfont'     => 'Noto Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans',
-				'gfont'     => 'Open Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans Condensed',
-				'gfont'     => 'Open Sans Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Oswald',
-				'gfont'     => 'Oswald:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Palatino',
 				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
 			],
 			[
 				'name'      => 'Papyrus',
 				'fallbacks' => [ 'fantasy' ],
-			],
-			[
-				'name'      => 'Playfair Display',
-				'gfont'     => 'Playfair Display:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'PT Sans',
-				'gfont'     => 'PT Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Sans Narrow',
-				'gfont'     => 'PT Sans Narrow:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Serif',
-				'gfont'     => 'PT Serif:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Raleway',
-				'gfont'     => 'Raleway:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto',
-				'gfont'     => 'Roboto:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Condensed',
-				'gfont'     => 'Roboto Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Slab',
-				'gfont'     => 'Roboto Slab:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Slabo 27px',
-				'gfont'     => 'Slabo 27px:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Source Sans Pro',
-				'gfont'     => 'Source Sans Pro:400,700',
-				'fallbacks' => [ 'sans-serif' ],
 			],
 			[
 				'name'      => 'Tahoma',
@@ -1157,11 +1062,6 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Ubuntu',
-				'gfont'     => 'Ubuntu:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Verdana',
 				'fallbacks' => [ 'Geneva', 'sans-serif' ],
 			],
@@ -1174,7 +1074,21 @@ class AMP_Story_Post_Type {
 				continue;
 			}
 			$gfont    = '';
-			$variants = array_diff( $font['variants'], [ 'regular' ] );
+			$variants = array_intersect( $font['variants'], [
+				"regular",
+				"italic",
+				"700",
+				"700italic",
+			] );
+			$variants = array_map(
+				function ( $variant ) {
+					$variant = str_replace( '0italic', '0i', $variant );
+					$variant = str_replace( 'regular', '400', $variant );
+					$variant = str_replace( 'italic', '400i', $variant );
+					return $variant;
+				},
+				$variants
+			);
 			if ( $variants ) {
 				$gfont = $font['family'] . ':' . implode( ',', $variants );
 			}
