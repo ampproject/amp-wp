@@ -639,6 +639,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return true|WP_Error True when valid or error when invalid.
 	 */
 	private function validate_cdata_for_node( $element, $cdata_spec ) {
+		if ( isset( $cdata_spec['max_bytes'] ) && strlen( $element->textContent ) > $cdata_spec['max_bytes'] ) {
+			return new WP_Error( 'excessive_bytes' );
+		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
 				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
