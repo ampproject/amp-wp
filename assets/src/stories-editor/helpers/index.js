@@ -1785,6 +1785,7 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 	const animationName = `story-animation-${ animationType }`;
 
 	blockElement.classList.remove( animationName );
+	blockElement.removeAttribute( 'style' );
 
 	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
 	blockElement.style.setProperty( '--animation-delay', `${ animationDelay }ms` );
@@ -1847,6 +1848,8 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 
 	blockElement.addEventListener( 'animationend', () => {
 		blockElement.classList.remove( animationName );
+		blockElement.removeAttribute( 'style' );
+
 		if ( callback ) {
 			callback();
 		}
