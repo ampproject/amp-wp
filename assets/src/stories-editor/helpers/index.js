@@ -1663,3 +1663,37 @@ export const copyTextToClipBoard = ( text ) => {
 	// Remove the temporary element.
 	document.body.removeChild( tmpInput );
 };
+
+/**
+ * Ensure that only allowed blocks are pasted.
+ *
+ * @param {[]}      blocks Array of blocks.
+ * @param {string}  clientId Page ID.
+ * @param {boolean} isFirstPage If is first page.
+ * @return {[]} Filtered blocks.
+ */
+export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
+	const allowedBlocks = [];
+	// @todo This will need handling for Page Attachment once it's available.
+	blocks.forEach( ( block ) => {
+		switch ( block.name ) {
+			// Skip copying Page.
+			case 'amp/amp-story-page':
+				return;
+			case 'amp/amp-story-cta':
+				// If the content has CTA block or it's the first page, don't add it.
+				const ctaBlock = getCallToActionBlock( clientId );
+				if ( ctaBlock || isFirstPage ) {
+					return;
+				}
+				allowedBlocks.push( block );
+				break;
+			default:
+				if ( ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+					allowedBlocks.push( block );
+				}
+				break;
+		}
+	} );
+	return allowedBlocks;
+};
