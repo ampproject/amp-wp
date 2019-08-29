@@ -1074,12 +1074,15 @@ class AMP_Story_Post_Type {
 				continue;
 			}
 			$gfont    = '';
-			$variants = array_intersect( $font['variants'], [
-				"regular",
-				"italic",
-				"700",
-				"700italic",
-			] );
+			$variants = array_intersect(
+				$font['variants'],
+				[
+					'regular',
+					'italic',
+					'700',
+					'700italic',
+				]
+			);
 			$variants = array_map(
 				function ( $variant ) {
 					$variant = str_replace( '0italic', '0i', $variant );
