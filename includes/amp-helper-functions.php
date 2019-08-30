@@ -459,6 +459,15 @@ function amp_register_default_scripts( $wp_scripts ) {
 		}
 	}
 
+	if ( isset( $extensions['amp-carousel'] ) ) {
+		/*
+		 * The 0.2 version of amp-carousel depends on the amp-base-carousel component, but this is still experimental.
+		 * Also, the validator spec does not currently specify what base dependencies a given component has.
+		 * @todo Revisit once amp-base-carousel is no longer experimental. Add support for obtaining a list of extensions that depend on other extensions to include in the script dependencies when registering below.
+		 */
+		$extensions['amp-carousel'] = '0.1';
+	}
+
 	foreach ( $extensions as $extension => $version ) {
 		$src = sprintf(
 			'https://cdn.ampproject.org/v0/%s-%s.js',
