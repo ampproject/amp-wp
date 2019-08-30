@@ -1761,6 +1761,10 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<html amp><head><meta charset="utf-8"><meta name="amp-script-src" content="sha384-abc123 sha384-def456"></head><body></body></html>',
 				null, // No change.
 			],
+			'link_without_valid_mandatory_href'       => [
+				'<html amp><head><meta charset="utf-8"><link rel="manifest" href="https://bad@"></head><body></body></html>',
+				'<html amp><head><meta charset="utf-8"></head><body></body></html>',
+			],
 		];
 
 		$bad_dev_mode_document = sprintf(
