@@ -33,8 +33,7 @@ import {
 	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { pasteHandler, serialize } from '@wordpress/blocks';
-import { documentHasSelection } from '@wordpress/dom';
+import { pasteHandler } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -53,6 +52,8 @@ import {
 	getVideoBytesPerSecond,
 	isVideoSizeExcessive,
 } from '../../../common/helpers';
+
+import CopyPasteHandler from './copy-paste-handler';
 
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -141,35 +142,6 @@ class PageEdit extends Component {
 				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 	}
-
-	/**
-	 * Copy handler for ensuring that the store's copiedMarkup is in sync with what's actually in clipBoard.
-	 * If it's not a block that's being copied, let's clear the copiedMarkup.
-	 * Otherwise, let's set the copied markup.
-	 */
-	onCopy = () => {
-		const {
-			clearCopiedMarkup,
-			setCopiedMarkup,
-			getBlocksByClientId,
-			getSelectedBlockClientIds,
-			hasMultiSelection,
-		} = this.props;
-		const selectedBlockClientIds = getSelectedBlockClientIds();
-
-		if ( selectedBlockClientIds.length === 0 ) {
-			clearCopiedMarkup();
-			return;
-		}
-
-		// Let native copy behaviour take over in input fields.
-		if ( ! hasMultiSelection() && documentHasSelection() ) {
-			clearCopiedMarkup();
-			return;
-		}
-		const serialized = serialize( getBlocksByClientId( selectedBlockClientIds ) );
-		setCopiedMarkup( serialized );
-	};
 
 	onPaste = ( event ) => {
 		const {
@@ -520,25 +492,24 @@ class PageEdit extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<div
-					style={ style }
-					// Clear copied markup from state to ensure it doesn't have "expired" data in.
-					onCopy={ this.onCopy }
-					onPaste={ this.onPaste }
-				>
-					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
-								<source src={ mediaUrl } type={ media.mime_type } />
-							</video>
-						</div>
-					) }
-					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle } />
-					) }
-					<InnerBlocks allowedBlocks={ allowedBlocks } />
-				</div>
+				<CopyPasteHandler onPaste={ this.onPaste }>
+					<div
+						style={ style }
+					>
+						{ /* todo: show poster image as background-image instead */ }
+						{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+							<div className="editor-amp-story-page-video-wrap">
+								<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
+									<source src={ mediaUrl } type={ media.mime_type } />
+								</video>
+							</div>
+						) }
+						{ backgroundColors.length > 0 && (
+							<div style={ overlayStyle } />
+						) }
+						<InnerBlocks allowedBlocks={ allowedBlocks } />
+					</div>
+				</CopyPasteHandler>
 			</>
 		);
 	}
@@ -562,14 +533,9 @@ PageEdit.propTypes = {
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ).isRequired,
 	canUserUseUnfilteredHTML: PropTypes.bool,
-	clearCopiedMarkup: PropTypes.func.isRequired,
 	insertBlocks: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
-	setCopiedMarkup: PropTypes.func.isRequired,
-	getBlocksByClientId: PropTypes.func.isRequired,
-	getSelectedBlockClientIds: PropTypes.func.isRequired,
-	hasMultiSelection: PropTypes.func.isRequired,
 	isFirstPage: PropTypes.bool.isRequired,
 	media: PropTypes.object,
 	name: PropTypes.string.isRequired,
@@ -587,12 +553,9 @@ PageEdit.propTypes = {
 export default compose(
 	withDispatch( () => {
 		const { insertBlocks, moveBlockToPosition } = dispatch( 'core/block-editor' );
-		const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
 		return {
-			clearCopiedMarkup,
 			insertBlocks,
 			moveBlockToPosition,
-			setCopiedMarkup,
 		};
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
@@ -601,9 +564,6 @@ export default compose(
 			getBlockOrder,
 			getBlockRootClientId,
 			getSettings,
-			getBlocksByClientId,
-			getSelectedBlockClientIds,
-			hasMultiSelection,
 		} = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
@@ -638,9 +598,6 @@ export default compose(
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 			isFirstPage,
 			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
-			getBlocksByClientId,
-			getSelectedBlockClientIds,
-			hasMultiSelection,
 		};
 	} ),
 )( PageEdit );
