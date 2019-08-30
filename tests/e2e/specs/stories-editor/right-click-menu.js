@@ -21,7 +21,7 @@ async function openRightClickMenu( el ) {
 	} );
 }
 
-describe( 'Code Editor', () => {
+describe( 'Right Click Menu', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
 	} );
