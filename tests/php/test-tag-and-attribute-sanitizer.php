@@ -517,7 +517,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'attribute_value_blacklisted_by_regex_removed' => [
 				'<a href="__amp_source_origin">Click me.</a>',
-				'<a href="">Click me.</a>',
+				'<a>Click me.</a>',
 			],
 
 			'host_relative_url_allowed'                    => [
@@ -528,15 +528,15 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				'<a href="//example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whiteilsted_protocol_http_allowed'  => [
+			'node_with_whitelisted_protocol_http_allowed'  => [
 				'<a href="http://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whiteilsted_protocol_https_allowed' => [
+			'node_with_whitelisted_protocol_https_allowed' => [
 				'<a href="https://example.com/path/to/content">Click me.</a>',
 			],
 
-			'node_with_whiteilsted_protocol_other_allowed' => [
+			'node_with_whitelisted_protocol_other_allowed' => [
 				implode(
 					'',
 					[
@@ -546,6 +546,16 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 						'<a href="web+mastodon:follow/@handle@instance">Click me.</a>',
 					]
 				),
+			],
+
+			'node_with_non_parseable_url_removed'          => [
+				'<a href="http://foo@">Invalid Link</a>',
+				'<a>Invalid Link</a>',
+			],
+
+			'node_with_non_parseable_url_leftovers_cleaned_up' => [
+				'<a id="this-is-kept" href="http://foo@" target="_blank" download rel="nofollow" rev="nofollow" hreflang="en" type="text/html" class="this-stays">Invalid Link</a>',
+				'<a id="this-is-kept" class="this-stays">Invalid Link</a>',
 			],
 
 			'attribute_value_valid'                        => [
@@ -959,12 +969,12 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 
 			'a_with_custom_protocol'                       => [
 				'<a class="foo" href="custom:bad">value</a>',
-				'<a class="foo" href="">value</a>',
+				'<a class="foo">value</a>',
 			],
 
 			'a_with_wrong_host'                            => [
 				'<a class="foo" href="http://foo bar">value</a>',
-				'<a class="foo" href="">value</a>',
+				'<a class="foo">value</a>',
 			],
 			'a_with_encoded_host'                          => [
 				'<a class="foo" href="http://%65%78%61%6d%70%6c%65%2e%63%6f%6d/foo/">value</a>',
@@ -972,11 +982,11 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			],
 			'a_with_wrong_schemeless_host'                 => [
 				'<a class="foo" href="//bad domain with a space.com/foo">value</a>',
-				'<a class="foo" href="">value</a>',
+				'<a class="foo">value</a>',
 			],
 			'a_with_mail_host'                             => [
 				'<a class="foo" href="mail to:foo@bar.com">value</a>',
-				'<a class="foo" href="">value</a>',
+				'<a class="foo">value</a>',
 			],
 
 			// font is removed so we should check that other elements are checked as well.
@@ -1888,7 +1898,7 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 			'code'            => 'invalid_element',
 			'node_attributes' => [ 'class' => 'baz-invalid' ],
 		];
-		$content[]         = '<amp-story-grid-layer class="a-invalid"><a href="">Invalid a tag.</a></amp-story-grid-layer>';
+		$content[]         = '<amp-story-grid-layer class="a-invalid"><a>Invalid a tag.</a></amp-story-grid-layer>';
 		$expected_errors[] = [
 			'node_name'       => 'amp-story-grid-layer',
 			'parent_name'     => 'body',
