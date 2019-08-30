@@ -1875,7 +1875,7 @@ class AMP_Theme_Support {
 		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
 		 * have the HTML mime type and it must start <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
 		 */
-		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head.*?>#is', $response ) ) {
+		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
 			return $response;
 		}
 
@@ -2062,7 +2062,7 @@ class AMP_Theme_Support {
 			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
 
 			$response = preg_replace(
-				'/(<head.*?>)/is',
+				'/(<head\b.*?>)/is',
 				'$1' . $meta_charset,
 				$response,
 				1,

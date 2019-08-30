@@ -1789,15 +1789,21 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
 
+		// HTML, but still a fragment.
+		$input = '<html><header><h1>HellO!</h1></header></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
 		// HTML, but very stripped down.
 		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
+		$this->assertContains( '<meta charset="UTF-8">', $output );
 
 		// HTML with doctype, comments, and whitespace before head.
 		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
+		$this->assertContains( '<meta charset="UTF-8">', $output );
 	}
 
 	/**
