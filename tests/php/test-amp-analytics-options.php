@@ -248,8 +248,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 		);
 		$analytics = amp_get_analytics();
 		$this->assertEquals( 'test', $analytics[ $key ]['type'] );
-		$this->assertEquals( '_till_responded', $analytics[ $key ]['data-include'] );
-		$this->assertEquals( 'credentials', $analytics[ $key ]['data-block-on-consent'] );
+		$this->assertEquals( '_till_responded', $analytics[ $key ]['attributes']['data-include'] );
+		$this->assertEquals( 'credentials', $analytics[ $key ]['attributes']['data-block-on-consent'] );
 	}
 
 	/**
@@ -265,6 +265,8 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
+		$key = key( $analytics );
+		
 		$trigger_count = 0;
 		add_action(
 			'amp_print_analytics',
@@ -273,7 +275,7 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 				$trigger_count++;
 			}
 		);
-
+		
 		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
 
 		$this->assertEquals( 1, $trigger_count );
