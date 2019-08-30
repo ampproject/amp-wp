@@ -6,13 +6,19 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { BaseControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { AMP_STORY_FONT_IMAGES } from '../../constants';
-import { PreviewPicker } from '../';
+import { maybeEnqueueFontStyle } from '../../helpers';
+/**
+ * Internal dependencies
+ */
+import Autocomplete from 'accessible-autocomplete/react';
+
+import 'accessible-autocomplete/src/autocomplete.css';
+import './edit.css';
 
 /**
  * Font Family Picker component.
@@ -24,44 +30,60 @@ function FontFamilyPicker( {
 	onChange = () => {},
 	value = '',
 } ) {
-	const defaultOption = {
-		value: '',
-		label: __( 'None', 'amp' ),
+	const results = fonts;
+	const suggest = ( query, syncResults ) => {
+		const searchResults = query ? results.filter( function( result ) {
+			return result.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
+		} ) :
+			[];
+		syncResults( searchResults );
 	};
 
-	const options = fonts.map( ( font ) => ( {
-		value: font.name,
-		label: font.name,
-	} ) );
+	const suggestionTemplate = ( result ) => {
+		maybeEnqueueFontStyle( result.name );
+		const fallbacks = ( result.fallbacks ) ? ', ' + result.fallbacks.join( ', ' ) : '';
+		return result && `<span style='font-family: ${ result.name }${ fallbacks }'>${ result.name }</span>`;
+	};
 
-	const fontLabel = ( familyName ) => AMP_STORY_FONT_IMAGES[ familyName ] ?
-		AMP_STORY_FONT_IMAGES[ familyName ]( { height: 13 } ) :
-		familyName;
+	const inputValueTemplate = ( result ) => {
+		return result && result.name;
+	};
 
 	return (
-		<PreviewPicker
-			value={ value }
-			options={ options }
-			defaultOption={ defaultOption }
-			onChange={ ( { value: selectedValue } ) => onChange( '' === selectedValue ? undefined : selectedValue ) }
+		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
 			id="amp-stories-font-family-picker"
-			ariaLabel={ ( currentOption ) => {
-				return sprintf(
-					/* translators: %s: font name */
-					__( 'Font Family: %s', 'amp' ),
-					currentOption.label
-				);
-			} }
-			renderToggle={ ( { label } ) => fontLabel( label ) }
-			renderOption={ ( option ) => {
-				return (
-					<span className="components-preview-picker__dropdown-label" data-font-family={ option.value === '' ? undefined : option.value }>
-						{ fontLabel( option.label ) }
-					</span>
-				);
-			} }
-		/>
+		>
+			<Autocomplete
+				id="amp-stories-font-family-picker"
+				source={ suggest }
+				templates={
+					{ suggestion: suggestionTemplate, inputValue: inputValueTemplate }
+				}
+				minLength={ 2 }
+				onConfirm={ onChange }
+				showAllValues={ false }
+				confirmOnBlur={ false }
+				defaultValue={ value }
+				dropdownArrow={ () => '' }
+				preserveNullOptions={ true }
+				placeholder={ __( 'None', 'amp' ) }
+				showNoOptionsFound={ false }
+				displayMenu="overlay"
+				tStatusQueryTooShort={ ( minQueryLength ) =>
+					// translators: %d: the number characters required to initiate an author search.
+					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
+				}
+				// translators: 1: the index of thre selected result. 2: The total number of results.
+				tStatusSelectedOption={ ( selectedOption, length ) => sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length ) }
+				tStatusResults={ ( length, contentSelectedOption ) => {
+					return (
+						_n( '%d font is available.', '%d fonts are available.', length, 'amp' ) +
+						' ' + contentSelectedOption
+					);
+				} }
+			/>
+		</BaseControl>
 	);
 }
 
