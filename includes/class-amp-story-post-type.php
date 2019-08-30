@@ -1068,7 +1068,7 @@ class AMP_Story_Post_Type {
 		];
 		$existing_fonts = wp_list_pluck( $fonts, 'name' );
 
-		foreach ( $google_fonts['items'] as $font ) {
+		foreach ( $google_fonts as $font ) {
 			// If font already defined, then don't load from the google fonts list.
 			if ( in_array( $font['family'], $existing_fonts, true ) ) {
 				continue;

@@ -160,8 +160,26 @@ module.exports = function( grunt ) {
 		doNext();
 	} );
 
+	grunt.registerTask( 'process-fonts', function() {
+		const fileName = 'includes/data/fonts.json';
+		let map = grunt.file.readJSON( fileName );
+		map = JSON.stringify( map );
+		map = JSON.parse( map );
+		if ( map ) {
+			const stripped = map.items.map( ( font ) => {
+				return {
+					family: font.family,
+					variants: font.variants,
+					category: font.category,
+				};
+			} );
+			grunt.file.write( fileName, JSON.stringify( stripped ) );
+		}
+	} );
+
 	grunt.registerTask( 'download-fonts', [
 		'http',
+		'process-fonts',
 	] );
 
 	grunt.registerTask( 'create-build-zip', [
