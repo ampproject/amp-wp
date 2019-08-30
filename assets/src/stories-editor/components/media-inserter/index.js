@@ -21,12 +21,11 @@ const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, getCurrentPageBackgroundType } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, mediaType } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
 	];
-	const mediaType = getCurrentPageBackgroundType();
 
 	const imageTitle = 'image' === mediaType ? __( 'Update Background Image', 'amp' ) : __( 'Insert Background Image', 'amp' );
 	const videoTitle = 'video' === mediaType ? __( 'Update Background Video', 'amp' ) : __( 'Insert Background Video', 'amp' );
@@ -82,7 +81,7 @@ MediaInserter.propTypes = {
 	updateBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
 	showInserter: PropTypes.bool.isRequired,
-	getCurrentPageBackgroundType: PropTypes.func.isRequired,
+	mediaType: PropTypes.string.isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -114,6 +113,20 @@ const applyWithSelect = withSelect( ( select ) => {
 	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
 	const { isReordering } = select( 'amp/story' );
 
+	const getCurrentPageBackgroundType = () => {
+		const clientId = getCurrentPage();
+		const blocks = select( 'core/block-editor' ).getBlocksByClientId( clientId );
+		if ( ! blocks ) {
+			return '';
+		}
+		const block = blocks.shift();
+		if ( ! block ) {
+			return '';
+		}
+		const mediaType = ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
+		return mediaType;
+	};
+
 	return {
 		isReordering: isReordering(),
 		canInsertBlockType: ( name ) => {
@@ -123,16 +136,7 @@ const applyWithSelect = withSelect( ( select ) => {
 		},
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
-		getCurrentPageBackgroundType: () => {
-			const clientId = getCurrentPage();
-			const blocks = select( 'core/block-editor' ).getBlocksByClientId( clientId );
-			if ( ! blocks ) {
-				return '';
-			}
-			const block = blocks.shift();
-			const mediaType = ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
-			return mediaType;
-		},
+		mediaType: getCurrentPageBackgroundType(),
 	};
 } );
 
