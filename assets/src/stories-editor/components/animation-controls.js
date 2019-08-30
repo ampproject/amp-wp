@@ -19,7 +19,7 @@ import { AnimationOrderPicker } from './';
 /**
  * Animation controls for AMP Story layout blocks'.
  *
- * @return {Component} Controls.
+ * @return {import('react').ReactElement} Controls.
  */
 const AnimationControls = ( {
 	animatedBlocks,

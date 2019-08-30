@@ -21,7 +21,7 @@ import { StoryBlockMover } from './index';
  *
  * @param {Object} props Component props.
  *
- * @return {WPElement} Rendered element.
+ * @return {import('react').ReactElement} Rendered element.
  */
 const DraggableText = ( props ) => {
 	const {

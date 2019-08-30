@@ -34,6 +34,8 @@ export default ( InitialMediaUpload ) => {
 	return class EnforcedFileTypeMediaUpload extends InitialMediaUpload {
 		/**
 		 * Constructs the class.
+		 *
+		 * @param {*} args Constructor arguments.
 		 */
 		constructor( ...args ) {
 			super( ...args );

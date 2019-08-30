@@ -67,11 +67,11 @@ class Inserter extends Component {
 	/**
 	 * Render callback to display Dropdown toggle element.
 	 *
-	 * @param {Function} onToggle Callback to invoke when toggle is
-	 *                                    pressed.
-	 * @param {boolean}  isOpen   Whether dropdown is currently open.
+	 * @param {Object} args Callback args.
+	 * @param {Function} args.onToggle Callback to invoke when toggle is pressed.
+	 * @param {boolean} args.isOpen Whether dropdown is currently open.
 	 *
-	 * @return {WPElement} Dropdown toggle element.
+	 * @return {import('react').ReactElement} Dropdown toggle element.
 	 */
 	renderToggle( { onToggle, isOpen } ) {
 		const {
@@ -85,10 +85,9 @@ class Inserter extends Component {
 	/**
 	 * Render callback to display Dropdown content element.
 	 *
-	 * @param {Function} onClose Callback to invoke when dropdown is
-	 *                                   closed.
+	 * @param {Function} onClose Callback to invoke when dropdown is closed.
 	 *
-	 * @return {WPElement} Dropdown content element.
+	 * @return {import('react').ReactElement} Dropdown content element.
 	 */
 	renderContent( { onClose } ) {
 		const { rootClientId, clientId, isAppender } = this.props;

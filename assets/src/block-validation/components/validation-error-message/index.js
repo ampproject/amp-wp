@@ -11,12 +11,13 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Get message for validation error.
  *
- * @param {?string} code       Error code.
- * @param {?string} nodeName   Node name.
- * @param {?string} parentName Parent node name.
- * @param {?string} message    Error message.
+ * @param {Object} props Component props.
+ * @param {?string} props.code Error code.
+ * @param {?string} props.node_name Node name.
+ * @param {?string} props.parent_name Parent node name.
+ * @param {?string} props.message Error message.
  *
- * @return {Component} Validation error message.
+ * @return {import('react').ReactElement} Validation error message.
  */
 const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
 	if ( message ) {

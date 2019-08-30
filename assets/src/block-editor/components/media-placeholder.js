@@ -12,10 +12,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Display media placeholder.
  *
- * @param {string} name Block's name.
- * @param {string} url  URL.
+ * @param {Object} props Component props.
+ * @param {string} props.name Block's name.
+ * @param {string} props.url URL.
  *
- * @return {Component} Placeholder.
+ * @return {import('react').ReactElement} Placeholder.
  */
 const MediaPlaceholder = ( { name, url } ) => {
 	return (

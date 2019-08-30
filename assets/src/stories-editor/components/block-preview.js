@@ -15,7 +15,7 @@ import { BlockEdit } from '@wordpress/block-editor';
  *
  * @param {Object} props Component props.
  *
- * @return {WPElement} Rendered element.
+ * @return {import('react').ReactElement} Rendered element.
  */
 const BlockPreview = ( { clientId, name, attributes, innerBlocks = [] } ) => {
 	const block = createBlock( name, attributes, innerBlocks );

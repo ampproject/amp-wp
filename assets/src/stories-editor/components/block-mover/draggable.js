@@ -110,9 +110,7 @@ class Draggable extends Component {
 	 *  - Clones the current element and spawns clone over original element.
 	 *  - Adds dragover listener.
 	 *
-	 * @param {Object} event        Custom DragEvent.
-	 * @param {string} elementId	The HTML id of the element to be dragged.
-	 * @param {Object} transferData The data to be set to the event's dataTransfer - to be accessible in any later drop logic.
+	 * @param {Object} event Custom DragEvent.
 	 */
 	onDragStart( event ) {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
