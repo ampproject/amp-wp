@@ -15,7 +15,7 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
  */
 import { ensureAllowedBlocksOnPaste } from '../../helpers';
 
-function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
+function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	const {
 		isFirstPage,
 		canUserUseUnfilteredHTML,
@@ -79,7 +79,7 @@ function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 	};
 
 	return (
-		<div onCopy={ onCopy } onCut={ onCut } onPaste={ onPaste }>
+		<div onCopy={ onCopy } onPaste={ onPaste }>
 			{ children }
 		</div>
 	);
@@ -90,7 +90,6 @@ CopyPasteHandler.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onCopy: PropTypes.func.isRequired,
-	onCut: PropTypes.func.isRequired,
 	onPaste: PropTypes.func.isRequired,
 };
 
@@ -100,7 +99,6 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
-	const { removeBlocks } = dispatch( 'core/block-editor' );
 	const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
 
 	/**
@@ -127,10 +125,5 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 
 	return {
 		onCopy,
-		onCut( event ) {
-			onCopy( event );
-			const selectedBlockClientIds = getSelectedBlockClientIds();
-			removeBlocks( selectedBlockClientIds );
-		},
 	};
 } )( CopyPasteHandler );
