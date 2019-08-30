@@ -56,8 +56,6 @@ class ReordererItem extends Component {
 		this.state = {
 			isDragging: false,
 		};
-
-		this.onDrop = this.onDrop.bind( this );
 	}
 
 	getInsertIndex( position ) {
@@ -70,7 +68,13 @@ class ReordererItem extends Component {
 		return undefined;
 	}
 
-	onDrop( event, position ) {
+	/**
+	 * onDrop callback.
+	 *
+	 * @param {Event} event Event object.
+	 * @param {{x: number, y: number}} position Item position.
+	 */
+	onDrop = ( event, position ) => {
 		const { page: { clientId }, movePageToPosition, index } = this.props;
 		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 

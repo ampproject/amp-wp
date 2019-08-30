@@ -40,21 +40,17 @@ class CallToActionEdit extends Component {
 			hasOverlay: true,
 		};
 
-		this.toggleIsEditing = this.toggleIsEditing.bind( this );
-		this.toggleOverlay = this.toggleOverlay.bind( this );
-
 		this.nodeRef = null;
-		this.bindRef = this.bindRef.bind( this );
 	}
 
-	bindRef( node ) {
+	bindRef = ( node ) => {
 		if ( ! node ) {
 			return;
 		}
 		this.nodeRef = node;
 	}
 
-	toggleIsEditing( enable ) {
+	toggleIsEditing = ( enable ) => {
 		if ( enable !== this.state.isEditing ) {
 			this.setState( {
 				isEditing: ! this.state.isEditing,
@@ -62,7 +58,7 @@ class CallToActionEdit extends Component {
 		}
 	}
 
-	toggleOverlay( add ) {
+	toggleOverlay = ( add ) => {
 		if ( add !== this.state.hasOverlay ) {
 			this.setState( {
 				hasOverlay: ! this.state.hasOverlay,

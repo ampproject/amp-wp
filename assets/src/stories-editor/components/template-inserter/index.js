@@ -28,8 +28,6 @@ class TemplateInserter extends Component {
 	constructor( ...args ) {
 		super( ...args );
 
-		this.onToggle = this.onToggle.bind( this );
-
 		this.state = {
 			storyTemplates: [],
 		};
@@ -64,7 +62,7 @@ class TemplateInserter extends Component {
 		}
 	}
 
-	onToggle( isOpen ) {
+	onToggle = ( isOpen ) => {
 		const { onToggle } = this.props;
 
 		// Surface toggle callback to parent component

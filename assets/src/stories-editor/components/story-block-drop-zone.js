@@ -28,19 +28,13 @@ import {
 const wrapperElSelector = 'div[data-amp-selected="parent"] .editor-inner-blocks';
 
 class BlockDropZone extends Component {
-	constructor( ...args ) {
-		super( ...args );
-
-		this.onDrop = this.onDrop.bind( this );
-	}
-
 	/**
 	 * Handles the drop event for blocks within a page.
 	 * Separate handling for CTA block.
 	 *
 	 * @param {Object} event Drop event.
 	 */
-	onDrop( event ) {
+	onDrop = ( event ) => {
 		const { srcBlockName, updateBlockAttributes, srcClientId } = this.props;
 		const isCTABlock = 'amp/amp-story-cta' === srcBlockName;
 

@@ -51,8 +51,6 @@ class BlockNavigationItem extends Component {
 		this.state = {
 			isDragging: false,
 		};
-
-		this.onDrop = this.onDrop.bind( this );
 	}
 
 	getInsertIndex( position ) {
@@ -66,7 +64,7 @@ class BlockNavigationItem extends Component {
 		return undefined;
 	}
 
-	onDrop( event, position ) {
+	onDrop = ( event, position ) => {
 		const { block: { clientId }, moveBlockToPosition, getBlockIndex } = this.props;
 		const { srcClientId, srcIndex, type } = parseDropEvent( event );
 

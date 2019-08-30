@@ -40,7 +40,6 @@ export default ( InitialMediaUpload ) => {
 
 			// This class should only be present in the MediaUpload for the AMP Story 'Background Media' or when only 'video' types are allowed, like in the Core Video block.
 			if ( 'story-background-media' === this.props.id || isEqual( [ 'video/mp4' ], this.props.allowedTypes ) ) {
-				this.initFileTypeMedia = this.initFileTypeMedia.bind( this );
 				this.initFileTypeMedia();
 			}
 		}
@@ -54,7 +53,7 @@ export default ( InitialMediaUpload ) => {
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
-		initFileTypeMedia() {
+		initFileTypeMedia = () => {
 			const SelectMediaFrame = getSelectMediaFrame( EnforcedFileToolbarSelect );
 			const previousOnSelect = this.onSelect;
 			const isVideo = isEqual( [ 'video' ], this.props.allowedTypes );

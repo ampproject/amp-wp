@@ -33,10 +33,6 @@ class TextBlockEdit extends Component {
 			isEditing: false,
 			hasOverlay: true,
 		};
-
-		this.onReplace = this.onReplace.bind( this );
-		this.toggleIsEditing = this.toggleIsEditing.bind( this );
-		this.toggleOverlay = this.toggleOverlay.bind( this );
 	}
 
 	componentDidMount() {
@@ -88,7 +84,7 @@ class TextBlockEdit extends Component {
 		}
 	}
 
-	onReplace( blocks ) {
+	onReplace = ( blocks ) => {
 		const { attributes, onReplace, name } = this.props;
 		// Make sure that 'undefined' values aren't passed into onReplace.
 		blocks = blocks.filter( ( block ) => 'undefined' !== typeof block );
@@ -107,7 +103,7 @@ class TextBlockEdit extends Component {
 		) ) );
 	}
 
-	toggleIsEditing( enable ) {
+	toggleIsEditing = ( enable ) => {
 		if ( enable !== this.state.isEditing ) {
 			this.setState( {
 				isEditing: ! this.state.isEditing,
@@ -115,7 +111,7 @@ class TextBlockEdit extends Component {
 		}
 	}
 
-	toggleOverlay( add ) {
+	toggleOverlay = ( add ) => {
 		if ( add !== this.state.hasOverlay ) {
 			this.setState( {
 				hasOverlay: ! this.state.hasOverlay,
