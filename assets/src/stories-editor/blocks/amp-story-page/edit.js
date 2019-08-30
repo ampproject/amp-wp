@@ -30,10 +30,8 @@ import {
 import {
 	withSelect,
 	withDispatch,
-	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
-import { pasteHandler } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
@@ -46,7 +44,6 @@ import {
 	uploadVideoFrame,
 	getPosterImageFromFileObj,
 	processMedia,
-	ensureAllowedBlocksOnPaste,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -143,59 +140,6 @@ class PageEdit extends Component {
 		}
 	}
 
-	onPaste = ( event ) => {
-		const {
-			clientId,
-			isFirstPage,
-			insertBlocks,
-			isSelected,
-			tagName,
-			canUserUseUnfilteredHTML,
-		} = this.props;
-
-		// Ignore if the Page is not the selected page.
-		if ( ! isSelected ) {
-			return;
-		}
-		const clipboardData = event.clipboardData;
-
-		let plainText = '';
-		let html = '';
-
-		// IE11 only supports `Text` as an argument for `getData` and will
-		// otherwise throw an invalid argument error, so we try the standard
-		// arguments first, then fallback to `Text` if they fail.
-		try {
-			plainText = clipboardData.getData( 'text/plain' );
-			html = clipboardData.getData( 'text/html' );
-		} catch ( error1 ) {
-			try {
-				html = clipboardData.getData( 'Text' );
-			} catch ( error2 ) {
-				// Some browsers like UC Browser paste plain text by default and
-				// don't support clipboardData at all, so allow default
-				// behaviour.
-				return;
-			}
-		}
-
-		event.preventDefault();
-
-		const mode = 'BLOCKS';
-
-		const content = pasteHandler( {
-			HTML: html,
-			plainText,
-			mode,
-			tagName,
-			canUserUseUnfilteredHTML,
-		} );
-
-		if ( content.length > 0 ) {
-			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), null, clientId );
-		}
-	};
-
 	removeBackgroundColor( index ) {
 		const { attributes, setAttributes } = this.props;
 		const backgroundColors = JSON.parse( attributes.backgroundColors );
@@ -267,6 +211,7 @@ class PageEdit extends Component {
 	render() { // eslint-disable-line complexity
 		const {
 			attributes,
+			clientId,
 			media,
 			setAttributes,
 			totalAnimationDuration,
@@ -492,7 +437,7 @@ class PageEdit extends Component {
 						) }
 					</PanelBody>
 				</InspectorControls>
-				<CopyPasteHandler onPaste={ this.onPaste }>
+				<CopyPasteHandler clientId={ clientId }>
 					<div
 						style={ style }
 					>
@@ -532,8 +477,6 @@ PageEdit.propTypes = {
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ).isRequired,
-	canUserUseUnfilteredHTML: PropTypes.bool,
-	insertBlocks: PropTypes.func.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	isFirstPage: PropTypes.bool.isRequired,
@@ -551,10 +494,9 @@ PageEdit.propTypes = {
 };
 
 export default compose(
-	withDispatch( () => {
-		const { insertBlocks, moveBlockToPosition } = dispatch( 'core/block-editor' );
+	withDispatch( ( dispatch ) => {
+		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
-			insertBlocks,
 			moveBlockToPosition,
 		};
 	} ),
@@ -563,14 +505,11 @@ export default compose(
 		const {
 			getBlockOrder,
 			getBlockRootClientId,
-			getSettings,
 		} = select( 'core/block-editor' );
 		const { getAnimatedBlocks } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
-
-		const { __experimentalCanUserUseUnfilteredHTML } = getSettings();
 
 		const { mediaType, mediaId, poster } = attributes;
 
@@ -597,7 +536,6 @@ export default compose(
 			getBlockOrder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 			isFirstPage,
-			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
 		};
 	} ),
 )( PageEdit );
