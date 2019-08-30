@@ -86,9 +86,6 @@ class PageEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
-		this.onSelectMedia = this.onSelectMedia.bind( this );
-		this.onPaste = this.onPaste.bind( this );
-		this.onCopy = this.onCopy.bind( this );
 	}
 
 	/**
@@ -107,7 +104,7 @@ class PageEdit extends Component {
 		const { setAttributes } = this.props;
 		const processed = processMedia( media );
 		setAttributes( processed );
-	}
+	};
 
 	componentDidUpdate( prevProps ) {
 		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
@@ -150,7 +147,7 @@ class PageEdit extends Component {
 	 * If it's not a block that's being copied, let's clear the copiedMarkup.
 	 * Otherwise, let's set the copied markup.
 	 */
-	onCopy() {
+	onCopy = () => {
 		const {
 			clearCopiedMarkup,
 			setCopiedMarkup,
@@ -172,11 +169,12 @@ class PageEdit extends Component {
 		}
 		const serialized = serialize( getBlocksByClientId( selectedBlockClientIds ) );
 		setCopiedMarkup( serialized );
-	}
+	};
 
-	onPaste( event ) {
+	onPaste = ( event ) => {
 		const {
 			clientId,
+			isFirstPage,
 			insertBlocks,
 			isSelected,
 			tagName,
@@ -222,9 +220,9 @@ class PageEdit extends Component {
 		} );
 
 		if ( content.length > 0 ) {
-			insertBlocks( ensureAllowedBlocksOnPaste( content ), null, clientId );
+			insertBlocks( ensureAllowedBlocksOnPaste( content, clientId, isFirstPage ), null, clientId );
 		}
-	}
+	};
 
 	removeBackgroundColor( index ) {
 		const { attributes, setAttributes } = this.props;
@@ -572,6 +570,7 @@ PageEdit.propTypes = {
 	getBlocksByClientId: PropTypes.func.isRequired,
 	getSelectedBlockClientIds: PropTypes.func.isRequired,
 	hasMultiSelection: PropTypes.func.isRequired,
+	isFirstPage: PropTypes.bool.isRequired,
 	media: PropTypes.object,
 	name: PropTypes.string.isRequired,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
@@ -637,6 +636,7 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
+			isFirstPage,
 			canUserUseUnfilteredHTM: __experimentalCanUserUseUnfilteredHTML,
 			getBlocksByClientId,
 			getSelectedBlockClientIds,
