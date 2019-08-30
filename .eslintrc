@@ -56,7 +56,7 @@
       ],
       "extends": [
         "plugin:jest/all"
-			],
+      ],
       "rules": {
         "jest/lowercase-name": [
           "error",
@@ -72,9 +72,9 @@
     {
       "files": [ "tests/e2e/**/*.js" ],
       "extends": [
-				"plugin:@wordpress/eslint-plugin/test-e2e",
+        "plugin:@wordpress/eslint-plugin/test-e2e",
         "plugin:jest/all"
-			],
+      ],
       "rules": {
         "jest/lowercase-name": [
           "error",
