@@ -682,7 +682,21 @@ function amp_print_analytics( $analytics ) {
 	if ( '' === $analytics ) {
 		$analytics = [];
 	}
+
 	$analytics_entries = amp_get_analytics( $analytics );
+
+	/**
+	 * Triggers before analytics entries are printed as amp-analytics tags.
+	 *
+	 * This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing
+	 * markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases,
+	 * this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and
+	 * `amp_post_template_footer` actions; this will ensure analytics will also be included on AMP Stories.
+	 *
+	 * @since 1.3
+	 * @param array $analytics_entries Analytics entries, already potentially modified by the amp_analytics_entries filter.
+	 */
+	do_action( 'amp_print_analytics', $analytics_entries );
 
 	if ( empty( $analytics_entries ) ) {
 		return;
