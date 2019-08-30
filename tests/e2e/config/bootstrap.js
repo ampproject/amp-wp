@@ -122,9 +122,12 @@ function observeConsoleLogging() {
 	} );
 }
 
-// Before every test suite run, delete all content created by the test. This ensures
-// other posts/comments/etc. aren't dirtying tests and tests don't depend on
-// each other's side-effects.
+/*
+ Before every test suite run, delete all content created by the test. This ensures
+ other posts/comments/etc. aren't dirtying tests and tests don't depend on
+ each other's side-effects.
+*/
+// eslint-disable-next-line jest/require-top-level-describe
 beforeAll( async () => {
 	capturePageEventsForTearDown();
 	enablePageDialogAccept();
@@ -132,11 +135,13 @@ beforeAll( async () => {
 	await setBrowserViewport( 'large' );
 } );
 
+// eslint-disable-next-line jest/require-top-level-describe
 afterEach( async () => {
 	await clearLocalStorage();
 	await setBrowserViewport( 'large' );
 } );
 
+// eslint-disable-next-line jest/require-top-level-describe
 afterAll( () => {
 	removePageEvents();
 } );
