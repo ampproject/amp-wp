@@ -102,12 +102,12 @@ describe( 'Resizing', () => {
 			const width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
 			expect( width ).toStrictEqual( textBlockMinWidth );
 
-			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).parentNode.style.left );
 			expect( positionLeft ).toContain( '%' );
 
 			// Drag the resizer more.
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
-			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
+			const positionLeftAfter = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).parentNode.style.left );
 			// Verify that that the positionLeft has not changed.
 			expect( positionLeftAfter ).toStrictEqual( positionLeft );
 		} );
