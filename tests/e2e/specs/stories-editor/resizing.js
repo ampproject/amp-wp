@@ -29,7 +29,7 @@ async function rotateSelectedBlock() {
 // eslint-disable-next-line require-await
 async function getSelectedBlockPosition() {
 	return page.evaluate( () => {
-		const el = document.querySelector( '.wp-block.is-selected' );
+		const el = document.querySelector( '.wp-block.is-selected' ).parentNode;
 		return {
 			positionLeft: el.style.left,
 			positionTop: el.style.top,
