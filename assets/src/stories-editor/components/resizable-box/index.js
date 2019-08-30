@@ -303,72 +303,31 @@ class EnhancedResizableBox extends Component {
 						newSnapLines.push( snapLine );
 					}
 
-					if ( ! angle ) {
-						// If the resizing is to left or top then we have to compensate
-						if ( REVERSE_WIDTH_CALCULATIONS.includes( direction ) ) {
-							let leftInPx = getPixelsFromPercentage( 'x', parseFloat( blockElementLeft ) );
+					const radianAngle = getRadianFromDeg( angle );
 
-							leftInPx = leftInPx - lastDeltaW;
+					// Compare position between the initial and after resizing.
+					let initialPosition, resizedPosition;
 
-							if ( lastDeltaW ) {
-								if ( horizontalLeftSnap !== null && snappingEnabled ) {
-									appliedWidth += leftInPx - horizontalLeftSnap;
-									leftInPx = horizontalLeftSnap;
-								}
-							}
-
-							blockElement.style.left = getPercentageFromPixels( 'x', leftInPx ) + '%';
-						} else if ( lastDeltaW ) {
-							if ( horizontalRightSnap !== null && snappingEnabled ) {
-								appliedWidth = horizontalRightSnap - blockElement.offsetLeft;
-							}
-						}
-
-						if ( REVERSE_HEIGHT_CALCULATIONS.includes( direction ) ) {
-							let topInPx = getPixelsFromPercentage( 'y', parseFloat( blockElementTop ) );
-
-							topInPx = topInPx - lastDeltaH;
-
-							if ( lastDeltaH ) {
-								if ( verticalTopSnap !== null && snappingEnabled ) {
-									appliedHeight += topInPx - verticalTopSnap;
-									topInPx = verticalTopSnap;
-								}
-							}
-
-							blockElement.style.top = getPercentageFromPixels( 'y', topInPx ) + '%';
-						} else if ( lastDeltaH ) {
-							if ( verticalBottomSnap !== null && snappingEnabled ) {
-								appliedHeight = verticalBottomSnap - blockElement.offsetTop;
-							}
-						}
+					// If it's a text block, we shouldn't consider the added padding for measuring.
+					if ( isText ) {
+						initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
 					} else {
-						const radianAngle = getRadianFromDeg( angle );
-
-						// Compare position between the initial and after resizing.
-						let initialPosition, resizedPosition;
-
-						// If it's a text block, we shouldn't consider the added padding for measuring.
-						if ( isText ) {
-							initialPosition = getBlockPositioning( width - ( TEXT_BLOCK_PADDING * 2 ), height - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth - ( TEXT_BLOCK_PADDING * 2 ), appliedHeight - ( TEXT_BLOCK_PADDING * 2 ), radianAngle, direction );
-						} else {
-							initialPosition = getBlockPositioning( width, height, radianAngle, direction );
-							resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
-						}
-						const diff = {
-							left: resizedPosition.left - initialPosition.left,
-							top: resizedPosition.top - initialPosition.top,
-						};
-
-						const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
-						const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
-
-						// @todo: Do actual snapping.
-
-						blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
-						blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
+						initialPosition = getBlockPositioning( width, height, radianAngle, direction );
+						resizedPosition = getBlockPositioning( appliedWidth, appliedHeight, radianAngle, direction );
 					}
+					const diff = {
+						left: resizedPosition.left - initialPosition.left,
+						top: resizedPosition.top - initialPosition.top,
+					};
+
+					const originalPos = getResizedBlockPosition( direction, blockElementLeft, blockElementTop, lastDeltaW, lastDeltaH );
+					const updatedPos = getUpdatedBlockPosition( direction, originalPos, diff );
+
+					// @todo: Do actual snapping.
+
+					blockElement.style.left = getPercentageFromPixels( 'x', updatedPos.left ) + '%';
+					blockElement.style.top = getPercentageFromPixels( 'y', updatedPos.top ) + '%';
 
 					element.style.width = appliedWidth + 'px';
 					element.style.height = appliedHeight + 'px';
