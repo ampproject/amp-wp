@@ -90,7 +90,6 @@ CopyPasteHandler.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onCopy: PropTypes.func.isRequired,
-	onPaste: PropTypes.func.isRequired,
 };
 
 export default withDispatch( ( dispatch, ownProps, { select } ) => {
