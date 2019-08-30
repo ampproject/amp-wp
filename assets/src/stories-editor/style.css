@@ -243,7 +243,14 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	object-fit: cover;
 }
 
-/* Animations */
+/*
+ * AMP Stories Animations.
+ *
+ * The animations as defined in AMP Stories have been ported over to CSS.
+ * The first keyframe will be applied to the element as the first frame before animation starts.
+ *
+ * @link https://amp.dev/documentation/examples/visual-effects/amp_story_animations/
+ */
 
 @keyframes story-animation-pulse {
 
@@ -272,6 +279,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: scale(1);
 }
 
 @keyframes story-animation-fly-in-left {
@@ -294,6 +303,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+
+	transform: translate(var(--animation-offset-x), 0);
 }
 
 @keyframes story-animation-fly-in-right {
@@ -316,6 +328,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), 0);
 }
 
 @keyframes story-animation-fly-in-top {
@@ -338,6 +352,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translate(0, var(--animation-offset-y));
 }
 
 @keyframes story-animation-fly-in-bottom {
@@ -360,6 +376,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translate(0, var(--animation-offset-y));
 }
 
 @keyframes story-animation-rotate-in-left {
@@ -382,6 +400,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), 0) rotate(-360deg);
 }
 
 @keyframes story-animation-rotate-in-right {
@@ -404,6 +424,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), 0) rotate(-360deg);
 }
 
 @keyframes story-animation-fade-in {
@@ -425,6 +447,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	opacity: 0;
 }
 
 @keyframes story-animation-drop {
@@ -469,6 +493,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: translateY(calc(-1 * var(--animation-offset-y)));
 }
 
 @keyframes story-animation-twirl-in {
@@ -492,6 +518,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(.2, .75, .4, 1);
 	animation-delay: var(--animation-delay);
+
+	transform: rotate(-540deg) scale(0.1);
+	opacity: 0;
 }
 
 @keyframes story-animation-whoosh-in-left {
@@ -515,6 +544,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	opacity: 0;
+	transform: translate(var(--animation-offset-x), 0) scale(.15);
 }
 
 @keyframes story-animation-whoosh-in-right {
@@ -538,6 +570,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+
+	opacity: 0;
+	transform: translate(var(--animation-offset-x), 0) scale(.15);
 }
 
 @keyframes story-animation-pan-left {
@@ -565,6 +600,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+	transform-origin: left top;
 }
 
 @keyframes story-animation-pan-right {
@@ -592,6 +630,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: translate(0, var(--animation-offset-y)) scale(var(--animation-scale-start));
+	transform-origin: left top;
 }
 
 @keyframes story-animation-pan-down {
@@ -619,6 +660,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+	transform-origin: left top;
 }
 
 @keyframes story-animation-pan-up {
@@ -646,6 +690,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
+	transform-origin: left top;
 }
 
 @keyframes story-animation-zoom-in {
@@ -669,6 +716,8 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: scale(var(--animation-scale-start));
 }
 
 @keyframes story-animation-zoom-out {
@@ -692,4 +741,6 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+
+	transform: scale(var(--animation-scale-start));
 }
