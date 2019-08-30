@@ -50,7 +50,7 @@ module.exports = function( grunt ) {
 		http: {
 			google_fonts: {
 				options: {
-					url: 'https://www.googleapis.com/webfonts/v1/webfonts?key=' + process.env.GOOGLE_FONT_API,
+					url: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items&prettyPrint=false&key=' + process.env.GOOGLE_FONT_API,
 				},
 				dest: 'includes/data/fonts.json',
 			},
