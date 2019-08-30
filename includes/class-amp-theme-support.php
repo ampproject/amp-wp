@@ -1645,6 +1645,7 @@ class AMP_Theme_Support {
 		// "5. Load the AMP runtime."
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
+			unset( $amp_scripts['amp-runtime'] );
 		} else {
 			$script = $dom->createElement( 'script' );
 			$script->setAttribute( 'async', '' );
