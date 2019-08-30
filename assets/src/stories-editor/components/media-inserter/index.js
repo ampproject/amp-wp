@@ -115,14 +115,11 @@ const applyWithSelect = withSelect( ( select ) => {
 
 	const getCurrentPageBackgroundType = () => {
 		const clientId = getCurrentPage();
-		const blocks = select( 'core/block-editor' ).getBlocksByClientId( clientId );
-		if ( ! blocks ) {
-			return '';
-		}
-		const block = blocks.shift();
+		const block = select( 'core/block-editor' ).getBlock( clientId );
 		if ( ! block ) {
 			return '';
 		}
+	
 		const mediaType = ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
 		return mediaType;
 	};
