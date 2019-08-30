@@ -483,7 +483,6 @@ PageEdit.propTypes = {
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
-	isFirstPage: PropTypes.bool.isRequired,
 	media: PropTypes.object,
 	name: PropTypes.string.isRequired,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
@@ -535,7 +534,6 @@ export default compose(
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
-			isFirstPage,
 		};
 	} ),
 )( PageEdit );
