@@ -4,6 +4,7 @@
  */
 import { castArray } from 'lodash';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 /**
  * WordPress dependencies
@@ -103,21 +104,25 @@ const RightClickMenu = ( props ) => {
 				name: __( 'Copy Block', 'amp' ),
 				blockAction: copyBlock,
 				icon: 'admin-page',
+				className: 'right-click-copy',
 			},
 			{
 				name: __( 'Cut Block', 'amp' ),
 				blockAction: cutBlock,
 				icon: 'clipboard',
+				className: 'right-click-cut',
 			},
 			{
 				name: __( 'Duplicate Block', 'amp' ),
 				blockAction: duplicateBlock,
 				icon: 'admin-page',
+				className: 'right-click-duplicate',
 			},
 			{
 				name: __( 'Remove Block', 'amp' ),
 				blockAction: removeBlock,
 				icon: 'trash',
+				className: 'right-click-remove',
 			},
 		];
 	}
@@ -133,6 +138,7 @@ const RightClickMenu = ( props ) => {
 				name: __( 'Paste', 'amp' ),
 				blockAction: pasteBlock,
 				icon: 'pressthis',
+				className: 'right-click-paste',
 			}
 		);
 	}
@@ -152,7 +158,7 @@ const RightClickMenu = ( props ) => {
 						{ blockActions.map( ( action ) => (
 							<MenuGroup key={ `action-${ action.name }` } >
 								<MenuItem
-									className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
+									className={ classnames( action.className, 'editor-block-settings-menu__control block-editor-block-settings-menu__control' ) }
 									onClick={ () => {
 										onClose();
 										action.blockAction( firstBlockClientId );
