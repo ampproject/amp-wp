@@ -25,6 +25,7 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import './edit.css';
+import useOutsideClickChecker from './outside-click-checker';
 import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
@@ -34,30 +35,6 @@ const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
 	position: 'bottom left',
 };
-
-function useOutsideClickChecker( ref, onClose ) {
-	/**
-	 * Close the Popover if outside click was detected.
-	 *
-	 * @param {Object} event Click event.
-	 */
-	function handleClickOutside( event ) {
-		if ( ref.current && ! ref.current.contains( event.target ) ) {
-			onClose();
-		}
-	}
-
-	useEffect( () => {
-		// Handle click outside only if the the menu has been added.
-		if ( ref.current && ref.current.innerHTML ) {
-			document.addEventListener( 'mousedown', handleClickOutside );
-		}
-		return () => {
-			// Unbind when cleaning up.
-			document.removeEventListener( 'mousedown', handleClickOutside );
-		};
-	} );
-}
 
 const RightClickMenu = ( props ) => {
 	const {
