@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost } from '@wordpress/e2e-test-utils';
+import { createNewPost, getAllBlocks, selectBlockByClientId } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -10,9 +10,16 @@ import {
 	activateExperience,
 	clickButton,
 	deactivateExperience,
+	goToPreviousPage,
 	insertBlock,
 	removeAllBlocks,
 } from '../../utils';
+
+async function openRightClickMenu( el ) {
+	await el.click( {
+		button: 'right',
+	} );
+}
 
 describe( 'Code Editor', () => {
 	beforeAll( async () => {
@@ -25,19 +32,19 @@ describe( 'Code Editor', () => {
 
 	const BLOCK_SELECTOR = '.wp-block-amp-amp-story-post-author';
 	const POPOVER_SELECTOR = '.amp-story-right-click-menu__popover';
+	const ACTIVE_PAGE_SELECTOR = '.amp-page-active';
 
 	beforeEach( async () => {
 		await createNewPost( { postType: 'amp_story' } );
 		await removeAllBlocks();
+		await page.waitForSelector( ACTIVE_PAGE_SELECTOR );
 		await insertBlock( 'Author' );
 		await page.waitForSelector( BLOCK_SELECTOR );
 	} );
 
 	it( 'opens the right click menu with the block actions when clicking on a block', async () => {
 		const block = await page.$( BLOCK_SELECTOR );
-		await block.click( {
-			button: 'right',
-		} );
+		await openRightClickMenu( block );
 
 		expect( page ).toMatchElement( POPOVER_SELECTOR );
 		expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-copy' );
@@ -47,60 +54,93 @@ describe( 'Code Editor', () => {
 	} );
 
 	it( 'does not open the menu by clicking on a page', async () => {
-		const pageBlock = await page.$( '.amp-page-active' );
-		await pageBlock.click( {
-			button: 'right',
-		} );
+		const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
+		await openRightClickMenu( pageBlock );
+
 		expect( page ).not.toMatchElement( POPOVER_SELECTOR );
 	} );
 
-	/*it( 'should open right click menu for pasting on a page if a block has been copied previously', async () => {
+	it( 'should open right click menu for pasting on a page if a block has been copied previously', async () => {
 		const block = await page.$( BLOCK_SELECTOR );
-		await block.click( {
-			button: 'right',
-		} );
+		await openRightClickMenu( block );
+
 		await clickButton( 'Copy Block' );
-		await page.waitFor( 1500 );
-		const pageBlock = await page.$( '.amp-page-active' );
-		await page.waitFor( 1500 );
-		await pageBlock.click( {
-			button: 'right',
-		} );
-		await page.waitFor( 1500 );
-		expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-copy' );
-		await page.waitFor( 1500 );
+		const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
+		await openRightClickMenu( pageBlock );
+
+		expect( page ).toMatchElement( POPOVER_SELECTOR + ' .right-click-paste' );
 	} );
 
 	it( 'should allow copying and pasting a block', async () => {
 		const block = await page.$( BLOCK_SELECTOR );
-		await block.click( {
-			button: 'right',
-		} );
+		await openRightClickMenu( block );
+
 		await clickButton( 'Copy Block' );
 
-		await insertBlock( 'Page' );
-		await page.waitForSelector( '.amp-page-active' );
-		const pageBlock = await page.$( '.amp-page-active' );
-		await pageBlock.click( {
-			button: 'right',
-		} );
+		await removeAllBlocks();
+		await page.waitForSelector( ACTIVE_PAGE_SELECTOR );
+		const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
+		await openRightClickMenu( pageBlock );
+
 		await clickButton( 'Paste' );
 
-		expect( page ).toMatchElement( '.amp-page-active ' + BLOCK_SELECTOR );
+		expect( page ).toMatchElement( ACTIVE_PAGE_SELECTOR + ' ' + BLOCK_SELECTOR );
 	} );
 
 	it( 'should allow cutting and pasting a block', async () => {
+		const block = await page.$( BLOCK_SELECTOR );
+		await openRightClickMenu( block );
+
+		await clickButton( 'Cut Block' );
+		expect( page ).not.toMatchElement( BLOCK_SELECTOR );
+
+		const pageBlock = await page.$( ACTIVE_PAGE_SELECTOR );
+		await openRightClickMenu( pageBlock );
+
+		await clickButton( 'Paste' );
+
+		expect( page ).toMatchElement( BLOCK_SELECTOR );
 	} );
 
 	it( 'should allow duplicating a block', async () => {
+		const block = await page.$( BLOCK_SELECTOR );
+		await openRightClickMenu( block );
+
+		await clickButton( 'Duplicate Block' );
+
+		const nodes = await page.$x(
+			'//div[contains(@class, "wp-block-amp-amp-story-post-author")]'
+		);
+		expect( nodes ).toHaveLength( 2 );
 	} );
 
 	it( 'should allow removing a block', async () => {
+		const block = await page.$( BLOCK_SELECTOR );
+		await openRightClickMenu( block );
+
+		await clickButton( 'Remove Block' );
+		expect( page ).not.toMatchElement( BLOCK_SELECTOR );
 	} );
 
-	it( 'should close the menu when clicking anywhere outside of the menu', async () => {
-	} );
+	it( 'should not allow pasting disallowed blocks', async () => {
+		const firstPageClientId = ( await getAllBlocks() )[ 0 ].clientId;
+		await insertBlock( 'Page' );
+		await insertBlock( 'Call to Action' );
 
-	it( 'should not allow pastin disallowed blocks', async () => {
-	} );*/
+		const callToActionSelector = '.wp-block-amp-amp-story-cta';
+		const ctaBlock = await page.waitForSelector( callToActionSelector );
+		await openRightClickMenu( ctaBlock );
+
+		await clickButton( 'Copy Block' );
+
+		await goToPreviousPage();
+		await selectBlockByClientId( firstPageClientId );
+		const pageBlock = await page.$( `#block-${ firstPageClientId }` );
+		// Wait for transition time 300ms.
+		await page.waitFor( 300 );
+		await openRightClickMenu( pageBlock );
+
+		await clickButton( 'Paste' );
+		expect( page ).not.toMatchElement( `#block-${ firstPageClientId } ${ callToActionSelector }` );
+	} );
 } );
