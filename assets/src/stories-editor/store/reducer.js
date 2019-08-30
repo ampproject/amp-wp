@@ -163,10 +163,13 @@ export function copiedMarkup( state = {}, action ) {
 	switch ( action.type ) {
 		case 'SET_COPIED_MARKUP':
 			const { markup } = action;
-			return markup;
+			if ( 'string' === typeof markup ) {
+				return markup;
+			}
+			return state;
 
 		case 'CLEAR_COPIED_MARKUP':
-			if ( ! state.length ) {
+			if ( '' === state ) {
 				return state;
 			}
 
