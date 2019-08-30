@@ -139,7 +139,7 @@
 /*
  * Make all the inner blocks positioned with absolute.
  */
-div[data-type="amp/amp-story-page"] .editor-inner-blocks .editor-block-list__layout:first-of-type .wp-block {
+div[data-type="amp/amp-story-page"] .editor-inner-blocks .amp-page-child-block {
 	position: absolute;
 	z-index: 10;
 }

@@ -116,7 +116,7 @@ class Draggable extends Component {
 	 */
 	onDragStart( event ) {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const element = document.getElementById( elementId );
+		const element = document.getElementById( elementId ).parentNode;
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
 		if ( ! element || ! parentPage ) {

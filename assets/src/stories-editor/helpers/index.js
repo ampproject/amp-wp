@@ -1180,17 +1180,23 @@ const getBlockInnerTextElement = ( block ) => {
  *
  * @param {Object} block Block object.
  *
- * @return {null|Element} The inner element.
+ * @return {?Element} The inner element.
  */
-export const getBlockInnerElementForAnimation = ( block ) => {
+export const getBlockInnerElement = ( block ) => {
 	const { name, clientId } = block;
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+	const isPage = 'amp/amp-story-page' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
 
-	if ( ! isMovableBlock ) {
-		return null;
+	if ( isPage ) {
+		return document.querySelector( `[data-block="${ clientId }"]` );
 	}
 
-	return document.querySelector( `[data-block="${ clientId }"]` );
+	if ( isCTABlock ) {
+		// Not the block itself is movable, only the button within.
+		return document.querySelector( `amp-story-cta-button-${ clientId }` );
+	}
+
+	return document.querySelector( `#block-${ clientId }` );
 };
 
 /**
@@ -1736,6 +1742,24 @@ export const processMedia = ( media ) => {
 };
 
 /**
+ * Returns a movable block's wrapper element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+export const getBlockWrapperElement = ( block ) => {
+	const { name, clientId } = block;
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return null;
+	}
+
+	return document.querySelector( `.amp-page-child-block[data-block="${ clientId }"]` );
+};
+
+/**
  * Calculate target scaling factor so that it is at least 25% larger than the
  * page.
  *
@@ -1760,6 +1784,80 @@ const calculateTargetScalingFactor = ( width, height ) => {
 };
 
 /**
+ * Returns the block's actual position in relation to the page it's on.
+ *
+ * @param {Element} blockElement Block element.
+ * @param {Element} parentElement The block parent element.
+ *
+ * @return {{top: number, left: number}} Relative position of the block.
+ */
+const getRelativeElementPosition = ( blockElement, parentElement ) => {
+	const { left: parentLeft, top: parentTop } = parentElement.getBoundingClientRect();
+	const { top, left } = blockElement.getBoundingClientRect();
+
+	return {
+		top: top - parentTop,
+		left: left - parentLeft,
+	};
+};
+
+const getAnimationTransformParams = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+	const innerElement = getBlockInnerElement( block );
+	const parentBlock = getBlockRootClientId( block.clientId );
+	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
+
+	const { width, height } = innerElement.getBoundingClientRect();
+	const { top, left } = getRelativeElementPosition( blockElement, parentBlockElement );
+
+	let offsetX;
+	let offsetY;
+	let scalingFactor;
+
+	switch ( animationType ) {
+		case 'fly-in-left':
+		case 'rotate-in-left':
+		case 'whoosh-in-left':
+			offsetX = -( left + width );
+			break;
+		case 'fly-in-right':
+		case 'rotate-in-right':
+		case 'whoosh-in-right':
+			offsetX = STORY_PAGE_INNER_WIDTH + left + width;
+			break;
+		case 'fly-in-top':
+			offsetY = -( top + height );
+			break;
+		case 'fly-in-bottom':
+			offsetY = STORY_PAGE_INNER_HEIGHT + top + height;
+			break;
+		case 'drop':
+			offsetY = Math.max( 160, ( top + height ) );
+			break;
+		case 'pan-left':
+		case 'pan-right':
+			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
+			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			break;
+		case 'pan-down':
+		case 'pan-up':
+			offsetX = -width / 2;
+			offsetY = STORY_PAGE_INNER_HEIGHT - height;
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			break;
+		default:
+			offsetX = 0;
+	}
+
+	return {
+		offsetX,
+		offsetY,
+		scalingFactor,
+	};
+};
+
+/**
  * Plays the block's animation in the editor.
  *
  * @param {Object} block Block object.
@@ -1768,90 +1866,43 @@ const calculateTargetScalingFactor = ( width, height ) => {
  * @param {number} animationDelay Animation delay.
  * @param {function} callback Callback for when animation has stopped.
  */
-export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback ) => {
-	const blockElement = getBlockInnerElementForAnimation( block );
-	const parentBlock = getBlockRootClientId( block.clientId );
-	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
+export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
+	const blockElement = getBlockWrapperElement( block );
 
-	if ( ! blockElement || ! parentBlock || ! parentBlockElement ) {
-		if ( callback ) {
-			callback();
-		}
+	if ( ! blockElement ) {
+		callback();
 
 		return;
 	}
 
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
-	const animationName = `story-animation-${ animationType }`;
+	const animationClassName = `story-animation-${ animationType }`;
 
-	blockElement.classList.remove( animationName );
-	blockElement.removeAttribute( 'style' );
+	blockElement.classList.remove( animationClassName );
 
 	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
-	blockElement.style.setProperty( '--animation-delay', `${ animationDelay }ms` );
+	blockElement.style.setProperty( '--animation-delay', `${ animationDelay || 0 }ms` );
 
-	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
-	const { top, left, width, height } = blockElement.getBoundingClientRect();
-	const scalingFactor = calculateTargetScalingFactor( width, height );
+	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
 
-	// We calculate with the block's actual dimensions relative to the page it's on.
-	const actualTop = top - parentBlockOffsetTop;
-	const actualLeft = left - parentBlockOffsetLeft;
-
-	let offsetX;
-	let offsetY;
-
-	// @todo Verify this.
-	switch ( animationType ) {
-		case 'fly-in-left':
-		case 'rotate-in-left':
-		case 'whoosh-in-left':
-			offsetX = -( actualLeft + width );
-			break;
-		case 'fly-in-right':
-		case 'rotate-in-right':
-		case 'whoosh-in-right':
-			offsetX = STORY_PAGE_INNER_WIDTH + actualLeft + width;
-			break;
-		case 'fly-in-top':
-			offsetY = -( actualTop + height );
-			break;
-		case 'fly-in-bottom':
-			// const offsetY = dimensions.pageHeight - dimensions.targetY;
-			offsetY = STORY_PAGE_INNER_HEIGHT + actualTop + height;
-			break;
-		case 'drop':
-			offsetY = Math.max( 160, ( actualTop + height ) );
-			break;
-		case 'pan-left':
-		case 'pan-right':
-			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
-			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
-			blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
-			blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
-			break;
-		case 'pan-down':
-		case 'pan-up':
-			offsetX = -width / 2;
-			offsetY = STORY_PAGE_INNER_HEIGHT - height;
-			blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
-			blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
-			break;
-		default:
-			offsetX = 0;
+	if ( offsetX ) {
+		blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
 	}
 
-	blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
-	blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+	if ( offsetY ) {
+		blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+	}
 
-	blockElement.classList.add( animationName );
+	if ( scalingFactor ) {
+		blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+		blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
+	}
+
+	blockElement.classList.add( animationClassName );
 
 	blockElement.addEventListener( 'animationend', () => {
-		blockElement.classList.remove( animationName );
-		blockElement.removeAttribute( 'style' );
+		blockElement.classList.remove( animationClassName );
 
-		if ( callback ) {
-			callback();
-		}
+		callback();
 	}, { once: true } );
 };
