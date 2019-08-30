@@ -299,7 +299,7 @@ describe( 'Resizing', () => {
 		} );
 	} );
 
-	describe( 'Author block', () => {
+	describe( 'Rotated Author block', () => {
 		beforeEach( async () => {
 			await createNewPost( { postType: 'amp_story' } );
 			await insertBlock( 'Author' );
