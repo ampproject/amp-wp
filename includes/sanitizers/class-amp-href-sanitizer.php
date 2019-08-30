@@ -51,7 +51,7 @@ final class AMP_Href_Sanitizer extends AMP_Base_Sanitizer {
 				);
 			}
 
-			$url = esc_url( $node->getAttribute( 'href' ) );
+			$url = esc_url_raw( $node->getAttribute( 'href' ) );
 
 			if ( ! empty( $url ) && false !== wp_parse_url( $url ) ) {
 				continue;
