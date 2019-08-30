@@ -89,31 +89,6 @@ const RightClickMenu = ( props ) => {
 	const containerRef = useRef( null );
 	useOutsideClickChecker( containerRef, onClose );
 
-	const onCopy = () => {
-		onClose();
-		copyBlock( firstBlockClientId );
-	};
-
-	const onCut = () => {
-		onClose();
-		cutBlock( firstBlockClientId );
-	};
-
-	const onRemove = () => {
-		onClose();
-		removeBlock( firstBlockClientId );
-	};
-
-	const onDuplicate = () => {
-		onClose();
-		duplicateBlock( firstBlockClientId );
-	};
-
-	const onPaste = () => {
-		pasteBlock( firstBlockClientId );
-		onClose();
-	};
-
 	const position = {
 		top: clientY,
 		left: clientX,
@@ -126,22 +101,22 @@ const RightClickMenu = ( props ) => {
 		blockActions = [
 			{
 				name: __( 'Copy Block', 'amp' ),
-				blockAction: onCopy,
+				blockAction: copyBlock,
 				icon: 'admin-page',
 			},
 			{
 				name: __( 'Cut Block', 'amp' ),
-				blockAction: onCut,
+				blockAction: cutBlock,
 				icon: 'clipboard',
 			},
 			{
 				name: __( 'Duplicate Block', 'amp' ),
-				blockAction: onDuplicate,
+				blockAction: duplicateBlock,
 				icon: 'admin-page',
 			},
 			{
 				name: __( 'Remove Block', 'amp' ),
-				blockAction: onRemove,
+				blockAction: removeBlock,
 				icon: 'trash',
 			},
 		];
@@ -156,7 +131,7 @@ const RightClickMenu = ( props ) => {
 		blockActions.push(
 			{
 				name: __( 'Paste', 'amp' ),
-				blockAction: onPaste,
+				blockAction: pasteBlock,
 				icon: 'pressthis',
 			}
 		);
@@ -178,7 +153,10 @@ const RightClickMenu = ( props ) => {
 							<MenuGroup key={ `action-${ action.name }` } >
 								<MenuItem
 									className="editor-block-settings-menu__control block-editor-block-settings-menu__control"
-									onClick={ action.blockAction }
+									onClick={ () => {
+										onClose();
+										action.blockAction( firstBlockClientId );
+									} }
 									icon={ action.icon }
 								>
 									{ action.name }
