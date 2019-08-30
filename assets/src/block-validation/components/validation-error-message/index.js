@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -17,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {?string} props.parent_name Parent node name.
  * @param {?string} props.message Error message.
  *
- * @return {import('react').ReactElement} Validation error message.
+ * @return {ReactElement} Validation error message.
  */
 const ValidationErrorMessage = ( { message, code, node_name: nodeName, parent_name: parentName } ) => {
 	if ( message ) {

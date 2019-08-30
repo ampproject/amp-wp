@@ -5,6 +5,7 @@ import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import { every, has, isEqual } from 'lodash';
 import memize from 'memize';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -535,7 +536,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @param {number}  attributes.width         Block width in pixels.
  * @param {number}  attributes.height        Block height in pixels.
  *
- * @return {Object} The wrapped element.
+ * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {

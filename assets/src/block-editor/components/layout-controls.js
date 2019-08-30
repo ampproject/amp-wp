@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -17,7 +18,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Function} props.setAttributes        Callback to update block attributes.
  * @param {Array}    props.ampLayoutOptions     Layout options.
  *
- * @return {import('react').ReactElement} Controls.
+ * @return {ReactElement} Controls.
  */
 const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 	const { ampLayout, height, width } = attributes;
