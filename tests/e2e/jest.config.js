@@ -10,10 +10,6 @@ module.exports = {
 		'<rootDir>/config/bootstrap.js',
 		'expect-puppeteer',
 	],
-	testMatch: [
-		'**/specs/**/*.js',
-		'**/?(*.)spec.js',
-	],
 	testPathIgnorePatterns: [
 		'.git',
 		'node_modules',
