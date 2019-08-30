@@ -10,6 +10,7 @@ import {
 	animations,
 	currentPage,
 	blocks,
+	copiedMarkup,
 } from '../reducer';
 
 describe( 'reducers', () => {
@@ -169,6 +170,48 @@ describe( 'reducers', () => {
 			expect( state ).toStrictEqual( {
 				order: [ 'page-1', 'page-2' ],
 				isReordering: false,
+			} );
+		} );
+	} );
+
+	describe( 'copiedMarkup()', () => {
+		it( 'should set copied markup', () => {
+			const markup = '<! -- Hello -->';
+			const state = copiedMarkup( undefined, {
+				type: 'SET_COPIED_MARKUP',
+				markup,
+			} );
+
+			expect( state ).toStrictEqual( markup );
+		} );
+
+		it( 'should not set non-string values', () => {
+			const markups = [
+				false,
+				999,
+				[],
+			];
+			markups.forEach( ( markup ) => {
+				const state = copiedMarkup( undefined, {
+					type: 'SET_COPIED_MARKUP',
+					markup,
+				} );
+				expect( state ).toStrictEqual( {} );
+			} );
+		} );
+
+		it( 'should clear markup', () => {
+			const originals = [
+				999,
+				false,
+				'Hello',
+			];
+
+			originals.forEach( ( original ) => {
+				const state = copiedMarkup( original, {
+					type: 'CLEAR_COPIED_MARKUP',
+				} );
+				expect( state ).toStrictEqual( '' );
 			} );
 		} );
 	} );

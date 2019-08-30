@@ -10,6 +10,7 @@ export { insertBlock } from './insert-block';
 export { openGlobalBlockInserter } from './open-global-block-inserter';
 export { openPreviewPage } from './open-preview-page';
 export { openTemplateInserter } from './open-template-inserter';
+export { removeAllBlocks } from './remove-all-blocks';
 export { searchForBlock } from './search-for-block';
 export { selectBlockByClassName } from './select-block-by-classname';
 export { switchEditorModeTo } from './switch-editor-mode-to';

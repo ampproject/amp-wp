@@ -6,7 +6,7 @@ import { createNewPost } from '@wordpress/e2e-test-utils';
 /**
  * Internal dependencies
  */
-import { activateExperience, deactivateExperience } from '../../utils';
+import { activateExperience, deactivateExperience, removeAllBlocks } from '../../utils';
 
 describe( 'Code Editor', () => {
 	beforeAll( async () => {
@@ -19,12 +19,7 @@ describe( 'Code Editor', () => {
 
 	beforeEach( async () => {
 		await createNewPost( { postType: 'amp_story' } );
-		// Remove all blocks from the post so that we're working with a clean slate.
-		await page.evaluate( () => {
-			const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-			const clientIds = blocks.map( ( block ) => block.clientId );
-			wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
-		} );
+		await removeAllBlocks();
 	} );
 
 	it( 'opens the right click menu with the block actions when clicking on a block', async () => {
