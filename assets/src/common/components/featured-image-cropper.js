@@ -11,7 +11,7 @@ const FeaturedImageCropper = wp.media.controller.Cropper.extend( {
 	 * Creates an object with the image attachment and crop properties.
 	 *
 	 * @param {wp.media.model.Attachment} attachment The attachment to crop.
-	 * @return {Function} A jQuery promise that represents the crop image request.
+	 * @return {Promise} A jQuery promise (not a native one!) that represents the crop image request.
 	 */
 	doCrop( attachment ) {
 		const cropDetails = attachment.get( 'cropDetails' );
