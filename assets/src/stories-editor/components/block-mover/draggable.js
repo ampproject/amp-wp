@@ -107,8 +107,8 @@ class Draggable extends Component {
 	}
 
 	/**
-	 *  - Clones the current element and spawns clone over original element.
-	 *  - Adds dragover listener.
+	 * Clones the current element and spawns clone over original element.
+	 * Adds dragover listener.
 	 *
 	 * @param {Object} event Custom DragEvent.
 	 */

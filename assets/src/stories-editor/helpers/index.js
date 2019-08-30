@@ -1438,14 +1438,12 @@ export const maybeInitializeAnimations = () => {
 /**
  * Return a label for the block order controls depending on block position.
  *
- * @param {string}  type            Block type - in the case of a single block, should
- *                                  define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
+ * @param {string}  type            Block type - in the case of a single block, should define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
  * @param {number}  currentPosition The block's current position.
  * @param {number}  newPosition     The block's new position.
  * @param {boolean} isFirst         This is the first block.
  * @param {boolean} isLast          This is the last block.
- * @param {number}  dir             Direction of movement (> 0 is considered to be going
- *                                  down, < 0 is up).
+ * @param {number}  dir             Direction of movement (> 0 is considered to be going down, < 0 is up).
  *
  * @return {string} Label for the block movement controls.
  */
