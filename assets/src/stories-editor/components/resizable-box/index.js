@@ -20,7 +20,6 @@ import withSnapTargets from '../higher-order/with-snap-targets';
 import './edit.css';
 import {
 	getPercentageFromPixels,
-	getPixelsFromPercentage,
 	findClosestSnap,
 	getBlockInnerElement,
 } from '../../helpers';
@@ -37,8 +36,6 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 	STORY_PAGE_INNER_WIDTH,
 	TEXT_BLOCK_PADDING,
-	REVERSE_WIDTH_CALCULATIONS,
-	REVERSE_HEIGHT_CALCULATIONS,
 	BLOCK_DRAGGING_SNAP_GAP,
 } from '../../constants';
 
@@ -245,8 +242,6 @@ class EnhancedResizableBox extends Component {
 					if ( minWidth < appliedWidth ) {
 						lastDeltaW = deltaW;
 					}
-
-					const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 					const dimensions = blockElement.getBoundingClientRect();
 
