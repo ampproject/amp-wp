@@ -9,6 +9,7 @@ import memize from 'memize';
 /**
  * WordPress dependencies
  */
+import '@wordpress/core-data';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
