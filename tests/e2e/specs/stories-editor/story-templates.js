@@ -73,11 +73,14 @@ describe( 'Story Templates', () => {
 			} );
 
 			it( 'should display non-template reusable blocks in the reusable blocks management screen', async () => {
+				const titleSelector = '.page-title .row-title';
+
 				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+				await page.waitForSelector( titleSelector );
 
 				// Check that it is untitled
 				const title = await page.$eval(
-					'.page-title .row-title',
+					titleSelector,
 					( element ) => element.innerText
 				);
 				expect( title ).toBe( 'Untitled Reusable Block' );
