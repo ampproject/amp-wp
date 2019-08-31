@@ -98,6 +98,8 @@ module.exports = function( grunt ) {
 			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
 			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
 			paths.push( 'vendor/willwashburn/stream/src/**' );
+			paths.push( 'vendor/wp-cli/mustangostang-spyc/includes/*' );
+			paths.push( 'vendor/wp-cli/php-cli-tools/lib/**' );
 
 			grunt.config.set( 'copy', {
 				build: {
