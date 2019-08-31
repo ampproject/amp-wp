@@ -67,6 +67,119 @@ $metadata = amp_get_schemaorg_metadata();
 			the_content();
 			amp_print_analytics( '' );
 			?>
+			
+            <amp-story-bookend layout=nodisplay>
+                <script type="application/json">
+            {
+                "bookendVersion": "v1.0",
+                "shareProviders": [
+                    "linkedin",
+                    "whatsapp",
+                    "Twitter"
+                ],
+                "components": [
+                    {
+                        "type": "heading",
+                        "text": "Up Next"
+                    }
+<?php
+					// to loop post in bookend
+					$loop_length=3;  //specify number of posts ahead you want to display
+					$check_help=0;    //require as a checkpoint to follow different paths in loop
+					global $post;
+					$revert_post_content=$post;  //save current global post content to setback changes to current post after loop execution ends
+					for($loop_start = 1; $loop_start <= $loop_length; $loop_start++)
+					{
+						if( $loop_start === 1)
+						{
+							$nextPost = get_next_post();
+						}
+						else
+						{
+							global $post;
+							$post = get_next_post();
+							setup_postdata( $post );
+
+							if($check_help===1)
+							{
+								$nextPost = $post;
+								$check_help=2;
+							}
+							else
+							{
+								$nextPost = get_next_post();
+								$check_help=0;
+							}
+						}
+						if(get_permalink($nextPost) != get_permalink($post))   // to check when last post arrives to loop back to first posts
+						{
+						}
+						else
+						{
+							// getting the link of oldest story (1st story)
+							$args = array(
+								'numberposts'      => 2,
+								'category'         => 0,
+								'orderby'          => 'date',
+								'order'            => 'ASC', // the 1st array element will be 1st story(oldest story)
+								'include'          => array(),
+								'exclude'          => array(),
+								'meta_key'         => '',
+								'meta_value'       => '',
+								'post_type'        => 'amp_story',
+								'suppress_filters' => true,
+							);
+							$get_post_for_story=get_posts($args);
+							$first_story=$get_post_for_story[0]; // 0 will give the 1st  story here ( oldest story)
+
+							global $post;
+							$post = $first_story;
+							setup_postdata( $post );
+							if($check_help!=0 )
+							{
+								$nextPost = get_next_post();
+							}
+							else
+							{
+								$nextPost = $post;
+								$check_help=1;
+							}
+
+						}
+
+
+						// to stop looping of stories
+						if(get_permalink($revert_post_content)!== get_permalink($nextPost))
+						{
+							echo ',{';
+							if ( $loop_start === 1 ) {
+								echo ' "type": "landscape", ';
+							} else {
+								echo ' "type": "small", ';
+							}
+							echo '"title": "';
+							echo $nextPost->post_title;
+							echo '",';
+							echo '"url": "';
+							echo get_permalink( $nextPost );
+							echo '",';
+							echo '"image": "';
+							echo get_the_post_thumbnail_url( $nextPost->ID );
+							echo '"';
+							echo '}';
+						}
+						else{
+							$loop_start=$loop_length+2;
+						}
+						if( $loop_start >= $loop_length)
+						{ //wp_reset_postdata();
+							$post=$revert_post_content;}
+					}
+					?>
+  ]
+      }
+     </script>
+            </amp-story-bookend>
 		</amp-story>
 
 		<?php
