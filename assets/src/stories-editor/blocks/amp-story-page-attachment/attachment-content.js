@@ -17,6 +17,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { RichText } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
+import { ENTER, SPACE } from '@wordpress/keycodes';
 
 const AttachmentContent = ( props ) => {
 	const [ selectedPost, setSelectedPost ] = useState( null );
@@ -97,8 +98,11 @@ const AttachmentContent = ( props ) => {
 						tabIndex="0"
 						className="amp-story-page-attachment-close-button"
 						role="button"
-						onKeyDown={ () => {
-							// @todo
+						onKeyDown={ ( event ) => {
+							if ( ENTER === event.keyCode || SPACE === event.keyCode ) {
+								toggleAttachment( false );
+								event.stopPropagation();
+							}
 						} }
 						ref={ closeButtonRef }
 					/>
