@@ -22,8 +22,6 @@ import {
 	BaseControl,
 	FocalPointPicker,
 	Notice,
-	SelectControl,
-	RangeControl,
 	ResponsiveWrapper,
 } from '@wordpress/components';
 import {
@@ -37,7 +35,6 @@ import { compose } from '@wordpress/compose';
  * Internal dependencies
  */
 import {
-	getTotalAnimationDuration,
 	addBackgroundColorToOverlay,
 	getCallToActionBlock,
 	getPageAttachmentBlock,
@@ -65,6 +62,7 @@ import {
 } from '../../../common/constants';
 import './edit.css';
 import BackgroundColorSettings from './background-color-settings';
+import PageSettings from './page-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -171,7 +169,7 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
+		const { attributes, clientId, media, setAttributes, allowedBlocks } = this.props;
 
 		const {
 			mediaId,
@@ -195,21 +193,6 @@ class PageEdit extends Component {
 
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && poster ) {
 			style.backgroundImage = `url(${ poster })`;
-		}
-
-		const autoAdvanceAfterOptions = [
-			{ value: '', label: __( 'Manual', 'amp' ) },
-			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-			{ value: 'media', label: __( 'After media has played', 'amp' ) },
-		];
-
-		let autoAdvanceAfterHelp;
-
-		if ( 'media' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
-		} else if ( 'auto' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
 		}
 
 		let overlayStyle = {
@@ -342,28 +325,12 @@ class PageEdit extends Component {
 							) }
 						</>
 					</PanelBody>
-					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
-						<SelectControl
-							label={ __( 'Advance to next page', 'amp' ) }
-							help={ autoAdvanceAfterHelp }
-							value={ autoAdvanceAfter }
-							options={ autoAdvanceAfterOptions }
-							onChange={ ( value ) => {
-								setAttributes( { autoAdvanceAfter: value } );
-								setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
-							} }
-						/>
-						{ 'time' === autoAdvanceAfter && (
-							<RangeControl
-								label={ __( 'Time in seconds', 'amp' ) }
-								value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
-								onChange={ ( value ) => setAttributes( { autoAdvanceAfterDuration: value } ) }
-								min={ Math.max( totalAnimationDuration, 1 ) }
-								initialPosition={ totalAnimationDuration }
-								help={ totalAnimationDuration > 1 ? __( 'A minimum time is enforced because there are animated blocks on this page.', 'amp' ) : undefined }
-							/>
-						) }
-					</PanelBody>
+					<PageSettings
+						autoAdvanceAfter={ autoAdvanceAfter }
+						autoAdvanceAfterDuration={ autoAdvanceAfterDuration }
+						clientId={ clientId }
+						setAttributes={ setAttributes }
+					/>
 				</InspectorControls>
 				<div style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
@@ -404,7 +371,6 @@ PageEdit.propTypes = {
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
-	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
 	videoFeaturedImage: PropTypes.shape( {
@@ -421,8 +387,7 @@ export default compose(
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
-		const { getAnimatedBlocks } = select( 'amp/story' );
+		const { getBlockOrder } = select( 'core/block-editor' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId ) && ! getPageAttachmentBlock( clientId );
@@ -437,11 +402,6 @@ export default compose(
 		if ( VIDEO_BACKGROUND_TYPE === mediaType && media && media.featured_media && ! poster ) {
 			videoFeaturedImage = getMedia( media.featured_media );
 		}
-
-		const animatedBlocks = getAnimatedBlocks();
-		const animatedBlocksPerPage = ( animatedBlocks[ clientId ] || [] ).filter( ( { id } ) => clientId === getBlockRootClientId( id ) );
-		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
-		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
 		let allowedBlocks = ALLOWED_MOVABLE_BLOCKS;
 
@@ -462,7 +422,6 @@ export default compose(
 			media,
 			videoFeaturedImage,
 			allowedBlocks,
-			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 		};
 	} ),
