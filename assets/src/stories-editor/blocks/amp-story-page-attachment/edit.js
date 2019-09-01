@@ -20,6 +20,7 @@ import { Button } from '@wordpress/components';
 import './edit.css';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import { PostSelector } from '../../components';
+import AttachmentOpener from './attachment-opener';
 
 class PageAttachmentEdit extends Component {
 	constructor( props ) {
@@ -147,7 +148,7 @@ class PageAttachmentEdit extends Component {
 		} = this.props;
 
 		const {
-			text,
+			openText,
 			title,
 			wrapperStyle,
 			attachmentClass,
@@ -228,29 +229,11 @@ class PageAttachmentEdit extends Component {
 					</div>
 				}
 				{ ! this.state.isOpen &&
-				<div className="open-attachment-wrapper">
-					<span
-						role="button"
-						tabIndex="0"
-						onClick={ () => {
-							this.toggleAttachment( true );
-						} }
-						onKeyDown={ () => {
-							// @todo
-						} }
-						className="amp-story-page-open-attachment-icon"
-					>
-						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-left" />
-						<span className="amp-story-page-open-attachment-bar amp-story-page-open-attachment-bar-right" />
-					</span>
-					<RichText
-						value={ text }
-						tagName="span"
-						wrapperClassName="amp-story-page-attachment__text"
-						onChange={ ( value ) => setAttributes( { text: value } ) }
-						placeholder={ __( 'Write CTA Text', 'amp' ) }
+					<AttachmentOpener
+						setAttributes={ setAttributes }
+						toggleAttachment={ this.toggleAttachment }
+						openText={ openText }
 					/>
-				</div>
 				}
 			</>
 		);
@@ -263,7 +246,7 @@ PageAttachmentEdit.propTypes = {
 		postId: PropTypes.number,
 		postType: PropTypes.string.isRequired,
 		wrapperStyle: PropTypes.object,
-		text: PropTypes.string,
+		openText: PropTypes.string,
 		title: PropTypes.string,
 		attachmentClass: PropTypes.string,
 	} ).isRequired,

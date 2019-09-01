@@ -19,7 +19,7 @@ const schema = {
 	title: {
 		type: 'string',
 	},
-	text: {
+	openText: {
 		type: 'string',
 		default: __( 'Swipe Up', 'amp' ),
 	},
