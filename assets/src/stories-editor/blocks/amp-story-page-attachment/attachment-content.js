@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
  * Internal dependencies
  */
 import { PostSelector } from '../../components';
+import useElementClickDetector from './element-click-detector';
 
 /**
  * WordPress dependencies
@@ -15,7 +16,7 @@ import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { RichText } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
-import { RawHTML, useEffect, useState } from '@wordpress/element';
+import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 
 const AttachmentContent = ( props ) => {
 	const [ selectedPost, setSelectedPost ] = useState( null );
@@ -72,29 +73,38 @@ const AttachmentContent = ( props ) => {
 	}, [ postId ] );
 
 	const removePost = () => {
+		setFailedToFetch( false );
 		setAttributes( { postId: null } );
 		setSelectedPost( null );
-		setFailedToFetch( false );
 	};
+
+	// Since the Page Attachment content is "out of it's borders" then clicking
+	// on the links might sometimes lose focus instead. Using refs for workaround.
+	const removeLinkRef = useRef( null );
+	const closeButtonRef = useRef( null );
+
+	useElementClickDetector( closeButtonRef, () => {
+		toggleAttachment( false );
+	} );
+
+	useElementClickDetector( removeLinkRef, null, true );
 
 	return (
 		<div className="attachment-container">
 			<div className="attachment-wrapper">
 				<div className="attachment-header">
 					<span
-						onClick={ () => {
-							toggleAttachment( false );
-						} }
 						tabIndex="0"
 						className="amp-story-page-attachment-close-button"
 						role="button"
 						onKeyDown={ () => {
 							// @todo
 						} }
+						ref={ closeButtonRef }
 					/>
 					<RichText
 						value={ title }
-						tagName="span"
+						tagName="div"
 						wrapperClassName="amp-story-page-attachment-title"
 						onChange={ ( value ) => setAttributes( { title: value } ) }
 						placeholder={ __( 'Write Title', 'amp' ) }
@@ -108,7 +118,9 @@ const AttachmentContent = ( props ) => {
 								removePost();
 							} }
 							isLink
-							isDestructive>
+							isDestructive
+							ref={ removeLinkRef }
+						>
 							{ __( 'Remove Post', 'amp' ) }
 						</Button>
 					) }

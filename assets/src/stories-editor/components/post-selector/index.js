@@ -321,7 +321,7 @@ PostSelector.propTypes = {
 	onSelect: PropTypes.func.isRequired,
 	speak: PropTypes.func,
 	value: PropTypes.string.isRequired,
-	instanceId: PropTypes.string.isRequired,
+	instanceId: PropTypes.number.isRequired,
 	className: PropTypes.string,
 	id: PropTypes.string,
 };

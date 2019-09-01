@@ -32,7 +32,7 @@ const AttachmentOpener = ( { setAttributes, toggleAttachment, openText } ) => {
 			</span>
 			<RichText
 				value={ openText }
-				tagName="span"
+				tagName="div"
 				wrapperClassName="amp-story-page-attachment__text"
 				onChange={ ( value ) => setAttributes( { openText: value } ) }
 				placeholder={ __( 'Write CTA Text', 'amp' ) }
