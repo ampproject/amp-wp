@@ -206,6 +206,7 @@ export default createHigherOrderComponent(
 			const isImageBlock = 'core/image' === name;
 			const isVideoBlock = 'core/video' === name;
 			const isTextBlock = 'amp/amp-story-text' === name;
+			const excludeOpacity = 'amp/amp-story-page-attachment' === name;
 
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
@@ -493,14 +494,16 @@ export default createHigherOrderComponent(
 										fontSize: fontSize.size,
 									} }
 								/>
-								<RangeControl
-									label={ __( 'Opacity', 'amp' ) }
-									value={ opacity }
-									onChange={ ( value ) => setAttributes( { opacity: value } ) }
-									min={ 5 }
-									max={ 100 }
-									step={ 5 }
-								/>
+								{ ! excludeOpacity && (
+									<RangeControl
+										label={ __( 'Opacity', 'amp' ) }
+										value={ opacity }
+										onChange={ ( value ) => setAttributes( { opacity: value } ) }
+										min={ 5 }
+										max={ 100 }
+										step={ 5 }
+									/>
+								) }
 							</PanelColorSettings>
 						</InspectorControls>
 					) }
