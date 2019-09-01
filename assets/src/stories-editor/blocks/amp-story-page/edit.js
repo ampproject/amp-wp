@@ -11,7 +11,6 @@ import { has } from 'lodash';
 import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
-	PanelColorSettings,
 	InspectorControls,
 	MediaUpload,
 	MediaUploadCheck,
@@ -65,6 +64,7 @@ import {
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../../../common/constants';
 import './edit.css';
+import BackgroundColorSettings from './background-color-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -139,55 +139,6 @@ class PageEdit extends Component {
 				} )
 				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
-	}
-
-	removeBackgroundColor( index ) {
-		const { attributes, setAttributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-		backgroundColors.splice( index, 1 );
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
-	}
-
-	setBackgroundColors( value, index ) {
-		const { attributes, setAttributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-		backgroundColors[ index ] = {
-			color: value,
-		};
-		setAttributes( { backgroundColors: JSON.stringify( backgroundColors ) } );
-	}
-
-	getOverlayColorSettings() {
-		const { attributes } = this.props;
-		const backgroundColors = JSON.parse( attributes.backgroundColors );
-
-		if ( ! backgroundColors.length ) {
-			return [
-				{
-					value: undefined,
-					onChange: ( value ) => {
-						this.setBackgroundColors( value, 0 );
-					},
-					label: __( 'Color', 'amp' ),
-				},
-			];
-		}
-
-		const backgroundColorSettings = [];
-		const useNumberedLabels = backgroundColors.length > 1;
-
-		backgroundColors.forEach( ( color, index ) => {
-			backgroundColorSettings[ index ] = {
-				value: color ? color.color : undefined,
-				onChange: ( value ) => {
-					this.setBackgroundColors( value, index );
-				},
-				/* translators: %s: color number */
-				label: useNumberedLabels ? sprintf( __( 'Color %s', 'amp' ), index + 1 ) : __( 'Color', 'amp' ),
-			};
-		} );
-
-		return backgroundColorSettings;
 	}
 
 	ensureCorrectBlockOrder() {
@@ -272,44 +223,17 @@ class PageEdit extends Component {
 		overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
 		overlayStyle.opacity = overlayOpacity / 100;
 
-		const colorSettings = this.getOverlayColorSettings();
 		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
 		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
 
 		return (
 			<>
 				<InspectorControls>
-					<PanelColorSettings
-						title={ __( 'Background Color', 'amp' ) }
-						colorSettings={ colorSettings }
-					>
-						<p>
-							{ backgroundColors.length < 2 &&
-							<Button
-								onClick={ () => this.setBackgroundColors( null, 1 ) }
-								isSmall>
-								{ __( 'Add Gradient', 'amp' ) }
-							</Button>
-							}
-							{ backgroundColors.length > 1 &&
-							<Button
-								onClick={ () => this.removeBackgroundColor( backgroundColors.length - 1 ) }
-								isLink
-								isDestructive>
-								{ __( 'Remove Gradient', 'amp' ) }
-							</Button>
-							}
-						</p>
-						<RangeControl
-							label={ __( 'Opacity', 'amp' ) }
-							value={ overlayOpacity }
-							onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
-							min={ 0 }
-							max={ 100 }
-							step={ 5 }
-							required
-						/>
-					</PanelColorSettings>
+					<BackgroundColorSettings
+						backgroundColors={ JSON.parse( attributes.backgroundColors ) }
+						setAttributes={ setAttributes }
+						overlayOpacity={ overlayOpacity }
+					/>
 					<PanelBody title={ __( 'Background Media', 'amp' ) }>
 						<>
 							{
