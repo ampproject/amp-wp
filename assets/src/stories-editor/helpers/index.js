@@ -1817,7 +1817,8 @@ const getAnimationTransformParams = ( block, animationType ) => {
 	const parentBlock = getBlockRootClientId( block.clientId );
 	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
 
-	const { width, height } = innerElement.getBoundingClientRect();
+	const width = innerElement.offsetWidth;
+	const height = innerElement.offsetHeight;
 	const { top, left } = getRelativeElementPosition( blockElement, parentBlockElement );
 
 	let offsetX;
@@ -1846,15 +1847,15 @@ const getAnimationTransformParams = ( block, animationType ) => {
 			break;
 		case 'pan-left':
 		case 'pan-right':
+			scalingFactor = calculateTargetScalingFactor( width, height );
 			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
 			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
-			scalingFactor = calculateTargetScalingFactor( width, height );
 			break;
 		case 'pan-down':
 		case 'pan-up':
-			offsetX = -width / 2;
-			offsetY = STORY_PAGE_INNER_HEIGHT - height;
 			scalingFactor = calculateTargetScalingFactor( width, height );
+			offsetX = -( width * scalingFactor ) / 2;
+			offsetY = STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor );
 			break;
 		default:
 			offsetX = 0;

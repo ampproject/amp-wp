@@ -638,12 +638,12 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 @keyframes story-animation-pan-down {
 
 	0% {
-		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
 		transform-origin: left top;
 	}
 
 	100% {
-		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-end));
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-end));
 		transform-origin: left top;
 	}
 }
@@ -661,19 +661,19 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
 
-	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
+	transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
 
 @keyframes story-animation-pan-up {
 
 	0% {
-		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
+		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
 		transform-origin: left top;
 	}
 
 	100% {
-		transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-end));
+		transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-end));
 		transform-origin: left top;
 	}
 }
@@ -691,7 +691,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
 
-	transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
+	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
 
