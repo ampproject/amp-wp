@@ -1880,7 +1880,7 @@ const getAnimationTransformParams = ( block, animationType ) => {
 export const setAnimationTransformProperties = ( block, animationType ) => {
 	const blockElement = getBlockWrapperElement( block );
 
-	if ( ! blockElement ) {
+	if ( ! blockElement || ! animationType ) {
 		return;
 	}
 
@@ -1916,7 +1916,7 @@ export const setAnimationTransformProperties = ( block, animationType ) => {
 export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
 	const blockElement = getBlockWrapperElement( block );
 
-	if ( ! blockElement ) {
+	if ( ! blockElement || ! animationType ) {
 		callback();
 
 		return;
