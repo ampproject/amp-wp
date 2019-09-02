@@ -179,11 +179,12 @@ npm run build:js
 
 Before updating Google Fonts, an `.env` is required to add the Google Fonts API key. 
 Details of how to get an API key can be found on in the [Google fonts docs](https://developers.google.com/fonts/docs/developer_api). 
-To add an API. 
 
-1. Copy `.env.example` to `.env`. 
+To add an API key.
+
+1. Copy `example.env` to `.env`. 
 1. Replace `replacemewithrealkey` with API key. 
-1. Run `Grunt download-fonts`
+1. Run `grunt download-fonts`
 
 The fonts file can be found in `includes/data/fonts.json`. 
 
