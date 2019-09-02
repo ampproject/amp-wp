@@ -35,7 +35,7 @@ const schema = {
 export const name = 'amp/amp-story-page-attachment';
 
 export const settings = {
-	title: __( 'Page attachment', 'amp' ),
+	title: __( 'Page Attachment', 'amp' ),
 
 	description: __( 'Attach additional content to a story page.', 'amp' ),
 
