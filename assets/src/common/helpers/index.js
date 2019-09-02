@@ -48,7 +48,7 @@ export const hasMinimumDimensions = ( media, dimensions ) => {
 /**
  * Get minimum dimensions for a featured image.
  *
- * @link https://developers.google.com/search/docs/data-types/article#article_types
+ * @see https://developers.google.com/search/docs/data-types/article#article_types
  *
  * "Images should be at least 1200 pixels wide.
  * For best results, provide multiple high-resolution images (minimum of 800,000 pixels when multiplying width and height)
