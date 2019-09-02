@@ -279,6 +279,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-pulse,
@@ -306,6 +307,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-fly-in-left,
@@ -333,6 +335,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-fly-in-right,
@@ -360,6 +363,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-fly-in-top,
@@ -387,6 +391,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-fly-in-bottom,
@@ -414,6 +419,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-rotate-in-left,
@@ -441,6 +447,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-rotate-in-right,
@@ -467,6 +474,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-fade-in,
@@ -516,6 +524,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-drop,
@@ -544,6 +553,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(.2, .75, .4, 1);
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-twirl-in,
@@ -635,6 +645,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-pan-left,
@@ -663,6 +674,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
+	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-right;
 	animation-duration: var(--animation-duration);
@@ -696,11 +708,13 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
+	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-down;
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-pan-down,
@@ -729,6 +743,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
+	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-up;
 	animation-duration: var(--animation-duration);
@@ -763,6 +778,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-zoom-in,
@@ -791,6 +807,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-zoom-out,
