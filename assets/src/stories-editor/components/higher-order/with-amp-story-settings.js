@@ -37,7 +37,7 @@ import {
 	BLOCK_ROTATION_SNAPS,
 	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
-import { getBlockOrderDescription, getCallToActionBlock } from '../../helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
 import sendBackwardIcon from '../../../../images/stories-editor/send-backwards.svg';
 import bringFrontIcon from '../../../../images/stories-editor/bring-front.svg';
@@ -432,8 +432,9 @@ export default createHigherOrderComponent(
 								<FontFamilyPicker
 									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
-									onChange={ ( font ) => {
-										setAttributes( { ampFontFamily: font.name } );
+									onChange={ ( value ) => {
+										maybeEnqueueFontStyle( value );
+										setAttributes( { ampFontFamily: value } );
 									} }
 								/>
 								<ToggleControl
