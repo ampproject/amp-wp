@@ -2,21 +2,18 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import Autocomplete from 'accessible-autocomplete/react';
 
 /**
  * WordPress dependencies
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { BaseControl } from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
 import { maybeEnqueueFontStyle } from '../../helpers';
-/**
- * Internal dependencies
- */
-import Autocomplete from 'accessible-autocomplete/react';
-
 import 'accessible-autocomplete/src/autocomplete.css';
 import './edit.css';
 
