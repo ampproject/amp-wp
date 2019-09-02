@@ -10,6 +10,33 @@ export function getAnimatedBlocks( state ) {
 }
 
 /**
+ * Returns a list of animated blocks for a given page.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ *
+ * @return {Array} Animation order.
+ */
+export function getAnimatedBlocksPerPage( state, page ) {
+	return getAnimatedBlocks( state ) && getAnimatedBlocks( state )[ page ] ?
+		state.animations.animationOrder[ page ] :
+		[];
+}
+
+/**
+ * Returns a list of animated blocks that start directly after a given block.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ * @param {string} predecessor Predecessor ID.
+ *
+ * @return {Array} Animation order.
+ */
+export function getAnimationSuccessors( state, page, predecessor ) {
+	return getAnimatedBlocksPerPage( state, page ).filter( ( { parent } ) => parent === predecessor );
+}
+
+/**
  * Returns whether an animation is currently playing or not.
  *
  * @param {Object} state Editor state.

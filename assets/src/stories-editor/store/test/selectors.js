@@ -3,6 +3,8 @@
  */
 import {
 	getAnimatedBlocks,
+	getAnimatedBlocksPerPage,
+	getAnimationSuccessors,
 	isPlayingAnimation,
 	isValidAnimationPredecessor,
 	getCurrentPage,
@@ -11,12 +13,102 @@ import {
 	isReordering,
 } from '../selectors';
 
-describe( 'actions', () => {
+describe( 'selectors', () => {
 	describe( 'getAnimatedBlocks', () => {
 		it( 'should return an empty object if state is empty', () => {
 			const state = {};
 
 			expect( getAnimatedBlocks( state ) ).toStrictEqual( {} );
+		} );
+
+		it( 'should return the unmodified animation order', () => {
+			const page = 'foo';
+			const item = 'bar';
+			const item2 = 'baz';
+			const item3 = 'foobar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined },
+							{ id: item2, parent: item },
+							{ id: item3, parent: item2 },
+						],
+					},
+				},
+			};
+
+			expect( getAnimatedBlocks( state ) ).toStrictEqual( {
+				[ page ]: [
+					{ id: item, parent: undefined },
+					{ id: item2, parent: item },
+					{ id: item3, parent: item2 },
+				],
+			} );
+		} );
+	} );
+
+	describe( 'getAnimatedBlocksPerPage', () => {
+		it( 'should return an empty array if state is empty', () => {
+			const state = {};
+
+			expect( getAnimatedBlocksPerPage( state, 'foo' ) ).toStrictEqual( [] );
+		} );
+
+		it( 'should return the unmodified animation order', () => {
+			const page = 'foo';
+			const item = 'bar';
+			const item2 = 'baz';
+			const item3 = 'foobar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined },
+							{ id: item2, parent: item },
+							{ id: item3, parent: item2 },
+						],
+					},
+				},
+			};
+
+			expect( getAnimatedBlocksPerPage( state, page ) ).toStrictEqual( [
+				{ id: item, parent: undefined },
+				{ id: item2, parent: item },
+				{ id: item3, parent: item2 },
+			] );
+		} );
+	} );
+
+	describe( 'getAnimationSuccessors', () => {
+		it( 'should return an empty array if state is empty', () => {
+			const state = {};
+
+			expect( getAnimationSuccessors( state, 'foo', undefined ) ).toStrictEqual( [] );
+		} );
+
+		it( 'should return the animation successors', () => {
+			const page = 'foo';
+			const item = 'bar';
+			const item2 = 'baz';
+			const item3 = 'foobar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined },
+							{ id: item2, parent: item },
+							{ id: item3, parent: item2 },
+						],
+					},
+				},
+			};
+
+			expect( getAnimationSuccessors( state, page, item ) ).toStrictEqual( [ { id: item2, parent: item } ] );
+			expect( getAnimationSuccessors( state, page, item2 ) ).toStrictEqual( [ { id: item3, parent: item2 } ] );
 		} );
 	} );
 
