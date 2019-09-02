@@ -17,10 +17,11 @@
 .block-editor-block-list__block .rotatable-box-wrap {
 	position: absolute;
 	right: -14px;
-	bottom: -25px;
+	bottom: -44px;
 	left: calc(50% - 15px);
 	width: 30px;
-	height: 25px;
+	height: 44px;
+	z-index: 1;
 }
 
 .block-editor-block-list__block .rotatable-box-wrap::before {
@@ -31,6 +32,8 @@
 	height: 24px;
 	width: 0;
 	margin: 3px auto 0;
+	position: relative;
+	right: -1px;
 }
 
 .block-editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
@@ -38,8 +41,8 @@
 	opacity: 1;
 	transition: opacity .3s;
 	position: absolute;
-	bottom: -20px;
-	left: calc(50% - 25px);
+	bottom: 0;
+	left: calc(50% - 24px);
 	width: 50px;
 	height: 24px;
 	padding: 4px;
