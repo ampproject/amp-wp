@@ -484,12 +484,10 @@ PageEdit.propTypes = {
 	setAttributes: PropTypes.func.isRequired,
 	isFirstPage: PropTypes.bool.isRequired,
 	media: PropTypes.object,
-	name: PropTypes.string.isRequired,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	totalAnimationDuration: PropTypes.number.isRequired,
 	getBlockOrder: PropTypes.func.isRequired,
 	moveBlockToPosition: PropTypes.func.isRequired,
-	tagName: PropTypes.string,
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
