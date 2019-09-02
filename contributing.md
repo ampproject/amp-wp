@@ -62,6 +62,9 @@ If you have an incompatible version of Node in your development environment, you
 nvm install
 ```
 
+A [Google Fonts API Key](https://developers.google.com/fonts/docs/developer_api)  is required to build or update Google font list. May not be require for many contributors.  
+
+
 ## Local Environment
 
 Since you need a WordPress environment to run the plugin in, the quickest way to get up and running is to use the provided Docker setup. Install [Docker](https://www.docker.com/products/docker-desktop) and [Docker Compose](https://docs.docker.com/compose/install/) by following the instructions on their website.
@@ -171,6 +174,18 @@ To get a production build, run:
 ```bash
 npm run build:js
 ```
+
+### Updating Google fonts 
+
+Before updating Google Fonts, an `.env` is required to add the Google Fonts API key. 
+Details of how to get an API key can be found on in the [Google fonts docs](https://developers.google.com/fonts/docs/developer_api). 
+To add an API. 
+
+1. Copy `.env.example` to `.env`. 
+1. Replace `replacemewithrealkey` with API key. 
+1. Run `Grunt download-fonts`
+
+The fonts file can be found in `includes/data/fonts.json`. 
 
 ### Creating a Plugin Build
 
