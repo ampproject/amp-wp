@@ -119,9 +119,8 @@ const applyWithSelect = withSelect( ( select ) => {
 		if ( ! block ) {
 			return '';
 		}
-	
-		const mediaType = ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
-		return mediaType;
+
+		return ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
 	};
 
 	return {

@@ -142,8 +142,6 @@ describe( 'Stories Editor Screen', () => {
 		await expect( page ).toMatchElement( '.wp-block-video video' );
 	} );
 
-
-
 	it( 'should dropdown title should change after sidebar upload', async () => {
 		await selectBlockByClientId(
 			( await getAllBlocks() )[ 0 ].clientId
@@ -160,6 +158,9 @@ describe( 'Stories Editor Screen', () => {
 		await page.waitForSelector( '.components-focal-point-picker-wrapper' );
 		// Click the media selection button.
 		await openMediaInserter();
-		await clickButton( 'Update Background Image' );
+		const nodes = await page.$x(
+			`//button[contains(text(), 'Update Background Image')]`
+		);
+		expect( nodes ).toHaveLength( 1 );
 	} );
 } );
