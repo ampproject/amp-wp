@@ -57,6 +57,7 @@ describe( 'Story Templates', () => {
 
 				const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
 				await convertButton.click();
+				await page.waitForSelector( '.components-snackbar__content' );
 			} );
 
 			afterAll( async () => {
@@ -75,8 +76,6 @@ describe( 'Story Templates', () => {
 			it( 'should display non-template reusable blocks in the reusable blocks management screen', async () => { // eslint-disable-line jest/no-disabled-tests
 				const titleSelector = '.page-title .row-title';
 
-				// @todo Remove this, it's for testing purposes.
-				await page.waitFor( 1000 );
 				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
 				await page.waitForSelector( titleSelector );
 
