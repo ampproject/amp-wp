@@ -110,29 +110,23 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
+	const { canInsertBlockType, getBlockListSettings, getBlock } = select( 'core/block-editor' );
 	const { isReordering } = select( 'amp/story' );
 
-	const getCurrentPageBackgroundType = () => {
-		const clientId = getCurrentPage();
-		const block = select( 'core/block-editor' ).getBlock( clientId );
-		if ( ! block ) {
-			return '';
-		}
-
-		return ( block.attributes.mediaType ) ? block.attributes.mediaType : '';
-	};
+	const currentPage = getCurrentPage();
+	const block = getBlock( currentPage );
+	const mediaType = block && block.attributes.mediaType ? block.attributes.mediaType : '';
 
 	return {
 		isReordering: isReordering(),
 		canInsertBlockType: ( name ) => {
 			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( getCurrentPage() );
-			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
+			const blockSettings = getBlockListSettings( currentPage );
+			return canInsertBlockType( name, currentPage ) && blockSettings && blockSettings.allowedBlocks.includes( name );
 		},
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
-		mediaType: getCurrentPageBackgroundType(),
+		mediaType,
 	};
 } );
 
