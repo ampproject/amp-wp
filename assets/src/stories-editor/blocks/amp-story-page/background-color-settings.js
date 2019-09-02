@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
@@ -9,11 +14,6 @@ import {
 	Button,
 	RangeControl,
 } from '@wordpress/components';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity } ) => {
 	const removeBackgroundColor = ( index ) => {

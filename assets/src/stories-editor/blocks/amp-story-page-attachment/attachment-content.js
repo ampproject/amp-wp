@@ -4,12 +4,6 @@
 import PropTypes from 'prop-types';
 
 /**
- * Internal dependencies
- */
-import { PostSelector } from '../../components';
-import useElementClickDetector from './element-click-detector';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -18,6 +12,12 @@ import { RichText } from '@wordpress/block-editor';
 import { Button } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { ENTER, SPACE } from '@wordpress/keycodes';
+
+/**
+ * Internal dependencies
+ */
+import { PostSelector } from '../../components';
+import useElementClickDetector from './element-click-detector';
 
 const AttachmentContent = ( props ) => {
 	const [ selectedPost, setSelectedPost ] = useState( null );
