@@ -133,7 +133,7 @@ class AMP_Post_Meta_Box {
 		$validate = (
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
-			! $screen->is_block_editor &&
+			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
 			is_post_type_viewable( $post->post_type ) &&
 			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		);
