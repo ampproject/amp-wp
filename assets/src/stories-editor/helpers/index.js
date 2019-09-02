@@ -1804,6 +1804,13 @@ const getRelativeElementPosition = ( blockElement, parentElement ) => {
 	};
 };
 
+/**
+ * Calculates the offsets and scaling factors for animation playback.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @return {{offsetX: number, offsetY: number, scalingFactor: number}} Animation transform parameters.
+ */
 const getAnimationTransformParams = ( block, animationType ) => {
 	const blockElement = getBlockWrapperElement( block );
 	const innerElement = getBlockInnerElement( block );
@@ -1867,7 +1874,7 @@ const getAnimationTransformParams = ( block, animationType ) => {
  * @param {string} animationType Animation type.
  * @param {number} animationDuration Animation duration.
  * @param {number} animationDelay Animation delay.
- * @param {function} callback Callback for when animation has stopped.
+ * @param {Function} callback Callback for when animation has stopped.
  */
 export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
 	const blockElement = getBlockWrapperElement( block );
