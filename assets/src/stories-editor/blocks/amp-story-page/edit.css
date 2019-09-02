@@ -150,6 +150,7 @@ div[data-type="amp/amp-story-page"] .editor-inner-blocks .amp-page-child-block:n
 div[data-type="amp/amp-story-page"] .editor-inner-blocks .amp-page-child-block[data-type="amp/amp-story-cta"] {
 	height: 100%;
 }
+
 .editor-block-list__block .editor-block-list__layout {
 	margin: 0;
 }
