@@ -35,7 +35,7 @@ const AttachmentOpener = ( { setAttributes, toggleAttachment, openText } ) => {
 				tagName="div"
 				wrapperClassName="amp-story-page-attachment__text"
 				onChange={ ( value ) => setAttributes( { openText: value } ) }
-				placeholder={ __( 'Write CTA Text', 'amp' ) }
+				placeholder={ __( 'Swipe Up', 'amp' ) }
 			/>
 		</div>
 	);
