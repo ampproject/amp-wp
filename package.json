@@ -79,6 +79,7 @@
     "grunt-contrib-copy": "1.0.0",
     "grunt-shell": "3.0.1",
     "grunt-wp-deploy": "2.0.0",
+    "jest-silent-reporter": "0.1.2",
     "lodash": "4.17.15",
     "mini-css-extract-plugin": "0.8.0",
     "moment": "2.24.0",
