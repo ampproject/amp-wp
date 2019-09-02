@@ -20,17 +20,15 @@ import { hasMinimumDimensions, getMinimumFeaturedImageDimensions } from '../../c
  */
 export default ( BlockEdit ) => {
 	return withSelect( ( select, ownProps ) => {
-		const { getMedia } = select( 'core' );
 		const { getEditedPostAttribute } = select( 'core/editor' );
-		const { getSelectedBlock } = select( 'core/block-editor' );
-		const { editPost } = dispatch( 'core/editor' );
-
 		const featuredImage = getEditedPostAttribute( 'featured_media' );
 		const isRelevantBlock = ( 'core/image' === ownProps.name || 'amp/amp-story-page' === ownProps.name );
 
 		if ( featuredImage || ! isRelevantBlock || ! ownProps.attributes ) {
 			return;
 		}
+
+		const { getSelectedBlock } = select( 'core/block-editor' );
 
 		const selectedMediaId = ownProps.attributes.mediaId || ownProps.attributes.id;
 		const selectedBlock = getSelectedBlock();
@@ -43,6 +41,9 @@ export default ( BlockEdit ) => {
 		if ( ! selectedBlockMediaId || selectedBlockMediaId !== selectedMediaId ) {
 			return;
 		}
+
+		const { getMedia } = select( 'core' );
+		const { editPost } = dispatch( 'core/editor' );
 
 		// Conditionally set the selected image as the featured image.
 		const media = getMedia( selectedMediaId );
