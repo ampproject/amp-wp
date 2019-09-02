@@ -60,13 +60,13 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should allow adding Page Attachment', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await expect( page ).toMatchElement( '.wp-block[data-type="amp/amp-story-page-attachment"]' );
 	} );
 
 	it( 'should not allow adding Page Attachment if Page Attachment is already present', async () => {
-		await insertBlock( 'Page attachment' );
-		await searchForBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
+		await searchForBlock( 'Page Attachment' );
 
 		await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 	} );
@@ -74,13 +74,13 @@ describe( 'Stories Editor Screen', () => {
 	it( 'should not allow adding Page Attachment if CTA block is already present', async () => {
 		await insertBlock( 'Page' );
 		await insertBlock( 'Call to Action' );
-		await searchForBlock( 'Page attachment' );
+		await searchForBlock( 'Page Attachment' );
 
 		await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 	} );
 
 	it( 'should allow changing the CTA Text', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		const callToActionInputSelector = '.amp-story-page-attachment__text .block-editor-rich-text__editable';
 		await page.waitForSelector( callToActionInputSelector );
 		await page.type( callToActionInputSelector, 'Hello, ' );
@@ -95,7 +95,7 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should allow changing the Title Text', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
 		const titleInputSelector = '.amp-story-page-attachment-title .block-editor-rich-text__editable';
@@ -112,7 +112,7 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should allow choosing Posts as content', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
 		const defaultPostTitle = 'Hello world!';
@@ -125,7 +125,7 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should allow choosing Pages as content', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
 		const defaultPageTitle = 'Sample Page';
@@ -138,7 +138,7 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should display chosen content in preview', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
 		const defaultPostTitle = 'Hello world!';
@@ -154,7 +154,7 @@ describe( 'Stories Editor Screen', () => {
 	} );
 
 	it( 'should allow removing selected content', async () => {
-		await insertBlock( 'Page attachment' );
+		await insertBlock( 'Page Attachment' );
 		await openPageAttachment();
 
 		const defaultPostTitle = 'Hello world!';
