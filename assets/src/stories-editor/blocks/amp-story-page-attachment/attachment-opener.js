@@ -1,14 +1,14 @@
 /**
+ * External dependencies
+ */
+import PropTypes from 'prop-types';
+
+/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
 import { RichText } from '@wordpress/block-editor';
 import { ENTER, SPACE } from '@wordpress/keycodes';
-
-/**
- * External dependencies
- */
-import PropTypes from 'prop-types';
 
 const AttachmentOpener = ( { setAttributes, toggleAttachment, openText } ) => {
 	return (
