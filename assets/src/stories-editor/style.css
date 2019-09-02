@@ -663,12 +663,12 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
-	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-right;
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-init-pan-right {
@@ -696,7 +696,6 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
-	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-down;
 	animation-duration: var(--animation-duration);
@@ -730,12 +729,12 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	--animation-scale-end: 1.25;
 	--animation-offset-x: 0;
 	--animation-offset-y: 0;
-	animation-fill-mode: forwards;
 
 	animation-name: story-animation-pan-up;
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+	animation-fill-mode: forwards;
 }
 
 .story-animation-init-pan-up {
