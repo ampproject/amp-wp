@@ -23,11 +23,11 @@ import {
 	STORY_PAGE_INNER_HEIGHT,
 } from '../../constants';
 
-const { Image } = window;
+const { Image, navigator } = window;
 
 const cloneWrapperClass = 'components-draggable__clone';
 
-const isChromeUA = ( ) => /Chrome/i.test( window.navigator.userAgent );
+const isChromeUA = ( ) => /Chrome/i.test( navigator.userAgent );
 const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).querySelectorAll( 'iframe' ) ].length > 0;
 
 class Draggable extends Component {

@@ -1,4 +1,3 @@
-/* global navigator */
 /**
  * External dependencies
  */
@@ -259,6 +258,8 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 			removeBlock( clientId );
 		},
 		pasteBlock( clientId ) {
+			const { navigator } = window;
+
 			if ( navigator.clipboard ) {
 				// We have to ask permissions for being able to read from clipboard.
 				navigator.clipboard.readText().
