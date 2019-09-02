@@ -279,7 +279,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-pulse {
@@ -306,7 +306,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-fly-in-left {
@@ -333,7 +333,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-fly-in-right {
@@ -360,7 +360,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-fly-in-top {
@@ -387,7 +387,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-fly-in-bottom {
@@ -414,7 +414,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-rotate-in-left {
@@ -441,7 +441,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-rotate-in-right {
@@ -467,7 +467,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-fade-in {
@@ -516,7 +516,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-drop {
@@ -544,7 +544,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(.2, .75, .4, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-twirl-in {
@@ -573,7 +573,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-whoosh-in-left {
@@ -602,7 +602,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-whoosh-in-right {
@@ -635,7 +635,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-pan-left {
@@ -668,7 +668,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-pan-right {
@@ -701,7 +701,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-pan-down {
@@ -734,7 +734,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-pan-up {
@@ -763,7 +763,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-zoom-in {
@@ -791,7 +791,7 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
-	animation-fill-mode: forwards;
+	animation-fill-mode: both;
 }
 
 .story-animation-init-zoom-out {
