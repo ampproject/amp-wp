@@ -1,8 +1,8 @@
 /**
  * WordPress dependencies
  */
-import { withDispatch, withSelect } from '@wordpress/data';
-import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import { withSelect } from '@wordpress/data';
+import { createHigherOrderComponent } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -11,18 +11,14 @@ import { ALLOWED_CHILD_BLOCKS } from '../../constants';
 import { render } from '@wordpress/element';
 import { RightClickMenu } from '../';
 
-const applyWithSelect = withSelect( ( select ) => {
-	const {	isReordering } = select( 'amp/story' );
-	return {
-		isReordering: isReordering(),
-	};
-} );
-
-const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
+const applyWithSelect = withSelect( ( select, props ) => {
+	const {	isReordering, getCopiedMarkup } = select( 'amp/story' );
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
+
+	const { name } = props;
 
 	const onContextMenu = ( event ) => {
 		const selectedBlockClientIds = getSelectedBlockClientIds();
@@ -30,9 +26,15 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 		if ( selectedBlockClientIds.length === 0 ) {
 			return;
 		}
+		// If nothing is in the saved markup, use the default behavior.
+		if ( 'amp/amp-story-page' === name && ! getCopiedMarkup().length ) {
+			return;
+		}
 
+		// Let's ignore if some text has been selected.
+		const selectedText = window.getSelection().toString();
 		// Let's ignore multi-selection for now.
-		if ( hasMultiSelection() ) {
+		if ( hasMultiSelection() || selectedText.length ) {
 			return;
 		}
 
@@ -65,13 +67,9 @@ const applyWithDispatch = withDispatch( ( dispatch, ownProps, { select } ) => {
 
 	return {
 		onContextMenu,
+		isReordering: isReordering(),
 	};
 } );
-
-const enhanced = compose(
-	applyWithSelect,
-	applyWithDispatch,
-);
 
 /**
  * Higher-order component that adds right click handler to each inner block.
@@ -80,7 +78,7 @@ const enhanced = compose(
  */
 export default createHigherOrderComponent(
 	( BlockEdit ) => {
-		return enhanced( ( props ) => {
+		return applyWithSelect( ( props ) => {
 			const { name, onContextMenu, isReordering } = props;
 			const isPageBlock = 'amp/amp-story-page' === name;
 
