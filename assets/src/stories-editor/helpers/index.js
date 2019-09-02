@@ -1869,7 +1869,43 @@ const getAnimationTransformParams = ( block, animationType ) => {
 };
 
 /**
+ * Sets the needed CSS custom properties and class name for animation playback.
+ *
+ * This way the initial animation state can be displayed without having to actually
+ * start the animation.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const setAnimationTransformProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement ) {
+		return;
+	}
+
+	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
+
+	if ( offsetX ) {
+		blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
+	}
+
+	if ( offsetY ) {
+		blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+	}
+
+	if ( scalingFactor ) {
+		blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+		blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
+	}
+
+	blockElement.classList.add( `story-animation-init-${ animationType }` );
+};
+
+/**
  * Plays the block's animation in the editor.
+ *
+ * Assumes that setAnimationTransformProperties() has been called before.
  *
  * @param {Object} block Block object.
  * @param {string} animationType Animation type.
@@ -1887,32 +1923,16 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 	}
 
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
-	const animationClassName = `story-animation-${ animationType }`;
 
-	blockElement.classList.remove( animationClassName );
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
 
 	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
 	blockElement.style.setProperty( '--animation-delay', `${ animationDelay || 0 }ms` );
 
-	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
-
-	if ( offsetX ) {
-		blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
-	}
-
-	if ( offsetY ) {
-		blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
-	}
-
-	if ( scalingFactor ) {
-		blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
-		blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
-	}
-
-	blockElement.classList.add( animationClassName );
+	blockElement.classList.add( `story-animation-${ animationType }` );
 
 	blockElement.addEventListener( 'animationend', () => {
-		blockElement.classList.remove( animationClassName );
+		blockElement.classList.remove( `story-animation-${ animationType }` );
 
 		callback();
 	}, { once: true } );

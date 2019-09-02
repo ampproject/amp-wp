@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
 import AnimationOrderPicker from './animation-order-picker';
 import withSelectedBlock from '../higher-order/with-selected-block';
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../../constants';
-import { playAnimation } from '../../helpers';
+import { playAnimation, setAnimationTransformProperties } from '../../helpers';
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -90,6 +90,7 @@ const AnimationControls = ( {
 						className="is-button is-default"
 						onClick={ () => {
 							onAnimationStart();
+							setAnimationTransformProperties( selectedBlock, animationType );
 							playAnimation( selectedBlock, animationType, animationDuration, animationDelay, onAnimationStop );
 						} }
 					>
