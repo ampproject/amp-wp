@@ -279,7 +279,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-pulse,
+.story-animation-init-pulse {
 	transform: scale(1);
 }
 
@@ -303,8 +306,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
-
+.story-animation-fly-in-left,
+.story-animation-init-fly-in-left {
 	transform: translate(var(--animation-offset-x), 0);
 }
 
@@ -328,7 +333,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-fly-in-right,
+.story-animation-init-fly-in-right {
 	transform: translate(var(--animation-offset-x), 0);
 }
 
@@ -352,7 +360,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-fly-in-top,
+.story-animation-init-fly-in-top {
 	transform: translate(0, var(--animation-offset-y));
 }
 
@@ -376,7 +387,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-fly-in-bottom,
+.story-animation-init-fly-in-bottom {
 	transform: translate(0, var(--animation-offset-y));
 }
 
@@ -400,7 +414,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-rotate-in-left,
+.story-animation-init-rotate-in-left {
 	transform: translate(var(--animation-offset-x), 0) rotate(-360deg);
 }
 
@@ -424,7 +441,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-rotate-in-right,
+.story-animation-init-rotate-in-right {
 	transform: translate(var(--animation-offset-x), 0) rotate(-360deg);
 }
 
@@ -447,7 +467,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-fade-in,
+.story-animation-init-fade-in {
 	opacity: 0;
 }
 
@@ -493,7 +516,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-drop,
+.story-animation-init-drop {
 	transform: translateY(calc(-1 * var(--animation-offset-y)));
 }
 
@@ -518,7 +544,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(.2, .75, .4, 1);
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-twirl-in,
+.story-animation-init-twirl-in {
 	transform: rotate(-540deg) scale(0.1);
 	opacity: 0;
 }
@@ -544,9 +573,12 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
-	opacity: 0;
+.story-animation-whoosh-in-left,
+.story-animation-init-whoosh-in-left {
 	transform: translate(var(--animation-offset-x), 0) scale(.15);
+	opacity: 0;
 }
 
 @keyframes story-animation-whoosh-in-right {
@@ -570,9 +602,12 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
 	animation-delay: var(--animation-delay);
+}
 
-	opacity: 0;
+.story-animation-whoosh-in-right,
+.story-animation-init-whoosh-in-right {
 	transform: translate(var(--animation-offset-x), 0) scale(.15);
+	opacity: 0;
 }
 
 @keyframes story-animation-pan-left {
@@ -600,7 +635,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-pan-left,
+.story-animation-init-pan-left {
 	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
@@ -630,7 +668,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-pan-right,
+.story-animation-init-pan-right {
 	transform: translate(0, var(--animation-offset-y)) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
@@ -660,7 +701,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-pan-down,
+.story-animation-init-pan-down {
 	transform: translate(var(--animation-offset-x), 0) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
@@ -690,7 +734,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-pan-up,
+.story-animation-init-pan-up {
 	transform: translate(var(--animation-offset-x), var(--animation-offset-y)) scale(var(--animation-scale-start));
 	transform-origin: left top;
 }
@@ -716,7 +763,10 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-zoom-in,
+.story-animation-init-zoom-in {
 	transform: scale(var(--animation-scale-start));
 }
 
@@ -741,6 +791,9 @@ div[data-amp-caption="noCaption"] .wp-block-video figcaption {
 	animation-duration: var(--animation-duration);
 	animation-timing-function: linear;
 	animation-delay: var(--animation-delay);
+}
 
+.story-animation-zoom-out,
+.story-animation-init-zoom-out {
 	transform: scale(var(--animation-scale-start));
 }
