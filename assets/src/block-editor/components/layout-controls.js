@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -12,12 +13,12 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Layout controls for AMP blocks' attributes: layout, width, height.
  *
- * @param {Object}   attributes           Block attributes.
- * @param {string}   attributes.ampLayout AMP layout option.
- * @param {Function} setAttributes        Callback to update block attributes.
- * @param {Array}    ampLayoutOptions     Layout options.
+ * @param {Object}   props                      Component props.
+ * @param {Object}   props.attributes           Block attributes.
+ * @param {Function} props.setAttributes        Callback to update block attributes.
+ * @param {Array}    props.ampLayoutOptions     Layout options.
  *
- * @return {Component} Controls.
+ * @return {ReactElement} Controls.
  */
 const LayoutControls = ( { attributes, setAttributes, ampLayoutOptions } ) => {
 	const { ampLayout, height, width } = attributes;

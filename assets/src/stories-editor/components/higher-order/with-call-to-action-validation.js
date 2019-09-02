@@ -15,10 +15,6 @@ const enhance = compose(
 	 * first block of the same type on the page -- if and only if that
 	 * "original" block is not the current one. Thus, an non-existent
 	 * `originalBlockClientId` prop signals that the block is valid.
-	 *
-	 * @param {Component} WrappedBlockEdit A filtered BlockEdit instance.
-	 *
-	 * @return {Component} Enhanced component with merged state data props.
 	 */
 	withSelect( ( select, props ) => {
 		const { getBlockRootClientId, getBlock, getBlockOrder, getBlocksByClientId } = select( 'core/block-editor' );
