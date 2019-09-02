@@ -432,9 +432,9 @@ export default createHigherOrderComponent(
 								<FontFamilyPicker
 									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
-									onChange={ ( value ) => {
-										maybeEnqueueFontStyle( value );
-										setAttributes( { ampFontFamily: value } );
+									onChange={ ( font ) => {
+										maybeEnqueueFontStyle( font.name );
+										setAttributes( { ampFontFamily: font.name } );
 									} }
 								/>
 								<ToggleControl
