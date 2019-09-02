@@ -173,7 +173,7 @@ BlockNavigationItem.propTypes = {
 	} ),
 	isSelected: PropTypes.bool,
 	onClick: PropTypes.func.isRequired,
-	unMovableBlock: PropTypes.bool.isRequired,
+	unMovableBlock: PropTypes.object,
 };
 
 const applyWithSelect = withSelect( ( select, { block: { clientId } } ) => {

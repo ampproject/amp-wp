@@ -45,7 +45,7 @@ const AttachmentContent = ( props ) => {
 		if ( postId ) {
 			setIsFetching( true );
 			const currentFetchRequest = fetchRequest = apiFetch( {
-				path: `/wp/v2/${ postType }s/kary`,
+				path: `/wp/v2/${ postType }s/${ postId }`,
 			} ).then(
 				( post ) => {
 					if ( isStillMounted && fetchRequest === currentFetchRequest ) {

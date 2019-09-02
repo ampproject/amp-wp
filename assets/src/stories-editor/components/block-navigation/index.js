@@ -118,7 +118,7 @@ export default compose(
 
 		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 		// Let's get the CTA/Attachment block to handle it separately.
-		const unMovableBlock = blocks.find( ( { name } ) => name === 'amp/amp-story-cta' || name === 'amp/amp-story-page-attachment' );
+		const unMovableBlock = blocks.find( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) );
 		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
 		return {
 			blocks,
