@@ -143,23 +143,19 @@ const AttachmentContent = ( props ) => {
 						<>
 							{ failedToFetch && (
 								<div>
-									{ ! isFetching && (
-										<>
-											<p className="failed-message">
-												{ __( 'The selected post failed to load, please select a new post or ', 'amp' ) }
-												<Button
-													className="refetch-attachment-post"
-													onClick={ ( event ) => {
-														event.stopPropagation();
-														fetchSelectedPost();
-													} }
-													isLink
-												>
-													{ __( 'try again', 'amp' ) }
-												</Button>
-											</p>
-										</>
-									) }
+									<p className="failed-message">
+										{ __( 'The selected post failed to load, please select a new post or try loading again.', 'amp' ) }
+										<Button
+											className="refetch-attachment-post"
+											onClick={ ( event ) => {
+												event.stopPropagation();
+												fetchSelectedPost();
+											} }
+											isLink
+										>
+											{ __( ' Try again', 'amp' ) }
+										</Button>
+									</p>
 								</div>
 							) }
 							<PostSelector
