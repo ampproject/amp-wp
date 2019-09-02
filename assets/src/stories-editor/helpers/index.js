@@ -1884,6 +1884,8 @@ export const setAnimationTransformProperties = ( block, animationType ) => {
 		return;
 	}
 
+	resetAnimationProperties( block, animationType );
+
 	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
 
 	if ( offsetX ) {
@@ -1900,6 +1902,29 @@ export const setAnimationTransformProperties = ( block, animationType ) => {
 	}
 
 	blockElement.classList.add( `story-animation-init-${ animationType }` );
+};
+
+/**
+ * Removes all inline styles and class name previously set for animation playback.
+ *
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const resetAnimationProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		return;
+	}
+
+	blockElement.classList.remove( `story-animation-${ animationType }` );
+	blockElement.style.removeProperty( '--animation-offset-x' );
+	blockElement.style.removeProperty( '--animation-offset-y' );
+	blockElement.style.removeProperty( '--animation-scale-start' );
+	blockElement.style.removeProperty( '--animation-scale-end' );
+	blockElement.style.removeProperty( '--animation-duration' );
+	blockElement.style.removeProperty( '--animation-delay' );
 };
 
 /**
@@ -1931,9 +1956,5 @@ export const playAnimation = ( block, animationType, animationDuration, animatio
 
 	blockElement.classList.add( `story-animation-${ animationType }` );
 
-	blockElement.addEventListener( 'animationend', () => {
-		blockElement.classList.remove( `story-animation-${ animationType }` );
-
-		callback();
-	}, { once: true } );
+	blockElement.addEventListener( 'animationend', callback, { once: true } );
 };
