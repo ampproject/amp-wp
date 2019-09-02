@@ -8,7 +8,7 @@ import { useEffect } from '@wordpress/element';
  *
  * @param {Object} ref Reference.
  * @param {Function} onDetected Action when detected.
- * @param {boolean} clickRef, If to trigger click of the referenced element when click detected.
+ * @param {boolean} clickRef Whether to trigger click of the referenced element when click detected.
  */
 const useElementClickDetector = ( ref, onDetected = null, clickRef = false ) => {
 	/**
