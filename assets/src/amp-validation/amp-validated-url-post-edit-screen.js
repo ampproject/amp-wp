@@ -9,14 +9,14 @@ const { ampValidation } = window;
 /**
  * The id for the 'Showing x of y errors' notice.
  *
- * @var {string}
+ * @member {string}
  */
 const idNumberErrors = 'number-errors';
 
 /**
  * The id for the 'Show all' button.
  *
- * @var {string}
+ * @member {string}
  */
 const showAllId = 'show-all-errors';
 
