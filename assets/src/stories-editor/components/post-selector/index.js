@@ -238,7 +238,7 @@ class PostSelector extends Component {
 	}
 
 	render() {
-		const { autoFocus = true, value = '', instanceId, className, id, placeholder } = this.props;
+		const { autoFocus = true, value = '', instanceId, className, id = 'post-selector', placeholder, labelText } = this.props;
 		const { showSuggestions, suggestions, selectedSuggestion, loading } = this.state;
 
 		const suggestionsListboxId = `block-editor-post-input-suggestions-${ instanceId }`;
@@ -247,6 +247,11 @@ class PostSelector extends Component {
 		/* eslint-disable jsx-a11y/no-autofocus */
 		return (
 			<div className={ classnames( 'editor-post-input block-editor-post-input', className ) }>
+				{ labelText && (
+					<label htmlFor={ id } >
+						{ labelText }
+					</label>
+				) }
 				<input
 					id={ id }
 					type="text"
@@ -313,17 +318,18 @@ class PostSelector extends Component {
 PostSelector.propTypes = {
 	autocompleteRef: PropTypes.object,
 	autoFocus: PropTypes.bool,
+	className: PropTypes.string,
+	debouncedSpeak: PropTypes.func,
+	id: PropTypes.string,
+	instanceId: PropTypes.number.isRequired,
+	labelText: PropTypes.string,
 	setTimeout: PropTypes.func,
 	searchablePostTypes: PropTypes.array,
-	debouncedSpeak: PropTypes.func,
-	placeholder: PropTypes.string,
 	onChange: PropTypes.func.isRequired,
 	onSelect: PropTypes.func.isRequired,
+	placeholder: PropTypes.string,
 	speak: PropTypes.func,
 	value: PropTypes.string.isRequired,
-	instanceId: PropTypes.number.isRequired,
-	className: PropTypes.string,
-	id: PropTypes.string,
 };
 
 export default compose(

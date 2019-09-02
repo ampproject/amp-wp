@@ -140,7 +140,8 @@ const AttachmentContent = ( props ) => {
 								<span>{ __( 'The selected post failed to load, please select a new post', 'amp' ) }</span>
 							) }
 							<PostSelector
-								placeholder={ __( 'Search & select a post or page to embed content.', 'amp' ) }
+								labelText={ __( 'Attachment Content', 'amp' ) }
+								placeholder={ __( 'Search for a post or page ...', 'amp' ) }
 								value={ searchValue }
 								onSelect={ ( id, type ) => {
 									setAttributes( {

@@ -8,11 +8,16 @@
 .block-editor-post-input input[type="text"] {
 	font-size: 13px;
 	width: 300px;
-	padding: 8px;
-	border: none;
+	padding: 12px;
+	border-color: #007cba;
+	outline: 2px solid transparent;
 	border-radius: 0;
 	margin-left: 0;
 	margin-right: 0;
+}
+
+.block-editor-post-input label {
+	font-size: 14px;
 }
 
 .block-editor-post-input__suggestions {

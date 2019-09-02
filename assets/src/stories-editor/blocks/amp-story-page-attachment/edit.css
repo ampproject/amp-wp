@@ -15,6 +15,10 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-wrapper {
 	height: 100%;
 }
 
+div[data-type="amp/amp-story-page-attachment"] .attachment-wrapper {
+	overflow: hidden;
+}
+
 @keyframes slide-up {
 
 	0% {
@@ -94,9 +98,9 @@ div[data-type="amp/amp-story-page-attachment"] .open-attachment-wrapper .amp-sto
 }
 
 div[data-type="amp/amp-story-page-attachment"] .attachment-container {
-	overflow: hidden;
 	position: relative;
 	height: 553px;
+	overflow: hidden;
 	transform: translateY(-85%);
 }
 
