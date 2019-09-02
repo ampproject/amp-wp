@@ -63,7 +63,6 @@ const AttachmentContent = ( props ) => {
 	};
 
 	useEffect( () => {
-		fetchSelectedPost();
 		return () => {
 			isStillMounted = false;
 		};
