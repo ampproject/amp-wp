@@ -104,6 +104,15 @@ div[data-type="amp/amp-story-page-attachment"] .attachment-container {
 	transform: translateY(-85%);
 }
 
+.attachment-container .components-spinner {
+	margin-right: calc(50% - 9px);
+	margin-left: calc(50% - 9px);
+}
+
+.attachment-container .failed-message {
+	font-size: 14px;
+}
+
 .amp-story-page-open-attachment-icon {
 	position: relative;
 	display: block;

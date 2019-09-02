@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { RichText } from '@wordpress/block-editor';
-import { Button } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { ENTER, SPACE } from '@wordpress/keycodes';
 
@@ -23,6 +23,7 @@ const AttachmentContent = ( props ) => {
 	const [ selectedPost, setSelectedPost ] = useState( null );
 	const [ failedToFetch, setFailedToFetch ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
+	const [ isFetching, setIsFetching ] = useState( false );
 	let fetchRequest, isStillMounted;
 
 	const {
@@ -42,13 +43,15 @@ const AttachmentContent = ( props ) => {
 	const fetchSelectedPost = () => {
 		isStillMounted = true;
 		if ( postId ) {
+			setIsFetching( true );
 			const currentFetchRequest = fetchRequest = apiFetch( {
-				path: `/wp/v2/${ postType }s/${ postId }`,
+				path: `/wp/v2/${ postType }s/kary`,
 			} ).then(
 				( post ) => {
 					if ( isStillMounted && fetchRequest === currentFetchRequest ) {
 						setSelectedPost( post );
 						setFailedToFetch( false );
+						setIsFetching( false );
 					}
 				}
 			).catch(
@@ -56,6 +59,7 @@ const AttachmentContent = ( props ) => {
 					if ( isStillMounted && fetchRequest === currentFetchRequest ) {
 						setSelectedPost( null );
 						setFailedToFetch( true );
+						setIsFetching( false );
 					}
 				}
 			);
@@ -129,15 +133,34 @@ const AttachmentContent = ( props ) => {
 					) }
 				</div>
 				<div className={ attachmentClass } style={ wrapperStyle }>
-					{ selectedPost && selectedPost.content && (
+					{ isFetching && <Spinner /> }
+					{ ! isFetching && selectedPost && selectedPost.content && (
 						<RawHTML>
 							{ `<h2>${ selectedPost.title.rendered }</h2>${ selectedPost.content.rendered }` }
 						</RawHTML>
 					) }
-					{ ( ! postId || failedToFetch ) && (
+					{ ! isFetching && ( ! postId || failedToFetch ) && (
 						<>
 							{ failedToFetch && (
-								<span>{ __( 'The selected post failed to load, please select a new post', 'amp' ) }</span>
+								<div>
+									{ ! isFetching && (
+										<>
+											<p className="failed-message">
+												{ __( 'The selected post failed to load, please select a new post or ', 'amp' ) }
+												<Button
+													className="refetch-attachment-post"
+													onClick={ ( event ) => {
+														event.stopPropagation();
+														fetchSelectedPost();
+													} }
+													isLink
+												>
+													{ __( 'try again', 'amp' ) }
+												</Button>
+											</p>
+										</>
+									) }
+								</div>
 							) }
 							<PostSelector
 								labelText={ __( 'Attachment Content', 'amp' ) }
