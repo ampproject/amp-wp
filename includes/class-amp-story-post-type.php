@@ -1132,7 +1132,7 @@ class AMP_Story_Post_Type {
 			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
-				if ( isset( $font['gfont'] ) && ! empty( $font['gfont'] ) ) {
+				if ( ! empty( $font['gfont'] ) ) {
 					$font['handle'] = sprintf( '%s-font', $font['slug'] );
 					$font['src']    = add_query_arg(
 						[
