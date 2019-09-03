@@ -78,7 +78,7 @@ function FontFamilyPicker( {
 					// translators: %d: the number characters required to initiate an author search.
 					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
 				}
-				// translators: 1: the index of thre selected result. 2: The total number of results.
+				// translators: 1: the index of the selected result. 2: The total number of results.
 				tStatusSelectedOption={ ( selectedOption, length ) =>
 					sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length )
 				}
