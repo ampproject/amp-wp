@@ -339,6 +339,44 @@ abstract class AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Check whether the document of a given node is in dev mode.
+	 *
+	 * @param DOMNode $node Node to check the document of.
+	 * @return bool Whether the document is in dev mode.
+	 */
+	protected function is_document_in_dev_mode( DOMNode $node ) {
+		$document = $node instanceof DOMDocument ? $node : $node->ownerDocument;
+
+		return $document->documentElement->hasAttribute(
+			AMP_Rule_Spec::DEV_MODE_ATTRIBUTE
+		);
+	}
+
+	/**
+	 * Check whether a node is exempt from validation during dev mode.
+	 *
+	 * @param DOMNode $node Node to check.
+	 * @return bool Whether the node should be exempt during dev mode.
+	 */
+	protected function has_dev_mode_exemption( DOMNode $node ) {
+		if ( ! $node instanceof DOMElement ) {
+			return false;
+		}
+
+		return $node->hasAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
+	}
+
+	/**
+	 * Check whether a certain node should be exempt from validation.
+	 *
+	 * @param DOMNode $node Node to check.
+	 * @return bool Whether the node should be exempt from validation.
+	 */
+	protected function is_exempt_from_validation( DOMNode $node ) {
+		return $this->is_document_in_dev_mode( $node ) && $this->has_dev_mode_exemption( $node );
+	}
+
+	/**
 	 * Removes an invalid child of a node.
 	 *
 	 * Also, calls the mutation callback for it.
@@ -351,6 +389,9 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_child( $node, $validation_error = [] ) {
+		if ( $this->is_exempt_from_validation( $node ) ) {
+			return false;
+		}
 
 		// Prevent double-reporting nodes that are rejected for sanitization.
 		if ( isset( $this->should_not_removed_nodes[ $node->nodeName ] ) && in_array( $node, $this->should_not_removed_nodes[ $node->nodeName ], true ) ) {
@@ -380,6 +421,10 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should have been removed, that is, that the node was sanitized for validity.
 	 */
 	public function remove_invalid_attribute( $element, $attribute, $validation_error = [] ) {
+		if ( $this->is_exempt_from_validation( $element ) ) {
+			return false;
+		}
+
 		if ( is_string( $attribute ) ) {
 			$node = $element->getAttributeNode( $attribute );
 		} else {
@@ -388,6 +433,7 @@ abstract class AMP_Base_Sanitizer {
 		$should_remove = $this->should_sanitize_validation_error( $validation_error, compact( 'node' ) );
 		if ( $should_remove ) {
 			$element->removeAttributeNode( $node );
+			$this->clean_up_after_attribute_removal( $element, $node, $validation_error );
 		}
 		return $should_remove;
 	}
@@ -483,6 +529,33 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		return $error;
+	}
+
+	/**
+	 * Cleans up artifacts after the removal of an attribute node.
+	 *
+	 * @since 1.3
+	 *
+	 * @param DOMElement $element          The node for which he attribute was
+	 *                                     removed.
+	 * @param DOMAttr    $attribute        The attribute that was removed.
+	 * @param array      $validation_error Validation error details.
+	 */
+	protected function clean_up_after_attribute_removal( $element, $attribute, $validation_error ) {
+		static $attributes_tied_to_href = [ 'target', 'download', 'rel', 'rev', 'hreflang', 'type' ];
+
+		if ( 'href' === $attribute->nodeName ) {
+			/*
+			 * "The target, download, rel, rev, hreflang, and type attributes must be omitted
+			 * if the href attribute is not present."
+			 * See: https://www.w3.org/TR/2016/REC-html51-20161101/textlevel-semantics.html#the-a-element
+			 */
+			foreach ( $attributes_tied_to_href as $attribute_to_remove ) {
+				if ( $element->hasAttribute( $attribute_to_remove ) ) {
+					$element->removeAttribute( $attribute_to_remove );
+				}
+			}
+		}
 	}
 
 	/**

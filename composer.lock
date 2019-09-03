@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0467db52d812eba125e5ba9af8d03509",
+    "content-hash": "179b08a9aeba3a490f40eaad8fc729b6",
     "packages": [
         {
             "name": "cweagans/composer-patches",
-            "version": "1.6.6",
+            "version": "1.6.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/cweagans/composer-patches.git",
-                "reference": "1d89dcc730e7f42426c434b88261fcfb3bce651e"
+                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/1d89dcc730e7f42426c434b88261fcfb3bce651e",
-                "reference": "1d89dcc730e7f42426c434b88261fcfb3bce651e",
+                "url": "https://api.github.com/repos/cweagans/composer-patches/zipball/2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
+                "reference": "2e6f72a2ad8d59cd7e2b729f218bf42adb14f590",
                 "shasum": ""
             },
             "require": {
@@ -48,7 +48,7 @@
                 }
             ],
             "description": "Provides a way to patch Composer packages.",
-            "time": "2018-10-24T15:51:16+00:00"
+            "time": "2019-08-29T20:11:49+00:00"
         },
         {
             "name": "fasterimage/fasterimage",
@@ -127,11 +127,6 @@
                 "phpunit/phpunit": "~4.8"
             },
             "type": "library",
-            "extra": {
-                "patches_applied": {
-                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "patches/php-css-parser-mods.diff"
-                }
-            },
             "autoload": {
                 "psr-0": {
                     "Sabberworm\\CSS": "lib/"
@@ -318,16 +313,16 @@
         },
         {
             "name": "phpcompatibility/php-compatibility",
-            "version": "9.2.0",
+            "version": "9.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
-                "reference": "3db1bf1e28123fd574a4ae2e9a84072826d51b5e"
+                "reference": "06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/3db1bf1e28123fd574a4ae2e9a84072826d51b5e",
-                "reference": "3db1bf1e28123fd574a4ae2e9a84072826d51b5e",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5",
+                "reference": "06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5",
                 "shasum": ""
             },
             "require": {
@@ -351,18 +346,18 @@
             ],
             "authors": [
                 {
-                    "name": "Contributors",
-                    "homepage": "https://github.com/PHPCompatibility/PHPCompatibility/graphs/contributors"
-                },
-                {
                     "name": "Wim Godden",
-                    "role": "lead",
-                    "homepage": "https://github.com/wimg"
+                    "homepage": "https://github.com/wimg",
+                    "role": "lead"
                 },
                 {
                     "name": "Juliette Reinders Folmer",
-                    "role": "lead",
-                    "homepage": "https://github.com/jrfnl"
+                    "homepage": "https://github.com/jrfnl",
+                    "role": "lead"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "https://github.com/PHPCompatibility/PHPCompatibility/graphs/contributors"
                 }
             ],
             "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP cross-version compatibility.",
@@ -372,7 +367,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-06-27T19:58:56+00:00"
+            "time": "2019-08-28T15:29:06+00:00"
         },
         {
             "name": "rmccue/requests",
@@ -426,17 +421,6 @@
         {
             "name": "roave/security-advisories",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "ea693fa060702164985511acc3ceb5389c9ac761"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/ea693fa060702164985511acc3ceb5389c9ac761",
-                "reference": "ea693fa060702164985511acc3ceb5389c9ac761",
-                "shasum": ""
-            },
             "conflict": {
                 "3f/pygmentize": "<1.2",
                 "adodb/adodb-php": "<5.20.12",
