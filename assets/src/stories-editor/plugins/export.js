@@ -95,10 +95,11 @@ export const name = 'amp-story-export';
 /**
  * Renders the actual export menu item.
  *
- * @param {number} postId
- * @param {function} createErrorNotice
- * @param {function} createSuccessNotice
- * @param {function} removeNotice
+ * @param {Object} props Component props.
+ * @param {number} props.postId Post ID.
+ * @param {Function} props.createErrorNotice Callback to create an error notice.
+ * @param {Function} props.createSuccessNotice Callback to create a success notice.
+ * @param {Function} props.removeNotice Callback to remove a notice.
  *
  * @return {Object} The rendered export menu item.
  */

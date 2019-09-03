@@ -46,6 +46,8 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 	return class FeaturedImageMediaUpload extends InitialMediaUpload {
 		/**
 		 * Constructs the class.
+		 *
+		 * @param {*} args Constructor arguments.
 		 */
 		constructor( ...args ) {
 			super( ...args );
