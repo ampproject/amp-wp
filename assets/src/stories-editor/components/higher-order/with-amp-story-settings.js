@@ -436,6 +436,7 @@ export default createHigherOrderComponent(
 										maybeEnqueueFontStyle( font.name );
 										setAttributes( { ampFontFamily: font.name } );
 									} }
+									id={ 'amp-stories-font-family-picker' }
 								/>
 								<ToggleControl
 									label={ __( 'Automatically fit text to container', 'amp' ) }
