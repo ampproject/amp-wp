@@ -72,7 +72,7 @@ function FontFamilyPicker( {
 				placeholder={ __( 'None', 'amp' ) }
 				displayMenu="overlay"
 				tNoResults={ () =>
-					__('No font found', 'amp')
+					__( 'No font found', 'amp' )
 				}
 				tStatusQueryTooShort={ ( minQueryLength ) =>
 					// translators: %d: the number characters required to initiate an author search.
