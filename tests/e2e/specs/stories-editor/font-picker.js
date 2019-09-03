@@ -53,11 +53,9 @@ describe( 'Font picker in Text Block', () => {
 
 	it( 'should be able to search for none existing font', async () => {
 		await page.keyboard.type( 'Wibble' );
-
-		const nodes = await page.$x(
-			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
-		);
-		expect( nodes ).toHaveLength( 0 );
+		expect( await page.evaluate( () => {
+			return document.querySelector( '.autocomplete__option--no-results' ).innerHTML;
+		} ) ).toContain( 'No font found' );
 	} );
 
 	it( 'should be able to search for ubuntu font and select font', async () => {

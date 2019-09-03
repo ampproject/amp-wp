@@ -71,7 +71,9 @@ function FontFamilyPicker( {
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
 				displayMenu="overlay"
-				showNoOptionsFound={ false }
+				tNoResults={ () =>
+					__('No font found', 'amp')
+				}
 				tStatusQueryTooShort={ ( minQueryLength ) =>
 					// translators: %d: the number characters required to initiate an author search.
 					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
