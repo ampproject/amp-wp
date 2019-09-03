@@ -22,7 +22,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '5.8';
+	const REQUIRED_GUTENBERG_VERSION = '5.9';
 
 	/**
 	 * The slug of the story card CSS file.
