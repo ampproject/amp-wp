@@ -62,7 +62,7 @@ If you have an incompatible version of Node in your development environment, you
 nvm install
 ```
 
-A [Google Fonts API Key](https://developers.google.com/fonts/docs/developer_api)  is required to build or update Google font list. May not be require for many contributors.  
+A [Google Fonts API Key](https://developers.google.com/fonts/docs/developer_api)  is required to build or update Google font list. May not be required for many contributors.  
 
 
 ## Local Environment
@@ -184,7 +184,7 @@ To add an API key.
 
 1. Copy `example.env` to `.env`. 
 1. Replace `replacemewithrealkey` with API key. 
-1. Run `grunt download-fonts`
+1. Run `npm run build:download-fonts`
 
 The fonts file can be found in `includes/data/fonts.json`. 
 
