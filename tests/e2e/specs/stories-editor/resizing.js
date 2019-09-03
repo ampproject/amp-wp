@@ -40,7 +40,7 @@ async function getSelectedBlockPosition() {
 /**
  * Returns the selected block's width and height.
  *
- * @returns {Promise<{width: number, height: number}>} Block dimensions.
+ * @return {Promise<{width: number, height: number}>} Block dimensions.
  */
 // eslint-disable-next-line require-await
 async function getSelectedBlockDimensions() {
