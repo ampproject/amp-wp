@@ -385,9 +385,6 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 
 		$content = AMP_DOM_Utils::get_content_from_dom( $dom );
 		$this->assertEquals( $expected, $content );
-
-		$xpath = new DOMXPath( $dom );
-		$this->assertEquals( $img_count ? 1 : 0, $xpath->query( '/html/head/meta[ @name = "amp-experiments-opt-in" ][ @content = "amp-img-auto-sizes" ]' )->length );
 	}
 
 	/**
