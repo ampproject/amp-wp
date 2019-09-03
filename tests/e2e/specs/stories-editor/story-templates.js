@@ -66,8 +66,6 @@ async function removeAllReusableBlocks() {
 describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
-			// Ensure that the default reusable blocks are removed.
-			await removeAllReusableBlocks();
 			await visitAdminPage( 'edit.php', 'post_type=wp_block' );
 
 			await expect( page ).toMatchElement( '.no-items' );
