@@ -119,6 +119,9 @@ module.exports = function( grunt ) {
 									content = content.replace( versionRegex, '$1' + version );
 									content = content.replace( /(define\(\s*'AMP__VERSION',\s*')(.+?)(?=')/, '$1' + version );
 								}
+
+								// Remove dev mode code blocks.
+								content = content.replace( /\n\/\/\s*DEV_CODE.+?\n}\n/s, '' );
 							}
 							return content;
 						},
