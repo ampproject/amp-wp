@@ -900,6 +900,27 @@ class AMP_Story_Post_Type {
 			);
 		}
 
+		/**
+		 * Filter list of allowed video mime types.
+		 *
+		 * This can be used by video Transcoding services to add formats they support.
+		 *
+		 * @param array Supported mime types.
+		 */
+		$allowed_video_mime_types = apply_filters( 'amp_supported_video_types', [ 'video/mp4' ] );
+
+		// If `$allowed_video_mime_types` doesn't have valid data or is empty add default supported type.
+		if ( ! is_array( $allowed_video_mime_types ) || empty( $allowed_video_mime_types ) ) {
+			$allowed_video_mime_types = [ 'video/mp4' ];
+		}
+
+		// Pass final list of allowed video types to script.
+		wp_localize_script(
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			'ampAllowedVideoTypes',
+			$allowed_video_mime_types
+		);
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
