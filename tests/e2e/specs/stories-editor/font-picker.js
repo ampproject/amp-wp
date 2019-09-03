@@ -1,0 +1,94 @@
+/**
+ * WordPress dependencies
+ */
+import { createNewPost, saveDraft } from '@wordpress/e2e-test-utils';
+
+/**
+ * Internal dependencies
+ */
+import { activateExperience, deactivateExperience, selectBlockByClassName, getBlocksOnPage } from '../../utils';
+
+const textBlockClass = 'wp-block-amp-story-text';
+const fontPickerID = 'amp-stories-font-family-picker';
+
+describe( 'Font picker in Text Block', () => {
+	beforeAll( async () => {
+		await activateExperience( 'stories' );
+	} );
+
+	afterAll( async () => {
+		await deactivateExperience( 'stories' );
+	} );
+
+	beforeEach( async () => {
+		await createNewPost( { postType: 'amp_story' } );
+		await page.waitForSelector( `.${ textBlockClass }.is-not-editing` );
+		await selectBlockByClassName( textBlockClass );
+		const textToWrite = 'Hello';
+
+		await page.click( `.${ textBlockClass }` );
+		await page.keyboard.type( textToWrite );
+		await page.$eval( '.block-editor-block-list__layout .block-editor-block-list__block .wp-block-amp-amp-story-text', ( node ) => node.textContent );
+
+		await page.click( `#${ fontPickerID }` );
+	} );
+
+	it( 'should be able to search for ubuntu font', async () => {
+		await page.keyboard.type( 'Ubuntu' );
+
+		const nodes = await page.$x(
+			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
+		);
+		expect( nodes ).toHaveLength( 1 );
+	} );
+
+	it( 'should be able to search for Arial font and get multi results', async () => {
+		await page.keyboard.type( 'Arial' );
+
+		const nodes = await page.$x(
+			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
+		);
+		expect( nodes ).toHaveLength( 3 );
+	} );
+
+	it( 'should be able to search for none existing font', async () => {
+		await page.keyboard.type( 'Wibble' );
+
+		const nodes = await page.$x(
+			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
+		);
+		expect( nodes ).toHaveLength( 0 );
+	} );
+
+	it( 'should be able to search for ubuntu font and select font', async () => {
+		await page.keyboard.type( 'Ubuntu' );
+
+		await page.waitForSelector( '.autocomplete__option' );
+		await page.click( '.autocomplete__option' );
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( 'Ubuntu' );
+	} );
+
+	it( 'should be able to search for ubuntu font and select font with keyboard', async () => {
+		await page.keyboard.type( 'Ubuntu' );
+
+		await page.waitForSelector( '.autocomplete__option' );
+		await page.keyboard.press( 'ArrowDown' );
+		await page.keyboard.press( 'Enter' );
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( 'Ubuntu' );
+	} );
+
+	it( 'should be able to search for ubuntu font and save post', async () => {
+		await page.keyboard.type( 'Ubuntu' );
+
+		await page.waitForSelector( '.autocomplete__option' );
+		await page.click( '.autocomplete__option' );
+
+		await saveDraft();
+		await page.reload();
+
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( 'Ubuntu' );
+	} );
+} );
