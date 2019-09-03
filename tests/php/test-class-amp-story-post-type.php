@@ -618,6 +618,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'fallbacks', $fonts[0] );
 		$this->assertArrayHasKey( 'gfont', $fonts[0] );
 		$this->assertArrayHasKey( 'extra', $fonts[0] );
+	}
 
+	/**
+	 * Test fallback font.
+	 *
+	 * @covers AMP_Story_Post_Type::get_fallback
+	 */
+	public function test_fallback_font() {
+		$this->assertEquals( 'cursive', AMP_Story_Post_Type::get_fallback( 'display' ) );
+		$this->assertEquals( 'serif', AMP_Story_Post_Type::get_fallback( 'wibble' ) );
 	}
 }
