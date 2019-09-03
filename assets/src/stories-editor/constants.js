@@ -109,7 +109,7 @@ export const ALLOWED_BLOCKS = [
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
-export const ALLOWED_VIDEO_TYPES = ampAllowedVideoTypes ;
+export const ALLOWED_VIDEO_TYPES = ampAllowedVideoTypes;
 export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ampAllowedVideoTypes ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
 
