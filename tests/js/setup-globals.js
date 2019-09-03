@@ -47,3 +47,5 @@ global.ampStoriesFonts = [
 		handle: 'verdana-font',
 	},
 ];
+
+global.ampAllowedVideoTypes = [ 'video/mp4', 'video/webm' ];
