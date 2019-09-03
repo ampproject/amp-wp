@@ -553,9 +553,11 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$fonts = AMP_Story_Post_Type::get_google_fonts( [], $file );
 		$this->assertTrue( is_array( $fonts ) );
 		$this->assertEquals( 952, count( $fonts ) );
-		$this->assertArrayHasKey( 'name', $fonts[0] );
-		$this->assertArrayHasKey( 'fallbacks', $fonts[0] );
-		$this->assertArrayHasKey( 'gfont', $fonts[0] );
+		foreach ( $fonts as $font ) {
+			$this->assertArrayHasKey( 'name', $font );
+			$this->assertArrayHasKey( 'fallbacks', $font );
+			$this->assertArrayHasKey( 'gfont', $font );
+		}
 	}
 
 	/**
@@ -614,35 +616,101 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
 		$this->assertTrue( is_array( $fonts ) );
 		$this->assertEquals( 952, count( $fonts ) );
-		$this->assertArrayHasKey( 'name', $fonts[0] );
-		$this->assertArrayHasKey( 'fallbacks', $fonts[0] );
-		$this->assertArrayHasKey( 'gfont', $fonts[0] );
-		$this->assertArrayHasKey( 'extra', $fonts[0] );
+
+		$key = $this->find_key( $fonts, 'name', 'ABeeZee' );
+
+		$this->assertArrayHasKey( 'name', $fonts[ $key ] );
+		$this->assertArrayHasKey( 'fallbacks', $fonts[ $key ] );
+		$this->assertArrayHasKey( 'gfont', $fonts[ $key ] );
+		$this->assertArrayHasKey( 'extra', $fonts[ $key ] );
+	}
+
+
+	/**
+	 * Test gfont values.
+	 *
+	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 * @dataProvider get_gfont_data
+	 */
+	public function test_gfont_in_google_fonts( $font, $gfont ) {
+		$file = __DIR__ . '/data/json/fonts.json';
+
+		$fonts = AMP_Story_Post_Type::get_google_fonts( [], $file );
+
+		$key = $this->find_key( $fonts, 'name', $font );
+
+		$this->assertArrayHasKey( 'name', $fonts[ $key ] );
+		$this->assertArrayHasKey( 'fallbacks', $fonts[ $key ] );
+		$this->assertArrayHasKey( 'gfont', $fonts[ $key ] );
+		$this->assertEquals( $gfont, $fonts[ $key ]['gfont'] );
 	}
 
 	/**
 	 * Test fallback fonts.
 	 *
 	 * @covers       AMP_Story_Post_Type::get_font_fallback
-	 * @dataProvider get_data
+	 * @dataProvider get_fallback_data
 	 */
 	public function test_fallback_font( $category, $fallback ) {
 		$this->assertEquals( $category, AMP_Story_Post_Type::get_font_fallback( $fallback ) );
 	}
 
-	public function get_data() {
+	/**
+	 * Helper to find key in array.
+	 *
+	 * @param $data
+	 * @param $key
+	 * @param $value
+	 *
+	 * @return false|int|string
+	 */
+	private function find_key( $data, $key, $value ) {
+		$column = wp_list_pluck( $data, $key );
+
+		return array_search( $value, $column, true );
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function get_fallback_data() {
 		return [
 			'display' => [
 				'cursive',
-				'display'
+				'display',
 			],
 			'wibble'  => [
 				'serif',
-				'wibble'
+				'wibble',
 			],
-			'serif'  => [
+			'serif'   => [
 				'serif',
-				'serif'
+				'serif',
+			],
+		];
+	}
+
+	/**
+	 * Data provider.
+	 *
+	 * @return array
+	 */
+	public function get_gfont_data() {
+		return [
+
+			'ABeeZee' => [
+				'ABeeZee',
+				'ABeeZee:400,400i',
+			],
+			'Abel'    => [
+				'Abel',
+				'Abel:400',
+			],
+			'Ubuntu'  => [
+				'Ubuntu',
+				'Ubuntu:400,400i,700,700i',
 			],
 		];
 	}
