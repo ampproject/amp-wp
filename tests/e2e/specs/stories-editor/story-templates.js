@@ -47,9 +47,27 @@ async function addReusableBlock() {
 	await page.waitForSelector( '.components-snackbar__content' );
 }
 
+/**
+ * Removes all reusable blocks.
+ */
+async function removeAllReusableBlocks() {
+	await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+
+	// Delete all reusable blocks to restore clean state.
+	const selector = '#cb-select-all-1';
+	const actionsSelector = '#bulk-action-selector-top';
+
+	await page.click( selector );
+	await page.select( actionsSelector, 'trash' );
+	await page.click( '#doaction' );
+	await page.waitForNavigation();
+}
+
 describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
+			// Ensure that the default reusable blocks are removed.
+			await removeAllReusableBlocks();
 			await visitAdminPage( 'edit.php', 'post_type=wp_block' );
 
 			await expect( page ).toMatchElement( '.no-items' );
@@ -68,16 +86,7 @@ describe( 'Story Templates', () => {
 			} );
 
 			afterAll( async () => {
-				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
-
-				// Delete all reusable blocks to restore clean state.
-				const selector = '#cb-select-all-1';
-				const actionsSelector = '#bulk-action-selector-top';
-
-				await page.click( selector );
-				await page.select( actionsSelector, 'trash' );
-				await page.click( '#doaction' );
-				await page.waitForNavigation();
+				await removeAllReusableBlocks();
 			} );
 
 			it( 'should display non-template reusable blocks in the reusable blocks management screen', async () => {
@@ -110,6 +119,7 @@ describe( 'Story Templates', () => {
 
 		afterAll( async () => {
 			await deactivateExperience( 'stories' );
+			await removeAllReusableBlocks();
 		} );
 
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
