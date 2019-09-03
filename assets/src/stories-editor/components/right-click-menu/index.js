@@ -260,7 +260,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		pasteBlock( clientId ) {
 			const { navigator } = window;
 
-			if ( navigator.clipboard ) {
+			if ( navigator.clipboard && navigator.clipboard.readText ) {
 				// We have to ask permissions for being able to read from clipboard.
 				navigator.clipboard.readText().
 					then( ( clipBoardText ) => {
