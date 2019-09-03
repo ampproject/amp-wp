@@ -985,10 +985,7 @@ class AMP_Story_Post_Type {
 		if ( isset( $fonts ) ) {
 			return $fonts;
 		}
-
-		$file_content   = file_get_contents( __DIR__ . '/data/fonts.json' );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-		$google_fonts   = json_decode( $file_content, true );
-		$fonts          = [
+		$fonts = [
 			[
 				'name'      => 'Arial',
 				'fallbacks' => [ 'Helvetica Neue', 'Helvetica', 'sans-serif' ],
@@ -1066,43 +1063,8 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Geneva', 'sans-serif' ],
 			],
 		];
-		$existing_fonts = wp_list_pluck( $fonts, 'name' );
-
-		foreach ( $google_fonts as $font ) {
-			// If font already defined, then don't load from the google fonts list.
-			if ( in_array( $font['family'], $existing_fonts, true ) ) {
-				continue;
-			}
-			$gfont    = '';
-			$variants = array_intersect(
-				$font['variants'],
-				[
-					'regular',
-					'italic',
-					'700',
-					'700italic',
-				]
-			);
-
-			$variants = array_map(
-				function ( $variant ) {
-					$variant = str_replace( '0italic', '0i', $variant );
-					$variant = str_replace( 'regular', '400', $variant );
-					$variant = str_replace( 'italic', '400i', $variant );
-					return $variant;
-				},
-				$variants
-			);
-
-			if ( $variants ) {
-				$gfont = $font['family'] . ':' . implode( ',', $variants );
-			}
-			$fonts[] = [
-				'name'      => $font['family'],
-				'fallbacks' => (array) self::get_fallback( $font['category'] ),
-				'gfont'     => $gfont,
-			];
-		}
+		$file  = __DIR__ . '/data/fonts.json';
+		$fonts = self::get_google_fonts( $fonts, $file );
 
 		$columns = wp_list_pluck( $fonts, 'name' );
 		array_multisort( $columns, SORT_ASC, $fonts );
@@ -1147,6 +1109,65 @@ class AMP_Story_Post_Type {
 			},
 			$fonts
 		);
+
+		return $fonts;
+	}
+
+	/**
+	 * Get list of google fonts from Google fonts file used in AMP Stories.
+	 *
+	 * @param array  $fonts Array of existing fonts.
+	 * @param string $file  Path to google font file.
+	 *
+	 * @return array $fonts
+	 */
+	public static function get_google_fonts( $fonts, $file ) {
+		if ( ! is_readable( $file ) ) {
+			return $fonts;
+		}
+		$file_content = file_get_contents( $file );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$google_fonts = json_decode( $file_content, true );
+		if ( empty( $google_fonts ) ) {
+			return $fonts;
+		}
+		$existing_fonts = wp_list_pluck( $fonts, 'name' );
+
+		foreach ( $google_fonts as $font ) {
+			// If font already defined, then don't load from the google fonts list.
+			if ( in_array( $font['family'], $existing_fonts, true ) ) {
+				continue;
+			}
+			$gfont    = '';
+			$variants = array_intersect(
+				$font['variants'],
+				[
+					'regular',
+					'italic',
+					'700',
+					'700italic',
+				]
+			);
+
+			$variants = array_map(
+				function ( $variant ) {
+					$variant = str_replace( '0italic', '0i', $variant );
+					$variant = str_replace( 'regular', '400', $variant );
+					$variant = str_replace( 'italic', '400i', $variant );
+
+					return $variant;
+				},
+				$variants
+			);
+
+			if ( $variants ) {
+				$gfont = $font['family'] . ':' . implode( ',', $variants );
+			}
+			$fonts[] = [
+				'name'      => $font['family'],
+				'fallbacks' => (array) self::get_fallback( $font['category'] ),
+				'gfont'     => $gfont,
+			];
+		}
 
 		return $fonts;
 	}

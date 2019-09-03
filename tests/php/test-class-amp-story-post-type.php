@@ -542,4 +542,82 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$filtered_block = AMP_Story_Post_Type::render_block_with_grid_layer( $block_content, $block );
 		$this->assertEquals( $expected, $filtered_block );
 	}
+
+	/**
+	 * Test process google fonts.
+	 *
+	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 */
+	public function test_google_fonts() {
+		$file  = __DIR__ . '/data/json/fonts.json';
+		$fonts = AMP_Story_Post_Type::get_google_fonts( [], $file );
+		$this->assertTrue( is_array( $fonts ) );
+		$this->assertEquals( 952, count( $fonts ) );
+		$this->assertArrayHasKey( 'name', $fonts[0] );
+		$this->assertArrayHasKey( 'fallbacks', $fonts[0] );
+		$this->assertArrayHasKey( 'gfont', $fonts[0] );
+	}
+
+	/**
+	 * Test processing empty google font file.
+	 *
+	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 */
+	public function test_empty_google_fonts_file() {
+		$file           = __DIR__ . '/data/json/nofiles.json';
+		$original_fonts = [
+			[
+				'name'      => 'ABeeZee',
+				'fallbacks' => [ 'sans-serif' ],
+				'gfont'     => 'ABeeZee:400,400i',
+			],
+		];
+		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
+		$this->assertTrue( is_array( $fonts ) );
+		$this->assertEquals( $original_fonts, $fonts );
+	}
+
+	/**
+	 * Test processing invalid google font file.
+	 *
+	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 */
+	public function test_invalid_google_fonts_file() {
+		$file           = __DIR__ . '/data/json/invalid.json';
+		$original_fonts = [
+			[
+				'name'      => 'ABeeZee',
+				'fallbacks' => [ 'sans-serif' ],
+				'gfont'     => 'ABeeZee:400,400i',
+			],
+		];
+		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
+		$this->assertTrue( is_array( $fonts ) );
+		$this->assertEquals( $original_fonts, $fonts );
+	}
+
+	/**
+	 * Test processing google font file with
+	 *
+	 * @covers AMP_Story_Post_Type::get_google_fonts
+	 */
+	public function test_same_google_fonts_file() {
+		$file           = __DIR__ . '/data/json/fonts.json';
+		$original_fonts = [
+			[
+				'name'      => 'ABeeZee',
+				'fallbacks' => [ 'sans-serif' ],
+				'gfont'     => 'ABeeZee:400,400i',
+				'extra'     => 'extra field for test',
+			],
+		];
+		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
+		$this->assertTrue( is_array( $fonts ) );
+		$this->assertEquals( 952, count( $fonts ) );
+		$this->assertArrayHasKey( 'name', $fonts[0] );
+		$this->assertArrayHasKey( 'fallbacks', $fonts[0] );
+		$this->assertArrayHasKey( 'gfont', $fonts[0] );
+		$this->assertArrayHasKey( 'extra', $fonts[0] );
+
+	}
 }
