@@ -1164,7 +1164,7 @@ class AMP_Story_Post_Type {
 			}
 			$fonts[] = [
 				'name'      => $font['family'],
-				'fallbacks' => (array) self::get_fallback( $font['category'] ),
+				'fallbacks' => (array) self::get_font_fallback( $font['category'] ),
 				'gfont'     => $gfont,
 			];
 		}
@@ -1179,7 +1179,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @return string $fallback Fallback font.
 	 */
-	public static function get_fallback( $category ) {
+	public static function get_font_fallback( $category ) {
 		switch ( $category ) {
 			case 'serif':
 				$fallback = 'serif';

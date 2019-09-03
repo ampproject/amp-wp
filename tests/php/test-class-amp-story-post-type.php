@@ -621,12 +621,29 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test fallback font.
+	 * Test fallback fonts.
 	 *
-	 * @covers AMP_Story_Post_Type::get_fallback
+	 * @covers       AMP_Story_Post_Type::get_font_fallback
+	 * @dataProvider get_data
 	 */
-	public function test_fallback_font() {
-		$this->assertEquals( 'cursive', AMP_Story_Post_Type::get_fallback( 'display' ) );
-		$this->assertEquals( 'serif', AMP_Story_Post_Type::get_fallback( 'wibble' ) );
+	public function test_fallback_font( $category, $fallback ) {
+		$this->assertEquals( $category, AMP_Story_Post_Type::get_font_fallback( $fallback ) );
+	}
+
+	public function get_data() {
+		return [
+			'display' => [
+				'cursive',
+				'display'
+			],
+			'wibble'  => [
+				'serif',
+				'wibble'
+			],
+			'serif'  => [
+				'serif',
+				'serif'
+			],
+		];
 	}
 }
