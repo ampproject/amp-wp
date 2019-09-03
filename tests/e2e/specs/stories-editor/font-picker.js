@@ -40,15 +40,18 @@ describe( 'Font picker in Text Block', () => {
 			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
 		);
 		expect( nodes ).toHaveLength( 1 );
+		await expect( page ).toMatchElement( '#ubuntu-font' );
 	} );
 
 	it( 'should be able to search for Arial font and get multi results', async () => {
-		await page.keyboard.type( 'Arial' );
+		await page.keyboard.type( 'pt sans' );
 
 		const nodes = await page.$x(
 			'//ul[@id="amp-stories-font-family-picker__listbox"]//li'
 		);
-		expect( nodes ).toHaveLength( 3 );
+		expect( nodes ).toHaveLength( 2 );
+		await expect( page ).toMatchElement( '#pt-sans-font' );
+		await expect( page ).toMatchElement( '#pt-sans-narrow-font' );
 	} );
 
 	it( 'should be able to search for none existing font', async () => {
