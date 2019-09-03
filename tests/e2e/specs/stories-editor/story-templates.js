@@ -48,7 +48,7 @@ async function addReusableBlock() {
 }
 
 /**
- * Removes all reusable blocks.
+ * Removes all reusable blocks visible on the edit screen.
  */
 async function removeAllReusableBlocks() {
 	await visitAdminPage( 'edit.php', 'post_type=wp_block' );
