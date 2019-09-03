@@ -15,6 +15,38 @@ import {
 	searchForBlock as searchForStoryBlock,
 } from '../../utils';
 
+/**
+ * Adds a reusable block.
+ */
+async function addReusableBlock() {
+	await createNewPost();
+
+	const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
+		return layout.classList.contains( 'has-fixed-toolbar' );
+	} );
+	if ( ! isTopToolbarEnabled ) {
+		await clickOnMoreMenuItem( 'Top Toolbar' );
+	}
+
+	// Remove all blocks from the post so that we're working with a clean slate.
+	await page.evaluate( () => {
+		const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
+		const clientIds = blocks.map( ( block ) => block.clientId );
+		wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
+	} );
+
+	// Insert a paragraph block
+	await insertBlock( 'Paragraph' );
+	await page.keyboard.type( 'Reusable block!' );
+
+	await clickButtonByLabel( 'More options' );
+
+	const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
+	await convertButton.click();
+	// Wait for the snackbar confirmation of the block creation result.
+	await page.waitForSelector( '.components-snackbar__content' );
+}
+
 describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
@@ -31,32 +63,8 @@ describe( 'Story Templates', () => {
 		} );
 
 		describe( 'With non-template Reusable block', () => {
-			// Add Reusable block.
 			beforeAll( async () => {
-				await createNewPost();
-
-				const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
-					return layout.classList.contains( 'has-fixed-toolbar' );
-				} );
-				if ( ! isTopToolbarEnabled ) {
-					await clickOnMoreMenuItem( 'Top Toolbar' );
-				}
-
-				// Remove all blocks from the post so that we're working with a clean slate.
-				await page.evaluate( () => {
-					const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-					const clientIds = blocks.map( ( block ) => block.clientId );
-					wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
-				} );
-
-				// Insert a paragraph block
-				await insertBlock( 'Paragraph' );
-				await page.keyboard.type( 'Reusable block!' );
-
-				await clickButtonByLabel( 'More options' );
-
-				const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
-				await convertButton.click();
+				await addReusableBlock();
 			} );
 
 			afterAll( async () => {
@@ -133,6 +141,14 @@ describe( 'Story Templates', () => {
 
 			const numberOfTemplates = await page.$$eval( '.block-editor-block-preview', ( templates ) => templates.length );
 			expect( numberOfTemplates ).toStrictEqual( 11 ); // 10 default templates plus the empty page.
+		} );
+
+		it( 'should not load default reusable blocks in the stories editor', async () => {
+			await addReusableBlock();
+			await createNewPost( { postType: 'amp_story' } );
+			await searchForStoryBlock( 'Reusable' );
+
+			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
 		it( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {

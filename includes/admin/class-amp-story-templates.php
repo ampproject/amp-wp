@@ -83,15 +83,16 @@ class AMP_Story_Templates {
 
 		$referer = wp_parse_url( wp_get_referer() );
 
+		$is_story_page = false;
 		if ( isset( $referer['query'] ) ) {
 			$parsed_args = wp_parse_args( $referer['query'] );
 
 			if ( isset( $parsed_args['post_type'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === $parsed_args['post_type'] ) {
-				return $query; // This is in the editor for a new AMP Story.
+				$is_story_page = true; // This is in the editor for a new AMP Story.
 			}
 
 			if ( isset( $parsed_args['post'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
-				return $query; // This is in the editor for an existing AMP Story.
+				$is_story_page = true; // This is in the editor for an existing AMP Story.
 			}
 		}
 
@@ -100,13 +101,14 @@ class AMP_Story_Templates {
 			$tax_query = [];
 		}
 
-		$tax_query[] = [
+		$reusable_query = [
 			'taxonomy' => self::TEMPLATES_TAXONOMY,
 			'field'    => 'slug',
 			'terms'    => [ self::TEMPLATES_TERM ],
-			'operator' => 'NOT IN',
+			'operator' => $is_story_page ? 'IN' : 'NOT IN', // Include templates if is Story page, exclude otherwise.
 		];
 
+		$tax_query[] = $reusable_query;
 		$query->set( 'tax_query', $tax_query );
 		return $query;
 	}
