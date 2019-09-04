@@ -218,8 +218,20 @@ class AMP_Story_Post_Type {
 			},
 			8
 		);
-		add_action( 'amp_story_head', 'rel_canonical' );
 		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
+		add_action( 'amp_story_head', 'rest_output_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_resource_hints', 2 );
+		add_action( 'amp_story_head', 'feed_links', 2 );
+		add_action( 'amp_story_head', 'feed_links_extra', 3 );
+		add_action( 'amp_story_head', 'rsd_link' );
+		add_action( 'amp_story_head', 'wlwmanifest_link' );
+		add_action( 'amp_story_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'noindex', 1 );
+		add_action( 'amp_story_head', 'wp_generator' );
+		add_action( 'amp_story_head', 'rel_canonical' );
+		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_site_icon', 99 );
+		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
 
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
