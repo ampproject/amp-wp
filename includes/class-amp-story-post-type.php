@@ -1181,24 +1181,16 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_font_fallback( $category ) {
 		switch ( $category ) {
-			case 'serif':
-				$fallback = 'serif';
-				break;
 			case 'sans-serif':
-				$fallback = 'sans-serif';
-				break;
+				return 'sans-serif';
 			case 'handwriting':
 			case 'display':
-				$fallback = 'cursive';
-				break;
+				return 'cursive';
 			case 'monospace':
-				$fallback = 'monospace';
-				break;
+				return 'monospace';
 			default:
-				$fallback = 'serif';
-				break;
+				return 'serif';
 		}
-		return $fallback;
 	}
 
 	/**

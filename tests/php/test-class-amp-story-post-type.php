@@ -675,19 +675,31 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 *
 	 * @return array
 	 */
-	public function get_fallback_data() {
+	public function get_font_fallback_data() {
 		return [
+			'sans-serif' => [
+				'sans-serif',
+				'sans-serif',
+			],
+			'handwriting' => [
+				'cursive',
+				'handwriting',
+			],
 			'display' => [
 				'cursive',
 				'display',
 			],
-			'wibble'  => [
-				'serif',
-				'wibble',
+			'monospace' => [
+				'monospace',
+				'monospace',
 			],
 			'serif'   => [
 				'serif',
 				'serif',
+			],
+			'invalid data'  => [
+				'serif',
+				'not-a-valid-category',
 			],
 		];
 	}
