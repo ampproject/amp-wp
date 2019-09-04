@@ -9,6 +9,7 @@ import Autocomplete from 'accessible-autocomplete/react';
  */
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { BaseControl } from '@wordpress/components';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -26,6 +27,7 @@ function FontFamilyPicker( {
 	fonts = [],
 	onChange = () => {},
 	value = '',
+	instanceId,
 } ) {
 	const results = fonts;
 	const suggest = ( query, syncResults ) => {
@@ -49,10 +51,10 @@ function FontFamilyPicker( {
 	return (
 		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
-			id="amp-stories-font-family-picker"
+			id={ `amp-stories-font-family-picker-${ instanceId }` }
 		>
 			<Autocomplete
-				id="amp-stories-font-family-picker"
+				id={ `amp-stories-font-family-picker-${ instanceId }` }
 				source={ suggest }
 				templates={
 					{ suggestion: suggestionTemplate, inputValue: inputValueTemplate }
@@ -93,4 +95,4 @@ FontFamilyPicker.propTypes = {
 	onChange: PropTypes.func,
 };
 
-export default FontFamilyPicker;
+export default withInstanceId( FontFamilyPicker );
