@@ -90,10 +90,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		}
 
 		/**
-		 * Handle image selection.
-		 *
-		 * After an image is selected in the media modal, switch to the cropper state if the image isn't the right size.
-		 * Only an image that is at least the expected width/height can be selected in the first place.
+		 * Handles image selection.
 		 */
 		onSelectImage() {
 			const attachment = this.frame.state().get( 'selection' ).first().toJSON();
