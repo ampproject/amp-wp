@@ -32,6 +32,9 @@ module.exports = function( grunt ) {
 			verify_matching_versions: {
 				command: 'php bin/verify-version-consistency.php',
 			},
+			composer_install: {
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -f composer.*',
+			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
 			},
@@ -95,17 +98,13 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml|example\.env)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml|example\.env)/.test( file );
 			} );
 
-			paths.push( 'vendor/autoload.php' );
+			paths.push( 'composer.*' );
 			paths.push( 'assets/js/*.js' );
 			paths.push( 'assets/js/*.deps.json' );
 			paths.push( 'assets/css/*.css' );
-			paths.push( 'vendor/composer/**' );
-			paths.push( 'vendor/sabberworm/php-css-parser/lib/**' );
-			paths.push( 'vendor/fasterimage/fasterimage/src/**' );
-			paths.push( 'vendor/willwashburn/stream/src/**' );
 
 			grunt.config.set( 'copy', {
 				build: {
@@ -138,6 +137,7 @@ module.exports = function( grunt ) {
 			} );
 			grunt.task.run( 'readme' );
 			grunt.task.run( 'copy' );
+			grunt.task.run( 'shell:composer_install' );
 
 			done();
 		}
