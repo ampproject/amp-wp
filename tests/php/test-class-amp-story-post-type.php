@@ -550,9 +550,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function test_google_fonts() {
 		$file  = __DIR__ . '/data/json/fonts.json';
-		$fonts = AMP_Story_Post_Type::get_google_fonts( [], $file );
-		$this->assertTrue( is_array( $fonts ) );
-		$this->assertEquals( 952, count( $fonts ) );
+		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$this->assertInternalType( 'array', $fonts );
+		$this->assertCount( 952, $fonts );
+
 		foreach ( $fonts as $font ) {
 			$this->assertArrayHasKey( 'name', $font );
 			$this->assertArrayHasKey( 'fallbacks', $font );
@@ -561,22 +562,15 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test processing empty google font file.
+	 * Test processing non-existent google font file.
 	 *
 	 * @covers AMP_Story_Post_Type::get_google_fonts
 	 */
 	public function test_empty_google_fonts_file() {
-		$file           = __DIR__ . '/data/json/nofiles.json';
-		$original_fonts = [
-			[
-				'name'      => 'ABeeZee',
-				'fallbacks' => [ 'sans-serif' ],
-				'gfont'     => 'ABeeZee:400,400i',
-			],
-		];
-		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
-		$this->assertTrue( is_array( $fonts ) );
-		$this->assertEquals( $original_fonts, $fonts );
+		$file  = __DIR__ . '/data/json/nofiles.json';
+		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$this->assertInternalType( 'array', $fonts );
+		$this->assertEmpty( $fonts );
 	}
 
 	/**
@@ -585,57 +579,26 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @covers AMP_Story_Post_Type::get_google_fonts
 	 */
 	public function test_invalid_google_fonts_file() {
-		$file           = __DIR__ . '/data/json/invalid.json';
-		$original_fonts = [
-			[
-				'name'      => 'ABeeZee',
-				'fallbacks' => [ 'sans-serif' ],
-				'gfont'     => 'ABeeZee:400,400i',
-			],
-		];
-		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
-		$this->assertTrue( is_array( $fonts ) );
-		$this->assertEquals( $original_fonts, $fonts );
+		$file  = __DIR__ . '/data/json/invalid.json';
+		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
+		$this->assertInternalType( 'array', $fonts );
+		$this->assertEmpty( $fonts );
 	}
 
 	/**
-	 * Test processing google font file with
-	 *
-	 * @covers AMP_Story_Post_Type::get_google_fonts
-	 */
-	public function test_same_google_fonts_file() {
-		$file           = __DIR__ . '/data/json/fonts.json';
-		$original_fonts = [
-			[
-				'name'      => 'ABeeZee',
-				'fallbacks' => [ 'sans-serif' ],
-				'gfont'     => 'ABeeZee:400,400i',
-				'extra'     => 'extra field for test',
-			],
-		];
-		$fonts          = AMP_Story_Post_Type::get_google_fonts( $original_fonts, $file );
-		$this->assertTrue( is_array( $fonts ) );
-		$this->assertEquals( 952, count( $fonts ) );
-
-		$key = $this->find_key( $fonts, 'name', 'ABeeZee' );
-
-		$this->assertArrayHasKey( 'name', $fonts[ $key ] );
-		$this->assertArrayHasKey( 'fallbacks', $fonts[ $key ] );
-		$this->assertArrayHasKey( 'gfont', $fonts[ $key ] );
-		$this->assertArrayHasKey( 'extra', $fonts[ $key ] );
-	}
-
-
-	/**
-	 * Test gfont values.
+	 * Test valid Google Font processing
 	 *
 	 * @covers AMP_Story_Post_Type::get_google_fonts
 	 * @dataProvider get_gfont_data
+	 *
+	 * @param string $font Font name
+	 * @param string $gfont gfont entry
+	 * @param string $fallbacks Font fallbacks.
 	 */
-	public function test_gfont_in_google_fonts( $font, $gfont ) {
+	public function test_google_fonts_entries( $font, $gfont, $fallbacks ) {
 		$file = __DIR__ . '/data/json/fonts.json';
 
-		$fonts = AMP_Story_Post_Type::get_google_fonts( [], $file );
+		$fonts = AMP_Story_Post_Type::get_google_fonts( $file );
 
 		$key = $this->find_key( $fonts, 'name', $font );
 
@@ -643,16 +606,20 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->assertArrayHasKey( 'fallbacks', $fonts[ $key ] );
 		$this->assertArrayHasKey( 'gfont', $fonts[ $key ] );
 		$this->assertEquals( $gfont, $fonts[ $key ]['gfont'] );
+		$this->assertEquals( $fallbacks, $fonts[ $key ]['fallbacks'] );
 	}
 
 	/**
 	 * Test fallback fonts.
 	 *
-	 * @covers       AMP_Story_Post_Type::get_font_fallback
-	 * @dataProvider get_fallback_data
+	 * @covers AMP_Story_Post_Type::get_font_fallback
+	 * @dataProvider get_font_fallback_data
+	 *
+	 * @param string $expected
+	 * @param string $category
 	 */
-	public function test_fallback_font( $category, $fallback ) {
-		$this->assertEquals( $category, AMP_Story_Post_Type::get_font_fallback( $fallback ) );
+	public function test_fallback_font( $expected, $category ) {
+		$this->assertEquals( $expected, AMP_Story_Post_Type::get_font_fallback( $category ) );
 	}
 
 	/**
@@ -677,27 +644,27 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 */
 	public function get_font_fallback_data() {
 		return [
-			'sans-serif' => [
+			'sans-serif'   => [
 				'sans-serif',
 				'sans-serif',
 			],
-			'handwriting' => [
+			'handwriting'  => [
 				'cursive',
 				'handwriting',
 			],
-			'display' => [
+			'display'      => [
 				'cursive',
 				'display',
 			],
-			'monospace' => [
+			'monospace'    => [
 				'monospace',
 				'monospace',
 			],
-			'serif'   => [
+			'serif'        => [
 				'serif',
 				'serif',
 			],
-			'invalid data'  => [
+			'invalid data' => [
 				'serif',
 				'not-a-valid-category',
 			],
@@ -715,14 +682,17 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 			'ABeeZee' => [
 				'ABeeZee',
 				'ABeeZee:400,400i',
+				[ 'sans-serif' ],
 			],
 			'Abel'    => [
 				'Abel',
 				'Abel:400',
+				[ 'sans-serif' ],
 			],
 			'Ubuntu'  => [
 				'Ubuntu',
 				'Ubuntu:400,400i,700,700i',
+				[ 'sans-serif' ],
 			],
 		];
 	}

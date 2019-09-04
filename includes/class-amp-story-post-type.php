@@ -982,9 +982,12 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_fonts() {
 		static $fonts = null;
+
 		if ( isset( $fonts ) ) {
 			return $fonts;
 		}
+
+		// Default system fonts.
 		$fonts = [
 			[
 				'name'      => 'Arial',
@@ -1064,7 +1067,7 @@ class AMP_Story_Post_Type {
 			],
 		];
 		$file  = __DIR__ . '/data/fonts.json';
-		$fonts = self::get_google_fonts( $fonts, $file );
+		$fonts = array_merge( $fonts, self::get_google_fonts( $file ) );
 
 		$columns = wp_list_pluck( $fonts, 'name' );
 		array_multisort( $columns, SORT_ASC, $fonts );
@@ -1114,30 +1117,26 @@ class AMP_Story_Post_Type {
 	}
 
 	/**
-	 * Get list of google fonts from Google fonts file used in AMP Stories.
+	 * Get list of Google Fonts from a given JSON file.
 	 *
-	 * @param array  $fonts Array of existing fonts.
-	 * @param string $file  Path to google font file.
+	 * @param string $file  Path to file containing Google Fonts definitions.
 	 *
-	 * @return array $fonts
+	 * @return array $fonts Fonts list.
 	 */
-	public static function get_google_fonts( $fonts, $file ) {
+	public static function get_google_fonts( $file ) {
 		if ( ! is_readable( $file ) ) {
-			return $fonts;
+			return [];
 		}
 		$file_content = file_get_contents( $file );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$google_fonts = json_decode( $file_content, true );
+
 		if ( empty( $google_fonts ) ) {
-			return $fonts;
+			return [];
 		}
-		$existing_fonts = wp_list_pluck( $fonts, 'name' );
+
+		$fonts = [];
 
 		foreach ( $google_fonts as $font ) {
-			// If font already defined, then don't load from the google fonts list.
-			if ( in_array( $font['family'], $existing_fonts, true ) ) {
-				continue;
-			}
-			$gfont    = '';
 			$variants = array_intersect(
 				$font['variants'],
 				[
@@ -1149,19 +1148,24 @@ class AMP_Story_Post_Type {
 			);
 
 			$variants = array_map(
-				function ( $variant ) {
-					$variant = str_replace( '0italic', '0i', $variant );
-					$variant = str_replace( 'regular', '400', $variant );
-					$variant = str_replace( 'italic', '400i', $variant );
+				static function ( $variant ) {
+					$variant = str_replace(
+						[ '0italic', 'regular', 'italic' ],
+						[ '0i', '400', '400i' ],
+						$variant
+					);
 
 					return $variant;
 				},
 				$variants
 			);
 
+			$gfont = '';
+
 			if ( $variants ) {
 				$gfont = $font['family'] . ':' . implode( ',', $variants );
 			}
+
 			$fonts[] = [
 				'name'      => $font['family'],
 				'fallbacks' => (array) self::get_font_fallback( $font['category'] ),
