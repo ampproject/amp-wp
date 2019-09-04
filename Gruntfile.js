@@ -2,7 +2,7 @@
 
 module.exports = function( grunt ) {
 	'use strict';
-
+	require( 'dotenv' ).config();
 	grunt.initConfig( {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -47,7 +47,14 @@ module.exports = function( grunt ) {
 				},
 			},
 		},
-
+		http: {
+			google_fonts: {
+				options: {
+					url: 'https://www.googleapis.com/webfonts/v1/webfonts?fields=items&prettyPrint=false&key=' + process.env.GOOGLE_FONTS_API_KEY,
+				},
+				dest: 'includes/data/fonts.json',
+			},
+		},
 	} );
 
 	// Load tasks.
@@ -55,6 +62,7 @@ module.exports = function( grunt ) {
 	grunt.loadNpmTasks( 'grunt-contrib-copy' );
 	grunt.loadNpmTasks( 'grunt-shell' );
 	grunt.loadNpmTasks( 'grunt-wp-deploy' );
+	grunt.loadNpmTasks( 'grunt-http' );
 
 	// Register tasks.
 	grunt.registerTask( 'default', [
@@ -87,7 +95,7 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml)/.test( file );
+				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|composer\..*|patches|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml|example\.env)/.test( file );
 			} );
 
 			paths.push( 'vendor/autoload.php' );
@@ -154,6 +162,28 @@ module.exports = function( grunt ) {
 
 		doNext();
 	} );
+
+	grunt.registerTask( 'process-fonts', function() {
+		const fileName = 'includes/data/fonts.json';
+		let map = grunt.file.readJSON( fileName );
+		map = JSON.stringify( map );
+		map = JSON.parse( map );
+		if ( map ) {
+			const stripped = map.items.map( ( font ) => {
+				return {
+					family: font.family,
+					variants: font.variants,
+					category: font.category,
+				};
+			} );
+			grunt.file.write( fileName, JSON.stringify( stripped ) );
+		}
+	} );
+
+	grunt.registerTask( 'download-fonts', [
+		'http',
+		'process-fonts',
+	] );
 
 	grunt.registerTask( 'create-build-zip', [
 		'shell:create_build_zip',
