@@ -26,7 +26,6 @@ function FontFamilyPicker( {
 	fonts = [],
 	onChange = () => {},
 	value = '',
-	id = '',
 } ) {
 	const results = fonts;
 	const suggest = ( query, syncResults ) => {
@@ -50,17 +49,13 @@ function FontFamilyPicker( {
 	return (
 		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
-			id={ id }
-			help={ __( 'Type to search for fonts', 'amp' ) }
+			id="amp-stories-font-family-picker"
 		>
 			<Autocomplete
-				id={ id }
+				id="amp-stories-font-family-picker"
 				source={ suggest }
 				templates={
-					{
-						suggestion: suggestionTemplate,
-						inputValue: inputValueTemplate,
-					}
+					{ suggestion: suggestionTemplate, inputValue: inputValueTemplate }
 				}
 				minLength={ 2 }
 				onConfirm={ onChange }
@@ -70,20 +65,16 @@ function FontFamilyPicker( {
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
+				showNoOptionsFound={ false }
 				displayMenu="overlay"
-				tNoResults={ () =>
-					__( 'No font found', 'amp' )
-				}
 				tStatusQueryTooShort={ ( minQueryLength ) =>
-					// translators: %d: the number characters required to initiate an author search.
+					// translators: %d: the number characters required to initiate a font search.
 					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
 				}
-				// translators: 1: the index of the selected result. 2: The total number of results.
-				tStatusSelectedOption={ ( selectedOption, length ) =>
-					sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length )
-				}
+				tStatusSelectedOption={ ( selectedOption, length ) => sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length ) }
 				tStatusResults={ ( length, contentSelectedOption ) => {
 					return (
+						// translators: 1: the index of thre selected result. 2: The total number of results.
 						_n( '%d font is available.', '%d fonts are available.', length, 'amp' ) +
 						' ' + contentSelectedOption
 					);
@@ -95,7 +86,6 @@ function FontFamilyPicker( {
 
 FontFamilyPicker.propTypes = {
 	value: PropTypes.string,
-	id: PropTypes.string,
 	fonts: PropTypes.arrayOf( PropTypes.shape( {
 		value: PropTypes.string,
 		label: PropTypes.string,
