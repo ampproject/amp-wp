@@ -25,10 +25,7 @@ import {
 /**
  * Internal dependencies
  */
-import {
-	withCroppedFeaturedImage,
-	withEnforcedFileType,
-} from '../common/components';
+import { withEnforcedFileType } from '../common/components';
 import {
 	withAmpStorySettings,
 	withPageNumber,
@@ -39,6 +36,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withCroppedFeaturedImage,
 	withEnforcedVideoUploadType,
 } from './components';
 import {

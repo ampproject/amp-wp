@@ -1,9 +1,4 @@
 /**
- * External dependencies
- */
-import { now } from 'lodash';
-
-/**
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
@@ -12,11 +7,20 @@ import { dispatch } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import { FeaturedImageToolbarSelect, getSelectMediaFrame } from './select-media-frame';
-import FeaturedImageCropper from './featured-image-cropper';
-import { getAspectRatioType } from '../helpers';
+import { FeaturedImageToolbarSelect, getSelectMediaFrame } from '../../common/components/select-media-frame';
+import FeaturedImageCropper from '../../common/components/featured-image-cropper';
+import { getAspectRatioType, setImageFromURL } from '../../common/helpers';
 
 const { wp } = window;
+
+/**
+ * When an image is selected, dispatch it to the store.
+ *
+ * @param {number} attachmentId
+ */
+const dispatchImage = ( attachmentId ) => {
+	dispatch( 'core/editor' ).editPost( { featured_media: attachmentId } );
+};
 
 /**
  * Gets a wrapped version of MediaUpload to crop featured images.
@@ -184,7 +188,9 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 				( EXPECTED_WIDTH === attachment.width && EXPECTED_HEIGHT === attachment.height ) ||
 				( ALTERNATE_EXPECTED_WIDTH && ALTERNATE_EXPECTED_WIDTH === attachment.width && ALTERNATE_EXPECTED_HEIGHT === attachment.height )
 			) {
-				this.setImageFromURL( attachment.url, attachment.id, attachment.width, attachment.height );
+				const { url, id, width, height } = attachment;
+				const { onSelect } = this.props;
+				setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
 				this.frame.close();
 			} else {
 				this.frame.setState( 'cropper' );
@@ -229,11 +235,10 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 * @param {Object} croppedImage Cropped attachment data.
 		 */
 		onCropped( croppedImage ) {
-			const url = croppedImage.url,
-				attachmentId = croppedImage.id,
-				width = croppedImage.width,
-				height = croppedImage.height;
-			this.setImageFromURL( url, attachmentId, width, height );
+			const { url, id, width, height } = croppedImage;
+			const { onSelect } = this.props;
+
+			setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
 		}
 
 		/**
@@ -242,42 +247,13 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 * @param {Object} selection Selection.
 		 */
 		onSkippedCrop( selection ) {
-			const url = selection.get( 'url' ),
-				width = selection.get( 'width' ),
-				height = selection.get( 'height' );
-			this.setImageFromURL( url, selection.id, width, height );
-		}
-
-		/**
-		 * Set the featured image.
-		 *
-		 * @param {string} url          Image URL.
-		 * @param {number} attachmentId Attachment ID.
-		 * @param {number} width        Image width.
-		 * @param {number} height       Image height.
-		 */
-		setImageFromURL( url, attachmentId, width, height ) {
-			const data = {};
+			const url = selection.get( 'url' );
+			const width = selection.get( 'width' );
+			const height = selection.get( 'height' );
+			const { id } = selection;
 			const { onSelect } = this.props;
 
-			data.url = url;
-			data.thumbnail_url = url;
-			data.timestamp = now();
-
-			if ( attachmentId ) {
-				data.attachment_id = attachmentId;
-			}
-
-			if ( width ) {
-				data.width = width;
-			}
-
-			if ( height ) {
-				data.height = height;
-			}
-
-			onSelect( data ); // @todo Does this do anything?
-			dispatch( 'core/editor' ).editPost( { featured_media: attachmentId } );
+			setImageFromURL( { url, id, width, height, onSelect, dispatchImage } );
 		}
 	};
 };

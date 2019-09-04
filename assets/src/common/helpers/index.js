@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { get, has, includes, reduce, template } from 'lodash';
+import { get, has, includes, now, reduce, template } from 'lodash';
 /**
  * WordPress dependencies
  */
@@ -391,4 +391,36 @@ export const getContentLengthFromUrl = async ( url ) => {
 		method: 'head',
 	} );
 	return Number( response.headers.get( 'content-length' ) );
+};
+
+/**
+ * Sets the featured image, on selecting it in the Media Library.
+ *
+ * @param {string} url             Image URL.
+ * @param {number} id    Attachment ID.
+ * @param {number} width           Image width.
+ * @param {number} height          Image height.
+ * @param {Function} onSelect      A function in the MediaUpload component called on selecting the image.
+ * @param {Function} dispatchImage A function to dispatch the change in image to the store.
+ */
+export const setImageFromURL = ( { url, id, width, height, onSelect, dispatchImage } ) => {
+	const data = {};
+	data.url = url;
+	data.thumbnail_url = url;
+	data.timestamp = now();
+
+	if ( id ) {
+		data.attachment_id = id;
+	}
+
+	if ( width ) {
+		data.width = width;
+	}
+
+	if ( height ) {
+		data.height = height;
+	}
+
+	onSelect( data ); // @todo Does this do anything?
+	dispatchImage( id );
 };
