@@ -54,9 +54,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 		 * Mainly copied from customize-controls.js, like most of this class.
 		 *
 		 * Overwrites the Media Library frame, this.frame.
-		 * Adds the ability to crop the featured image.
-		 *
-		 * @see wp.media.CroppedImageControl.initFrame
+		 * Adds a suggested width and height.
 		 */
 		initFeaturedImage() {
 			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
