@@ -52,12 +52,16 @@ function FontFamilyPicker( {
 		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
 			id={ `amp-stories-font-family-picker-${ instanceId }` }
+			help={ __( 'Type to search for fonts', 'amp' ) }
 		>
 			<Autocomplete
 				id={ `amp-stories-font-family-picker-${ instanceId }` }
 				source={ suggest }
 				templates={
-					{ suggestion: suggestionTemplate, inputValue: inputValueTemplate }
+					{
+						suggestion: suggestionTemplate,
+						inputValue: inputValueTemplate,
+					}
 				}
 				minLength={ 2 }
 				onConfirm={ onChange }
@@ -67,16 +71,21 @@ function FontFamilyPicker( {
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
-				showNoOptionsFound={ false }
 				displayMenu="overlay"
+				tNoResults={ () =>
+					__( 'No font found', 'amp' )
+				}
 				tStatusQueryTooShort={ ( minQueryLength ) =>
 					// translators: %d: the number characters required to initiate a font search.
 					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
 				}
-				tStatusSelectedOption={ ( selectedOption, length ) => sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length ) }
+				tStatusSelectedOption={ ( selectedOption, length ) =>
+					// translators: 1: the index of the selected result. 2: The total number of results.
+					sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length )
+				}
 				tStatusResults={ ( length, contentSelectedOption ) => {
 					return (
-						// translators: 1: the index of thre selected result. 2: The total number of results.
+						// translators: %d: The total number of results.
 						_n( '%d font is available.', '%d fonts are available.', length, 'amp' ) +
 						' ' + contentSelectedOption
 					);
@@ -93,6 +102,7 @@ FontFamilyPicker.propTypes = {
 		label: PropTypes.string,
 	} ) ),
 	onChange: PropTypes.func,
+	instanceId: PropTypes.number.isRequired,
 };
 
 export default withInstanceId( FontFamilyPicker );
