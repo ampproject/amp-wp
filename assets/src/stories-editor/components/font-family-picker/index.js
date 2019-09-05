@@ -14,7 +14,7 @@ import { withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { maybeEnqueueFontStyle } from '../../helpers';
-import { OverrideAutocomplete as Autocomplete } from './overrideAutocomplete';
+import Autocomplete from './autocomplete';
 import 'accessible-autocomplete/src/autocomplete.css';
 import './edit.css';
 
