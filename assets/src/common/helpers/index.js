@@ -18,7 +18,9 @@ import {
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../constants';
 
-const { ampAllowedVideoTypes } = window;
+// @todo This is is not guaranteed to exist.
+const { ampStoriesEditorSettings = {} } = window;
+const { allowedVideoMimeTypes = [ 'video/mp4' ] } = ampStoriesEditorSettings;
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -235,9 +237,9 @@ export const getNoticeTemplate = ( message ) => {
 /**
  * Gets whether the file type is allowed.
  *
- * For videos, only supported mime types in `ampAllowedVideoTypes` should be allowed.
+ * For videos, only supported mime types as defined by the editor settings should be allowed.
  * But the allowedTypes property only has 'video', and it can accidentally allow mime types that are not supported.
- * So this returns false for videos with mime types other than the ones in `ampAllowedVideoTypes`.
+ * So this returns false for videos with mime types other than the ones in the editor settings.
  *
  * @param {Object} attachment   The file to evaluate.
  * @param {Array}  allowedTypes The allowed file types.
@@ -251,7 +253,7 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 		return false;
 	}
 
-	if ( 'video' === fileType && ! includes( ampAllowedVideoTypes, mimeType ) ) {
+	if ( 'video' === fileType && ! includes( allowedVideoMimeTypes, mimeType ) ) {
 		return false;
 	}
 

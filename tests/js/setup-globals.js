@@ -48,4 +48,6 @@ global.ampStoriesFonts = [
 	},
 ];
 
-global.ampAllowedVideoTypes = [ 'video/mp4', 'video/webm' ];
+global.ampStoriesEditorSettings = {
+	allowedVideoMimeTypes: [ 'video/mp4', 'video/webm' ],
+};

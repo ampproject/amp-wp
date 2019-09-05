@@ -22,6 +22,9 @@ export default registerStore(
 		selectors,
 		actions,
 		initialState: {
+			editorSettings: {
+				...window.ampStoriesEditorSettings,
+			},
 			animations: {},
 			blocks: {
 				order: [],

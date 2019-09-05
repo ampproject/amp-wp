@@ -27,8 +27,6 @@ import Slabo27 from '../../images/stories-editor/font-names/slabo-27.svg';
 import SourceSansPro from '../../images/stories-editor/font-names/source-sans-pro.svg';
 import Ubuntu from '../../images/stories-editor/font-names/ubuntu.svg';
 
-const { ampAllowedVideoTypes } = window;
-
 export const STORY_PAGE_INNER_WIDTH = 328;
 export const STORY_PAGE_INNER_HEIGHT = 553;
 
@@ -109,8 +107,6 @@ export const ALLOWED_BLOCKS = [
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
-export const ALLOWED_VIDEO_TYPES = ampAllowedVideoTypes;
-export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ampAllowedVideoTypes ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
 
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
