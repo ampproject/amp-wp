@@ -1292,14 +1292,14 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertTrue( AMP_Theme_Support::is_output_buffering() );
 		$this->assertSame( 3, ob_get_level() );
 
-		echo '<img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
+		echo '<html><head></head><body><img src="test.png"><script data-test>document.write(\'Illegal\');</script>';
 
 		// Additional nested output bufferings which aren't getting closed.
 		ob_start();
 		echo 'foo';
 		ob_start(
 			static function( $response ) {
-					return strtoupper( $response );
+				return strtoupper( $response );
 			}
 		);
 		echo 'bar';
@@ -1427,15 +1427,16 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'<script src="https://cdn.ampproject.org/v0/amp-audio-0.1.js" async="" custom-element="amp-audio"></script>',
 			'<script src="https://cdn.ampproject.org/v0/amp-ad-0.1.js" async="" custom-element="amp-ad"></script>',
 
+			'#<style amp-custom(="")?>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
+
+			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="32x32">',
 			'<link rel="icon" href="https://example.org/favicon.png" sizes="192x192">',
-
-			'#<style amp-custom>.*?body\s*{\s*background:\s*black;?\s*}.*?</style>#s',
-			'<link crossorigin="anonymous" rel="stylesheet" id="my-font-css" href="https://fonts.googleapis.com/css?family=Tangerine" type="text/css" media="all">',
-			'<style amp-boilerplate>',
-			'<noscript><style amp-boilerplate>',
 			'<script type="application/ld+json">{"@context"',
 			'<link rel="canonical" href="',
+
+			'#<style amp-boilerplate(="")?>#',
+			'#<noscript><style amp-boilerplate(="")?>#',
 			'</head>',
 		];
 
@@ -1654,7 +1655,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			'wp_enqueue_scripts',
 			static function() {
 				wp_enqueue_script( 'amp-list' );
-			wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
+				wp_enqueue_style( 'my-font', 'https://fonts.googleapis.com/css?family=Tangerine', [], null ); // phpcs:ignore
 			}
 		);
 		add_action(
@@ -1681,7 +1682,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			static function() {
 				wp_print_scripts( 'amp-mathml' );
 				?>
-			<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
+				<amp-mathml layout="container" data-formula="\[x = {-b \pm \sqrt{b^2-4ac} \over 2a}.\]"></amp-mathml>
 				<?php
 			},
 			1
@@ -1765,11 +1766,11 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test prepare_response for bad/non-HTML.
+	 * Test prepare_response for responses that may or may not be valid HTML.
 	 *
 	 * @covers AMP_Theme_Support::prepare_response()
 	 */
-	public function test_prepare_response_bad_html() {
+	public function test_prepare_response_varying_html() {
 		wp();
 		add_filter( 'amp_validation_error_sanitized', '__return_true' );
 		add_theme_support( AMP_Theme_Support::SLUG );
@@ -1784,10 +1785,25 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$input = '';
 		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
 
+		// HTML, but a fragment.
+		$input = '<ul><li>one</li><li>two</li><li>three</li></ul>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
+		// HTML, but still a fragment.
+		$input = '<html><header><h1>HellO!</h1></header></html>';
+		$this->assertEquals( $input, AMP_Theme_Support::prepare_response( $input ) );
+
 		// HTML, but very stripped down.
-		$input  = '<html>Hello</html>';
+		$input  = '<html><head></head>Hello</html>';
 		$output = AMP_Theme_Support::prepare_response( $input );
 		$this->assertContains( '<html amp', $output );
+		$this->assertContains( '<meta charset="UTF-8">', $output );
+
+		// HTML with doctype, comments, and whitespace before head.
+		$input  = "   <!--\nHello world!\n-->\n\n<!DOCTYPE html>  <html\n\n>\n<head profile='http://www.acme.com/profiles/core'></head><body>Hello</body></html>";
+		$output = AMP_Theme_Support::prepare_response( $input );
+		$this->assertContains( '<html amp', $output );
+		$this->assertContains( '<meta charset="UTF-8">', $output );
 	}
 
 	/**
@@ -1902,12 +1918,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers AMP_Theme_Support::enqueue_assets()
 	 */
 	public function test_enqueue_assets() {
-		$script_slug = 'amp-runtime';
-		$style_slug  = 'amp-default';
-		wp_dequeue_script( $script_slug );
+		$style_slug = 'amp-default';
 		wp_dequeue_style( $style_slug );
 		AMP_Theme_Support::enqueue_assets();
-		$this->assertContains( $script_slug, wp_scripts()->queue );
 		$this->assertContains( $style_slug, wp_styles()->queue );
 	}
 
