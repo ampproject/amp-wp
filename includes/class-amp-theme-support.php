@@ -365,6 +365,23 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Gets whether the parent or child theme supports Reader Mode.
+	 *
+	 * True if the theme does not call add_theme_support( 'amp' ) at all,
+	 * and it has an amp/ directory for templates.
+	 *
+	 * @return bool Whether the theme supports Reader Mode.
+	 */
+	public static function theme_supports_reader_mode() {
+		$amp_dir = '/amp';
+		return (
+			! self::get_support_mode_added_via_theme()
+			&&
+			( is_dir( get_template_directory() . $amp_dir ) || is_dir( get_stylesheet_directory() . $amp_dir ) )
+		);
+	}
+
+	/**
 	 * Finish initialization once query vars are set.
 	 *
 	 * @since 0.7

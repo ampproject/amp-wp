@@ -21,6 +21,13 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	const TESTED_CLASS = 'AMP_Theme_Support';
 
 	/**
+	 * The amp/ directory in the theme, to test whether a theme has Reader Mode templates.
+	 *
+	 * @var string
+	 */
+	public $amp_directory_in_theme = '';
+
+	/**
 	 * Set up before class.
 	 */
 	public static function setUpBeforeClass() {
@@ -61,6 +68,9 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
 		AMP_HTTP::$headers_sent = [];
+		if ( is_dir( $this->amp_directory_in_theme ) ) {
+			rmdir( $this->amp_directory_in_theme );
+		}
 	}
 
 	/**
@@ -221,6 +231,33 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
+	}
+
+	/**
+	 * Test theme_supports_reader_mode.
+	 *
+	 * @covers \AMP_Theme_Support::theme_supports_reader_mode.
+	 */
+	public function test_theme_supports_reader_mode() {
+		remove_all_filters( 'theme_root' );
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Standard, and there is no /amp directory, so this should be false.
+		$this->assertFalse( AMP_Theme_Support::theme_supports_reader_mode() );
+
+		remove_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Reader, but there is no /amp directory in the theme.
+		$this->assertFalse( AMP_Theme_Support::theme_supports_reader_mode() );
+
+		$this->amp_directory_in_theme = get_template_directory() . '/amp';
+		mkdir( $this->amp_directory_in_theme );
+
+		// This should be true, as there is now an /amp directory in the theme.
+		$this->assertTrue( AMP_Theme_Support::theme_supports_reader_mode() );
 	}
 
 	/**
