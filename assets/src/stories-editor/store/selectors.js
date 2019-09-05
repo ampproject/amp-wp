@@ -107,5 +107,5 @@ export function isReordering( state ) {
  * @return {Object} The editor settings object.
  */
 export function getSettings( state ) {
-	return state.editorSettings || {};
+	return state.editorSettings || window.ampStoriesEditorSettings || {};
 }
