@@ -2,7 +2,6 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
-import Autocomplete from 'accessible-autocomplete/react';
 
 /**
  * WordPress dependencies
@@ -15,11 +14,10 @@ import { withInstanceId } from '@wordpress/compose';
  * Internal dependencies
  */
 import { maybeEnqueueFontStyle } from '../../helpers';
+import * as Autocomplete from './overrideAutocomplete';
 import 'accessible-autocomplete/src/autocomplete.css';
 import './edit.css';
 
-// Override method on class as not required.
-Autocomplete.prototype.handleInputBlur = () => {};
 /**
  * Font Family Picker component.
  *
