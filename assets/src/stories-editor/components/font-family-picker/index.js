@@ -73,7 +73,7 @@ function FontFamilyPicker( {
 				defaultValue={ value }
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
-				placeholder={ __( 'None', 'amp' ) }
+				placeholder={ __( 'Default', 'amp' ) }
 				displayMenu="overlay"
 				tNoResults={ () =>
 					__( 'No font found', 'amp' )
