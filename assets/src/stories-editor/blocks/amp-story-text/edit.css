@@ -65,6 +65,6 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-editor__rotate-container,
 .wp-block[data-type="amp/amp-story-text"] .block-mover,
-.wp-block[data-type="amp/amp-story-text"] .block-mover div {
+.wp-block[data-type="amp/amp-story-text"] .block-mover > div {
 	height: 100%;
 }
