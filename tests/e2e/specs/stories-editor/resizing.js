@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, dragAndResize } from '@wordpress/e2e-test-utils';
+import { createNewPost, dragAndResize, selectBlockByClientId, getAllBlocks } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -47,11 +47,27 @@ async function getSelectedBlockPosition() {
  */
 // eslint-disable-next-line require-await
 async function getSelectedBlockDimensions() {
-	return await page.evaluate( () => {
+	return page.evaluate( () => {
 		const el = document.querySelector( '.wp-block.is-selected .components-resizable-box__container' );
 		return {
 			width: el.clientWidth,
 			height: el.clientHeight,
+		};
+	} );
+}
+
+/**
+ * Returns the selected block's text box's width and height.
+ *
+ * @return {Promise<{width: number, height: number}>} Text box dimensions.
+ */
+// eslint-disable-next-line require-await
+async function getSelectedTextBoxDimensions() {
+	return page.evaluate( () => {
+		const textbox = document.querySelector( '.wp-block.is-selected .wp-block-amp-amp-story-text' );
+		return {
+			height: textbox.clientHeight,
+			offset: textbox.offsetTop,
 		};
 	} );
 }
@@ -188,6 +204,62 @@ describe( 'Resizing', () => {
 			expect( positionLeft ).toStrictEqual( '-25.61%' );
 			expect( positionTop ).toStrictEqual( '10%' );
 		} );
+
+		it( 'should keep text content height when resizing when max font size', async () => {
+			// click to enable edit and input text to have non-empty textbox
+			await page.click( '.wp-block-amp-story-text' );
+			await page.keyboard.type( 'Hello' );
+
+			// deselect element again by clicking the background and then reselect element (but now not in editable mode)
+			await selectBlockByClientId( ( await getAllBlocks() )[ 0 ].clientId );
+			await selectBlockByClassName( 'wp-block-amp-story-text' );
+
+			// resize to make sure font-size will be maximum
+			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
+			await dragAndResize( resizableHandleBottom, { x: 0, y: 100 } );
+
+			const initialDimensions = await getSelectedTextBoxDimensions();
+
+			await dragAndResize( resizableHandleBottom, { x: 0, y: 150 } );
+			await getSelectedBlockDimensions();
+
+			const newDimensions = await getSelectedTextBoxDimensions();
+
+			expect( newDimensions.height ).toStrictEqual( initialDimensions.height );
+		} );
+
+		it( 'should keep text content vertically centered when resizing', async () => {
+			// click to enable edit and input text to have non-empty textbox
+			await page.click( '.wp-block-amp-story-text' );
+			await page.keyboard.type( 'Hello' );
+
+			// deselect element again by clicking the background and then reselect element (but now not in editable mode)
+			await selectBlockByClientId( ( await getAllBlocks() )[ 0 ].clientId );
+			await selectBlockByClassName( 'wp-block-amp-story-text' );
+
+			// create helper function to check text box dimensions compared to block dimensions
+			const checkDimensions = async () => {
+				const textBoxDimensions = await getSelectedTextBoxDimensions();
+				const blockDimensions = await getSelectedBlockDimensions();
+
+				const blockHeight = blockDimensions.height;
+				const textBoxPlusDoubleOffset = textBoxDimensions.height + ( textBoxDimensions.offset * 2 );
+
+				// the two heights won't match perfectly, but should be within a few pixels
+				// 2, 3 and 4 pixel difference has been spotted in the wild!
+				const difference = Math.abs( blockHeight - textBoxPlusDoubleOffset );
+
+				expect( difference ).toBeLessThan( 5 );
+			};
+
+			await checkDimensions();
+
+			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
+			await dragAndResize( resizableHandleBottom, { x: 0, y: 150 } );
+			await getSelectedBlockDimensions();
+
+			await checkDimensions();
+		} );
 	} );
 
 	describe( 'Non-Fitted Text block', () => {
@@ -200,10 +272,9 @@ describe( 'Resizing', () => {
 			fitToggle.click();
 		} );
 
-		const defaultWidth = 250;
-
 		// TODO: unskip when this actually works. Currently non-fit text blocks can't be resized smaller, only larger.
 		// reported in #3199
+		// eslint-disable-next-line jest/no-disabled-tests
 		it.skip( 'should not resize smaller than the set minimum width and height', async () => {
 			let dimensions;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
@@ -226,7 +297,7 @@ describe( 'Resizing', () => {
 			dimensions = await getSelectedBlockDimensions();
 			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
 		} );
-	});
+	} );
 
 	describe( 'Rotated Text block', () => {
 		beforeEach( async () => {
