@@ -74,7 +74,7 @@ function FontFamilyPicker( {
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
-				displayMenu="inline"
+				displayMenu="overlay"
 				tNoResults={ () =>
 					__( 'No font found', 'amp' )
 				}
