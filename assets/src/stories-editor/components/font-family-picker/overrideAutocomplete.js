@@ -3,6 +3,6 @@
  */
 import Autocomplete from 'accessible-autocomplete/react';
 
-export default class OverrideAutocomplete extends Autocomplete {
+export class OverrideAutocomplete extends Autocomplete {
 	handleInputBlur() {}
 }
