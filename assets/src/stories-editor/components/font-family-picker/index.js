@@ -30,18 +30,17 @@ function FontFamilyPicker( {
 	instanceId,
 } ) {
 	const results = fonts;
-	const suggest = ( query, syncResults ) => {
-		const searchResults = query ? results.filter( function( result ) {
-			return result.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1;
-		} ) :
+	const suggest = ( query, populateResults ) => {
+		const searchResults = query ?
+			results.filter( ( result ) => result.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1 ) :
 			[];
-		syncResults( searchResults );
+		populateResults( searchResults );
 	};
 
-	const suggestionTemplate = ( result ) => {
-		maybeEnqueueFontStyle( result.name );
-		const fallbacks = ( result.fallbacks ) ? ', ' + result.fallbacks.join( ', ' ) : '';
-		return result && `<span style='font-family: ${ result.name }${ fallbacks }'>${ result.name }</span>`;
+	const suggestionTemplate = ( font ) => {
+		maybeEnqueueFontStyle( font.name );
+		const fallbacks = ( font.fallbacks ) ? ', ' + font.fallbacks.join( ', ' ) : '';
+		return font && `<span style='font-family: ${ font.name }${ fallbacks }'>${ font.name }</span>`;
 	};
 
 	const inputValueTemplate = ( result ) => {
