@@ -6,6 +6,7 @@ set -e
 # Change to the expected directory.
 cd "$(dirname "$0")"
 cd ..
+PLUGIN_DIR=$(pwd)
 
 # Enable nicer messaging for build status.
 BLUE_BOLD='\033[1;34m';
@@ -28,42 +29,14 @@ warning () {
 
 status "Time to release AMP ⚡️"
 
-if [ -z "$NO_CHECKS" ]; then
-	# Make sure there are no changes in the working tree. Release builds should be
-	# traceable to a particular commit and reliably reproducible.
-	changed=
-	if ! git diff --exit-code > /dev/null; then
-		changed="file(s) modified"
-	elif ! git diff --cached --exit-code > /dev/null; then
-		changed="file(s) staged"
-	fi
-	if [ -n "$changed" ]; then
-		git status
-		error "ERROR: Cannot build plugin zip with dirty working tree. ☝️
-		Commit your changes and try again."
-		exit 1
-	fi
+status "Setting up a fresh build environment in a temporary folder. ✨"
 
-	# Do a dry run of the repository reset. Prompting the user for a list of all
-	# files that will be removed should prevent them from losing important files!
-	status "Resetting the repository to pristine condition. ✨"
-	to_clean=$(git clean -xdf --dry-run)
-	if [ -n "$to_clean" ]; then
-		echo "$to_clean"
-		warning "🚨 About to delete everything above! Is this okay? 🚨"
-		echo -n "[y]es/[N]o: "
-		read -r answer
-		if [ "$answer" != "${answer#[Yy]}" ]; then
-			# Remove ignored files to reset repository to pristine condition. Previous
-			# test ensures that changed files abort the plugin build.
-			status "Cleaning working directory... 🛀"
-			git clean -xdf
-		else
-			error "Fair enough; aborting. Tidy up your repo and try again. 🙂"
-			exit 1
-		fi
-	fi
-fi
+# Create a fresh temporary folder in a way that works across platforms.
+BUILD_DIR=$(mktemp -d 2>/dev/null || mktemp -d -t 'amp-production-build')
+
+# Do a local clone to move the current files across.
+git clone -l . "$BUILD_DIR"
+cd "$BUILD_DIR"
 
 # Run the build.
 status "Installing dependencies... 📦"
@@ -73,4 +46,11 @@ PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm install
 status "Generating build... ⚙️"
 npm run build
 
-success "You've built AMP! 🎉 "
+status "Copying the ZIP file back over... ↩️"
+rm -f "$PLUGIN_DIR/amp.zip"
+cp "$BUILD_DIR/amp.zip" "$PLUGIN_DIR/amp.zip"
+
+status "Removing the temporary folder again... 🗑️"
+rm -rf "$BUILD_DIR"
+
+success "You've built AMP! 🎉 \nThe ZIP file can be found in the following location:\n$PLUGIN_DIR/amp.zip"
