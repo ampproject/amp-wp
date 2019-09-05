@@ -77,7 +77,7 @@ describe( 'Resizing', () => {
 
 		const defaultWidth = 250;
 
-		it( 'it should not resize smaller than the set minimum width and height', async () => {
+		it( 'should not resize smaller than the set minimum width and height', async () => {
 			let dimensions;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
@@ -204,7 +204,7 @@ describe( 'Resizing', () => {
 
 		// TODO: unskip when this actually works. Currently non-fit text blocks can't be resized smaller, only larger.
 		// reported in #3199
-		it.skip( 'it should not resize smaller than the set minimum width and height', async () => {
+		it.skip( 'should not resize smaller than the set minimum width and height', async () => {
 			let dimensions;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
