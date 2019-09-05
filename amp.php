@@ -242,7 +242,7 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 }
 
 /**
- * Print admin notice if the xdebug extension is loaded.
+ * Print admin notice if the Xdebug extension is loaded.
  *
  * @since T.B.D
  */
