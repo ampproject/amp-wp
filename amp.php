@@ -244,7 +244,7 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 /**
  * Print admin notice if the Xdebug extension is loaded.
  *
- * @since T.B.D
+ * @since 1.3
  */
 function _amp_xdebug_admin_notice() {
 	?>
