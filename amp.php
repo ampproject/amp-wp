@@ -241,6 +241,28 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }
 
+/**
+ * Print admin notice if the xdebug extension is loaded.
+ *
+ * @since T.B.D
+ */
+function _amp_xdebug_admin_notice() {
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			echo wp_kses_post(
+				__( 'We\'ve detected that your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. We recommend deactivating Xdebug for the best experience.', 'amp' )
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( extension_loaded( 'xdebug' ) ) {
+	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
+}
+
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
 
