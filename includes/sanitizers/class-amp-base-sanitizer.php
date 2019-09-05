@@ -341,6 +341,8 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Check whether the document of a given node is in dev mode.
 	 *
+	 * @todo There is only ever one document: $this->dom. Eliminate the argument.
+	 *
 	 * @param DOMNode $node Node to check the document of.
 	 * @return bool Whether the document is in dev mode.
 	 */

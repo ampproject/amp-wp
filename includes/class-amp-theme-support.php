@@ -1346,18 +1346,32 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 */
 	public static function init_admin_bar() {
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
 
-		// Replace admin-bar.css in core with forked version which makes use of :focus-within among other change for AMP-compat.
-		wp_styles()->registered['admin-bar']->src = amp_get_asset_url( 'css/admin-bar.css' );
-		wp_styles()->registered['admin-bar']->ver = AMP__VERSION;
+		// Inject the data-ampdevmode attribute into the admin bar bump style. See \WP_Admin_Bar::initialize().
+		if ( current_theme_supports( 'admin-bar' ) ) {
+			$admin_bar_args  = get_theme_support( 'admin-bar' );
+			$header_callback = $admin_bar_args[0]['callback'];
+		} else {
+			$header_callback = '_admin_bar_bump_cb';
+		}
+		$header_callback_priority = has_filter( 'wp_head', $header_callback );
+		if ( '__return_false' !== $header_callback ) {
+			remove_action( 'wp_head', $header_callback, $header_callback_priority );
+			add_action(
+				'wp_head',
+				function () use ( $header_callback ) {
+					ob_start();
+					$header_callback();
+					$style = ob_get_clean();
+					echo preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $style ); // phpcs:ignore
+				},
+				$header_callback_priority
+			);
+		}
 
-		// Remove any possible '.min' to avoid RTL failing to generate the href for admin-bar-rtl.css, which does not currently have a minified version in the AMP plugin.
-		wp_styles()->registered['admin-bar']->extra['suffix'] = '';
-
-		// Remove script which is almost entirely made obsolete by :focus-inside in the forked admin-bar.css.
-		wp_dequeue_script( 'admin-bar' );
-
-		// Remove customize support script since not valid AMP.
+		// Emulate customize support script in PHP, to assume Customizer.
 		add_action(
 			'admin_bar_menu',
 			static function() {
@@ -1365,24 +1379,6 @@ class AMP_Theme_Support {
 			},
 			41
 		);
-
-		// Convert admin bar bump callback into an inline style for admin-bar. See \WP_Admin_Bar::initialize().
-		if ( current_theme_supports( 'admin-bar' ) ) {
-			$admin_bar_args  = get_theme_support( 'admin-bar' );
-			$header_callback = $admin_bar_args[0]['callback'];
-		} else {
-			$header_callback = '_admin_bar_bump_cb';
-		}
-		remove_action( 'wp_head', $header_callback );
-		if ( '__return_false' !== $header_callback ) {
-			ob_start();
-			$header_callback();
-			$style = ob_get_clean();
-			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
-			wp_add_inline_style( 'admin-bar', $data );
-		}
-
-		// Emulate customize support script in PHP, to assume Customizer.
 		add_filter(
 			'body_class',
 			static function( $body_classes ) {
@@ -1395,6 +1391,57 @@ class AMP_Theme_Support {
 				);
 			}
 		);
+	}
+
+	/**
+	 * Recursively determine if a given dependency depends on another.
+	 *
+	 * @param WP_Dependencies $dependencies      Dependencies.
+	 * @param string          $current_handle    Current handle.
+	 * @param string          $dependency_handle Dependency handle.
+	 * @return bool Whether the current handle is a dependency of the dependency handle.
+	 */
+	protected static function has_dependency( WP_Dependencies $dependencies, $current_handle, $dependency_handle ) {
+		if ( $current_handle === $dependency_handle ) {
+			return true;
+		}
+		if ( ! isset( $dependencies->registered[ $current_handle ] ) ) {
+			return false;
+		}
+		foreach ( $dependencies->registered[ $current_handle ]->deps as $handle ) {
+			if ( self::has_dependency( $dependencies, $handle, $dependency_handle ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
+	 *
+	 * @param string $tag    The link tag for the enqueued style.
+	 * @param string $handle The style's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
+		if ( self::has_dependency( wp_styles(), $handle, 'admin-bar' ) ) {
+			$tag = preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $tag );
+		}
+		return $tag;
+	}
+
+	/**
+	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
+	 *
+	 * @param string $tag    The `<script>` tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @return string Tag.
+	 */
+	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
+		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
+			$tag = preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $tag );
+		}
+		return $tag;
 	}
 
 	/**
@@ -2103,9 +2150,45 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
+		// Enable AMP dev mode when admin bar is showing or in Customizer preview.
+		if ( is_admin_bar_showing() || is_customize_preview() ) { // @todo Allow this to be filtered.
+			$dom->documentElement->setAttribute( 'data-ampdevmode', '' );
+		}
+
+		// Replace admin bar with placeholder prior to sanitizing to prevent conversion of its elements.
+		$original_admin_bar_element    = null;
+		$placeholder_admin_bar_element = null;
+		if ( is_admin_bar_showing() ) {
+			$original_admin_bar_element = $dom->getElementById( 'wpadminbar' );
+			if ( $original_admin_bar_element ) {
+				$placeholder_admin_bar_element = $dom->createElement( 'div' );
+				foreach ( [ 'id', 'class' ] as $attribute_name ) {
+					$placeholder_admin_bar_element->setAttribute(
+						$attribute_name,
+						$original_admin_bar_element->getAttribute( $attribute_name )
+					);
+				}
+				$original_admin_bar_element->parentNode->replaceChild( $placeholder_admin_bar_element, $original_admin_bar_element );
+			}
+		}
+
 		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
+
+		// Replace the original admin bar.
+		if ( $original_admin_bar_element && $placeholder_admin_bar_element ) {
+			$placeholder_admin_bar_element->parentNode->replaceChild( $original_admin_bar_element, $placeholder_admin_bar_element );
+			$original_admin_bar_element->setAttribute( 'data-ampdevmode', '' );
+			/**
+			 * Element.
+			 *
+			 * @var DOMElement $admin_bar_element
+			 */
+			foreach ( $original_admin_bar_element->getElementsByTagName( '*' ) as $admin_bar_element ) {
+				$admin_bar_element->setAttribute( 'data-ampdevmode', '' );
+			}
+		}
 
 		// Determine what the validation errors are.
 		$blocking_error_count = 0;

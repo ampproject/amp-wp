@@ -2309,11 +2309,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
-					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
+					$this->assertContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
-					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
-					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
-					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
+					$this->assertContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
+					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
+					$this->assertTrue( $amphtml_dom->getElementById( 'wpadminbar' )->hasAttribute( 'data-ampdevmode' ) );
 				},
 			],
 			// @todo Add other scenarios in the future.
@@ -2331,6 +2331,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param callable $assert         Function which runs assertions.
 	 */
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
+		$this->markTestIncomplete( 'This needs to actually use AMP_Theme_Support::prepare_response.' );
+
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}

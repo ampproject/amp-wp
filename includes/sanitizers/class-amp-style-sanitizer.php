@@ -731,10 +731,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		 */
 		$xpath = $this->xpath;
 
+		$dev_mode_predicate = '';
+		if ( $this->is_document_in_dev_mode( $this->dom ) ) {
+			$dev_mode_predicate = ' and not ( @data-ampdevmode )';
+		}
+
 		$lower_case = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
 		$predicates = [
-			sprintf( '( self::style and not( @amp-boilerplate ) and ( not( @type ) or %s = "text/css" ) )', sprintf( $lower_case, '@type' ) ),
-			sprintf( '( self::link and @href and %s = "stylesheet" )', sprintf( $lower_case, '@rel' ) ),
+			sprintf( '( self::style and not( @amp-boilerplate ) and ( not( @type ) or %s = "text/css" ) %s )', sprintf( $lower_case, '@type' ), $dev_mode_predicate ),
+			sprintf( '( self::link and @href and %s = "stylesheet" %s )', sprintf( $lower_case, '@rel' ), $dev_mode_predicate ),
 		];
 
 		foreach ( $xpath->query( '//*[ ' . implode( ' or ', $predicates ) . ' ]' ) as $element ) {
@@ -814,7 +819,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_stylesheet_priority( DOMNode $node ) {
 		$print_priority_base = 100;
-		$admin_bar_priority  = 200;
 
 		$remove_url_scheme = static function( $url ) {
 			return preg_replace( '/^https?:/', '', $url );
@@ -846,9 +850,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( in_array( $style_handle, $non_amp_handles, true ) ) {
 				// Styles are for non-AMP JS only so not be used in AMP at all.
 				$priority = 1000;
-			} elseif ( 'admin-bar' === $style_handle ) {
-				// Admin bar has lowest priority. If it gets excluded, then the entire admin bar should be removed.
-				$priority = $admin_bar_priority;
 			} elseif ( 'dashicons' === $style_handle ) {
 				// Dashicons could be used by the theme, but low priority compared to other styles.
 				$priority = 90;
@@ -877,9 +878,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
 			$element_id = (string) $node->getAttribute( 'id' );
-			if ( 'admin-bar-inline-css' === $element_id ) {
-				$priority = $admin_bar_priority;
-			} elseif ( 'wp-custom-css' === $element_id ) {
+			if ( 'wp-custom-css' === $element_id ) {
 				// Additional CSS from Customizer.
 				$priority = 60;
 			} else {
@@ -2662,65 +2661,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$body->appendChild( $style_element );
 			}
 		}
-
-		$this->remove_admin_bar_if_css_excluded();
-	}
-
-	/**
-	 * Remove admin bar if its CSS was excluded.
-	 *
-	 * @since 1.2
-	 */
-	private function remove_admin_bar_if_css_excluded() {
-		if ( ! is_admin_bar_showing() ) {
-			return;
-		}
-
-		$admin_bar_id = 'wpadminbar';
-		$admin_bar    = $this->dom->getElementById( $admin_bar_id );
-		if ( ! $admin_bar ) {
-			return;
-		}
-
-		$included = true;
-		foreach ( $this->pending_stylesheets as &$pending_stylesheet ) {
-			$is_admin_bar_css = (
-				'custom' === $pending_stylesheet['group']
-				&&
-				$pending_stylesheet['node'] instanceof DOMElement
-				&&
-				'admin-bar-css' === $pending_stylesheet['node']->getAttribute( 'id' )
-			);
-			if ( $is_admin_bar_css ) {
-				$included = $pending_stylesheet['included'];
-				break;
-			}
-		}
-
-		unset( $pending_stylesheet );
-
-		if ( ! $included ) {
-			// Remove admin-bar class from body element.
-			// @todo It would be nice if any style rules which refer to .admin-bar could also be removed, but this would mean retroactively going back over the CSS again and re-shaking it.
-			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
-			if ( $body instanceof DOMElement && $body->hasAttribute( 'class' ) ) {
-				$body->setAttribute(
-					'class',
-					preg_replace( '/(^|\s)admin-bar(\s|$)/', ' ', $body->getAttribute( 'class' ) )
-				);
-			}
-
-			// Remove admin bar element.
-			$comment_text = sprintf(
-				/* translators: %s: CSS selector for admin bar element  */
-				__( 'Admin bar (%s) was removed to preserve AMP validity due to excessive CSS.', 'amp' ),
-				'#' . $admin_bar_id
-			);
-			$admin_bar->parentNode->replaceChild(
-				$this->dom->createComment( ' ' . $comment_text . ' ' ),
-				$admin_bar
-			);
-		}
 	}
 
 	/**
@@ -3041,44 +2981,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		}
 
-		$included_count -= $this->exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id );
-
 		return $included_count;
-	}
-
-	/**
-	 * If the admin-bar CSS was excluded, make sure the admin-bar inline CSS is also excluded, and vice-versa.
-	 *
-	 * @param int[] $indices_by_stylesheet_element_id Lookup of stylesheet indices by stylesheet element ID.
-	 * @return int Number of excluded styles.
-	 */
-	private function exclude_all_admin_bar_css_if_excessive( $indices_by_stylesheet_element_id ) {
-		$excluded_count = 0;
-
-		$admin_bar_style_element_ids         = [ 'admin-bar-css', 'admin-bar-inline-css' ];
-		$should_exclude_admin_bar_inline_css = false;
-		foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
-			if ( ! isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ) ) {
-				continue;
-			}
-			if ( false === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] ) {
-				$should_exclude_admin_bar_inline_css = true;
-				break;
-			}
-		}
-		if ( $should_exclude_admin_bar_inline_css ) {
-			foreach ( $admin_bar_style_element_ids as $admin_bar_style_element_id ) {
-				$needs_exclusion = (
-					isset( $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] )
-					&&
-					true === $this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included']
-				);
-				if ( $needs_exclusion ) {
-					$this->pending_stylesheets[ $indices_by_stylesheet_element_id[ $admin_bar_style_element_id ] ]['included'] = false;
-					$excluded_count++;
-				}
-			}
-		}
-		return $excluded_count;
 	}
 }
