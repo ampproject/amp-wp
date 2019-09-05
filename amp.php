@@ -252,7 +252,7 @@ function _amp_xdebug_admin_notice() {
 		<p>
 			<?php
 			echo wp_kses_post(
-				__( 'We\'ve detected that your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. We recommend deactivating Xdebug for the best experience.', 'amp' )
+				__( 'Your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. Please deactivate Xdebug for the best experience.', 'amp' )
 			);
 			?>
 		</p>
