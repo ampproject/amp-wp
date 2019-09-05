@@ -571,6 +571,29 @@ class AMP_Tag_And_Attribute_Sanitizer_Test extends WP_UnitTestCase {
 				[], // No scripts because removed.
 			],
 
+			'attribute_requirements_overriden_by_placeholders_within_template' => [
+				'<template type="amp-mustache"><amp-timeago datetime="{{iso}}"></amp-timeago></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_not_overriden_by_placeholders_outside_of_template' => [
+				'<amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'',
+			],
+
+			'attribute_requirements_overriden_in_indirect_template_parents' => [
+				'<template type="amp-mustache"><div><span><amp-timeago datetime="{{iso}}"></amp-timeago></span></div></template>',
+				null,
+				[ 'amp-mustache', 'amp-timeago' ],
+			],
+
+			'attribute_requirements_not_overriden_in_sibling_template_tags' => [
+				'<template type="amp-mustache"></template><amp-timeago datetime="{{iso}}"></amp-timeago>',
+				'<template type="amp-mustache"></template>',
+				[ 'amp-mustache' ],
+			],
+
 			'attribute_amp_accordion_value'                => call_user_func(
 				static function() {
 					$html = str_replace(
