@@ -40,12 +40,15 @@ async function getSelectedBlockPosition() {
 /**
  * Returns the selected block's width and height.
  *
+ * This will look at the resizable box inside the block for the true visual
+ * size as represented by the drawn border and position of resize handles.
+ *
  * @return {Promise<{width: number, height: number}>} Block dimensions.
  */
 // eslint-disable-next-line require-await
 async function getSelectedBlockDimensions() {
-	return page.evaluate( () => {
-		const el = document.querySelector( '.wp-block.is-selected' );
+	return await page.evaluate( () => {
+		const el = document.querySelector( '.wp-block.is-selected .components-resizable-box__container' );
 		return {
 			width: el.clientWidth,
 			height: el.clientHeight,
@@ -62,6 +65,9 @@ describe( 'Resizing', () => {
 		await deactivateExperience( 'stories' );
 	} );
 
+	const textBlockMinWidth = 40;
+	const textBlockMinHeight = 30;
+
 	describe( 'Text block', () => {
 		beforeEach( async () => {
 			await createNewPost( { postType: 'amp_story' } );
@@ -70,36 +76,34 @@ describe( 'Resizing', () => {
 		} );
 
 		const defaultWidth = 250;
-		const textBlockMinWidth = 40;
 
 		it( 'it should not resize smaller than the set minimum width and height', async () => {
-			const textBlockMinHeight = 30;
-			let height, width;
+			let dimensions;
 			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
 			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
-			height = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientHeight );
-			expect( height ).toStrictEqual( textBlockMinHeight );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
 
 			const resizableHandleTop = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
 			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
-			height = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientHeight );
-			expect( height ).toStrictEqual( textBlockMinHeight );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
 
 			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
-			width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
-			expect( width ).toStrictEqual( textBlockMinWidth );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
 
 			const resizableHandleRight = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
 			await dragAndResize( resizableHandleRight, { x: -300, y: 0 } );
-			width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
-			expect( width ).toStrictEqual( textBlockMinWidth );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
 		} );
 
 		it( 'should not change the block position when resizing from left handle and minimum width has been reached', async () => {
 			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
 			await dragAndResize( resizableHandleLeft, { x: defaultWidth - textBlockMinWidth, y: 0 } );
-			const width = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).clientWidth );
+			const { width } = await getSelectedBlockDimensions();
 			expect( width ).toStrictEqual( textBlockMinWidth );
 
 			const positionLeft = await page.evaluate( () => document.querySelector( '.wp-block.is-selected' ).style.left );
@@ -185,6 +189,44 @@ describe( 'Resizing', () => {
 			expect( positionTop ).toStrictEqual( '10%' );
 		} );
 	} );
+
+	describe( 'Non-Fitted Text block', () => {
+		beforeEach( async () => {
+			await createNewPost( { postType: 'amp_story' } );
+			// Select the Text block inserted by default.
+			await selectBlockByClassName( 'wp-block-amp-story-text' );
+			// Click the toggle to disable automatic fitting
+			const fitToggle = await page.waitForSelector( '.components-toggle-control input' );
+			fitToggle.click();
+		} );
+
+		const defaultWidth = 250;
+
+		// TODO: unskip when this actually works. Currently non-fit text blocks can't be resized smaller, only larger.
+		// reported in #3199
+		it.skip( 'it should not resize smaller than the set minimum width and height', async () => {
+			let dimensions;
+			const resizableHandleBottom = await page.$( '.wp-block.is-selected .components-resizable-box__handle-bottom' );
+			await dragAndResize( resizableHandleBottom, { x: 0, y: -250 } );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+
+			const resizableHandleTop = await page.$( '.wp-block.is-selected .components-resizable-box__handle-top' );
+			await dragAndResize( resizableHandleTop, { x: 0, y: 250 } );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.height ).toStrictEqual( textBlockMinHeight );
+
+			const resizableHandleLeft = await page.$( '.wp-block.is-selected .components-resizable-box__handle-left' );
+			await dragAndResize( resizableHandleLeft, { x: 300, y: 0 } );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+
+			const resizableHandleRight = await page.$( '.wp-block.is-selected .components-resizable-box__handle-right' );
+			await dragAndResize( resizableHandleRight, { x: -300, y: 0 } );
+			dimensions = await getSelectedBlockDimensions();
+			expect( dimensions.width ).toStrictEqual( textBlockMinWidth );
+		} );
+	});
 
 	describe( 'Rotated Text block', () => {
 		beforeEach( async () => {
