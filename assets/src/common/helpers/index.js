@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { get, has, includes, reduce, template } from 'lodash';
+import { get, has, reduce, template } from 'lodash';
+
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
+
 /**
  * Internal dependencies
  */
@@ -249,11 +251,11 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 	const fileType = attachment.get( 'type' );
 	const mimeType = attachment.get( 'mime' );
 
-	if ( ! includes( allowedTypes, fileType ) && ! includes( allowedTypes, mimeType ) ) {
+	if ( ! allowedTypes.includes( fileType ) && ! allowedTypes.includes( mimeType ) ) {
 		return false;
 	}
 
-	if ( 'video' === fileType && ! includes( allowedVideoMimeTypes, mimeType ) ) {
+	if ( 'video' === fileType && ! allowedVideoMimeTypes.includes( mimeType ) ) {
 		return false;
 	}
 
