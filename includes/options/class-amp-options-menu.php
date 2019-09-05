@@ -325,7 +325,7 @@ class AMP_Options_Menu {
 				</div>
 			<?php endif; ?>
 
-			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::theme_supports_reader_mode() ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
