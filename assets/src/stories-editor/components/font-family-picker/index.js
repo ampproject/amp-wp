@@ -18,6 +18,8 @@ import { maybeEnqueueFontStyle } from '../../helpers';
 import 'accessible-autocomplete/src/autocomplete.css';
 import './edit.css';
 
+// Override method on class as not required.
+Autocomplete.prototype.handleInputBlur = () => {};
 /**
  * Font Family Picker component.
  *
@@ -71,7 +73,7 @@ function FontFamilyPicker( {
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
-				displayMenu="overlay"
+				displayMenu="inline"
 				tNoResults={ () =>
 					__( 'No font found', 'amp' )
 				}

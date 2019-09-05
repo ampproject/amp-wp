@@ -5,6 +5,7 @@
 	border-bottom-right-radius: 4px !important;
 	margin-top: -3px;
 	padding-top: 3px;
+	max-height: 200px;
 }
 
 .autocomplete__icon {
