@@ -48,14 +48,17 @@ function FontFamilyPicker( {
 		return result && result.name;
 	};
 
+	const id = `amp-stories-font-family-picker-${ instanceId }`;
+
 	return (
 		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
-			id={ `amp-stories-font-family-picker-${ instanceId }` }
+			id={ id }
 			help={ __( 'Type to search for fonts', 'amp' ) }
 		>
 			<Autocomplete
-				id={ `amp-stories-font-family-picker-${ instanceId }` }
+				id={ id }
+				name={ id }
 				source={ suggest }
 				templates={
 					{
