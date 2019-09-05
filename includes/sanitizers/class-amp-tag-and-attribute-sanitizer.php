@@ -100,6 +100,18 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $should_not_replace_nodes = [];
 
 	/**
+	 * Keep track of whether we are currently within a <template> tag.
+	 *
+	 * If we are, the variable's value denotes the regex pattern to match template placeholders.
+	 *
+	 * As an example, if we are currently within a <template type="amp-mustache"> tag, the $is_within_template
+	 * variable will contain the value '/^.*{{.*}}.*$/'
+	 *
+	 * @var string|false
+	 */
+	protected $is_within_template = false;
+
+	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
 	 *
 	 * @since 0.5
@@ -1017,6 +1029,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		foreach ( $node->attributes as $attr_name => $attr_node ) {
 
 			if ( ! isset( $attr_spec_list[ $attr_name ] ) || in_array( $attr_node, $attributes_pending_removal, true ) ) {
+				continue;
+			}
+
+			if ( false !== $this->is_within_template && preg_match( $this->is_within_template, $attr_node->nodeValue ) ) {
 				continue;
 			}
 
