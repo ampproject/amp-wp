@@ -738,7 +738,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		$xpath = $this->xpath;
 
 		$dev_mode_predicate = '';
-		if ( $this->is_document_in_dev_mode( $this->dom ) ) {
+		if ( $this->is_document_in_dev_mode() ) {
 			$dev_mode_predicate = ' and not ( @data-ampdevmode )';
 		}
 
