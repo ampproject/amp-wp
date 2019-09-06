@@ -3,6 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import classnames from 'classnames';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -21,7 +22,7 @@ import { StoryBlockMover } from './index';
  *
  * @param {Object} props Component props.
  *
- * @return {WPElement} Rendered element.
+ * @return {ReactElement} Rendered element.
  */
 const DraggableText = ( props ) => {
 	const {

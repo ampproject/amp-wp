@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -15,7 +16,7 @@ import { BlockEdit } from '@wordpress/block-editor';
  *
  * @param {Object} props Component props.
  *
- * @return {WPElement} Rendered element.
+ * @return {ReactElement} Rendered element.
  */
 const BlockPreview = ( { clientId, name, attributes, innerBlocks = [] } ) => {
 	const block = createBlock( name, attributes, innerBlocks );
