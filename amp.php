@@ -251,7 +251,7 @@ function _amp_xdebug_admin_notice() {
 	<div class="notice notice-warning">
 		<p>
 			<?php
-			echo esc_html_e(
+			esc_html_e(
 				'Your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. Please deactivate Xdebug for the best experience.',
 				'amp'
 			);
