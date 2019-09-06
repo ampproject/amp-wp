@@ -235,7 +235,7 @@ class CustomVideoBlockEdit extends Component {
 					className={ className }
 					onSelect={ onSelectVideo }
 					onSelectURL={ this.onSelectURL }
-					accept="video/mp4"
+					accept={ allowedVideoMimeTypes.join( ',' ) }
 					allowedTypes={ allowedVideoMimeTypes }
 					value={ this.props.attributes }
 					notices={ noticeUI }
