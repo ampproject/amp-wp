@@ -1950,6 +1950,40 @@ class AMP_Theme_Support {
 			! is_customize_preview()
 		);
 
+		/**
+		 * Filters the XPath queries for elements that should be enabled for dev mode.
+		 *
+		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
+		 * root HTML element as well as to any elements that match the expressions. The attribute is added to the
+		 * elements prior to running any of the sanitizers.
+		 *
+		 * @since 1.3
+		 * @param string[] XPath element queries. Context is the root element.
+		 */
+		$dev_mode_xpath_queries = apply_filters( 'amp_dev_mode_element_xpaths', [] );
+
+		/**
+		 * Filters whether AMP mode is enabled.
+		 *
+		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
+		 * root HTML element as well as to any elements that match the expressions.
+		 *
+		 * @todo Should this be applied in add_hooks()? Ideally the admin-bar script would be skipped from being enqueued if dev mode is not going to be enabled.
+		 *
+		 * @since 1.3
+		 * @param bool[] XPath element queries.
+		 */
+		$dev_mode_enabled = apply_filters(
+			'amp_dev_mode_enabled',
+			(
+				! empty( $dev_mode_xpath_queries )
+				||
+				is_admin_bar_showing() // @todo Limit to if is_user_logged_in()?
+				||
+				is_customize_preview()
+			)
+		);
+
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
 		if ( $enable_response_caching ) {
@@ -1961,12 +1995,12 @@ class AMP_Theme_Support {
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
 				'use_document_element' => true,
-				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
+				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcuts).
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
 			$args,
-			compact( 'enable_response_caching' )
+			compact( 'enable_response_caching', 'dev_mode_enabled', 'dev_mode_xpath_queries' )
 		);
 
 		$current_url = amp_get_current_url();
@@ -2118,8 +2152,9 @@ class AMP_Theme_Support {
 			);
 		}
 
-		$dom  = AMP_DOM_Utils::get_dom( $response );
-		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
+		$dom   = AMP_DOM_Utils::get_dom( $response );
+		$xpath = new DOMXPath( $dom );
+		$head  = $dom->getElementsByTagName( 'head' )->item( 0 );
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -2139,7 +2174,6 @@ class AMP_Theme_Support {
 
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
-			$xpath = new DOMXPath( $dom );
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
 				$head->appendChild( $script->parentNode->removeChild( $script ) );
 			}
@@ -2151,14 +2185,21 @@ class AMP_Theme_Support {
 		}
 
 		// Enable AMP dev mode when admin bar is showing or in Customizer preview.
-		if ( is_admin_bar_showing() || is_customize_preview() ) { // @todo Allow this to be filtered.
-			$dom->documentElement->setAttribute( 'data-ampdevmode', '' );
+		if ( $dev_mode_enabled ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+			foreach ( $dev_mode_xpath_queries as $dev_mode_xpath_query ) {
+				foreach ( $xpath->query( $dev_mode_xpath_query ) as $node ) {
+					if ( $node instanceof DOMElement ) {
+						$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+					}
+				}
+			}
 		}
 
 		// Replace admin bar with placeholder prior to sanitizing to prevent conversion of its elements.
 		$original_admin_bar_element    = null;
 		$placeholder_admin_bar_element = null;
-		if ( is_admin_bar_showing() ) {
+		if ( $dev_mode_enabled && is_admin_bar_showing() ) {
 			$original_admin_bar_element = $dom->getElementById( 'wpadminbar' );
 			if ( $original_admin_bar_element ) {
 				$placeholder_admin_bar_element = $dom->createElement( 'div' );
@@ -2177,16 +2218,16 @@ class AMP_Theme_Support {
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
 		// Replace the original admin bar.
-		if ( $original_admin_bar_element && $placeholder_admin_bar_element ) {
+		if ( $dev_mode_enabled && $original_admin_bar_element && $placeholder_admin_bar_element ) {
 			$placeholder_admin_bar_element->parentNode->replaceChild( $original_admin_bar_element, $placeholder_admin_bar_element );
-			$original_admin_bar_element->setAttribute( 'data-ampdevmode', '' );
+			$original_admin_bar_element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 			/**
 			 * Element.
 			 *
 			 * @var DOMElement $admin_bar_element
 			 */
 			foreach ( $original_admin_bar_element->getElementsByTagName( '*' ) as $admin_bar_element ) {
-				$admin_bar_element->setAttribute( 'data-ampdevmode', '' );
+				$admin_bar_element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 			}
 		}
 

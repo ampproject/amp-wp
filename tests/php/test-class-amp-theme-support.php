@@ -49,6 +49,7 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		global $wp_scripts;
 		$wp_scripts = null;
 		parent::tearDown();
+		unset( $GLOBALS['show_admin_bar'] );
 		AMP_Validation_Manager::reset_validation_results();
 		remove_theme_support( AMP_Theme_Support::SLUG );
 		remove_theme_support( 'custom-header' );
