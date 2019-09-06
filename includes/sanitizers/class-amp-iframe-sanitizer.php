@@ -93,8 +93,8 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$node = $nodes->item( $i );
 
-			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( $this->is_inside_amp_noscript( $node ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback, or if it has a dev mode exemption.
+			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
 				continue;
 			}
 

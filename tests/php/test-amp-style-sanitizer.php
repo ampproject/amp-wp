@@ -520,6 +520,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
+			'test_with_dev_mode' => [
+				'<html amp data-ampdevmode=""><body data-ampdevmode="" style="background:red !important"><link rel="stylesheet" href="https://example.com/foo.css" data-ampdevmode=""><style data-ampdevmode="">body{color:red !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				[],
+				[],
+			],
 		];
 	}
 
@@ -589,7 +594,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 
-		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		if ( $actual_stylesheets ) {
+			$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		}
 	}
 
 	/**

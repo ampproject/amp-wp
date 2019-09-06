@@ -69,8 +69,8 @@ class AMP_Video_Sanitizer extends AMP_Base_Sanitizer {
 			 */
 			$node = $nodes->item( $i );
 
-			// Skip element if already inside of an AMP element as a noscript fallback.
-			if ( $this->is_inside_amp_noscript( $node ) ) {
+			// Skip element if already inside of an AMP element as a noscript fallback, or if the element is in dev mode.
+			if ( $this->is_inside_amp_noscript( $node ) || $this->has_dev_mode_exemption( $node ) ) {
 				continue;
 			}
 

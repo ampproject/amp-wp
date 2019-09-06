@@ -739,7 +739,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$dev_mode_predicate = '';
 		if ( $this->is_document_in_dev_mode() ) {
-			$dev_mode_predicate = ' and not ( @data-ampdevmode )';
+			$dev_mode_predicate = sprintf( ' and not ( @%s )', AMP_Rule_Spec::DEV_MODE_ATTRIBUTE );
 		}
 
 		$lower_case = 'translate( %s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz" )'; // In XPath 2.0 this is lower-case().
@@ -794,7 +794,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		$elements = [];
-		foreach ( $xpath->query( '//*[ @style ]' ) as $element ) {
+		foreach ( $xpath->query( "//*[ @style $dev_mode_predicate ]" ) as $element ) {
 			$elements[] = $element;
 		}
 		foreach ( $elements as $element ) {

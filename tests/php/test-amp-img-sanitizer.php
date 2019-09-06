@@ -343,6 +343,14 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" /></figure></div>',
 				'<div data-amp-lightbox="true" class="wp-block-image"><figure class="alignleft is-resized"><amp-img src="https://placehold.it/100x100" width="100" height="100" data-foo="bar" role="button" tabindex="0" data-amp-lightbox="" on="tap:amp-image-lightbox" class="amp-wp-enforced-sizes" layout="intrinsic"><noscript><img src="https://placehold.it/100x100" width="100" height="100" role="button" tabindex="0"></noscript></amp-img></figure></div><amp-image-lightbox id="amp-image-lightbox" layout="nodisplay" data-close-button-aria-label="Close"></amp-image-lightbox>',
 			],
+
+			'test_with_dev_mode'                       => [
+				'<img data-ampdevmode src="http://example.com/foo.png">',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -372,8 +380,10 @@ class AMP_Img_Sanitizer_Test extends WP_UnitTestCase {
 			$args
 		);
 
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
-		$img_count = $dom->getElementsByTagName( 'img' )->length;
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
 
 		$sanitizer = new AMP_Img_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
