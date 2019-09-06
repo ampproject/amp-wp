@@ -1939,7 +1939,7 @@ export const resetAnimationProperties = ( block, animationType ) => {
  * @param {number} animationDelay Animation delay.
  * @param {Function} callback Callback for when animation has stopped.
  */
-export const playAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
+export const startAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
 	const blockElement = getBlockWrapperElement( block );
 
 	if ( ! blockElement || ! animationType ) {

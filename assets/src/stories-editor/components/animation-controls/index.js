@@ -9,16 +9,14 @@ import { ReactElement } from 'react';
  */
 import { RangeControl, SelectControl, IconButton } from '@wordpress/components';
 import { compose } from '@wordpress/compose';
-import { withDispatch } from '@wordpress/data';
+import { withDispatch, withSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import AnimationOrderPicker from './animation-order-picker';
-import withSelectedBlock from '../higher-order/with-selected-block';
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../../constants';
-import { playAnimation, setAnimationTransformProperties, resetAnimationProperties } from '../../helpers';
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -35,15 +33,14 @@ const AnimationControls = ( {
 	animationDuration,
 	animationDelay,
 	animationAfter,
-	selectedBlock,
 	onAnimationStart,
 	onAnimationStop,
+	isPlayingAnimation,
+	isImageBlock,
 } ) => {
 	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
 
-	const isImageBlock = selectedBlock && 'core/image' === selectedBlock.name;
-
-	// pan- animations are only really meant for images.
+	// "pan" animations are only really meant for images.
 	const animationTypeOptions = AMP_ANIMATION_TYPE_OPTIONS.filter( ( { value } ) => {
 		return ! ( value.startsWith( 'pan-' ) && ! isImageBlock );
 	} );
@@ -86,24 +83,11 @@ const AnimationControls = ( {
 						onChange={ onAnimationAfterChange }
 					/>
 					<IconButton
-						icon="controls-play"
+						icon={ isPlayingAnimation ? 'controls-pause' : 'controls-play' }
 						className="is-button is-default"
-						onClick={ () => {
-							onAnimationStart();
-							setAnimationTransformProperties( selectedBlock, animationType );
-							playAnimation(
-								selectedBlock,
-								animationType,
-								animationDuration,
-								animationDelay,
-								() => {
-									resetAnimationProperties( selectedBlock, animationType );
-									onAnimationStop();
-								}
-							);
-						} }
+						onClick={ isPlayingAnimation ? onAnimationStop : onAnimationStart }
 					>
-						{ __( 'Play Animation', 'amp' ) }
+						{ isPlayingAnimation ? __( 'Stop Animation', 'amp' ) : __( 'Play Animation', 'amp' ) }
 					</IconButton>
 				</>
 			) }
@@ -112,6 +96,7 @@ const AnimationControls = ( {
 };
 
 AnimationControls.propTypes = {
+	isImageBlock: PropTypes.bool.isRequired,
 	animatedBlocks: PropTypes.func.isRequired,
 	onAnimationTypeChange: PropTypes.func.isRequired,
 	onAnimationDurationChange: PropTypes.func.isRequired,
@@ -121,23 +106,36 @@ AnimationControls.propTypes = {
 	animationDuration: PropTypes.number,
 	animationDelay: PropTypes.number,
 	animationAfter: PropTypes.string,
-	selectedBlock: PropTypes.object,
 	onAnimationStart: PropTypes.func.isRequired,
 	onAnimationStop: PropTypes.func.isRequired,
+	isPlayingAnimation: PropTypes.bool.isRequired,
 };
 
-const withAnimationPlayback = withDispatch( ( dispatch ) => {
-	const { startAnimation, stopAnimation } = dispatch( 'amp/story' );
+const applyWithSelect = withSelect( ( select, { clientId, page } ) => {
+	const { getBlock } = select( 'core/block-editor' );
+	const { isPlayingAnimation } = select( 'amp/story' );
+
+	const block = getBlock( clientId );
+	const isImageBlock = block && 'core/image' === block.name;
 
 	return {
-		onAnimationStart: startAnimation,
-		onAnimationStop: stopAnimation,
+		isImageBlock,
+		isPlayingAnimation: isPlayingAnimation( page, clientId ),
+	};
+} );
+
+const withAnimationPlayback = withDispatch( ( dispatch, { clientId, page } ) => {
+	const { playAnimation, stopAnimation } = dispatch( 'amp/story' );
+
+	return {
+		onAnimationStart: () => playAnimation( page, clientId ),
+		onAnimationStop: () => stopAnimation( page, clientId ),
 	};
 } );
 
 const enhance = compose(
-	withSelectedBlock,
-	withAnimationPlayback
+	applyWithSelect,
+	withAnimationPlayback,
 );
 
 export default enhance( AnimationControls );

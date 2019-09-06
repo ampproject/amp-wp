@@ -7,6 +7,7 @@ import { combineReducers } from '@wordpress/data';
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
+import { ANIMATION_STATUS } from './constants';
 
 /**
  * Reducer handling animation state changes.
@@ -19,7 +20,7 @@ import { isValidAnimationPredecessor } from './selectors';
  *
  * @return {Object} Updated state.
  */
-export function animations( state = {}, action ) {
+export function animations( state = {}, action ) { // eslint-disable-line complexity
 	const animationOrder = { ...state.animationOrder };
 	const { page, item, predecessor, animationType, duration, delay } = action;
 	const pageAnimationOrder = animationOrder[ page ] || [];
@@ -97,16 +98,42 @@ export function animations( state = {}, action ) {
 				},
 			};
 
-		case 'START_ANIMATION':
+		case 'PLAY_ANIMATION':
+			if ( item ) {
+				if ( entryIndex( item ) !== -1 ) {
+					pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.playing;
+				}
+			} else {
+				pageAnimationOrder.forEach( ( entry, index ) => {
+					pageAnimationOrder[ index ] = { ...entry, status: entry.parent === undefined ? ANIMATION_STATUS.playing : ANIMATION_STATUS.prepared };
+				} );
+			}
+
 			return {
 				...state,
-				isPlayingAnimation: true,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
 			};
 
 		case 'STOP_ANIMATION':
+			if ( item ) {
+				if ( entryIndex( item ) !== -1 ) {
+					pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.stopped;
+				}
+			} else {
+				pageAnimationOrder.forEach( ( entry, index ) => {
+					pageAnimationOrder[ index ] = { ...entry, status: ANIMATION_STATUS.stopped };
+				} );
+			}
+
 			return {
 				...state,
-				isPlayingAnimation: false,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
 			};
 
 		default:

@@ -11,7 +11,7 @@ import {
 	movePageToPosition,
 	saveOrder,
 	resetOrder,
-	startAnimation,
+	playAnimation,
 	stopAnimation,
 } from '../actions';
 
@@ -80,20 +80,52 @@ describe( 'actions', () => {
 		} );
 	} );
 
-	describe( 'startAnimation', () => {
-		it( 'should return the START_ANIMATION action', () => {
-			const result = startAnimation();
+	describe( 'playAnimation', () => {
+		it( 'should return the PLAY_ANIMATION action for a given page', () => {
+			const page = 'foo';
+
+			const result = playAnimation( page );
 			expect( result ).toStrictEqual( {
-				type: 'START_ANIMATION',
+				type: 'PLAY_ANIMATION',
+				page,
+				item: undefined,
+			} );
+		} );
+
+		it( 'should return the PLAY_ANIMATION action for a given page and item', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const result = playAnimation( page, item );
+			expect( result ).toStrictEqual( {
+				type: 'PLAY_ANIMATION',
+				page,
+				item,
 			} );
 		} );
 	} );
 
 	describe( 'stopAnimation', () => {
-		it( 'should return the STOP_ANIMATION action', () => {
-			const result = stopAnimation();
+		it( 'should return the STOP_ANIMATION action for a given page', () => {
+			const page = 'foo';
+
+			const result = stopAnimation( page );
 			expect( result ).toStrictEqual( {
 				type: 'STOP_ANIMATION',
+				item: undefined,
+				page,
+			} );
+		} );
+
+		it( 'should return the STOP_ANIMATION action for a given page and item', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const result = stopAnimation( page, item );
+			expect( result ).toStrictEqual( {
+				type: 'STOP_ANIMATION',
+				page,
+				item,
 			} );
 		} );
 	} );

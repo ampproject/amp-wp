@@ -12,6 +12,7 @@ import {
 	getBlockIndex,
 	isReordering,
 } from '../selectors';
+import { ANIMATION_STATUS } from '../constants';
 
 describe( 'selectors', () => {
 	describe( 'getAnimatedBlocks', () => {
@@ -117,6 +118,77 @@ describe( 'selectors', () => {
 			const state = {};
 
 			expect( isPlayingAnimation( state ) ).toBe( false );
+		} );
+
+		it( 'should return false if no item is playing', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined, status: ANIMATION_STATUS.stopped },
+						],
+					},
+				},
+			};
+
+			expect( isPlayingAnimation( state ) ).toBe( false );
+		} );
+
+		it( 'should return true if one item is playing', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined, status: ANIMATION_STATUS.playing },
+						],
+					},
+				},
+			};
+
+			expect( isPlayingAnimation( state ) ).toBe( true );
+			expect( isPlayingAnimation( state, page ) ).toBe( true );
+		} );
+
+		it( 'should return true if one item is prepared', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined, status: ANIMATION_STATUS.prepared },
+						],
+					},
+				},
+			};
+
+			expect( isPlayingAnimation( state ) ).toBe( true );
+			expect( isPlayingAnimation( state, page ) ).toBe( true );
+		} );
+
+		it( 'should return true if specific item is prepared', () => {
+			const page = 'foo';
+			const item = 'bar';
+
+			const state = {
+				animations: {
+					animationOrder: {
+						[ page ]: [
+							{ id: item, parent: undefined, status: ANIMATION_STATUS.prepared },
+						],
+					},
+				},
+			};
+
+			expect( isPlayingAnimation( state, page ) ).toBe( true );
+			expect( isPlayingAnimation( state, page, item ) ).toBe( true );
 		} );
 	} );
 

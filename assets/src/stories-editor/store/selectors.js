@@ -1,4 +1,9 @@
 /**
+ * Internal dependencies
+ */
+import { ANIMATION_STATUS } from './constants';
+
+/**
  * Returns a list of all pages and their animated child blocks.
  *
  * @param {Object} state Editor state.
@@ -15,12 +20,25 @@ export function getAnimatedBlocks( state ) {
  * @param {Object} state Editor state.
  * @param {string} page Page ID.
  *
- * @return {Array} Animation order.
+ * @return {Array} Animation entries.
  */
 export function getAnimatedBlocksPerPage( state, page ) {
 	return getAnimatedBlocks( state ) && getAnimatedBlocks( state )[ page ] ?
 		state.animations.animationOrder[ page ] :
 		[];
+}
+
+/**
+ * Returns a the animation entry for a given item.
+ *
+ * @param {Object} state Editor state.
+ * @param {string} page Page ID.
+ * @param {string} item Item ID.
+ *
+ * @return {Array} Animation entry.
+ */
+export function getAnimationEntry( state, page, item ) {
+	return getAnimatedBlocksPerPage( state, page ).find( ( { id } ) => id === item );
 }
 
 /**
@@ -30,7 +48,7 @@ export function getAnimatedBlocksPerPage( state, page ) {
  * @param {string} page Page ID.
  * @param {string} predecessor Predecessor ID.
  *
- * @return {Array} Animation order.
+ * @return {Array} Animation successors.
  */
 export function getAnimationSuccessors( state, page, predecessor ) {
 	return getAnimatedBlocksPerPage( state, page ).filter( ( { parent } ) => parent === predecessor );
@@ -40,11 +58,26 @@ export function getAnimationSuccessors( state, page, predecessor ) {
  * Returns whether an animation is currently playing or not.
  *
  * @param {Object} state Editor state.
+ * @param {string} [page] Optional. Page ID. If not passed, checks whether any animation is playing anywhere.
+ * @param {string} [item] Optional. Item ID. If not passed, checks whether any animation is playing on the given page.
  *
- * @return {Array} Whether an animation is currently playing.
+ * @return {boolean} Whether an animation is currently playing.
  */
-export function isPlayingAnimation( state ) {
-	return state.animations && state.animations.isPlayingAnimation ? state.animations.isPlayingAnimation : false;
+export function isPlayingAnimation( state, page, item ) {
+	if ( page && item ) {
+		const entry = getAnimationEntry( state, page, item );
+		return entry && entry.status ? entry.status !== ANIMATION_STATUS.stopped : false;
+	} else if ( page ) {
+		return Boolean( getAnimatedBlocksPerPage( state, page ).find( ( { status } ) => status && status !== ANIMATION_STATUS.stopped ) );
+	}
+
+	for ( const p of Object.keys( getAnimatedBlocks( state ) ) ) {
+		if ( isPlayingAnimation( state, p ) ) {
+			return true;
+		}
+	}
+
+	return false;
 }
 
 /**

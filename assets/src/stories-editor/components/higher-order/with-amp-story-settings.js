@@ -167,6 +167,7 @@ export default createHigherOrderComponent(
 		return enhance( ( props ) => { // eslint-disable-line complexity
 			const {
 				clientId,
+				rootClientId,
 				name,
 				attributes,
 				isLast,
@@ -513,6 +514,8 @@ export default createHigherOrderComponent(
 								title={ __( 'Animation', 'amp' ) }
 							>
 								<AnimationControls
+									clientId={ clientId }
+									page={ rootClientId }
 									animatedBlocks={ getAnimatedBlocks }
 									animationType={ ampAnimationType }
 									animationDuration={ animationDuration }
