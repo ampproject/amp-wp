@@ -19,6 +19,7 @@ import {
 	Path,
 	ResponsiveWrapper,
 	SVG,
+	TextControl,
 	ToggleControl,
 	Toolbar,
 	withNotices,
@@ -124,6 +125,15 @@ class CustomVideoBlockEdit extends Component {
 			return;
 		}
 
+		if ( media && media !== prevProps.media && ! attributes.ampAriaLabel ) {
+			/*
+			 * New video set from media library and we don't have an aria label already,
+			 * use alt text or title from media object.
+			 */
+			const ampAriaLabel = media.alt_text || ( media.title && media.title.raw ) || '';
+			setAttributes( { ampAriaLabel } );
+		}
+
 		if ( videoFeaturedImage ) {
 			setAttributes( { poster: videoFeaturedImage.source_url } );
 		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
@@ -205,6 +215,7 @@ class CustomVideoBlockEdit extends Component {
 			src,
 			width,
 			height,
+			ampAriaLabel,
 		} = attributes;
 
 		const { editing } = this.state;
@@ -265,6 +276,12 @@ class CustomVideoBlockEdit extends Component {
 							label={ __( 'Loop', 'amp' ) }
 							onChange={ this.toggleAttribute( 'loop' ) }
 							checked={ loop }
+						/>
+						<TextControl
+							label={ __( 'Accessibility label', 'amp' ) }
+							help={ __( 'This label is used to inform visually impaired users about the video content.', 'amp' ) }
+							value={ ampAriaLabel }
+							onChange={ ( label ) => setAttributes( { ampAriaLabel: label } ) }
 						/>
 						{ ( ! this.state.extractingPoster || poster ) && (
 							<MediaUploadCheck>
@@ -342,6 +359,7 @@ class CustomVideoBlockEdit extends Component {
 					<video
 						autoPlay
 						muted
+						aria-label={ ampAriaLabel }
 						loop={ loop }
 						controls={ ! loop }
 						poster={ poster }
@@ -369,6 +387,7 @@ CustomVideoBlockEdit.propTypes = {
 		caption: PropTypes.string,
 		controls: PropTypes.bool,
 		loop: PropTypes.bool,
+		ampAriaLabel: PropTypes.string,
 		id: PropTypes.number,
 		poster: PropTypes.string,
 		src: PropTypes.string,
