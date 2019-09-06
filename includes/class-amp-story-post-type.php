@@ -942,11 +942,11 @@ class AMP_Story_Post_Type {
 		 * This can be used to add additionally supported formats, for example by plugins
 		 * that do video transcoding.
 		 *
-		 * @since 1.2
+		 * @since 1.3
 		 *
-		 * @param array Supported video mime types.
+		 * @param array Allowed video mime types.
 		 */
-		$allowed_video_mime_types = apply_filters( 'amp_supported_video_types', [ 'video/mp4' ] );
+		$allowed_video_mime_types = apply_filters( 'amp_story_allowed_video_types', [ 'video/mp4' ] );
 
 		// If `$allowed_video_mime_types` doesn't have valid data or is empty add default supported type.
 		if ( ! is_array( $allowed_video_mime_types ) || empty( $allowed_video_mime_types ) ) {
