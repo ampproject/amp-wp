@@ -875,6 +875,7 @@ function amp_get_content_sanitizers( $post = null ) {
 		'AMP_Script_Sanitizer'            => [],
 		'AMP_Style_Sanitizer'             => [
 			'include_manifest_comment' => ( defined( 'WP_DEBUG' ) && WP_DEBUG ) ? 'always' : 'when_excessive',
+			'admin_bar_showing'        => is_admin_bar_showing(),
 		],
 		'AMP_Tag_And_Attribute_Sanitizer' => [], // Note: This whitelist sanitizer must come at the end to clean up any remaining issues the other sanitizers didn't catch.
 	];
