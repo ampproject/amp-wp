@@ -10,6 +10,7 @@ import {
 	getAnimationEntry,
 	getAnimatedBlocksPerPage,
 	getAnimationSuccessors,
+	getAnimatedBlocks,
 } from './selectors';
 import {
 	playAnimation,
@@ -50,30 +51,36 @@ export default {
 				() => {
 					dispatch( stopAnimation( page, id ) );
 
-					getAnimationSuccessors( state, page, id )
-						.filter( ( { status } ) => status === ANIMATION_STATUS.prepared )
-						.forEach( ( successor ) => {
-							dispatch( playAnimation( page, successor.id ) );
+					if ( ! item ) {
+						getAnimationSuccessors( state, page, id ).forEach( ( successor ) => {
+							if ( successor.status !== ANIMATION_STATUS.prepared ) {
+								dispatch( playAnimation( page, successor.id ) );
+							}
 						} );
+					}
 				}
 			);
 		} );
 	},
 
-	STOP_ANIMATION( action, { getState, dispatch } ) {
+	STOP_ANIMATION( action, { getState } ) {
 		const { getBlock } = select( 'core/block-editor' );
 
 		const state = getState();
 		const { page, item } = action;
+		const entries = item ? [ getAnimationEntry( state, page, item ) ] : getAnimatedBlocksPerPage( state, page );
 
-		if ( item ) {
-			const { id, animationType } = getAnimationEntry( state, page, item );
+		entries.forEach( ( { id, animationType } ) => {
 			const block = getBlock( id );
 			resetAnimationProperties( block, animationType );
-		} else {
-			getAnimatedBlocksPerPage( state, page ).forEach( ( { id } ) => {
-				dispatch( stopAnimation( page, id ) );
-			} );
-		}
+		} );
+	},
+
+	SET_CURRENT_PAGE( action, { getState, dispatch } ) {
+		const state = getState();
+
+		Object.keys( getAnimatedBlocks( state ) ).forEach( ( page ) => {
+			dispatch( stopAnimation( page ) );
+		} );
 	},
 };
