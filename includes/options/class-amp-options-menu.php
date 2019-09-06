@@ -134,6 +134,17 @@ class AMP_Options_Menu {
 			]
 		);
 
+		add_settings_field(
+			'stories_settings',
+			__( 'Stories Settings', 'amp' ),
+			[ $this, 'render_stories_settings' ],
+			AMP_Options_Manager::OPTION_NAME,
+			'general',
+			[
+				'class' => 'amp-stories-settings-field',
+			]
+		);
+
 		add_action(
 			'admin_print_styles',
 			function() {
@@ -667,6 +678,88 @@ class AMP_Options_Menu {
 			</p>
 			<p class="description"><?php esc_html_e( 'AMP requires most asset URLs to be absolute as opposed to relative. In order to export stories with the desired absolute URLs, you can provide the required URL base here. This base URL will be used for the uploaded files, as well as, links to other stories. If left empty, the default URLs will be used. Meaning, uploaded images and videos will be referenced from the WordPress install. Remember that the provided URL should be HTTPS.', 'amp' ); ?></p>
 		</fieldset>
+		<?php
+	}
+
+	/**
+	 * Render the stories settings section.
+	 *
+	 * @since 1.3
+	 */
+	public function render_stories_settings() {
+		$this->render_stories_settings_page_advance();
+	}
+
+	/**
+	 * Render the page advancement settings section.
+	 *
+	 * @since 1.3
+	 */
+	private function render_stories_settings_page_advance() {
+		$stories_settings_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
+
+		/**
+		 * Currently the list of options with values and descriptions is hardcoded in PHP and JS.
+		 * There should be a single source for this data to be shared in the application.
+		 *
+		 * @todo Figure out the best way to keep these settings DRY.
+		 */
+		$auto_advance_after_options = $stories_settings_definitions['stories_settings_auto_advance_after']['data']['options'];
+
+		$auto_advance_after          = AMP_Options_Manager::get_option( 'stories_settings_auto_advance_after', '' );
+		$auto_advance_after_duration = AMP_Options_Manager::get_option( 'stories_settings_auto_advance_after_duration', 1 );
+		?>
+		<fieldset <?php disabled( ! current_user_can( 'publish_posts' ) ); ?>>
+			<p>
+				<label for="stories_settings_auto_advance_after">
+					<strong><?php echo esc_html__( 'Advance to next page', 'amp' ); ?></strong>
+				</label>
+				<br />
+				<select id="stories_settings_auto_advance_after" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[stories_settings_auto_advance_after]' ); ?>">
+				<?php foreach ( $auto_advance_after_options as $option ) : ?>
+					<option
+						value="<?php echo esc_attr( $option['value'] ); ?>"
+						data-description="<?php echo esc_attr( $option['description'] ); ?>"
+						<?php selected( $auto_advance_after, $option['value'] ); ?>
+					>
+						<?php echo esc_html( $option['label'] ); ?>
+					</option>
+				<?php endforeach; ?>
+				</select>
+			</p>
+			<p class="hidden">
+				<label for="stories_settings_auto_advance_after_duration">
+					<strong><?php echo esc_html__( 'Time in seconds', 'amp' ); ?></strong>
+				</label>
+				<br />
+				<input
+					type="number"
+					class="small-text"
+					id="stories_settings_auto_advance_after_duration"
+					min="1"
+					max="100"
+					name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[stories_settings_auto_advance_after_duration]' ); ?>"
+					value="<?php echo intval( $auto_advance_after_duration ); ?>"
+				>
+			</p>
+			<p class="description"></p>
+		</fieldset>
+		<script>
+			(function( $ ) {
+				const $autoAdvanceAfter = $('#stories_settings_auto_advance_after');
+				const $description = $autoAdvanceAfter.closest('fieldset').find('.description');
+				const $durationSection = $('#stories_settings_auto_advance_after_duration').closest('p');
+
+				$autoAdvanceAfter
+					.on('change', function() {
+						const $selectedOption = $('option:selected', this);
+
+						$description.text( $selectedOption.data('description') );
+						$durationSection.toggleClass( 'hidden', 'time' !== $selectedOption.prop('value') );
+					})
+					.trigger('change');
+			})( jQuery );
+		</script>
 		<?php
 	}
 

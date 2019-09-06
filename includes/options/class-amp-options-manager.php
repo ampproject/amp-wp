@@ -35,17 +35,18 @@ class AMP_Options_Manager {
 	 * @var array
 	 */
 	protected static $defaults = [
-		'experiences'              => [ self::WEBSITE_EXPERIENCE ],
-		'theme_support'            => AMP_Theme_Support::READER_MODE_SLUG,
-		'supported_post_types'     => [ 'post' ],
-		'analytics'                => [],
-		'auto_accept_sanitization' => true,
-		'all_templates_supported'  => true,
-		'supported_templates'      => [ 'is_singular' ],
-		'enable_response_caching'  => true,
-		'version'                  => AMP__VERSION,
-		'story_templates_version'  => false,
-		'story_export_base_url'    => '',
+		'experiences'                         => [ self::WEBSITE_EXPERIENCE ],
+		'theme_support'                       => AMP_Theme_Support::READER_MODE_SLUG,
+		'supported_post_types'                => [ 'post' ],
+		'analytics'                           => [],
+		'auto_accept_sanitization'            => true,
+		'all_templates_supported'             => true,
+		'supported_templates'                 => [ 'is_singular' ],
+		'enable_response_caching'             => true,
+		'version'                             => AMP__VERSION,
+		'story_templates_version'             => false,
+		'story_export_base_url'               => '',
+		'stories_settings_auto_advance_after' => '',
 	];
 
 	/**
@@ -339,6 +340,18 @@ class AMP_Options_Manager {
 
 		// Handle the base URL for exported stories.
 		$options['story_export_base_url'] = isset( $new_options['story_export_base_url'] ) ? esc_url_raw( $new_options['story_export_base_url'], [ 'https' ] ) : '';
+
+		// AMP stories settings definitions.
+		$stories_settings_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
+
+		// Handle the AMP stories settings sanitization.
+		foreach ( $stories_settings_definitions as $option_name => $definition ) {
+			$value = isset( $new_options[ $option_name ] )
+				? $new_options[ $option_name ]
+				: null;
+
+			$options[ $option_name ] = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+		}
 
 		return $options;
 	}

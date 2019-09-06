@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has } from 'lodash';
+import { has, defaults } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -45,6 +45,7 @@ import {
 	uploadVideoFrame,
 	getPosterImageFromFileObj,
 	processMedia,
+	metaToAttributeNames,
 } from '../../helpers';
 import {
 	getVideoBytesPerSecond,
@@ -210,7 +211,16 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
+		const {
+			attributes,
+			media,
+			setAttributes,
+			totalAnimationDuration,
+			allowedBlocks,
+			storySettingsAttributes,
+		} = this.props;
+
+		const attributesWithDefaults = defaults( attributes, storySettingsAttributes );
 
 		const {
 			mediaId,
@@ -221,7 +231,7 @@ class PageEdit extends Component {
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
-		} = attributes;
+		} = attributesWithDefaults;
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -476,6 +486,10 @@ PageEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	storySettingsAttributes: PropTypes.shape( {
+		autoAdvanceAfter: PropTypes.string,
+		autoAdvanceAfterDuration: PropTypes.number,
+	} ),
 };
 
 export default compose(
@@ -508,12 +522,17 @@ export default compose(
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
+		const { getEditedPostAttribute } = select( 'core/editor' );
+		const postMeta = getEditedPostAttribute( 'meta' ) || {};
+		const storySettingsAttributes = metaToAttributeNames( postMeta );
+
 		return {
 			media,
 			videoFeaturedImage,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
+			storySettingsAttributes,
 		};
 	} ),
 )( PageEdit );

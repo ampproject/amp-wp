@@ -1715,3 +1715,17 @@ export const processMedia = ( media ) => {
 		poster,
 	};
 };
+
+/**
+ * Helper to convert snake_case meta keys to key names used in the amp-story-page attributes.
+ *
+ * @param {Object} meta Meta object to be converted to an object with attributes key names.
+ *
+ * @return {Object} Processed object.
+ */
+export const metaToAttributeNames = ( meta ) => {
+	return {
+		autoAdvanceAfter: meta.stories_settings_auto_advance_after,
+		autoAdvanceAfterDuration: meta.stories_settings_auto_advance_after_duration,
+	};
+};

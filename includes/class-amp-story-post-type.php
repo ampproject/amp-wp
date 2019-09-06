@@ -157,6 +157,7 @@ class AMP_Story_Post_Type {
 					'thumbnail', // Used for poster images.
 					'amp',
 					'revisions', // Without this, the REST API will return 404 for an autosave request.
+					'custom-fields', // Used for global stories settings.
 				],
 				'rewrite'      => [
 					'slug' => self::REWRITE_SLUG,
@@ -301,6 +302,31 @@ class AMP_Story_Post_Type {
 		);
 
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
+
+		// Register story settings meta.
+		$stories_settings_definitions = self::get_stories_settings_meta_definitions();
+
+		foreach ( $stories_settings_definitions as $meta_key => $definition ) {
+			$meta_args = isset( $definition['meta_args'] )
+				? (array) $definition['meta_args']
+				: [];
+
+			$meta_args_defaults = [
+				'type'           => 'string',
+				'object_subtype' => self::POST_TYPE_SLUG,
+				'description'    => '',
+				'single'         => true,
+				'show_in_rest'   => true,
+			];
+
+			register_meta(
+				'post',
+				$meta_key,
+				wp_parse_args( $meta_args, $meta_args_defaults )
+			);
+		}
+
+		add_action( 'wp_insert_post', [ __CLASS__, 'add_story_settings_meta_to_new_story' ], 10, 3 );
 
 		AMP_Story_Media::init();
 	}
@@ -2028,5 +2054,108 @@ class AMP_Story_Post_Type {
 		fpassthru( $fo );
 		unlink( $file );
 		die();
+	}
+
+	/**
+	 * Returns the definitions for the stories settings.
+	 *
+	 * @since 1.3
+	 *
+	 * @return array
+	 *
+	 * - meta_args array Arguments passed to `register_meta`; sanitize_callback is required.
+	 * - data      array Any additional data.
+	 */
+	public static function get_stories_settings_meta_definitions() {
+		return apply_filters(
+			'amp_stories_settings_meta_definitions',
+			[
+				'stories_settings_auto_advance_after' => [
+					'meta_args' => [
+						'type'              => 'string',
+						'sanitize_callback' => function( $value ) {
+							$valid_values = [ '', 'auto', 'time', 'media' ];
+
+							if ( ! in_array( $value, $valid_values, true ) ) {
+								return '';
+							}
+							return $value;
+						},
+					],
+					'data'      => [
+						'options' => [
+							[
+								'value'       => '',
+								'label'       => __( 'Manual', 'amp' ),
+								'description' => '',
+							],
+							[
+								'value'       => 'auto',
+								'label'       => __( 'Automatic', 'amp' ),
+								'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+							],
+							[
+								'value'       => 'time',
+								'label'       => __( 'After a certain time', 'amp' ),
+								'description' => '',
+							],
+							[
+								'value'       => 'media',
+								'label'       => __( 'After media has played', 'amp' ),
+								'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
+							],
+						],
+					],
+				],
+				'stories_settings_auto_advance_after_duration' => [
+					'meta_args' => [
+						'type'              => 'integer',
+						'sanitize_callback' => function( $value ) {
+							$value = intval( $value );
+
+							return filter_var(
+								$value,
+								FILTER_VALIDATE_INT,
+								[
+									'default'   => 0,
+									'min_range' => 1,
+									'max_range' => 100,
+								]
+							);
+						},
+					],
+					'data'      => [],
+				],
+			]
+		);
+	}
+
+	/**
+	 * Adds stories global settings as post meta to all new Stories.
+	 *
+	 * @param int      $post_id New Story post ID.
+	 * @param \WP_Post $post    Story post object.
+	 * @param bool     $update  Whether this is an update or a new post being created.
+	 *
+	 * @return void
+	 */
+	public static function add_story_settings_meta_to_new_story( $post_id, $post, $update ) {
+		$is_story = ( self::POST_TYPE_SLUG === $post->post_type );
+
+		if ( $update || ! $is_story ) {
+			return;
+		}
+
+		$stories_settings_definitions = self::get_stories_settings_meta_definitions();
+		$options                      = AMP_Options_Manager::get_options();
+
+		foreach ( $stories_settings_definitions as $meta_key => $definition ) {
+			$value = isset( $options[ $meta_key ] )
+				? $options[ $meta_key ]
+				: null;
+
+			$sanitized_value = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+			add_post_meta( $post_id, $meta_key, $sanitized_value, true );
+		}
 	}
 }
