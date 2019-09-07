@@ -825,6 +825,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	private function get_stylesheet_priority( DOMNode $node ) {
 		$print_priority_base = 100;
+		$admin_bar_priority  = 200;
 
 		$remove_url_scheme = static function( $url ) {
 			return preg_replace( '/^https?:/', '', $url );
@@ -856,6 +857,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			if ( in_array( $style_handle, $non_amp_handles, true ) ) {
 				// Styles are for non-AMP JS only so not be used in AMP at all.
 				$priority = 1000;
+			} elseif ( 'admin-bar' === $style_handle ) {
+				// Admin bar has lowest priority. If it gets excluded, then the entire admin bar should be removed.
+				$priority = $admin_bar_priority;
 			} elseif ( 'dashicons' === $style_handle ) {
 				// Dashicons could be used by the theme, but low priority compared to other styles.
 				$priority = 90;
@@ -884,7 +888,9 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			}
 		} elseif ( $node instanceof DOMElement && 'style' === $node->nodeName ) {
 			$element_id = (string) $node->getAttribute( 'id' );
-			if ( 'wp-custom-css' === $element_id ) {
+			if ( 'admin-bar-inline-css' === $element_id ) {
+				$priority = $admin_bar_priority;
+			} elseif ( 'wp-custom-css' === $element_id ) {
 				// Additional CSS from Customizer.
 				$priority = 60;
 			} else {
@@ -2666,6 +2672,65 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 				$style_element->appendChild( $this->dom->createTextNode( $css ) );
 				$body->appendChild( $style_element );
 			}
+		}
+
+		$this->remove_admin_bar_if_css_excluded();
+	}
+
+	/**
+	 * Remove admin bar if its CSS was excluded.
+	 *
+	 * @since 1.2
+	 */
+	private function remove_admin_bar_if_css_excluded() {
+		if ( ! is_admin_bar_showing() ) {
+			return;
+		}
+
+		$admin_bar_id = 'wpadminbar';
+		$admin_bar    = $this->dom->getElementById( $admin_bar_id );
+		if ( ! $admin_bar ) {
+			return;
+		}
+
+		$included = true;
+		foreach ( $this->pending_stylesheets as &$pending_stylesheet ) {
+			$is_admin_bar_css = (
+				'custom' === $pending_stylesheet['group']
+				&&
+				$pending_stylesheet['node'] instanceof DOMElement
+				&&
+				'admin-bar-css' === $pending_stylesheet['node']->getAttribute( 'id' )
+			);
+			if ( $is_admin_bar_css ) {
+				$included = $pending_stylesheet['included'];
+				break;
+			}
+		}
+
+		unset( $pending_stylesheet );
+
+		if ( ! $included ) {
+			// Remove admin-bar class from body element.
+			// @todo It would be nice if any style rules which refer to .admin-bar could also be removed, but this would mean retroactively going back over the CSS again and re-shaking it.
+			$body = $this->dom->getElementsByTagName( 'body' )->item( 0 );
+			if ( $body instanceof DOMElement && $body->hasAttribute( 'class' ) ) {
+				$body->setAttribute(
+					'class',
+					preg_replace( '/(^|\s)admin-bar(\s|$)/', ' ', $body->getAttribute( 'class' ) )
+				);
+			}
+
+			// Remove admin bar element.
+			$comment_text = sprintf(
+				/* translators: %s: CSS selector for admin bar element  */
+				__( 'Admin bar (%s) was removed to preserve AMP validity due to excessive CSS.', 'amp' ),
+				'#' . $admin_bar_id
+			);
+			$admin_bar->parentNode->replaceChild(
+				$this->dom->createComment( ' ' . $comment_text . ' ' ),
+				$admin_bar
+			);
 		}
 	}
 

@@ -2284,7 +2284,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
 					AMP_Theme_Support::add_hooks();
 					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
-					wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 					add_action(
 						'wp_footer',
@@ -2320,7 +2319,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
 					$this->assertContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
 					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
-					$this->assertTrue( $amphtml_dom->getElementById( 'wpadminbar' )->hasAttribute( 'data-ampdevmode' ) );
 				},
 			],
 			// @todo Add other scenarios in the future.
@@ -2338,8 +2336,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 	 * @param callable $assert         Function which runs assertions.
 	 */
 	public function test_prioritized_stylesheets( $html_generator, $assert ) {
-		$this->markTestIncomplete( 'This needs to actually use AMP_Theme_Support::prepare_response.' );
-
 		if ( version_compare( get_bloginfo( 'version' ), '5.0', '<' ) ) {
 			$this->markTestSkipped( 'Requires WordPress 5.0.' );
 		}

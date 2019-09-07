@@ -1356,18 +1356,20 @@ class AMP_Theme_Support {
 		} else {
 			$header_callback = '_admin_bar_bump_cb';
 		}
-		$header_callback_priority = has_filter( 'wp_head', $header_callback );
+		remove_action( 'wp_head', $header_callback );
 		if ( '__return_false' !== $header_callback ) {
-			remove_action( 'wp_head', $header_callback, $header_callback_priority );
-			add_action(
-				'wp_head',
-				function () use ( $header_callback ) {
-					ob_start();
-					$header_callback();
-					$style = ob_get_clean();
-					echo preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $style ); // phpcs:ignore
-				},
-				$header_callback_priority
+			ob_start();
+			$header_callback();
+			$style = ob_get_clean();
+			$data  = trim( preg_replace( '#<style[^>]*>(.*)</style>#is', '$1', $style ) ); // See wp_add_inline_style().
+			wp_add_inline_style( 'admin-bar', $data );
+
+			add_filter(
+				'amp_dev_mode_element_xpaths',
+				function ( $queries ) {
+					$queries[] = '//style[ @id = "admin-bar-inline-css" ]';
+					return $queries;
+				}
 			);
 		}
 
@@ -1396,6 +1398,8 @@ class AMP_Theme_Support {
 	/**
 	 * Recursively determine if a given dependency depends on another.
 	 *
+	 * @since 1.3
+	 *
 	 * @param WP_Dependencies $dependencies      Dependencies.
 	 * @param string          $current_handle    Current handle.
 	 * @param string          $dependency_handle Dependency handle.
@@ -1419,6 +1423,8 @@ class AMP_Theme_Support {
 	/**
 	 * Add data-ampdevmode attribute to any enqueued style that depends on the admin-bar.
 	 *
+	 * @since 1.3
+	 *
 	 * @param string $tag    The link tag for the enqueued style.
 	 * @param string $handle The style's registered handle.
 	 * @return string Tag.
@@ -1432,6 +1438,8 @@ class AMP_Theme_Support {
 
 	/**
 	 * Add data-ampdevmode attribute to any enqueued script that depends on the admin-bar.
+	 *
+	 * @since 1.3
 	 *
 	 * @param string $tag    The `<script>` tag for the enqueued script.
 	 * @param string $handle The script's registered handle.
