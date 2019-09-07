@@ -26,6 +26,11 @@
 class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 	/**
+	 * Contextual node tag used for keeping track of when we are within a template tag.
+	 */
+	const CONTEXT_NODE_TAG_IS_WITHIN_TEMPLATE = '_AMP_IS_WITHIN_TEMPLATE_';
+
+	/**
 	 * Allowed tags.
 	 *
 	 * @since 0.5
@@ -100,16 +105,16 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	protected $should_not_replace_nodes = [];
 
 	/**
-	 * Keep track of whether we are currently within a <template> tag.
+	 * Contextual information to keep track of.
 	 *
-	 * If we are, the variable's value denotes the regex pattern to match template placeholders.
+	 * The context is adapted when it encounters contextual nodes that perform operations on it.
 	 *
-	 * As an example, if we are currently within a <template type="amp-mustache"> tag, the $is_within_template
-	 * variable will contain the value '/^.*{{.*}}.*$/'
+	 * This mechanism is used to overcome the fact that the linearization we are doing when building the stack we process
+	 * loses important hierarchical information (unless we want to endlessly traverse parent nodes).
 	 *
-	 * @var string|false
+	 * @var AMP_Context
 	 */
-	protected $is_within_template = false;
+	protected $context;
 
 	/**
 	 * AMP_Tag_And_Attribute_Sanitizer constructor.
@@ -125,6 +130,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			'amp_globally_allowed_attributes' => AMP_Allowed_Tags_Generated::get_allowed_attributes(),
 			'amp_layout_allowed_attributes'   => AMP_Allowed_Tags_Generated::get_layout_attributes(),
 		];
+
+		$this->context = new AMP_Context();
 
 		parent::__construct( $dom, $args );
 
@@ -270,27 +277,123 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		 * This loop traverses through the DOM tree iteratively.
 		 */
 		while ( ! empty( $this->stack ) ) {
+			// Make sure we're targeting the first node of the remaining stack.
+			reset( $this->stack );
+			$node = current( $this->stack );
+			$node_index = key( $this->stack );
 
-			// Get the next node to process.
-			$node = array_shift( $this->stack );
-
-			/**
-			 * Process this node.
-			 */
+			// Process this node.
 			$this->process_node( $node );
+
+			// No need to check for children on contextual nodes.
+			if ( $node instanceof AMP_Contextual_Node ) {
+				array_shift( $this->stack );
+				continue;
+			}
+
+			// No need to proceed further if the node has no children.
+			if ( ! $node->parentNode ) {
+				array_shift( $this->stack );
+				continue;
+			}
 
 			/*
 			 * Push child nodes onto the stack, if any exist.
 			 * if node was removed, then it's parentNode value is null.
 			 */
 			if ( $node->parentNode ) {
-				$child = $node->firstChild;
-				while ( $child ) {
-					$this->stack[] = $child;
-					$child         = $child->nextSibling;
+
+				$child_nodes = $this->has_child_nodes( $node );
+
+				// If we need contextual nodes to track state for the current element,
+				// we add them as wrapping nodes around all children.
+				$contextual_nodes = $this->needs_contextual_nodes( $node );
+
+				if ( ! empty( $contextual_nodes ) ) {
+					array_unshift( $child_nodes, array_shift( $contextual_nodes ) );
+					array_push( $child_nodes, array_shift( $contextual_nodes ) );
 				}
+
+				// Replace the parent node by its child nodes.
+				array_splice( $this->stack, $node_index, 1, $child_nodes );
 			}
 		}
+	}
+
+	/**
+	 * Check whether a given node requires keeping track of context.
+	 *
+	 * If this is the case, it will return a pair of start and end nodes to
+	 * keep track of said context. This is done because we linearize the stack
+	 * and lack hierarchical information when processing the nodes. So we turn
+	 * one parent node into a pair of starting and ending contextual nodes.
+	 *
+	 * @param DOMNode $node Node to examine.
+	 * @return DOMNode[]|false Pair of contextual nodes, or false if none to be
+	 *                         used.
+	 */
+	protected function needs_contextual_nodes( DOMNode $node ) {
+		switch ( $node->nodeName ) {
+			case 'template':
+				return $this->get_template_contextual_nodes( $node );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Retrieve an array of direct child nodes from a given node.
+	 *
+	 * @param DOMNode $node Node to retrieve the direct children from.
+	 * @return DOMNode[] Array of child nodes.
+	 */
+	protected function has_child_nodes( DOMNode $node ) {
+		$children = [];
+		$child    = $node->firstChild;
+
+		while ( $child ) {
+			$children[] = $child;
+			$child      = $child->nextSibling;
+		}
+
+		return $children;
+	}
+
+	/**
+	 * Build and return the contextual nodes needed for template tags.
+	 *
+	 * @param DOMNode $node Template tag to examine.
+	 * @return DOMNode[]|false Pair of contextual nodes, or false if none to be
+	 *                         used.
+	 */
+	protected function get_template_contextual_nodes( DOMNode $node ) {
+		// A template tag is only valid if it has a type attribute.
+		if ( ! $node->hasAttributes() ) {
+			return false;
+		}
+		$type = $node->attributes->getNamedItem( 'type' );
+		if ( null === $type ) {
+			return false;
+		}
+
+		// The type attribute of a template tag defines what templating engine to use.
+		switch ( $type->nodeValue ) {
+			case 'amp-mustache':
+				$start_node = new AMP_Contextual_Node(
+					AMP_Context::WITHIN_TEMPLATE_TAG,
+					AMP_Contextual_Node::OPERATION_ENTER,
+					[ 'pattern' => '/^.*{{.*}}.*$/' ]
+				);
+				$end_node   = new AMP_Contextual_Node(
+					AMP_Context::WITHIN_TEMPLATE_TAG,
+					AMP_Contextual_Node::OPERATION_LEAVE
+				);
+
+				return compact( 'start_node', 'end_node' );
+		}
+
+		// No matching engine found to act upon.
+		return false;
 	}
 
 	/**
@@ -380,6 +483,25 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @param DOMNode $node Node.
 	 */
 	private function process_node( $node ) {
+
+		// Process contextual nodes first.
+		if ( $node instanceof AMP_Contextual_Node ) {
+			switch ( $node->get_operation() ) {
+				case AMP_Contextual_Node::OPERATION_ENTER:
+					$this->context->enter( $node->get_context(), $node->get_state() );
+					break;
+
+				case AMP_Contextual_Node::OPERATION_LEAVE:
+					$this->context->leave( $node->get_context() );
+					break;
+
+				case AMP_Contextual_Node::OPERATION_TOGGLE:
+					$this->context->toggle( $node->get_context(), $node->get_state() );
+					break;
+			}
+
+			return;
+		}
 
 		// Don't process text or comment nodes.
 		if ( XML_TEXT_NODE === $node->nodeType || XML_COMMENT_NODE === $node->nodeType || XML_CDATA_SECTION_NODE === $node->nodeType ) {
@@ -1032,8 +1154,11 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
-			if ( false !== $this->is_within_template && preg_match( $this->is_within_template, $attr_node->nodeValue ) ) {
-				continue;
+			if ( false !== $this->context->is( AMP_Context::WITHIN_TEMPLATE_TAG ) ) {
+				$state = $this->context->get_state( AMP_Context::WITHIN_TEMPLATE_TAG );
+				if ( ! empty( $state['pattern'] ) && preg_match( $state['pattern'], $attr_node->nodeValue ) ) {
+					continue;
+				}
 			}
 
 			$should_remove_node = false;
