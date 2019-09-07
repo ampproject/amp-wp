@@ -5,6 +5,13 @@
  * @package AMP
  */
 
+/**
+ * The AMP_Contextual_Node class is used to store operations in a node stack to
+ * alter the current context as it is stored in the AMP_Context instance.
+ *
+ * This is meant to be used to wrap child nodes in the linearized stack so that
+ * we can track when we enter or leave a certain context.
+ */
 final class AMP_Contextual_Node extends DOMNode {
 
 	const OPERATION_ENTER  = 'enter';

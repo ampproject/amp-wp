@@ -279,7 +279,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 		while ( ! empty( $this->stack ) ) {
 			// Make sure we're targeting the first node of the remaining stack.
 			reset( $this->stack );
-			$node = current( $this->stack );
+			$node       = current( $this->stack );
 			$node_index = key( $this->stack );
 
 			// Process this node.
