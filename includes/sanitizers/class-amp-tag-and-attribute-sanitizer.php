@@ -1154,6 +1154,8 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 				continue;
 			}
 
+			// Check the context to see if we are currently within a template tag.
+			// If this is the case and the attribute value contains a template placeholder, we skip sanitization.
 			if ( false !== $this->context->is( AMP_Context::WITHIN_TEMPLATE_TAG ) ) {
 				$state = $this->context->get_state( AMP_Context::WITHIN_TEMPLATE_TAG );
 				if ( ! empty( $state['pattern'] ) && preg_match( $state['pattern'], $attr_node->nodeValue ) ) {
