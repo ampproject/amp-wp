@@ -236,7 +236,7 @@ class AMP_Story_Post_Type {
 		// Disable admin bar from even trying to be output, since wp_head and wp_footer hooks are not on the template.
 		add_filter(
 			'show_admin_bar',
-			function( $show ) {
+			static function( $show ) {
 				if ( is_singular( self::POST_TYPE_SLUG ) ) {
 					$show = false;
 				}

@@ -116,6 +116,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		parent::__construct( $dom, $args );
 
+		// @todo AMP dev mode should eventually be used instead of allow_dirty_styles.
 		if ( ! empty( $this->args['allow_dirty_styles'] ) ) {
 
 			// Allow style attribute on all elements.
@@ -159,6 +160,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			];
 		}
 
+		// @todo AMP dev mode should eventually be used instead of allow_dirty_scripts.
 		// Allow scripts if requested.
 		if ( ! empty( $this->args['allow_dirty_scripts'] ) ) {
 			$this->args['amp_allowed_tags']['script'][] = [

@@ -1366,7 +1366,7 @@ class AMP_Theme_Support {
 
 			add_filter(
 				'amp_dev_mode_element_xpaths',
-				function ( $queries ) {
+				static function ( $queries ) {
 					$queries[] = '//style[ @id = "admin-bar-inline-css" ]';
 					return $queries;
 				}
@@ -2046,6 +2046,8 @@ class AMP_Theme_Support {
 			! is_customize_preview()
 		);
 
+		$dev_mode_enabled = self::is_dev_mode_enabled();
+
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
 		if ( $enable_response_caching ) {
@@ -2053,6 +2055,7 @@ class AMP_Theme_Support {
 			$enable_response_caching                           = ! $disable_response_caching;
 		}
 
+		// @todo Both allow_dirty_styles and allow_dirty_scripts should eventually use AMP dev mode instead.
 		$args = array_merge(
 			[
 				'content_max_width'    => ! empty( $content_width ) ? $content_width : AMP_Post_Template::CONTENT_MAX_WIDTH, // Back-compat.
@@ -2249,7 +2252,6 @@ class AMP_Theme_Support {
 		}
 
 		// Apply dev mode mutations when in dev mode.
-		$dev_mode_enabled = self::is_dev_mode_enabled();
 		if ( $dev_mode_enabled ) {
 			list( $original_admin_bar_element, $placeholder_admin_bar_element ) = self::apply_dev_mode_mutations( $dom );
 		}
