@@ -2689,7 +2689,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 		$admin_bar_id = 'wpadminbar';
 		$admin_bar    = $this->dom->getElementById( $admin_bar_id );
-		if ( ! $admin_bar ) {
+		if ( ! $admin_bar || ! $admin_bar->parentNode ) {
 			return;
 		}
 

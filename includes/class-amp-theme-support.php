@@ -1346,8 +1346,8 @@ class AMP_Theme_Support {
 	 * @since 1.0
 	 */
 	public static function init_admin_bar() {
-		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
-		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
+		add_filter( 'style_loader_tag', [ __CLASS__, 'filter_admin_bar_style_loader_tag' ], 10, 2 );
+		add_filter( 'script_loader_tag', [ __CLASS__, 'filter_admin_bar_script_loader_tag' ], 10, 2 );
 
 		// Inject the data-ampdevmode attribute into the admin bar bump style. See \WP_Admin_Bar::initialize().
 		if ( current_theme_supports( 'admin-bar' ) ) {
@@ -1431,7 +1431,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
 		if ( self::has_dependency( wp_styles(), $handle, 'admin-bar' ) ) {
-			$tag = preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $tag );
+			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
 	}
@@ -1447,7 +1447,7 @@ class AMP_Theme_Support {
 	 */
 	public static function filter_admin_bar_script_loader_tag( $tag, $handle ) {
 		if ( self::has_dependency( wp_scripts(), $handle, 'admin-bar' ) ) {
-			$tag = preg_replace( '/<[a-z0-9\-]+(?=\s|>)/i', '$0 data-ampdevmode ', $tag );
+			$tag = preg_replace( '/(?<=<script)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
 	}
@@ -1878,6 +1878,94 @@ class AMP_Theme_Support {
 	}
 
 	/**
+	 * Determine whether AMP dev mode is enabled.
+	 *
+	 * When enabled, the <html> element will get the data-ampdevmode attribute, and
+	 *
+	 * @since 1.3
+	 *
+	 * @return bool Whether AMP dev mode is enabled.
+	 */
+	public static function is_dev_mode_enabled() {
+
+		/**
+		 * Filters whether AMP mode is enabled.
+		 *
+		 * When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the
+		 * attributes to be added to admin bar. It will also add the attribute to all elements which match the
+		 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
+		 *
+		 * @todo Should this be applied in add_hooks()? Ideally the admin-bar script would be skipped from being enqueued if dev mode is not going to be enabled.
+		 *
+		 * @since 1.3
+		 * @param bool[] Whether AMP dev mode is enabled.
+		 */
+		return apply_filters(
+			'amp_dev_mode_enabled',
+			(
+				// For the few sites that forcible show the admin bar even when the user is logged-out, only enable dev
+				// mode if the user is actually logged-in. This prevents the dev mode from being served to crawlers
+				// when they index the AMP version.
+				( is_admin_bar_showing() && is_user_logged_in() )
+				||
+				is_customize_preview()
+			)
+		);
+	}
+
+	/**
+	 * Apply dev mode mutations.
+	 *
+	 * @since 1.3
+	 *
+	 * @param DOMDocument $dom Document.
+	 * @return array The original admin bar element and the placeholder admin bar element, if the admin bar is shown.
+	 */
+	private static function apply_dev_mode_mutations( DOMDocument $dom ) {
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$xpath = new DOMXPath( $dom );
+
+		/**
+		 * Filters the XPath queries for elements that should be enabled for dev mode.
+		 *
+		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
+		 * root HTML element as well as to any elements that match the expressions. The attribute is added to the
+		 * elements prior to running any of the sanitizers.
+		 *
+		 * @since 1.3
+		 * @param string[] XPath element queries. Context is the root element.
+		 */
+		$dev_mode_xpath_queries = apply_filters( 'amp_dev_mode_element_xpaths', [] );
+		if ( is_admin_bar_showing() ) {
+			$dev_mode_xpath_queries[] = '//*[ @id = "wpadminbar" ]';
+			$dev_mode_xpath_queries[] = '//*[ @id = "wpadminbar" ]//*';
+		}
+		foreach ( $dev_mode_xpath_queries as $dev_mode_xpath_query ) {
+			foreach ( $xpath->query( $dev_mode_xpath_query ) as $node ) {
+				if ( $node instanceof DOMElement ) {
+					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+				}
+			}
+		}
+
+		// Replace admin bar with placeholder prior to sanitizing to prevent conversion of its elements.
+		$original_admin_bar_element    = $dom->getElementById( 'wpadminbar' );
+		$placeholder_admin_bar_element = null;
+		if ( is_admin_bar_showing() && $original_admin_bar_element ) {
+			$placeholder_admin_bar_element = $dom->createElement( 'div' );
+			foreach ( [ 'id', 'class' ] as $attribute_name ) {
+				$placeholder_admin_bar_element->setAttribute(
+					$attribute_name,
+					$original_admin_bar_element->getAttribute( $attribute_name )
+				);
+			}
+			$original_admin_bar_element->parentNode->replaceChild( $placeholder_admin_bar_element, $original_admin_bar_element );
+		}
+
+		return [ $original_admin_bar_element, $placeholder_admin_bar_element ];
+	}
+
+	/**
 	 * Process response to ensure AMP validity.
 	 *
 	 * @since 0.7
@@ -1956,40 +2044,6 @@ class AMP_Theme_Support {
 			! AMP_Validation_Manager::should_validate_response()
 			&&
 			! is_customize_preview()
-		);
-
-		/**
-		 * Filters the XPath queries for elements that should be enabled for dev mode.
-		 *
-		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
-		 * root HTML element as well as to any elements that match the expressions. The attribute is added to the
-		 * elements prior to running any of the sanitizers.
-		 *
-		 * @since 1.3
-		 * @param string[] XPath element queries. Context is the root element.
-		 */
-		$dev_mode_xpath_queries = apply_filters( 'amp_dev_mode_element_xpaths', [] );
-
-		/**
-		 * Filters whether AMP mode is enabled.
-		 *
-		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
-		 * root HTML element as well as to any elements that match the expressions.
-		 *
-		 * @todo Should this be applied in add_hooks()? Ideally the admin-bar script would be skipped from being enqueued if dev mode is not going to be enabled.
-		 *
-		 * @since 1.3
-		 * @param bool[] XPath element queries.
-		 */
-		$dev_mode_enabled = apply_filters(
-			'amp_dev_mode_enabled',
-			(
-				! empty( $dev_mode_xpath_queries )
-				||
-				is_admin_bar_showing() // @todo Limit to if is_user_logged_in()?
-				||
-				is_customize_preview()
-			)
 		);
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
@@ -2180,6 +2234,8 @@ class AMP_Theme_Support {
 			}
 		}
 
+		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
+
 		// Make sure scripts from the body get moved to the head.
 		if ( isset( $head ) ) {
 			foreach ( $xpath->query( '//body//script[ @custom-element or @custom-template ]' ) as $script ) {
@@ -2192,51 +2248,17 @@ class AMP_Theme_Support {
 			$dom->documentElement->setAttribute( 'amp', '' );
 		}
 
-		// Enable AMP dev mode when admin bar is showing or in Customizer preview.
+		// Apply dev mode mutations when in dev mode.
+		$dev_mode_enabled = self::is_dev_mode_enabled();
 		if ( $dev_mode_enabled ) {
-			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-			foreach ( $dev_mode_xpath_queries as $dev_mode_xpath_query ) {
-				foreach ( $xpath->query( $dev_mode_xpath_query ) as $node ) {
-					if ( $node instanceof DOMElement ) {
-						$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-					}
-				}
-			}
+			list( $original_admin_bar_element, $placeholder_admin_bar_element ) = self::apply_dev_mode_mutations( $dom );
 		}
-
-		// Replace admin bar with placeholder prior to sanitizing to prevent conversion of its elements.
-		$original_admin_bar_element    = null;
-		$placeholder_admin_bar_element = null;
-		if ( $dev_mode_enabled && is_admin_bar_showing() ) {
-			$original_admin_bar_element = $dom->getElementById( 'wpadminbar' );
-			if ( $original_admin_bar_element ) {
-				$placeholder_admin_bar_element = $dom->createElement( 'div' );
-				foreach ( [ 'id', 'class' ] as $attribute_name ) {
-					$placeholder_admin_bar_element->setAttribute(
-						$attribute_name,
-						$original_admin_bar_element->getAttribute( $attribute_name )
-					);
-				}
-				$original_admin_bar_element->parentNode->replaceChild( $placeholder_admin_bar_element, $original_admin_bar_element );
-			}
-		}
-
-		AMP_HTTP::send_server_timing( 'amp_dom_parse', -$dom_parse_start, 'AMP DOM Parse' );
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
 
-		// Replace the original admin bar.
-		if ( $dev_mode_enabled && $original_admin_bar_element && $placeholder_admin_bar_element ) {
+		// Replace the original admin bar after sanitizers have all run.
+		if ( $dev_mode_enabled && isset( $original_admin_bar_element ) && isset( $placeholder_admin_bar_element ) ) {
 			$placeholder_admin_bar_element->parentNode->replaceChild( $original_admin_bar_element, $placeholder_admin_bar_element );
-			$original_admin_bar_element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-			/**
-			 * Element.
-			 *
-			 * @var DOMElement $admin_bar_element
-			 */
-			foreach ( $original_admin_bar_element->getElementsByTagName( '*' ) as $admin_bar_element ) {
-				$admin_bar_element->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-			}
 		}
 
 		// Determine what the validation errors are.
