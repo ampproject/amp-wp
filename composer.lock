@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5652961f0071f90ddaaae6a6c42c0951",
+    "content-hash": "da3403f1f44ade0351beef9a5a5be1b9",
     "packages": [
         {
             "name": "cweagans/composer-patches",
@@ -129,7 +129,7 @@
             "type": "library",
             "extra": {
                 "patches_applied": {
-                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://patch-diff.githubusercontent.com/raw/sabberworm/PHP-CSS-Parser/pull/138.diff"
+                    "PHP-CSS-Parser: Fix parsing CSS selectors which contain commas <https://github.com/sabberworm/PHP-CSS-Parser/pull/138>": "https://github.com/sabberworm/PHP-CSS-Parser/commit/fa139f65c5b098ae652c970b25e6eb03fc495eb4.diff"
                 }
             },
             "autoload": {
@@ -318,16 +318,16 @@
         },
         {
             "name": "phpcompatibility/php-compatibility",
-            "version": "9.3.0",
+            "version": "9.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
-                "reference": "06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5"
+                "reference": "9999344e47e7af6b00e1a898eacc4e4368fb7196"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5",
-                "reference": "06cc8d2c2ed62a70f52963dbdf5eaa1ec0fe34c5",
+                "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/9999344e47e7af6b00e1a898eacc4e4368fb7196",
+                "reference": "9999344e47e7af6b00e1a898eacc4e4368fb7196",
                 "shasum": ""
             },
             "require": {
@@ -372,7 +372,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2019-08-28T15:29:06+00:00"
+            "time": "2019-09-05T18:36:49+00:00"
         },
         {
             "name": "rmccue/requests",
