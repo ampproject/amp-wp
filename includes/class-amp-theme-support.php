@@ -1914,17 +1914,13 @@ class AMP_Theme_Support {
 	}
 
 	/**
-	 * Apply dev mode mutations.
+	 * Get the XPath expressions to query for elements to add data-ampdevmode attributes.
 	 *
 	 * @since 1.3
 	 *
-	 * @param DOMDocument $dom Document.
-	 * @return array The original admin bar element and the placeholder admin bar element, if the admin bar is shown.
+	 * @return string[] XPath queries for elements to add data-ampdevmode attributes.
 	 */
-	private static function apply_dev_mode_mutations( DOMDocument $dom ) {
-		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
-		$xpath = new DOMXPath( $dom );
-
+	private static function get_dev_mode_xpaths() {
 		/**
 		 * Filters the XPath queries for elements that should be enabled for dev mode.
 		 *
@@ -1935,13 +1931,29 @@ class AMP_Theme_Support {
 		 * @since 1.3
 		 * @param string[] XPath element queries. Context is the root element.
 		 */
-		$dev_mode_xpath_queries = apply_filters( 'amp_dev_mode_element_xpaths', [] );
+		$dev_mode_xpaths = apply_filters( 'amp_dev_mode_element_xpaths', [] );
 		if ( is_admin_bar_showing() ) {
-			$dev_mode_xpath_queries[] = '//*[ @id = "wpadminbar" ]';
-			$dev_mode_xpath_queries[] = '//*[ @id = "wpadminbar" ]//*';
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
 		}
-		foreach ( $dev_mode_xpath_queries as $dev_mode_xpath_query ) {
-			foreach ( $xpath->query( $dev_mode_xpath_query ) as $node ) {
+		return $dev_mode_xpaths;
+	}
+
+	/**
+	 * Apply dev mode mutations.
+	 *
+	 * @since 1.3
+	 *
+	 * @param DOMDocument $dom             Document.
+	 * @param string[]    $dev_mode_xpaths Dev mode XPath expressions.
+	 * @return array The original admin bar element and the placeholder admin bar element, if the admin bar is shown.
+	 */
+	private static function apply_dev_mode_mutations( DOMDocument $dom, array $dev_mode_xpaths ) {
+		$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		$xpath = new DOMXPath( $dom );
+
+		foreach ( $dev_mode_xpaths as $dev_mode_xpath ) {
+			foreach ( $xpath->query( $dev_mode_xpath ) as $node ) {
 				if ( $node instanceof DOMElement ) {
 					$node->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
 				}
@@ -2047,6 +2059,7 @@ class AMP_Theme_Support {
 		);
 
 		$dev_mode_enabled = self::is_dev_mode_enabled();
+		$dev_mode_xpaths  = $dev_mode_enabled ? self::get_dev_mode_xpaths() : [];
 
 		// When response caching is enabled, determine if it should be turned off for cache misses.
 		$caches_for_url = null;
@@ -2065,7 +2078,7 @@ class AMP_Theme_Support {
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
 			],
 			$args,
-			compact( 'enable_response_caching', 'dev_mode_enabled', 'dev_mode_xpath_queries' )
+			compact( 'enable_response_caching', 'dev_mode_enabled', 'dev_mode_xpaths' )
 		);
 
 		$current_url = amp_get_current_url();
@@ -2253,7 +2266,7 @@ class AMP_Theme_Support {
 
 		// Apply dev mode mutations when in dev mode.
 		if ( $dev_mode_enabled ) {
-			list( $original_admin_bar_element, $placeholder_admin_bar_element ) = self::apply_dev_mode_mutations( $dom );
+			list( $original_admin_bar_element, $placeholder_admin_bar_element ) = self::apply_dev_mode_mutations( $dom, $dev_mode_xpaths );
 		}
 
 		$assets = AMP_Content_Sanitizer::sanitize_document( $dom, self::$sanitizer_classes, $args );
