@@ -3,6 +3,42 @@
 module.exports = function( grunt ) {
 	'use strict';
 	require( 'dotenv' ).config();
+
+	// Root paths to include in the plugin build ZIP when running `npm run build`.
+	const productionIncludedRootFiles = [
+		'LICENSE',
+		'amp.php',
+		'assets',
+		'back-compat',
+		'includes',
+		'readme.txt',
+		'templates',
+		'vendor',
+	];
+
+	// These patterns paths will be excluded from among the above directory.
+	const productionExcludedPathPatterns = [
+		/.*\/src\/.*/,
+		/.*images\/stories-editor\/.*\.svg/,
+	];
+
+	// These will be removed from the vendor directory after installing but prior to creating a ZIP.
+	// ⚠️ Warning: These paths are passed straight to rm command in the shell, without any escaping.
+	const productionVendorExcludedFilePatterns = [
+		'composer.*',
+		'vendor/*/*/.editorconfig',
+		'vendor/*/*/.gitignore',
+		'vendor/*/*/composer.*',
+		'vendor/*/*/Doxyfile',
+		'vendor/*/*/LICENSE',
+		'vendor/*/*/phpunit.*',
+		'vendor/*/*/*.md',
+		'vendor/*/*/*.txt',
+		'vendor/*/*/*.yml',
+		'vendor/*/*/.*.yml',
+		'vendor/*/*/tests',
+	];
+
 	grunt.initConfig( {
 
 		pkg: grunt.file.readJSON( 'package.json' ),
@@ -33,7 +69,7 @@ module.exports = function( grunt ) {
 				command: 'php bin/verify-version-consistency.php',
 			},
 			composer_install: {
-				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -f composer.*',
+				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; cd build; composer install --no-dev -o && composer remove cweagans/composer-patches --update-no-dev -o && rm -r ' + productionVendorExcludedFilePatterns.join( ' ' ),
 			},
 			create_build_zip: {
 				command: 'if [ ! -e build ]; then echo "Run grunt build first."; exit 1; fi; if [ -e amp.zip ]; then rm amp.zip; fi; cd build; zip -r ../amp.zip .; cd ..; echo; echo "ZIP of build: $(pwd)/amp.zip"',
@@ -98,10 +134,21 @@ module.exports = function( grunt ) {
 			const versionAppend = new Date().toISOString().replace( /\.\d+/, '' ).replace( /-|:/g, '' ) + '-' + commitHash;
 
 			const paths = lsOutput.trim().split( /\n/ ).filter( function( file ) {
-				return ! /^(blocks|\.|bin|([^/]+)+\.(md|json|xml)|Gruntfile\.js|tests|wp-assets|readme\.md|webpack.*|assets\/images\/stories-editor\/.*\.svg|assets\/src|assets\/css\/src|docker-compose\.yml|.*\.config\.js|codecov\.yml|example\.env)/.test( file );
+				const topSegment = file.replace( /\/.*/, '' );
+				if ( ! productionIncludedRootFiles.includes( topSegment ) ) {
+					return false;
+				}
+
+				for ( const productionExcludedPathPattern of productionExcludedPathPatterns ) {
+					if ( productionExcludedPathPattern.test( file ) ) {
+						return false;
+					}
+				}
+
+				return true;
 			} );
 
-			paths.push( 'composer.*' );
+			paths.push( 'composer.*' ); // Copy in order to be able to do run composer_install.
 			paths.push( 'assets/js/*.js' );
 			paths.push( 'assets/js/*.deps.json' );
 			paths.push( 'assets/css/*.css' );
