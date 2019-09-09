@@ -25,6 +25,7 @@ import {
 	Notice,
 	SelectControl,
 	RangeControl,
+	TextControl,
 	ResponsiveWrapper,
 } from '@wordpress/components';
 import {
@@ -215,6 +216,7 @@ class PageEdit extends Component {
 			mediaId,
 			mediaType,
 			mediaUrl,
+			mediaAlt,
 			focalPoint = { x: 0.5, y: 0.5 },
 			overlayOpacity,
 			poster,
@@ -405,6 +407,14 @@ class PageEdit extends Component {
 									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 								/>
 							) }
+							{ mediaType && (
+								<TextControl
+									label={ __( 'Assistive Text', 'amp' ) }
+									help={ __( 'This text is used to inform visually impaired users about the background content.', 'amp' ) }
+									value={ mediaAlt }
+									onChange={ ( label ) => setAttributes( { mediaAlt: label } ) }
+								/>
+							) }
 						</>
 					</PanelBody>
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
@@ -465,6 +475,7 @@ PageEdit.propTypes = {
 		poster: PropTypes.string,
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
+		mediaAlt: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
