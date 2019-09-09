@@ -1892,7 +1892,7 @@ class AMP_Theme_Support {
 		 * Filters whether AMP mode is enabled.
 		 *
 		 * When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the
-		 * attributes to be added to admin bar. It will also add the attribute to all elements which match the
+		 * attributes to be added to the admin bar. It will also add the attribute to all elements which match the
 		 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
 		 *
 		 * @todo Should this be applied in add_hooks()? Ideally the admin-bar script would be skipped from being enqueued if dev mode is not going to be enabled.
@@ -1903,8 +1903,8 @@ class AMP_Theme_Support {
 		return apply_filters(
 			'amp_dev_mode_enabled',
 			(
-				// For the few sites that forcible show the admin bar even when the user is logged-out, only enable dev
-				// mode if the user is actually logged-in. This prevents the dev mode from being served to crawlers
+				// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
+				// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
 				// when they index the AMP version.
 				( is_admin_bar_showing() && is_user_logged_in() )
 				||
@@ -1931,7 +1931,7 @@ class AMP_Theme_Support {
 		 * @since 1.3
 		 * @param string[] XPath element queries. Context is the root element.
 		 */
-		$dev_mode_xpaths = apply_filters( 'amp_dev_mode_element_xpaths', [] );
+		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
 		if ( is_admin_bar_showing() ) {
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
 			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
