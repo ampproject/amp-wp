@@ -1753,6 +1753,10 @@ export const processMedia = ( media ) => {
  * @return {null|Element} The inner element.
  */
 export const getBlockWrapperElement = ( block ) => {
+	if ( ! block ) {
+		return null;
+	}
+
 	const { name, clientId } = block;
 	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
