@@ -8,6 +8,7 @@ export { clickOnMoreMenuItem } from './click-on-more-menu-item';
 export { getSidebarPanelToggleByTitle } from './get-sidebar-panel-toggle-by-title';
 export { insertBlock } from './insert-block';
 export { openGlobalBlockInserter } from './open-global-block-inserter';
+export { openMediaInserter } from './open-media-inserter';
 export { openPreviewPage } from './open-preview-page';
 export { openTemplateInserter } from './open-template-inserter';
 export { searchForBlock } from './search-for-block';

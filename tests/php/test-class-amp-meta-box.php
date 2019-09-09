@@ -135,6 +135,7 @@ class Test_AMP_Post_Meta_Box extends WP_UnitTestCase {
 			[
 				'lodash',
 				'moment',
+				'react',
 				'wp-block-editor',
 				'wp-blocks',
 				'wp-components',

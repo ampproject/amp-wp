@@ -148,21 +148,6 @@ class AMP_Img_Sanitizer extends AMP_Base_Sanitizer {
 
 		$this->determine_dimensions( $need_dimensions );
 		$this->adjust_and_replace_nodes_in_array_map( $need_dimensions );
-
-		/*
-		 * Opt-in to amp-img-auto-sizes experiment.
-		 * This is needed because the sizes attribute is removed from all img elements converted to amp-img
-		 * in order to prevent the undesirable setting of the width. This $meta tag can be removed once the
-		 * experiment ends (and the feature has been fully launched).
-		 * See <https://github.com/ampproject/amphtml/issues/21371> and <https://github.com/ampproject/amp-wp/pull/2036>.
-		 */
-		$head = $this->dom->getElementsByTagName( 'head' )->item( 0 );
-		if ( $head ) {
-			$meta = $this->dom->createElement( 'meta' );
-			$meta->setAttribute( 'name', 'amp-experiments-opt-in' );
-			$meta->setAttribute( 'content', 'amp-img-auto-sizes' );
-			$head->insertBefore( $meta, $head->firstChild );
-		}
 	}
 
 	/**

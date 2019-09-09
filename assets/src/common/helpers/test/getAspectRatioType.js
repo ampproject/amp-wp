@@ -14,6 +14,6 @@ describe( 'getAspectRatioType', () => {
 		expect( getAspectRatioType( 1200, 1200 ) ).toStrictEqual( 'square' );
 	} );
 	it( 'should return null when the arguments are null', () => {
-		expect( getAspectRatioType( null, null ) ).toStrictEqual( null );
+		expect( getAspectRatioType( null, null ) ).toBeNull( );
 	} );
 } );
