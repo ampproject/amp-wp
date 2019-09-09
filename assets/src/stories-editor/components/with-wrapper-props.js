@@ -80,7 +80,12 @@ const withWrapperProps = ( BlockListBlock ) => {
 			};
 
 			return (
-				<div className="amp-page-child-block" data-block={ clientId } style={ outerStyle }>
+				<div
+					className="amp-page-child-block"
+					data-block={ clientId }
+					data-type={ blockName }
+					style={ outerStyle }
+				>
 					<BlockListBlock { ...props } wrapperProps={ wrapperProps } enableAnimation={ false } />
 				</div>
 			);
