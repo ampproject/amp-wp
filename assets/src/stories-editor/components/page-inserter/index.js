@@ -19,12 +19,14 @@ function PageInserter() {
 	};
 
 	return (
-		<IconButton
-			icon={ addTemplateIcon( { width: 16, height: 16 } ) }
-			label={ __( 'Insert Blank Page', 'amp' ) }
-			onClick={ onClick }
-			className="block-editor-inserter editor-inserter__amp-inserter"
-		/>
+		<div className="block-editor-inserter">
+			<IconButton
+				icon={ addTemplateIcon( { width: 16, height: 16 } ) }
+				label={ __( 'Insert Blank Page', 'amp' ) }
+				onClick={ onClick }
+				className="editor-inserter__amp-inserter"
+			/>
+		</div>
 	);
 }
 
