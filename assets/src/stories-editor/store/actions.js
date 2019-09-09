@@ -87,7 +87,23 @@ export function playAnimation( page, item ) {
 }
 
 /**
- * Returns an action object in signalling that animation has been stopped.
+ * Returns an action object in signalling that an animation has finished.
+ *
+ * @param {string} page ID of the page the item is on.
+ * @param {string} item ID of the animated item.
+ *
+ * @return {Object} Action object.
+ */
+export function finishAnimation( page, item ) {
+	return {
+		type: 'FINISH_ANIMATION',
+		page,
+		item,
+	};
+}
+
+/**
+ * Returns an action object in signalling that an animation has been stopped.
  *
  * @param {string} page ID of the page the item is on.
  * @param {string} [item] Optional. ID of the animated item. If not passed, all items on the given page are stopped.

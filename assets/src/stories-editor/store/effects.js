@@ -15,6 +15,7 @@ import {
 import {
 	playAnimation,
 	stopAnimation,
+	finishAnimation,
 } from './actions';
 import { startAnimation, resetAnimationProperties, setAnimationTransformProperties } from '../helpers';
 import { ANIMATION_STATUS } from './constants';
@@ -49,11 +50,13 @@ export default {
 				duration ? parseInt( duration ) : 0,
 				delay ? parseInt( delay ) : 0,
 				() => {
-					dispatch( stopAnimation( page, id ) );
+					dispatch( finishAnimation( page, id ) );
 
 					if ( ! item ) {
-						getAnimationSuccessors( state, page, id ).forEach( ( successor ) => {
-							if ( successor.status !== ANIMATION_STATUS.prepared ) {
+						const successors = getAnimationSuccessors( state, page, id );
+
+						successors.forEach( ( successor ) => {
+							if ( successor.status === ANIMATION_STATUS.prepared ) {
 								dispatch( playAnimation( page, successor.id ) );
 							}
 						} );
@@ -74,6 +77,23 @@ export default {
 			const block = getBlock( id );
 			resetAnimationProperties( block, animationType );
 		} );
+	},
+
+	FINISH_ANIMATION( action, { getState, dispatch } ) {
+		const state = getState();
+		const { page } = action;
+
+		const hasPlayingAnimations = getAnimatedBlocksPerPage( state, page ).find( ( { status } ) => {
+			return status && ( status === ANIMATION_STATUS.prepared || status === ANIMATION_STATUS.playing );
+		} );
+
+		if ( ! hasPlayingAnimations ) {
+			const entries = getAnimatedBlocksPerPage( state, page );
+
+			entries.forEach( ( { id } ) => {
+				dispatch( stopAnimation( page, id ) );
+			} );
+		}
 	},
 
 	SET_CURRENT_PAGE( action, { getState, dispatch } ) {

@@ -117,6 +117,19 @@ export function animations( state = {}, action ) { // eslint-disable-line comple
 				},
 			};
 
+		case 'FINISH_ANIMATION':
+			if ( entryIndex( item ) !== -1 ) {
+				pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.finished;
+			}
+
+			return {
+				...state,
+				animationOrder: {
+					...animationOrder,
+					[ page ]: pageAnimationOrder,
+				},
+			};
+
 		case 'STOP_ANIMATION':
 			if ( item ) {
 				if ( entryIndex( item ) !== -1 ) {
