@@ -172,6 +172,18 @@ To get a production build, run:
 npm run build:js
 ```
 
+### Updating Google Fonts list
+
+**Note:** A [Google Fonts API key](https://developers.google.com/fonts/docs/developer_api) is required to update the list of Google Fonts that is included in the plugin. Details of how to get an API key can be found on in the [Google fonts docs](https://developers.google.com/fonts/docs/developer_api).
+
+Once obtained, follow these steps to configure the project appropriately: 
+
+1. Copy `example.env` to `.env`.
+1. Replace `replacemewithrealkey` with API key.
+1. Run `npm run download-fonts`
+
+The fonts will then be downloaded to `includes/data/fonts.json`. 
+
 ### Creating a Plugin Build
 
 To create a build of the plugin for installing in WordPress as a ZIP package, run:

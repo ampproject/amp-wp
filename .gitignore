@@ -12,3 +12,5 @@ assets/js/*.deps.json
 assets/js/*.map
 built
 /amphtml
+.env
+.idea/
