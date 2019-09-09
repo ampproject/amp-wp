@@ -11,10 +11,10 @@
 .autocomplete__icon {
 	position: absolute;
 	top: 2px;
-	right: 0px;
+	right: 0;
 	padding: 4px;
 	box-shadow: none !important;
-	border: 0px none;
+	border: 0 none;
 }
 
 .autocomplete__option {
