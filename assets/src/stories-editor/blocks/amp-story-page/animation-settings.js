@@ -14,6 +14,11 @@ import {
 import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
+ * Internal dependencies
+ */
+import stopIcon from '../../../../images/stories-editor/stop.svg';
+
+/**
  * Displays the animation settings for the page block.
  *
  * It allows the user to preview all animations on the current page.
@@ -35,7 +40,7 @@ const AnimationSettings = ( { clientId } ) => {
 			title={ __( 'Animation', 'amp' ) }
 		>
 			<IconButton
-				icon={ isPlayingAnimations ? 'controls-pause' : 'controls-play' }
+				icon={ isPlayingAnimations ? stopIcon( { width: 20, height: 20 } ) : 'controls-play' }
 				className="is-button is-default"
 				onClick={ isPlayingAnimations ? onAnimationStop : onAnimationStart }
 			>

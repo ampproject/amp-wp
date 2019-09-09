@@ -17,6 +17,7 @@ import { __ } from '@wordpress/i18n';
  */
 import AnimationOrderPicker from './animation-order-picker';
 import { ANIMATION_DURATION_DEFAULTS, AMP_ANIMATION_TYPE_OPTIONS } from '../../constants';
+import stopIcon from '../../../../images/stories-editor/stop.svg';
 
 /**
  * Animation controls for AMP Story layout blocks'.
@@ -83,7 +84,7 @@ const AnimationControls = ( {
 						onChange={ onAnimationAfterChange }
 					/>
 					<IconButton
-						icon={ isPlayingAnimation ? 'controls-pause' : 'controls-play' }
+						icon={ isPlayingAnimation ? stopIcon( { width: 20, height: 20 } ) : 'controls-play' }
 						className="is-button is-default"
 						onClick={ isPlayingAnimation ? onAnimationStop : onAnimationStart }
 					>
