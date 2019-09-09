@@ -10,7 +10,9 @@ export { default as StoryControls } from './story-controls';
 export { default as Shortcuts } from './shortcuts';
 export { default as StoryBlockDropZone } from './story-block-drop-zone';
 export { default as StoryBlockMover } from './block-mover';
-export { default as TemplateInserter } from './template-inserter';
+// @see https://github.com/ampproject/amp-wp/issues/3211
+// export { default as TemplateInserter } from './template-inserter';
+export { default as PageInserter } from './page-inserter';
 export { default as FontFamilyPicker } from './font-family-picker';
 export { default as RotatableBox } from './rotatable-box';
 export { default as PreviewPicker } from './preview-picker';

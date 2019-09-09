@@ -19,7 +19,7 @@ import { compose } from '@wordpress/compose';
 /**
  * Internal dependencies
  */
-import { TemplateInserter } from '../';
+import { PageInserter } from '../';
 import reorderIcon from '../../../../images/stories-editor/reorder.svg';
 import './edit.css';
 
@@ -48,7 +48,7 @@ function StoryControls( { isReordering, startReordering, saveOrder, resetOrder }
 
 	return (
 		<>
-			<TemplateInserter />
+			<PageInserter />
 			<IconButton
 				className="amp-story-controls-reorder"
 				icon={ reorderIcon( { width: 24, height: 19 } ) }
