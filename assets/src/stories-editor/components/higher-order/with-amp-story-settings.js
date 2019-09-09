@@ -433,6 +433,10 @@ export default createHigherOrderComponent(
 									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
 									onChange={ ( font ) => {
+										if ( ! font ) {
+											setAttributes( { ampFontFamily: null } );
+											return;
+										}
 										maybeEnqueueFontStyle( font.name );
 										setAttributes( { ampFontFamily: font.name } );
 									} }

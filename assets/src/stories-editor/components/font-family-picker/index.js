@@ -72,24 +72,27 @@ function FontFamilyPicker( {
 				defaultValue={ value }
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
-				placeholder={ __( 'Default', 'amp' ) }
+				placeholder={ __( 'None', 'amp' ) }
 				displayMenu="overlay"
 				tNoResults={ () =>
 					__( 'No font found', 'amp' )
 				}
 				tStatusQueryTooShort={ ( minQueryLength ) =>
 					// translators: %d: the number characters required to initiate a font search.
-					sprintf( __( 'Type in %d or more characters for results', 'amp' ), minQueryLength )
+					sprintf( __( 'Type in %s or more characters for results', 'amp' ), minQueryLength )
 				}
 				tStatusSelectedOption={ ( selectedOption, length ) =>
 					// translators: 1: the index of the selected result. 2: The total number of results.
-					sprintf( __( '%1$s (1 of %2$s) is selected', 'amp' ), selectedOption, length )
+					sprintf( __( '%s (1 of %s) is selected', 'amp' ), selectedOption, length )
 				}
 				tStatusResults={ ( length, contentSelectedOption ) => {
 					return (
+						sprintf(
 						// translators: %d: The total number of results.
-						_n( '%d font is available.', '%d fonts are available.', length, 'amp' ) +
-						' ' + contentSelectedOption
+							_n( '%d font is available. %s', '%d fonts are available. %s', length, 'amp' ),
+							length,
+							contentSelectedOption
+						)
 					);
 				} }
 			/>

@@ -81,6 +81,18 @@ describe( 'Font picker in Text Block', () => {
 		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( 'Ubuntu' );
 	} );
 
+	it( 'should be able to search for ubuntu font and remove font', async () => {
+		await page.keyboard.type( 'Ubuntu' );
+
+		await page.waitForSelector( '.autocomplete__option' );
+		await page.click( '.autocomplete__option' );
+
+		await page.waitForSelector( '.autocomplete__icon' );
+		await page.click( '.autocomplete__icon' );
+		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
+		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( null );
+	} );
+
 	it( 'should be able to search for ubuntu font and save post', async () => {
 		await page.keyboard.type( 'Ubuntu' );
 
