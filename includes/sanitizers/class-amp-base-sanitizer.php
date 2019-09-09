@@ -717,6 +717,8 @@ abstract class AMP_Base_Sanitizer {
 		}
 
 		$chunks = array_chunk( $elements, 2 );
+
+		// phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_columnFound -- WP Core provides a polyfill.
 		return array_combine( array_column( $chunks, 0 ), array_column( $chunks, 1 ) );
 	}
 
@@ -734,12 +736,16 @@ abstract class AMP_Base_Sanitizer {
 		// Discard empty values first.
 		$styles = array_filter( $styles );
 
-		return array_reduce( array_keys( $styles ), static function ( $style_string, $style_name ) use ( $styles ) {
-			if ( ! empty( $style_string ) ) {
-				$style_string .= ';';
-			}
+		return array_reduce(
+			array_keys( $styles ),
+			static function ( $style_string, $style_name ) use ( $styles ) {
+				if ( ! empty( $style_string ) ) {
+					$style_string .= ';';
+				}
 
-			return $style_string . "{$style_name}:{$styles[ $style_name ]}";
-		}, '' );
+				return $style_string . "{$style_name}:{$styles[ $style_name ]}";
+			},
+			''
+		);
 	}
 }
