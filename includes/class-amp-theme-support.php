@@ -372,7 +372,7 @@ class AMP_Theme_Support {
 	 *
 	 * @return bool Whether the theme supports Reader Mode.
 	 */
-	public static function theme_supports_reader_mode() {
+	public static function supports_reader_mode() {
 		$amp_dir = '/amp';
 		return (
 			! self::get_support_mode_added_via_theme()

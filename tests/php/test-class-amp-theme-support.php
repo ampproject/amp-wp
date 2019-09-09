@@ -234,30 +234,30 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test theme_supports_reader_mode.
+	 * Test supports_reader_mode.
 	 *
-	 * @covers \AMP_Theme_Support::theme_supports_reader_mode.
+	 * @covers \AMP_Theme_Support::supports_reader_mode.
 	 */
-	public function test_theme_supports_reader_mode() {
+	public function test_supports_reader_mode() {
 		remove_all_filters( 'theme_root' );
 
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::read_theme_support();
 
 		// The mode is Standard, and there is no /amp directory, so this should be false.
-		$this->assertFalse( AMP_Theme_Support::theme_supports_reader_mode() );
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
 
 		remove_theme_support( 'amp' );
 		AMP_Theme_Support::read_theme_support();
 
 		// The mode is Reader, but there is no /amp directory in the theme.
-		$this->assertFalse( AMP_Theme_Support::theme_supports_reader_mode() );
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
 
 		$this->amp_directory_in_theme = get_template_directory() . '/amp';
 		mkdir( $this->amp_directory_in_theme );
 
 		// This should be true, as there is now an /amp directory in the theme.
-		$this->assertTrue( AMP_Theme_Support::theme_supports_reader_mode() );
+		$this->assertTrue( AMP_Theme_Support::supports_reader_mode() );
 	}
 
 	/**

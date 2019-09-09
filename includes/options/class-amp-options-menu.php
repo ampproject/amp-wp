@@ -319,13 +319,13 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
-			<?php elseif ( AMP_Theme_Support::theme_supports_reader_mode() ) : ?>
+			<?php elseif ( AMP_Theme_Support::supports_reader_mode() ) : ?>
 				<div class="notice notice-success notice-alt inline">
 					<p><?php echo wp_kses_post( $reader_mode_support ); ?></p>
 				</div>
 			<?php endif; ?>
 
-			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::theme_supports_reader_mode() ) : ?>
+			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>
