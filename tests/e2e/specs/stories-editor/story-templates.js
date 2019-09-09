@@ -140,7 +140,9 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		it( 'should load story templates in the stories editor', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should load story templates in the stories editor', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -157,7 +159,9 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		it( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -191,7 +195,9 @@ describe( 'Story Templates', () => {
 			expect( defaultStyledQuote ).toStrictEqual( 0 );
 		} );
 
-		it( 'should contain expected content in the template preview', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should contain expected content in the template preview', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
