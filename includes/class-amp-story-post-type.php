@@ -953,6 +953,9 @@ class AMP_Story_Post_Type {
 			$allowed_video_mime_types = [ 'video/mp4' ];
 		}
 
+		// Only add currently supported mime types.
+		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditorSettings',
