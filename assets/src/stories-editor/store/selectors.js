@@ -108,3 +108,14 @@ export function isReordering( state ) {
 export function getCopiedMarkup( state ) {
 	return state.copiedMarkup || '';
 }
+
+/**
+ * Returns the stories editor settings.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {Object} The editor settings object.
+ */
+export function getSettings( state ) {
+	return state.editorSettings || window.ampStoriesEditorSettings || {};
+}

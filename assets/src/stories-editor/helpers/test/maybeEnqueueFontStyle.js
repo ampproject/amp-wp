@@ -5,19 +5,19 @@ import { maybeEnqueueFontStyle } from '../';
 
 describe( 'maybeEnqueueFontStyle', () => {
 	it( 'should ignore invalid font name', () => {
-		expect( maybeEnqueueFontStyle( undefined ) ).toStrictEqual( undefined );
+		expect( maybeEnqueueFontStyle( undefined ) ).toBeUndefined( );
 	} );
 
 	it( 'should ignore missing font name', () => {
-		expect( maybeEnqueueFontStyle( 'Tahoma' ) ).toStrictEqual( undefined );
+		expect( maybeEnqueueFontStyle( 'Tahoma' ) ).toBeUndefined( );
 	} );
 
 	it( 'should ignore font without handle', () => {
-		expect( maybeEnqueueFontStyle( 'Ubuntu' ) ).toStrictEqual( undefined );
+		expect( maybeEnqueueFontStyle( 'Ubuntu' ) ).toBeUndefined( );
 	} );
 
 	it( 'should ignore font without src', () => {
-		expect( maybeEnqueueFontStyle( 'Verdana' ) ).toStrictEqual( undefined );
+		expect( maybeEnqueueFontStyle( 'Verdana' ) ).toBeUndefined( );
 	} );
 
 	it( 'should enqueue requested font only once', () => {

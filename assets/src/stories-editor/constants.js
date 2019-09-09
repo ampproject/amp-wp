@@ -107,8 +107,6 @@ export const ALLOWED_BLOCKS = [
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
-export const ALLOWED_VIDEO_TYPES = [ 'video/mp4' ];
-export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ALLOWED_VIDEO_TYPES ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
 
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
