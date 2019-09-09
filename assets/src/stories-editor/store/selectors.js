@@ -98,3 +98,14 @@ export function getBlockIndex( state, page ) {
 export function isReordering( state ) {
 	return state.blocks.isReordering || false;
 }
+
+/**
+ * Returns the stories editor settings.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {Object} The editor settings object.
+ */
+export function getSettings( state ) {
+	return state.editorSettings || window.ampStoriesEditorSettings || {};
+}
