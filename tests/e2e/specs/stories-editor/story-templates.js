@@ -13,6 +13,8 @@ import {
 	deactivateExperience,
 	openTemplateInserter,
 	searchForBlock as searchForStoryBlock,
+	getBlocksOnPage,
+	wpDataSelect,
 } from '../../utils';
 
 /**
@@ -234,6 +236,18 @@ describe( 'Story Templates', () => {
 			expect( templateContents[ 8 ] ).toContain( 'One of the biggest things missing from the show is the fact that before his death, Robb Start legitimizes Jon Snow as a Stark and makes him his heir.' );
 			// Fandom Intro
 			expect( templateContents[ 9 ] ).toContain( 'got-logo.png' );
+		} );
+
+		// @see https://github.com/ampproject/amp-wp/issues/3211
+		it( 'should directly insert a new blank page', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
+			const blockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			await openTemplateInserter();
+			const newBlockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+
+			expect( newBlockOrder ).toHaveLength( blockOrder.length + 1 );
+			expect( await getBlocksOnPage() ).toHaveLength( 0 );
 		} );
 	} );
 } );
