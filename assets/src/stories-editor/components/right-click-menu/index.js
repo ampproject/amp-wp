@@ -198,7 +198,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		insertBlocks,
 	} = dispatch( 'core/block-editor' );
 
-	const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
+	const { setCopiedMarkup } = dispatch( 'amp/story' );
 
 	const { __experimentalCanUserUseUnfilteredHTML: canUserUseUnfilteredHTML } = getSettings();
 
@@ -236,7 +236,6 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 
 		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
 		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId );
-		clearCopiedMarkup();
 	};
 
 	return {
