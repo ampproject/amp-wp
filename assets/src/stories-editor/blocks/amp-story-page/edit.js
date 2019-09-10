@@ -54,7 +54,6 @@ import {
 
 import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_BACKGROUND_MEDIA_TYPES,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
@@ -217,6 +216,7 @@ class PageEdit extends Component {
 			setAttributes,
 			totalAnimationDuration,
 			allowedBlocks,
+			allowedBackgroundMediaTypes,
 			storySettingsAttributes,
 		} = this.props;
 
@@ -335,7 +335,7 @@ class PageEdit extends Component {
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
 										onSelect={ this.onSelectMedia }
-										allowedTypes={ ALLOWED_BACKGROUND_MEDIA_TYPES }
+										allowedTypes={ allowedBackgroundMediaTypes }
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
@@ -490,6 +490,7 @@ PageEdit.propTypes = {
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ),
+	allowedBackgroundMediaTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 export default compose(
@@ -502,7 +503,7 @@ export default compose(
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
 		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
-		const { getAnimatedBlocks } = select( 'amp/story' );
+		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
@@ -525,6 +526,7 @@ export default compose(
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const postMeta = getEditedPostAttribute( 'meta' ) || {};
 		const storySettingsAttributes = metaToAttributeNames( postMeta );
+		const { allowedVideoMimeTypes } = getSettings();
 
 		return {
 			media,
@@ -533,6 +535,7 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			storySettingsAttributes,
+			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 		};
 	} ),
 )( PageEdit );
