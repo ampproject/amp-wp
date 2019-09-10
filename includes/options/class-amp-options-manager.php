@@ -645,15 +645,16 @@ class AMP_Options_Manager {
 		if ( ! $uses_ssl && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
 			printf(
 				'<div class="notice notice-warning"><p>%s</p></div>',
-				sprintf(
-					/* translators: %s: "Why should I use HTTPS" support URL */
-					wp_kses(
-						__( 'Your site is not being fully served over a secure connection (using HTTPS).<br>' .
-						    'As some AMP functionality requires a secure connection, you might experience degraded performance or broken components.<br>' .
-						    '<a href="%s">More details</a>', 'amp' ),
-						[ 'br' => [], 'a' => [ 'href' => true ] ]
+				wp_kses(
+					sprintf(
+						/* translators: %s: "Why should I use HTTPS" support URL */
+						__( 'Your site is not being fully served over a secure connection (using HTTPS).<br>As some AMP functionality requires a secure connection, you might experience degraded performance or broken components.<br><a href="%s">More details</a>', 'amp' ),
+						esc_url( __( 'https://wordpress.org/support/article/why-should-i-use-https/', 'amp' ) )
 					),
-					esc_url( __( 'https://wordpress.org/support/article/why-should-i-use-https/', 'amp' ) )
+					[
+						'br' => [],
+						'a'  => [ 'href' => true ],
+					]
 				)
 			);
 		}
