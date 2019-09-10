@@ -29,6 +29,7 @@ import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
 } from '../../helpers';
+import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
@@ -242,9 +243,14 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
 		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
 			for ( const block of blocks ) {
-				updateBlockAttributes( block.clientId, { positionTop: insidePercentageY, positionLeft: insidePercentageX } );
+				if ( ALLOWED_MOVABLE_BLOCKS.includes( block.name ) ) {
+					updateBlockAttributes( block.clientId, {
+						positionTop: insidePercentageY,
+						positionLeft: insidePercentageX,
+					} );
+				}
 			}
-		} );
+		} ).catch( () => {} );
 	};
 
 	return {
