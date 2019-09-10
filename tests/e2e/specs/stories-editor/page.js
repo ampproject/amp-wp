@@ -16,6 +16,10 @@ import {
 	insertBlock,
 } from '../../utils';
 
+const LARGE_IMAGE = 'large-image-36521.jpg';
+const CORRECT_VIDEO = 'clothes-hanged-to-dry-1295231.mp4';
+const SELECT_BUTTON = '.media-modal button.media-button-select';
+
 describe( 'Story Page', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
@@ -166,5 +170,45 @@ describe( 'Story Page', () => {
 		expect( await page.evaluate( ( selector ) => {
 			return document.querySelector( selector ).value;
 		}, secondsSelector ) ).toBe( '2' );
+	} );
+
+	it( 'should allow changing the alt attribute for the background image', async () => {
+		// Add background image.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( LARGE_IMAGE );
+		await expect( page ).toClick( SELECT_BUTTON );
+
+		// Write assistive text.
+		const label = await page.waitForXPath( `//label[contains(text(), 'Assistive Text')]` );
+		await page.evaluate( ( lbl ) => {
+			lbl.click();
+		}, label );
+		await page.keyboard.type( 'Hello World' );
+
+		// Open preview.
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		await previewPage.waitForSelector( 'amp-img[alt*="Hello World"]' );
+	} );
+
+	it( 'should allow changing the ARIA label for the background video', async () => {
+		// Add background video.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( CORRECT_VIDEO );
+		await expect( page ).toClick( SELECT_BUTTON );
+
+		// Write assistive text.
+		const label = await page.waitForXPath( `//label[contains(text(), 'Assistive Text')]` );
+		await page.evaluate( ( lbl ) => {
+			lbl.click();
+		}, label );
+		await page.keyboard.type( 'Hello World' );
+
+		// Open preview.
+		const editorPage = page;
+		const previewPage = await openPreviewPage( editorPage, 'amp-story' );
+		await previewPage.waitForXPath( '//amp-video[contains(@aria-label, "Hello World")]' );
 	} );
 } );
