@@ -739,6 +739,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 			compact( 'element_xpaths' ),
 			$sanitizers['AMP_Dev_Mode_Sanitizer']
 		);
+		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
 
 		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
 		add_filter( 'amp_dev_mode_enabled', '__return_true' );
