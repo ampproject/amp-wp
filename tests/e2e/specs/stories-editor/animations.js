@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { createNewPost, saveDraft } from '@wordpress/e2e-test-utils';
+import { createNewPost, getAllBlocks, saveDraft, selectBlockByClientId } from '@wordpress/e2e-test-utils';
 
 /**
  * Internal dependencies
@@ -22,13 +22,13 @@ describe( 'Story Animations', () => {
 	} );
 
 	const animationTypeSelector = '.components-select-control__input';
+	const animationDurationSelector = 'input[aria-label="Duration (ms)"]';
+	const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
+	const animationOrderSelector = '#amp-stories-animation-order-picker';
 	const unSelectedAnimationSelector = '.components-animate__appear button[aria-checked="false"]';
 	const authorBlockClassName = 'wp-block-amp-amp-story-post-author';
 
 	it( 'should save correct animation values', async () => {
-		// Add Author block with animation.
-
-		const animationDelaySelector = 'input[aria-label="Delay (ms)"]';
 		await insertBlock( 'Author' );
 		await page.waitForSelector( animationTypeSelector );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
@@ -52,7 +52,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should save correct animation after values', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.waitForSelector( animationTypeSelector );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
@@ -86,7 +85,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should not allow creating a cycle in animation after', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.select( animationTypeSelector, 'fly-in-bottom' );
 
@@ -116,7 +114,6 @@ describe( 'Story Animations', () => {
 	} );
 
 	it( 'should save ID to the same element as animation', async () => {
-		// Add Author block with animation.
 		await insertBlock( 'Author' );
 		await page.select( animationTypeSelector, 'pulse' );
 
@@ -148,5 +145,44 @@ describe( 'Story Animations', () => {
 		const idHandle = await elementHandle.getProperty( 'value' );
 		const idValue = await idHandle.jsonValue();
 		expect( idValue ).not.toBeUndefined();
+	} );
+
+	it( 'should play a single animation in the editor', async () => {
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'twirl-in' );
+		await page.waitForSelector( animationDurationSelector );
+		await page.type( animationDurationSelector, '500' );
+
+		await clickButton( 'Play Animation' );
+
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-twirl-in' );
+	} );
+
+	it( 'should play all animations on the current page in the editor', async () => {
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'twirl-in' );
+		await page.waitForSelector( animationDurationSelector );
+		await page.type( animationDurationSelector, '500' );
+
+		await insertBlock( 'Author' );
+		await page.waitForSelector( animationTypeSelector );
+		await page.select( animationTypeSelector, 'drop' );
+		await page.waitForSelector( animationDurationSelector );
+		await page.type( animationDurationSelector, '500' );
+
+		await page.click( animationOrderSelector );
+		await clickButton( 'admin' );
+
+		// Select page block.
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+
+		await clickButton( 'Play All Animations' );
+
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-twirl-in' );
+		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-init-drop' );
 	} );
 } );
