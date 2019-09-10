@@ -192,7 +192,14 @@ describe( 'Story Page', () => {
 		await previewPage.waitForSelector( 'amp-img[alt*="Hello World"]' );
 	} );
 
-	it( 'should allow changing the ARIA label for the background video', async () => {
+	/**
+	 * This test is disabled because it does not work on Chromium.
+	 *
+	 * @see https://github.com/ampproject/amp-wp/pull/2874
+	 * @see https://github.com/ampproject/amp-wp/pull/3214
+	 */
+	// eslint-disable-next-line jest/no-disabled-tests
+	it.skip( 'should allow changing the ARIA label for the background video', async () => {
 		// Add background video.
 		await page.waitForSelector( '.editor-amp-story-page-background' );
 		await page.click( '.editor-amp-story-page-background' );
