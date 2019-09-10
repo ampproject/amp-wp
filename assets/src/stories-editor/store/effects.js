@@ -76,7 +76,7 @@ export default {
 		entries.forEach( ( { id, animationType } ) => {
 			const block = getBlock( id );
 
-			if ( block ) {
+			if ( block && animationType ) {
 				resetAnimationProperties( block, animationType );
 			}
 		} );

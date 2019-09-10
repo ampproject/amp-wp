@@ -1912,7 +1912,6 @@ export const setAnimationTransformProperties = ( block, animationType ) => {
 /**
  * Removes all inline styles and class name previously set for animation playback.
  *
- *
  * @param {Object} block Block object.
  * @param {string} animationType Animation type.
  */
@@ -1923,6 +1922,7 @@ export const resetAnimationProperties = ( block, animationType ) => {
 		return;
 	}
 
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
 	blockElement.classList.remove( `story-animation-${ animationType }` );
 	blockElement.style.removeProperty( '--animation-offset-x' );
 	blockElement.style.removeProperty( '--animation-offset-y' );
