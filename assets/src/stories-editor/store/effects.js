@@ -49,19 +49,7 @@ export default {
 				animationType,
 				duration ? parseInt( duration ) : 0,
 				delay ? parseInt( delay ) : 0,
-				() => {
-					dispatch( finishAnimation( page, id ) );
-
-					if ( ! item ) {
-						const successors = getAnimationSuccessors( state, page, id );
-
-						successors.forEach( ( successor ) => {
-							if ( successor.status === ANIMATION_STATUS.prepared ) {
-								dispatch( playAnimation( page, successor.id ) );
-							}
-						} );
-					}
-				}
+				() => dispatch( finishAnimation( page, id ) )
 			);
 		} );
 	},
@@ -84,7 +72,14 @@ export default {
 
 	FINISH_ANIMATION( action, { getState, dispatch } ) {
 		const state = getState();
-		const { page } = action;
+		const { page, item } = action;
+
+		const successors = getAnimationSuccessors( state, page, item )
+			.filter( ( { status } ) => status && ( status === ANIMATION_STATUS.prepared ) );
+
+		successors.forEach( ( successor ) => {
+			dispatch( playAnimation( page, successor.id ) );
+		} );
 
 		const hasPlayingAnimations = getAnimatedBlocksPerPage( state, page ).find( ( { status } ) => {
 			return status && ( status === ANIMATION_STATUS.prepared || status === ANIMATION_STATUS.playing );
