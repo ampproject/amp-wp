@@ -27,6 +27,7 @@
   "devDependencies": {
     "@babel/cli": "7.6.0",
     "@babel/core": "7.6.0",
+    "@babel/plugin-proposal-class-properties": "7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "7.5.5",
     "@babel/plugin-transform-react-jsx": "7.3.0",
     "@wordpress/babel-preset-default": "4.5.0",
@@ -55,6 +56,7 @@
     "@wordpress/server-side-render": "1.1.0",
     "@wordpress/url": "2.7.0",
     "@wordpress/wordcount": "2.6.0",
+    "accessible-autocomplete": "1.6.2",
     "autoprefixer": "9.6.1",
     "babel-eslint": "10.0.3",
     "babel-jest": "24.9.0",

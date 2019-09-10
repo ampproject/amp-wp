@@ -84,7 +84,6 @@ class PageEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
-		this.onSelectMedia = this.onSelectMedia.bind( this );
 	}
 
 	/**
@@ -99,7 +98,7 @@ class PageEdit extends Component {
 	 * @param {Object} media.image      Media image object.
 	 * @param {string} media.image.src  Media image URL
 	 */
-	onSelectMedia( media ) {
+	onSelectMedia = ( media ) => {
 		const { setAttributes } = this.props;
 		const processed = processMedia( media );
 		setAttributes( processed );
