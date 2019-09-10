@@ -481,6 +481,39 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_asset_url.
+	 *
+	 * @covers ::amp_get_asset_url()
+	 */
+	public function test_amp_get_asset_url() {
+		$this->assertStringEndsWith( '/assets/foo.jpg', amp_get_asset_url( 'foo.jpg' ) );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_code.
+	 *
+	 * @covers ::amp_get_boilerplate_code()
+	 */
+	public function test_amp_get_boilerplate_code() {
+		$boilerplate_code = amp_get_boilerplate_code();
+		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
+		$this->assertContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_stylesheets.
+	 *
+	 * @covers ::amp_get_boilerplate_stylesheets()
+	 */
+	public function test_amp_get_boilerplate_stylesheets() {
+		$stylesheets = amp_get_boilerplate_stylesheets();
+		$this->assertInternalType( 'array', $stylesheets );
+		$this->assertCount( 2, $stylesheets );
+		$this->assertContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
+		$this->assertContains( 'body{-webkit-animation:none', $stylesheets[1] );
+	}
+
+	/**
 	 * Test amp_add_generator_metadata.
 	 *
 	 * @covers ::amp_add_generator_metadata()
@@ -954,7 +987,7 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 
 		$site_icon_attachment_id   = $this->insert_site_icon_attachment( DIR_TESTDATA . '/images/33772.jpg' );
 		$custom_logo_attachment_id = self::factory()->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg', null );
-		$fallback_publisher_logo   = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+		$fallback_publisher_logo   = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
 
 		$post_id = self::factory()->post->create(
 			[

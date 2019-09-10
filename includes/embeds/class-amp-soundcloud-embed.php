@@ -189,9 +189,13 @@ class AMP_SoundCloud_Embed_Handler extends AMP_Base_Embed_Handler {
 			$attributes['data-visual'] = rest_sanitize_boolean( $args['visual'] ) ? 'true' : 'false';
 		}
 
-		// @todo Set width to $args['width'] and layout to responsive once amp-soundcloud supports it: <https://github.com/ampproject/amphtml/issues/23144>.
 		$attributes['height'] = $args['height'] ?: $this->args['height'];
-		$attributes['layout'] = 'fixed-height';
+		if ( $args['width'] ) {
+			$attributes['width']  = $args['width'];
+			$attributes['layout'] = 'responsive';
+		} else {
+			$attributes['layout'] = 'fixed-height';
+		}
 
 		return AMP_HTML_Utils::build_tag(
 			'amp-soundcloud',

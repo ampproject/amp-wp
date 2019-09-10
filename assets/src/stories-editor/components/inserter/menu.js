@@ -115,8 +115,6 @@ export class InserterMenu extends Component {
 			itemsPerCategory: {},
 			openPanels: [ 'suggested' ],
 		};
-		this.onChangeSearchInput = this.onChangeSearchInput.bind( this );
-		this.onHover = this.onHover.bind( this );
 		this.panels = {};
 		this.inserterResults = createRef();
 	}
@@ -131,11 +129,11 @@ export class InserterMenu extends Component {
 		}
 	}
 
-	onChangeSearchInput( event ) {
+	onChangeSearchInput = ( event ) => {
 		this.filter( event.target.value );
 	}
 
-	onHover( item ) {
+	onHover = ( item ) => {
 		this.setState( {
 			hoveredItem: item,
 		} );
@@ -274,7 +272,7 @@ export class InserterMenu extends Component {
 		/* eslint-disable jsx-a11y/no-autofocus, jsx-a11y/no-static-element-interactions */
 		return (
 			<div
-				className="editor-inserter__menu block-editor-inserter__menu"
+				className="editor-inserter__menu block-editor-inserter__menu amp__block-editor-inserter__menu"
 				onKeyPress={ stopKeyPropagation }
 				onKeyDown={ this.onKeyDown }
 			>
@@ -285,13 +283,13 @@ export class InserterMenu extends Component {
 					id={ `block-editor-inserter__search-${ instanceId }` }
 					type="search"
 					placeholder={ __( 'Search for an element', 'amp' ) }
-					className="editor-inserter__search block-editor-inserter__search"
+					className="editor-inserter__search block-editor-inserter__search amp__block-editor-inserter__search"
 					autoFocus
 					onChange={ this.onChangeSearchInput }
 				/>
 
 				<div
-					className="editor-inserter__results block-editor-inserter__results"
+					className="editor-inserter__results amp__block-editor-inserter__results block-editor-inserter__results"
 					ref={ this.inserterResults }
 					tabIndex="0"
 					role="region"

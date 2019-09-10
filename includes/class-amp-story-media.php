@@ -85,7 +85,7 @@ class AMP_Story_Media {
 		add_image_size( self::STORY_LANDSCAPE_IMAGE_SIZE, self::STORY_LARGE_IMAGE_DIMENSION, self::STORY_SMALL_IMAGE_DIMENSION, true );
 
 		// The default image size for AMP Story image block and background media image.
-		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1440 );
+		add_image_size( self::MAX_IMAGE_SIZE_SLUG, 99999, 1280 );
 
 		// Include additional story image sizes in Schema.org metadata.
 		add_filter( 'amp_schemaorg_metadata', [ __CLASS__, 'filter_schemaorg_metadata_images' ], 100 );
@@ -141,12 +141,14 @@ class AMP_Story_Media {
 			return $data;
 		}
 
-		if ( ! isset( $data['image'] ) ) {
+		if ( empty( $data['image'] ) ) {
 			$data['image'] = [];
 		} elseif ( is_string( $data['image'] ) ) {
 			$data['image'] = [ $data['image'] ];
-		} elseif ( isset( $data['image']['@type'] ) ) {
+		} elseif ( is_array( $data['image'] ) && isset( $data['image']['@type'] ) ) {
 			$data['image'] = [ $data['image'] ];
+		} elseif ( ! is_array( $data['image'] ) ) {
+			$data['image'] = [];
 		}
 
 		$data['image'] = array_merge(
@@ -168,7 +170,7 @@ class AMP_Story_Media {
 	public static function poster_portrait_fallback( $image, $attachment_id, $size ) {
 		if ( ! $image && self::STORY_CARD_IMAGE_SIZE === $size ) {
 			return [
-				amp_get_asset_url( 'images/story-fallback-poster.jpg' ),
+				amp_get_asset_url( 'images/stories-editor/story-fallback-poster.jpg' ),
 				self::STORY_LARGE_IMAGE_DIMENSION,
 				self::STORY_SMALL_IMAGE_DIMENSION,
 			];
@@ -205,9 +207,7 @@ class AMP_Story_Media {
 	/**
 	 * Adds a new max image size to the image sizes available.
 	 *
-	 * In the AMP story editor, when selecting Background Media,
-	 * it will use this custom image size.
-	 * This filter will also make it available in the Image block's 'Image Size' <select> element.
+	 * This filter makes this custom image size available in the Image block's 'Image Size' <select> element.
 	 *
 	 * @param array $image_sizes {
 	 *     An associative array of image sizes.
@@ -218,15 +218,10 @@ class AMP_Story_Media {
 	 * @return array $image_sizes The filtered image sizes.
 	 */
 	public static function add_new_max_image_size( $image_sizes ) {
-		$full_size_name = __( 'Story Max Size', 'amp' );
 
-		if ( isset( $_POST['action'] ) && ( 'query-attachments' === $_POST['action'] || 'upload-attachment' === $_POST['action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
-		} elseif ( get_post_type() && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() ) {
-			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = $full_size_name;
-			unset( $image_sizes['full'] );
+		if ( AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type() ) {
+			$image_sizes[ self::MAX_IMAGE_SIZE_SLUG ] = __( 'Story Page', 'amp' );
 		}
-
 		return $image_sizes;
 	}
 

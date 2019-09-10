@@ -111,7 +111,7 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 				'
 					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" sandbox="allow-scripts allow-same-origin" layout="intrinsic" class="amp-wp-enforced-sizes">
 						<noscript>
-							<iframe src="https://example.com/embed/132886713" width="500" height="281"></iframe>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0"></iframe>
 						</noscript>					
 					</amp-iframe>
 				',
@@ -340,6 +340,38 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					'add_placeholder'       => false,
 					'current_origin'        => 'https://example.com',
 					'alias_origin'          => 'https://alt.example.org',
+				],
+			],
+
+			'iframe_with_frameborder_no'                => [
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="no" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'
+					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+						<noscript>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="0" class="iframe-class"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
+				],
+			],
+
+			'iframe_with_frameborder_yes'               => [
+				'<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="yes" class="iframe-class" allowtransparency="false" allowfullscreen></iframe>',
+				'
+					<amp-iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" class="iframe-class amp-wp-enforced-sizes" allowfullscreen="" sandbox="allow-scripts allow-same-origin" layout="intrinsic">
+						<span placeholder="" class="amp-wp-iframe-placeholder"></span>
+						<noscript>
+							<iframe src="https://example.com/embed/132886713" width="500" height="281" frameborder="1" class="iframe-class"></iframe>
+						</noscript>
+					</amp-iframe>
+				',
+				[
+					'add_noscript_fallback' => true,
+					'add_placeholder'       => true,
 				],
 			],
 		];

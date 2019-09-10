@@ -132,6 +132,11 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 			if ( $this->args['add_noscript_fallback'] ) {
 				$node->setAttribute( 'src', $normalized_attributes['src'] );
 
+				// AMP is stricter than HTML5 for this attribute, so make sure we use a normalized value.
+				if ( $node->hasAttribute( 'frameborder' ) ) {
+					$node->setAttribute( 'frameborder', $normalized_attributes['frameborder'] );
+				}
+
 				// Preserve original node in noscript for no-JS environments.
 				$this->append_old_node_noscript( $new_node, $node, $this->dom );
 			}
@@ -155,7 +160,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool $allowfullscreen <iframe> `allowfullscreen` attribute - Convert 'false' to empty string ''
 	 *      @type bool $allowtransparency <iframe> `allowtransparency` attribute - Convert 'false' to empty string ''
 	 * }
-	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandox, allowtransparency and allowfullscreen
+	 * @return array Returns HTML attributes; normalizes src, dimensions, frameborder, sandbox, allowtransparency and allowfullscreen
 	 */
 	private function normalize_attributes( $attributes ) {
 		$out = [];
@@ -189,10 +194,7 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 					break;
 
 				case 'frameborder':
-					if ( '0' !== $value && '1' !== $value ) {
-						$value = '0';
-					}
-					$out[ $name ] = $value;
+					$out[ $name ] = $this->sanitize_boolean_digit( $value );
 					break;
 
 				case 'allowfullscreen':
@@ -271,4 +273,34 @@ class AMP_Iframe_Sanitizer extends AMP_Base_Sanitizer {
 		return $placeholder_node;
 	}
 
+	/**
+	 * Sanitizes a boolean character (or string) into a '0' or '1' character.
+	 *
+	 * @param string $value A boolean character to sanitize. If a string containing more than a single
+	 *                      character is provided, only the first character is taken into account.
+	 *
+	 * @return string Returns either '0' or '1'.
+	 */
+	private function sanitize_boolean_digit( $value ) {
+
+		// Default to false if the value was forgotten.
+		if ( empty( $value ) ) {
+			return '0';
+		}
+
+		// Default to false if the value has an unexpected type.
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '0';
+		}
+
+		// See: https://github.com/ampproject/amp-wp/issues/2335#issuecomment-493209861.
+		switch ( substr( (string) $value, 0, 1 ) ) {
+			case '1':
+			case 'y':
+			case 'Y':
+				return '1';
+		}
+
+		return '0';
+	}
 }

@@ -114,23 +114,33 @@ class AMP_Twitter_Embed_Test extends WP_UnitTestCase {
 	 */
 	public function get_raw_embed_dataset() {
 		return [
-			'no_embed'                         => [
+			'no_embed'                                => [
 				'<p>Hello world.</p>',
 				'<p>Hello world.</p>',
 			],
-			'embed_blockquote_without_twitter' => [
+			'embed_blockquote_without_twitter'        => [
 				'<blockquote>lorem ipsum</blockquote>',
 				'<blockquote>lorem ipsum</blockquote>',
 			],
 
-			'blockquote_embed'                 => [
+			'blockquote_embed'                        => [
 				wpautop( '<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter>' . "\n\n",
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"></amp-twitter>' . "\n\n",
 			],
 
-			'blockquote_embed_not_autop'       => [
+			'blockquote_embed_with_data_conversation' => [
+				wpautop( '<blockquote class="twitter-tweet" data-conversation="none"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-conversation="none"></amp-twitter>' . "\n\n",
+			],
+
+			'blockquote_embed_with_data_theme'        => [
+				wpautop( '<blockquote class="twitter-tweet" data-theme="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>' ), // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-theme="en"></amp-twitter>' . "\n\n",
+			],
+
+			'blockquote_embed_not_autop'              => [
 				'<blockquote class="twitter-tweet" data-lang="en"><p lang="en" dir="ltr">Celebrate the WordPress 15th Anniversary on May 27 <a href="https://t.co/jv62WkI9lr">https://t.co/jv62WkI9lr</a> <a href="https://t.co/4ZECodSK78">pic.twitter.com/4ZECodSK78</a></p>&mdash; WordPress (@WordPress) <a href="https://twitter.com/WordPress/status/987437752164737025?ref_src=twsrc%5Etfw">April 20, 2018</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedScript, WordPress.Arrays.ArrayDeclarationSpacing.ArrayItemNoNewLine
-				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025"></amp-twitter> ',
+				'<amp-twitter width="600" height="480" layout="responsive" data-tweetid="987437752164737025" class="twitter-tweet" data-lang="en"></amp-twitter> ',
 			],
 		];
 	}

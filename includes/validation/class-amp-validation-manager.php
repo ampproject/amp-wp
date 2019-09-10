@@ -1994,7 +1994,7 @@ class AMP_Validation_Manager {
 			AMP__VERSION
 		);
 
-		wp_styles()->add_data( $slug, 'rtl', true );
+		wp_styles()->add_data( $slug, 'rtl', 'replace' );
 
 		$status_and_errors = AMP_Post_Meta_Box::get_status_and_errors( get_post() );
 		$enabled_status    = $status_and_errors['status'];

@@ -160,11 +160,14 @@ class AMP_Template_Customizer {
 				)
 			);
 
-			// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
 			wp_enqueue_style(
 				'amp-customizer',
-				amp_get_asset_url( 'css/amp-customizer.css' )
+				amp_get_asset_url( 'css/amp-customizer.css' ),
+				[],
+				AMP__VERSION
 			);
+
+			wp_styles()->add_data( 'amp-customizer', 'rtl', 'replace' );
 		}
 
 		/**

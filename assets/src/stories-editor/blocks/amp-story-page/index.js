@@ -7,9 +7,10 @@ import { createBlock, getBlockAttributes } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import deprecated from './deprecated';
 import edit from './edit';
 import save from './save';
-import blockIcon from '../../../../images/amp-story-page-icon.svg';
+import blockIcon from '../../../../images/stories-editor/amp-story-page-icon.svg';
 
 export const name = 'amp/amp-story-page';
 
@@ -25,10 +26,13 @@ const schema = {
 	mediaUrl: {
 		type: 'string',
 		source: 'attribute',
-		selector: 'amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
+		selector: 'amp-story-grid-layer[template="fill"] > img, amp-story-grid-layer[template="fill"] > amp-img, amp-story-grid-layer[template="fill"] > amp-video',
 		attribute: 'src',
 	},
 	mediaType: {
+		type: 'string',
+	},
+	mediaAlt: {
 		type: 'string',
 	},
 	poster: {
@@ -79,6 +83,8 @@ export const settings = {
 	edit,
 
 	save,
+
+	deprecated,
 
 	transforms: {
 		from: [

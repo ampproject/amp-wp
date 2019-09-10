@@ -4,20 +4,18 @@
 set -e
 
 # Common variables.
-DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
 WP_DEBUG=${WP_DEBUG-true}
 SCRIPT_DEBUG=${SCRIPT_DEBUG-true}
+WP_VERSION=${WP_VERSION-"latest"}
 
 # Include useful functions
 . "$(dirname "$0")/includes.sh"
 
-# These are the containers and values for the development site.
-CLI='cli'
-CONTAINER='wordpress'
-SITE_TITLE='AMP Dev'
+# Make sure Docker containers are running
+dc up -d >/dev/null 2>&1
 
 # Get the host port for the WordPress container.
-HOST_PORT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS port $CONTAINER 80 | awk -F : '{printf $2}')
+HOST_PORT=$(dc port $CONTAINER 80 | awk -F : '{printf $2}')
 
 # Wait until the Docker containers are running and the WordPress site is
 # responding to requests.
@@ -32,72 +30,92 @@ echo ''
 # dirty up the tests.
 if [ "$1" == '--reset-site' ]; then
 	echo -e $(status_message "Resetting test database...")
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI db reset --yes --quiet
+	wp db reset --yes --quiet
+fi
+
+if [ ! -z "$WP_VERSION" ] && [ "$WP_VERSION" != "latest" ]; then
+	# Potentially downgrade WordPress
+	echo -e $(status_message "Downloading WordPress version $WP_VERSION...")
+	wp core download --version=${WP_VERSION} --force --quiet
 fi
 
 # Install WordPress.
 echo -e $(status_message "Installing WordPress...")
-# The `-u 33` flag tells Docker to run the command as a particular user and
-# prevents permissions errors. See: https://github.com/WordPress/gutenberg/pull/8427#issuecomment-410232369
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT --quiet
+wp core install --title="$SITE_TITLE" --admin_user=admin --admin_password=password --admin_email=test@test.com --skip-email --url=http://localhost:$HOST_PORT  --quiet
 
-if [ "$E2E_ROLE" = "author" ]; then
-	echo -e $(status_message "Creating an additional author user for testing...")
-	# Create an additional author user for testing.
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI user create author author@example.com --role=author --user_pass=authpass --quiet
-	# Assign the existing Hello World post to the author.
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI post update 1 --post_author=2 --quiet
-fi
+# Create additional users.
+echo -e $(status_message "Creating additional users...")
+wp user create editor editor@example.com --role=editor --user_pass=password --quiet
+echo -e $(status_message "Editor created! Username: editor Password: password")
+wp user create author author@example.com --role=author --user_pass=password --quiet
+echo -e $(status_message "Author created! Username: author Password: password")
+wp user create contributor contributor@example.com --role=contributor --user_pass=password --quiet
+echo -e $(status_message "Contributor created! Username: contributor Password: password")
+wp user create subscriber subscriber@example.com --role=subscriber --user_pass=password --quiet
+echo -e $(status_message "Subscriber created! Username: subscriber Password: password")
 
 # Make sure the uploads and upgrade folders exist and we have permissions to add files.
 echo -e $(status_message "Ensuring that files can be uploaded...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER mkdir -p /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER chmod 767 /var/www/html/wp-content/plugins /var/www/html/wp-config.php /var/www/html/wp-settings.php /var/www/html/wp-content/uploads /var/www/html/wp-content/upgrade
+container mkdir -p \
+	/var/www/html/wp-content/uploads \
+	/var/www/html/wp-content/upgrade
+container chmod 767 \
+	/var/www/html/wp-content \
+	/var/www/html/wp-content/plugins \
+	/var/www/html/wp-config.php \
+	/var/www/html/wp-settings.php \
+	/var/www/html/wp-content/uploads \
+	/var/www/html/wp-content/upgrade
 
-CURRENT_WP_VERSION=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm $CLI core version)
+CURRENT_WP_VERSION=$(wp core version | tr -d '\r')
 echo -e $(status_message "Current WordPress version: $CURRENT_WP_VERSION...")
 
 if [ "$WP_VERSION" == "latest" ]; then
 	# Check for WordPress updates, to make sure we're running the very latest version.
 	echo -e $(status_message "Updating WordPress to the latest version...")
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI core update --quiet
+	wp core update --quiet
 	echo -e $(status_message "Updating The WordPress Database...")
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI core update-db --quiet
+	wp core update-db --quiet
 fi
 
 # If the 'wordpress' volume wasn't during the down/up earlier, but the post port has changed, we need to update it.
 echo -e $(status_message "Checking the site's url...")
-CURRENT_URL=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm $CLI option get siteurl)
+CURRENT_URL=$(wp option get siteurl)
 if [ "$CURRENT_URL" != "http://localhost:$HOST_PORT" ]; then
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI option update home "http://localhost:$HOST_PORT" --quiet
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI option update siteurl "http://localhost:$HOST_PORT" --quiet
+	wp option update home "http://localhost:$HOST_PORT" --quiet
+	wp option update siteurl "http://localhost:$HOST_PORT" --quiet
 fi
 
 # Install a dummy favicon to avoid 404 errors.
 echo -e $(status_message "Installing a dummy favicon...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm $CONTAINER touch /var/www/html/favicon.ico
+container touch /var/www/html/favicon.ico
+container chmod 767 /var/www/html/favicon.ico
 
 # Activate AMP plugin.
 echo -e $(status_message "Activating AMP plugin...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate amp --quiet
+wp plugin activate amp --quiet
 
 # Install & activate Gutenberg plugin.
 echo -e $(status_message "Installing and activating Gutenberg plugin...")
-# todo: Use `wp plugin install --activate` once WP-CLI is updated, see https://github.com/wp-cli/extension-command/issues/176.
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin install gutenberg --activate --quiet
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI plugin activate gutenberg --quiet
+wp plugin install gutenberg --activate --force --quiet
+
+# Set pretty permalinks.
+echo -e $(status_message "Setting permalink structure...")
+wp rewrite structure '%postname%' --hard --quiet
 
 # Configure site constants.
 echo -e $(status_message "Configuring site constants...")
-WP_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
+WP_DEBUG_CURRENT=$(wp config get --type=constant --format=json WP_DEBUG | tr -d '\r')
+
 if [ "$WP_DEBUG" != $WP_DEBUG_CURRENT ]; then
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set WP_DEBUG $WP_DEBUG --raw --type=constant --quiet
-	WP_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json WP_DEBUG)
+	wp config set WP_DEBUG $WP_DEBUG --raw --type=constant --quiet
+	WP_DEBUG_RESULT=$(wp config get --type=constant --format=json WP_DEBUG | tr -d '\r')
 	echo -e $(status_message "WP_DEBUG: $WP_DEBUG_RESULT...")
 fi
-SCRIPT_DEBUG_CURRENT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
+
+SCRIPT_DEBUG_CURRENT=$(wp config get --type=constant --format=json SCRIPT_DEBUG | tr -d '\r')
 if [ "$SCRIPT_DEBUG" != $SCRIPT_DEBUG_CURRENT ]; then
-	docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run --rm -u 33 $CLI config set SCRIPT_DEBUG $SCRIPT_DEBUG --raw --type=constant --quiet
-	SCRIPT_DEBUG_RESULT=$(docker-compose $DOCKER_COMPOSE_FILE_OPTIONS run -T --rm -u 33 $CLI config get --type=constant --format=json SCRIPT_DEBUG)
+	wp config set SCRIPT_DEBUG $SCRIPT_DEBUG --raw --type=constant --quiet
+	SCRIPT_DEBUG_RESULT=$(wp config get --type=constant --format=json SCRIPT_DEBUG | tr -d '\r')
 	echo -e $(status_message "SCRIPT_DEBUG: $SCRIPT_DEBUG_RESULT...")
 fi

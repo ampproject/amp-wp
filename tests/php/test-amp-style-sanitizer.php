@@ -339,10 +339,12 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						'<style amp-custom>.dead-list li .highlighted, amp-live-list li .highlighted { background: yellow }</style>',
 						'<style amp-custom>article.missing amp-live-list li .highlighted { background: yellow }</style>',
 						'<style amp-custom>body amp-list .portland { color:blue; }</style>',
+						'<style amp-custom>amp-script .loaded { color:brown; }</style>',
 						'</head><body>',
 						'<form method="post" action-xhr="https://example.com/subscribe" target="_top"><div submit-success><template type="amp-mustache"><b>Thanks</b>, {{name}}}</template></div></form>',
 						'<amp-live-list id="my-live-list" data-poll-interval="15000" data-max-items-per-page="20"><button update on="tap:my-live-list.update">You have updates!</button><ul items><li id="live-list-2-item-2" data-sort-time="1464281932879">Hello</li></ul></amp-live-list>',
 						'<amp-list width="auto" height="100" layout="fixed-height" src="https://ampproject-b5f4c.firebaseapp.com/examples/data/amp-list-urls.json"> <template type="amp-mustache"> <div class="url-entry"> <a href="{{url}}" class="{{class}}">{{title}}</a> </div> </template> </amp-list>',
+						'<amp-script src="https://example.com/populate/server/time">The current server time is <time class="loading">loading...</time>.</amp-script>',
 						'</body></html>',
 					]
 				),
@@ -351,6 +353,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'amp-live-list li .highlighted{background:yellow}',
 					'',
 					'body amp-list .portland{color:blue}',
+					'amp-script .loaded{color:brown}',
 				],
 				[],
 			],
@@ -458,7 +461,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
-			'dynamic_classes_preserved_conditionally' => [
+			'dynamic_classes_and_attributes_preserved_conditionally' => [
 				'
 					<html amp><head>
 					<style> .amp-viewer { color: blue; } </style>
@@ -469,8 +472,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-form-submit-success { color: green; } </style>
 					<style> .amp-access-laterpay-container { color: purple} </style>
 					<style> .amp-image-lightbox-caption { color: brown} </style>
-					<style> .amp-live-list-item-new { color: lime} </style>
-					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} </style>
+					<style> .amp-live-list-item-new { color: lime} #my-live-list [data-tombstone] { display: block; }</style>
+					<style> .amp-sidebar-toolbar-target-hidden { color: lavender} #sidebar1[open] { outline: solid 1px red; }</style>
 					<style> .amp-sticky-ad-close-button { color: aliceblue} </style>
 					<style> .amp-docked-video-shadow { color: azure} </style>
 					<style> .amp-geo-pending { color: saddlebrown; } </style>
@@ -478,6 +481,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					<style> .amp-geo-group-foo { color: peru; } </style>
 					<style> .amp-iso-country-us { color: oldlace; } </style>
 					<style> .amp-video-eq { display: none; } </style>
+					<style> #accord section[expanded] { outline: solid 1px blue; } </style>
 					<style> .non-existent { color: black; } </style>
 					</head>
 					<body>
@@ -492,6 +496,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 						<amp-sticky-ad layout="nodisplay"><amp-ad width="320" height="50" type="doubleclick" data-slot="/35096353/amptesting/formats/sticky"></amp-ad></amp-sticky-ad>
 						<amp-video dock width="720" height="305" layout="responsive" src="https://yourhost.com/videos/myvideo.mp4" poster="https://yourhost.com/posters/poster.png" artwork="https://yourhost.com/artworks/artwork.png" title="Awesome video" artist="Awesome artist" album="Amazing album"></amp-video>
 						<amp-geo layout="nodisplay"><script type="application/json">{"ISOCountryGroups": {"foo":["us"]}}</script></amp-geo>
+						<amp-accordion id="accord" disable-session-states><section><h2>Section 1</h2><p>Content in section 1.</p></section><section><h2>Section 2</h2><div>Content in section 2.</div></section></amp-accordion>
 					</body>
 					</html>
 				',
@@ -504,8 +509,8 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-form-submit-success{color:green}',
 					'.amp-access-laterpay-container{color:purple}',
 					'.amp-image-lightbox-caption{color:brown}',
-					'.amp-live-list-item-new{color:lime}',
-					'.amp-sidebar-toolbar-target-hidden{color:lavender}',
+					'.amp-live-list-item-new{color:lime}#my-live-list [data-tombstone]{display:block}',
+					'.amp-sidebar-toolbar-target-hidden{color:lavender}#sidebar1[open]{outline:solid 1px red}',
 					'.amp-sticky-ad-close-button{color:aliceblue}',
 					'.amp-docked-video-shadow{color:azure}',
 					'.amp-geo-pending{color:saddlebrown}',
@@ -513,6 +518,7 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					'.amp-geo-group-foo{color:peru}',
 					'.amp-iso-country-us{color:oldlace}',
 					'.amp-video-eq{display:none}',
+					'#accord section[expanded]{outline:solid 1px blue}',
 					'', // Because no non-existent.
 				],
 				[],

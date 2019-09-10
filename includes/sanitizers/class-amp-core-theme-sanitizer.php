@@ -1407,12 +1407,12 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 		$amp_carousel_desktop_id = 'twentyFourteenSliderDesktop';
 		$amp_carousel_mobile_id  = 'twentyFourteenSliderMobile';
 		$amp_carousel_attributes = [
-			'layout'              => 'responsive',
-			'on'                  => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
-			'width'               => '100',
-			'type'                => 'slides',
-			'loop'                => '',
-			'data-amp-bind-slide' => $selected_slide_state_id,
+			'layout' => 'responsive',
+			'on'     => "slideChange:AMP.setState( { $selected_slide_state_id: event.index } )",
+			'width'  => '100',
+			'type'   => 'slides',
+			'loop'   => '',
+			AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'slide' => $selected_slide_state_id,
 		];
 		$amp_carousel_desktop    = AMP_DOM_Utils::create_node(
 			$this->dom,
@@ -1460,7 +1460,7 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 				$li->setAttribute( 'selected', '' );
 				$a->setAttribute( 'class', 'slider-active' );
 			}
-			$a->setAttribute( 'data-amp-bind-class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
+			$a->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$selected_slide_state_id == $i ? 'slider-active' : ''" );
 			$a->setAttribute( 'role', 'button' );
 			$a->setAttribute( 'on', "tap:AMP.setState( { $selected_slide_state_id: $i } )" );
 			$li->setAttribute( 'option', (string) $i );
@@ -1511,8 +1511,8 @@ class AMP_Core_Theme_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Set visibility and aria-expanded based of the link based on whether the search bar is expanded.
 		$search_toggle_link->setAttribute( 'aria-expanded', wp_json_encode( $hidden ) );
-		$search_toggle_link->setAttribute( 'data-amp-bind-aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
-		$search_toggle_div->setAttribute( 'data-amp-bind-class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
-		$search_container->setAttribute( 'data-amp-bind-class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
+		$search_toggle_link->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'aria-expanded', "$hidden_state_id ? 'false' : 'true'" );
+		$search_toggle_div->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-toggle' : 'search-toggle active'" );
+		$search_container->setAttribute( AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class', "$hidden_state_id ? 'search-box-wrapper hide' : 'search-box-wrapper'" );
 	}
 }

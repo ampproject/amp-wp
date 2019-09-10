@@ -103,6 +103,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			'amp-live-list',
 			'[submit-error]',
 			'[submit-success]',
+			'amp-script',
 		],
 		'should_locate_sources'     => false,
 		'parsed_cache_variant'      => null,
@@ -187,6 +188,12 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 * This is initially populated with boolean attributes which can be mutated by AMP at runtime,
 	 * since they can by dynamically added at any time.
 	 *
+	 * @todo With the exception of 'hidden' (which can be on any element), the values here could be removed in favor of
+	 *       checking to see if any of the related elements exist in the page in `\AMP_Style_Sanitizer::has_used_attributes()`.
+	 *       Nevertheless, selectors mentioning these attributes are very numerous, so tree-shaking improvements will be marginal.
+	 *
+	 * @see \AMP_Style_Sanitizer::has_used_attributes()
+	 *
 	 * @since 1.1
 	 * @var array
 	 */
@@ -198,7 +205,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		'hidden'    => true,
 		'loop'      => true,
 		'multiple'  => true,
-		'open'      => true,
 		'readonly'  => true,
 		'required'  => true,
 		'selected'  => true,
@@ -451,7 +457,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 		}
 
 		// Find all [class] attributes and capture the contents of any single- or double-quoted strings.
-		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::get_amp_bind_placeholder_prefix() . 'class' ) as $bound_class_attribute ) {
+		foreach ( $this->xpath->query( '//*/@' . AMP_DOM_Utils::AMP_BIND_DATA_ATTR_PREFIX . 'class' ) as $bound_class_attribute ) {
 			if ( preg_match_all( '/([\'"])([^\1]*?)\1/', $bound_class_attribute->nodeValue, $matches ) ) {
 				$classes .= ' ' . implode( ' ', $matches[2] );
 			}
@@ -666,6 +672,32 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 
 				$this->used_attributes[ $attribute_name ] = ( 0 !== $this->xpath->query( $expression )->length );
 			}
+
+			// Attributes for amp-accordion, see <https://amp.dev/documentation/components/amp-accordion/#styling>.
+			if ( 'expanded' === $attribute_name ) {
+				if ( ! $this->has_used_tag_names( [ 'amp-accordion' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Attributes for amp-sidebar, see <https://amp.dev/documentation/components/amp-sidebar/#styling>.
+			if ( 'open' === $attribute_name ) {
+				// The 'open' attribute is also used by the HTML5 <details> attribute.
+				if ( ! $this->has_used_tag_names( [ 'amp-sidebar' ] ) && ! $this->has_used_tag_names( [ 'details' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			// Attributes for amp-live-list, see <https://amp.dev/documentation/components/amp-live-list/#styling>.
+			if ( 'data-tombstone' === $attribute_name ) {
+				if ( ! $this->has_used_tag_names( [ 'amp-live-list' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
 			if ( ! $this->used_attributes[ $attribute_name ] ) {
 				return false;
 			}

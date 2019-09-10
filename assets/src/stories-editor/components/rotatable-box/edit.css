@@ -10,8 +10,7 @@
 
 .editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-list__insertion-point,
 .editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-list__breadcrumb,
-.editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-contextual-toolbar,
-.block-editor-block-list__layout .block-editor-block-list__block.is-rotating > .block-editor-block-list__block-edit::before {
+.editor-inner-blocks .block-editor-block-list__block.is-rotating .block-editor-block-contextual-toolbar {
 	display: none !important;
 }
 
@@ -28,11 +27,10 @@
 	display: block;
 	content: "";
 	cursor: inherit;
-	border-left: 1px solid theme(outlines);
-	box-shadow: inset -3px 0 0 0 #555d66;
-	height: 40px;
+	border-left: 1px solid rgba(66, 88, 99, .4);
+	height: 24px;
 	width: 0;
-	margin: 0 auto;
+	margin: 3px auto 0;
 }
 
 .block-editor-block-list__block .rotatable-box-wrap .rotatable-box-wrap__handle {
@@ -57,26 +55,26 @@
 	content: "";
 	cursor: inherit;
 	display: block;
-	height: 16px;
-	width: 16px;
+	height: 15px;
+	width: 15px;
 	margin: 0 auto;
 }
 
 
-.wp-block .rotatable-box-wrap,
-.wp-block.is-typing .rotatable-box-wrap {
+.block-editor-inner-blocks .wp-block .rotatable-box-wrap,
+.block-editor-inner-blocks .wp-block.is-typing .rotatable-box-wrap {
 	display: block;
 	opacity: 0;
 	transition: opacity .3s;
 }
 
-.wp-block.amp-page-active .wp-block:hover .rotatable-box-wrap,
-.wp-block.amp-page-active .wp-block .rotatable-box-wrap:hover,
-.wp-block.amp-page-active .wp-block.is-rotating .rotatable-box-wrap {
-	opacity: 1;
+.block-editor-inner-blocks .wp-block.is-typing .rotatable-box-wrap,
+.block-editor-inner-blocks .wp-block .amp-story-resize-container.is-resizing .rotatable-box-wrap {
+	opacity: 0;
 }
 
-.wp-block.amp-page-active .wp-block.is-rotating:hover .components-resizable-box__handle,
-.wp-block.amp-page-active .wp-block.is-rotating .components-resizable-box__handle:hover {
-	opacity: 0;
+.block-editor-inner-blocks .wp-block:hover .rotatable-box-wrap,
+.block-editor-inner-blocks .wp-block.is-selected .rotatable-box-wrap,
+.block-editor-inner-blocks .wp-block.is-rotating .rotatable-box-wrap {
+	opacity: 1;
 }

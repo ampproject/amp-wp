@@ -41,6 +41,11 @@ class AMP_Block_Sanitizer_Test extends WP_UnitTestCase {
 				'<figure class="wp-block-embed" data-amp-layout="fill"><amp-facebook width="100"></amp-facebook></figure>',
 				'<figure class="wp-block-embed" data-amp-layout="fill" style="position:relative; width: 100%; height: 400px;"><amp-facebook layout="fill"></amp-facebook></figure>',
 			],
+
+			'responsive_layout'    => [
+				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud wp-embed-aspect-4-3 wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="400" width="640" layout="responsive"></amp-soundcloud></div></figure>',
+				'<figure class="wp-block-embed-soundcloud wp-block-embed is-type-rich is-provider-soundcloud  wp-has-aspect-ratio"><div class="wp-block-embed__wrapper"><amp-soundcloud data-trackid="90097394" data-visual="true" height="3" width="4" layout="responsive"></amp-soundcloud></div></figure>',
+			],
 		];
 	}
 

@@ -8,11 +8,12 @@ import PropTypes from 'prop-types';
  */
 import BlockDraggable from './block-draggable';
 
-export const BlockDragArea = ( { children, className, onDragStart, onDragEnd, blockElementId, clientId } ) => {
+export const BlockDragArea = ( { children, blockName, className, onDragStart, onDragEnd, blockElementId, clientId } ) => {
 	return (
 		<BlockDraggable
 			clientId={ clientId }
 			blockElementId={ blockElementId }
+			blockName={ blockName }
 			onDragStart={ onDragStart }
 			onDragEnd={ onDragEnd }
 		>
@@ -39,6 +40,7 @@ BlockDragArea.propTypes = {
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,
 	blockElementId: PropTypes.string,
+	blockName: PropTypes.string,
 	clientId: PropTypes.string,
 	children: PropTypes.any.isRequired,
 };

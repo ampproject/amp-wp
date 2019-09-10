@@ -83,6 +83,13 @@ class AMP_Validated_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
+	 * The transient key to use for caching the number of URLs with new validation errors.
+	 *
+	 * @var string
+	 */
+	const NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT = 'amp_new_validation_error_urls_count';
+
+	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
 	 *
 	 * @var int
@@ -112,7 +119,7 @@ class AMP_Validated_URL_Post_Type {
 				'supports'     => false,
 				'public'       => false,
 				'show_ui'      => true,
-				'show_in_menu' => ( self::should_show_in_menu() || AMP_Validation_Error_Taxonomy::should_show_in_menu() ) ? AMP_Options_Manager::OPTION_NAME : false,
+				'show_in_menu' => current_theme_supports( 'amp' ) && current_user_can( 'manage_options' ) ? AMP_Options_Manager::OPTION_NAME : false,
 				// @todo Show in rest.
 			]
 		);
@@ -154,25 +161,12 @@ class AMP_Validated_URL_Post_Type {
 	}
 
 	/**
-	 * Determine whether the admin menu item should be included.
-	 *
-	 * @return bool Whether to show in menu.
-	 */
-	public static function should_show_in_menu() {
-		global $pagenow;
-		if ( AMP_Options_Manager::is_website_experience_enabled() && current_theme_supports( AMP_Theme_Support::SLUG ) ) {
-			return true;
-		}
-		return ( 'edit.php' === $pagenow && ( isset( $_GET['post_type'] ) && self::POST_TYPE_SLUG === $_GET['post_type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-	}
-
-	/**
 	 * Add admin hooks.
 	 */
 	public static function add_admin_hooks() {
 		add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_post_list_screen_scripts' ] );
 
-		if ( AMP_Options_Manager::is_website_experience_enabled() ) {
+		if ( AMP_Options_Manager::is_website_experience_enabled() && current_user_can( 'manage_options' ) ) {
 			add_filter( 'dashboard_glance_items', [ __CLASS__, 'filter_dashboard_glance_items' ] );
 			add_action( 'rightnow_end', [ __CLASS__, 'print_dashboard_glance_styles' ] );
 		}
@@ -282,6 +276,8 @@ class AMP_Validated_URL_Post_Type {
 				false,
 				AMP__VERSION
 			);
+
+			wp_styles()->add_data( 'amp-admin-tables', 'rtl', 'replace' );
 		}
 
 		if ( 'edit-' . self::POST_TYPE_SLUG !== $screen->id ) {
@@ -294,6 +290,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'wp-pointer' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/amp-validation-tooltips.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
@@ -314,6 +312,8 @@ class AMP_Validated_URL_Post_Type {
 			[ 'common', 'amp-validation-tooltips' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-validation-error-taxonomy', 'rtl', 'replace' );
 
 		wp_enqueue_script(
 			'amp-validation-detail-toggle',
@@ -367,6 +367,33 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		$new_validation_error_urls = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+
+		if ( false === $new_validation_error_urls ) {
+			$new_validation_error_urls = static::get_validation_error_urls_count();
+			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
+		}
+
+		if ( 0 === $new_validation_error_urls ) {
+			return;
+		}
+
+		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
+			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Get the count of URLs that have new validation errors.
+	 *
+	 * @since 1.3
+	 *
+	 * @return int Count of new validation error URLs.
+	 */
+	protected static function get_validation_error_urls_count() {
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -379,15 +406,7 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
-		if ( 0 === $query->found_posts ) {
-			return;
-		}
-		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
-			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $query->found_posts ) ) . '</span></span>';
-				break;
-			}
-		}
+		return $query->found_posts;
 	}
 
 	/**
@@ -795,6 +814,8 @@ class AMP_Validated_URL_Post_Type {
 			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
 		}
 
+		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+
 		return $post_id;
 	}
 
@@ -804,9 +825,14 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
+		// We want to sort the list of plugins to avoid fluctuations due to plugins fighting for first spot
+		// to constantly invalidate our cache.
+		$plugins = get_option( 'active_plugins', [] );
+		sort( $plugins );
+
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => get_option( 'active_plugins', [] ),
+			'plugins' => $plugins,
 		];
 	}
 
@@ -1602,6 +1628,8 @@ class AMP_Validated_URL_Post_Type {
 					)
 				);
 			}
+
+			delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 		}
 
 		$redirect = wp_get_referer();

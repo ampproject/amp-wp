@@ -145,6 +145,8 @@ class AMP_Admin_Pointer {
 			AMP__VERSION
 		);
 
+		wp_styles()->add_data( 'amp-validation-tooltips', 'rtl', 'replace' );
+
 		add_action(
 			'admin_print_footer_scripts',
 			function() {

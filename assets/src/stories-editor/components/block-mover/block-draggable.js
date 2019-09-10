@@ -17,7 +17,7 @@ import { withSelect } from '@wordpress/data';
  */
 import Draggable from './draggable';
 
-const BlockDraggable = ( { children, clientId, rootClientId, blockElementId, index, onDragStart, onDragEnd } ) => {
+const BlockDraggable = ( { children, clientId, blockName, rootClientId, blockElementId, index, onDragStart, onDragEnd } ) => {
 	const transferData = {
 		type: 'block',
 		srcIndex: index,
@@ -27,6 +27,7 @@ const BlockDraggable = ( { children, clientId, rootClientId, blockElementId, ind
 
 	return (
 		<Draggable
+			blockName={ blockName }
 			elementId={ blockElementId }
 			transferData={ transferData }
 			onDragStart={ onDragStart }
@@ -49,6 +50,7 @@ BlockDraggable.propTypes = {
 	rootClientId: PropTypes.string,
 	clientId: PropTypes.string,
 	blockElementId: PropTypes.string,
+	blockName: PropTypes.string,
 	children: PropTypes.any.isRequired,
 	onDragStart: PropTypes.func,
 	onDragEnd: PropTypes.func,

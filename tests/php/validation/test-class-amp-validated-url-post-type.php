@@ -34,6 +34,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	public function test_register() {
 		add_theme_support( AMP_Theme_Support::SLUG );
 		$this->assertFalse( is_admin() );
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 		AMP_Validated_URL_Post_Type::register();
 		$amp_post_type = get_post_type_object( AMP_Validated_URL_Post_Type::POST_TYPE_SLUG );
@@ -55,32 +56,12 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Test should_show_in_menu.
-	 *
-	 * @covers AMP_Validated_URL_Post_Type::should_show_in_menu()
-	 */
-	public function test_should_show_in_menu() {
-		global $pagenow;
-		add_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertTrue( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		remove_theme_support( AMP_Theme_Support::SLUG );
-		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		$pagenow           = 'edit.php';
-		$_GET['post_type'] = 'post';
-		$this->assertFalse( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-
-		$_GET['post_type'] = AMP_Validated_URL_Post_Type::POST_TYPE_SLUG;
-		$this->assertTrue( AMP_Validated_URL_Post_Type::should_show_in_menu() );
-	}
-
-	/**
 	 * Test add_admin_hooks.
 	 *
 	 * @covers \AMP_Validated_URL_Post_Type::add_admin_hooks()
 	 */
 	public function test_add_admin_hooks() {
+		wp_set_current_user( $this->factory()->user->create( [ 'role' => 'administrator' ] ) );
 		AMP_Validated_URL_Post_Type::add_admin_hooks();
 
 		$this->assertEquals( 10, has_filter( 'dashboard_glance_items', [ self::TESTED_CLASS, 'filter_dashboard_glance_items' ] ) );
@@ -160,7 +141,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
 
-		$this->assertContains( '<span class="awaiting-mod"><span class="pending-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertContains( '<span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 	}
 
 	/**

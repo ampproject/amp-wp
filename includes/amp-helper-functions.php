@@ -361,8 +361,23 @@ function amp_get_asset_url( $file ) {
  * @return string Boilerplate code.
  */
 function amp_get_boilerplate_code() {
-	return '<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>'
-		. '<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>';
+	$stylesheets = amp_get_boilerplate_stylesheets();
+	return sprintf( '<style amp-boilerplate>%s</style><noscript><style amp-boilerplate>%s</style></noscript>', $stylesheets[0], $stylesheets[1] );
+}
+
+/**
+ * Get AMP boilerplate stylesheets.
+ *
+ * @since 1.3
+ * @link https://www.ampproject.org/docs/reference/spec#boilerplate
+ *
+ * @return string[] Stylesheets, where first is contained in style[amp-boilerplate] and the second in noscript>style[amp-boilerplate].
+ */
+function amp_get_boilerplate_stylesheets() {
+	return [
+		'body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}',
+		'body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}',
+	];
 }
 
 /**
@@ -400,10 +415,20 @@ function amp_register_default_scripts( $wp_scripts ) {
 	 * Polyfill dependencies that are registered in Gutenberg and WordPress 5.0.
 	 * Note that Gutenberg will override these at wp_enqueue_scripts if it is active.
 	 */
-	$handles = [ 'wp-i18n', 'wp-dom-ready' ];
+	$handles = [ 'wp-i18n', 'wp-dom-ready', 'wp-server-side-render' ];
 	foreach ( $handles as $handle ) {
 		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
-			$wp_scripts->add( $handle, amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ) );
+			$script_deps_path    = AMP__DIR__ . '/assets/js/' . $handle . '.deps.json';
+			$script_dependencies = file_exists( $script_deps_path )
+				? json_decode( file_get_contents( $script_deps_path ), false ) // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+				: [];
+
+			$wp_scripts->add(
+				$handle,
+				amp_get_asset_url( sprintf( 'js/%s.js', $handle ) ),
+				$script_dependencies,
+				AMP__VERSION
+			);
 		}
 	}
 
@@ -447,6 +472,15 @@ function amp_register_default_scripts( $wp_scripts ) {
 			array_pop( $versions );
 			$extensions[ $script_spec[ AMP_Rule_Spec::TAG_SPEC ]['extension_spec']['name'] ] = array_pop( $versions );
 		}
+	}
+
+	if ( isset( $extensions['amp-carousel'] ) ) {
+		/*
+		 * The 0.2 version of amp-carousel depends on the amp-base-carousel component, but this is still experimental.
+		 * Also, the validator spec does not currently specify what base dependencies a given component has.
+		 * @todo Revisit once amp-base-carousel is no longer experimental. Add support for obtaining a list of extensions that depend on other extensions to include in the script dependencies when registering below.
+		 */
+		$extensions['amp-carousel'] = '0.1';
 	}
 
 	foreach ( $extensions as $extension => $version ) {
@@ -663,7 +697,21 @@ function amp_print_analytics( $analytics ) {
 	if ( '' === $analytics ) {
 		$analytics = [];
 	}
+
 	$analytics_entries = amp_get_analytics( $analytics );
+
+	/**
+	 * Triggers before analytics entries are printed as amp-analytics tags.
+	 *
+	 * This is useful for printing additional `amp-analytics` tags to the page without having to refactor any existing
+	 * markup generation logic to use the data structure mutated by the `amp_analytics_entries` filter. For such cases,
+	 * this action should be used for printing `amp-analytics` tags as opposed to using the `wp_footer` and
+	 * `amp_post_template_footer` actions; this will ensure analytics will also be included on AMP Stories.
+	 *
+	 * @since 1.3
+	 * @param array $analytics_entries Analytics entries, already potentially modified by the amp_analytics_entries filter.
+	 */
+	do_action( 'amp_print_analytics', $analytics_entries );
 
 	if ( empty( $analytics_entries ) ) {
 		return;
@@ -990,7 +1038,7 @@ function amp_get_publisher_logo() {
 	// Fallback to serving the WordPress logo.
 	if ( empty( $logo_image_url ) ) {
 		if ( $is_amp_story ) {
-			$logo_image_url = amp_get_asset_url( 'images/amp-story-fallback-wordpress-publisher-logo.png' );
+			$logo_image_url = amp_get_asset_url( 'images/stories-editor/amp-story-fallback-wordpress-publisher-logo.png' );
 		} else {
 			$logo_image_url = amp_get_asset_url( 'images/amp-page-fallback-wordpress-publisher-logo.png' );
 		}

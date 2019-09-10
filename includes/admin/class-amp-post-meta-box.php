@@ -133,7 +133,7 @@ class AMP_Post_Meta_Box {
 		$validate = (
 			isset( $screen->base ) &&
 			'post' === $screen->base &&
-			! $screen->is_block_editor &&
+			( ! isset( $screen->is_block_editor ) || ! $screen->is_block_editor ) &&
 			is_post_type_viewable( $post->post_type ) &&
 			AMP_Story_Post_Type::POST_TYPE_SLUG !== $post->post_type
 		);
@@ -148,6 +148,8 @@ class AMP_Post_Meta_Box {
 			false,
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::ASSETS_HANDLE, 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::ASSETS_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )
@@ -207,6 +209,8 @@ class AMP_Post_Meta_Box {
 			[],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( self::BLOCK_ASSET_HANDLE, 'rtl', 'replace' );
 
 		$script_deps_path    = AMP__DIR__ . '/assets/js/' . self::BLOCK_ASSET_HANDLE . '.deps.json';
 		$script_dependencies = file_exists( $script_deps_path )

@@ -114,6 +114,8 @@ class AMP_Playlist_Embed_Handler extends AMP_Base_Embed_Handler {
 			[ 'wp-mediaelement' ],
 			AMP__VERSION
 		);
+
+		wp_styles()->add_data( 'amp-playlist-shortcode', 'rtl', 'replace' );
 	}
 
 	/**

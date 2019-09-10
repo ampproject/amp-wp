@@ -166,9 +166,18 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		$is_lightbox = isset( $attributes['amp-lightbox'] ) && true === filter_var( $attributes['amp-lightbox'], FILTER_VALIDATE_BOOLEAN );
 		if ( isset( $attributes['amp-carousel'] ) && false === filter_var( $attributes['amp-carousel'], FILTER_VALIDATE_BOOLEAN ) ) {
 			if ( true === $is_lightbox ) {
+				$add_lightbox_attribute = static function ( $attr ) {
+					$attr['lightbox'] = '';
+					return $attr;
+				};
+
 				remove_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10 );
+				add_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
+
 				$attributes['link'] = 'none';
-				$html               = '<ul class="amp-lightbox">' . gallery_shortcode( $attributes ) . '</ul>';
+				$html               = gallery_shortcode( $attributes );
+
+				remove_filter( 'wp_get_attachment_image_attributes', $add_lightbox_attribute );
 				add_filter( 'post_gallery', [ $this, 'maybe_override_gallery' ], 10, 2 );
 			}
 
@@ -217,12 +226,14 @@ class AMP_Gallery_Embed_Handler extends AMP_Base_Embed_Handler {
 		foreach ( $args['images'] as $props ) {
 			$image_atts = [
 				'src'    => $props['url'],
-				'srcset' => $props['srcset'],
 				'width'  => $props['width'],
 				'height' => $props['height'],
 				'layout' => 'responsive',
 				'alt'    => $props['alt'],
 			];
+			if ( ! empty( $props['srcset'] ) ) {
+				$image_atts['srcset'] = $props['srcset'];
+			}
 
 			$this_aspect_ratio = $props['width'] / $props['height'];
 			if ( $this_aspect_ratio > $max_aspect_ratio ) {

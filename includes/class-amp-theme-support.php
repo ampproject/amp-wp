@@ -976,9 +976,6 @@ class AMP_Theme_Support {
 	 */
 	public static function add_hooks() {
 
-		// Let the AMP plugin manage service worker streaming in the PWA plugin.
-		remove_action( 'template_redirect', 'WP_Service_Worker_Navigation_Routing_Component::start_output_buffering_stream_fragment', PHP_INT_MAX );
-
 		// Remove core actions which are invalid AMP.
 		remove_action( 'wp_head', 'wp_post_preview_js', 1 );
 		remove_action( 'wp_head', 'wp_oembed_add_host_js' );
@@ -1017,34 +1014,6 @@ class AMP_Theme_Support {
 				return preg_replace( '/(?<=<img\s)/', ' data-amp-noloading="" ', $html );
 			},
 			1
-		);
-
-		/*
-		 * "AMP HTML documents MUST contain the AMP boilerplate code (head > style[amp-boilerplate] and noscript > style[amp-boilerplate])
-		 * in their head tag." {@link https://www.ampproject.org/docs/fundamentals/spec#required-markup AMP Required markup}
-		 *
-		 * After "Specify the <link> tag for your favicon.", then
-		 * "Specify any custom styles by using the <style amp-custom> tag."
-		 *
-		 * Note that the boilerplate is added at the very end because:
-		 * "Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles from accidentally
-		 * overriding the boilerplate css rules." {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
-		 *
-		 * Other required markup is added in the ensure_required_markup method, including meta charset, meta viewport, and rel=canonical link.
-		 */
-		add_action(
-			'wp_head',
-			static function() {
-				echo '<style amp-custom></style>';
-			},
-			0
-		);
-		add_action(
-			'wp_head',
-			static function() {
-				echo amp_get_boilerplate_code(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-			},
-			PHP_INT_MAX
 		);
 
 		add_action( 'admin_bar_init', [ __CLASS__, 'init_admin_bar' ] );
@@ -1437,8 +1406,9 @@ class AMP_Theme_Support {
 	 *
 	 * @since 0.7
 	 * @link https://www.ampproject.org/docs/reference/spec#required-markup
-	 * @link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos
+	 * @link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/
 	 * @todo All of this might be better placed inside of a sanitizer.
+	 * @todo Consider removing any scripts that are not among the $script_handles.
 	 *
 	 * @param DOMDocument $dom            Document.
 	 * @param string[]    $script_handles AMP script handles for components identified during output buffering.
@@ -1450,6 +1420,8 @@ class AMP_Theme_Support {
 		 * @var DOMElement $meta
 		 * @var DOMElement $script
 		 * @var DOMElement $link
+		 * @var DOMElement $style
+		 * @var DOMElement $noscript
 		 */
 
 		$xpath = new DOMXPath( $dom );
@@ -1499,9 +1471,9 @@ class AMP_Theme_Support {
 		 * there are a few basic optimizations that you can apply. The key is to structure the <head> section
 		 * in a way so that all render-blocking scripts and custom fonts load as fast as possible."
 		 *
-		 * "The first tag should be the meta charset tag, followed by any remaining meta tags."
+		 * "1. The first tag should be the meta charset tag, followed by any remaining meta tags."
 		 *
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
 		$meta_charset  = null;
 		$meta_viewport = null;
@@ -1609,10 +1581,10 @@ class AMP_Theme_Support {
 
 		/* phpcs:ignore Squiz.PHP.CommentedOutCode.Found
 		 *
-		 * "Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
+		 * "2. Next, preload the AMP runtime v0.js <script> tag with <link as=script href=https://cdn.ampproject.org/v0.js rel=preload>.
 		 * The AMP runtime should start downloading as soon as possible because the AMP boilerplate hides the document via body { visibility:hidden }
 		 * until the AMP runtime has loaded. Preloading the AMP runtime tells the browser to download the script with a higher priority."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit#heading=h.2ha259c3ffos Optimize the AMP Runtime loading}
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ Optimize the AMP Runtime loading}
 		 */
 		$prioritized_preloads = [];
 		if ( ! isset( $links['preload'] ) ) {
@@ -1629,6 +1601,10 @@ class AMP_Theme_Support {
 			]
 		);
 
+		/*
+		 * "3. If your page includes render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, amp-story),
+		 * preload those extensions as they're required by the AMP runtime for rendering the page."
+		 */
 		$amp_script_handles = array_keys( $amp_scripts );
 		foreach ( array_intersect( $render_delaying_extensions, $amp_script_handles ) as $script_handle ) {
 			if ( ! in_array( $script_handle, $render_delaying_extensions, true ) ) {
@@ -1646,6 +1622,12 @@ class AMP_Theme_Support {
 		}
 		$links['preload'] = array_merge( $prioritized_preloads, $links['preload'] );
 
+		/*
+		 * "4. Use preconnect to speedup the connection to other origin where the full resource URL is not known ahead of time,
+		 * for example, when using Google Fonts."
+		 *
+		 * Note that \AMP_Style_Sanitizer::process_link_element() will ensure preconnect links for Google Fonts are present.
+		 */
 		$link_relations = [ 'preconnect', 'dns-prefetch', 'preload', 'prerender', 'prefetch' ];
 		foreach ( $link_relations as $rel ) {
 			if ( ! isset( $links[ $rel ] ) ) {
@@ -1660,15 +1642,22 @@ class AMP_Theme_Support {
 			}
 		}
 
-		/*
-		 * "Specify the <script> tags for render-delaying extensions (e.g., amp-experiment, amp-dynamic-css-classes, and amp-story)."
-		 * "Specify the <script> tags for remaining extensions (e.g., amp-bind, ...). These extensions are not render-delaying and therefore
-		 * should not be preloaded because they might take away important bandwidth for the initial render."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
-		 */
+		// "5. Load the AMP runtime."
 		if ( isset( $amp_scripts['amp-runtime'] ) ) {
 			$ordered_scripts['amp-runtime'] = $amp_scripts['amp-runtime'];
+			unset( $amp_scripts['amp-runtime'] );
+		} else {
+			$script = $dom->createElement( 'script' );
+			$script->setAttribute( 'async', '' );
+			$script->setAttribute( 'src', $runtime_src );
+			$ordered_scripts['amp-runtime'] = $script;
 		}
+
+		/*
+		 * "6. Specify the <script> tags for render-delaying extensions (e.g., amp-experiment amp-dynamic-css-classes and amp-story"
+		 *
+		 * {@link https://amp.dev/documentation/guides-and-tutorials/optimize-and-measure/optimize_amp/ AMP Hosting Guide}
+		 */
 		foreach ( $render_delaying_extensions as $extension ) {
 			if ( isset( $amp_scripts[ $extension ] ) ) {
 				$ordered_scripts[ $extension ] = $amp_scripts[ $extension ];
@@ -1676,6 +1665,10 @@ class AMP_Theme_Support {
 			}
 		}
 
+		/*
+		 * "7. Specify the <script> tags for remaining extensions (e.g., amp-bind ...). These extensions are not render-delaying
+		 * and therefore should not be preloaded as they might take away important bandwidth for the initial render."
+		 */
 		$ordered_scripts = array_merge( $ordered_scripts, $amp_scripts );
 		foreach ( $ordered_scripts as $ordered_script ) {
 			$head->insertBefore( $ordered_script, $previous_node->nextSibling );
@@ -1683,18 +1676,54 @@ class AMP_Theme_Support {
 		}
 
 		/*
-		 * "Specify the <link> tag for your favicon."
-		 * {@link https://docs.google.com/document/d/169XUxtSSEJb16NfkrCr9y5lqhUR7vxXEAsNxBzg07fM/edit AMP Hosting Guide}
+		 * "8. Specify any custom styles by using the <style amp-custom> tag."
 		 */
-		if ( isset( $links['icon'] ) ) {
-			foreach ( $links['icon'] as $link ) {
-				$link->parentNode->removeChild( $link ); // So we can move it.
-				$head->insertBefore( $link, $previous_node->nextSibling );
-				$previous_node = $link;
+		$style = $xpath->query( './style[ @amp-custom ]', $head )->item( 0 );
+		if ( $style ) {
+			// Ensure the CSS manifest comment remains before style[amp-custom].
+			if ( $style->previousSibling instanceof DOMComment ) {
+				$comment = $style->previousSibling;
+				$comment->parentNode->removeChild( $comment );
+				$head->insertBefore( $comment, $previous_node->nextSibling );
+				$previous_node = $comment;
 			}
+
+			$style->parentNode->removeChild( $style );
+			$head->insertBefore( $style, $previous_node->nextSibling );
+			$previous_node = $style;
 		}
 
-		// Note the style[amp-custom] and style[amp-boilerplate] are output in the add_hooks() method.
+		/*
+		 * "9. Add any other tags allowed in the <head> section. In particular, any external fonts should go last since
+		 * they block rendering."
+		 */
+
+		/*
+		 * "10. Finally, specify the AMP boilerplate code. By putting the boilerplate code last, it prevents custom styles
+		 * from accidentally overriding the boilerplate css rules."
+		 */
+		$style = $xpath->query( './style[ @amp-boilerplate ]', $head )->item( 0 );
+		if ( ! $style ) {
+			$style = $dom->createElement( 'style' );
+			$style->setAttribute( 'amp-boilerplate', '' );
+			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[0] ) );
+		} else {
+			$style->parentNode->removeChild( $style ); // So we can move it.
+		}
+		$head->appendChild( $style );
+
+		$noscript = $xpath->query( './noscript[ style[ @amp-boilerplate ] ]', $head )->item( 0 );
+		if ( ! $noscript ) {
+			$noscript = $dom->createElement( 'noscript' );
+			$style    = $dom->createElement( 'style' );
+			$style->setAttribute( 'amp-boilerplate', '' );
+			$style->appendChild( $dom->createTextNode( amp_get_boilerplate_stylesheets()[1] ) );
+			$noscript->appendChild( $style );
+		} else {
+			$noscript->parentNode->removeChild( $noscript ); // So we can move it.
+		}
+		$head->appendChild( $noscript );
+
 		unset( $previous_node );
 	}
 
@@ -1843,15 +1872,12 @@ class AMP_Theme_Support {
 			);
 		}
 
-		// Abort if the response was not HTML.
-		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || '<' !== substr( ltrim( $response ), 0, 1 ) ) {
+		/*
+		 * Abort if the response was not HTML. To be post-processed as an AMP page, the output-buffered document must
+		 * have the HTML mime type and it must start with <html> followed by <head> tag (with whitespace, doctype, and comments optionally interspersed).
+		 */
+		if ( 'text/html' !== substr( AMP_HTTP::get_response_content_type(), 0, 9 ) || ! preg_match( '#^(?:<!.*?>|\s+)*<html.*?>(?:<!.*?>|\s+)*<head\b(.*?)>#is', $response ) ) {
 			return $response;
-		}
-
-		// Dependencies on the PWA plugin for service worker streaming.
-		$stream_fragment = null;
-		if ( class_exists( 'WP_Service_Worker_Navigation_Routing_Component' ) && current_theme_supports( WP_Service_Worker_Navigation_Routing_Component::STREAM_THEME_SUPPORT ) ) {
-			$stream_fragment = WP_Service_Worker_Navigation_Routing_Component::get_stream_fragment_query_var();
 		}
 
 		/**
@@ -1891,7 +1917,6 @@ class AMP_Theme_Support {
 				'allow_dirty_styles'   => self::is_customize_preview_iframe(), // Dirty styles only needed when editing (e.g. for edit shortcodes).
 				'allow_dirty_scripts'  => is_customize_preview(), // Scripts are always needed to inject changeset UUID.
 				'user_can_validate'    => AMP_Validation_Manager::has_cap(),
-				'stream_fragment'      => $stream_fragment,
 			],
 			$args,
 			compact( 'enable_response_caching' )
@@ -2035,31 +2060,19 @@ class AMP_Theme_Support {
 		 * See <https://www.w3.org/International/questions/qa-html-encoding-declarations>.
 		 */
 		if ( ! preg_match( '#<meta[^>]+charset=#i', substr( $response, 0, 1024 ) ) ) {
+			$meta_charset = sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) );
+
 			$response = preg_replace(
-				'/(<head[^>]*>)/i',
-				'$1' . sprintf( '<meta charset="%s">', esc_attr( get_bloginfo( 'charset' ) ) ),
+				'/(<head\b.*?>)/is',
+				'$1' . $meta_charset,
 				$response,
-				1
+				1,
+				$count
 			);
 		}
 
 		$dom  = AMP_DOM_Utils::get_dom( $response );
 		$head = $dom->getElementsByTagName( 'head' )->item( 0 );
-
-		// Remove scripts that are being added for PWA service worker streaming for restoration later.
-		$stream_combine_script_define_element     = null;
-		$stream_combine_script_define_placeholder = null;
-		$stream_combine_script_invoke_element     = null;
-		$stream_combine_script_invoke_placeholder = null;
-		if ( 'header' === $stream_fragment ) {
-			$stream_combine_script_define_element = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
-			if ( $stream_combine_script_define_element ) {
-				$stream_combine_script_define_placeholder = $dom->createComment( WP_Service_Worker_Navigation_Routing_Component::STREAM_COMBINE_DEFINE_SCRIPT_ID );
-				$stream_combine_script_define_element->parentNode->replaceChild( $stream_combine_script_define_placeholder, $stream_combine_script_define_element );
-			}
-		} elseif ( 'body' === $stream_fragment ) {
-			$stream_combine_script_invoke_placeholder = $dom->getElementById( WP_Service_Worker_Navigation_Routing_Component::STREAM_FRAGMENT_BOUNDARY_ELEMENT_ID );
-		}
 
 		// Move anything after </html>, such as Query Monitor output added at shutdown, to be moved before </body>.
 		$body = $dom->getElementsByTagName( 'body' )->item( 0 );
@@ -2180,41 +2193,8 @@ class AMP_Theme_Support {
 			]
 		);
 
-		// For service worker streaming, restore the script that was removed above and obtain the script that should be added to the body fragment.
-		$truncate_after_comment  = null;
-		$truncate_before_comment = null;
-		if ( $stream_fragment ) {
-			if ( $stream_combine_script_define_placeholder && $stream_combine_script_define_element ) {
-				$stream_combine_script_define_placeholder->parentNode->replaceChild( $stream_combine_script_define_element, $stream_combine_script_define_placeholder );
-				$truncate_after_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_HEADER' );
-				$stream_combine_script_define_element->parentNode->insertBefore( $truncate_after_comment, $stream_combine_script_define_element->nextSibling );
-			}
-			if ( $stream_combine_script_invoke_placeholder ) {
-				$stream_combine_script_invoke_element = WP_Service_Worker_Navigation_Routing_Component::get_header_combine_invoke_script( $dom, false );
-				$stream_combine_script_invoke_placeholder->parentNode->replaceChild( $stream_combine_script_invoke_element, $stream_combine_script_invoke_placeholder );
-				$truncate_before_comment = $dom->createComment( 'AMP_TRUNCATE_RESPONSE_FOR_STREAM_BODY' );
-				$stream_combine_script_invoke_element->parentNode->insertBefore( $truncate_before_comment, $stream_combine_script_invoke_element );
-			}
-		}
-
 		$response  = "<!DOCTYPE html>\n";
 		$response .= AMP_DOM_Utils::get_content_from_dom_node( $dom, $dom->documentElement );
-
-		// For service worker streaming, make sure that the header response doesn't contain closing tags, and that the body fragment starts with the required script tag.
-		if ( $truncate_after_comment ) {
-			$search   = sprintf( '<!--%s-->', $truncate_after_comment->nodeValue );
-			$position = strpos( $response, $search );
-			if ( false !== $position ) {
-				$response = substr( $response, 0, $position );
-			}
-		}
-		if ( $truncate_before_comment ) {
-			$search   = sprintf( '<!--%s-->', $truncate_before_comment->nodeValue );
-			$position = strpos( $response, $search );
-			if ( false !== $position ) {
-				$response = substr( $response, $position + strlen( $search ) );
-			}
-		}
 
 		AMP_HTTP::send_server_timing( 'amp_dom_serialize', -$dom_serialize_start, 'AMP DOM Serialize' );
 
@@ -2311,10 +2291,9 @@ class AMP_Theme_Support {
 	 * @return void
 	 */
 	public static function enqueue_assets() {
-		wp_enqueue_script( 'amp-runtime' );
-
 		// Enqueue default styles expected by sanitizer.
 		wp_enqueue_style( 'amp-default', amp_get_asset_url( 'css/amp-default.css' ), [], AMP__VERSION );
+		wp_styles()->add_data( 'amp-default', 'rtl', 'replace' );
 	}
 
 	/**
