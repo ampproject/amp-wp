@@ -360,6 +360,28 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
+		$pending_count = static::get_pending_urls_count();
+
+		if ( 0 === $pending_count ) {
+			return;
+		}
+
+		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
+			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $pending_count ) ) . '</span></span>';
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Get the count of pending URLs that have validation errors.
+	 *
+	 * @since 1.3
+	 *
+	 * @return int Count of pending URLs.
+	 */
+	protected static function get_pending_urls_count() {
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -372,15 +394,7 @@ class AMP_Validated_URL_Post_Type {
 			]
 		);
 
-		if ( 0 === $query->found_posts ) {
-			return;
-		}
-		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
-			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $query->found_posts ) ) . '</span></span>';
-				break;
-			}
-		}
+		return $query->found_posts;
 	}
 
 	/**
