@@ -51,8 +51,9 @@ class Autocomplete extends OriginalAutocomplete {
 
 		const inputFocused = focused === -1;
 		const noOptionsAvailable = options.length === 0;
-		const queryNotEmpty = query && query.length !== 0;
-		const queryLongEnough = query && query.length >= minLength;
+		const queryLength = ( query ) ? query.length : 0;
+		const queryNotEmpty = queryLength !== 0;
+		const queryLongEnough = queryLength >= minLength;
 		const showNoOptionsFound = this.props.showNoOptionsFound &&
 			inputFocused && noOptionsAvailable && queryNotEmpty && queryLongEnough;
 
@@ -76,14 +77,14 @@ class Autocomplete extends OriginalAutocomplete {
 		const optionBeginsWithQuery = selectedOptionText &&
 			selectedOptionText.toLowerCase().indexOf( query.toLowerCase() ) === 0;
 		const hintValue = ( optionBeginsWithQuery && autoselect ) ?
-			query + selectedOptionText.substr( query.length ) :
+			query + selectedOptionText.substr( queryLength ) :
 			'';
 
 		return (
 			<div className={ wrapperClassName } onKeyDown={ this.handleKeyDown } role="combobox" tabIndex="-1" aria-expanded={ menuOpen ? 'true' : 'false' }>
 				<Status
 					length={ options.length }
-					queryLength={ query && query.length }
+					queryLength={ queryLength }
 					minQueryLength={ minLength }
 					selectedOption={ this.templateInputValue( options[ selected ] ) }
 					selectedOptionIndex={ selected }

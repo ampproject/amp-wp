@@ -48,15 +48,7 @@ defaultRenderToggle.propTypes = {
 };
 
 class Inserter extends Component {
-	constructor( ...args ) {
-		super( ...args );
-
-		this.onToggle = this.onToggle.bind( this );
-		this.renderToggle = this.renderToggle.bind( this );
-		this.renderContent = this.renderContent.bind( this );
-	}
-
-	onToggle( isOpen ) {
+	onToggle = ( isOpen ) => {
 		const { onToggle } = this.props;
 
 		// Surface toggle callback to parent component
@@ -74,7 +66,7 @@ class Inserter extends Component {
 	 *
 	 * @return {ReactElement} Dropdown toggle element.
 	 */
-	renderToggle( { onToggle, isOpen } ) {
+	renderToggle = ( { onToggle, isOpen } ) => {
 		const {
 			disabled,
 			renderToggle = defaultRenderToggle,
@@ -90,7 +82,7 @@ class Inserter extends Component {
 	 *
 	 * @return {ReactElement} Dropdown content element.
 	 */
-	renderContent( { onClose } ) {
+	renderContent = ( { onClose } ) => {
 		const { rootClientId, clientId, isAppender } = this.props;
 
 		return (
