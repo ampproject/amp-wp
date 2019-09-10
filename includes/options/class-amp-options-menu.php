@@ -696,7 +696,6 @@ class AMP_Options_Menu {
 	 * @since 1.3
 	 */
 	private function render_stories_settings_page_advance() {
-		var_dump( get_post_meta( 42 ) );
 		$meta_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
 		$auto_advance_after_options = $meta_definitions['auto_advance_after']['data']['options'];
 

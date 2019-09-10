@@ -36,8 +36,13 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		$this->_original_options = AMP_Options_Manager::get_options();
 
 		// Set stories settings for testing.
-		AMP_Options_Manager::update_option( 'stories_settings_auto_advance_after', 'time' );
-		AMP_Options_Manager::update_option( 'stories_settings_auto_advance_after_duration', 4 );
+		AMP_Options_Manager::update_option(
+			AMP_Story_Post_Type::STORY_SETTINGS_OPTION,
+			[
+				'auto_advance_after' => 'time',
+				'auto_advance_after_duration' => '10',
+			]
+		);
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::STORIES_EXPERIENCE ] );
 	}
@@ -721,7 +726,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		return [
 			[
 				[
-					'stories_settings_auto_advance_after' => [
+					'auto_advance_after' => [
 						'meta_args' => [
 							'type'              => 'string',
 							'sanitize_callback' => function( $value ) {
@@ -758,7 +763,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 							],
 						],
 					],
-					'stories_settings_auto_advance_after_duration' => [
+					'auto_advance_after_duration' => [
 						'meta_args' => [
 							'type'              => 'integer',
 							'sanitize_callback' => function( $value ) {
@@ -804,10 +809,10 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		);
 		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
 
-		$advance_after = get_post_meta( $new_story->ID, 'stories_settings_auto_advance_after', true );
-		$advance_after_duration = get_post_meta( $new_story->ID, 'stories_settings_auto_advance_after_duration', true );
+		$advance_after = get_post_meta( $new_story->ID, 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, 'auto_advance_after_duration', true );
 
-		$this->assertEquals( $advance_after, 'time' );
-		$this->assertEquals( $advance_after_duration, 4 );
+		$this->assertEquals( 'time', $advance_after );
+		$this->assertEquals( 10, $advance_after_duration );
 	}
 }
