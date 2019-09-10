@@ -45,6 +45,7 @@ function PreviewPicker( {
 							onClick={ onToggle }
 							aria-expanded={ isOpen }
 							aria-label={ ariaLabel( currentOption ) }
+							id={ id }
 						>
 							{ renderToggle( currentOption ) }
 						</Button>
