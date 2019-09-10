@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { sprintf, __, _n } from '@wordpress/i18n';
 import {
 	PanelBody,
 	IconButton,
@@ -34,14 +34,22 @@ const AnimationSettings = ( { clientId } ) => {
 		const { isPlayingAnimation } = select( 'amp/story' );
 		return isPlayingAnimation( clientId );
 	} );
-	const hasAnimatedBlocks = useSelect( ( select ) => {
+	const animatedBlocks = useSelect( ( select ) => {
+		const { getBlock } = select( 'core/block-editor' );
 		const { getAnimatedBlocksPerPage } = select( 'amp/story' );
-		return getAnimatedBlocksPerPage( clientId ).find( ( { animationType } ) => animationType );
+		return getAnimatedBlocksPerPage( clientId ).filter( ( { id, animationType } ) => animationType && getBlock( id ) );
 	} );
 
-	if ( ! hasAnimatedBlocks ) {
+	if ( ! animatedBlocks.length ) {
 		return null;
 	}
+
+	const buttonLabel = isPlayingAnimations ?
+		__( 'Stop All Animations', 'amp' ) :
+		sprintf(
+			_n( 'Play %s Animation', 'Play %s Animations', animatedBlocks.length, 'amp' ),
+			animatedBlocks.length
+		);
 
 	return (
 		<PanelBody
@@ -52,7 +60,7 @@ const AnimationSettings = ( { clientId } ) => {
 				className="is-button is-default"
 				onClick={ isPlayingAnimations ? onAnimationStop : onAnimationStart }
 			>
-				{ isPlayingAnimations ? __( 'Stop All Animations', 'amp' ) : __( 'Play All Animations', 'amp' ) }
+				{ buttonLabel }
 			</IconButton>
 		</PanelBody>
 	);
