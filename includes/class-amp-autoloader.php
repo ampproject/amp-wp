@@ -102,7 +102,6 @@ class AMP_Autoloader {
 		'AMP_CLI_Namespace'                  => 'includes/cli/class-amp-cli-namespace',
 		'AMP_CLI_Validation_Command'         => 'includes/cli/class-amp-cli-validation-command',
 		'AMP_String_Utils'                   => 'includes/utils/class-amp-string-utils',
-		'AMP_WP_Utils'                       => 'includes/utils/class-amp-wp-utils',
 		'AMP_Widget_Archives'                => 'includes/widgets/class-amp-widget-archives',
 		'AMP_Widget_Categories'              => 'includes/widgets/class-amp-widget-categories',
 		'AMP_Widget_Text'                    => 'includes/widgets/class-amp-widget-text',
