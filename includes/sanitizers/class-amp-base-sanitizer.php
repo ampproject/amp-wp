@@ -280,10 +280,10 @@ abstract class AMP_Base_Sanitizer {
 			// top, left, bottom, right are used.
 			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] )
 				&& 'absolute' === $styles['position']
-				&& '0' === (string) $styles['top']
-				&& '0' === (string) $styles['left']
-				&& '0' === (string) $styles['bottom']
-				&& '0' === (string) $styles['right']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
+				&& 0 === (int) $styles['bottom']
+				&& 0 === (int) $styles['right']
 			) {
 				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] );
 				if ( ! empty( $styles ) ) {
@@ -296,8 +296,8 @@ abstract class AMP_Base_Sanitizer {
 			// top, left, width, height are used.
 			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] )
 				&& 'absolute' === $styles['position']
-				&& '0' === (string) $styles['top']
-				&& '0' === (string) $styles['left']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
 				&& '100%' === (string) $styles['width']
 				&& '100%' === (string) $styles['height']
 			) {
