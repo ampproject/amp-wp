@@ -34,8 +34,6 @@ export class IgnoreNestedEvents extends Component {
 	constructor( ...args ) {
 		super( ...args );
 
-		this.proxyEvent = this.proxyEvent.bind( this );
-
 		// The event map is responsible for tracking an event type to a React
 		// component prop name, since it is easy to determine event type from
 		// a React prop name, but not the other way around.
@@ -50,7 +48,7 @@ export class IgnoreNestedEvents extends Component {
 	 *
 	 * @return {void}
 	 */
-	proxyEvent( event ) {
+	proxyEvent = ( event ) => {
 		const isHandled = Boolean( event.nativeEvent._blockHandled );
 
 		// Assign into the native event, since React will reuse their synthetic
