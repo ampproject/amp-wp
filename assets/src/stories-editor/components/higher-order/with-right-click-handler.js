@@ -57,16 +57,16 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		}
 		const relativePositionX = event.clientX - wrapperDimensions.left;
 		const relativePositionY = event.clientY - wrapperDimensions.top - toolBarHeight;
-		const clientID = getCurrentPage();
+		const clientId = getCurrentPage();
 
 		let insidePercentageY = 0;
 		let insidePercentageX = 0;
 
-		const block = getBlockDOMNode( clientID );
-		if ( block ) {
-			const blockPostions = block.getBoundingClientRect();
-			const insideY = event.clientY - blockPostions.top;
-			const insideX = event.clientX - blockPostions.left;
+		const page = getBlockDOMNode( clientId );
+		if ( page ) {
+			const pagePostions = page.getBoundingClientRect();
+			const insideY = event.clientY - pagePostions.top;
+			const insideX = event.clientX - pagePostions.left;
 			insidePercentageY = getPercentageFromPixels( 'y', insideY );
 			insidePercentageX = getPercentageFromPixels( 'x', insideX );
 		}
