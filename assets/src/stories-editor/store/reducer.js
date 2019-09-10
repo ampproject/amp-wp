@@ -2,12 +2,12 @@
  * WordPress dependencies
  */
 import { combineReducers } from '@wordpress/data';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
-import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Reducer handling animation state changes.
