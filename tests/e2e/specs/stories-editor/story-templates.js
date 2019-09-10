@@ -243,9 +243,11 @@ describe( 'Story Templates', () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			const blockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
-			await openTemplateInserter();
-			const newBlockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			await page.click( '.block-editor-inserter .editor-inserter__amp-inserter' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button:not(disabled)[aria-label="Previous Page"]' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button[disabled][aria-label="Next Page"]' );
 
+			const newBlockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
 			expect( newBlockOrder ).toHaveLength( blockOrder.length + 1 );
 			expect( await getBlocksOnPage() ).toHaveLength( 0 );
 		} );
