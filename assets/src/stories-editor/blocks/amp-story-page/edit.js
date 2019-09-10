@@ -221,6 +221,7 @@ class PageEdit extends Component {
 			allowedBlocks,
 			allowedBackgroundMediaTypes,
 		} = this.props;
+
 		const {
 			mediaId,
 			mediaType,
@@ -482,7 +483,6 @@ PageEdit.propTypes = {
 	} ).isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
-	isFirstPage: PropTypes.bool.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
 	totalAnimationDuration: PropTypes.number.isRequired,
@@ -507,7 +507,7 @@ export default compose(
 			getBlockOrder,
 			getBlockRootClientId,
 		} = select( 'core/block-editor' );
-		const { getAnimatedBlocks } = select( 'amp/story' );
+		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
@@ -536,7 +536,6 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
-			isFirstPage,
 		};
 	} ),
 )( PageEdit );

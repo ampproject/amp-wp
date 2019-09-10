@@ -12,6 +12,7 @@ import {
 	clickOnMoreMenuItem,
 	deactivateExperience,
 	openTemplateInserter,
+	removeAllBlocks,
 	searchForBlock as searchForStoryBlock,
 	getBlocksOnPage,
 	wpDataSelect,
@@ -30,12 +31,7 @@ async function addReusableBlock() {
 		await clickOnMoreMenuItem( 'Top Toolbar' );
 	}
 
-	// Remove all blocks from the post so that we're working with a clean slate.
-	await page.evaluate( () => {
-		const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-		const clientIds = blocks.map( ( block ) => block.clientId );
-		wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
-	} );
+	await removeAllBlocks();
 
 	// Insert a paragraph block
 	await insertBlock( 'Paragraph' );

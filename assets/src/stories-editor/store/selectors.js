@@ -100,6 +100,16 @@ export function isReordering( state ) {
 }
 
 /**
+ * Returns copied markup for pasting workaround.
+ *
+ * @param {Object} state Editor state.
+ * @return {string} Markup.
+ */
+export function getCopiedMarkup( state ) {
+	return state.copiedMarkup || '';
+}
+
+/**
  * Returns the stories editor settings.
  *
  * @param {Object} state Editor state.
