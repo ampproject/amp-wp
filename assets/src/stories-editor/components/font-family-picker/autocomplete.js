@@ -32,7 +32,7 @@ class Autocomplete extends OriginalAutocomplete {
 	 * Override render method, to add clear font button.
 	 *
 	 */
-	render() {
+	render() { // eslint-disable-line complexity
 		const {
 			cssNamespace,
 			displayMenu,
@@ -51,8 +51,8 @@ class Autocomplete extends OriginalAutocomplete {
 
 		const inputFocused = focused === -1;
 		const noOptionsAvailable = options.length === 0;
-		const queryNotEmpty = query.length !== 0;
-		const queryLongEnough = query.length >= minLength;
+		const queryNotEmpty = query && query.length !== 0;
+		const queryLongEnough = query && query.length >= minLength;
 		const showNoOptionsFound = this.props.showNoOptionsFound &&
 			inputFocused && noOptionsAvailable && queryNotEmpty && queryLongEnough;
 
@@ -78,13 +78,12 @@ class Autocomplete extends OriginalAutocomplete {
 		const hintValue = ( optionBeginsWithQuery && autoselect ) ?
 			query + selectedOptionText.substr( query.length ) :
 			'';
-		const showHint = hintValue;
 
 		return (
 			<div className={ wrapperClassName } onKeyDown={ this.handleKeyDown } role="combobox" tabIndex="-1" aria-expanded={ menuOpen ? 'true' : 'false' }>
 				<Status
 					length={ options.length }
-					queryLength={ query.length }
+					queryLength={ query && query.length }
 					minQueryLength={ minLength }
 					selectedOption={ this.templateInputValue( options[ selected ] ) }
 					selectedOptionIndex={ selected }
@@ -93,7 +92,7 @@ class Autocomplete extends OriginalAutocomplete {
 					tSelectedOption={ tStatusSelectedOption }
 					tResults={ tStatusResults }
 				/>
-				{ showHint && (
+				{ hintValue && (
 					<span><input className={ hintClassName } readOnly tabIndex="-1" value={ hintValue } /></span>
 				) }
 

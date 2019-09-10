@@ -69,7 +69,7 @@ function FontFamilyPicker( {
 				onConfirm={ onChange }
 				showAllValues={ false }
 				confirmOnBlur={ false }
-				defaultValue={ value }
+				defaultValue={ value || '' }
 				dropdownArrow={ () => '' }
 				preserveNullOptions={ true }
 				placeholder={ __( 'None', 'amp' ) }
