@@ -90,7 +90,7 @@ describe( 'Font picker in Text Block', () => {
 		await page.waitForSelector( '.autocomplete__icon' );
 		await page.click( '.autocomplete__icon' );
 		const textBlockBefore = ( await getBlocksOnPage() )[ 0 ];
-		expect( textBlockBefore.attributes.ampFontFamily ).toBeNull();
+		expect( textBlockBefore.attributes.ampFontFamily ).toStrictEqual( '' );
 	} );
 
 	it( 'should be able to search for ubuntu font and save post', async () => {
