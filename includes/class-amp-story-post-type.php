@@ -1844,7 +1844,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function render_block_page_attachment( $attributes ) {
 
-		if ( ! isset( $attributes['postId'] ) ) {
+		if ( empty( $attributes['postId'] ) ) {
 			return null;
 		}
 
