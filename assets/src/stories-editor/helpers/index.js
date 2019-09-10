@@ -1780,7 +1780,7 @@ export const getBlockWrapperElement = ( block ) => {
  *
  * @return {number} Target scaling factor.
  */
-const calculateTargetScalingFactor = ( width, height ) => {
+export const calculateTargetScalingFactor = ( width, height ) => {
 	const targetFitsWithinPage = width <= STORY_PAGE_INNER_WIDTH || height <= STORY_PAGE_INNER_HEIGHT;
 
 	if ( targetFitsWithinPage ) {
