@@ -1771,6 +1771,10 @@ export const getBlockWrapperElement = ( block ) => {
  * Calculate target scaling factor so that it is at least 25% larger than the
  * page.
  *
+ * A copy of the same method in the AMP framework.
+ *
+ * @see https://github.com/ampproject/amphtml/blob/13b3b6d92ee0565c54ec34732e88f01847aa8a91/extensions/amp-story/1.0/animation-presets-utils.js#L91-L111
+ *
  * @param {number} width Target width.
  * @param {number} height Target height.
  *
