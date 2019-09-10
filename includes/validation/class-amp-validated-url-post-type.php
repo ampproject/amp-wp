@@ -83,11 +83,11 @@ class AMP_Validated_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
-	 * The transient key to use for caching the pending URLs count.
+	 * The transient key to use for caching the number of URLs with new validation errors.
 	 *
 	 * @var string
 	 */
-	const PENDING_URLS_COUNT_TRANSIENT = 'amp_pending_urls_count';
+	const NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT = 'amp_new_validation_error_urls_count';
 
 	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
@@ -367,33 +367,33 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$pending_count = get_transient( static::PENDING_URLS_COUNT_TRANSIENT );
+		$new_validation_error_urls = get_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
-		if ( false === $pending_count ) {
-			$pending_count = static::get_pending_urls_count();
-			set_transient( static::PENDING_URLS_COUNT_TRANSIENT, $pending_count, DAY_IN_SECONDS );
+		if ( false === $new_validation_error_urls ) {
+			$new_validation_error_urls = static::get_validation_error_urls_count();
+			set_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT, $new_validation_error_urls, DAY_IN_SECONDS );
 		}
 
-		if ( 0 === $pending_count ) {
+		if ( 0 === $new_validation_error_urls ) {
 			return;
 		}
 
 		foreach ( $submenu[ AMP_Options_Manager::OPTION_NAME ] as &$submenu_item ) {
 			if ( 'edit.php?post_type=' . self::POST_TYPE_SLUG === $submenu_item[2] ) {
-				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="pending-count">' . esc_html( number_format_i18n( $pending_count ) ) . '</span></span>';
+				$submenu_item[0] .= ' <span class="awaiting-mod"><span class="new-validation-error-urls-count">' . esc_html( number_format_i18n( $new_validation_error_urls ) ) . '</span></span>';
 				break;
 			}
 		}
 	}
 
 	/**
-	 * Get the count of pending URLs that have validation errors.
+	 * Get the count of URLs that have new validation errors.
 	 *
 	 * @since 1.3
 	 *
-	 * @return int Count of pending URLs.
+	 * @return int Count of new validation error URLs.
 	 */
-	protected static function get_pending_urls_count() {
+	protected static function get_validation_error_urls_count() {
 		$query = new WP_Query(
 			[
 				'post_type'              => self::POST_TYPE_SLUG,
@@ -814,7 +814,7 @@ class AMP_Validated_URL_Post_Type {
 			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
 		}
 
-		delete_transient( static::PENDING_URLS_COUNT_TRANSIENT );
+		delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 
 		return $post_id;
 	}
