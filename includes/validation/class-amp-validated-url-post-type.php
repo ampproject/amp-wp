@@ -797,9 +797,14 @@ class AMP_Validated_URL_Post_Type {
 	 * @return array Environment.
 	 */
 	public static function get_validated_environment() {
+		// We want to sort the list of plugins to avoid fluctuations due to plugins fighting for first spot
+		// to constantly invalidate our cache.
+		$plugins = get_option( 'active_plugins', [] );
+		sort( $plugins );
+
 		return [
 			'theme'   => get_stylesheet(),
-			'plugins' => get_option( 'active_plugins', [] ),
+			'plugins' => $plugins,
 		];
 	}
 
