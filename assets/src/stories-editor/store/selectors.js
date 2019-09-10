@@ -119,13 +119,3 @@ export function getCopiedMarkup( state ) {
 export function getSettings( state ) {
 	return state.editorSettings || window.ampStoriesEditorSettings || {};
 }
-
-/**
- * Returns copied markup for pasting workaround.
- *
- * @param {Object} state Editor state.
- * @return {string} Markup.
- */
-export function getCopiedMarkup( state ) {
-	return state.copiedMarkup || '';
-}
