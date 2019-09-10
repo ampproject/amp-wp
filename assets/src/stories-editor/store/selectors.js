@@ -100,6 +100,17 @@ export function isReordering( state ) {
 }
 
 /**
+ * Returns the stories editor settings.
+ *
+ * @param {Object} state Editor state.
+ *
+ * @return {Object} The editor settings object.
+ */
+export function getSettings( state ) {
+	return state.editorSettings || window.ampStoriesEditorSettings || {};
+}
+
+/**
  * Shared reference to an empty array for cases where it is important to avoid
  * returning a new array reference on every invocation, as in a connected or
  * other pure component which performs `shouldComponentUpdate` check on props.

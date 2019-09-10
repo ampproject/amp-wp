@@ -53,7 +53,6 @@ import {
 
 import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_BACKGROUND_MEDIA_TYPES,
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
@@ -210,7 +209,7 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks } = this.props;
+		const { attributes, media, setAttributes, totalAnimationDuration, allowedBlocks, allowedBackgroundMediaTypes } = this.props;
 
 		const {
 			mediaId,
@@ -325,7 +324,7 @@ class PageEdit extends Component {
 								<MediaUploadCheck fallback={ instructions }>
 									<MediaUpload
 										onSelect={ this.onSelectMedia }
-										allowedTypes={ ALLOWED_BACKGROUND_MEDIA_TYPES }
+										allowedTypes={ allowedBackgroundMediaTypes }
 										value={ mediaId }
 										render={ ( { open } ) => (
 											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
@@ -476,6 +475,7 @@ PageEdit.propTypes = {
 	videoFeaturedImage: PropTypes.shape( {
 		source_url: PropTypes.string,
 	} ),
+	allowedBackgroundMediaTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
 export default compose(
@@ -491,7 +491,7 @@ export default compose(
 			getBlockOrder,
 			getBlockRootClientId,
 		} = select( 'core/block-editor' );
-		const { getAnimatedBlocks } = select( 'amp/story' );
+		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;
 		const isCallToActionAllowed = ! isFirstPage && ! getCallToActionBlock( clientId );
@@ -511,12 +511,15 @@ export default compose(
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
+		const { allowedVideoMimeTypes } = getSettings();
+
 		return {
 			media,
 			videoFeaturedImage,
 			allowedBlocks: isCallToActionAllowed ? ALLOWED_CHILD_BLOCKS : ALLOWED_MOVABLE_BLOCKS,
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
+			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 		};
 	} ),
 )( PageEdit );
