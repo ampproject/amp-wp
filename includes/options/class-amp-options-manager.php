@@ -637,9 +637,9 @@ class AMP_Options_Manager {
 		$uses_ssl = (
 			is_ssl()
 			&&
-			( strpos( get_bloginfo( 'wpurl' ), 'https' ) !== 0 )
+			( strpos( get_bloginfo( 'wpurl' ), 'https' ) === 0 )
 			&&
-			( strpos( get_bloginfo( 'url' ), 'https' ) !== 0 )
+			( strpos( get_bloginfo( 'url' ), 'https' ) === 0 )
 		);
 
 		if ( ! $uses_ssl && 'toplevel_page_' . self::OPTION_NAME === get_current_screen()->id ) {
