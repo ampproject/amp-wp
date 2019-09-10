@@ -65,10 +65,6 @@ class CustomVideoBlockEdit extends Component {
 		};
 
 		this.videoPlayer = createRef();
-		this.toggleAttribute = this.toggleAttribute.bind( this );
-		this.onSelectURL = this.onSelectURL.bind( this );
-		this.onUploadError = this.onUploadError.bind( this );
-		this.onLoadedMetadata = this.onLoadedMetadata.bind( this );
 	}
 
 	componentDidMount() {
@@ -146,13 +142,24 @@ class CustomVideoBlockEdit extends Component {
 		}
 	}
 
-	toggleAttribute( attribute ) {
+	/**
+	 * Callback to toggle an attribute's value.
+	 *
+	 * @param {string} attribute Attribute name.
+	 * @return {Function} Function that updates the block's attributes.
+	 */
+	toggleAttribute = ( attribute ) => {
 		return ( newValue ) => {
 			this.props.setAttributes( { [ attribute ]: newValue } );
 		};
-	}
+	};
 
-	onSelectURL( newSrc ) {
+	/**
+	 * URL selection callback.
+	 *
+	 * @param {string} newSrc New src value.
+	 */
+	onSelectURL = ( newSrc ) => {
 		const { attributes, setAttributes } = this.props;
 		const { src } = attributes;
 
@@ -176,19 +183,29 @@ class CustomVideoBlockEdit extends Component {
 		}
 
 		this.setState( { editing: false, duration: null, videoSize: null } );
-	}
+	};
 
-	onUploadError( message ) {
+	/**
+	 * Upload error callback.
+	 *
+	 * @param {string} message Error message.
+	 */
+	onUploadError = ( message ) => {
 		const { noticeOperations } = this.props;
 		noticeOperations.removeAllNotices();
 		noticeOperations.createErrorNotice( message );
-	}
+	};
 
-	onLoadedMetadata( event ) {
+	/**
+	 * Metadata loaded callback.
+	 *
+	 * @param {Event} event Event object.
+	 */
+	onLoadedMetadata = ( event ) => {
 		const duration = Math.round( event.currentTarget.duration );
 
 		this.setState( { duration } );
-	}
+	};
 
 	render() {
 		const {

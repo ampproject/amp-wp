@@ -27,18 +27,13 @@ class RotatableBox extends Component {
 			isRotating: false,
 			angle: props.angle,
 		};
-
-		this.onRotateStart = this.onRotateStart.bind( this );
-		this.onRotate = this.onRotate.bind( this );
-		this.onRotateStop = this.onRotateStop.bind( this );
-		this.onKeyUp = this.onKeyUp.bind( this );
 	}
 
 	componentDidMount() {
 		this.elementRef = document.getElementById( this.props.blockElementId );
 	}
 
-	onKeyUp( e ) {
+	onKeyUp = ( e ) => {
 		if ( ! this.state.isRotating ) {
 			return;
 		}
@@ -85,7 +80,7 @@ class RotatableBox extends Component {
 		}
 	}
 
-	onRotateStart( e ) {
+	onRotateStart = ( e ) => {
 		if ( this.state.isRotating ) {
 			return;
 		}
@@ -108,7 +103,7 @@ class RotatableBox extends Component {
 		);
 	}
 
-	onRotate( e ) {
+	onRotate = ( e ) => {
 		if ( ! this.state.isRotating ) {
 			return;
 		}
@@ -151,7 +146,7 @@ class RotatableBox extends Component {
 		);
 	}
 
-	onRotateStop( e ) {
+	onRotateStop = ( e ) => {
 		if ( ! this.state.isRotating ) {
 			return;
 		}

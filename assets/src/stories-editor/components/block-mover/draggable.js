@@ -79,7 +79,7 @@ class Draggable extends Component {
 	 *
 	 * @param {Object} event The non-custom DragEvent.
 	 */
-	onDragEnd( event ) {
+	onDragEnd = ( event ) => {
 		const { onDragEnd = noop, snapLines, hideSnapLines, clearSnapLines } = this.props;
 		if ( event ) {
 			event.preventDefault();
@@ -100,7 +100,7 @@ class Draggable extends Component {
 	 *
 	 * @param  {Object} event The non-custom DragEvent.
 	 */
-	onDragOver( event ) { // eslint-disable-line complexity
+	onDragOver = ( event ) => { // eslint-disable-line complexity
 		const {
 			snapLines,
 			clearSnapLines,
@@ -259,7 +259,7 @@ class Draggable extends Component {
 		}
 	}
 
-	onDrop( ) {
+	onDrop = () => {
 		// As per https://html.spec.whatwg.org/multipage/dnd.html#dndevents
 		// the target node for the dragend is the source node that started the drag operation,
 		// while drop event's target is the current target element.
@@ -272,7 +272,7 @@ class Draggable extends Component {
 	 *
 	 * @param {Object} event Custom DragEvent.
 	 */
-	onDragStart( event ) {
+	onDragStart = ( event ) => {
 		const {
 			blockName,
 			elementId,
@@ -372,7 +372,7 @@ class Draggable extends Component {
 	 * Cleans up drag state when drag has completed, or component unmounts
 	 * while dragging.
 	 */
-	resetDragState() {
+	resetDragState = () => {
 		// Remove drag clone
 		document.removeEventListener( 'dragover', this.onDragOver );
 		if ( this.cloneWrapper && this.cloneWrapper.parentNode ) {

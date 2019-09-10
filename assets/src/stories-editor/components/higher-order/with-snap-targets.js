@@ -18,10 +18,7 @@ import { getBlockInnerElement } from '../../helpers';
  * - The page's width / height constraints and center.
  * - The block's position in relation to its siblings.
  *
- * @todo Update horizontalSnaps() and verticalSnaps() to return a map of snap targets -> snap lines
- *       in order to allow showing multiple snap lines for a single snapping point that can differ from the actual target.
- *
- * @type {Component}
+ * @todo Update horizontalSnaps() and verticalSnaps() to return a map of snap targets -> snap lines in order to allow showing multiple snap lines for a single snapping point that can differ from the actual target.
  */
 const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const {
