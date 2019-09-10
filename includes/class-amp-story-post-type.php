@@ -23,6 +23,11 @@ class AMP_Story_Post_Type {
 	const STORY_SETTINGS_OPTION = 'story_settings';
 
 	/**
+	 * The meta prefix applied to story settings options saved as individual post meta.
+	 */
+	const STORY_SETTINGS_META_PREFIX = 'amp_story_';
+
+	/**
 	 * Minimum required version of Gutenberg required.
 	 *
 	 * @var string
@@ -345,9 +350,9 @@ class AMP_Story_Post_Type {
 		add_action( 'wp_head', [ __CLASS__, 'print_feed_link' ] );
 
 		// Register story settings meta.
-		$stories_settings_definitions = self::get_stories_settings_meta_definitions();
+		$stories_settings_definitions = self::get_stories_settings_definitions();
 
-		foreach ( $stories_settings_definitions as $meta_key => $definition ) {
+		foreach ( $stories_settings_definitions as $option_key => $definition ) {
 			$meta_args = isset( $definition['meta_args'] )
 				? (array) $definition['meta_args']
 				: [];
@@ -362,7 +367,7 @@ class AMP_Story_Post_Type {
 
 			register_meta(
 				'post',
-				$meta_key,
+				self::STORY_SETTINGS_META_PREFIX . $option_key,
 				wp_parse_args( $meta_args, $meta_args_defaults )
 			);
 		}
@@ -988,7 +993,7 @@ class AMP_Story_Post_Type {
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
 		// Convert auto advancement.
-		$meta_definitions         = self::get_stories_settings_meta_definitions();
+		$meta_definitions         = self::get_stories_settings_definitions();
 		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
 
 		wp_localize_script(
@@ -2131,7 +2136,7 @@ class AMP_Story_Post_Type {
 	 * - meta_args array Arguments passed to `register_meta`; sanitize_callback is required.
 	 * - data      array Any additional data.
 	 */
-	public static function get_stories_settings_meta_definitions() {
+	public static function get_stories_settings_definitions() {
 		return [
 			'auto_advance_after'          => [
 				'meta_args' => [
@@ -2208,12 +2213,12 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		$meta_definitions = self::get_stories_settings_meta_definitions();
+		$meta_definitions = self::get_stories_settings_definitions();
 		$story_settings   = AMP_Options_Manager::get_option( self::STORY_SETTINGS_OPTION );
 
-		foreach ( $story_settings as $meta_key => $value ) {
-			$sanitized_value = call_user_func( $meta_definitions[ $meta_key ]['meta_args']['sanitize_callback'], $value );
-			add_post_meta( $post_id, $meta_key, $sanitized_value, true );
+		foreach ( $story_settings as $option_key => $value ) {
+			$sanitized_value = call_user_func( $meta_definitions[ $option_key ]['meta_args']['sanitize_callback'], $value );
+			add_post_meta( $post_id, self::STORY_SETTINGS_META_PREFIX . $option_key, $sanitized_value, true );
 		}
 	}
 }

@@ -45,13 +45,13 @@ const MetaFields = ( props ) => {
 				help={ currentOption.description || '' }
 				value={ autoAdvanceAfter }
 				options={ autoAdvanceAfterOptions }
-				onChange={ ( value ) => updateMeta( { auto_advance_after: value } ) }
+				onChange={ ( value ) => updateMeta( { amp_story_auto_advance_after: value } ) }
 			/>
 			{ 'time' === autoAdvanceAfter && (
 				<RangeControl
 					label={ __( 'Time in seconds', 'amp' ) }
 					value={ autoAdvanceAfterDuration ? parseInt( autoAdvanceAfterDuration ) : 0 }
-					onChange={ ( value ) => updateMeta( { auto_advance_after_duration: value } ) }
+					onChange={ ( value ) => updateMeta( { amp_story_auto_advance_after_duration: value } ) }
 				/>
 			) }
 		</>
@@ -62,8 +62,8 @@ MetaFields.propTypes = {
 	autoAdvanceAfterOptions: PropTypes.array.isRequired,
 	updateMeta: PropTypes.func.isRequired,
 	meta: PropTypes.shape( {
-		auto_advance_after: PropTypes.string,
-		auto_advance_after_duration: PropTypes.number,
+		amp_story_auto_advance_after: PropTypes.string,
+		amp_story_auto_advance_after_duration: PropTypes.number,
 	} ),
 };
 

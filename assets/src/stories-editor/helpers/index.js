@@ -1729,7 +1729,7 @@ export const processMedia = ( media ) => {
  */
 export const metaToAttributeNames = ( meta ) => {
 	return {
-		autoAdvanceAfter: meta.auto_advance_after,
-		autoAdvanceAfterDuration: meta.auto_advance_after_duration,
+		autoAdvanceAfter: meta.amp_story_auto_advance_after,
+		autoAdvanceAfterDuration: meta.amp_story_auto_advance_after_duration,
 	};
 };

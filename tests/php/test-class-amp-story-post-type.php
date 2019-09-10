@@ -75,7 +75,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @dataProvider get_default_settings_definitions
 	 * @covers \AMP_Story_Post_Type::register()
 	 */
-	public function test_requires_opt_in( $default_settings_definitions ) {
+	public function test_requires_opt_in( $definitions ) {
 		unregister_post_type( AMP_Story_Post_Type::POST_TYPE_SLUG );
 
 		AMP_Options_Manager::update_option( 'experiences', [ AMP_Options_Manager::WEBSITE_EXPERIENCE ] );
@@ -86,8 +86,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		AMP_Story_Post_Type::register();
 		$this->assertTrue( post_type_exists( AMP_Story_Post_Type::POST_TYPE_SLUG ) );
 
-		foreach ( $default_settings_definitions as $meta_id => $definition ) {
-			$is_meta_registered = registered_meta_key_exists( 'post', $meta_id, AMP_Story_Post_Type::POST_TYPE_SLUG );
+		foreach ( $definitions as $option_key => $definition ) {
+			$is_meta_registered = registered_meta_key_exists( 'post', AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . $option_key, AMP_Story_Post_Type::POST_TYPE_SLUG );
 			$this->assertTrue( $is_meta_registered );
 		}
 	}
@@ -793,9 +793,9 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 	 * @dataProvider get_default_settings_definitions
 	 * @covers AMP_Story_Post_Type::get_stories_settings_meta_definitions
 	 */
-	public function test_get_stories_settings_meta_definitions( $default_settings_definitions ) {
-		$settings_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
-		$this->assertEquals( $default_settings_definitions, $settings_definitions );
+	public function test_get_stories_settings_meta_definitions( $default_definitions ) {
+		$definitions = AMP_Story_Post_Type::get_stories_settings_definitions();
+		$this->assertEquals( $default_definitions, $definitions );
 	}
 
 	/**
@@ -809,8 +809,8 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		);
 		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
 
-		$advance_after          = get_post_meta( $new_story->ID, 'auto_advance_after', true );
-		$advance_after_duration = get_post_meta( $new_story->ID, 'auto_advance_after_duration', true );
+		$advance_after          = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after', true );
+		$advance_after_duration = get_post_meta( $new_story->ID, AMP_Story_Post_Type::STORY_SETTINGS_META_PREFIX . 'auto_advance_after_duration', true );
 
 		$this->assertEquals( 'time', $advance_after );
 		$this->assertEquals( 10, $advance_after_duration );
