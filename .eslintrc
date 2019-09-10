@@ -2,21 +2,9 @@
   "root": true,
   "extends": [
     "plugin:@wordpress/eslint-plugin/recommended",
-    "plugin:jest/all",
     "plugin:import/recommended",
     "plugin:eslint-comments/recommended"
   ],
-  "settings": {
-    "react": {
-      "pragma": "wp",
-      "version": "16.6"
-    }
-  },
-  "globals": {
-    "browser": true,
-    "wp": true,
-    "Set": true
-  },
   "rules": {
     "block-scoped-var": "error",
     "complexity": ["error", { "max": 20 } ],
@@ -51,30 +39,53 @@
     "radix": [ "error", "as-needed" ],
     "require-await": "error",
     "rest-spread-spacing": [ "error", "never" ],
-    "jest/lowercase-name": [
-      "error",
-      {
-        "ignore": [ "describe" ]
-      }
-    ],
-    "jest/no-hooks": "off",
-    "jest/prefer-expect-assertions": "off",
-    "jest/prefer-inline-snapshots": "off",
     "react/prop-types": "error",
     "import/no-unresolved": [ "error", {
       "ignore": [ "jquery", "amp-block-editor-data" ]
-    } ]
+    } ],
+    "jsdoc/check-indentation": "error",
+    "@wordpress/dependency-group": "error",
+    "@wordpress/react-no-unsafe-timeout": "error"
   },
   "overrides": [
     {
+      "files":[
+        "**/__tests__/**/*.js",
+        "**/test/*.js",
+        "**/?(*.)test.js",
+        "tests/js/**/*.js"
+      ],
+      "extends": [
+        "plugin:jest/all"
+      ],
+      "rules": {
+        "jest/lowercase-name": [
+          "error",
+          {
+            "ignore": [ "describe" ]
+          }
+        ],
+        "jest/no-hooks": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/prefer-inline-snapshots": "off",
+      }
+    },
+    {
       "files": [ "tests/e2e/**/*.js" ],
-      "env": {
-        "browser": true
-      },
-      "globals": {
-        "browser": true,
-        "page": true,
-        "wp": true
+      "extends": [
+        "plugin:@wordpress/eslint-plugin/test-e2e",
+        "plugin:jest/all"
+      ],
+      "rules": {
+        "jest/lowercase-name": [
+          "error",
+          {
+            "ignore": [ "describe" ]
+          }
+        ],
+        "jest/no-hooks": "off",
+        "jest/prefer-expect-assertions": "off",
+        "jest/prefer-inline-snapshots": "off",
       }
     }
   ]

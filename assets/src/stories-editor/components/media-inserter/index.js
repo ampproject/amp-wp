@@ -21,21 +21,24 @@ const POPOVER_PROPS = {
 	position: 'bottom right',
 };
 
-const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter } ) => {
+const MediaInserter = ( { insertBlock, updateBlock, canInsertBlockType, showInserter, mediaType } ) => {
 	const blocks = [
 		'core/video',
 		'core/image',
 	];
 
+	const imageTitle = 'image' === mediaType ? __( 'Update Background Image', 'amp' ) : __( 'Insert Background Image', 'amp' );
+	const videoTitle = 'video' === mediaType ? __( 'Update Background Video', 'amp' ) : __( 'Insert Background Video', 'amp' );
+
 	const dropDownOptions = [
 		{
-			title: __( 'Insert Background Image', 'amp' ),
+			title: imageTitle,
 			icon: <BlockIcon icon="format-image" />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'image', updateBlock ),
 			disabled: ! showInserter,
 		},
 		{
-			title: __( 'Insert Background Video', 'amp' ),
+			title: videoTitle,
 			icon: <BlockIcon icon="media-video" />,
 			onClick: () => mediaPicker( __( 'Select or Upload Media', 'amp' ), 'video', updateBlock ),
 			disabled: ! showInserter,
@@ -78,6 +81,7 @@ MediaInserter.propTypes = {
 	updateBlock: PropTypes.func.isRequired,
 	canInsertBlockType: PropTypes.func.isRequired,
 	showInserter: PropTypes.bool.isRequired,
+	mediaType: PropTypes.string.isRequired,
 };
 
 const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
@@ -106,18 +110,23 @@ const mediaPicker = ( dialogTitle, mediaType, updateBlock ) => {
 
 const applyWithSelect = withSelect( ( select ) => {
 	const { getCurrentPage } = select( 'amp/story' );
-	const { canInsertBlockType, getBlockListSettings } = select( 'core/block-editor' );
+	const { canInsertBlockType, getBlockListSettings, getBlock } = select( 'core/block-editor' );
 	const { isReordering } = select( 'amp/story' );
+
+	const currentPage = getCurrentPage();
+	const block = getBlock( currentPage );
+	const mediaType = block && block.attributes.mediaType ? block.attributes.mediaType : '';
 
 	return {
 		isReordering: isReordering(),
 		canInsertBlockType: ( name ) => {
 			// canInsertBlockType() alone is not enough, see https://github.com/WordPress/gutenberg/issues/14515
-			const blockSettings = getBlockListSettings( getCurrentPage() );
-			return canInsertBlockType( name, getCurrentPage() ) && blockSettings && blockSettings.allowedBlocks.includes( name );
+			const blockSettings = getBlockListSettings( currentPage );
+			return canInsertBlockType( name, currentPage ) && blockSettings && blockSettings.allowedBlocks.includes( name );
 		},
 		// As used in <HeaderToolbar> component
 		showInserter: select( 'core/edit-post' ).getEditorMode() === 'visual' && select( 'core/editor' ).getEditorSettings().richEditingEnabled,
+		mediaType,
 	};
 } );
 

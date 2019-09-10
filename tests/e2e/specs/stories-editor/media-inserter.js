@@ -3,7 +3,9 @@
  */
 import {
 	createNewPost,
+	getAllBlocks,
 	saveDraft,
+	selectBlockByClientId,
 } from '@wordpress/e2e-test-utils';
 
 /**
@@ -15,6 +17,7 @@ import {
 	uploadMedia,
 	openPreviewPage,
 	clickButton,
+	openMediaInserter,
 } from '../../utils';
 
 const LARGE_IMAGE = 'large-image-36521.jpg';
@@ -44,8 +47,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should be possible to add Background Image', async () => {
 		// Click the media selection button.
-		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
-		await page.click( '.amp-story-media-inserter-dropdown' );
+		await openMediaInserter();
 		await clickButton( 'Insert Background Image' );
 		await uploadMedia( LARGE_IMAGE );
 
@@ -68,10 +70,29 @@ describe( 'Stories Editor Screen', () => {
 		expect( src ).toContain( 'wp-content/uploads' );
 	} );
 
+	it( 'should be possible to update Background Image', async () => {
+		// Click the media selection button.
+		await openMediaInserter();
+		await clickButton( 'Insert Background Image' );
+		await uploadMedia( LARGE_IMAGE );
+
+		// Insert the image.
+		await page.click( '.media-modal button.media-button-select' );
+
+		// Wait for media to be inserted.
+		await page.waitForSelector( '.components-focal-point-picker-wrapper' );
+
+		await openMediaInserter();
+
+		const nodes = await page.$x(
+			`//button[contains(text(), 'Update Background Image')]`
+		);
+		expect( nodes ).toHaveLength( 1 );
+	} );
+
 	it( 'should be possible to add Background Video', async () => {
 		// Click the media selection button.
-		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
-		await page.click( '.amp-story-media-inserter-dropdown' );
+		await openMediaInserter();
 		await clickButton( 'Insert Background Video' );
 		await uploadMedia( LARGE_VIDEO );
 
@@ -87,8 +108,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should be possible to add Image block', async () => {
 		// Click the media selection button.
-		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
-		await page.click( '.amp-story-media-inserter-dropdown' );
+		await openMediaInserter();
 		await clickButton( 'Insert Image' );
 		// Click the media library button.
 		await page.waitForSelector( MEDIA_LIBRARY_BUTTON );
@@ -106,8 +126,7 @@ describe( 'Stories Editor Screen', () => {
 
 	it( 'should be possible to add Video block', async () => {
 		// Click the media selection button.
-		await page.waitForSelector( '.amp-story-media-inserter-dropdown' );
-		await page.click( '.amp-story-media-inserter-dropdown' );
+		await openMediaInserter();
 		await clickButton( 'Insert Video' );
 		// Click the media library button.
 		await page.waitForSelector( MEDIA_LIBRARY_BUTTON );
@@ -121,5 +140,27 @@ describe( 'Stories Editor Screen', () => {
 
 		// Wait for image to appear in the block.
 		await expect( page ).toMatchElement( '.wp-block-video video' );
+	} );
+
+	it( 'should dropdown title should change after sidebar upload', async () => {
+		await selectBlockByClientId(
+			( await getAllBlocks() )[ 0 ].clientId
+		);
+		// Click the media selection button.
+		await page.waitForSelector( '.editor-amp-story-page-background' );
+		await page.click( '.editor-amp-story-page-background' );
+		await uploadMedia( LARGE_IMAGE );
+
+		// Insert the image.
+		await page.click( '.media-modal button.media-button-select' );
+
+		// Wait for media to be inserted.
+		await page.waitForSelector( '.components-focal-point-picker-wrapper' );
+		// Click the media selection button.
+		await openMediaInserter();
+		const nodes = await page.$x(
+			`//button[contains(text(), 'Update Background Image')]`
+		);
+		expect( nodes ).toHaveLength( 1 );
 	} );
 } );

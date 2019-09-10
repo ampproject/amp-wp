@@ -5,10 +5,12 @@ import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import { every, has, isEqual } from 'lodash';
 import memize from 'memize';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
  */
+import '@wordpress/core-data';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
@@ -526,16 +528,16 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {WPElement} element                  Block element.
- * @param {Object}    blockType                Block type object.
- * @param {Object}    attributes               Block attributes.
- * @param {number}    attributes.positionTop   Top offset in pixel.
- * @param {number}    attributes.positionLeft  Left offset in pixel.
- * @param {number}    attributes.rotationAngle Rotation angle in degrees.
- * @param {number}    attributes.width         Block width in pixels.
- * @param {number}    attributes.height        Block height in pixels.
+ * @param {ReactElement} element                  Block element.
+ * @param {Object}       blockType                Block type object.
+ * @param {Object}       attributes               Block attributes.
+ * @param {number}       attributes.positionTop   Top offset in pixel.
+ * @param {number}       attributes.positionLeft  Left offset in pixel.
+ * @param {number}       attributes.rotationAngle Rotation angle in degrees.
+ * @param {number}       attributes.width         Block width in pixels.
+ * @param {number}       attributes.height        Block height in pixels.
  *
- * @return {Object} The wrapped element.
+ * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
@@ -837,7 +839,7 @@ export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) 
 /**
  * Returns the minimum dimensions for a story poster image.
  *
- * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
+ * @see https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
  *
  * @return {Object} Minimum dimensions including width and height.
  */
@@ -930,13 +932,14 @@ export const createSkeletonTemplate = ( template ) => {
 /**
  * Determines a block's HTML class name based on its attributes.
  *
- * @param {string[]} className             List of pre-existing class names for the block.
- * @param {boolean}  ampFitText            Whether amp-fit-text should be used or not.
- * @param {?string}  backgroundColor       A string containing the background color slug.
- * @param {?string}  textColor             A string containing the color slug.
- * @param {string}   customBackgroundColor A string containing the custom background color value.
- * @param {string}   customTextColor       A string containing the custom color value.
- * @param {?number}  opacity               Opacity.
+ * @param {Object}   attributes                       Block attributes.
+ * @param {string[]} attributes.className             List of pre-existing class names for the block.
+ * @param {boolean}  attributes.ampFitText            Whether amp-fit-text should be used or not.
+ * @param {?string}  attributes.backgroundColor       A string containing the background color slug.
+ * @param {?string}  attributes.textColor             A string containing the color slug.
+ * @param {string}   attributes.customBackgroundColor A string containing the custom background color value.
+ * @param {string}   attributes.customTextColor       A string containing the custom color value.
+ * @param {?number}  attributes.opacity               Opacity.
  *
  * @return {string} The block's HTML class name.
  */
@@ -966,15 +969,16 @@ export const getClassNameFromBlockAttributes = ( {
 /**
  * Determines a block's inline style based on its attributes.
  *
- * @param {string}  align                 Block alignment.
- * @param {?string} fontSize              Font size slug.
- * @param {?number} customFontSize        Custom font size in pixels.
- * @param {boolean} ampFitText            Whether amp-fit-text should be used or not.
- * @param {?string} backgroundColor       A string containing the background color slug.
- * @param {?string} textColor             A string containing the color slug.
- * @param {string}  customBackgroundColor A string containing the custom background color value.
- * @param {string}  customTextColor       A string containing the custom color value.
- * @param {?number} opacity               Opacity.
+ * @param {Object}  attributes                       Block attributes.
+ * @param {string}  attributes.align                 Block alignment.
+ * @param {?string} attributes.fontSize              Font size slug.
+ * @param {?number} attributes.customFontSize        Custom font size in pixels.
+ * @param {boolean} attributes.ampFitText            Whether amp-fit-text should be used or not.
+ * @param {?string} attributes.backgroundColor       A string containing the background color slug.
+ * @param {?string} attributes.textColor             A string containing the color slug.
+ * @param {string}  attributes.customBackgroundColor A string containing the custom background color value.
+ * @param {string}  attributes.customTextColor       A string containing the custom color value.
+ * @param {?number} attributes.opacity               Opacity.
  *
  * @return {Object} Block inline style.
  */
@@ -1014,10 +1018,11 @@ export const getStylesFromBlockAttributes = ( {
 /**
  * Returns the settings object for the AMP story meta blocks (post title, author, date).
  *
- * @param {string}  attribute   The post attribute this meta block reads from.
- * @param {?string} placeholder Optional. Placeholder text in case the attribute is empty.
- * @param {string}  tagName     Optional. The HTML tag name to use for the content. Default '<p>'.
- * @param {boolean} isEditable  Optional. Whether the meta block is editable by the user or not. Default false.
+ * @param {Object}  args               Function arguments.
+ * @param {string}  args.attribute     The post attribute this meta block reads from.
+ * @param {string}  args.placeholder   Optional. Placeholder text in case the attribute is empty.
+ * @param {string}  [args.tagName]     Optional. The HTML tag name to use for the content. Default '<p>'.
+ * @param {boolean} [args.isEditable]  Optional. Whether the meta block is editable by the user or not. Default false.
  *
  * @return {Object} The meta block's settings object.
  */
@@ -1434,14 +1439,12 @@ export const maybeInitializeAnimations = () => {
 /**
  * Return a label for the block order controls depending on block position.
  *
- * @param {string}  type            Block type - in the case of a single block, should
- *                                  define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
+ * @param {string}  type            Block type - in the case of a single block, should define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
  * @param {number}  currentPosition The block's current position.
  * @param {number}  newPosition     The block's new position.
  * @param {boolean} isFirst         This is the first block.
  * @param {boolean} isLast          This is the last block.
- * @param {number}  dir             Direction of movement (> 0 is considered to be going
- *                                  down, < 0 is up).
+ * @param {number}  dir             Direction of movement (> 0 is considered to be going down, < 0 is up).
  *
  * @return {string} Label for the block movement controls.
  */
@@ -1544,8 +1547,9 @@ export const getFirstFrameOfVideo = ( src ) => {
 /**
  * Uploads the video's first frame as an attachment.
  *
- * @param {number} id  Video ID.
- * @param {string} src Video URL.
+ * @param {Object} media Media object.
+ * @param {number} media.id  Video ID.
+ * @param {string} media.src Video URL.
  */
 export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 	const { __experimentalMediaUpload: mediaUpload } = getSettings();
@@ -1624,7 +1628,7 @@ export const maybeAddMissingAnchor = ( clientId ) => {
  * @see https://github.com/bokuweb/re-resizable
  *
  * @param {number} number
- * @param {Array|function<number>} snap List of snap targets or function that provider
+ * @param {Array|Function<number>} snap List of snap targets or function that provider
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
  * @return {number} New angle.
  */

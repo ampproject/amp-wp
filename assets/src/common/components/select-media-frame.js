@@ -20,7 +20,6 @@ const NOTICE_CLASSNAME = 'notice notice-warning notice-alt inline';
 /**
  * FeaturedImageSelectionError
  *
- * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
@@ -47,7 +46,6 @@ const FeaturedImageSelectionError = wp.media.View.extend( {
  * Applies if the featured image has the wrong file type, like .mov or .txt.
  * Very similar to the FeaturedImageSelectionError class.
  *
- * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
@@ -71,7 +69,6 @@ export const SelectionFileTypeError = wp.media.View.extend( {
  * Applies when the video size is more than a certain amount of MB per second.
  * Very similar to the FeaturedImageSelectionError class.
  *
- * @class
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
@@ -96,13 +93,11 @@ export const SelectionFileSizeError = wp.media.View.extend( {
  * Prevent selection of an image that does not meet the minimum requirements.
  * Also enforces the file type, ensuring that it was in the allowedTypes prop.
  *
- * @class
  * @augments wp.media.view.Toolbar.Select
  * @augments wp.media.view.Toolbar
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
- * @inheritDoc
  */
 export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 	/**
@@ -146,13 +141,11 @@ export const FeaturedImageToolbarSelect = wp.media.view.Toolbar.Select.extend( {
  *
  * Prevents selecting an attachment that has the wrong file type, like .mov or .txt.
  *
- * @class
  * @augments wp.media.view.Toolbar.Select
  * @augments wp.media.view.Toolbar
  * @augments wp.media.View
  * @augments wp.Backbone.View
  * @augments Backbone.View
- * @inheritDoc
  */
 export const EnforcedFileToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 	/**
@@ -179,14 +172,13 @@ export const EnforcedFileToolbarSelect = wp.media.view.Toolbar.Select.extend( {
 /**
  * Gets the select media frame, which displays in the bottom of the Media Library.
  *
- * @param {Class} ToolbarSelect The select toolbar that display at the bottom of the Media Library.
- * @return {Class} ToolbarSelect A wp.media Class that creates a Media Library toolbar.
+ * @param {Object} ToolbarSelect The select toolbar that display at the bottom of the Media Library.
+ * @return {Object} ToolbarSelect A wp.media Class that creates a Media Library toolbar.
  */
 export const getSelectMediaFrame = ( ToolbarSelect ) => {
 	/**
 	 * Selects a featured image from the media library.
 	 *
-	 * @class
 	 * @augments wp.media.view.MediaFrame.Select
 	 * @augments wp.media.view.MediaFrame
 	 * @augments wp.media.view.Frame
@@ -194,7 +186,6 @@ export const getSelectMediaFrame = ( ToolbarSelect ) => {
 	 * @augments wp.Backbone.View
 	 * @augments Backbone.View
 	 * @mixes wp.media.controller.StateMachine
-	 * @inheritDoc
 	 */
 	return wp.media.view.MediaFrame.Select.extend( {
 		/**

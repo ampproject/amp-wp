@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -464,7 +465,7 @@ export const setImageBlockLayoutAttributes = ( props, layout ) => {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Inspector Controls.
+ * @return {ReactElement} Inspector Controls.
  */
 export const setUpInspectorControls = ( props ) => {
 	const { isSelected } = props;
@@ -492,7 +493,7 @@ setUpInspectorControls.propTypes = {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Element.
+ * @return {ReactElement} Element.
  */
 const AmpLayoutControl = ( props ) => {
 	const { name, attributes: { ampLayout }, setAttributes } = props;
@@ -531,7 +532,7 @@ AmpLayoutControl.propTypes = {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Element.
+ * @return {ReactElement} Element.
  */
 const AmpNoloadingToggle = ( props ) => {
 	const { attributes: { ampNoLoading }, setAttributes } = props;
@@ -562,7 +563,7 @@ AmpNoloadingToggle.propTypes = {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Inspector Controls.
+ * @return {ReactElement} Inspector Controls.
  */
 const setUpTextBlocksInspectorControls = ( props ) => {
 	const { isSelected, attributes, setAttributes } = props;
@@ -698,7 +699,7 @@ setUpTextBlocksInspectorControls.propTypes = {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Inspector controls.
+ * @return {ReactElement} Inspector controls.
  */
 const setUpShortcodeInspectorControls = ( props ) => {
 	const { isSelected } = props;
@@ -729,7 +730,7 @@ setUpShortcodeInspectorControls.propTypes = {
  *
  * @param {Object} props Props.
  *
- * @return {Component} Element.
+ * @return {ReactElement} Element.
  */
 const AmpLightboxToggle = ( props ) => {
 	const { attributes: { ampLightbox, linkTo, ampLayout }, setAttributes } = props;

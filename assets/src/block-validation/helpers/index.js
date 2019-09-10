@@ -47,12 +47,13 @@ export const maybeResetValidationErrors = () => {
  */
 export const updateValidationErrors = () => {
 	const { getBlockCount, getClientIdsWithDescendants, getBlock } = select( 'core/block-editor' );
-	const { getCurrentPost } = select( 'core/editor' );
 	const { resetValidationErrors, addValidationError, updateReviewLink } = dispatch( 'amp/block-validation' );
 
 	if ( 0 === getBlockCount() ) {
 		return;
 	}
+
+	const { getCurrentPost } = select( 'core/editor' );
 
 	const currentPost = getCurrentPost();
 

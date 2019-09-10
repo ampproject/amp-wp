@@ -22,7 +22,7 @@ class AMP_Story_Post_Type {
 	 *
 	 * @var string
 	 */
-	const REQUIRED_GUTENBERG_VERSION = '5.8';
+	const REQUIRED_GUTENBERG_VERSION = '5.9';
 
 	/**
 	 * The slug of the story card CSS file.
@@ -189,6 +189,42 @@ class AMP_Story_Post_Type {
 		add_action( 'enqueue_block_editor_assets', [ __CLASS__, 'export_latest_stories_block_editor_data' ], 100 );
 
 		add_action( 'wp_enqueue_scripts', [ __CLASS__, 'add_custom_stories_styles' ] );
+
+		add_action(
+			'amp_story_head',
+			function() {
+				// Theme support for title-tag is implied for stories. See _wp_render_title_tag().
+				echo '<title>' . esc_html( wp_get_document_title() ) . '</title>' . "\n";
+			},
+			1
+		);
+		add_action( 'amp_story_head', 'wp_enqueue_scripts', 1 );
+		add_action(
+			'amp_story_head',
+			function() {
+				/*
+				 * Same as wp_print_styles() but importantly omitting the wp_print_styles action, which themes/plugins
+				 * can use to output arbitrary styling. Styling is constrained in story template via the
+				 * \AMP_Story_Post_Type::filter_frontend_print_styles_array() method.
+				 */
+				wp_styles()->do_items();
+			},
+			8
+		);
+		add_action( 'amp_story_head', 'amp_add_generator_metadata' );
+		add_action( 'amp_story_head', 'rest_output_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_resource_hints', 2 );
+		add_action( 'amp_story_head', 'feed_links', 2 );
+		add_action( 'amp_story_head', 'feed_links_extra', 3 );
+		add_action( 'amp_story_head', 'rsd_link' );
+		add_action( 'amp_story_head', 'wlwmanifest_link' );
+		add_action( 'amp_story_head', 'adjacent_posts_rel_link_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'noindex', 1 );
+		add_action( 'amp_story_head', 'wp_generator' );
+		add_action( 'amp_story_head', 'rel_canonical' );
+		add_action( 'amp_story_head', 'wp_shortlink_wp_head', 10, 0 );
+		add_action( 'amp_story_head', 'wp_site_icon', 99 );
+		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
 
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
@@ -893,6 +929,34 @@ class AMP_Story_Post_Type {
 			);
 		}
 
+		/**
+		 * Filter list of allowed video mime types.
+		 *
+		 * This can be used to add additionally supported formats, for example by plugins
+		 * that do video transcoding.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed video mime types.
+		 */
+		$allowed_video_mime_types = apply_filters( 'amp_story_allowed_video_types', [ 'video/mp4' ] );
+
+		// If `$allowed_video_mime_types` doesn't have valid data or is empty add default supported type.
+		if ( ! is_array( $allowed_video_mime_types ) || empty( $allowed_video_mime_types ) ) {
+			$allowed_video_mime_types = [ 'video/mp4' ];
+		}
+
+		// Only add currently supported mime types.
+		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
+
+		wp_localize_script(
+			self::AMP_STORIES_SCRIPT_HANDLE,
+			'ampStoriesEditorSettings',
+			[
+				'allowedVideoMimeTypes' => $allowed_video_mime_types,
+			]
+		);
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesFonts',
@@ -975,10 +1039,12 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_fonts() {
 		static $fonts = null;
+
 		if ( isset( $fonts ) ) {
 			return $fonts;
 		}
 
+		// Default system fonts.
 		$fonts = [
 			[
 				'name'      => 'Arial',
@@ -991,11 +1057,6 @@ class AMP_Story_Post_Type {
 			[
 				'name'      => 'Arial Narrow',
 				'fallbacks' => [ 'Arial', 'sans-serif' ],
-			],
-			[
-				'name'      => 'Arimo',
-				'gfont'     => 'Arimo:400,700',
-				'fallbacks' => [ 'sans-serif' ],
 			],
 			[
 				'name'      => 'Baskerville',
@@ -1030,16 +1091,6 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Gill Sans MT', 'Calibri', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Lato',
-				'gfont'     => 'Lato:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Lora',
-				'gfont'     => 'Lora:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
 				'name'      => 'Lucida Bright',
 				'fallbacks' => [ 'Georgia', 'serif' ],
 			],
@@ -1048,92 +1099,12 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Console', 'monaco', 'Bitstream Vera Sans Mono', 'monospace' ],
 			],
 			[
-				'name'      => 'Merriweather',
-				'gfont'     => 'Merriweather:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Montserrat',
-				'gfont'     => 'Montserrat:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Noto Sans',
-				'gfont'     => 'Noto Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans',
-				'gfont'     => 'Open Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Open Sans Condensed',
-				'gfont'     => 'Open Sans Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Oswald',
-				'gfont'     => 'Oswald:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Palatino',
 				'fallbacks' => [ 'Palatino Linotype', 'Palatino LT STD', 'Book Antiqua', 'Georgia', 'serif' ],
 			],
 			[
 				'name'      => 'Papyrus',
 				'fallbacks' => [ 'fantasy' ],
-			],
-			[
-				'name'      => 'Playfair Display',
-				'gfont'     => 'Playfair Display:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'PT Sans',
-				'gfont'     => 'PT Sans:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Sans Narrow',
-				'gfont'     => 'PT Sans Narrow:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'PT Serif',
-				'gfont'     => 'PT Serif:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Raleway',
-				'gfont'     => 'Raleway:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto',
-				'gfont'     => 'Roboto:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Condensed',
-				'gfont'     => 'Roboto Condensed:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
-				'name'      => 'Roboto Slab',
-				'gfont'     => 'Roboto Slab:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Slabo 27px',
-				'gfont'     => 'Slabo 27px:400,700',
-				'fallbacks' => [ 'serif' ],
-			],
-			[
-				'name'      => 'Source Sans Pro',
-				'gfont'     => 'Source Sans Pro:400,700',
-				'fallbacks' => [ 'sans-serif' ],
 			],
 			[
 				'name'      => 'Tahoma',
@@ -1148,15 +1119,15 @@ class AMP_Story_Post_Type {
 				'fallbacks' => [ 'Lucida Grande', 'Lucida Sans Unicode', 'Lucida Sans', 'Tahoma', 'sans-serif' ],
 			],
 			[
-				'name'      => 'Ubuntu',
-				'gfont'     => 'Ubuntu:400,700',
-				'fallbacks' => [ 'sans-serif' ],
-			],
-			[
 				'name'      => 'Verdana',
 				'fallbacks' => [ 'Geneva', 'sans-serif' ],
 			],
 		];
+		$file  = __DIR__ . '/data/fonts.json';
+		$fonts = array_merge( $fonts, self::get_google_fonts( $file ) );
+
+		$columns = wp_list_pluck( $fonts, 'name' );
+		array_multisort( $columns, SORT_ASC, $fonts );
 
 		$fonts_url = 'https://fonts.googleapis.com/css';
 		$subsets   = [ 'latin', 'latin-ext' ];
@@ -1183,7 +1154,7 @@ class AMP_Story_Post_Type {
 			static function ( $font ) use ( $fonts_url, $subsets ) {
 				$font['slug'] = sanitize_title( $font['name'] );
 
-				if ( isset( $font['gfont'] ) ) {
+				if ( ! empty( $font['gfont'] ) ) {
 					$font['handle'] = sprintf( '%s-font', $font['slug'] );
 					$font['src']    = add_query_arg(
 						[
@@ -1200,6 +1171,87 @@ class AMP_Story_Post_Type {
 		);
 
 		return $fonts;
+	}
+
+	/**
+	 * Get list of Google Fonts from a given JSON file.
+	 *
+	 * @param string $file  Path to file containing Google Fonts definitions.
+	 *
+	 * @return array $fonts Fonts list.
+	 */
+	public static function get_google_fonts( $file ) {
+		if ( ! is_readable( $file ) ) {
+			return [];
+		}
+		$file_content = file_get_contents( $file );  // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$google_fonts = json_decode( $file_content, true );
+
+		if ( empty( $google_fonts ) ) {
+			return [];
+		}
+
+		$fonts = [];
+
+		foreach ( $google_fonts as $font ) {
+			$variants = array_intersect(
+				$font['variants'],
+				[
+					'regular',
+					'italic',
+					'700',
+					'700italic',
+				]
+			);
+
+			$variants = array_map(
+				static function ( $variant ) {
+					$variant = str_replace(
+						[ '0italic', 'regular', 'italic' ],
+						[ '0i', '400', '400i' ],
+						$variant
+					);
+
+					return $variant;
+				},
+				$variants
+			);
+
+			$gfont = '';
+
+			if ( $variants ) {
+				$gfont = $font['family'] . ':' . implode( ',', $variants );
+			}
+
+			$fonts[] = [
+				'name'      => $font['family'],
+				'fallbacks' => (array) self::get_font_fallback( $font['category'] ),
+				'gfont'     => $gfont,
+			];
+		}
+
+		return $fonts;
+	}
+
+	/**
+	 * Helper method to lookup fallback font.
+	 *
+	 * @param string $category Google font category.
+	 *
+	 * @return string $fallback Fallback font.
+	 */
+	public static function get_font_fallback( $category ) {
+		switch ( $category ) {
+			case 'sans-serif':
+				return 'sans-serif';
+			case 'handwriting':
+			case 'display':
+				return 'cursive';
+			case 'monospace':
+				return 'monospace';
+			default:
+				return 'serif';
+		}
 	}
 
 	/**

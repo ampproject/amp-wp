@@ -13,7 +13,57 @@ import {
 	deactivateExperience,
 	openTemplateInserter,
 	searchForBlock as searchForStoryBlock,
+	getBlocksOnPage,
+	wpDataSelect,
 } from '../../utils';
+
+/**
+ * Adds a reusable block.
+ */
+async function addReusableBlock() {
+	await createNewPost();
+
+	const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
+		return layout.classList.contains( 'has-fixed-toolbar' );
+	} );
+	if ( ! isTopToolbarEnabled ) {
+		await clickOnMoreMenuItem( 'Top Toolbar' );
+	}
+
+	// Remove all blocks from the post so that we're working with a clean slate.
+	await page.evaluate( () => {
+		const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
+		const clientIds = blocks.map( ( block ) => block.clientId );
+		wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
+	} );
+
+	// Insert a paragraph block
+	await insertBlock( 'Paragraph' );
+	await page.keyboard.type( 'Reusable block!' );
+
+	await clickButtonByLabel( 'More options' );
+
+	const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
+	await convertButton.click();
+	// Wait for the snackbar confirmation of the block creation result.
+	await page.waitForSelector( '.components-snackbar__content' );
+}
+
+/**
+ * Removes all reusable blocks visible on the wp_blocks edit screen.
+ */
+async function removeAllReusableBlocks() {
+	await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+
+	// Delete all reusable blocks to restore clean state.
+	const selector = '#cb-select-all-1';
+	const actionsSelector = '#bulk-action-selector-top';
+
+	await page.click( selector );
+	await page.select( actionsSelector, 'trash' );
+	await page.click( '#doaction' );
+	await page.waitForNavigation();
+}
 
 describe( 'Story Templates', () => {
 	describe( 'Stories experience disabled', () => {
@@ -31,53 +81,23 @@ describe( 'Story Templates', () => {
 		} );
 
 		describe( 'With non-template Reusable block', () => {
-			// Add Reusable block.
 			beforeAll( async () => {
-				await createNewPost();
-
-				const isTopToolbarEnabled = await page.$eval( '.edit-post-layout', ( layout ) => {
-					return layout.classList.contains( 'has-fixed-toolbar' );
-				} );
-				if ( ! isTopToolbarEnabled ) {
-					await clickOnMoreMenuItem( 'Top Toolbar' );
-				}
-
-				// Remove all blocks from the post so that we're working with a clean slate.
-				await page.evaluate( () => {
-					const blocks = wp.data.select( 'core/block-editor' ).getBlocks();
-					const clientIds = blocks.map( ( block ) => block.clientId );
-					wp.data.dispatch( 'core/block-editor' ).removeBlocks( clientIds );
-				} );
-
-				// Insert a paragraph block
-				await insertBlock( 'Paragraph' );
-				await page.keyboard.type( 'Reusable block!' );
-
-				await clickButtonByLabel( 'More options' );
-
-				const convertButton = await page.waitForXPath( '//button[text()="Add to Reusable Blocks"]' );
-				await convertButton.click();
+				await addReusableBlock();
 			} );
 
 			afterAll( async () => {
-				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
-
-				// Delete all reusable blocks to restore clean state.
-				const selector = '#cb-select-all-1';
-				const actionsSelector = '#bulk-action-selector-top';
-
-				await page.click( selector );
-				await page.select( actionsSelector, 'trash' );
-				await page.click( '#doaction' );
-				await page.waitForNavigation();
+				await removeAllReusableBlocks();
 			} );
 
 			it( 'should display non-template reusable blocks in the reusable blocks management screen', async () => {
+				const titleSelector = '.page-title .row-title';
+
 				await visitAdminPage( 'edit.php', 'post_type=wp_block' );
+				await page.waitForSelector( titleSelector );
 
 				// Check that it is untitled
 				const title = await page.$eval(
-					'.page-title .row-title',
+					titleSelector,
 					( element ) => element.innerText
 				);
 				expect( title ).toBe( 'Untitled Reusable Block' );
@@ -99,6 +119,7 @@ describe( 'Story Templates', () => {
 
 		afterAll( async () => {
 			await deactivateExperience( 'stories' );
+			await removeAllReusableBlocks();
 		} );
 
 		it( 'should hide story templates from the reusable blocks management screen', async () => {
@@ -121,7 +142,9 @@ describe( 'Story Templates', () => {
 			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
 		} );
 
-		it( 'should load story templates in the stories editor', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should load story templates in the stories editor', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -130,7 +153,17 @@ describe( 'Story Templates', () => {
 			expect( numberOfTemplates ).toStrictEqual( 11 ); // 10 default templates plus the empty page.
 		} );
 
-		it( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
+		it( 'should not load default reusable blocks in the stories editor', async () => {
+			await addReusableBlock();
+			await createNewPost( { postType: 'amp_story' } );
+			await searchForStoryBlock( 'Reusable' );
+
+			await expect( page ).toMatchElement( '.block-editor-inserter__no-results' );
+		} );
+
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should insert the correct blocks and as skeletons when clicking on a template', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -164,7 +197,9 @@ describe( 'Story Templates', () => {
 			expect( defaultStyledQuote ).toStrictEqual( 0 );
 		} );
 
-		it( 'should contain expected content in the template preview', async () => {
+		// Disable reason: see https://github.com/ampproject/amp-wp/issues/3211
+		// eslint-disable-next-line jest/no-disabled-tests
+		it.skip( 'should contain expected content in the template preview', async () => {
 			await createNewPost( { postType: 'amp_story' } );
 
 			await openTemplateInserter();
@@ -201,6 +236,20 @@ describe( 'Story Templates', () => {
 			expect( templateContents[ 8 ] ).toContain( 'One of the biggest things missing from the show is the fact that before his death, Robb Start legitimizes Jon Snow as a Stark and makes him his heir.' );
 			// Fandom Intro
 			expect( templateContents[ 9 ] ).toContain( 'got-logo.png' );
+		} );
+
+		// @see https://github.com/ampproject/amp-wp/issues/3211
+		it( 'should directly insert a new blank page', async () => {
+			await createNewPost( { postType: 'amp_story' } );
+
+			const blockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			await page.click( '.block-editor-inserter .editor-inserter__amp-inserter' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button:not(disabled)[aria-label="Previous Page"]' );
+			await expect( page ).toMatchElement( '.amp-story-editor-carousel-navigation button[disabled][aria-label="Next Page"]' );
+
+			const newBlockOrder = await wpDataSelect( 'core/block-editor', 'getBlockOrder' );
+			expect( newBlockOrder ).toHaveLength( blockOrder.length + 1 );
+			expect( await getBlocksOnPage() ).toHaveLength( 0 );
 		} );
 	} );
 } );

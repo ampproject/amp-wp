@@ -261,7 +261,18 @@ class AMP_Analytics_Options_Test extends WP_UnitTestCase {
 
 		$analytics = amp_get_analytics();
 
+		$trigger_count = 0;
+		add_action(
+			'amp_print_analytics',
+			function ( $entries ) use ( $analytics, &$trigger_count ) {
+				$this->assertEquals( $analytics, $entries );
+				$trigger_count++;
+			}
+		);
+
 		$output = get_echo( 'amp_print_analytics', [ $analytics ] );
+
+		$this->assertEquals( 1, $trigger_count );
 
 		$this->assertStringStartsWith( '<amp-analytics', $output );
 		$this->assertContains( 'type="googleanalytics"><script type="application/json">{"requests":{"event":', $output );

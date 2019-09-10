@@ -115,8 +115,6 @@ export class InserterMenu extends Component {
 			itemsPerCategory: {},
 			openPanels: [ 'suggested' ],
 		};
-		this.onChangeSearchInput = this.onChangeSearchInput.bind( this );
-		this.onHover = this.onHover.bind( this );
 		this.panels = {};
 		this.inserterResults = createRef();
 	}
@@ -131,11 +129,11 @@ export class InserterMenu extends Component {
 		}
 	}
 
-	onChangeSearchInput( event ) {
+	onChangeSearchInput = ( event ) => {
 		this.filter( event.target.value );
 	}
 
-	onHover( item ) {
+	onHover = ( item ) => {
 		this.setState( {
 			hoveredItem: item,
 		} );

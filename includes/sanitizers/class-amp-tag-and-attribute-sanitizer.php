@@ -639,6 +639,9 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 	 * @return true|WP_Error True when valid or error when invalid.
 	 */
 	private function validate_cdata_for_node( $element, $cdata_spec ) {
+		if ( isset( $cdata_spec['max_bytes'] ) && strlen( $element->textContent ) > $cdata_spec['max_bytes'] ) {
+			return new WP_Error( 'excessive_bytes' );
+		}
 		if ( isset( $cdata_spec['blacklisted_cdata_regex'] ) ) {
 			if ( preg_match( '@' . $cdata_spec['blacklisted_cdata_regex']['regex'] . '@u', $element->textContent ) ) {
 				return new WP_Error( $cdata_spec['blacklisted_cdata_regex']['error_message'] );
@@ -1069,7 +1072,10 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 		// Remove the disallowed values.
 		foreach ( $attrs_to_remove as $attr_node ) {
-			if ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
+			if ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ] ) &&
+				'href' === $attr_node->nodeName ) {
+				$attributes_pending_removal[] = $attr_node;
+			} elseif ( isset( $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) &&
 				( true === $attr_spec_list[ $attr_node->nodeName ][ AMP_Rule_Spec::VALUE_URL ][ AMP_Rule_Spec::ALLOW_EMPTY ] ) ) {
 				$attr_node->nodeValue = '';
 			} else {
@@ -1320,6 +1326,12 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 			foreach ( $this->extract_attribute_urls( $node->getAttributeNode( $attr_name ) ) as $url ) {
 				$url = urldecode( $url );
 
+				// Check whether the URL is parseable.
+				$parts = wp_parse_url( $url );
+				if ( false === $parts ) {
+					return AMP_Rule_Spec::FAIL;
+				}
+
 				// Check if the protocol contains invalid chars (protocolCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L31-L39).
 				$protocol = $this->parse_protocol( $url );
 				if ( isset( $protocol ) ) {
@@ -1331,7 +1343,7 @@ class AMP_Tag_And_Attribute_Sanitizer extends AMP_Base_Sanitizer {
 
 				// Check if the host contains invalid chars (hostCharIsValid: https://github.com/ampproject/amphtml/blob/af1e3a550feeafd732226202b8d1f26dcefefa18/validator/engine/parse-url.js#L62-L103).
 				$host = wp_parse_url( $url, PHP_URL_HOST );
-				if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/i', $host ) ) {
+				if ( $host && preg_match( '/[!"#$%&\'()*+,\/:;<=>?@[\]^`{|}~\s]/', $host ) ) {
 					return AMP_Rule_Spec::FAIL;
 				}
 			}
