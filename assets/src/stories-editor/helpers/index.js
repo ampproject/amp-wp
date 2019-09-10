@@ -1786,5 +1786,5 @@ export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
  * @return {Element} Block DOM node.
  */
 export const getBlockDOMNode = ( clientId, scope = document ) => {
-	return scope.querySelector( '[data-block="' + clientId + '"]' );
+	return scope.querySelector( `[data-block="${ clientId }"]` );
 };
