@@ -83,6 +83,13 @@ class AMP_Validated_URL_Post_Type {
 	const VALIDATION_ERRORS_META_BOX = 'amp_validation_errors';
 
 	/**
+	 * The transient key to use for caching the pending URLs count.
+	 *
+	 * @var string
+	 */
+	const PENDING_URLS_COUNT_TRANSIENT = 'amp_pending_urls_count';
+
+	/**
 	 * The total number of errors associated with a URL, regardless of the maximum that can display.
 	 *
 	 * @var int
@@ -360,7 +367,12 @@ class AMP_Validated_URL_Post_Type {
 			return;
 		}
 
-		$pending_count = static::get_pending_urls_count();
+		$pending_count = get_transient( static::PENDING_URLS_COUNT_TRANSIENT );
+
+		if ( false === $pending_count ) {
+			$pending_count = static::get_pending_urls_count();
+			set_transient( static::PENDING_URLS_COUNT_TRANSIENT, $pending_count, DAY_IN_SECONDS );
+		}
 
 		if ( 0 === $pending_count ) {
 			return;
