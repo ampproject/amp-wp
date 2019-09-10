@@ -88,7 +88,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 *      @type bool     $should_locate_sources      Whether to locate the sources when reporting validation errors.
 	 *      @type string   $parsed_cache_variant       Additional value by which to vary parsed cache.
 	 *      @type string   $include_manifest_comment   Whether to show the manifest HTML comment in the response before the style[amp-custom] element. Can be 'always', 'never', or 'when_excessive'.
-	 *      @type bool     $admin_bar_showing          Whether the admin bar is showing. When true, the #wpadminbar is added to dynamic_element_selectors.
 	 * }
 	 */
 	protected $args;
@@ -368,11 +367,6 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	 */
 	public function __construct( DOMDocument $dom, array $args = [] ) {
 		parent::__construct( $dom, $args );
-
-		// Prevent tree shaking theme-specific admin bar styles when admin bar is showing.
-		if ( ! empty( $this->args['admin_bar_showing'] ) ) {
-			$this->args['dynamic_element_selectors'][] = '#wpadminbar';
-		}
 
 		foreach ( AMP_Allowed_Tags_Generated::get_allowed_tag( 'style' ) as $spec_rule ) {
 			if ( ! isset( $spec_rule[ AMP_Rule_Spec::TAG_SPEC ]['spec_name'] ) ) {
