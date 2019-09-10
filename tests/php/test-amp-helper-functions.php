@@ -22,9 +22,10 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	 */
 	public function tearDown() {
 		remove_theme_support( AMP_Theme_Support::SLUG );
-		global $wp_scripts, $pagenow;
-		$wp_scripts = null;
-		$pagenow    = 'index.php'; // Since clean_up_global_scope() doesn't.
+		global $wp_scripts, $pagenow, $show_admin_bar;
+		$wp_scripts     = null;
+		$show_admin_bar = null;
+		$pagenow        = 'index.php'; // Since clean_up_global_scope() doesn't.
 
 		if ( class_exists( 'WP_Block_Type_Registry' ) ) {
 			foreach ( WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
@@ -626,6 +627,33 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 		$this->assertEquals( 'amp_content_embed_handlers', $this->last_filter_call['current_filter'] );
 		$this->assertEquals( $handlers, $this->last_filter_call['args'][0] );
 		$this->assertEquals( $post, $this->last_filter_call['args'][1] );
+	}
+
+	/**
+	 * Test amp_is_dev_mode().
+	 *
+	 * @covers ::amp_is_dev_mode()
+	 */
+	public function test_amp_is_dev_mode() {
+		$this->assertFalse( amp_is_dev_mode() );
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$this->assertTrue( amp_is_dev_mode() );
+		remove_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$this->assertFalse( amp_is_dev_mode() );
+
+		// Test authenticated user with admin bar showing.
+		add_filter( 'show_admin_bar', '__return_true' );
+		wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( is_user_logged_in() );
+		$this->assertTrue( amp_is_dev_mode() );
+
+		// Test unauthenticated user with admin bar forced.
+		add_filter( 'show_admin_bar', '__return_true' );
+		wp_set_current_user( 0 );
+		$this->assertFalse( is_user_logged_in() );
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertFalse( amp_is_dev_mode() );
 	}
 
 	/**
