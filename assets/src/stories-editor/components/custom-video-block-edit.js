@@ -297,8 +297,8 @@ class CustomVideoBlockEdit extends Component {
 							checked={ loop }
 						/>
 						<TextControl
-							label={ __( 'Accessibility label', 'amp' ) }
-							help={ __( 'This label is used to inform visually impaired users about the video content.', 'amp' ) }
+							label={ __( 'Assistive Text', 'amp' ) }
+							help={ __( 'Used to inform visually impaired users about the video content.', 'amp' ) }
 							value={ ampAriaLabel }
 							onChange={ ( label ) => setAttributes( { ampAriaLabel: label } ) }
 						/>
