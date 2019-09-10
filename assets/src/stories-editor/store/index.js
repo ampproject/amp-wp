@@ -25,7 +25,6 @@ const store = registerStore(
 		initialState: {
 			animations: {
 				animationOrder: {},
-				isPlayingAnimation: false,
 			},
 			editorSettings: {
 				...window.ampStoriesEditorSettings,
