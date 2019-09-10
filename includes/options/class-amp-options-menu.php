@@ -702,7 +702,7 @@ class AMP_Options_Menu {
 		$story_settings = AMP_Options_Manager::get_option( 'story_settings' );
 		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Post_Type::STORY_SETTINGS_OPTION );
 		?>
-		<fieldset <?php disabled( ! current_user_can( 'publish_posts' ) ); ?>>
+		<fieldset>
 			<p>
 				<label for="stories_settings_auto_advance_after">
 					<strong><?php echo esc_html__( 'Advance to next page', 'amp' ); ?></strong>
