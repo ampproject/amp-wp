@@ -16,7 +16,7 @@ class AMP_Story_Templates {
 	 *
 	 * @var string
 	 */
-	const STORY_TEMPLATES_VERSION = '0.3.6';
+	const STORY_TEMPLATES_VERSION = '0.3.8';
 
 	/**
 	 * Slug for templates' taxonomy.
@@ -32,20 +32,21 @@ class AMP_Story_Templates {
 	 * Init.
 	 */
 	public function init() {
-		// Hide story templates even when the stories feature is not active.
+		// Always hide the story templates.
 		add_filter( 'pre_get_posts', [ $this, 'filter_pre_get_posts' ] );
+
+		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
+		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
+
+		// We need to register the taxonomy even if AMP Stories is disabled for tax_query.
+		$this->register_taxonomy();
 
 		if ( ! AMP_Options_Manager::is_stories_experience_enabled() ) {
 			return;
 		}
 
-		add_filter( 'rest_wp_block_query', [ $this, 'filter_rest_wp_block_query' ], 10, 2 );
 		add_action( 'save_post_wp_block', [ $this, 'flag_template_as_modified' ] );
 
-		// Temporary filters for disallowing the users to edit any templates until the feature has been implemented.
-		add_filter( 'user_has_cap', [ $this, 'filter_user_has_cap' ], 10, 3 );
-
-		$this->register_taxonomy();
 		$this->maybe_import_story_templates();
 	}
 
@@ -82,15 +83,16 @@ class AMP_Story_Templates {
 
 		$referer = wp_parse_url( wp_get_referer() );
 
+		$is_story_page = false;
 		if ( isset( $referer['query'] ) ) {
 			$parsed_args = wp_parse_args( $referer['query'] );
 
 			if ( isset( $parsed_args['post_type'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === $parsed_args['post_type'] ) {
-				return $query; // This is in the editor for a new AMP Story.
+				$is_story_page = true; // This is in the editor for a new AMP Story.
 			}
 
 			if ( isset( $parsed_args['post'] ) && AMP_Story_Post_Type::POST_TYPE_SLUG === get_post_type( $parsed_args['post'] ) ) {
-				return $query; // This is in the editor for an existing AMP Story.
+				$is_story_page = true; // This is in the editor for an existing AMP Story.
 			}
 		}
 
@@ -99,13 +101,14 @@ class AMP_Story_Templates {
 			$tax_query = [];
 		}
 
-		$tax_query[] = [
+		$reusable_query = [
 			'taxonomy' => self::TEMPLATES_TAXONOMY,
 			'field'    => 'slug',
 			'terms'    => [ self::TEMPLATES_TERM ],
-			'operator' => 'NOT IN',
+			'operator' => $is_story_page ? 'IN' : 'NOT IN', // Include templates if is Story page, exclude otherwise.
 		];
 
+		$tax_query[] = $reusable_query;
 		$query->set( 'tax_query', $tax_query );
 		return $query;
 	}
@@ -294,44 +297,6 @@ class AMP_Story_Templates {
 				]
 			);
 		}
-	}
-
-	/**
-	 * Filter REST request for reusable blocks to not display templates under Reusable Blocks within other posts.
-	 *
-	 * @param array           $args Original args.
-	 * @param WP_REST_Request $request WP REST Request object.
-	 * @return array Args.
-	 */
-	public function filter_rest_wp_block_query( $args, $request ) {
-		$headers = $request->get_headers();
-		if ( ! isset( $headers['referer'][0] ) ) {
-			return $args;
-		}
-
-		$parts = wp_parse_url( $headers['referer'][0] );
-		if ( ! isset( $parts['query'] ) ) {
-			return $args;
-		}
-		parse_str( $parts['query'], $params );
-		if ( ! isset( $params['post'], $params['action'] ) ) {
-			return $args;
-		}
-
-		$edited_post = get_post( absint( $params['post'] ) );
-		if ( AMP_Story_Post_Type::POST_TYPE_SLUG !== $edited_post->post_type ) {
-			if ( ! isset( $args['tax_query'] ) ) {
-				$args['tax_query'] = [];
-			}
-			$args['tax_query'][] = [
-				'taxonomy' => self::TEMPLATES_TAXONOMY,
-				'field'    => 'slug',
-				'terms'    => [ self::TEMPLATES_TERM ],
-				'operator' => 'NOT IN',
-			];
-		}
-
-		return $args;
 	}
 
 	/**

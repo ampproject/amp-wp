@@ -42,7 +42,6 @@ class AMP_Story_Templates_Test extends WP_UnitTestCase {
 		$amp_story_templates->init();
 
 		$this->assertTrue( post_type_exists( 'amp_story' ) );
-		$this->assertEquals( 10, has_action( 'rest_wp_block_query', [ $amp_story_templates, 'filter_rest_wp_block_query' ] ) );
 		$this->assertEquals( 10, has_action( 'save_post_wp_block', [ $amp_story_templates, 'flag_template_as_modified' ] ) );
 		$this->assertEquals( 10, has_action( 'user_has_cap', [ $amp_story_templates, 'filter_user_has_cap' ] ) );
 		$this->assertEquals( 10, has_action( 'pre_get_posts', [ $amp_story_templates, 'filter_pre_get_posts' ] ) );

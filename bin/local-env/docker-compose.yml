@@ -29,6 +29,7 @@ services:
     depends_on:
       - mysql
       - wordpress
+    command: tail -f /dev/null
 
   mysql:
     image: mysql:5.7

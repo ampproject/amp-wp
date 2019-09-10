@@ -107,8 +107,6 @@ export const ALLOWED_BLOCKS = [
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
-export const ALLOWED_VIDEO_TYPES = [ 'video/mp4' ];
-export const ALLOWED_BACKGROUND_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE, ...ALLOWED_VIDEO_TYPES ];
 export const POSTER_ALLOWED_MEDIA_TYPES = [ IMAGE_BACKGROUND_TYPE ];
 
 export const MEDIA_INNER_BLOCKS = [ 'core/video', 'core/audio' ];
@@ -237,7 +235,18 @@ export const AMP_STORY_FONT_IMAGES = {
 	Ubuntu,
 };
 
-export const TEXT_BLOCK_BORDER = 5;
+export const REVERSE_WIDTH_CALCULATIONS = [
+	'left',
+	'bottomLeft',
+	'topLeft',
+];
+
+export const REVERSE_HEIGHT_CALCULATIONS = [
+	'top',
+	'topRight',
+	'topLeft',
+];
+
 export const TEXT_BLOCK_PADDING = 7;
 
 export const BLOCK_ROTATION_SNAPS = [ -180, -165, -150, -135, -120, -105, -90, -75, -60, -45, -30, -15, 0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180 ];

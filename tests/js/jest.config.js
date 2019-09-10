@@ -11,9 +11,9 @@ module.exports = {
 		'<rootDir>/.git',
 		'<rootDir>/node_modules',
 		'<rootDir>/build',
-		'.*/e2e/.*',
 	],
 	coveragePathIgnorePatterns: [ '/node_modules/', '<rootDir>/build/' ],
 	coverageReporters: [ 'lcov' ],
 	coverageDirectory: '<rootDir>/build/logs',
+	reporters: [ [ 'jest-silent-reporter', { useDots: true } ] ],
 };

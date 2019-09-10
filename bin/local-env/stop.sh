@@ -3,9 +3,6 @@
 # Exit if any command fails.
 set -e
 
-# Common variables.
-DOCKER_COMPOSE_FILE_OPTIONS="-f $(dirname "$0")/docker-compose.yml"
-
 # Include useful functions.
 . "$(dirname "$0")/includes.sh"
 
@@ -23,4 +20,4 @@ fi
 
 # Stop existing containers.
 echo -e $(status_message "Stopping Docker containers...")
-docker-compose $DOCKER_COMPOSE_FILE_OPTIONS down --remove-orphans >/dev/null 2>&1
+dc down --remove-orphans >/dev/null 2>&1

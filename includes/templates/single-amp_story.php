@@ -7,26 +7,25 @@
 
 the_post();
 
-$metadata = amp_get_schemaorg_metadata();
 ?>
 <!DOCTYPE html>
 <html amp <?php language_attributes(); ?>>
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
-		<title><?php echo esc_html( wp_get_document_title() ); ?></title>
+
 		<?php
-		wp_enqueue_scripts();
-		wp_scripts()->do_items( [ 'amp-runtime' ] ); // @todo Duplicate with AMP_Theme_Support::enqueue_assets().
-		wp_styles()->do_items();
+		/**
+		 * Prints scripts or data in the head tag on the front end.
+		 *
+		 * @since 1.3
+		 */
+		do_action( 'amp_story_head' );
 		?>
-		<?php rel_canonical(); ?>
-		<?php amp_add_generator_metadata(); ?>
-		<script type="application/ld+json"><?php echo wp_json_encode( $metadata, JSON_UNESCAPED_UNICODE ); ?></script>
-		<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
 	</head>
 	<body>
 		<?php
+		$metadata = amp_get_schemaorg_metadata();
 		if ( isset( $metadata['publisher']['logo']['url'] ) ) {
 			$publisher_logo_src = $metadata['publisher']['logo']['url'];
 		} elseif ( isset( $metadata['publisher']['logo'] ) && is_string( $metadata['publisher']['logo'] ) ) {

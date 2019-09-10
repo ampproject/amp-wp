@@ -481,6 +481,39 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test amp_get_asset_url.
+	 *
+	 * @covers ::amp_get_asset_url()
+	 */
+	public function test_amp_get_asset_url() {
+		$this->assertStringEndsWith( '/assets/foo.jpg', amp_get_asset_url( 'foo.jpg' ) );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_code.
+	 *
+	 * @covers ::amp_get_boilerplate_code()
+	 */
+	public function test_amp_get_boilerplate_code() {
+		$boilerplate_code = amp_get_boilerplate_code();
+		$this->assertStringStartsWith( '<style amp-boilerplate>', $boilerplate_code );
+		$this->assertContains( '<noscript><style amp-boilerplate>', $boilerplate_code );
+	}
+
+	/**
+	 * Test amp_get_boilerplate_stylesheets.
+	 *
+	 * @covers ::amp_get_boilerplate_stylesheets()
+	 */
+	public function test_amp_get_boilerplate_stylesheets() {
+		$stylesheets = amp_get_boilerplate_stylesheets();
+		$this->assertInternalType( 'array', $stylesheets );
+		$this->assertCount( 2, $stylesheets );
+		$this->assertContains( 'body{-webkit-animation:-amp-start', $stylesheets[0] );
+		$this->assertContains( 'body{-webkit-animation:none', $stylesheets[1] );
+	}
+
+	/**
 	 * Test amp_add_generator_metadata.
 	 *
 	 * @covers ::amp_add_generator_metadata()

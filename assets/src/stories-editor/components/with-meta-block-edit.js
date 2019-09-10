@@ -28,7 +28,9 @@ import { maybeUpdateFontSize, maybeUpdateBlockDimensions } from '../helpers';
 // @todo: Allow individual blocks to add custom controls.
 class MetaBlockEdit extends Component {
 	componentDidMount() {
-		maybeUpdateFontSize( this.props );
+		if ( ! this.props.isLoading ) {
+			maybeUpdateFontSize( this.props );
+		}
 	}
 
 	componentDidUpdate( prevProps ) {
@@ -48,7 +50,7 @@ class MetaBlockEdit extends Component {
 			prevProps.blockContent !== blockContent
 		);
 
-		if ( checkFontSize ) {
+		if ( checkFontSize && ! this.props.isLoading ) {
 			maybeUpdateFontSize( this.props );
 		}
 
@@ -139,6 +141,7 @@ MetaBlockEdit.propTypes = {
 	placeholder: PropTypes.string,
 	className: PropTypes.string,
 	tagName: PropTypes.string,
+	isLoading: PropTypes.bool,
 	isSelected: PropTypes.bool,
 	isEditable: PropTypes.bool,
 	fontSize: PropTypes.shape( {
@@ -177,7 +180,8 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 
 			const attributeValue = getEditedPostAttribute( attribute );
 
-			let blockContent;
+			let blockContent,
+				isLoading = false;
 
 			// Todo: Maybe pass callbacks as props instead.
 			switch ( attribute ) {
@@ -193,6 +197,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 					const author = getAuthors().find( ( { id } ) => id === attributeValue );
 
 					blockContent = author ? author.name : __( 'Anonymous', 'amp' );
+					isLoading = ! author;
 
 					break;
 				default:
@@ -205,6 +210,7 @@ export default ( { attribute, placeholder, tagName, isEditable } ) => {
 				blockContent,
 				placeholder,
 				colors,
+				isLoading,
 			};
 		} ),
 		// @todo: Implement isEditable handling to make this usable.

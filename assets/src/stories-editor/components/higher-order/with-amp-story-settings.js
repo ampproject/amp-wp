@@ -169,7 +169,6 @@ export default createHigherOrderComponent(
 				clientId,
 				name,
 				attributes,
-				isSelected,
 				isLast,
 				isFirst,
 				currentBlockPosition,
@@ -243,13 +242,11 @@ export default createHigherOrderComponent(
 			}
 
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
-
 			return (
 				<>
 					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
 					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
-							isSelected={ isSelected }
 							width={ width }
 							height={ height }
 							angle={ rotationAngle }
@@ -283,15 +280,20 @@ export default createHigherOrderComponent(
 								snap={ BLOCK_ROTATION_SNAPS }
 								snapGap={ BLOCK_ROTATION_SNAP_GAP }
 							>
-								<StoryBlockMover
-									clientId={ props.clientId }
-									blockName={ name }
-									blockElementId={ `block-${ props.clientId }` }
-									isDraggable={ ! props.isPartOfMultiSelection }
-									isMovable={ isMovableBlock }
-								>
+								{ isTextBlock && (
 									<BlockEdit { ...props } />
-								</StoryBlockMover>
+								) }
+								{ ! isTextBlock && (
+									<StoryBlockMover
+										clientId={ props.clientId }
+										blockName={ name }
+										blockElementId={ `block-${ props.clientId }` }
+										isDraggable={ ! props.isPartOfMultiSelection }
+										isMovable={ isMovableBlock }
+									>
+										<BlockEdit { ...props } />
+									</StoryBlockMover>
+								) }
 							</RotatableBox>
 						</ResizableBox>
 					) }
@@ -430,9 +432,13 @@ export default createHigherOrderComponent(
 								<FontFamilyPicker
 									fonts={ ampStoriesFonts }
 									value={ ampFontFamily }
-									onChange={ ( value ) => {
-										maybeEnqueueFontStyle( value );
-										setAttributes( { ampFontFamily: value } );
+									onChange={ ( font ) => {
+										if ( ! font ) {
+											setAttributes( { ampFontFamily: '' } );
+											return;
+										}
+										maybeEnqueueFontStyle( font.name );
+										setAttributes( { ampFontFamily: font.name } );
 									} }
 								/>
 								<ToggleControl

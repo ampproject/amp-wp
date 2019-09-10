@@ -5,10 +5,12 @@ import uuid from 'uuid/v4';
 import classnames from 'classnames';
 import { every, has, isEqual } from 'lodash';
 import memize from 'memize';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
  */
+import '@wordpress/core-data';
 import { render } from '@wordpress/element';
 import { count } from '@wordpress/wordcount';
 import { __, _x, sprintf } from '@wordpress/i18n';
@@ -26,6 +28,7 @@ import {
 	EditorCarousel,
 	StoryControls,
 	Shortcuts,
+	MediaInserter,
 	withMetaBlockEdit,
 	withMetaBlockSave,
 	Inserter,
@@ -40,6 +43,8 @@ import {
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	MAX_IMAGE_SIZE_SLUG,
+	VIDEO_BACKGROUND_TYPE,
+	IMAGE_BACKGROUND_TYPE,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -523,16 +528,16 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
 /**
  * Wraps all movable blocks in a grid layer and assigns custom attributes as needed.
  *
- * @param {WPElement} element                  Block element.
- * @param {Object}    blockType                Block type object.
- * @param {Object}    attributes               Block attributes.
- * @param {number}    attributes.positionTop   Top offset in pixel.
- * @param {number}    attributes.positionLeft  Left offset in pixel.
- * @param {number}    attributes.rotationAngle Rotation angle in degrees.
- * @param {number}    attributes.width         Block width in pixels.
- * @param {number}    attributes.height        Block height in pixels.
+ * @param {ReactElement} element                  Block element.
+ * @param {Object}       blockType                Block type object.
+ * @param {Object}       attributes               Block attributes.
+ * @param {number}       attributes.positionTop   Top offset in pixel.
+ * @param {number}       attributes.positionLeft  Left offset in pixel.
+ * @param {number}       attributes.rotationAngle Rotation angle in degrees.
+ * @param {number}       attributes.width         Block width in pixels.
+ * @param {number}       attributes.height        Block height in pixels.
  *
- * @return {Object} The wrapped element.
+ * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
 	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
@@ -649,6 +654,18 @@ export const renderStoryComponents = () => {
 			render(
 				<Shortcuts />,
 				shortcuts
+			);
+		}
+
+		if ( ! document.getElementById( 'amp-story-media-inserter' ) ) {
+			const mediaInserter = document.createElement( 'div' );
+			mediaInserter.id = 'amp-story-media-inserter';
+
+			editorBlockNavigation.parentNode.parentNode.insertBefore( mediaInserter, editorBlockNavigation.parentNode.nextSibling );
+
+			render(
+				<MediaInserter />,
+				mediaInserter
 			);
 		}
 
@@ -822,7 +839,7 @@ export const getPixelsFromPercentage = ( axis, percentageValue, baseValue = 0 ) 
 /**
  * Returns the minimum dimensions for a story poster image.
  *
- * @link https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
+ * @see https://www.ampproject.org/docs/reference/components/amp-story#poster-guidelines-(for-poster-portrait-src,-poster-landscape-src,-and-poster-square-src)
  *
  * @return {Object} Minimum dimensions including width and height.
  */
@@ -915,13 +932,14 @@ export const createSkeletonTemplate = ( template ) => {
 /**
  * Determines a block's HTML class name based on its attributes.
  *
- * @param {string[]} className             List of pre-existing class names for the block.
- * @param {boolean}  ampFitText            Whether amp-fit-text should be used or not.
- * @param {?string}  backgroundColor       A string containing the background color slug.
- * @param {?string}  textColor             A string containing the color slug.
- * @param {string}   customBackgroundColor A string containing the custom background color value.
- * @param {string}   customTextColor       A string containing the custom color value.
- * @param {?number}  opacity               Opacity.
+ * @param {Object}   attributes                       Block attributes.
+ * @param {string[]} attributes.className             List of pre-existing class names for the block.
+ * @param {boolean}  attributes.ampFitText            Whether amp-fit-text should be used or not.
+ * @param {?string}  attributes.backgroundColor       A string containing the background color slug.
+ * @param {?string}  attributes.textColor             A string containing the color slug.
+ * @param {string}   attributes.customBackgroundColor A string containing the custom background color value.
+ * @param {string}   attributes.customTextColor       A string containing the custom color value.
+ * @param {?number}  attributes.opacity               Opacity.
  *
  * @return {string} The block's HTML class name.
  */
@@ -951,15 +969,16 @@ export const getClassNameFromBlockAttributes = ( {
 /**
  * Determines a block's inline style based on its attributes.
  *
- * @param {string}  align                 Block alignment.
- * @param {?string} fontSize              Font size slug.
- * @param {?number} customFontSize        Custom font size in pixels.
- * @param {boolean} ampFitText            Whether amp-fit-text should be used or not.
- * @param {?string} backgroundColor       A string containing the background color slug.
- * @param {?string} textColor             A string containing the color slug.
- * @param {string}  customBackgroundColor A string containing the custom background color value.
- * @param {string}  customTextColor       A string containing the custom color value.
- * @param {?number} opacity               Opacity.
+ * @param {Object}  attributes                       Block attributes.
+ * @param {string}  attributes.align                 Block alignment.
+ * @param {?string} attributes.fontSize              Font size slug.
+ * @param {?number} attributes.customFontSize        Custom font size in pixels.
+ * @param {boolean} attributes.ampFitText            Whether amp-fit-text should be used or not.
+ * @param {?string} attributes.backgroundColor       A string containing the background color slug.
+ * @param {?string} attributes.textColor             A string containing the color slug.
+ * @param {string}  attributes.customBackgroundColor A string containing the custom background color value.
+ * @param {string}  attributes.customTextColor       A string containing the custom color value.
+ * @param {?number} attributes.opacity               Opacity.
  *
  * @return {Object} Block inline style.
  */
@@ -999,10 +1018,11 @@ export const getStylesFromBlockAttributes = ( {
 /**
  * Returns the settings object for the AMP story meta blocks (post title, author, date).
  *
- * @param {string}  attribute   The post attribute this meta block reads from.
- * @param {?string} placeholder Optional. Placeholder text in case the attribute is empty.
- * @param {string}  tagName     Optional. The HTML tag name to use for the content. Default '<p>'.
- * @param {boolean} isEditable  Optional. Whether the meta block is editable by the user or not. Default false.
+ * @param {Object}  args               Function arguments.
+ * @param {string}  args.attribute     The post attribute this meta block reads from.
+ * @param {string}  args.placeholder   Optional. Placeholder text in case the attribute is empty.
+ * @param {string}  [args.tagName]     Optional. The HTML tag name to use for the content. Default '<p>'.
+ * @param {boolean} [args.isEditable]  Optional. Whether the meta block is editable by the user or not. Default false.
  *
  * @return {Object} The meta block's settings object.
  */
@@ -1417,80 +1437,14 @@ export const maybeInitializeAnimations = () => {
 };
 
 /**
- * Get the distance between two points based on pythagorean.
- *
- * @param {number} deltaX Difference between X coordinates.
- * @param {number} deltaY Difference between Y coordinates.
- * @return {number} Difference between the two points.
- */
-const getDelta = ( deltaX, deltaY ) => Math.sqrt( Math.pow( deltaX, 2 ) + Math.pow( deltaY, 2 ) );
-
-/**
- * Converts degrees to radian.
- *
- * @param {number} angle Angle.
- * @return {number} Radian.
- */
-export const getRadianFromDeg = ( angle ) => angle * Math.PI / 180;
-
-/**
- * Gets width and height delta values based on the original coordinates, rotation angle and mouse event.
- *
- * @param {Object} event MouseEvent.
- * @param {number} angle Rotation angle.
- * @param {number} lastSeenX Starting X coordinate.
- * @param {number} lastSeenY Starint Y coordinate.
- * @param {string} direction Direction of resizing.
- * @return {Object} Width and height values.
- */
-export const getResizedWidthAndHeight = ( event, angle, lastSeenX, lastSeenY, direction ) => {
-	const deltaY = event.clientY - lastSeenY;
-	const deltaX = event.clientX - lastSeenX;
-	const deltaL = getDelta( deltaX, deltaY );
-
-	// Get the angle between the two points.
-	const alpha = Math.atan2( deltaY, deltaX );
-	// Get the difference with rotation angle.
-	const beta = alpha - getRadianFromDeg( angle );
-	const deltaW = 'right' === direction ? deltaL * Math.cos( beta ) : 0;
-	const deltaH = 'bottom' === direction ? deltaL * Math.sin( beta ) : 0;
-
-	return {
-		deltaW,
-		deltaH,
-	};
-};
-
-/**
- * Get block's left and top position based on width, height, and radian.
- *
- * @param {number} width Width.
- * @param {number} height Height.
- * @param {number} radian Radian.
- * @return {{top: number, left: number}} Top and left positioning.
- */
-export const getBlockPositioning = ( width, height, radian ) => {
-	const x = -width / 2;
-	const y = height / 2;
-	const rotatedX = ( y * Math.sin( radian ) ) + ( x * Math.cos( radian ) );
-	const rotatedY = ( y * Math.cos( radian ) ) - ( x * Math.sin( radian ) );
-	return {
-		left: rotatedX - x,
-		top: rotatedY - y,
-	};
-};
-
-/**
  * Return a label for the block order controls depending on block position.
  *
- * @param {string}  type            Block type - in the case of a single block, should
- *                                  define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
+ * @param {string}  type            Block type - in the case of a single block, should define its 'type'. I.e. 'Text', 'Heading', 'Image' etc.
  * @param {number}  currentPosition The block's current position.
  * @param {number}  newPosition     The block's new position.
  * @param {boolean} isFirst         This is the first block.
  * @param {boolean} isLast          This is the last block.
- * @param {number}  dir             Direction of movement (> 0 is considered to be going
- *                                  down, < 0 is up).
+ * @param {number}  dir             Direction of movement (> 0 is considered to be going down, < 0 is up).
  *
  * @return {string} Label for the block movement controls.
  */
@@ -1593,8 +1547,9 @@ export const getFirstFrameOfVideo = ( src ) => {
 /**
  * Uploads the video's first frame as an attachment.
  *
- * @param {number} id  Video ID.
- * @param {string} src Video URL.
+ * @param {Object} media Media object.
+ * @param {number} media.id  Video ID.
+ * @param {string} media.src Video URL.
  */
 export const uploadVideoFrame = async ( { id: videoId, src } ) => {
 	const { __experimentalMediaUpload: mediaUpload } = getSettings();
@@ -1673,7 +1628,7 @@ export const maybeAddMissingAnchor = ( clientId ) => {
  * @see https://github.com/bokuweb/re-resizable
  *
  * @param {number} number
- * @param {Array|function<number>} snap List of snap targets or function that provider
+ * @param {Array|Function<number>} snap List of snap targets or function that provider
  * @param {number} snapGap Minimum gap required in order to move to the next snapping target
  * @return {number} New angle.
  */
@@ -1688,3 +1643,79 @@ export const findClosestSnap = memize( ( number, snap, snapGap ) => {
 
 	return snapGap === 0 || gap < snapGap ? snapArray[ closestGapIndex ] : number;
 } );
+
+/**
+ * Sets input selection to the end for being able to type to the end of the existing text.
+ *
+ * @param {string} inputSelector Text input selector.
+ */
+export const setInputSelectionToEnd = ( inputSelector ) => {
+	const textInput = document.querySelector( inputSelector );
+	// Create selection, collapse it in the end of the content.
+	if ( textInput ) {
+		const range = document.createRange();
+		range.selectNodeContents( textInput );
+		range.collapse( false );
+		const selection = window.getSelection();
+		selection.removeAllRanges();
+		selection.addRange( range );
+	}
+};
+
+/**
+ * Helper to process media object and return attributes to be saved.
+ *
+ * @param {Object} media Attachment object to be processed.
+ *
+ * @return {Object} Processed Object to save to block attributes.
+ */
+export const processMedia = ( media ) => {
+	if ( ! media || ! media.url ) {
+		return {
+			mediaUrl: undefined,
+			mediaId: undefined,
+			mediaType: undefined,
+			mediaAlt: undefined,
+			poster: undefined,
+		};
+	}
+
+	let mediaType;
+
+	// For media selections originated from a file upload.
+	if ( media.media_type ) {
+		if ( media.media_type === VIDEO_BACKGROUND_TYPE ) {
+			mediaType = VIDEO_BACKGROUND_TYPE;
+		} else {
+			mediaType = IMAGE_BACKGROUND_TYPE;
+		}
+	} else {
+		// For media selections originated from existing files in the media library.
+		if (
+			media.type !== IMAGE_BACKGROUND_TYPE &&
+			media.type !== VIDEO_BACKGROUND_TYPE
+		) {
+			return {
+				mediaUrl: undefined,
+				mediaId: undefined,
+				mediaType: undefined,
+				mediaAlt: undefined,
+				poster: undefined,
+			};
+		}
+
+		mediaType = media.type;
+	}
+
+	const mediaAlt = media.alt || media.title;
+	const mediaUrl = media.url;
+	const poster = VIDEO_BACKGROUND_TYPE === mediaType && media.image && media.image.src !== media.icon ? media.image.src : undefined;
+
+	return {
+		mediaUrl,
+		mediaId: media.id,
+		mediaType,
+		mediaAlt,
+		poster,
+	};
+};

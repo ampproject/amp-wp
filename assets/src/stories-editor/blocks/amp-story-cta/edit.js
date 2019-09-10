@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Component, RawHTML } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import {
 	Dashicon,
 	IconButton,
@@ -23,9 +23,9 @@ import {
  */
 import './edit.css';
 import { select } from '@wordpress/data';
-import { getUniqueId } from '../../helpers';
+import { getUniqueId, setInputSelectionToEnd } from '../../helpers';
 import { getBackgroundColorWithOpacity } from '../../../common/helpers';
-import { StoryBlockMover } from '../../components';
+import { DraggableText } from '../../components';
 
 class CallToActionEdit extends Component {
 	constructor( props ) {
@@ -40,21 +40,17 @@ class CallToActionEdit extends Component {
 			hasOverlay: true,
 		};
 
-		this.toggleIsEditing = this.toggleIsEditing.bind( this );
-		this.toggleOverlay = this.toggleOverlay.bind( this );
-
 		this.nodeRef = null;
-		this.bindRef = this.bindRef.bind( this );
 	}
 
-	bindRef( node ) {
+	bindRef = ( node ) => {
 		if ( ! node ) {
 			return;
 		}
 		this.nodeRef = node;
 	}
 
-	toggleIsEditing( enable ) {
+	toggleIsEditing = ( enable ) => {
 		if ( enable !== this.state.isEditing ) {
 			this.setState( {
 				isEditing: ! this.state.isEditing,
@@ -62,7 +58,7 @@ class CallToActionEdit extends Component {
 		}
 	}
 
-	toggleOverlay( add ) {
+	toggleOverlay = ( add ) => {
 		if ( add !== this.state.hasOverlay ) {
 			this.setState( {
 				hasOverlay: ! this.state.hasOverlay,
@@ -78,16 +74,7 @@ class CallToActionEdit extends Component {
 			this.toggleOverlay( true );
 		}
 		if ( this.state.isEditing && ! prevState.isEditing ) {
-			const textInput = document.querySelector( '.is-selected .amp-block-story-cta__link' );
-			if ( textInput ) {
-				// Create selection, collapse it in the end of the content.
-				const range = document.createRange();
-				range.selectNodeContents( textInput );
-				range.collapse( false );
-				const selection = window.getSelection();
-				selection.removeAllRanges();
-				selection.addRange( range );
-			}
+			setInputSelectionToEnd( '.is-selected .amp-block-story-cta__link' );
 		}
 	}
 
@@ -132,81 +119,49 @@ class CallToActionEdit extends Component {
 		};
 		return (
 			<>
-				<StoryBlockMover
-					clientId={ clientId }
-					blockName={ name }
-					blockElementId={ `amp-story-cta-button-${ clientId }` }
-					isDraggable={ ! isEditing }
-					isMovable={ true }
-				>
-					<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
-						<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
-							{ isEditing && (
-								<RichText
-									placeholder={ placeholder }
-									value={ text }
-									onChange={ ( value ) => setAttributes( { text: value } ) }
-									className={ textWrapperClass }
-									style={ textStyle }
-								/>
-							) }
-							{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
-							{ ! isEditing && <div
-								role="textbox"
-								tabIndex="-1"
-								className="is-not-editing editor-rich-text block-editor-rich-text"
-								onClick={ () => {
-									if ( isSelected ) {
-										this.toggleIsEditing( true );
-									}
-								} }
-								onMouseDown={ ( event ) => {
-									// Prevent text selection on double click.
-									if ( 1 < event.detail ) {
-										event.preventDefault();
-									}
-								} }
-							>
-								{ /* eslint-disable-next-line jsx-a11y/click-events-have-key-events */ }
-								{ hasOverlay && ( <div
-									role="textbox"
-									tabIndex="-1"
-									className="amp-overlay"
-									onClick={ ( e ) => {
-										this.toggleOverlay( false );
-										e.stopPropagation();
-									} }
-								></div>
-								) }
-								<div
-									role="textbox"
-									className={ textWrapperClass }
-									style={ textStyle }>
-									{ text && text.length ?
-										<RawHTML>{ text }</RawHTML> : (
-											<span className="amp-text-placeholder">
-												{ placeholder }
-											</span>
-										) }
-								</div>
-							</div>
-							}
-						</div>
-						{ isSelected && (
-							<form
-								className="amp-block-story-cta__inline-link"
-								onSubmit={ ( event ) => event.preventDefault() }>
-								<Dashicon icon="admin-links" />
-								<URLInput
-									value={ url }
-									onChange={ ( value ) => setAttributes( { url: value } ) }
-									autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
-								/>
-								<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
-							</form>
+				<div className="amp-story-cta-button" id={ `amp-story-cta-button-${ clientId }` } style={ { top: `${ btnPositionTop }%`, left: `${ btnPositionLeft }%` } } >
+					<div className={ className } ref={ this.bindRef } style={ { backgroundColor: appliedBackgroundColor } }>
+						{ isEditing && (
+							<RichText
+								placeholder={ placeholder }
+								value={ text }
+								onChange={ ( value ) => setAttributes( { text: value } ) }
+								className={ textWrapperClass }
+								style={ textStyle }
+							/>
 						) }
+						{ ! isEditing &&
+							<DraggableText
+								blockElementId={ `amp-story-cta-button-${ clientId }` }
+								clientId={ clientId }
+								name={ name }
+								isDraggable={ true }
+								isEditing={ isEditing }
+								isSelected={ isSelected }
+								hasOverlay={ hasOverlay }
+								toggleIsEditing={ this.toggleIsEditing }
+								toggleOverlay={ this.toggleOverlay }
+								text={ text }
+								textStyle={ textStyle }
+								textWrapperClass={ textWrapperClass }
+								placeholder={ placeholder }
+							/>
+						}
 					</div>
-				</StoryBlockMover>
+					{ isSelected && isEditing && (
+						<form
+							className="amp-block-story-cta__inline-link"
+							onSubmit={ ( event ) => event.preventDefault() }>
+							<Dashicon icon="admin-links" />
+							<URLInput
+								value={ url }
+								onChange={ ( value ) => setAttributes( { url: value } ) }
+								autoFocus={ false /* eslint-disable-line jsx-a11y/no-autofocus */ }
+							/>
+							<IconButton icon="editor-break" label={ __( 'Apply', 'amp' ) } type="submit" />
+						</form>
+					) }
+				</div>
 			</>
 		);
 	}

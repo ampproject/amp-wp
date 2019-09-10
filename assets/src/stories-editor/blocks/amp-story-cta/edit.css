@@ -44,7 +44,7 @@ div[data-type="amp/amp-story-cta"] .amp-overlay {
 	--cta-margin: 3px;
 	height: calc(100% + calc(var(--cta-margin) * 2));
 	width: 100%;
-	bottom: calc(var(--cta-margin) * -1);
+	bottom: var(--cta-margin);
 }
 
 .block-editor-block-list__layout .block-editor-block-list__block[data-type="amp/amp-story-cta"] .block-editor-block-list__block-edit::before {

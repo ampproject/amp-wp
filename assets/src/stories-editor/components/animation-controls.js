@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -19,7 +20,7 @@ import { AnimationOrderPicker } from './';
 /**
  * Animation controls for AMP Story layout blocks'.
  *
- * @return {Component} Controls.
+ * @return {ReactElement} Controls.
  */
 const AnimationControls = ( {
 	animatedBlocks,

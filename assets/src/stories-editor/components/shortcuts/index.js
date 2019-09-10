@@ -15,7 +15,6 @@ import { compose, ifCondition } from '@wordpress/compose';
 const Shortcuts = ( { insertBlock, canInsertBlockType, showInserter } ) => {
 	const blocks = [
 		'amp/amp-story-text',
-		'core/image',
 		'amp/amp-story-cta',
 	];
 

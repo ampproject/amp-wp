@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -12,10 +13,11 @@ import { __ } from '@wordpress/i18n';
 /**
  * Display media placeholder.
  *
- * @param {string} name Block's name.
- * @param {string} url  URL.
+ * @param {Object} props Component props.
+ * @param {string} props.name Block's name.
+ * @param {string} props.url URL.
  *
- * @return {Component} Placeholder.
+ * @return {ReactElement} Placeholder.
  */
 const MediaPlaceholder = ( { name, url } ) => {
 	return (

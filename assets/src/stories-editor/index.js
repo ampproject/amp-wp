@@ -11,6 +11,7 @@ import { __ } from '@wordpress/i18n';
 import domReady from '@wordpress/dom-ready';
 import { select, subscribe, dispatch } from '@wordpress/data';
 import { registerPlugin } from '@wordpress/plugins';
+import { registerFormatType } from '@wordpress/rich-text';
 import {
 	getDefaultBlockName,
 	setDefaultBlockName,
@@ -38,7 +39,6 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
-	withEnforcedVideoUploadType,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -324,7 +324,6 @@ addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/withActivePageState', 
 addFilter( 'editor.BlockListBlock', 'ampStoryEditorBlocks/addWrapperProps', withWrapperProps );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addEnforcedFileType', ( InitialMediaUpload ) => withEnforcedFileType( InitialMediaUpload ) );
 addFilter( 'editor.MediaUpload', 'ampStoryEditorBlocks/addCroppedFeaturedImage', ( InitialMediaUpload ) => withCroppedFeaturedImage( InitialMediaUpload, getMinimumStoryPosterDimensions() ) );
-addFilter( 'editor.MediaPlaceholder', 'ampStoryEditorBlocks/addEnforcedVideoUploadType', withEnforcedVideoUploadType );
 addFilter( 'blocks.getSaveContent.extraProps', 'ampStoryEditorBlocks/addExtraAttributes', addAMPExtraProps );
 addFilter( 'blocks.getSaveElement', 'ampStoryEditorBlocks/wrapBlocksInGridLayer', wrapBlocksInGridLayer );
 addFilter( 'editor.BlockDropZone', 'ampStoryEditorBlocks/withStoryBlockDropZone', withStoryBlockDropZone );
@@ -337,4 +336,11 @@ const blocks = require.context( './blocks', true, /(?<!test\/)index\.js$/ );
 blocks.keys().forEach( ( modulePath ) => {
 	const { name, settings } = blocks( modulePath );
 	registerBlockType( name, settings );
+} );
+
+const formats = require.context( './formats', true, /(?<!test\/)index\.js$/ );
+
+formats.keys().sort( ( a, b ) => ( a.priority > b.priority ) ? 1 : -1 ).forEach( ( modulePath ) => {
+	const { name, settings } = formats( modulePath );
+	registerFormatType( name, settings );
 } );
