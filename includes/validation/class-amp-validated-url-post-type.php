@@ -814,6 +814,8 @@ class AMP_Validated_URL_Post_Type {
 			update_post_meta( $post_id, '_amp_queried_object', $args['queried_object'] );
 		}
 
+		delete_transient( static::PENDING_URLS_COUNT_TRANSIENT );
+
 		return $post_id;
 	}
 
