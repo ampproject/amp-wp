@@ -247,7 +247,7 @@ class PageEdit extends Component {
 			style.backgroundImage = `url(${ poster })`;
 		}
 
-		const currentOption = autoAdvanceAfterOptions.find( i => i.value === autoAdvanceAfter ) || {};
+		const currentOption = autoAdvanceAfterOptions.find( ( i ) => i.value === autoAdvanceAfter ) || {};
 
 		let overlayStyle = {
 			width: '100%',

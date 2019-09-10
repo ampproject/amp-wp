@@ -35,7 +35,7 @@ const MetaFields = ( props ) => {
 		autoAdvanceAfterDuration,
 	} = metaToAttributeNames( meta );
 
-	const currentOption = autoAdvanceAfterOptions.find( i => i.value === autoAdvanceAfter ) || {};
+	const currentOption = autoAdvanceAfterOptions.find( ( i ) => i.value === autoAdvanceAfter ) || {};
 
 	return (
 		<>
@@ -59,6 +59,7 @@ const MetaFields = ( props ) => {
 };
 
 MetaFields.propTypes = {
+	autoAdvanceAfterOptions: PropTypes.array.isRequired,
 	updateMeta: PropTypes.func.isRequired,
 	meta: PropTypes.shape( {
 		auto_advance_after: PropTypes.string,

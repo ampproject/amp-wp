@@ -987,8 +987,8 @@ class AMP_Story_Post_Type {
 		// Only add currently supported mime types.
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
-		// Convert auto advancement
-		$meta_definitions = self::get_stories_settings_meta_definitions();
+		// Convert auto advancement.
+		$meta_definitions         = self::get_stories_settings_meta_definitions();
 		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
 
 		wp_localize_script(
@@ -996,8 +996,8 @@ class AMP_Story_Post_Type {
 			'ampStoriesEditorSettings',
 			[
 				'allowedVideoMimeTypes' => $allowed_video_mime_types,
-				'storySettings' => [
-					'metaKey' => self::STORY_SETTINGS_OPTION,
+				'storySettings'         => [
+					'metaKey'                 => self::STORY_SETTINGS_OPTION,
 					'autoAdvanceAfterOptions' => $auto_advancement_options,
 				],
 			]
@@ -2133,7 +2133,7 @@ class AMP_Story_Post_Type {
 	 */
 	public static function get_stories_settings_meta_definitions() {
 		return [
-			'auto_advance_after' => [
+			'auto_advance_after'          => [
 				'meta_args' => [
 					'type'              => 'string',
 					'sanitize_callback' => function( $value ) {

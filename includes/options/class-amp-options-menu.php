@@ -696,10 +696,10 @@ class AMP_Options_Menu {
 	 * @since 1.3
 	 */
 	private function render_stories_settings_page_advance() {
-		$meta_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
+		$meta_definitions           = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
 		$auto_advance_after_options = $meta_definitions['auto_advance_after']['data']['options'];
 
-		$story_settings = AMP_Options_Manager::get_option( 'story_settings' );
+		$story_settings            = AMP_Options_Manager::get_option( 'story_settings' );
 		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Post_Type::STORY_SETTINGS_OPTION );
 		?>
 		<fieldset>

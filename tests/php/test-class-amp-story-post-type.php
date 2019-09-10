@@ -10,7 +10,7 @@
  */
 class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 
-	private $_original_options;
+	private $original_options;
 
 	/**
 	 * Set up.
@@ -33,13 +33,13 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		global $wp_styles;
 		$wp_styles = null;
 
-		$this->_original_options = AMP_Options_Manager::get_options();
+		$this->original_options = AMP_Options_Manager::get_options();
 
 		// Set stories settings for testing.
 		AMP_Options_Manager::update_option(
 			AMP_Story_Post_Type::STORY_SETTINGS_OPTION,
 			[
-				'auto_advance_after' => 'time',
+				'auto_advance_after'          => 'time',
 				'auto_advance_after_duration' => '10',
 			]
 		);
@@ -56,7 +56,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		global $wp_rewrite;
 
 		// Restore original options
-		foreach ( $this->_original_options as $option => $value ) {
+		foreach ( $this->original_options as $option => $value ) {
 			AMP_Options_Manager::update_option( $option, $value );
 		}
 
@@ -726,7 +726,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		return [
 			[
 				[
-					'auto_advance_after' => [
+					'auto_advance_after'          => [
 						'meta_args' => [
 							'type'              => 'string',
 							'sanitize_callback' => function( $value ) {
@@ -783,7 +783,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 						'data'      => [],
 					],
 				],
-			]
+			],
 		];
 	}
 
@@ -809,7 +809,7 @@ class AMP_Story_Post_Type_Test extends WP_UnitTestCase {
 		);
 		AMP_Story_Post_Type::add_story_settings_meta_to_new_story( $new_story->ID, $new_story, false );
 
-		$advance_after = get_post_meta( $new_story->ID, 'auto_advance_after', true );
+		$advance_after          = get_post_meta( $new_story->ID, 'auto_advance_after', true );
 		$advance_after_duration = get_post_meta( $new_story->ID, 'auto_advance_after_duration', true );
 
 		$this->assertEquals( 'time', $advance_after );
