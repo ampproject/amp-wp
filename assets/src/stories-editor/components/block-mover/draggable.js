@@ -47,12 +47,6 @@ class Draggable extends Component {
 	constructor( ...args ) {
 		super( ...args );
 
-		this.onDragStart = this.onDragStart.bind( this );
-		this.onDragOver = this.onDragOver.bind( this );
-		this.onDrop = this.onDrop.bind( this );
-		this.onDragEnd = this.onDragEnd.bind( this );
-		this.resetDragState = this.resetDragState.bind( this );
-
 		this.isChromeAndHasIframes = false;
 	}
 
