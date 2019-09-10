@@ -34,6 +34,14 @@ const AnimationSettings = ( { clientId } ) => {
 		const { isPlayingAnimation } = select( 'amp/story' );
 		return isPlayingAnimation( clientId );
 	} );
+	const hasAnimatedBlocks = useSelect( ( select ) => {
+		const { getAnimatedBlocksPerPage } = select( 'amp/story' );
+		return getAnimatedBlocksPerPage( clientId ).find( ( { animationType } ) => animationType );
+	} );
+
+	if ( ! hasAnimatedBlocks ) {
+		return null;
+	}
 
 	return (
 		<PanelBody
