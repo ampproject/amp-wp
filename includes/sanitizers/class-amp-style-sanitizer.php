@@ -621,6 +621,33 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 	}
 
 	/**
+	 * Determine if all the supplied IDs are used.
+	 *
+	 * @since 1.3
+	 *
+	 * @param string[] $ids IDs.
+	 * @return bool All used.
+	 */
+	private function has_used_ids( $ids ) {
+		foreach ( $ids as $id ) {
+
+			// Prevent tree-shaking the `<amp-lightbox-gallery id="amp-lightbox-gallery">` element which is added to the
+			// page dynamically by the amp-lightbox-gallery component when there are lightbox attribute(s) on the page.
+			if ( 'amp-lightbox-gallery' === $id ) {
+				if ( ! $this->has_used_attributes( [ 'lightbox' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
+			if ( ! $this->dom->getElementById( $id ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Get list of all the tag names used in the document.
 	 *
 	 * @since 1.0
@@ -649,6 +676,15 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 			$this->get_used_tag_names();
 		}
 		foreach ( $tag_names as $tag_name ) {
+
+			// Prevent tree-shaking the <amp-lightbox-gallery> element which is added to the page dynamically by the component.
+			if ( 'amp-lightbox-gallery' === $tag_name ) {
+				if ( ! $this->has_used_attributes( [ 'lightbox' ] ) ) {
+					return false;
+				}
+				continue;
+			}
+
 			if ( ! isset( $this->used_tag_names[ $tag_name ] ) ) {
 				return false;
 			}
@@ -2934,14 +2970,7 @@ class AMP_Style_Sanitizer extends AMP_Base_Sanitizer {
 						(
 							empty( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
 							||
-							0 === count(
-								array_filter(
-									$parsed_selector[ self::SELECTOR_EXTRACTED_IDS ],
-									function( $id ) {
-										return ! $this->dom->getElementById( $id );
-									}
-								)
-							)
+							$this->has_used_ids( $parsed_selector[ self::SELECTOR_EXTRACTED_IDS ] )
 						)
 						&&
 						// If tag names are present in the doc.
