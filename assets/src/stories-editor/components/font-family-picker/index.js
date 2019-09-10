@@ -88,7 +88,7 @@ function FontFamilyPicker( {
 				tStatusResults={ ( length, contentSelectedOption ) => {
 					return (
 						sprintf(
-						// translators: %d: The total number of results.
+							// translators: %d: The total number of results.
 							_n( '%d font is available. %s', '%d fonts are available. %s', length, 'amp' ),
 							length,
 							contentSelectedOption
