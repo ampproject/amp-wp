@@ -1188,12 +1188,15 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertEquals( 10, has_action( 'wp_head', $callback ) );
 
 		AMP_Theme_Support::init_admin_bar();
+		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ] ) );
+		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ] ) );
 		$this->assertFalse( has_action( 'wp_head', $callback ) );
 		ob_start();
 		wp_print_styles();
 		wp_print_scripts();
 		$output = ob_get_clean();
 		$this->assertContains( '<style id=\'admin-bar-inline-css\' type=\'text/css\'>', $output ); // Note: data-ampdevmode attribute will be added by AMP_Dev_Mode_Sanitizer.
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'example-admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 		$this->assertContains( 'html { margin-top: 64px !important; }', $output );
@@ -1203,9 +1206,56 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$body_classes = get_body_class();
 		$this->assertContains( 'customize-support', $body_classes );
 		$this->assertNotContains( 'no-customize-support', $body_classes );
+	}
 
-		$this->assertEquals( 10, has_filter( 'style_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_style_loader_tag' ] ) );
-		$this->assertEquals( 10, has_filter( 'script_loader_tag', [ 'AMP_Theme_Support', 'filter_admin_bar_script_loader_tag' ] ) );
+	/**
+	 * Test init_admin_bar to ensure dashicons are not added to dev mode when directly enqueued.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_init_admin_bar_for_directly_enqueued_dashicons() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		global $wp_admin_bar;
+		$wp_admin_bar = new WP_Admin_Bar();
+		$wp_admin_bar->initialize();
+		AMP_Theme_Support::init_admin_bar();
+
+		// Enqueued directly.
+		wp_enqueue_style( 'dashicons' );
+
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+	}
+
+	/**
+	 * Test init_admin_bar to ensure dashicons are not added to dev mode when indirectly enqueued.
+	 *
+	 * @covers \AMP_Theme_Support::init_admin_bar()
+	 * @covers \AMP_Theme_Support::filter_admin_bar_style_loader_tag()
+	 */
+	public function test_init_admin_bar_for_indirectly_enqueued_dashicons() {
+		require_once ABSPATH . WPINC . '/class-wp-admin-bar.php';
+
+		global $wp_admin_bar;
+		$wp_admin_bar = new WP_Admin_Bar();
+		$wp_admin_bar->initialize();
+		AMP_Theme_Support::init_admin_bar();
+
+		// Enqueued indirectly.
+		wp_enqueue_style( 'my-font-pack', 'https://example.com/fonts', [ 'dashicons' ], '0.1' );
+
+		ob_start();
+		wp_print_styles();
+		$output = ob_get_clean();
+
+		$this->assertContains( '<link rel=\'stylesheet\' id=\'dashicons-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+		$this->assertContains( '<link data-ampdevmode rel=\'stylesheet\' id=\'admin-bar-css\'', $output ); // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
 	}
 
 	/**

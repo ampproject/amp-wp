@@ -1422,7 +1422,31 @@ class AMP_Theme_Support {
 	 * @return string Tag.
 	 */
 	public static function filter_admin_bar_style_loader_tag( $tag, $handle ) {
-		if ( self::has_dependency( wp_styles(), $handle, 'admin-bar' ) ) {
+		if ( 'dashicons' === $handle ) {
+			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
+			$needs_dev_mode = true;
+			foreach ( wp_styles()->queue as $queued_handle ) {
+				$is_dashicons_without_admin_bar = (
+					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
+					'dashicons' === $queued_handle
+					||
+					// If a stylesheet has dashicons as a dependency without also having admin-bar as a dependency, then no dev mode.
+					(
+						self::has_dependency( wp_styles(), $queued_handle, 'dashicons' )
+						&&
+						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
+					)
+				);
+				if ( $is_dashicons_without_admin_bar ) {
+					$needs_dev_mode = false;
+					break;
+				}
+			}
+		} else {
+			$needs_dev_mode = self::has_dependency( wp_styles(), $handle, 'admin-bar' );
+		}
+
+		if ( $needs_dev_mode ) {
 			$tag = preg_replace( '/(?<=<link)(?=\s|>)/i', ' ' . AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, $tag );
 		}
 		return $tag;
