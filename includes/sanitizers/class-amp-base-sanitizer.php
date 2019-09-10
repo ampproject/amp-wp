@@ -704,7 +704,7 @@ abstract class AMP_Base_Sanitizer {
 	 * Parse a style string into an associative array of style attributes.
 	 *
 	 * @param string $style_string Style string to parse.
-	 * @return array Associative array of style attributes.
+	 * @return string[] Associative array of style attributes.
 	 */
 	protected function parse_style_string( $style_string ) {
 		// We need to turn the style string into an associative array of styles first.
