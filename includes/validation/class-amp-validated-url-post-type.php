@@ -1623,6 +1623,8 @@ class AMP_Validated_URL_Post_Type {
 					)
 				);
 			}
+
+			delete_transient( static::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
 		}
 
 		$redirect = wp_get_referer();
