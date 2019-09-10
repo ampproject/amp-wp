@@ -277,7 +277,7 @@ abstract class AMP_Base_Sanitizer {
 		if ( ! empty( $attributes['style'] ) ) {
 			$styles = $this->parse_style_string( $attributes['style'] );
 
-			// top, left, bottom, right are used.
+			// Apply fill layout if top, left, bottom, right are used.
 			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] )
 				&& 'absolute' === $styles['position']
 				&& 0 === (int) $styles['top']
@@ -293,7 +293,7 @@ abstract class AMP_Base_Sanitizer {
 				return $attributes;
 			}
 
-			// top, left, width, height are used.
+			// Apply fill layout if top, left, width, height are used.
 			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] )
 				&& 'absolute' === $styles['position']
 				&& 0 === (int) $styles['top']
