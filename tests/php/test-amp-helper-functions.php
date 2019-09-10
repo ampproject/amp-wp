@@ -703,10 +703,61 @@ class Test_AMP_Helper_Functions extends WP_UnitTestCase {
 				return $classes;
 			}
 		);
-		$orderd_sanitizers = array_keys( amp_get_content_sanitizers() );
-		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 3 ] );
-		$this->assertEquals( 'AMP_Style_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 2 ] );
-		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $orderd_sanitizers[ count( $orderd_sanitizers ) - 1 ] );
+		$ordered_sanitizers = array_keys( amp_get_content_sanitizers() );
+		$this->assertEquals( 'Even_After_Whitelist_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 3 ] );
+		$this->assertEquals( 'AMP_Style_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 2 ] );
+		$this->assertEquals( 'AMP_Tag_And_Attribute_Sanitizer', $ordered_sanitizers[ count( $ordered_sanitizers ) - 1 ] );
+	}
+
+	/**
+	 * Test amp_get_content_sanitizers().
+	 *
+	 * @covers ::amp_get_content_sanitizers()
+	 */
+	public function test_amp_get_content_sanitizers_with_dev_mode() {
+		$element_xpaths = [ '//script[ @id = "hello-world" ]' ];
+		add_filter(
+			'amp_dev_mode_element_xpaths',
+			function ( $xpaths ) use ( $element_xpaths ) {
+				return array_merge( $xpaths, $element_xpaths );
+			}
+		);
+
+		// Check that AMP_Dev_Mode_Sanitizer is not registered if not in dev mode.
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertFalse( amp_is_dev_mode() );
+		$this->assertArrayNotHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+
+		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, but not with admin bar showing yet.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertFalse( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertEquals( 'AMP_Dev_Mode_Sanitizer', current( array_keys( $sanitizers ) ) );
+		$this->assertEquals(
+			compact( 'element_xpaths' ),
+			$sanitizers['AMP_Dev_Mode_Sanitizer']
+		);
+
+		// Check that AMP_Dev_Mode_Sanitizer is registered once in dev mode, and now also with admin bar showing.
+		add_filter( 'amp_dev_mode_enabled', '__return_true' );
+		add_filter( 'show_admin_bar', '__return_true' );
+		$sanitizers = amp_get_content_sanitizers();
+		$this->assertTrue( is_admin_bar_showing() );
+		$this->assertTrue( amp_is_dev_mode() );
+		$this->assertArrayHasKey( 'AMP_Dev_Mode_Sanitizer', $sanitizers );
+		$this->assertEqualSets(
+			array_merge(
+				$element_xpaths,
+				[
+					'//*[ @id = "wpadminbar" ]',
+					'//*[ @id = "wpadminbar" ]//*',
+					'//style[ @id = "admin-bar-inline-css" ]',
+				]
+			),
+			$sanitizers['AMP_Dev_Mode_Sanitizer']['element_xpaths']
+		);
 	}
 
 	/**
