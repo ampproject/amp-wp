@@ -40,6 +40,8 @@ const RightClickMenu = ( props ) => {
 		clientIds,
 		clientX,
 		clientY,
+		insidePercentageX,
+		insidePercentageY,
 		copyBlock,
 		cutBlock,
 		getBlock,
@@ -137,7 +139,7 @@ const RightClickMenu = ( props ) => {
 									className={ classnames( action.className, 'editor-block-settings-menu__control block-editor-block-settings-menu__control' ) }
 									onClick={ () => {
 										onClose();
-										action.blockAction( firstBlockClientId );
+										action.blockAction( firstBlockClientId, insidePercentageY, insidePercentageX );
 									} }
 									icon={ action.icon }
 								>
@@ -156,6 +158,8 @@ RightClickMenu.propTypes = {
 	clientIds: PropTypes.array.isRequired,
 	clientX: PropTypes.number.isRequired,
 	clientY: PropTypes.number.isRequired,
+	insidePercentageX: PropTypes.number,
+	insidePercentageY: PropTypes.number,
 	copyBlock: PropTypes.func.isRequired,
 	cutBlock: PropTypes.func.isRequired,
 	getBlock: PropTypes.func.isRequired,
@@ -196,6 +200,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		removeBlock,
 		insertBlock,
 		insertBlocks,
+		updateBlockAttributes,
 	} = dispatch( 'core/block-editor' );
 
 	const { setCopiedMarkup } = dispatch( 'amp/story' );
@@ -211,7 +216,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		copyTextToClipBoard( serialized );
 	};
 
-	const processTextToPaste = ( text, clientId ) => {
+	const processTextToPaste = ( text, clientId, insidePercentageY, insidePercentageX ) => {
 		const mode = 'BLOCKS';
 		const content = pasteHandler( {
 			HTML: '',
@@ -235,7 +240,11 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		}
 
 		const isFirstPage = getBlockOrder().indexOf( pageClientId ) === 0;
-		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId );
+		insertBlocks( ensureAllowedBlocksOnPaste( content, pageClientId, isFirstPage ), null, pageClientId ).then( ( { blocks } ) => {
+			for ( const block of blocks ) {
+				updateBlockAttributes( block.clientId, { positionTop: insidePercentageY, positionLeft: insidePercentageX } );
+			}
+		} );
 	};
 
 	return {
@@ -256,7 +265,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 			copyBlock( clientId );
 			removeBlock( clientId );
 		},
-		pasteBlock( clientId ) {
+		pasteBlock( clientId, insidePercentageY, insidePercentageX ) {
 			const { navigator } = window;
 
 			if ( navigator.clipboard && navigator.clipboard.readText ) {
@@ -264,15 +273,15 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 				navigator.clipboard.readText().
 					then( ( clipBoardText ) => {
 						// If got permission, paste from clipboard.
-						processTextToPaste( clipBoardText, clientId );
+						processTextToPaste( clipBoardText, clientId, insidePercentageY, insidePercentageX );
 					} ).catch( () => {
 						// If forbidden, use the markup from state instead.
 						const text = getCopiedMarkup();
-						processTextToPaste( text, clientId );
+						processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
 					} );
 			} else {
 				const text = getCopiedMarkup();
-				processTextToPaste( text, clientId );
+				processTextToPaste( text, clientId, insidePercentageY, insidePercentageX );
 			}
 		},
 	};

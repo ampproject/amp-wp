@@ -3,16 +3,16 @@
  */
 import { withSelect } from '@wordpress/data';
 import { createHigherOrderComponent } from '@wordpress/compose';
-
+import { render } from '@wordpress/element';
 /**
  * Internal dependencies
  */
 import { ALLOWED_CHILD_BLOCKS } from '../../constants';
-import { render } from '@wordpress/element';
+import { getBlockDOMNode, getPercentageFromPixels } from '../../helpers';
 import { RightClickMenu } from '../';
 
 const applyWithSelect = withSelect( ( select, props ) => {
-	const {	isReordering, getCopiedMarkup } = select( 'amp/story' );
+	const {	isReordering, getCopiedMarkup, getCurrentPage } = select( 'amp/story' );
 	const {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
@@ -57,8 +57,22 @@ const applyWithSelect = withSelect( ( select, props ) => {
 		}
 		const relativePositionX = event.clientX - wrapperDimensions.left;
 		const relativePositionY = event.clientY - wrapperDimensions.top - toolBarHeight;
+		const clientId = getCurrentPage();
+
+		let insidePercentageY = 0;
+		let insidePercentageX = 0;
+
+		const page = getBlockDOMNode( clientId );
+		if ( page ) {
+			const pagePostions = page.getBoundingClientRect();
+			const insideY = event.clientY - pagePostions.top;
+			const insideX = event.clientX - pagePostions.left;
+			insidePercentageY = getPercentageFromPixels( 'y', insideY );
+			insidePercentageX = getPercentageFromPixels( 'x', insideX );
+		}
+
 		render(
-			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } />,
+			<RightClickMenu clientIds={ selectedBlockClientIds } clientX={ relativePositionX } clientY={ relativePositionY } insidePercentageX={ insidePercentageX } insidePercentageY={ insidePercentageY } />,
 			document.getElementById( 'amp-story-right-click-menu' )
 		);
 
