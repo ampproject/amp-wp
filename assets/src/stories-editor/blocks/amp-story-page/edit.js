@@ -218,6 +218,7 @@ class PageEdit extends Component {
 			allowedBlocks,
 			allowedBackgroundMediaTypes,
 			storySettingsAttributes,
+			autoAdvanceAfterOptions,
 		} = this.props;
 
 		const attributesWithDefaults = defaults( attributes, storySettingsAttributes );
@@ -246,20 +247,7 @@ class PageEdit extends Component {
 			style.backgroundImage = `url(${ poster })`;
 		}
 
-		const autoAdvanceAfterOptions = [
-			{ value: '', label: __( 'Manual', 'amp' ) },
-			{ value: 'auto', label: __( 'Automatic', 'amp' ) },
-			{ value: 'time', label: __( 'After a certain time', 'amp' ) },
-			{ value: 'media', label: __( 'After media has played', 'amp' ) },
-		];
-
-		let autoAdvanceAfterHelp;
-
-		if ( 'media' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the first media block encountered on the page', 'amp' );
-		} else if ( 'auto' === autoAdvanceAfter ) {
-			autoAdvanceAfterHelp = __( 'Based on the duration of all animated blocks on the page', 'amp' );
-		}
+		const currentOption = autoAdvanceAfterOptions.find( i => i.value === autoAdvanceAfter ) || {};
 
 		let overlayStyle = {
 			width: '100%',
@@ -421,7 +409,7 @@ class PageEdit extends Component {
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
 						<SelectControl
 							label={ __( 'Advance to next page', 'amp' ) }
-							help={ autoAdvanceAfterHelp }
+							help={ currentOption.description || '' }
 							value={ autoAdvanceAfter }
 							options={ autoAdvanceAfterOptions }
 							onChange={ ( value ) => {
@@ -490,6 +478,7 @@ PageEdit.propTypes = {
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
 	} ),
+	autoAdvanceAfterOptions: PropTypes.array,
 	allowedBackgroundMediaTypes: PropTypes.arrayOf( PropTypes.string ).isRequired,
 };
 
@@ -526,7 +515,8 @@ export default compose(
 		const { getEditedPostAttribute } = select( 'core/editor' );
 		const postMeta = getEditedPostAttribute( 'meta' ) || {};
 		const storySettingsAttributes = metaToAttributeNames( postMeta );
-		const { allowedVideoMimeTypes } = getSettings();
+		const { allowedVideoMimeTypes, storySettings } = getSettings();
+		const { autoAdvanceAfterOptions } = storySettings || {};
 
 		return {
 			media,
@@ -535,6 +525,7 @@ export default compose(
 			totalAnimationDuration: totalAnimationDurationInSeconds,
 			getBlockOrder,
 			storySettingsAttributes,
+			autoAdvanceAfterOptions,
 			allowedBackgroundMediaTypes: [ IMAGE_BACKGROUND_TYPE, ...allowedVideoMimeTypes ],
 		};
 	} ),

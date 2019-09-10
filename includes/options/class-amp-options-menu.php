@@ -696,18 +696,12 @@ class AMP_Options_Menu {
 	 * @since 1.3
 	 */
 	private function render_stories_settings_page_advance() {
-		$stories_settings_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
+		var_dump( get_post_meta( 42 ) );
+		$meta_definitions = AMP_Story_Post_Type::get_stories_settings_meta_definitions();
+		$auto_advance_after_options = $meta_definitions['auto_advance_after']['data']['options'];
 
-		/**
-		 * Currently the list of options with values and descriptions is hardcoded in PHP and JS.
-		 * There should be a single source for this data to be shared in the application.
-		 *
-		 * @todo Figure out the best way to keep these settings DRY.
-		 */
-		$auto_advance_after_options = $stories_settings_definitions['stories_settings_auto_advance_after']['data']['options'];
-
-		$auto_advance_after          = AMP_Options_Manager::get_option( 'stories_settings_auto_advance_after', '' );
-		$auto_advance_after_duration = AMP_Options_Manager::get_option( 'stories_settings_auto_advance_after_duration', 1 );
+		$story_settings = AMP_Options_Manager::get_option( 'story_settings' );
+		$story_settings_field_name = sprintf( '%s[%s]', AMP_Options_Manager::OPTION_NAME, AMP_Story_Post_Type::STORY_SETTINGS_OPTION );
 		?>
 		<fieldset <?php disabled( ! current_user_can( 'publish_posts' ) ); ?>>
 			<p>
@@ -715,12 +709,12 @@ class AMP_Options_Menu {
 					<strong><?php echo esc_html__( 'Advance to next page', 'amp' ); ?></strong>
 				</label>
 				<br />
-				<select id="stories_settings_auto_advance_after" name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[stories_settings_auto_advance_after]' ); ?>">
+				<select id="stories_settings_auto_advance_after" name="<?php echo esc_attr( $story_settings_field_name . '[auto_advance_after]' ); ?>">
 				<?php foreach ( $auto_advance_after_options as $option ) : ?>
 					<option
 						value="<?php echo esc_attr( $option['value'] ); ?>"
 						data-description="<?php echo esc_attr( $option['description'] ); ?>"
-						<?php selected( $auto_advance_after, $option['value'] ); ?>
+						<?php selected( $story_settings['auto_advance_after'], $option['value'] ); ?>
 					>
 						<?php echo esc_html( $option['label'] ); ?>
 					</option>
@@ -738,8 +732,8 @@ class AMP_Options_Menu {
 					id="stories_settings_auto_advance_after_duration"
 					min="1"
 					max="100"
-					name="<?php echo esc_attr( AMP_Options_Manager::OPTION_NAME . '[stories_settings_auto_advance_after_duration]' ); ?>"
-					value="<?php echo intval( $auto_advance_after_duration ); ?>"
+					name="<?php echo esc_attr( $story_settings_field_name . '[auto_advance_after_duration]' ); ?>"
+					value="<?php echo intval( $story_settings['auto_advance_after_duration'] ); ?>"
 				>
 			</p>
 			<p class="description"></p>

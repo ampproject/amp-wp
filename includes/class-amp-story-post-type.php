@@ -18,6 +18,11 @@ class AMP_Story_Post_Type {
 	const POST_TYPE_SLUG = 'amp_story';
 
 	/**
+	 * The option name where story settings are stored.
+	 */
+	const STORY_SETTINGS_OPTION = 'story_settings';
+
+	/**
 	 * Minimum required version of Gutenberg required.
 	 *
 	 * @var string
@@ -982,11 +987,19 @@ class AMP_Story_Post_Type {
 		// Only add currently supported mime types.
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
+		// Convert auto advancement
+		$meta_definitions = self::get_stories_settings_meta_definitions();
+		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditorSettings',
 			[
 				'allowedVideoMimeTypes' => $allowed_video_mime_types,
+				'storySettings' => [
+					'metaKey' => self::STORY_SETTINGS_OPTION,
+					'autoAdvanceAfterOptions' => $auto_advancement_options,
+				],
 			]
 		);
 
@@ -2119,67 +2132,64 @@ class AMP_Story_Post_Type {
 	 * - data      array Any additional data.
 	 */
 	public static function get_stories_settings_meta_definitions() {
-		return apply_filters(
-			'amp_stories_settings_meta_definitions',
-			[
-				'stories_settings_auto_advance_after' => [
-					'meta_args' => [
-						'type'              => 'string',
-						'sanitize_callback' => function( $value ) {
-							$valid_values = [ '', 'auto', 'time', 'media' ];
+		return [
+			'auto_advance_after' => [
+				'meta_args' => [
+					'type'              => 'string',
+					'sanitize_callback' => function( $value ) {
+						$valid_values = [ '', 'auto', 'time', 'media' ];
 
-							if ( ! in_array( $value, $valid_values, true ) ) {
-								return '';
-							}
-							return $value;
-						},
-					],
-					'data'      => [
-						'options' => [
-							[
-								'value'       => '',
-								'label'       => __( 'Manual', 'amp' ),
-								'description' => '',
-							],
-							[
-								'value'       => 'auto',
-								'label'       => __( 'Automatic', 'amp' ),
-								'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
-							],
-							[
-								'value'       => 'time',
-								'label'       => __( 'After a certain time', 'amp' ),
-								'description' => '',
-							],
-							[
-								'value'       => 'media',
-								'label'       => __( 'After media has played', 'amp' ),
-								'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
-							],
+						if ( ! in_array( $value, $valid_values, true ) ) {
+							return '';
+						}
+						return $value;
+					},
+				],
+				'data'      => [
+					'options' => [
+						[
+							'value'       => '',
+							'label'       => __( 'Manual', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'auto',
+							'label'       => __( 'Automatic', 'amp' ),
+							'description' => __( 'Based on the duration of all animated blocks on the page', 'amp' ),
+						],
+						[
+							'value'       => 'time',
+							'label'       => __( 'After a certain time', 'amp' ),
+							'description' => '',
+						],
+						[
+							'value'       => 'media',
+							'label'       => __( 'After media has played', 'amp' ),
+							'description' => __( 'Based on the first media block encountered on the page', 'amp' ),
 						],
 					],
 				],
-				'stories_settings_auto_advance_after_duration' => [
-					'meta_args' => [
-						'type'              => 'integer',
-						'sanitize_callback' => function( $value ) {
-							$value = intval( $value );
+			],
+			'auto_advance_after_duration' => [
+				'meta_args' => [
+					'type'              => 'integer',
+					'sanitize_callback' => function( $value ) {
+						$value = intval( $value );
 
-							return filter_var(
-								$value,
-								FILTER_VALIDATE_INT,
-								[
-									'default'   => 0,
-									'min_range' => 1,
-									'max_range' => 100,
-								]
-							);
-						},
-					],
-					'data'      => [],
+						return filter_var(
+							$value,
+							FILTER_VALIDATE_INT,
+							[
+								'default'   => 0,
+								'min_range' => 1,
+								'max_range' => 100,
+							]
+						);
+					},
 				],
-			]
-		);
+				'data'      => [],
+			],
+		];
 	}
 
 	/**
@@ -2198,15 +2208,11 @@ class AMP_Story_Post_Type {
 			return;
 		}
 
-		$stories_settings_definitions = self::get_stories_settings_meta_definitions();
-		$options                      = AMP_Options_Manager::get_options();
+		$meta_definitions = self::get_stories_settings_meta_definitions();
+		$story_settings   = AMP_Options_Manager::get_option( self::STORY_SETTINGS_OPTION );
 
-		foreach ( $stories_settings_definitions as $meta_key => $definition ) {
-			$value = isset( $options[ $meta_key ] )
-				? $options[ $meta_key ]
-				: null;
-
-			$sanitized_value = call_user_func( $definition['meta_args']['sanitize_callback'], $value );
+		foreach ( $story_settings as $meta_key => $value ) {
+			$sanitized_value = call_user_func( $meta_definitions[ $meta_key ]['meta_args']['sanitize_callback'], $value );
 			add_post_meta( $post_id, $meta_key, $sanitized_value, true );
 		}
 	}
