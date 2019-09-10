@@ -187,7 +187,8 @@ describe( 'Story Animations', () => {
 			( await getAllBlocks() )[ 0 ].clientId
 		);
 
-		await expect( page ).not.toMatch( 'Play All Animations' );
+		await expect( page ).not.toMatch( 'Play 0 Animations' );
+		await expect( page ).not.toMatch( 'Play 1 Animation' );
 	} );
 
 	it( 'should play all animations on the current page in the editor', async () => {
@@ -206,7 +207,7 @@ describe( 'Story Animations', () => {
 			( await getAllBlocks() )[ 0 ].clientId
 		);
 
-		await clickButton( 'Play All Animations' );
+		await clickButton( 'Play 2 Animations' );
 
 		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-twirl-in' );
 		await expect( page ).toMatchElement( '.amp-page-child-block.story-animation-init-drop' );
