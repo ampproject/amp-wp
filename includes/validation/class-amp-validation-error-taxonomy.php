@@ -2220,6 +2220,8 @@ class AMP_Validation_Error_Taxonomy {
 			);
 		}
 
+		delete_transient( AMP_Validated_URL_Post_Type::NEW_VALIDATION_ERROR_URLS_COUNT_TRANSIENT );
+
 		return $redirect_to;
 	}
 
