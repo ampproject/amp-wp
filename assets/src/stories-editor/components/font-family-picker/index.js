@@ -6,13 +6,17 @@ import PropTypes from 'prop-types';
 /**
  * WordPress dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import { BaseControl } from '@wordpress/components';
+import { withInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
  */
-import { AMP_STORY_FONT_IMAGES } from '../../constants';
-import { PreviewPicker } from '../';
+import { maybeEnqueueFontStyle } from '../../helpers';
+import Autocomplete from './autocomplete';
+import 'accessible-autocomplete/src/autocomplete.css';
+import './edit.css';
 
 /**
  * Font Family Picker component.
@@ -23,45 +27,76 @@ function FontFamilyPicker( {
 	fonts = [],
 	onChange = () => {},
 	value = '',
+	instanceId,
 } ) {
-	const defaultOption = {
-		value: '',
-		label: __( 'None', 'amp' ),
+	const results = fonts;
+	const suggest = ( query, populateResults ) => {
+		const searchResults = query ?
+			results.filter( ( result ) => result.name.toLowerCase().indexOf( query.toLowerCase() ) !== -1 ) :
+			[];
+		populateResults( searchResults );
 	};
 
-	const options = fonts.map( ( font ) => ( {
-		value: font.name,
-		label: font.name,
-	} ) );
+	const suggestionTemplate = ( font ) => {
+		maybeEnqueueFontStyle( font.name );
+		const fallbacks = ( font.fallbacks ) ? ', ' + font.fallbacks.join( ', ' ) : '';
+		return font && `<span style='font-family: ${ font.name }${ fallbacks }'>${ font.name }</span>`;
+	};
 
-	const fontLabel = ( familyName ) => AMP_STORY_FONT_IMAGES[ familyName ] ?
-		AMP_STORY_FONT_IMAGES[ familyName ]( { height: 13 } ) :
-		familyName;
+	const inputValueTemplate = ( result ) => {
+		return result && result.name;
+	};
+
+	const id = `amp-stories-font-family-picker-${ instanceId }`;
 
 	return (
-		<PreviewPicker
-			value={ value }
-			options={ options }
-			defaultOption={ defaultOption }
-			onChange={ ( { value: selectedValue } ) => onChange( '' === selectedValue ? undefined : selectedValue ) }
+		<BaseControl
 			label={ __( 'Font Family', 'amp' ) }
-			id="amp-stories-font-family-picker"
-			ariaLabel={ ( currentOption ) => {
-				return sprintf(
-					/* translators: %s: font name */
-					__( 'Font Family: %s', 'amp' ),
-					currentOption.label
-				);
-			} }
-			renderToggle={ ( { label } ) => fontLabel( label ) }
-			renderOption={ ( option ) => {
-				return (
-					<span className="components-preview-picker__dropdown-label" data-font-family={ option.value === '' ? undefined : option.value }>
-						{ fontLabel( option.label ) }
-					</span>
-				);
-			} }
-		/>
+			id={ id }
+			help={ __( 'Type to search for fonts', 'amp' ) }
+		>
+			<Autocomplete
+				id={ id }
+				name={ id }
+				source={ suggest }
+				templates={
+					{
+						suggestion: suggestionTemplate,
+						inputValue: inputValueTemplate,
+					}
+				}
+				minLength={ 2 }
+				onConfirm={ onChange }
+				showAllValues={ false }
+				confirmOnBlur={ false }
+				defaultValue={ value }
+				dropdownArrow={ () => '' }
+				preserveNullOptions={ true }
+				placeholder={ __( 'None', 'amp' ) }
+				displayMenu="overlay"
+				tNoResults={ () =>
+					__( 'No font found', 'amp' )
+				}
+				tStatusQueryTooShort={ ( minQueryLength ) =>
+					// translators: %d: the number characters required to initiate a font search.
+					sprintf( __( 'Type in %s or more characters for results', 'amp' ), minQueryLength )
+				}
+				tStatusSelectedOption={ ( selectedOption, length ) =>
+					// translators: 1: the index of the selected result. 2: The total number of results.
+					sprintf( __( '%s (1 of %s) is selected', 'amp' ), selectedOption, length )
+				}
+				tStatusResults={ ( length, contentSelectedOption ) => {
+					return (
+						sprintf(
+							// translators: %d: The total number of results.
+							_n( '%d font is available. %s', '%d fonts are available. %s', length, 'amp' ),
+							length,
+							contentSelectedOption
+						)
+					);
+				} }
+			/>
+		</BaseControl>
 	);
 }
 
@@ -72,6 +107,7 @@ FontFamilyPicker.propTypes = {
 		label: PropTypes.string,
 	} ) ),
 	onChange: PropTypes.func,
+	instanceId: PropTypes.number.isRequired,
 };
 
-export default FontFamilyPicker;
+export default withInstanceId( FontFamilyPicker );
