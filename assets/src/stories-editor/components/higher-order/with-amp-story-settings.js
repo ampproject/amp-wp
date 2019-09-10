@@ -434,7 +434,7 @@ export default createHigherOrderComponent(
 									value={ ampFontFamily }
 									onChange={ ( font ) => {
 										if ( ! font ) {
-											setAttributes( { ampFontFamily: null } );
+											setAttributes( { ampFontFamily: '' } );
 											return;
 										}
 										maybeEnqueueFontStyle( font.name );
