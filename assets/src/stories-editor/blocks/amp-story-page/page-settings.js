@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -19,6 +20,17 @@ import { useSelect } from '@wordpress/data';
  */
 import { getTotalAnimationDuration } from '../../helpers';
 
+/**
+ * PageSettings component that displays page-specific controls for advancing to the next page in the story.
+ *
+ * @param {Object} props Component props.
+ * @param {string} props.autoAdvanceAfter The current advancement setting.
+ * @param {number} props.autoAdvanceAfterDuration The duration for when advancement should happen after a period of time.
+ * @param {Function} props.setAttributes setAttributs callback.
+ * @param {string} props.clientId Page client ID.
+ *
+ * @return {ReactElement} Component.
+ */
 const PageSettings = ( { autoAdvanceAfter, autoAdvanceAfterDuration, setAttributes, clientId } ) => {
 	let autoAdvanceAfterHelp;
 
