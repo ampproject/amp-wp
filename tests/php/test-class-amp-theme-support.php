@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use org\bovigo\vfs;
+
 /**
  * Tests for Theme Support.
  *
@@ -19,13 +21,6 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @var string
 	 */
 	const TESTED_CLASS = 'AMP_Theme_Support';
-
-	/**
-	 * The amp/ directory in the theme, to test whether a theme has Reader Mode templates.
-	 *
-	 * @var string
-	 */
-	public $amp_directory_in_theme = '';
 
 	/**
 	 * Set up before class.
@@ -68,9 +63,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
 		AMP_HTTP::$headers_sent = [];
-		if ( is_dir( $this->amp_directory_in_theme ) ) {
-			rmdir( $this->amp_directory_in_theme );
-		}
+		remove_all_filters( 'theme_root' );
+		remove_all_filters( 'template' );
 	}
 
 	/**
@@ -239,7 +233,24 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 	 * @covers \AMP_Theme_Support::supports_reader_mode.
 	 */
 	public function test_supports_reader_mode() {
-		remove_all_filters( 'theme_root' );
+		$themes_directory = 'themes';
+		$mock_theme       = 'example-theme';
+		$mock_directory   = vfs\vfsStream::setup( $themes_directory, null, [ $mock_theme => [] ] );
+
+		// Add filters so that get_template_directory() the theme in the mock filesystem.
+		add_filter(
+			'theme_root',
+			function() use ( $mock_directory ) {
+				return $mock_directory->url();
+			}
+		);
+
+		add_filter(
+			'template',
+			function() use ( $mock_theme ) {
+				return $mock_theme;
+			}
+		);
 
 		add_theme_support( 'amp' );
 		AMP_Theme_Support::read_theme_support();
@@ -253,8 +264,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		// The mode is Reader, but there is no /amp directory in the theme.
 		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
 
-		$this->amp_directory_in_theme = get_template_directory() . '/amp';
-		mkdir( $this->amp_directory_in_theme );
+		// Add an /amp directory to the theme.
+		$mock_directory->getChild( $mock_theme )->addChild( vfs\vfsStream::newDirectory( 'amp' ) );
 
 		// This should be true, as there is now an /amp directory in the theme.
 		$this->assertTrue( AMP_Theme_Support::supports_reader_mode() );
