@@ -257,14 +257,14 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Sets the layout, and possibly the 'height' and 'width' attributes.
 	 *
-	 * @param string[] $attributes {
+	 * @param array $attributes {
 	 *      Attributes.
 	 *
-	 *      @type int $height
-	 *      @type int $width
-	 *      @type string $sizes
-	 *      @type string $class
-	 *      @type string $layout
+	 *      @type int|string $height
+	 *      @type int|string $width
+	 *      @type string     $sizes
+	 *      @type string     $class
+	 *      @type string     $layout
 	 * }
 	 * @return array Attributes.
 	 */
@@ -272,6 +272,44 @@ abstract class AMP_Base_Sanitizer {
 		if ( isset( $attributes['layout'] ) && ( 'fill' === $attributes['layout'] || 'flex-item' !== $attributes['layout'] ) ) {
 			return $attributes;
 		}
+
+		// Special-case handling for inline style that should be transformed into layout=fill.
+		if ( ! empty( $attributes['style'] ) ) {
+			$styles = $this->parse_style_string( $attributes['style'] );
+
+			// Apply fill layout if top, left, bottom, right are used.
+			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] )
+				&& 'absolute' === $styles['position']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
+				&& 0 === (int) $styles['bottom']
+				&& 0 === (int) $styles['right']
+			) {
+				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['bottom'], $styles['right'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
+				$attributes['layout'] = 'fill';
+				return $attributes;
+			}
+
+			// Apply fill layout if top, left, width, height are used.
+			if ( isset( $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] )
+				&& 'absolute' === $styles['position']
+				&& 0 === (int) $styles['top']
+				&& 0 === (int) $styles['left']
+				&& '100%' === (string) $styles['width']
+				&& '100%' === (string) $styles['height']
+			) {
+				unset( $attributes['style'], $styles['position'], $styles['top'], $styles['left'], $styles['width'], $styles['height'] );
+				if ( ! empty( $styles ) ) {
+					$attributes['style'] = $this->reassemble_style_string( $styles );
+				}
+				$attributes['layout'] = 'fill';
+				return $attributes;
+			}
+		}
+
 		if ( empty( $attributes['height'] ) ) {
 			unset( $attributes['width'] );
 			$attributes['height'] = self::FALLBACK_HEIGHT;
@@ -661,5 +699,54 @@ abstract class AMP_Base_Sanitizer {
 			]
 		);
 		$body_node->appendChild( $amp_image_lightbox );
+	}
+
+	/**
+	 * Parse a style string into an associative array of style attributes.
+	 *
+	 * @param string $style_string Style string to parse.
+	 * @return string[] Associative array of style attributes.
+	 */
+	protected function parse_style_string( $style_string ) {
+		// We need to turn the style string into an associative array of styles first.
+		$style_string = trim( $style_string, " \t\n\r\0\x0B;" );
+		$elements     = preg_split( '/(\s*:\s*|\s*;\s*)/', $style_string );
+
+		if ( 0 !== count( $elements ) % 2 ) {
+			// Style string was malformed, try to process as good as possible by stripping the last element.
+			array_pop( $elements );
+		}
+
+		$chunks = array_chunk( $elements, 2 );
+
+		// phpcs:ignore PHPCompatibility.FunctionUse.NewFunctions.array_columnFound -- WP Core provides a polyfill.
+		return array_combine( array_column( $chunks, 0 ), array_column( $chunks, 1 ) );
+	}
+
+	/**
+	 * Reassemble a style string that can be used in a 'style' attribute.
+	 *
+	 * @param array $styles Associative array of styles to reassemble into a string.
+	 * @return string Reassembled style string.
+	 */
+	protected function reassemble_style_string( $styles ) {
+		if ( ! is_array( $styles ) ) {
+			return '';
+		}
+
+		// Discard empty values first.
+		$styles = array_filter( $styles );
+
+		return array_reduce(
+			array_keys( $styles ),
+			static function ( $style_string, $style_name ) use ( $styles ) {
+				if ( ! empty( $style_string ) ) {
+					$style_string .= ';';
+				}
+
+				return $style_string . "{$style_name}:{$styles[ $style_name ]}";
+			},
+			''
+		);
 	}
 }
