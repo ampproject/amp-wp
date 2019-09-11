@@ -13,6 +13,7 @@ import { RichText } from '@wordpress/block-editor';
 import { Button, Spinner } from '@wordpress/components';
 import { RawHTML, useEffect, useRef, useState } from '@wordpress/element';
 import { ENTER, SPACE } from '@wordpress/keycodes';
+import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -56,12 +57,20 @@ const AttachmentContent = ( props ) => {
 		wrapperStyle,
 	} = attributes;
 
+	const allowedPostTypes = useSelect( ( select ) => {
+		const { getSettings } = select( 'amp/story' );
+		const { allowedPageAttachmentPostTypes } = getSettings();
+		return allowedPageAttachmentPostTypes;
+	} );
+
 	const fetchSelectedPost = () => {
+		const restBase = allowedPostTypes[ postType ] || `${ postType }s`;
+
 		isStillMounted = true;
 		if ( postId ) {
 			setIsFetching( true );
 			const currentFetchRequest = fetchRequest = apiFetch( {
-				path: `/wp/v2/${ postType }s/${ postId }`,
+				path: `/wp/v2/${ restBase }/${ postId }`,
 			} ).then(
 				( post ) => {
 					if ( isStillMounted && fetchRequest === currentFetchRequest ) {
@@ -187,10 +196,7 @@ const AttachmentContent = ( props ) => {
 									setSearchValue( '' );
 								} }
 								onChange={ ( value ) => setSearchValue( value ) }
-								searchablePostTypes={ [
-									'page',
-									'post',
-								] }
+								searchablePostTypes={ Object.keys( allowedPostTypes ) }
 							/>
 						</>
 					) }

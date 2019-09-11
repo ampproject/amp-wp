@@ -957,11 +957,29 @@ class AMP_Story_Post_Type {
 		// Only add currently supported mime types.
 		$allowed_video_mime_types = array_values( array_intersect( $allowed_video_mime_types, wp_get_mime_types() ) );
 
+		/**
+		 * Filters the list of allowed post types for use in page attachments.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed post types.
+		 */
+		$page_attachment_post_types = apply_filters( 'amp_story_allowed_page_attachment_post_types', [ 'page', 'post' ] );
+		$post_types                 = [];
+		foreach ( $page_attachment_post_types as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $post_type_object ) {
+				$post_types[ $post_type ] = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+			}
+		}
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditorSettings',
 			[
-				'allowedVideoMimeTypes' => $allowed_video_mime_types,
+				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
+				'allowedPageAttachmentPostTypes' => $post_types,
 			]
 		);
 
