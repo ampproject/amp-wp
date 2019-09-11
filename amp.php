@@ -241,6 +241,29 @@ if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
 }
 
+/**
+ * Print admin notice if the Xdebug extension is loaded.
+ *
+ * @since 1.3
+ */
+function _amp_xdebug_admin_notice() {
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			esc_html_e(
+				'Your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. Please deactivate Xdebug for the best experience.',
+				'amp'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( extension_loaded( 'xdebug' ) ) {
+	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
+}
+
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
 AMP_Autoloader::register();
 
@@ -466,6 +489,7 @@ function amp_maybe_add_actions() {
 
 		// Prevent infinite URL space under /amp/ endpoint.
 		global $wp;
+		$path_args = [];
 		wp_parse_str( $wp->matched_query, $path_args );
 		if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 			wp_safe_redirect( amp_get_permalink( $post->ID ), 301 );
