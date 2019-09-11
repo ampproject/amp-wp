@@ -18,9 +18,8 @@ const { wp } = window;
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Mostly copied from customize-controls.js.
  *
- * @param {Function} InitialMediaUpload          The MediaUpload component, passed from the filter.
- * @param {Object}   minImageDimensions          Minimum required image dimensions.
- * @param {Object}   alternateMinImageDimensions Alternate required image dimensions, like portrait dimensions (optional).
+ * @param {Function} InitialMediaUpload The MediaUpload component, passed from the filter.
+ * @param {Object}   minImageDimensions Minimum required image dimensions.
  * @return {Function} The wrapped component.
  */
 export default ( InitialMediaUpload, minImageDimensions ) => {
