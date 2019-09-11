@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -10,6 +11,17 @@ import { __ } from '@wordpress/i18n';
 import { RichText } from '@wordpress/block-editor';
 import { ENTER, SPACE } from '@wordpress/keycodes';
 
+/**
+ * Attachment opener that is displayed when the attachment hasn't been opened yet.
+ *
+ * Displays a form with an editable label that, when being clicked on, opens the attachment content.
+ *
+ * @param {Object} props Component props.
+ * @param {Function} props.setAttributes
+ * @param {Function} props.toggleAttachment
+ * @param {string} props.openText
+ * @return {ReactElement} Element.
+ */
 const AttachmentOpener = ( { setAttributes, toggleAttachment, openText } ) => {
 	return (
 		<div className="open-attachment-wrapper">

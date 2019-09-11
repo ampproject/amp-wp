@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -19,6 +20,21 @@ import { ENTER, SPACE } from '@wordpress/keycodes';
 import { PostSelector } from '../../components';
 import useElementClickDetector from './element-click-detector';
 
+/**
+ * Attachment content that is displayed when the attachment has been opened.
+ *
+ * Displays a form to select a page/post to be displayed as the actual page attachment content.
+ *
+ * Once a post has been selected, it displays the post's title and content and offers an option
+ * to remove the selection again.
+ *
+ * @param {Object} props Component props.
+ * @param {Function} props.attributes Block attributes.
+ * @param {Function} props.setAttributes setAttributes callback.
+ * @param {Function} props.toggleAttachment Callback to toggle attachment open/closed state.
+ *
+ * @return {ReactElement} Element.
+ */
 const AttachmentContent = ( props ) => {
 	const [ selectedPost, setSelectedPost ] = useState( null );
 	const [ failedToFetch, setFailedToFetch ] = useState( false );
@@ -97,6 +113,7 @@ const AttachmentContent = ( props ) => {
 		<div className="attachment-container">
 			<div className="attachment-wrapper">
 				<div className="attachment-header">
+					{ /* This does not use an IconButton as it replicates the close button on the frontend */ }
 					<span
 						tabIndex="0"
 						className="amp-story-page-attachment-close-button"

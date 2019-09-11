@@ -18,6 +18,9 @@ import { getBackgroundColorWithOpacity } from '../../../common/helpers';
 import AttachmentOpener from './attachment-opener';
 import AttachmentContent from './attachment-content';
 
+/**
+ * Edit component for the page attachment block rendered in the editor.
+ */
 class PageAttachmentEdit extends Component {
 	constructor( props ) {
 		super( props );
