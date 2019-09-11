@@ -79,6 +79,14 @@ class PageEdit extends Component {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
+		if ( props.storySettingsAttributes ) {
+			Object.entries( props.storySettingsAttributes ).forEach( ( [ key, value ] ) => {
+				if ( ! props.attributes.hasOwnProperty( key ) ) {
+					this.props.setAttributes( { [ key ]: value } );
+				}
+			} );
+		}
+
 		this.state = {
 			extractingPoster: false,
 		};
@@ -216,11 +224,8 @@ class PageEdit extends Component {
 			totalAnimationDuration,
 			allowedBlocks,
 			allowedBackgroundMediaTypes,
-			storySettingsAttributes,
 			autoAdvanceAfterOptions,
 		} = this.props;
-
-		const attributesWithDefaults = { ...attributes, ...storySettingsAttributes };
 
 		const {
 			mediaId,
@@ -231,7 +236,7 @@ class PageEdit extends Component {
 			poster,
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
-		} = attributesWithDefaults;
+		} = attributes;
 
 		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
@@ -413,7 +418,9 @@ class PageEdit extends Component {
 							options={ autoAdvanceAfterOptions }
 							onChange={ ( value ) => {
 								setAttributes( { autoAdvanceAfter: value } );
-								setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+								if ( 'auto' === value && totalAnimationDuration ) {
+									setAttributes( { autoAdvanceAfterDuration: totalAnimationDuration } );
+								}
 							} }
 						/>
 						{ 'time' === autoAdvanceAfter && (

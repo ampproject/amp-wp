@@ -261,7 +261,9 @@ store.subscribe( () => {
 			if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
 				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 			}
-		} else {
+		}
+
+		if ( 'auto' === pageAttributes.autoAdvanceAfter && totalAnimationDuration ) {
 			updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 		}
 
