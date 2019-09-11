@@ -1856,7 +1856,7 @@ class AMP_Story_Post_Type {
 		}
 
 		$original_post = $post;
-		$post = $content_post;
+		$post          = $content_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// Remove filter for not adding grid layer to blocks within the attachment content.
 		remove_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10 );
@@ -1875,7 +1875,7 @@ class AMP_Story_Post_Type {
 		?>
 		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
 			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
-				<h2><?php echo the_title(); ?></h2>
+				<h2><?php the_title(); ?></h2>
 				<?php the_content(); ?>
 			</div>
 		</amp-story-page-attachment>
@@ -1887,7 +1887,7 @@ class AMP_Story_Post_Type {
 
 		$output = ob_get_clean();
 
-		$post = $original_post;
+		$post = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		return $output;
 	}
