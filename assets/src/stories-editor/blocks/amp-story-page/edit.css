@@ -227,6 +227,10 @@ div[data-type="amp/amp-story-page"] .wp-block-image {
 	margin-top: 0;
 }
 
+.edit-post-settings-sidebar__panel-block .components-focal-point-picker_position-display-container > .components-base-control {
+	margin-bottom: 0;
+}
+
 /* Block Validation Warnings */
 
 .editor-block-list__layout [data-type="amp/amp-story-page"] .block-editor-block-list__block .block-editor-warning {
