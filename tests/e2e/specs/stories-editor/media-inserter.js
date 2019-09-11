@@ -111,18 +111,15 @@ describe( 'Stories Editor Screen', () => {
 		await openMediaInserter();
 		await clickButton( 'Insert Image' );
 		// Click the media library button.
-		const libraryBtn = await page.waitForSelector( MEDIA_LIBRARY_BUTTON );
+		// Click the media library button.
+		await page.waitForSelector( MEDIA_LIBRARY_BUTTON );
 
-		await page.evaluate( ( el ) => {
-			el.click();
-		}, libraryBtn );
+		await page.click( MEDIA_LIBRARY_BUTTON );
 		await uploadMedia( LARGE_IMAGE );
 
 		// Select the image from the Media Library.
-		const selectBtn = await page.waitForSelector( SELECT_BUTTON );
-		await page.evaluate( ( el ) => {
-			el.click();
-		}, selectBtn );
+		await page.waitForSelector( SELECT_BUTTON );
+		await page.click( SELECT_BUTTON );
 
 		// Wait for image to appear in the block.
 		await expect( page ).toMatchElement( '.wp-block-image img' );
