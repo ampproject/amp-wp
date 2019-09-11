@@ -13,8 +13,6 @@ class RowToggler {
 
 		// Since we're adding additional rows, we need to override default .striped tables styles.
 		this.tr.classList.add( this.index % 2 ? 'odd' : 'even' );
-
-		this.toggle = this.toggle.bind( this );
 	}
 
 	/**
@@ -73,7 +71,7 @@ class RowToggler {
 	 *
 	 * @param {Object} target The click event target.
 	 */
-	toggle( target ) {
+	toggle = ( target ) => {
 		if ( this.tr.classList.contains( 'expanded' ) ) {
 			this.onClose( target );
 		} else {

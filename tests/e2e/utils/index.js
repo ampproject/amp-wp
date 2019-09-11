@@ -17,3 +17,4 @@ export { switchEditorModeTo } from './switch-editor-mode-to';
 export { uploadMedia } from './upload-media';
 export { getBlocksOnPage } from './get-blocks-on-page';
 export { goToPreviousPage } from './go-to-previous-page';
+export { wpDataSelect } from './wp-data-select';

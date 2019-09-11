@@ -15,7 +15,9 @@
 }
 
 .wp-block-amp-story-text-wrapper.is-empty-draggable-text,
-.wp-block-amp-story-text-wrapper:not(.with-line-height) {
+/* `:not(.with-line-height)` means any non-fitted text block. This must keep full height with the surrounding block. */
+.wp-block-amp-story-text-wrapper:not(.with-line-height),
+.wp-block-amp-story-text-wrapper:not(.with-line-height) div {
 	height: 100%;
 }
 
@@ -64,7 +66,6 @@ div[data-type="amp/amp-story-page"] .block-editor-inner-blocks .block-editor-blo
 }
 
 .wp-block[data-type="amp/amp-story-text"] .amp-story-editor__rotate-container,
-.wp-block[data-type="amp/amp-story-text"] .block-mover,
-.wp-block[data-type="amp/amp-story-text"] .block-mover div {
+.wp-block[data-type="amp/amp-story-text"] .block-mover {
 	height: 100%;
 }

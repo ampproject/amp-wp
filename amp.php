@@ -5,7 +5,7 @@
  * Plugin URI: https://amp-wp.org
  * Author: AMP Project Contributors
  * Author URI: https://github.com/ampproject/amp-wp/graphs/contributors
- * Version: 1.2.3-alpha
+ * Version: 1.3-alpha
  * Text Domain: amp
  * Domain Path: /languages/
  * License: GPLv2 or later
@@ -15,7 +15,7 @@
 
 define( 'AMP__FILE__', __FILE__ );
 define( 'AMP__DIR__', dirname( __FILE__ ) );
-define( 'AMP__VERSION', '1.2.3-alpha' );
+define( 'AMP__VERSION', '1.3-alpha' );
 
 /**
  * Errors encountered while loading the plugin.
@@ -149,6 +149,7 @@ if ( count( $_amp_missing_functions ) > 0 ) {
 
 unset( $_amp_required_extensions, $_amp_missing_extensions, $_amp_required_constructs, $_amp_missing_classes, $_amp_missing_functions, $_amp_required_extension, $_amp_construct_type, $_amp_construct, $_amp_constructs );
 
+// DEV_CODE. This block of code is removed during the build process.
 if ( ! file_exists( AMP__DIR__ . '/vendor/autoload.php' ) || ! file_exists( AMP__DIR__ . '/vendor/sabberworm/php-css-parser' ) || ! file_exists( AMP__DIR__ . '/assets/js/amp-block-editor.js' ) ) {
 	$_amp_load_errors->add(
 		'build_required',
@@ -238,6 +239,29 @@ function _amp_incorrect_plugin_slug_admin_notice() {
 }
 if ( 'amp' !== basename( AMP__DIR__ ) ) {
 	add_action( 'admin_notices', '_amp_incorrect_plugin_slug_admin_notice' );
+}
+
+/**
+ * Print admin notice if the Xdebug extension is loaded.
+ *
+ * @since 1.3
+ */
+function _amp_xdebug_admin_notice() {
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<?php
+			esc_html_e(
+				'Your server currently has the Xdebug PHP extension loaded. This can cause some of the AMP plugin\'s processes to timeout depending on your system resources and configuration. Please deactivate Xdebug for the best experience.',
+				'amp'
+			);
+			?>
+		</p>
+	</div>
+	<?php
+}
+if ( extension_loaded( 'xdebug' ) ) {
+	add_action( 'admin_notices', '_amp_xdebug_admin_notice' );
 }
 
 require_once AMP__DIR__ . '/includes/class-amp-autoloader.php';
@@ -465,6 +489,7 @@ function amp_maybe_add_actions() {
 
 		// Prevent infinite URL space under /amp/ endpoint.
 		global $wp;
+		$path_args = [];
 		wp_parse_str( $wp->matched_query, $path_args );
 		if ( isset( $path_args[ amp_get_slug() ] ) && '' !== $path_args[ amp_get_slug() ] ) {
 			wp_safe_redirect( amp_get_permalink( $post->ID ), 301 );

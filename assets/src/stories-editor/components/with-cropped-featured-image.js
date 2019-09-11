@@ -59,7 +59,6 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 			// @todo This should be a different event.
 			// This class should only be present in the MediaUpload for the Featured Image.
 			if ( 'editor-post-featured-image__media-modal' === this.props.modalClass ) {
-				this.initFeaturedImage = this.initFeaturedImage.bind( this );
 				this.initFeaturedImage();
 			}
 		}
@@ -74,7 +73,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 		 *
 		 * @see wp.media.CroppedImageControl.initFrame
 		 */
-		initFeaturedImage() {
+		initFeaturedImage = () => {
 			const FeaturedImageSelectMediaFrame = getSelectMediaFrame( FeaturedImageToolbarSelect );
 			this.frame = new FeaturedImageSelectMediaFrame( {
 				allowedTypes: this.props.allowedTypes,

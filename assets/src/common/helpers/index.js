@@ -1,12 +1,14 @@
 /**
  * External dependencies
  */
-import { get, has, includes, now, reduce, template } from 'lodash';
+import { get, has, now, reduce, template } from 'lodash';
+
 /**
  * WordPress dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { getColorObjectByAttributeValues, getColorObjectByColorValue } from '@wordpress/block-editor';
+
 /**
  * Internal dependencies
  */
@@ -17,6 +19,10 @@ import {
 	MINIMUM_FEATURED_IMAGE_WIDTH,
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../constants';
+
+// @todo This is is not guaranteed to exist.
+const { ampStoriesEditorSettings = {} } = window;
+const { allowedVideoMimeTypes = [ 'video/mp4' ] } = ampStoriesEditorSettings;
 
 /**
  * Determines whether whether the image has the minimum required dimensions.
@@ -233,9 +239,9 @@ export const getNoticeTemplate = ( message ) => {
 /**
  * Gets whether the file type is allowed.
  *
- * For videos, only 'video/mp4' mime types should be allowed.
- * But the allowedTypes property only has 'video', and it can accidentally allow mime types like 'video/quicktime'.
- * So this returns false for videos with mime types other than 'video/mp4'.
+ * For videos, only supported mime types as defined by the editor settings should be allowed.
+ * But the allowedTypes property only has 'video', and it can accidentally allow mime types that are not supported.
+ * So this returns false for videos with mime types other than the ones in the editor settings.
  *
  * @param {Object} attachment   The file to evaluate.
  * @param {Array}  allowedTypes The allowed file types.
@@ -245,11 +251,11 @@ export const isFileTypeAllowed = ( attachment, allowedTypes ) => {
 	const fileType = attachment.get( 'type' );
 	const mimeType = attachment.get( 'mime' );
 
-	if ( ! includes( allowedTypes, fileType ) && ! includes( allowedTypes, mimeType ) ) {
+	if ( ! allowedTypes.includes( fileType ) && ! allowedTypes.includes( mimeType ) ) {
 		return false;
 	}
 
-	if ( 'video' === fileType && 'video/mp4' !== mimeType ) {
+	if ( 'video' === fileType && ! allowedVideoMimeTypes.includes( mimeType ) ) {
 		return false;
 	}
 
