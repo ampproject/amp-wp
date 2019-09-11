@@ -94,21 +94,21 @@ describe( 'Global Inserter', () => {
 
 		// There should only be one 'parent' block, the Page block.
 		const blocks = await getAllBlocks();
-		expect( blocks.length ).toStrictEqual( 1 );
+		expect( blocks ).toHaveLength( 1 );
 
 		// The 3 blocks added and the default text block should be innerBlocks of the Page block.
-		expect( blocks[ 0 ].innerBlocks.length ).toStrictEqual( 4 );
+		expect( blocks[ 0 ].innerBlocks ).toHaveLength( 4 );
 
 		await insertBlock( 'Page' );
 
 		// Now that there is a second Page block, there should be 2 blocks.
-		expect( ( await getAllBlocks() ).length ).toStrictEqual( 2 );
+		expect( ( await getAllBlocks() ) ).toHaveLength( 2 );
 
 		await insertBlock( 'Image' );
 
 		// The Image block should simply be an innerBlock of the 2nd page, and the parent block count should remain at 2.
-		expect( ( await getAllBlocks() )[ 1 ].innerBlocks.length ).toStrictEqual( 1 );
-		expect( ( await getAllBlocks() ).length ).toStrictEqual( 2 );
+		expect( ( await getAllBlocks() )[ 1 ].innerBlocks ).toHaveLength( 1 );
+		expect( ( await getAllBlocks() ) ).toHaveLength( 2 );
 	} );
 
 	it( 'should always add Page blocks as top-level blocks, not innerBlocks', async () => {
@@ -117,22 +117,22 @@ describe( 'Global Inserter', () => {
 		const blocks = await getAllBlocks();
 
 		// After adding a 2nd Page block, there should be 2 top-level blocks (2 pages).
-		expect( blocks.length ).toStrictEqual( 2 );
+		expect( blocks ).toHaveLength( 2 );
 
 		// The 1st Page should only have 1 innerBlock, the default Text block, not another Page.
-		expect( blocks[ 0 ].innerBlocks.length ).toStrictEqual( 1 );
+		expect( blocks[ 0 ].innerBlocks ).toHaveLength( 1 );
 
 		await insertBlock( 'Page' );
 		const blocksWithThreePages = await getAllBlocks();
 
 		// After adding a 3rd Page block, there should be 3 top-level blocks (3 pages).
-		expect( blocksWithThreePages.length ).toStrictEqual( 3 );
+		expect( blocksWithThreePages ).toHaveLength( 3 );
 
 		// The 1st Page should still only have 1 innerBlock, the default Text block.
-		expect( blocksWithThreePages[ 0 ].innerBlocks.length ).toStrictEqual( 1 );
+		expect( blocksWithThreePages[ 0 ].innerBlocks ).toHaveLength( 1 );
 
 		// The 2nd and 3rd pages should not have innerBlocks, as the inserter only added Pages.
-		expect( blocksWithThreePages[ 1 ].innerBlocks.length ).toStrictEqual( 0 );
-		expect( blocksWithThreePages[ 2 ].innerBlocks.length ).toStrictEqual( 0 );
+		expect( blocksWithThreePages[ 1 ].innerBlocks ).toHaveLength( 0 );
+		expect( blocksWithThreePages[ 2 ].innerBlocks ).toHaveLength( 0 );
 	} );
 } );
