@@ -87,6 +87,15 @@ class AMP_Theme_Support {
 	const PAIRED_FLAG = 'paired';
 
 	/**
+	 * The directory name in a theme where Reader Mode templates can be.
+	 *
+	 * For example, this could be at your-theme-name/amp.
+	 *
+	 * @var string
+	 */
+	const READER_MODE_TEMPLATE_DIRECTORY = 'amp';
+
+	/**
 	 * Sanitizer classes.
 	 *
 	 * @var array
@@ -373,11 +382,14 @@ class AMP_Theme_Support {
 	 * @return bool Whether the theme supports Reader Mode.
 	 */
 	public static function supports_reader_mode() {
-		$amp_dir = '/amp';
 		return (
 			! self::get_support_mode_added_via_theme()
 			&&
-			( is_dir( get_template_directory() . $amp_dir ) || is_dir( get_stylesheet_directory() . $amp_dir ) )
+			(
+				is_dir( trailingslashit( get_template_directory() ) . self::READER_MODE_TEMPLATE_DIRECTORY )
+				||
+				is_dir( trailingslashit( get_stylesheet_directory() ) . self::READER_MODE_TEMPLATE_DIRECTORY )
+			)
 		);
 	}
 
