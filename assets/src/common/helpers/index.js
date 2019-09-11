@@ -403,7 +403,7 @@ export const getContentLengthFromUrl = async ( url ) => {
  * Sets the featured image, on selecting it in the Media Library.
  *
  * @param {string} url             Image URL.
- * @param {number} id    Attachment ID.
+ * @param {number} id              Attachment ID.
  * @param {number} width           Image width.
  * @param {number} height          Image height.
  * @param {Function} onSelect      A function in the MediaUpload component called on selecting the image.
