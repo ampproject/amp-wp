@@ -140,10 +140,11 @@ amp-story-grid-layer .wp-block-quote {
 	font-size: calc(4.88 * var(--story-page-vw));
 }
 
-.amp-page-attachment-content {
+amp-story-page-attachment .amp-page-attachment-content {
 	padding: 10px;
+	height: 100%;
 }
 
-.amp-page-attachment-content .wp-block-quote {
+amp-story-page-attachment .amp-page-attachment-content .wp-block-quote {
 	background: none;
 }
