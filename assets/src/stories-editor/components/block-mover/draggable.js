@@ -12,7 +12,6 @@ import PropTypes from 'prop-types';
  * WordPress dependencies
  */
 import { Component } from '@wordpress/element';
-import { compose, withSafeTimeout } from '@wordpress/compose';
 import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
@@ -38,10 +37,6 @@ const documentHasIframes = ( ) => [ ...document.getElementById( 'editor' ).query
 
 let lastX;
 let lastY;
-let originalX;
-let originalY;
-let initialBlockX;
-let initialBlockY;
 
 class Draggable extends Component {
 	constructor( ...args ) {
@@ -103,20 +98,14 @@ class Draggable extends Component {
 			parentBlockOffsetLeft,
 		} = this.props;
 
-		const newSnapLines = [];
-
-		let top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
-		let left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
-
-		const originalTop = top;
-		const originalLeft = left;
+		const top = parseInt( this.cloneWrapper.style.top ) + event.clientY - this.cursorTop;
+		const left = parseInt( this.cloneWrapper.style.left ) + event.clientX - this.cursorLeft;
 
 		if ( top === lastY && left === lastX ) {
 			return;
 		}
 
-		lastY = top;
-		lastX = left;
+		const snappingEnabled = ! event.getModifierState( 'Alt' );
 
 		const dimensions = this.cloneWrapper.getBoundingClientRect();
 
@@ -133,100 +122,51 @@ class Draggable extends Component {
 		actualBottom -= parentBlockOffsetTop;
 		actualLeft -= parentBlockOffsetLeft;
 
-		const {
-			width: actualWidth,
-			height: actualHeight,
-		} = dimensions;
-
 		const horizontalCenter = actualLeft + ( ( actualRight - actualLeft ) / 2 );
 		const verticalCenter = actualTop + ( ( actualBottom - actualTop ) / 2 );
 
-		// The difference in width/height caused by rotation.
-		const rotatedWidthDiff = ( this.cloneWrapper.offsetWidth - actualWidth ) / 2;
-		const rotatedHeightDiff = ( this.cloneWrapper.offsetHeight - actualHeight ) / 2;
+		const newSnapLines = [];
 
-		const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
-		const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnaps, BLOCK_DRAGGING_SNAP_GAP );
+		if ( snappingEnabled ) {
+			const horizontalLeftSnap = findClosestSnap( actualLeft, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const horizontalRightSnap = findClosestSnap( actualRight, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const horizontalCenterSnap = findClosestSnap( horizontalCenter, this.horizontalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const verticalTopSnap = findClosestSnap( actualTop, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const verticalBottomSnap = findClosestSnap( actualBottom, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
+			const verticalCenterSnap = findClosestSnap( verticalCenter, this.verticalSnapKeys, BLOCK_DRAGGING_SNAP_GAP );
 
-		const snappingEnabled = ! event.getModifierState( 'Alt' );
+			if ( horizontalLeftSnap !== null ) {
+				newSnapLines.push( ...this.horizontalSnaps[ horizontalLeftSnap ] );
+			}
 
-		// @todo: Rely on withSnapTargets to provide the data for the snapping lines so this isn't a concern of this component.
+			if ( horizontalRightSnap !== null ) {
+				newSnapLines.push( ...this.horizontalSnaps[ horizontalRightSnap ] );
+			}
 
-		// What the cursor has moved since the beginning.
-		const leftDiff = event.clientX - originalX;
-		const topDiff = event.clientY - originalY;
-		// Where the original block would be positioned based on that.
-		const leftToCompareWith = initialBlockX + leftDiff;
-		const topToCompareWith = initialBlockY + topDiff;
+			if ( horizontalCenterSnap !== null ) {
+				newSnapLines.push( ...this.horizontalSnaps[ horizontalCenterSnap ] );
+			}
 
-		if ( horizontalLeftSnap !== null ) {
-			const snapLine = [ [ horizontalLeftSnap, 0 ], [ horizontalLeftSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			newSnapLines.push( snapLine );
+			if ( verticalTopSnap !== null ) {
+				newSnapLines.push( ...this.verticalSnaps[ verticalTopSnap ] );
+			}
 
-			if ( snappingEnabled ) {
-				if ( Math.abs( leftToCompareWith - horizontalLeftSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					left = horizontalLeftSnap - rotatedWidthDiff;
-				}
+			if ( verticalBottomSnap !== null ) {
+				newSnapLines.push( ...this.verticalSnaps[ verticalBottomSnap ] );
+			}
+
+			if ( verticalCenterSnap !== null ) {
+				newSnapLines.push( ...this.verticalSnaps[ verticalCenterSnap ] );
 			}
 		}
 
-		if ( horizontalRightSnap !== null ) {
-			const snapLine = [ [ horizontalRightSnap, 0 ], [ horizontalRightSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			newSnapLines.push( snapLine );
-
-			if ( snappingEnabled ) {
-				if ( Math.abs( leftToCompareWith + actualWidth - horizontalRightSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					left = horizontalRightSnap - actualWidth;
-				}
+		if ( newSnapLines.length ) {
+			const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+			if ( ! newSnapLines.every( hasSnapLine ) ) {
+				setSnapLines( ...newSnapLines );
 			}
-		}
-
-		if ( horizontalCenterSnap !== null ) {
-			const snapLine = [ [ horizontalCenterSnap, 0 ], [ horizontalCenterSnap, STORY_PAGE_INNER_HEIGHT ] ];
-			newSnapLines.push( snapLine );
-
-			if ( snappingEnabled ) {
-				if ( Math.abs( leftToCompareWith + ( actualWidth / 2 ) - horizontalCenterSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					left = originalLeft - ( horizontalCenter - horizontalCenterSnap );
-				}
-			}
-		}
-
-		if ( verticalTopSnap !== null ) {
-			const snapLine = [ [ 0, verticalTopSnap ], [ STORY_PAGE_INNER_WIDTH, verticalTopSnap ] ];
-			newSnapLines.push( snapLine );
-
-			if ( snappingEnabled ) {
-				if ( Math.abs( topToCompareWith - verticalTopSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					top = verticalTopSnap - rotatedHeightDiff;
-				}
-			}
-		}
-
-		if ( verticalBottomSnap !== null ) {
-			const snapLine = [ [ 0, verticalBottomSnap ], [ STORY_PAGE_INNER_WIDTH, verticalBottomSnap ] ];
-			newSnapLines.push( snapLine );
-
-			if ( snappingEnabled ) {
-				if ( Math.abs( topToCompareWith + actualHeight - verticalBottomSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					top = originalTop - ( actualBottom - verticalBottomSnap );
-				}
-			}
-		}
-
-		if ( verticalCenterSnap !== null ) {
-			const snapLine = [ [ 0, verticalCenterSnap ], [ STORY_PAGE_INNER_WIDTH, verticalCenterSnap ] ];
-			newSnapLines.push( snapLine );
-
-			if ( snappingEnabled ) {
-				if ( Math.abs( topToCompareWith + ( actualHeight / 2 ) - verticalCenterSnap ) <= BLOCK_DRAGGING_SNAP_GAP ) {
-					top = originalTop - ( verticalCenter - verticalCenterSnap );
-				}
-			}
+		} else if ( snapLines.length ) {
+			clearSnapLines();
 		}
 
 		// Don't allow the CTA button to go over its top limit.
@@ -242,15 +182,8 @@ class Draggable extends Component {
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
 
-		const hasSnapLine = ( item ) => snapLines.find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
-
-		if ( newSnapLines.length ) {
-			if ( ! newSnapLines.every( hasSnapLine ) ) {
-				setSnapLines( ...newSnapLines );
-			}
-		} else if ( snapLines.length ) {
-			clearSnapLines();
-		}
+		lastY = top;
+		lastX = left;
 	}
 
 	onDrop = () => {
@@ -308,8 +241,6 @@ class Draggable extends Component {
 		this.cloneWrapper.style.height = `${ element.clientHeight }px`;
 
 		const clone = element.cloneNode( true );
-		initialBlockX = getPixelsFromPercentage( 'x', parseInt( clone.style.left ), STORY_PAGE_INNER_WIDTH );
-		initialBlockY = getPixelsFromPercentage( 'y', parseInt( clone.style.top ), STORY_PAGE_INNER_HEIGHT );
 
 		this.cloneWrapper.style.transform = clone.style.transform;
 
@@ -334,8 +265,7 @@ class Draggable extends Component {
 		// Mark the current cursor coordinates.
 		this.cursorLeft = event.clientX;
 		this.cursorTop = event.clientY;
-		originalX = event.clientX;
-		originalY = event.clientY;
+
 		// Update cursor to 'grabbing', document wide.
 		document.body.classList.add( 'is-dragging-components-draggable' );
 		document.addEventListener( 'dragover', this.onDragOver );
@@ -357,7 +287,9 @@ class Draggable extends Component {
 		}
 
 		this.horizontalSnaps = horizontalSnaps();
+		this.horizontalSnapKeys = Object.keys( this.horizontalSnaps );
 		this.verticalSnaps = verticalSnaps();
+		this.verticalSnapKeys = Object.keys( this.verticalSnaps );
 
 		this.props.setTimeout( onDragStart );
 	}
@@ -420,9 +352,4 @@ Draggable.propTypes = {
 	parentBlockOffsetLeft: PropTypes.number.isRequired,
 };
 
-const enhance = compose(
-	withSnapTargets,
-	withSafeTimeout,
-);
-
-export default enhance( Draggable );
+export default withSnapTargets( Draggable );

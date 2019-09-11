@@ -3,6 +3,7 @@
  */
 import { withDispatch, withSelect } from '@wordpress/data';
 import { compose, createHigherOrderComponent } from '@wordpress/compose';
+import isShallowEqual from '@wordpress/is-shallow-equal';
 
 /**
  * Internal dependencies
@@ -18,7 +19,7 @@ import { getBlockInnerElement } from '../../helpers';
  * - The page's width / height constraints and center.
  * - The block's position in relation to its siblings.
  *
- * @todo Update horizontalSnaps() and verticalSnaps() to return a map of snap targets -> snap lines in order to allow showing multiple snap lines for a single snapping point that can differ from the actual target.
+ * The snap targets are stored in a map with the snap target as the key and the snap lines to be shown as the value.
  */
 const applyWithSelect = withSelect( ( select, { clientId } ) => {
 	const {
@@ -51,73 +52,88 @@ const applyWithSelect = withSelect( ( select, { clientId } ) => {
 
 	const { left: parentBlockOffsetLeft, top: parentBlockOffsetTop } = parentBlockElement.getBoundingClientRect();
 
-	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) )
-		.filter( ( { clientId: blockId } ) => blockId !== clientId );
+	const siblings = getBlocksByClientId( getBlockOrder( parentBlock ) ).filter( ( { clientId: blockId } ) => blockId !== clientId );
+
+	const getVerticalLine = ( offsetX ) => [ [ offsetX, 0 ], [ offsetX, STORY_PAGE_INNER_HEIGHT ] ];
+	const getHorizontalLine = ( offsetY ) => [ [ 0, offsetY ], [ STORY_PAGE_INNER_WIDTH, offsetY ] ];
+
+	// Setter used for the proxied objects.
+	const proxySet = ( obj, prop, value ) => {
+		prop = Math.round( prop );
+
+		if ( prop < 0 || prop > STORY_PAGE_INNER_WIDTH ) {
+			return true;
+		}
+
+		const hasSnapLine = ( item ) => obj[ prop ].find( ( snapLine ) => isShallowEqual( item[ 0 ], snapLine[ 0 ] ) && isShallowEqual( item[ 1 ], snapLine[ 1 ] ) );
+
+		if ( obj.hasOwnProperty( prop ) && ! hasSnapLine( value ) ) {
+			obj[ prop ].push( value );
+		} else {
+			obj[ prop ] = [ value ];
+		}
+
+		obj[ prop ] = obj[ prop ].sort();
+
+		return true;
+	};
 
 	return {
 		horizontalSnaps: () => {
-			const pageSnaps = [
-				0,
-				STORY_PAGE_INNER_WIDTH / 2,
-				STORY_PAGE_INNER_WIDTH,
-			];
+			const snaps = new Proxy( {
+				// Left page border.
+				0: [ getVerticalLine( 0 ) ],
+				// Center of the page.
+				[ STORY_PAGE_INNER_WIDTH / 2 ]: [ getVerticalLine( STORY_PAGE_INNER_WIDTH / 2 ) ],
+				// Right page border.
+				[ STORY_PAGE_INNER_WIDTH ]: [ getVerticalLine( STORY_PAGE_INNER_WIDTH ) ],
+			},
+			{
+				set: proxySet,
+			} );
 
-			const blockSnaps = siblings
-				.map( ( block ) => {
-					const blockElement = getBlockInnerElement( block );
+			for ( const block of siblings ) {
+				const blockElement = getBlockInnerElement( block );
 
-					if ( ! blockElement ) {
-						return [];
-					}
+				if ( ! blockElement ) {
+					continue;
+				}
 
-					const { left, right } = blockElement.getBoundingClientRect();
-					return [ Math.round( left - parentBlockOffsetLeft ), Math.round( right - parentBlockOffsetLeft ) ];
-				} )
-				.reduce( ( result, snaps ) => {
-					for ( const snap of snaps ) {
-						if ( snap < 0 || snap > STORY_PAGE_INNER_WIDTH || result.includes( snap ) || pageSnaps.includes( snap ) ) {
-							continue;
-						}
+				const { left, right } = blockElement.getBoundingClientRect();
 
-						result.push( snap );
-					}
+				snaps[ left - parentBlockOffsetLeft ] = getVerticalLine( left - parentBlockOffsetLeft );
+				snaps[ right - parentBlockOffsetLeft ] = getVerticalLine( right - parentBlockOffsetLeft );
+			}
 
-					return result;
-				}, [] );
-
-			return [ ...pageSnaps, ...blockSnaps ];
+			return snaps;
 		},
 		verticalSnaps: () => {
-			const pageSnaps = [
-				0,
-				STORY_PAGE_INNER_HEIGHT / 2,
-				STORY_PAGE_INNER_HEIGHT,
-			];
+			const snaps = new Proxy( {
+				// Top page border.
+				0: [ getHorizontalLine( 0 ) ],
+				// Center of the page.
+				[ STORY_PAGE_INNER_HEIGHT / 2 ]: [ getHorizontalLine( STORY_PAGE_INNER_HEIGHT / 2 ) ],
+				// Bottom page border.
+				[ STORY_PAGE_INNER_HEIGHT ]: [ getHorizontalLine( STORY_PAGE_INNER_HEIGHT ) ],
+			},
+			{
+				set: proxySet,
+			} );
 
-			const blockSnaps = siblings
-				.map( ( block ) => {
-					const blockElement = getBlockInnerElement( block );
+			for ( const block of siblings ) {
+				const blockElement = getBlockInnerElement( block );
 
-					if ( ! blockElement ) {
-						return [];
-					}
+				if ( ! blockElement ) {
+					continue;
+				}
 
-					const { top, bottom } = blockElement.getBoundingClientRect();
-					return [ Math.round( top - parentBlockOffsetTop ), Math.round( bottom - parentBlockOffsetTop ) ];
-				} )
-				.reduce( ( result, snaps ) => {
-					for ( const snap of snaps ) {
-						if ( snap < 0 || snap > STORY_PAGE_INNER_HEIGHT || result.includes( snap ) || pageSnaps.includes( snap ) ) {
-							continue;
-						}
+				const { top, bottom } = blockElement.getBoundingClientRect();
 
-						result.push( snap );
-					}
+				snaps[ top - parentBlockOffsetTop ] = getVerticalLine( top - parentBlockOffsetTop );
+				snaps[ bottom - parentBlockOffsetTop ] = getVerticalLine( bottom - parentBlockOffsetTop );
+			}
 
-					return result;
-				}, [] );
-
-			return [ ...pageSnaps, ...blockSnaps ];
+			return snaps;
 		},
 		snapLines: getSnapLines(),
 		parentBlockOffsetTop,
