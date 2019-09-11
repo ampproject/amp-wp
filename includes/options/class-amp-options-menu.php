@@ -321,7 +321,7 @@ class AMP_Options_Menu {
 				<?php endif; ?>
 			<?php elseif ( AMP_Theme_Support::supports_reader_mode() ) : ?>
 				<div class="notice notice-success notice-alt inline">
-					<p><?= wp_kses( $reader_mode_support, [ 'strong' => [] ] ); ?></p>
+					<p><?php echo wp_kses( $reader_mode_support, [ 'strong' => [] ] ); ?></p>
 				</div>
 			<?php endif; ?>
 
