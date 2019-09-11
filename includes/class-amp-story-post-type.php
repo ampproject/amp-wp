@@ -1002,7 +1002,6 @@ class AMP_Story_Post_Type {
 			[
 				'allowedVideoMimeTypes' => $allowed_video_mime_types,
 				'storySettings'         => [
-					'metaKey'                 => self::STORY_SETTINGS_OPTION,
 					'autoAdvanceAfterOptions' => $auto_advancement_options,
 				],
 			]
