@@ -27,7 +27,6 @@ const dispatchImage = ( attachmentId ) => {
  *
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
  * Suggests cropping of the featured image if it's not 696 x 928.
- * Mostly copied from customize-controls.js.
  * The optional alternateMinImageDimensions are used for the crop size when they are the same aspect ratio type as the actual image dimensions.
  * For example, if the selected image has a portrait aspect ratio, and the alternateMinImageDimensions are also portrait,
  * this will use the alternate dimensions as long as the selected image is big enough.
@@ -45,6 +44,7 @@ export default ( InitialMediaUpload, minImageDimensions, alternateMinImageDimens
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
 	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
 	 * @see wp.media.HeaderControl
 	 */
 	return class FeaturedImageMediaUpload extends InitialMediaUpload {

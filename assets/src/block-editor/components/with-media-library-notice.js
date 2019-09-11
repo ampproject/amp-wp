@@ -16,7 +16,6 @@ const { wp } = window;
  * Gets a wrapped version of MediaUpload to display a notice for small images.
  *
  * Only applies to the MediaUpload in the Featured Image component, PostFeaturedImage.
- * Mostly copied from customize-controls.js.
  *
  * @param {Function} InitialMediaUpload The MediaUpload component, passed from the filter.
  * @param {Object}   minImageDimensions Minimum required image dimensions.
@@ -28,6 +27,7 @@ export default ( InitialMediaUpload, minImageDimensions ) => {
 	/**
 	 * Mostly copied from customize-controls.js, with slight changes.
 	 *
+	 * @link https://github.com/WordPress/wordpress-develop/blob/c80325658f85d24ff82295dd2d55bfdf789f4163/src/js/_enqueues/wp/customize/controls.js#L4695
 	 * @see wp.media.HeaderControl
 	 */
 	return class FeaturedImageMediaUpload extends InitialMediaUpload {
