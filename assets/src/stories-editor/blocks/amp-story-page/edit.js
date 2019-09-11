@@ -1,30 +1,16 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has } from 'lodash';
 
 /**
  * WordPress dependencies
  */
-import { __, _x, sprintf } from '@wordpress/i18n';
 import {
 	InnerBlocks,
 	InspectorControls,
-	MediaUpload,
-	MediaUploadCheck,
 } from '@wordpress/block-editor';
 import { Component, createRef } from '@wordpress/element';
-import {
-	PanelBody,
-	Button,
-	BaseControl,
-	FocalPointPicker,
-	Notice,
-	TextControl,
-	ResponsiveWrapper,
-} from '@wordpress/components';
 import {
 	withSelect,
 	withDispatch,
@@ -40,29 +26,17 @@ import {
 	getCallToActionBlock,
 	getPageAttachmentBlock,
 	getUniqueId,
-	uploadVideoFrame,
-	getPosterImageFromFileObj,
-	processMedia,
 } from '../../helpers';
-import {
-	getVideoBytesPerSecond,
-	isVideoSizeExcessive,
-} from '../../../common/helpers';
 
 import {
 	ALLOWED_MOVABLE_BLOCKS,
 	IMAGE_BACKGROUND_TYPE,
 	VIDEO_BACKGROUND_TYPE,
-	POSTER_ALLOWED_MEDIA_TYPES,
-	MAX_IMAGE_SIZE_SLUG,
 } from '../../constants';
-import {
-	MEGABYTE_IN_BYTES,
-	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
-} from '../../../common/constants';
 import './edit.css';
 import BackgroundColorSettings from './background-color-settings';
 import PageSettings from './page-settings';
+import BackgroundMediaSettings from './background-media-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -84,27 +58,9 @@ class PageEdit extends Component {
 		this.videoPlayer = createRef();
 	}
 
-	/**
-	 * Media selection callback.
-	 *
-	 * @param {Object} media            Media object.
-	 * @param {string} media.icon       Media icon.
-	 * @param {string} media.url        Media URL.
-	 * @param {string} media.media_type Media type.
-	 * @param {string} media.type       Media type if it was an existing attachment.
-	 * @param {number} media.id         Attachment ID.
-	 * @param {Object} media.image      Media image object.
-	 * @param {string} media.image.src  Media image URL
-	 */
-	onSelectMedia = ( media ) => {
-		const { setAttributes } = this.props;
-		const processed = processMedia( media );
-		setAttributes( processed );
-	}
-
 	componentDidUpdate( prevProps ) {
-		const { attributes, setAttributes, videoFeaturedImage, media } = this.props;
-		const { mediaType, mediaUrl, mediaId, poster } = attributes;
+		const { attributes } = this.props;
+		const { mediaType, mediaUrl } = attributes;
 
 		if ( VIDEO_BACKGROUND_TYPE !== mediaType ) {
 			return;
@@ -112,29 +68,6 @@ class PageEdit extends Component {
 
 		if ( prevProps.attributes.mediaUrl !== mediaUrl && this.videoPlayer.current ) {
 			this.videoPlayer.current.load();
-		}
-
-		if ( poster ) {
-			return;
-		}
-
-		if ( videoFeaturedImage ) {
-			setAttributes( { poster: videoFeaturedImage.source_url } );
-		} else if ( media && media !== prevProps.media && ! media.featured_media && ! this.state.extractingPoster ) {
-			/*
-			 * The video has changed, and its media object has been loaded already.
-			 *
-			 * Since it's clear that the video does not have a featured (poster) image,
-			 * one can be generated now.
-			 */
-			this.setState( { extractingPoster: true } );
-
-			uploadVideoFrame( { id: mediaId, src: mediaUrl } )
-				.then( ( fileObj ) => {
-					setAttributes( { poster: getPosterImageFromFileObj( fileObj ) } );
-					this.setState( { extractingPoster: false } );
-				} )
-				.catch( () => this.setState( { extractingPoster: false } ) );
 		}
 	}
 
@@ -168,7 +101,7 @@ class PageEdit extends Component {
 	}
 
 	render() { // eslint-disable-line complexity
-		const { attributes, clientId, media, setAttributes, allowedBlocks, allowedBackgroundMediaTypes } = this.props;
+		const { attributes, clientId, media, setAttributes, allowedBlocks, allowedBackgroundMediaTypes, videoFeaturedImage } = this.props;
 
 		const {
 			mediaId,
@@ -181,8 +114,6 @@ class PageEdit extends Component {
 			autoAdvanceAfter,
 			autoAdvanceAfterDuration,
 		} = attributes;
-
-		const instructions = <p>{ __( 'To edit the background image or video, you need permission to upload media.', 'amp' ) }</p>;
 
 		const style = {
 			backgroundImage: IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl ? `url(${ mediaUrl })` : undefined,
@@ -206,9 +137,6 @@ class PageEdit extends Component {
 		overlayStyle = addBackgroundColorToOverlay( overlayStyle, backgroundColors );
 		overlayStyle.opacity = overlayOpacity / 100;
 
-		const isExcessiveVideoSize = VIDEO_BACKGROUND_TYPE === mediaType && isVideoSizeExcessive( getVideoBytesPerSecond( media ) );
-		const videoBytesPerSecond = VIDEO_BACKGROUND_TYPE === mediaType ? getVideoBytesPerSecond( media ) : null;
-
 		return (
 			<>
 				<InspectorControls>
@@ -217,122 +145,18 @@ class PageEdit extends Component {
 						setAttributes={ setAttributes }
 						overlayOpacity={ overlayOpacity }
 					/>
-					<PanelBody title={ __( 'Background Media', 'amp' ) }>
-						<>
-							{
-								isExcessiveVideoSize &&
-								<Notice status="warning" isDismissible={ false } >
-									{
-										sprintf(
-											/* translators: %d: the number of recommended megabytes per second */
-											__( 'A video size of less than %d MB per second is recommended.', 'amp' ),
-											VIDEO_ALLOWED_MEGABYTES_PER_SECOND
-										)
-									}
-									{
-										videoBytesPerSecond && ' ' + sprintf(
-											/* translators: %d: the number of actual megabytes per second */
-											__( 'The selected video is %d MB per second.', 'amp' ),
-											Math.round( videoBytesPerSecond / MEGABYTE_IN_BYTES )
-										)
-									}
-								</Notice>
-							}
-							<BaseControl>
-								<MediaUploadCheck fallback={ instructions }>
-									<MediaUpload
-										onSelect={ this.onSelectMedia }
-										allowedTypes={ allowedBackgroundMediaTypes }
-										value={ mediaId }
-										render={ ( { open } ) => (
-											<Button isDefault isLarge onClick={ open } className="editor-amp-story-page-background">
-												{ mediaUrl ? __( 'Change Media', 'amp' ) : __( 'Select Media', 'amp' ) }
-											</Button>
-										) }
-										id="story-background-media"
-									/>
-									{ mediaUrl && (
-										<Button onClick={ () => setAttributes( { mediaUrl: undefined, mediaId: undefined, mediaType: undefined } ) } isLink isDestructive>
-											{ _x( 'Remove', 'background media', 'amp' ) }
-										</Button>
-									) }
-								</MediaUploadCheck>
-							</BaseControl>
-							{ VIDEO_BACKGROUND_TYPE === mediaType && ( ! this.state.extractingPoster || poster ) && (
-								<MediaUploadCheck>
-									<BaseControl
-										id="editor-amp-story-page-poster"
-										label={ __( 'Poster Image', 'amp' ) }
-										help={ sprintf(
-											/* translators: 1: 720p. 2: 720w. 3: 1280h */
-											__( 'The recommended dimensions for a poster image are: %1$s (%2$s x %3$s)', 'amp' ),
-											'720p',
-											'720w',
-											'1080h',
-										) }
-									>
-										{
-											! poster &&
-											<Notice status="error" isDismissible={ false } >
-												{ __( 'A poster image must be set.', 'amp' ) }
-											</Notice>
-										}
-										<MediaUpload
-											title={ __( 'Select Poster Image', 'amp' ) }
-											onSelect={ ( image ) => {
-												const imageUrl = has( image, [ 'sizes', MAX_IMAGE_SIZE_SLUG, 'url' ] ) ? image.sizes[ MAX_IMAGE_SIZE_SLUG ].url : image.url;
-												setAttributes( { poster: imageUrl } );
-											} }
-											allowedTypes={ POSTER_ALLOWED_MEDIA_TYPES }
-											modalClass="editor-amp-story-background-video-poster__media-modal"
-											render={ ( { open } ) => (
-												<Button
-													id="editor-amp-story-page-poster"
-													className={ classnames(
-														'editor-amp-story-page-background',
-														{
-															'editor-post-featured-image__toggle': ! poster,
-															'editor-post-featured-image__preview': poster,
-														}
-													) }
-													onClick={ open }
-													aria-label={ ! poster ? null : __( 'Replace Poster Image', 'amp' ) }
-												>
-													{ poster && (
-														<ResponsiveWrapper
-															naturalWidth={ 960 }
-															naturalHeight={ 1280 }
-														>
-															<img src={ poster } alt="" />
-														</ResponsiveWrapper>
-													) }
-													{ ! poster &&
-														__( 'Set Poster Image', 'amp' )
-													}
-												</Button>
-											) }
-										/>
-									</BaseControl>
-								</MediaUploadCheck>
-							) }
-							{ IMAGE_BACKGROUND_TYPE === mediaType && mediaUrl && FocalPointPicker && (
-								<FocalPointPicker
-									label={ __( 'Focal Point Picker', 'amp' ) }
-									url={ mediaUrl }
-									value={ focalPoint }
-									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
-								/>
-							) }
-							{ mediaType && (
-								<TextControl
-									label={ __( 'Assistive Text', 'amp' ) }
-									help={ __( 'This text is used to inform visually impaired users about the background content.', 'amp' ) }
-									value={ mediaAlt }
-									onChange={ ( label ) => setAttributes( { mediaAlt: label } ) }
-								/>
-							) }
-						</>
-					</PanelBody>
+					<BackgroundMediaSettings
+						allowedBackgroundMediaTypes={ allowedBackgroundMediaTypes }
+						media={ media }
+						mediaId={ mediaId }
+						mediaType={ mediaType }
+						mediaAlt={ mediaAlt }
+						mediaUrl={ mediaUrl }
+						poster={ poster }
+						focalPoint={ focalPoint }
+						videoFeaturedImage={ videoFeaturedImage }
+						setAttributes={ setAttributes }
+					/>
 					<PageSettings
 						autoAdvanceAfter={ autoAdvanceAfter }
 						autoAdvanceAfterDuration={ autoAdvanceAfterDuration }
@@ -341,7 +165,6 @@ class PageEdit extends Component {
 					/>
 				</InspectorControls>
 				<div style={ style }>
-					{ /* todo: show poster image as background-image instead */ }
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
 						<div className="editor-amp-story-page-video-wrap">
 							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
