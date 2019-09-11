@@ -14,6 +14,8 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import Status from './status';
+import 'accessible-autocomplete/src/autocomplete.css';
+import './edit.css';
 
 class Autocomplete extends OriginalAutocomplete {
 	/**
