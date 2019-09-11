@@ -69,39 +69,37 @@ const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpac
 	};
 
 	return (
-		<>
-			<PanelColorSettings
-				title={ __( 'Background Color', 'amp' ) }
-				colorSettings={ getOverlayColorSettings() }
-			>
-				<p>
-					{ backgroundColors.length < 2 &&
-					<Button
-						onClick={ () => setBackgroundColors( null, 1 ) }
-						isSmall>
-						{ __( 'Add Gradient', 'amp' ) }
-					</Button>
-					}
-					{ backgroundColors.length > 1 &&
-					<Button
-						onClick={ () => removeBackgroundColor( backgroundColors.length - 1 ) }
-						isLink
-						isDestructive>
-						{ __( 'Remove Gradient', 'amp' ) }
-					</Button>
-					}
-				</p>
-				<RangeControl
-					label={ __( 'Opacity', 'amp' ) }
-					value={ overlayOpacity }
-					onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
-					min={ 0 }
-					max={ 100 }
-					step={ 5 }
-					required
-				/>
-			</PanelColorSettings>
-		</>
+		<PanelColorSettings
+			title={ __( 'Background Color', 'amp' ) }
+			colorSettings={ getOverlayColorSettings() }
+		>
+			<p>
+				{ backgroundColors.length < 2 &&
+				<Button
+					onClick={ () => setBackgroundColors( null, 1 ) }
+					isSmall>
+					{ __( 'Add Gradient', 'amp' ) }
+				</Button>
+				}
+				{ backgroundColors.length > 1 &&
+				<Button
+					onClick={ () => removeBackgroundColor( backgroundColors.length - 1 ) }
+					isLink
+					isDestructive>
+					{ __( 'Remove Gradient', 'amp' ) }
+				</Button>
+				}
+			</p>
+			<RangeControl
+				label={ __( 'Opacity', 'amp' ) }
+				value={ overlayOpacity }
+				onChange={ ( value ) => setAttributes( { overlayOpacity: value } ) }
+				min={ 0 }
+				max={ 100 }
+				step={ 5 }
+				required
+			/>
+		</PanelColorSettings>
 	);
 };
 
