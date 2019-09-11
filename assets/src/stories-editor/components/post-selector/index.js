@@ -1,8 +1,4 @@
 /**
- * PostSelector component, largely based on the logic of the Upstream URLInput.
- */
-
-/**
  * External dependencies
  */
 import { map, throttle } from 'lodash';
@@ -29,6 +25,11 @@ import './edit.css';
 
 const stopEventPropagation = ( event ) => event.stopPropagation();
 
+/**
+ * PostSelector component, largely based on the logic of the Upstream URLInput.
+ *
+ * Allows searching for a post of a given post type and displays them in a dropdown to select from.
+ */
 class PostSelector extends Component {
 	constructor( props ) {
 		super( props );
