@@ -82,6 +82,8 @@ const {
 const { saveMedia } = dispatch( 'core' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
+export const isMovableBlock = ( name ) => ALLOWED_MOVABLE_BLOCKS.includes( name );
+
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
  *
@@ -209,7 +211,6 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isVideoBlock = 'core/video' === name;
 	const isCTABlock = 'amp/amp-story-cta' === name;
 
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	// Image block already has width and height.
@@ -267,7 +268,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	if ( isMovableBlock ) {
+	if ( isMovableBlock( name ) ) {
 		addedAttributes.anchor = {
 			type: 'string',
 		};
@@ -372,9 +373,7 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 export const deprecateCoreBlocks = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -406,9 +405,7 @@ export const deprecateCoreBlocks = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -540,7 +537,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
-	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+	if ( ! element || ! isMovableBlock( blockType.name ) ) {
 		return element;
 	}
 

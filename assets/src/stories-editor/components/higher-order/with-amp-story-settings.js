@@ -28,7 +28,6 @@ import { __ } from '@wordpress/i18n';
 import { StoryBlockMover, FontFamilyPicker, ResizableBox, AnimationControls, RotatableBox } from '../';
 import {
 	ALLOWED_CHILD_BLOCKS,
-	ALLOWED_MOVABLE_BLOCKS,
 	BLOCKS_WITH_TEXT_SETTINGS,
 	BLOCKS_WITH_COLOR_SETTINGS,
 	MIN_BLOCK_WIDTH,
@@ -37,7 +36,7 @@ import {
 	BLOCK_ROTATION_SNAPS,
 	BLOCK_ROTATION_SNAP_GAP,
 } from '../../constants';
-import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock } from '../../helpers';
+import { getBlockOrderDescription, maybeEnqueueFontStyle, getCallToActionBlock, isMovableBlock } from '../../helpers';
 import bringForwardIcon from '../../../../images/stories-editor/bring-forward.svg';
 import sendBackwardIcon from '../../../../images/stories-editor/send-backwards.svg';
 import bringFrontIcon from '../../../../images/stories-editor/bring-front.svg';
@@ -211,7 +210,6 @@ export default createHigherOrderComponent(
 			const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 			const needsColorSettings = BLOCKS_WITH_COLOR_SETTINGS.includes( name );
 			const needsResizing = BLOCKS_WITH_RESIZING.includes( name );
-			const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
 			const {
 				ampFontFamily,
@@ -245,8 +243,8 @@ export default createHigherOrderComponent(
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 			return (
 				<>
-					{ ( ! isMovableBlock ) && ( <BlockEdit { ...props } /> ) }
-					{ isMovableBlock && ! isEmptyImageBlock && needsResizing && (
+					{ ( ! isMovableBlock( name ) ) && ( <BlockEdit { ...props } /> ) }
+					{ isMovableBlock( name ) && ! isEmptyImageBlock && needsResizing && (
 						<ResizableBox
 							width={ width }
 							height={ height }
@@ -290,7 +288,7 @@ export default createHigherOrderComponent(
 										blockName={ name }
 										blockElementId={ `block-${ props.clientId }` }
 										isDraggable={ ! props.isPartOfMultiSelection }
-										isMovable={ isMovableBlock }
+										isMovable={ isMovableBlock( name ) }
 									>
 										<BlockEdit { ...props } />
 									</StoryBlockMover>
@@ -298,7 +296,7 @@ export default createHigherOrderComponent(
 							</RotatableBox>
 						</ResizableBox>
 					) }
-					{ isMovableBlock && ( ! needsResizing || isEmptyImageBlock ) && (
+					{ isMovableBlock( name ) && ( ! needsResizing || isEmptyImageBlock ) && (
 						<RotatableBox
 							blockElementId={ `block-${ clientId }` }
 							initialAngle={ rotationAngle }
@@ -322,13 +320,13 @@ export default createHigherOrderComponent(
 								blockName={ name }
 								blockElementId={ `block-${ props.clientId }` }
 								isDraggable={ ! props.isPartOfMultiSelection }
-								isMovable={ isMovableBlock }
+								isMovable={ isMovableBlock( name ) }
 							>
 								<BlockEdit { ...props } />
 							</StoryBlockMover>
 						</RotatableBox>
 					) }
-					{ ! ( isLast && isFirst ) && isMovableBlock && (
+					{ ! ( isLast && isFirst ) && isMovableBlock( name ) && (
 						<InspectorControls>
 							<PanelBody
 								className="amp-story-order-controls"
@@ -511,7 +509,7 @@ export default createHigherOrderComponent(
 							</PanelColorSettings>
 						</InspectorControls>
 					) }
-					{ isMovableBlock && (
+					{ isMovableBlock( name ) && (
 						<InspectorControls>
 							<PanelBody
 								title={ __( 'Animation', 'amp' ) }

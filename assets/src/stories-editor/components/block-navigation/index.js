@@ -14,8 +14,8 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { isMovableBlock } from '../../helpers';
 import BlockNavigationItem from './item';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
 import './edit.css';
 
 function BlockNavigationList( { blocks, selectedBlockClientId, selectBlock, unMovableBlock } ) {
@@ -118,8 +118,8 @@ export default compose(
 
 		let blocks = getCurrentPage() ? getBlocksByClientId( getBlockOrder( getCurrentPage() ) ) : [];
 		// Let's get the CTA/Attachment block to handle it separately.
-		const unMovableBlock = blocks.find( ( { name } ) => ! ALLOWED_MOVABLE_BLOCKS.includes( name ) );
-		blocks = blocks.filter( ( { name } ) => ALLOWED_MOVABLE_BLOCKS.includes( name ) ).reverse();
+		const unMovableBlock = blocks.find( ( { name } ) => ! isMovableBlock( name ) );
+		blocks = blocks.filter( ( { name } ) => isMovableBlock( name ) ).reverse();
 		return {
 			blocks,
 			unMovableBlock,
