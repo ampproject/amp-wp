@@ -1876,7 +1876,9 @@ class AMP_Story_Post_Type {
 		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
 			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
 				<h2><?php the_title(); ?></h2>
-				<?php the_content(); ?>
+				<div class="<?php echo esc_attr( $attributes['attachmentClass'] . '-inner-content' ); ?>">
+					<?php the_content(); ?>
+				</div>
 			</div>
 		</amp-story-page-attachment>
 		<?php
