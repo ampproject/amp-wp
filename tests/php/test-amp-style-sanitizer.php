@@ -523,6 +523,11 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 				],
 				[],
 			],
+			'test_with_dev_mode' => [
+				'<html amp data-ampdevmode=""><body data-ampdevmode="" style="background:red !important"><link rel="stylesheet" href="https://example.com/foo.css" data-ampdevmode=""><style data-ampdevmode="">body{color:red !important}</style></body></html>', // phpcs:ignore WordPress.WP.EnqueuedResources.NonEnqueuedStylesheet
+				[],
+				[],
+			],
 		];
 	}
 
@@ -592,7 +597,9 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 			$this->assertContains( $expected_stylesheet, $sanitized_html );
 		}
 
-		$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		if ( $actual_stylesheets ) {
+			$this->assertContains( "\n\n/*# sourceURL=amp-custom.css */", $sanitized_html );
+		}
 	}
 
 	/**
@@ -2280,7 +2287,6 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					add_action( 'wp_enqueue_scripts', 'twentyten_scripts_styles' );
 					AMP_Theme_Support::add_hooks();
 					wp_add_inline_style( 'admin-bar', '.admin-bar-inline-style{ color:red }' );
-					wp_set_current_user( self::factory()->user->create( [ 'role' => 'administrator' ] ) );
 
 					add_action(
 						'wp_footer',
@@ -2312,11 +2318,10 @@ class AMP_Style_Sanitizer_Test extends WP_UnitTestCase {
 					$this->assertContains( '.is-style-outline .wp-block-button__link', $amphtml_source, 'Expected block-library/style.css' );
 					$this->assertContains( '[class^="wp-block-"]:not(.wp-block-gallery) figcaption', $amphtml_source, 'Expected twentyten/blocks.css' );
 					$this->assertContains( 'amp-img.amp-wp-enforced-sizes', $amphtml_source, 'Expected amp-default.css' );
-					$this->assertNotContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to not be present.' );
+					$this->assertContains( 'ab-empty-item', $amphtml_source, 'Expected admin-bar.css to still be present.' );
 					$this->assertNotContains( 'earlyprintstyle', $amphtml_source, 'Expected early print style to not be present.' );
-					$this->assertNotContains( 'admin-bar-inline-style', $amphtml_source, 'Expected admin-bar.css inline style to not be present.' );
-					$this->assertNotContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
-					$this->assertEmpty( $amphtml_dom->getElementById( 'wpadminbar' ) );
+					$this->assertContains( 'admin-bar', $amphtml_dom->getElementsByTagName( 'body' )->item( 0 )->getAttribute( 'class' ) );
+					$this->assertInstanceOf( 'DOMElement', $amphtml_dom->getElementById( 'wpadminbar' ) );
 				},
 			],
 			// @todo Add other scenarios in the future.

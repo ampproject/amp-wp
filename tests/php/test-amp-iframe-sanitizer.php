@@ -374,6 +374,14 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 					'add_placeholder'       => true,
 				],
 			],
+
+			'test_with_dev_mode' => [
+				'<iframe data-ampdevmode="" src="about:blank" onload="alert(\'Hey.\')"></iframe>',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -390,7 +398,11 @@ class AMP_Iframe_Converter_Test extends WP_UnitTestCase {
 		if ( ! $expected ) {
 			$expected = $source;
 		}
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
+
 		$sanitizer = new AMP_Iframe_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 

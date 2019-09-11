@@ -55,7 +55,7 @@ class AMP_Validation_Callback_Wrapper implements ArrayAccess {
 			$before_scripts_enqueued = $wp_scripts->queue;
 		}
 
-		$is_filter = isset( $callback['source']['hook'] ) && ! did_action( $this->callback['source']['hook'] );
+		$is_filter = isset( $this->callback['source']['hook'] ) && ! did_action( $this->callback['source']['hook'] );
 
 		// Wrap the markup output of (action) hooks in source comments.
 		AMP_Validation_Manager::$hook_source_stack[] = $this->callback['source'];

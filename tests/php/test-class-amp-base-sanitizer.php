@@ -36,7 +36,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 	 */
 	public function get_data() {
 		return [
-			'both_dimensions_included' => [
+			'both_dimensions_included'                   => [
 				[
 					'width'  => 100,
 					'height' => 100,
@@ -49,7 +49,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'both_dimensions_missing'  => [
+			'both_dimensions_missing'                    => [
 				[],
 				[
 					'height' => 400,
@@ -58,7 +58,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'both_dimensions_empty'    => [
+			'both_dimensions_empty'                      => [
 				[
 					'width'  => '',
 					'height' => '',
@@ -70,7 +70,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_width'                 => [
+			'no_width'                                   => [
 				[
 					'height' => 100,
 				],
@@ -81,7 +81,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_height'                => [
+			'no_height'                                  => [
 				[
 					'width' => 200,
 				],
@@ -92,7 +92,7 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				],
 			],
 
-			'no_layout_specified'      => [
+			'no_layout_specified'                        => [
 				[
 					'width'  => 100,
 					'height' => 100,
@@ -100,6 +100,54 @@ class AMP_Base_Sanitizer_Test extends WP_UnitTestCase {
 				[
 					'width'  => 100,
 					'height' => 100,
+				],
+			],
+
+			'fill_with_bottom_right_removes_empty_style' => [
+				[
+					'style' => 'position:absolute;top:0;left:0;right:0;bottom:0',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_with_bottom_right_keeps_unrelated_styles' => [
+				[
+					'style' => 'position:absolute;background-color:white;top:0;left:0;right:0;bottom:0;color:red;',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'background-color:white;color:red',
+				],
+			],
+
+			'fill_with_width_height_removes_empty_style' => [
+				[
+					'style' => 'position:absolute;top:0;left:0;width:100%;height:100%',
+				],
+				[
+					'layout' => 'fill',
+				],
+			],
+
+			'fill_with_width_height_keeps_unrelated_styles' => [
+				[
+					'style' => 'position:absolute;background-color:white;top:0;left:0;width:100%;height:100%;color:red;',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'background-color:white;color:red',
+				],
+			],
+
+			'fill_can_handle_whitespace_noise'           => [
+				[
+					'style' => '; position  :  absolute ;   top : 0; color:  red; left:0;   right:0;;;  bottom:0;; ',
+				],
+				[
+					'layout' => 'fill',
+					'style'  => 'color:red',
 				],
 			],
 		];
