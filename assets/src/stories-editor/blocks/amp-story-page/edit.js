@@ -3,7 +3,7 @@
  */
 import classnames from 'classnames';
 import PropTypes from 'prop-types';
-import { has, defaults } from 'lodash';
+import { has } from 'lodash';
 
 /**
  * WordPress dependencies
@@ -220,7 +220,7 @@ class PageEdit extends Component {
 			autoAdvanceAfterOptions,
 		} = this.props;
 
-		const attributesWithDefaults = defaults( attributes, storySettingsAttributes );
+		const attributesWithDefaults = { ...attributes, ...storySettingsAttributes };
 
 		const {
 			mediaId,
