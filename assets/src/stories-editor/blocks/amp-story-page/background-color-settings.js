@@ -2,6 +2,7 @@
  * External dependencies
  */
 import PropTypes from 'prop-types';
+import { ReactElement } from 'react';
 
 /**
  * WordPress dependencies
@@ -15,6 +16,15 @@ import {
 	RangeControl,
 } from '@wordpress/components';
 
+/**
+ * Displays the page background color settings.
+ *
+ * @param {Object} props Component props.
+ * @param {Array} props.backgroundColors Current background colors.
+ * @param {Function} props.setAttributes setAttributes callback.
+ * @param {number} props.overlayOpacity Overlay opacity.
+ * @return {ReactElement} Component.
+ */
 const BackgroundColorSettings = ( { backgroundColors, setAttributes, overlayOpacity } ) => {
 	const removeBackgroundColor = ( index ) => {
 		backgroundColors.splice( index, 1 );
