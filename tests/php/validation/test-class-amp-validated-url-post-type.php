@@ -141,7 +141,7 @@ class Test_AMP_Validated_URL_Post_Type extends WP_UnitTestCase {
 
 		AMP_Validated_URL_Post_Type::add_admin_menu_new_invalid_url_count();
 
-		$this->assertContains( '<span class="awaiting-mod"><span class="pending-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
+		$this->assertContains( '<span class="awaiting-mod"><span class="new-validation-error-urls-count">1</span></span>', $submenu[ AMP_Options_Manager::OPTION_NAME ][2][0] );
 	}
 
 	/**
