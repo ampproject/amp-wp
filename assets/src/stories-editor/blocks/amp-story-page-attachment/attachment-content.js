@@ -186,7 +186,7 @@ const AttachmentContent = ( props ) => {
 							) }
 							<PostSelector
 								labelText={ __( 'Attachment Content', 'amp' ) }
-								placeholder={ __( 'Search for a post or page ...', 'amp' ) }
+								placeholder={ __( 'Search for content ...', 'amp' ) }
 								value={ searchValue }
 								onSelect={ ( id, type ) => {
 									setAttributes( {
