@@ -79,8 +79,6 @@ class PageEdit extends Component {
 			this.props.setAttributes( { anchor: getUniqueId() } );
 		}
 
-		this.onSelectMedia = this.onSelectMedia.bind( this );
-
 		this.state = {
 			extractingPoster: false,
 		};
@@ -100,7 +98,7 @@ class PageEdit extends Component {
 	 * @param {Object} media.image      Media image object.
 	 * @param {string} media.image.src  Media image URL
 	 */
-	onSelectMedia( media ) {
+	onSelectMedia = ( media ) => {
 		const { setAttributes } = this.props;
 		const processed = processMedia( media );
 		setAttributes( processed );
