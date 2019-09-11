@@ -233,6 +233,17 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_site_icon', 99 );
 		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
 
+		// Disable admin bar from even trying to be output, since wp_head and wp_footer hooks are not on the template.
+		add_filter(
+			'show_admin_bar',
+			static function( $show ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$show = false;
+				}
+				return $show;
+			}
+		);
+
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
