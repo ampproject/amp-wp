@@ -341,19 +341,20 @@ abstract class AMP_Base_Sanitizer {
 	/**
 	 * Check whether the document of a given node is in dev mode.
 	 *
-	 * @param DOMNode $node Node to check the document of.
+	 * @since 1.3
+	 *
 	 * @return bool Whether the document is in dev mode.
 	 */
-	protected function is_document_in_dev_mode( DOMNode $node ) {
-		$document = $node instanceof DOMDocument ? $node : $node->ownerDocument;
-
-		return $document->documentElement->hasAttribute(
+	protected function is_document_in_dev_mode() {
+		return $this->dom->documentElement->hasAttribute(
 			AMP_Rule_Spec::DEV_MODE_ATTRIBUTE
 		);
 	}
 
 	/**
 	 * Check whether a node is exempt from validation during dev mode.
+	 *
+	 * @since 1.3
 	 *
 	 * @param DOMNode $node Node to check.
 	 * @return bool Whether the node should be exempt during dev mode.
@@ -373,7 +374,7 @@ abstract class AMP_Base_Sanitizer {
 	 * @return bool Whether the node should be exempt from validation.
 	 */
 	protected function is_exempt_from_validation( DOMNode $node ) {
-		return $this->is_document_in_dev_mode( $node ) && $this->has_dev_mode_exemption( $node );
+		return $this->is_document_in_dev_mode() && $this->has_dev_mode_exemption( $node );
 	}
 
 	/**

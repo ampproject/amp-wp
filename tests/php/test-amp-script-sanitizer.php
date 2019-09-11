@@ -35,6 +35,10 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 				'<html><head><noscript><span>No script</span></noscript></head><body></body></html>',
 				'<html><head></head><body><!--noscript--><span>No script</span><!--/noscript--></body></html>',
 			],
+			'test_with_dev_mode'  => [
+				'<html data-ampdevmode=""><head></head><body><noscript data-ampdevmode="">hey</noscript></body></html>',
+				null,
+			],
 		];
 	}
 
@@ -47,6 +51,9 @@ class AMP_Script_Sanitizer_Test extends WP_UnitTestCase {
 	 * @covers AMP_Script_Sanitizer::sanitize()
 	 */
 	public function test_noscript_promotion( $source, $expected = null ) {
+		if ( null === $expected ) {
+			$expected = $source;
+		}
 		$dom = AMP_DOM_Utils::get_dom( $source );
 		$this->assertSame( 1, $dom->getElementsByTagName( 'noscript' )->length );
 		$sanitizer = new AMP_Script_Sanitizer( $dom );

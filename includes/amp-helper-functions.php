@@ -816,6 +816,42 @@ function amp_get_content_embed_handlers( $post = null ) {
 }
 
 /**
+ * Determine whether AMP dev mode is enabled.
+ *
+ * When enabled, the <html> element will get the data-ampdevmode attribute and the plugin will add the same attribute
+ * to elements associated with the admin bar and other elements that are provided by the `amp_dev_mode_element_xpaths`
+ * filter.
+ *
+ * @since 1.3
+ *
+ * @return bool Whether AMP dev mode is enabled.
+ */
+function amp_is_dev_mode() {
+
+	/**
+	 * Filters whether AMP mode is enabled.
+	 *
+	 * When enabled, the data-ampdevmode attribute will be added to the document element and it will allow the
+	 * attributes to be added to the admin bar. It will also add the attribute to all elements which match the
+	 * queries for the expressions returned by the 'amp_dev_mode_element_xpaths' filter.
+	 *
+	 * @since 1.3
+	 * @param bool Whether AMP dev mode is enabled.
+	 */
+	return apply_filters(
+		'amp_dev_mode_enabled',
+		(
+			// For the few sites that forcibly show the admin bar even when the user is logged out, only enable dev
+			// mode if the user is actually logged in. This prevents the dev mode from being served to crawlers
+			// when they index the AMP version.
+			( is_admin_bar_showing() && is_user_logged_in() )
+			||
+			is_customize_preview()
+		)
+	);
+}
+
+/**
  * Get content sanitizers.
  *
  * @since 0.7
@@ -897,6 +933,33 @@ function amp_get_content_sanitizers( $post = null ) {
 	 * @param WP_Post $post     Post. Deprecated.
 	 */
 	$sanitizers = apply_filters( 'amp_content_sanitizers', $sanitizers, $post );
+
+	if ( amp_is_dev_mode() ) {
+		/**
+		 * Filters the XPath queries for elements that should be enabled for dev mode.
+		 *
+		 * By supplying XPath queries to this filter, the data-ampdevmode attribute will automatically be added to the
+		 * root HTML element as well as to any elements that match the expressions. The attribute is added to the
+		 * elements prior to running any of the sanitizers.
+		 *
+		 * @since 1.3
+		 * @param string[] XPath element queries. Context is the root element.
+		 */
+		$dev_mode_xpaths = (array) apply_filters( 'amp_dev_mode_element_xpaths', [] );
+		if ( is_admin_bar_showing() ) {
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]';
+			$dev_mode_xpaths[] = '//*[ @id = "wpadminbar" ]//*';
+			$dev_mode_xpaths[] = '//style[ @id = "admin-bar-inline-css" ]';
+		}
+		$sanitizers = array_merge(
+			[
+				'AMP_Dev_Mode_Sanitizer' => [
+					'element_xpaths' => $dev_mode_xpaths,
+				],
+			],
+			$sanitizers
+		);
+	}
 
 	// Force style sanitizer and whitelist sanitizer to be at end.
 	foreach ( [ 'AMP_Style_Sanitizer', 'AMP_Tag_And_Attribute_Sanitizer' ] as $class_name ) {
