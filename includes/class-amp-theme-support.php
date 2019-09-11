@@ -1426,7 +1426,7 @@ class AMP_Theme_Support {
 			// Conditionally include Dashicons in dev mode only if was included because it is a dependency of admin-bar.
 			$needs_dev_mode = true;
 			foreach ( wp_styles()->queue as $queued_handle ) {
-				$is_dashicons_without_admin_bar = (
+				if (
 					// If a theme or plugin directly enqueued dashicons, then it is not added via admin-bar dependency and it is not part of dev mode.
 					'dashicons' === $queued_handle
 					||
@@ -1436,8 +1436,7 @@ class AMP_Theme_Support {
 						&&
 						! self::has_dependency( wp_styles(), $queued_handle, 'admin-bar' )
 					)
-				);
-				if ( $is_dashicons_without_admin_bar ) {
+				) {
 					$needs_dev_mode = false;
 					break;
 				}
