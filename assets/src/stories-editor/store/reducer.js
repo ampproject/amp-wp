@@ -7,6 +7,177 @@ import { combineReducers } from '@wordpress/data';
  * Internal dependencies
  */
 import { isValidAnimationPredecessor } from './selectors';
+import { ANIMATION_STATUS } from './constants';
+
+function addAnimation( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item, predecessor } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	const parent = isValidAnimationPredecessor( { animations: state }, page, item, predecessor ) ? predecessor : undefined;
+
+	if ( entryIndex( item ) !== -1 ) {
+		pageAnimationOrder[ entryIndex( item ) ].parent = parent;
+	} else {
+		pageAnimationOrder.push( { id: item, parent } );
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function changeAnimationType( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item, animationType } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( entryIndex( item ) !== -1 ) {
+		pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
+
+		// If animation was disabled, update all successors.
+		if ( ! animationType ) {
+			const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
+			const itemSuccessors = pageAnimationOrder.filter( ( { parent: p } ) => p === item );
+
+			for ( const successor in itemSuccessors ) {
+				if ( entryIndex( successor ) !== -1 ) {
+					pageAnimationOrder[ entryIndex( successor ) ].parent = itemPredecessor.parent;
+				}
+			}
+		}
+	} else {
+		pageAnimationOrder.push( { id: item, animationType } );
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function changeAnimationDuration( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item, duration } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( entryIndex( item ) !== -1 ) {
+		pageAnimationOrder[ entryIndex( item ) ].duration = duration;
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function changeAnimationDelay( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item, delay } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( entryIndex( item ) !== -1 ) {
+		pageAnimationOrder[ entryIndex( item ) ].delay = delay;
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function playAnimation( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( item ) {
+		if ( entryIndex( item ) !== -1 ) {
+			pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.playing;
+		}
+	} else {
+		pageAnimationOrder.forEach( ( entry, index ) => {
+			pageAnimationOrder[ index ] = { ...entry, status: entry.parent === undefined ? ANIMATION_STATUS.playing : ANIMATION_STATUS.prepared };
+		} );
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function finishAnimation( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( entryIndex( item ) !== -1 ) {
+		pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.finished;
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
+
+function stopAnimation( state, action ) {
+	const animationOrder = { ...state.animationOrder };
+	const { page, item } = action;
+	const pageAnimationOrder = animationOrder[ page ] || [];
+
+	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
+
+	if ( item ) {
+		if ( entryIndex( item ) !== -1 ) {
+			pageAnimationOrder[ entryIndex( item ) ].status = ANIMATION_STATUS.stopped;
+		}
+	} else {
+		pageAnimationOrder.forEach( ( entry, index ) => {
+			pageAnimationOrder[ index ] = { ...entry, status: ANIMATION_STATUS.stopped };
+		} );
+	}
+
+	return {
+		...state,
+		animationOrder: {
+			...animationOrder,
+			[ page ]: pageAnimationOrder,
+		},
+	};
+}
 
 /**
  * Reducer handling animation state changes.
@@ -20,70 +191,27 @@ import { isValidAnimationPredecessor } from './selectors';
  * @return {Object} Updated state.
  */
 export function animations( state = {}, action ) {
-	const newAnimationOrder = { ...state };
-	const { page, item, predecessor, animationType, duration, delay } = action;
-	const pageAnimationOrder = newAnimationOrder[ page ] || [];
-
-	const entryIndex = ( entry ) => pageAnimationOrder.findIndex( ( { id } ) => id === entry );
-
 	switch ( action.type ) {
 		case 'ADD_ANIMATION':
-			const parent = isValidAnimationPredecessor( { animations: state }, page, item, predecessor ) ? predecessor : undefined;
-
-			if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder[ entryIndex( item ) ].parent = parent;
-			} else {
-				pageAnimationOrder.push( { id: item, parent } );
-			}
-
-			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
-			};
+			return addAnimation( state, action );
 
 		case 'CHANGE_ANIMATION_TYPE':
-			if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder[ entryIndex( item ) ].animationType = animationType;
-
-				// If animation was disabled, update all successors.
-				if ( ! animationType ) {
-					const itemPredecessor = pageAnimationOrder[ entryIndex( item ) ].parent;
-					const itemSuccessors = pageAnimationOrder.filter( ( { parent: p } ) => p === item );
-
-					for ( const successor in itemSuccessors ) {
-						if ( entryIndex( successor ) !== -1 ) {
-							pageAnimationOrder[ entryIndex( successor ) ].parent = itemPredecessor.parent;
-						}
-					}
-				}
-			} else {
-				pageAnimationOrder.push( { id: item, animationType } );
-			}
-
-			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
-			};
+			return changeAnimationType( state, action );
 
 		case 'CHANGE_ANIMATION_DURATION':
-			if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder[ entryIndex( item ) ].duration = duration;
-			}
-
-			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
-			};
+			return changeAnimationDuration( state, action );
 
 		case 'CHANGE_ANIMATION_DELAY':
-			if ( entryIndex( item ) !== -1 ) {
-				pageAnimationOrder[ entryIndex( item ) ].delay = delay;
-			}
+			return changeAnimationDelay( state, action );
 
-			return {
-				...newAnimationOrder,
-				[ page ]: pageAnimationOrder,
-			};
+		case 'PLAY_ANIMATION':
+			return playAnimation( state, action );
+
+		case 'FINISH_ANIMATION':
+			return finishAnimation( state, action );
+
+		case 'STOP_ANIMATION':
+			return stopAnimation( state, action );
 
 		default:
 			return state;

@@ -66,6 +66,7 @@ import {
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../../../common/constants';
 import './edit.css';
+import AnimationSettings from './animation-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -448,6 +449,7 @@ class PageEdit extends Component {
 							/>
 						) }
 					</PanelBody>
+					<AnimationSettings clientId={ this.props.clientId } />
 				</InspectorControls>
 				<CopyPasteHandler clientId={ clientId } isSelected={ isSelected }>
 					<div

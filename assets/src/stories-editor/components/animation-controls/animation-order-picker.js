@@ -11,7 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { PreviewPicker, BlockPreviewLabel } from './';
+import { PreviewPicker, BlockPreviewLabel } from '../';
 
 /**
  * Animation order picker component.

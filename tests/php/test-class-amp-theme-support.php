@@ -6,6 +6,8 @@
  * @since 0.7
  */
 
+use org\bovigo\vfs;
+
 /**
  * Tests for Theme Support.
  *
@@ -65,6 +67,8 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 			$GLOBALS['wp_customize']->stop_previewing_theme();
 		}
 		AMP_HTTP::$headers_sent = [];
+		remove_all_filters( 'theme_root' );
+		remove_all_filters( 'template' );
 	}
 
 	/**
@@ -225,6 +229,50 @@ class Test_AMP_Theme_Support extends WP_UnitTestCase {
 		$this->assertSame( AMP_Theme_Support::STANDARD_MODE_SLUG, AMP_Theme_Support::get_support_mode_added_via_option() );
 		$this->assertNull( AMP_Theme_Support::get_support_mode_added_via_theme() );
 		$this->assertTrue( get_theme_support( AMP_Theme_Support::SLUG ) );
+	}
+
+	/**
+	 * Test supports_reader_mode.
+	 *
+	 * @covers \AMP_Theme_Support::supports_reader_mode.
+	 */
+	public function test_supports_reader_mode() {
+		$themes_directory = 'themes';
+		$mock_theme       = 'example-theme';
+		$mock_directory   = vfs\vfsStream::setup( $themes_directory, null, [ $mock_theme => [] ] );
+
+		// Add filters so that get_template_directory() the theme in the mock filesystem.
+		add_filter(
+			'theme_root',
+			function() use ( $mock_directory ) {
+				return $mock_directory->url();
+			}
+		);
+
+		add_filter(
+			'template',
+			function() use ( $mock_theme ) {
+				return $mock_theme;
+			}
+		);
+
+		add_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Standard, and there is no /amp directory, so this should be false.
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
+
+		remove_theme_support( 'amp' );
+		AMP_Theme_Support::read_theme_support();
+
+		// The mode is Reader, but there is no /amp directory in the theme.
+		$this->assertFalse( AMP_Theme_Support::supports_reader_mode() );
+
+		// Add an /amp directory to the theme.
+		$mock_directory->getChild( $mock_theme )->addChild( vfs\vfsStream::newDirectory( 'amp' ) );
+
+		// This should be true, as there is now an /amp directory in the theme.
+		$this->assertTrue( AMP_Theme_Support::supports_reader_mode() );
 	}
 
 	/**
