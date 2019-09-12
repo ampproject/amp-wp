@@ -166,6 +166,7 @@ export default createHigherOrderComponent(
 		return enhance( ( props ) => { // eslint-disable-line complexity
 			const {
 				clientId,
+				rootClientId,
 				name,
 				attributes,
 				isLast,
@@ -239,6 +240,9 @@ export default createHigherOrderComponent(
 			} else {
 				minHeight = MIN_BLOCK_HEIGHTS[ name ] || MIN_BLOCK_HEIGHTS.default;
 			}
+
+			const animationDuration = parseInt( String( ampAnimationDuration ).replace( 'ms', '' ) );
+			const animationDelay = parseInt( String( ampAnimationDelay ).replace( 'ms', '' ) );
 
 			const captionAttribute = isVideoBlock ? 'ampShowCaption' : 'ampShowImageCaption';
 			return (
@@ -515,10 +519,12 @@ export default createHigherOrderComponent(
 								title={ __( 'Animation', 'amp' ) }
 							>
 								<AnimationControls
+									clientId={ clientId }
+									page={ rootClientId }
 									animatedBlocks={ getAnimatedBlocks }
 									animationType={ ampAnimationType }
-									animationDuration={ ampAnimationDuration ? parseInt( ampAnimationDuration ) : '' }
-									animationDelay={ ampAnimationDelay ? parseInt( ampAnimationDelay ) : '' }
+									animationDuration={ animationDuration }
+									animationDelay={ animationDelay }
 									animationAfter={ animationAfter }
 									onAnimationTypeChange={ onAnimationTypeChange }
 									onAnimationDurationChange={ onAnimationDurationChange }

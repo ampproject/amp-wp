@@ -37,6 +37,7 @@ import './edit.css';
 import BackgroundColorSettings from './background-color-settings';
 import PageSettings from './page-settings';
 import BackgroundMediaSettings from './background-media-settings';
+import AnimationSettings from './animation-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -163,6 +164,7 @@ class PageEdit extends Component {
 						clientId={ clientId }
 						setAttributes={ setAttributes }
 					/>
+					<AnimationSettings clientId={ this.props.clientId } />
 				</InspectorControls>
 				<div style={ style }>
 					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (

@@ -108,10 +108,18 @@ class Draggable extends Component {
 	 */
 	onDragStart = ( event ) => {
 		const { blockName, elementId, transferData, onDragStart = noop } = this.props;
-		const element = document.getElementById( elementId );
 		const isCTABlock = 'amp/amp-story-cta' === blockName;
+		// In the CTA block only the inner element (the button) is draggable, not the whole block.
+		const element = isCTABlock ? document.getElementById( elementId ) : document.getElementById( elementId ).parentNode;
+
+		if ( ! element ) {
+			event.preventDefault();
+			return;
+		}
+
 		const parentPage = element.closest( 'div[data-type="amp/amp-story-page"]' );
-		if ( ! element || ! parentPage ) {
+
+		if ( ! parentPage ) {
 			event.preventDefault();
 			return;
 		}

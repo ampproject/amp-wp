@@ -209,6 +209,14 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 					'add_noscript_fallback' => true,
 				],
 			],
+
+			'test_with_dev_mode' => [
+				'<audio data-ampdevmode="" src="https://example.com/audio/file.ogg" onclick="foo()" data-foo="bar"></audio>',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -225,7 +233,11 @@ class AMP_Audio_Converter_Test extends WP_UnitTestCase {
 		if ( null === $expected ) {
 			$expected = $source;
 		}
-		$dom       = AMP_DOM_Utils::get_dom_from_content( $source );
+		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
+
 		$sanitizer = new AMP_Audio_Sanitizer( $dom, $args );
 		$sanitizer->sanitize();
 
