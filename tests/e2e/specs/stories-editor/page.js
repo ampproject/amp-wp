@@ -14,6 +14,7 @@ import {
 	uploadMedia,
 	openPreviewPage,
 	insertBlock,
+	resetStorySettings,
 } from '../../utils';
 
 const LARGE_IMAGE = 'large-image-36521.jpg';
@@ -23,6 +24,7 @@ const SELECT_BUTTON = '.media-modal button.media-button-select';
 describe( 'Story Page', () => {
 	beforeAll( async () => {
 		await activateExperience( 'stories' );
+		await resetStorySettings();
 	} );
 
 	afterAll( async () => {
