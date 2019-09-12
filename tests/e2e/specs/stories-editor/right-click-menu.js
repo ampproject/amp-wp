@@ -143,4 +143,14 @@ describe( 'Right Click Menu', () => {
 		await clickButton( 'Paste' );
 		expect( page ).not.toMatchElement( `#block-${ firstPageClientId } ${ callToActionSelector }` );
 	} );
+
+	it( 'should not allow duplicate disallowed blocks', async () => {
+		await insertBlock( 'Page' );
+		await insertBlock( 'Page Attachment' );
+		const callToActionSelector = '.wp-block[data-type="amp/amp-story-page-attachment"]';
+		const ctaBlock = await page.waitForSelector( callToActionSelector );
+		await openRightClickMenu( ctaBlock );
+		const duplicateSelector = 'right-click-duplicate';
+		expect( page ).not.toMatchElement( duplicateSelector );
+	} );
 } );

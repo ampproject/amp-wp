@@ -1800,10 +1800,10 @@ export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
 			// Skip copying Page.
 			case 'amp/amp-story-page':
 				return;
+			case 'amp/amp-story-page-attachment':
 			case 'amp/amp-story-cta':
-				// If the content has CTA block or it's the first page, don't add it.
-				const ctaBlock = getCallToActionBlock( clientId );
-				if ( ctaBlock || isFirstPage ) {
+				const currentBlock = getPageBlockByName( clientId, block.name );
+				if ( currentBlock || ( isFirstPage && block.name === 'amp/amp-story-cta' ) ) {
 					return;
 				}
 				allowedBlocks.push( block );

@@ -106,6 +106,11 @@ export const ALLOWED_BLOCKS = [
 	...ALLOWED_CHILD_BLOCKS,
 ];
 
+export const DISABLE_DUPLICATE_BLOCKS = [
+	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
+];
+
 export const IMAGE_BACKGROUND_TYPE = 'image';
 export const VIDEO_BACKGROUND_TYPE = 'video';
 
