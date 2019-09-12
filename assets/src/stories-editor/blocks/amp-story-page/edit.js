@@ -25,6 +25,7 @@ import {
 	Notice,
 	SelectControl,
 	RangeControl,
+	TextControl,
 	ResponsiveWrapper,
 } from '@wordpress/components';
 import {
@@ -65,6 +66,7 @@ import {
 	VIDEO_ALLOWED_MEGABYTES_PER_SECOND,
 } from '../../../common/constants';
 import './edit.css';
+import AnimationSettings from './animation-settings';
 
 class PageEdit extends Component {
 	shouldComponentUpdate() {
@@ -231,6 +233,7 @@ class PageEdit extends Component {
 			mediaId,
 			mediaType,
 			mediaUrl,
+			mediaAlt,
 			focalPoint = { x: 0.5, y: 0.5 },
 			overlayOpacity,
 			poster,
@@ -408,6 +411,14 @@ class PageEdit extends Component {
 									onChange={ ( value ) => setAttributes( { focalPoint: value } ) }
 								/>
 							) }
+							{ mediaType && (
+								<TextControl
+									label={ __( 'Assistive Text', 'amp' ) }
+									help={ __( 'This text is used to inform visually impaired users about the background content.', 'amp' ) }
+									value={ mediaAlt }
+									onChange={ ( label ) => setAttributes( { mediaAlt: label } ) }
+								/>
+							) }
 						</>
 					</PanelBody>
 					<PanelBody title={ __( 'Page Settings', 'amp' ) }>
@@ -434,6 +445,7 @@ class PageEdit extends Component {
 							/>
 						) }
 					</PanelBody>
+					<AnimationSettings clientId={ this.props.clientId } />
 				</InspectorControls>
 				<div style={ style }>
 					{ /* todo: show poster image as background-image instead */ }
@@ -470,6 +482,7 @@ PageEdit.propTypes = {
 		poster: PropTypes.string,
 		autoAdvanceAfter: PropTypes.string,
 		autoAdvanceAfterDuration: PropTypes.number,
+		mediaAlt: PropTypes.string,
 	} ).isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,

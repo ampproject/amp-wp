@@ -316,7 +316,8 @@ class AMP_Options_Menu {
 		/* translators: %s: URL to the ecosystem page. */
 		$ecosystem_description = sprintf( __( 'For a list of themes and plugins that are known to be AMP compatible, please see the <a href="%s">ecosystem page</a>.', 'amp' ), esc_url( 'https://amp-wp.org/ecosystem/' ) );
 
-		$builtin_support = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
+		$builtin_support     = in_array( get_template(), AMP_Core_Theme_Sanitizer::get_supported_themes(), true );
+		$reader_mode_support = __( 'Your theme indicates it works best in <strong>Reader mode.</strong>', 'amp' );
 		?>
 
 		<fieldset>
@@ -330,9 +331,13 @@ class AMP_Options_Menu {
 						<p><?php esc_html_e( 'Your active theme is known to work well in standard or transitional mode.', 'amp' ); ?></p>
 					</div>
 				<?php endif; ?>
+			<?php elseif ( AMP_Theme_Support::supports_reader_mode() ) : ?>
+				<div class="notice notice-success notice-alt inline">
+					<p><?php echo wp_kses( $reader_mode_support, [ 'strong' => [] ] ); ?></p>
+				</div>
 			<?php endif; ?>
 
-			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() ) : ?>
+			<?php if ( ! AMP_Theme_Support::get_support_mode_added_via_theme() && ! AMP_Theme_Support::supports_reader_mode() && ! $builtin_support ) : ?>
 				<p>
 					<?php echo wp_kses_post( $ecosystem_description ); ?>
 				</p>

@@ -45,6 +45,7 @@ import {
 	MAX_IMAGE_SIZE_SLUG,
 	VIDEO_BACKGROUND_TYPE,
 	IMAGE_BACKGROUND_TYPE,
+	ANIMATION_DURATION_DEFAULTS,
 } from '../constants';
 import {
 	MAX_FONT_SIZE,
@@ -1180,6 +1181,30 @@ const getBlockInnerTextElement = ( block ) => {
 };
 
 /**
+ * Returns a movable block's inner element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {?Element} The inner element.
+ */
+export const getBlockInnerElement = ( block ) => {
+	const { name, clientId } = block;
+	const isPage = 'amp/amp-story-page' === name;
+	const isCTABlock = 'amp/amp-story-cta' === name;
+
+	if ( isPage ) {
+		return document.querySelector( `[data-block="${ clientId }"]` );
+	}
+
+	if ( isCTABlock ) {
+		// Not the block itself is movable, only the button within.
+		return document.querySelector( `amp-story-cta-button-${ clientId }` );
+	}
+
+	return document.querySelector( `#block-${ clientId }` );
+};
+
+/**
  * Updates a block's font size in case it uses amp-fit-text and the content has changed.
  *
  * @param {Object}  block                         Block object.
@@ -1732,4 +1757,227 @@ export const metaToAttributeNames = ( meta ) => {
 		autoAdvanceAfter: meta.amp_story_auto_advance_after,
 		autoAdvanceAfterDuration: meta.amp_story_auto_advance_after_duration,
 	};
+};
+
+/**
+ * Returns a movable block's wrapper element.
+ *
+ * @param {Object} block Block object.
+ *
+ * @return {null|Element} The inner element.
+ */
+export const getBlockWrapperElement = ( block ) => {
+	if ( ! block ) {
+		return null;
+	}
+
+	const { name, clientId } = block;
+	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
+
+	if ( ! isMovableBlock ) {
+		return null;
+	}
+
+	return document.querySelector( `.amp-page-child-block[data-block="${ clientId }"]` );
+};
+
+/**
+ * Calculate target scaling factor so that it is at least 25% larger than the
+ * page.
+ *
+ * A copy of the same method in the AMP framework.
+ *
+ * @see https://github.com/ampproject/amphtml/blob/13b3b6d92ee0565c54ec34732e88f01847aa8a91/extensions/amp-story/1.0/animation-presets-utils.js#L91-L111
+ *
+ * @param {number} width Target width.
+ * @param {number} height Target height.
+ *
+ * @return {number} Target scaling factor.
+ */
+export const calculateTargetScalingFactor = ( width, height ) => {
+	const targetFitsWithinPage = width <= STORY_PAGE_INNER_WIDTH || height <= STORY_PAGE_INNER_HEIGHT;
+
+	if ( targetFitsWithinPage ) {
+		const scalingFactor = 1.25;
+
+		const widthFactor = STORY_PAGE_INNER_WIDTH > width ? STORY_PAGE_INNER_WIDTH / width : 1;
+		const heightFactor = STORY_PAGE_INNER_HEIGHT > height ? STORY_PAGE_INNER_HEIGHT / height : 1;
+
+		return Math.max( widthFactor, heightFactor ) * scalingFactor;
+	}
+
+	return 1;
+};
+
+/**
+ * Returns the block's actual position in relation to the page it's on.
+ *
+ * @param {Element} blockElement Block element.
+ * @param {Element} parentElement The block parent element.
+ *
+ * @return {{top: number, left: number}} Relative position of the block.
+ */
+const getRelativeElementPosition = ( blockElement, parentElement ) => {
+	const { left: parentLeft, top: parentTop } = parentElement.getBoundingClientRect();
+	const { top, left } = blockElement.getBoundingClientRect();
+
+	return {
+		top: top - parentTop,
+		left: left - parentLeft,
+	};
+};
+
+/**
+ * Calculates the offsets and scaling factors for animation playback.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @return {{offsetX: number, offsetY: number, scalingFactor: number}} Animation transform parameters.
+ */
+const getAnimationTransformParams = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+	const innerElement = getBlockInnerElement( block );
+	const parentBlock = getBlockRootClientId( block.clientId );
+	const parentBlockElement = document.querySelector( `[data-block="${ parentBlock }"]` );
+
+	const width = innerElement.offsetWidth;
+	const height = innerElement.offsetHeight;
+	const { top, left } = getRelativeElementPosition( blockElement, parentBlockElement );
+
+	let offsetX;
+	let offsetY;
+	let scalingFactor;
+
+	switch ( animationType ) {
+		case 'fly-in-left':
+		case 'rotate-in-left':
+		case 'whoosh-in-left':
+			offsetX = -( left + width );
+			break;
+		case 'fly-in-right':
+		case 'rotate-in-right':
+		case 'whoosh-in-right':
+			offsetX = STORY_PAGE_INNER_WIDTH + left + width;
+			break;
+		case 'fly-in-top':
+			offsetY = -( top + height );
+			break;
+		case 'fly-in-bottom':
+			offsetY = STORY_PAGE_INNER_HEIGHT + top + height;
+			break;
+		case 'drop':
+			offsetY = Math.max( 160, ( top + height ) );
+			break;
+		case 'pan-left':
+		case 'pan-right':
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			offsetX = STORY_PAGE_INNER_WIDTH - ( width * scalingFactor );
+			offsetY = ( STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor ) ) / 2;
+			break;
+		case 'pan-down':
+		case 'pan-up':
+			scalingFactor = calculateTargetScalingFactor( width, height );
+			offsetX = -( width * scalingFactor ) / 2;
+			offsetY = STORY_PAGE_INNER_HEIGHT - ( height * scalingFactor );
+			break;
+		default:
+			offsetX = 0;
+	}
+
+	return {
+		offsetX,
+		offsetY,
+		scalingFactor,
+	};
+};
+
+/**
+ * Sets the needed CSS custom properties and class name for animation playback.
+ *
+ * This way the initial animation state can be displayed without having to actually
+ * start the animation.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const setAnimationTransformProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		return;
+	}
+
+	resetAnimationProperties( block, animationType );
+
+	const { offsetX, offsetY, scalingFactor } = getAnimationTransformParams( block, animationType );
+
+	if ( offsetX ) {
+		blockElement.style.setProperty( '--animation-offset-x', `${ offsetX }px` );
+	}
+
+	if ( offsetY ) {
+		blockElement.style.setProperty( '--animation-offset-y', `${ offsetY }px` );
+	}
+
+	if ( scalingFactor ) {
+		blockElement.style.setProperty( '--animation-scale-start', scalingFactor );
+		blockElement.style.setProperty( '--animation-scale-end', scalingFactor );
+	}
+
+	blockElement.classList.add( `story-animation-init-${ animationType }` );
+};
+
+/**
+ * Removes all inline styles and class name previously set for animation playback.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ */
+export const resetAnimationProperties = ( block, animationType ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		return;
+	}
+
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
+	blockElement.classList.remove( `story-animation-${ animationType }` );
+	blockElement.style.removeProperty( '--animation-offset-x' );
+	blockElement.style.removeProperty( '--animation-offset-y' );
+	blockElement.style.removeProperty( '--animation-scale-start' );
+	blockElement.style.removeProperty( '--animation-scale-end' );
+	blockElement.style.removeProperty( '--animation-duration' );
+	blockElement.style.removeProperty( '--animation-delay' );
+};
+
+/**
+ * Plays the block's animation in the editor.
+ *
+ * Assumes that setAnimationTransformProperties() has been called before.
+ *
+ * @param {Object} block Block object.
+ * @param {string} animationType Animation type.
+ * @param {number} animationDuration Animation duration.
+ * @param {number} animationDelay Animation delay.
+ * @param {Function} callback Callback for when animation has stopped.
+ */
+export const startAnimation = ( block, animationType, animationDuration, animationDelay, callback = () => {} ) => {
+	const blockElement = getBlockWrapperElement( block );
+
+	if ( ! blockElement || ! animationType ) {
+		callback();
+
+		return;
+	}
+
+	const DEFAULT_ANIMATION_DURATION = ANIMATION_DURATION_DEFAULTS[ animationType ] || 0;
+
+	blockElement.classList.remove( `story-animation-init-${ animationType }` );
+
+	blockElement.style.setProperty( '--animation-duration', `${ animationDuration || DEFAULT_ANIMATION_DURATION }ms` );
+	blockElement.style.setProperty( '--animation-delay', `${ animationDelay || 0 }ms` );
+
+	blockElement.classList.add( `story-animation-${ animationType }` );
+
+	blockElement.addEventListener( 'animationend', callback, { once: true } );
 };

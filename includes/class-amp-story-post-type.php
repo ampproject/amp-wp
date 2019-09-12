@@ -244,6 +244,17 @@ class AMP_Story_Post_Type {
 		add_action( 'amp_story_head', 'wp_site_icon', 99 );
 		add_action( 'amp_story_head', 'wp_oembed_add_discovery_links' );
 
+		// Disable admin bar from even trying to be output, since wp_head and wp_footer hooks are not on the template.
+		add_filter(
+			'show_admin_bar',
+			static function( $show ) {
+				if ( is_singular( self::POST_TYPE_SLUG ) ) {
+					$show = false;
+				}
+				return $show;
+			}
+		);
+
 		// Remove unnecessary settings.
 		add_filter( 'block_editor_settings', [ __CLASS__, 'filter_block_editor_settings' ], 10, 2 );
 
@@ -794,20 +805,12 @@ class AMP_Story_Post_Type {
 
 		wp_enqueue_style(
 			self::AMP_STORIES_EDITOR_STYLE_HANDLE,
-			amp_get_asset_url( 'css/amp-stories-editor.css' ),
-			[ 'wp-edit-blocks' ],
-			AMP__VERSION
-		);
-
-		wp_enqueue_style(
-			self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled',
 			amp_get_asset_url( 'css/amp-stories-editor-compiled.css' ),
 			[ 'wp-edit-blocks', 'amp-stories' ],
 			AMP__VERSION
 		);
 
 		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE, 'rtl', 'replace' );
-		wp_styles()->add_data( self::AMP_STORIES_EDITOR_STYLE_HANDLE . '-compiled', 'rtl', 'replace' );
 
 		self::enqueue_general_styles();
 	}

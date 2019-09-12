@@ -84,6 +84,14 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 				'<form method="post" action="/login/"></form>',
 				'#' . preg_quote( '<form method="post" action-xhr="//example.org/login/?_wp_amp_action_xhr_converted=1" target="_top">', '#' ) . $form_template_pattern . '</form>#s',
 			],
+
+			'test_with_dev_mode' => [
+				'<form data-ampdevmode="" action="javascript:"></form>',
+				null, // No change.
+				[
+					'add_dev_mode' => true,
+				],
+			],
 		];
 	}
 
@@ -92,9 +100,10 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 	 *
 	 * @param string      $source   The source HTML.
 	 * @param string|null $expected The expected HTML after conversion. Null means same as $source.
+	 * @param array       $args     Args.
 	 * @dataProvider get_data
 	 */
-	public function test_converter( $source, $expected = null ) {
+	public function test_converter( $source, $expected = null, $args = [] ) {
 		if ( is_null( $expected ) ) {
 			$expected = $source;
 		}
@@ -102,6 +111,9 @@ class AMP_Form_Sanitizer_Test extends WP_UnitTestCase {
 			$expected = '#' . preg_quote( $expected, '#' ) . '#s';
 		}
 		$dom = AMP_DOM_Utils::get_dom_from_content( $source );
+		if ( ! empty( $args['add_dev_mode'] ) ) {
+			$dom->documentElement->setAttribute( AMP_Rule_Spec::DEV_MODE_ATTRIBUTE, '' );
+		}
 
 		$sanitizer = new AMP_Form_Sanitizer( $dom );
 		$sanitizer->sanitize();
