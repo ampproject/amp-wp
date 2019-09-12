@@ -738,7 +738,7 @@ class AMP_Options_Menu {
 					type="number"
 					class="small-text"
 					id="stories_settings_auto_advance_after_duration"
-					min="1"
+					min="0"
 					max="100"
 					name="<?php echo esc_attr( $story_settings_field_name . '[auto_advance_after_duration]' ); ?>"
 					value="<?php echo (int) $story_settings['auto_advance_after_duration']; ?>"
