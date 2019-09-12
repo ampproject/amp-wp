@@ -15,7 +15,7 @@ import { withDispatch, useSelect, useDispatch } from '@wordpress/data';
  */
 import { ensureAllowedBlocksOnPaste } from '../../helpers';
 
-function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
+function CopyPasteHandler( { children, onCopy, onCut, clientId, isSelected } ) {
 	const {
 		isFirstPage,
 		canUserUseUnfilteredHTML,
@@ -79,7 +79,7 @@ function CopyPasteHandler( { children, onCopy, clientId, isSelected } ) {
 	};
 
 	return (
-		<div onCopy={ onCopy } onPaste={ onPaste }>
+		<div onCopy={ onCopy } onPaste={ onPaste } onCut={ onCut }>
 			{ children }
 		</div>
 	);
@@ -90,6 +90,7 @@ CopyPasteHandler.propTypes = {
 	clientId: PropTypes.string.isRequired,
 	isSelected: PropTypes.bool.isRequired,
 	onCopy: PropTypes.func.isRequired,
+	onCut: PropTypes.func.isRequired,
 };
 
 export default withDispatch( ( dispatch, ownProps, { select } ) => {
@@ -98,6 +99,7 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		getSelectedBlockClientIds,
 		hasMultiSelection,
 	} = select( 'core/block-editor' );
+	const { removeBlock } = dispatch( 'core/block-editor' );
 	const { clearCopiedMarkup, setCopiedMarkup } = dispatch( 'amp/story' );
 
 	/**
@@ -122,7 +124,27 @@ export default withDispatch( ( dispatch, ownProps, { select } ) => {
 		setCopiedMarkup( serialized );
 	};
 
+	/**
+	 * Cut handler for ensuring that the store's cutMarkup is in sync with what's actually in clipBoard.
+	 * If it's not a block that's being cut, let's clear the cutMarkup.
+	 * Otherwise, let's set the cut markup.
+	 */
+	const onCut = () => {
+		const selectedBlockClientIds = getSelectedBlockClientIds();
+
+		if ( selectedBlockClientIds.length === 0 ) {
+			return;
+		}
+		// Reuse code in onCode.
+		onCopy();
+		// Remove selected Blocks.
+		for ( const clientId of selectedBlockClientIds ) {
+			removeBlock( clientId );
+		}
+	};
+
 	return {
 		onCopy,
+		onCut,
 	};
 } )( CopyPasteHandler );
