@@ -17,9 +17,8 @@ const authorBlockClassName = 'wp-block-amp-amp-story-post-author';
 /**
  * Set after which other block the animation should begin.
  *
- * @param buttonText
+ * @param {string} buttonText Button text.
  */
-// eslint-disable-next-line require-await
 const setAnimationToBeginAfter = async ( buttonText ) => {
 	await page.click( animationOrderSelector );
 

@@ -77,6 +77,7 @@ export const BLOCKS_WITH_COLOR_SETTINGS = [
 	'amp/amp-story-post-date',
 	'amp/amp-story-post-title',
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const BLOCKS_WITH_RESIZING = [
@@ -97,11 +98,17 @@ export const BLOCKS_WITH_RESIZING = [
 export const ALLOWED_CHILD_BLOCKS = [
 	...ALLOWED_MOVABLE_BLOCKS,
 	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const ALLOWED_BLOCKS = [
 	...ALLOWED_TOP_LEVEL_BLOCKS,
 	...ALLOWED_CHILD_BLOCKS,
+];
+
+export const DISABLE_DUPLICATE_BLOCKS = [
+	'amp/amp-story-cta',
+	'amp/amp-story-page-attachment',
 ];
 
 export const IMAGE_BACKGROUND_TYPE = 'image';
