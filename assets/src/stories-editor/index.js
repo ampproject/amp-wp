@@ -256,11 +256,9 @@ store.subscribe( () => {
 		const totalAnimationDuration = getTotalAnimationDuration( animatedBlocksPerPage );
 		const totalAnimationDurationInSeconds = Math.ceil( totalAnimationDuration / 1000 );
 
-		if ( 'time' === pageAttributes.autoAdvanceAfter ) {
-			// Enforce minimum value for manually set time.
-			if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
-				updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
-			}
+		// Enforce minimum value for manually set time.
+		if ( totalAnimationDurationInSeconds > pageAttributes.autoAdvanceAfterDuration ) {
+			updateBlockAttributes( page, { autoAdvanceAfterDuration: totalAnimationDurationInSeconds } );
 		}
 
 		if ( 'auto' === pageAttributes.autoAdvanceAfter && totalAnimationDuration ) {
