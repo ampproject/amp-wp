@@ -93,27 +93,28 @@ const RightClickMenu = ( props ) => {
 			},
 
 		];
-	}
-	// Disable Duplicate Block option for cta and attachment blocks.
-	if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+
+		// Disable Duplicate Block option for cta and attachment blocks.
+		if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Block', 'amp' ),
+					blockAction: duplicateBlock,
+					icon: 'admin-page',
+					className: 'right-click-duplicate',
+				},
+			);
+		}
+
 		blockActions.push(
 			{
-				name: __( 'Duplicate Block', 'amp' ),
-				blockAction: duplicateBlock,
-				icon: 'admin-page',
-				className: 'right-click-duplicate',
+				name: __( 'Remove Block', 'amp' ),
+				blockAction: removeBlock,
+				icon: 'trash',
+				className: 'right-click-remove',
 			},
 		);
 	}
-
-	blockActions.push(
-		{
-			name: __( 'Remove Block', 'amp' ),
-			blockAction: removeBlock,
-			icon: 'trash',
-			className: 'right-click-remove',
-		},
-	);
 
 	// If it's Page block and clipboard is empty, don't display anything.
 	if ( ! getCopiedMarkup().length && isPageBlock ) {
