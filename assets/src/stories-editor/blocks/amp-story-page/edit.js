@@ -14,7 +14,6 @@ import { Component, createRef } from '@wordpress/element';
 import {
 	withSelect,
 	withDispatch,
-	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -27,6 +26,8 @@ import {
 	getPageAttachmentBlock,
 	getUniqueId,
 } from '../../helpers';
+
+import CopyPasteHandler from './copy-paste-handler';
 
 import {
 	ALLOWED_MOVABLE_BLOCKS,
@@ -101,8 +102,17 @@ class PageEdit extends Component {
 		}
 	}
 
-	render() { // eslint-disable-line complexity
-		const { attributes, clientId, media, setAttributes, allowedBlocks, allowedBackgroundMediaTypes, videoFeaturedImage } = this.props;
+	render() {
+		const {
+			attributes,
+			clientId,
+			isSelected,
+			media,
+			setAttributes,
+			allowedBlocks,
+			allowedBackgroundMediaTypes,
+			videoFeaturedImage,
+		} = this.props;
 
 		const {
 			mediaId,
@@ -164,21 +174,25 @@ class PageEdit extends Component {
 						clientId={ clientId }
 						setAttributes={ setAttributes }
 					/>
-					<AnimationSettings clientId={ this.props.clientId } />
+					<AnimationSettings clientId={ clientId } />
 				</InspectorControls>
-				<div style={ style }>
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
-								<source src={ mediaUrl } type={ media.mime_type } />
-							</video>
-						</div>
-					) }
-					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle } />
-					) }
-					<InnerBlocks allowedBlocks={ allowedBlocks } />
-				</div>
+				<CopyPasteHandler clientId={ clientId } isSelected={ isSelected }>
+					<div
+						style={ style }
+					>
+						{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+							<div className="editor-amp-story-page-video-wrap">
+								<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
+									<source src={ mediaUrl } type={ media.mime_type } />
+								</video>
+							</div>
+						) }
+						{ backgroundColors.length > 0 && (
+							<div style={ overlayStyle } />
+						) }
+						<InnerBlocks allowedBlocks={ allowedBlocks } />
+					</div>
+				</CopyPasteHandler>
 			</>
 		);
 	}
@@ -202,6 +216,7 @@ PageEdit.propTypes = {
 		autoAdvanceAfterDuration: PropTypes.number,
 		mediaAlt: PropTypes.string,
 	} ).isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
@@ -214,7 +229,7 @@ PageEdit.propTypes = {
 };
 
 export default compose(
-	withDispatch( () => {
+	withDispatch( ( dispatch ) => {
 		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
 			moveBlockToPosition,

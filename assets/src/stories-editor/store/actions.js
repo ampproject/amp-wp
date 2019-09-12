@@ -188,3 +188,27 @@ export function resetOrder( order ) {
 		order,
 	};
 }
+
+/**
+ * Returns an action object for setting copied block markup.
+ *
+ * @param {string} markup Markup copied to clipboard.
+ * @return {Object} Action object.
+ */
+export function setCopiedMarkup( markup ) {
+	return {
+		type: 'SET_COPIED_MARKUP',
+		markup,
+	};
+}
+
+/**
+ * Returns an action object signalling that copied markup needs to be cleared.
+ *
+ * @return {Object} Action object.
+ */
+export function clearCopiedMarkup() {
+	return {
+		type: 'CLEAR_COPIED_MARKUP',
+	};
+}
