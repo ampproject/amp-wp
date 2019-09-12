@@ -111,7 +111,6 @@ describe( 'Stories Editor Screen', () => {
 		await openMediaInserter();
 		await clickButton( 'Insert Image' );
 		// Click the media library button.
-		// Click the media library button.
 		await page.waitForSelector( MEDIA_LIBRARY_BUTTON );
 
 		await page.click( MEDIA_LIBRARY_BUTTON );
@@ -122,6 +121,7 @@ describe( 'Stories Editor Screen', () => {
 		await page.click( SELECT_BUTTON );
 
 		// Wait for image to appear in the block.
+		await page.waitForSelector( '.wp-block-image img' );
 		await expect( page ).toMatchElement( '.wp-block-image img' );
 	} );
 
@@ -140,6 +140,7 @@ describe( 'Stories Editor Screen', () => {
 		await page.click( SELECT_BUTTON );
 
 		// Wait for image to appear in the block.
+		await page.waitForSelector( '.wp-block-video video' );
 		await expect( page ).toMatchElement( '.wp-block-video video' );
 	} );
 
