@@ -102,6 +102,7 @@ export const render = () => {
 	return (
 		<PluginDocumentSettingPanel
 			name={ name }
+			className={ name }
 			title={ __( 'Story Settings', 'amp' ) }
 		>
 			<EnhancedMetaFields />

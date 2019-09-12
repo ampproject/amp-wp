@@ -13,12 +13,15 @@ export async function resetStorySettings() {
 
 	await visitAdminPage( 'admin.php', 'page=amp-options' );
 
-	// Set opacity to 15.
 	await page.evaluate( ( exportSel, durationSel ) => {
 		document.querySelector( exportSel ).value = '';
 		document.querySelector( durationSel ).value = '';
 	}, storiesExportSelector, advanceAfterDurationSelector );
 
 	await page.select( advanceAfterSelector, '' );
-	await page.type( advanceAfterDurationSelector, '0' );
+
+	const advanceAfterDurationElement = await page.$( advanceAfterDurationSelector );
+
+	await advanceAfterDurationElement.type( '0' );
+	await advanceAfterDurationElement.press( 'Enter' );
 }
