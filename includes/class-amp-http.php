@@ -237,9 +237,6 @@ class AMP_HTTP {
 			// Google AMP Cache subdomain.
 			$hosts[] = sprintf( '%s.cdn.ampproject.org', $subdomain );
 
-			// Cloudflare AMP Cache.
-			$hosts[] = sprintf( '%s.amp.cloudflare.com', $subdomain );
-
 			// Bing AMP Cache.
 			$hosts[] = sprintf( '%s.bing-amp.com', $subdomain );
 		}
