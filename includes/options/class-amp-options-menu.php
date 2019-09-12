@@ -155,7 +155,8 @@ class AMP_Options_Menu {
 					body:not(.amp-experience-website) .amp-validation-field {
 						display: none;
 					}
-					body:not(.amp-experience-stories) .amp-stories-export-field {
+					body:not(.amp-experience-stories) .amp-stories-export-field,
+					body:not(.amp-experience-stories) .amp-stories-settings-field {
 						display: none;
 					}
 				</style>
@@ -687,6 +688,9 @@ class AMP_Options_Menu {
 	 * @since 1.3
 	 */
 	public function render_stories_settings() {
+		?>
+		<p><?php esc_html_e( 'These settings are applied to new stories only.', 'amp' ); ?></p>
+		<?php
 		$this->render_stories_settings_page_advance();
 	}
 
