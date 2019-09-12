@@ -1760,6 +1760,75 @@ export const metaToAttributeNames = ( meta ) => {
 };
 
 /**
+ * Copy text to clipboard by using temporary input field.
+ *
+ * @param {string} text Text to copy.
+ */
+export const copyTextToClipBoard = ( text ) => {
+	// Create temporary input element for being able to copy.
+	const tmpInput = document.createElement( 'textarea' );
+	tmpInput.setAttribute( 'readonly', '' );
+	tmpInput.style = {
+		position: 'absolute',
+		left: '-9999px',
+	};
+	tmpInput.value = text;
+	document.body.appendChild( tmpInput );
+	tmpInput.select();
+	document.execCommand( 'copy' );
+	// Remove the temporary element.
+	document.body.removeChild( tmpInput );
+};
+
+/**
+ * Ensure that only allowed blocks are pasted.
+ *
+ * @param {[]}      blocks Array of blocks.
+ * @param {string}  clientId Page ID.
+ * @param {boolean} isFirstPage If is first page.
+ * @return {[]} Filtered blocks.
+ */
+export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
+	const allowedBlocks = [];
+	// @todo This will need handling for Page Attachment once it's available.
+	blocks.forEach( ( block ) => {
+		switch ( block.name ) {
+			// Skip copying Page.
+			case 'amp/amp-story-page':
+				return;
+			case 'amp/amp-story-cta':
+				// If the content has CTA block or it's the first page, don't add it.
+				const ctaBlock = getCallToActionBlock( clientId );
+				if ( ctaBlock || isFirstPage ) {
+					return;
+				}
+				allowedBlocks.push( block );
+				break;
+			default:
+				if ( ALLOWED_CHILD_BLOCKS.includes( block.name ) ) {
+					allowedBlocks.push( block );
+				}
+				break;
+		}
+	} );
+	return allowedBlocks;
+};
+
+/**
+ * Given a block client ID, returns the corresponding DOM node for the block,
+ * if exists. As much as possible, this helper should be avoided, and used only
+ * in cases where isolated behaviors need remote access to a block node.
+ *
+ * @param {string} clientId Block client ID.
+ * @param {Element} scope an optional DOM Element to which the selector should be scoped
+ *
+ * @return {Element} Block DOM node.
+ */
+export const getBlockDOMNode = ( clientId, scope = document ) => {
+	return scope.querySelector( `[data-block="${ clientId }"]` );
+};
+
+/**
  * Returns a movable block's wrapper element.
  *
  * @param {Object} block Block object.

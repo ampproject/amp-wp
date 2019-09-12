@@ -40,6 +40,7 @@ import {
 	withActivePageState,
 	withStoryBlockDropZone,
 	withCallToActionValidation,
+	withRightClickHandler,
 } from './components';
 import {
 	maybeEnqueueFontStyle,
@@ -318,6 +319,7 @@ addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/filterBlockTransfor
 addFilter( 'blocks.registerBlockType', 'ampStoryEditorBlocks/deprecateCoreBlocks', deprecateCoreBlocks );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addStorySettings', withAmpStorySettings );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addPageNumber', withPageNumber );
+addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/rightClickHandler', withRightClickHandler );
 addFilter( 'editor.BlockEdit', 'ampStoryEditorBlocks/addEditFeaturedImage', withEditFeaturedImage );
 addFilter( 'editor.BlockEdit', 'ampEditorBlocks/addVideoBlockPreview', withCustomVideoBlockEdit, 9 );
 addFilter( 'editor.PostFeaturedImage', 'ampStoryEditorBlocks/addFeaturedImageNotice', withStoryFeaturedImageNotice );

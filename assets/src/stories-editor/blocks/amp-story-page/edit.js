@@ -31,7 +31,6 @@ import {
 import {
 	withSelect,
 	withDispatch,
-	dispatch,
 } from '@wordpress/data';
 import { compose } from '@wordpress/compose';
 
@@ -52,6 +51,8 @@ import {
 	getVideoBytesPerSecond,
 	isVideoSizeExcessive,
 } from '../../../common/helpers';
+
+import CopyPasteHandler from './copy-paste-handler';
 
 import {
 	ALLOWED_CHILD_BLOCKS,
@@ -221,12 +222,14 @@ class PageEdit extends Component {
 	render() { // eslint-disable-line complexity
 		const {
 			attributes,
+			autoAdvanceAfterOptions,
+			clientId,
+			isSelected,
 			media,
 			setAttributes,
 			totalAnimationDuration,
 			allowedBlocks,
 			allowedBackgroundMediaTypes,
-			autoAdvanceAfterOptions,
 		} = this.props;
 
 		const {
@@ -447,20 +450,23 @@ class PageEdit extends Component {
 					</PanelBody>
 					<AnimationSettings clientId={ this.props.clientId } />
 				</InspectorControls>
-				<div style={ style }>
-					{ /* todo: show poster image as background-image instead */ }
-					{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
-						<div className="editor-amp-story-page-video-wrap">
-							<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
-								<source src={ mediaUrl } type={ media.mime_type } />
-							</video>
-						</div>
-					) }
-					{ backgroundColors.length > 0 && (
-						<div style={ overlayStyle } />
-					) }
-					<InnerBlocks allowedBlocks={ allowedBlocks } />
-				</div>
+				<CopyPasteHandler clientId={ clientId } isSelected={ isSelected }>
+					<div
+						style={ style }
+					>
+						{ VIDEO_BACKGROUND_TYPE === mediaType && media && (
+							<div className="editor-amp-story-page-video-wrap">
+								<video autoPlay muted loop className="editor-amp-story-page-video" poster={ poster } ref={ this.videoPlayer }>
+									<source src={ mediaUrl } type={ media.mime_type } />
+								</video>
+							</div>
+						) }
+						{ backgroundColors.length > 0 && (
+							<div style={ overlayStyle } />
+						) }
+						<InnerBlocks allowedBlocks={ allowedBlocks } />
+					</div>
+				</CopyPasteHandler>
 			</>
 		);
 	}
@@ -484,6 +490,7 @@ PageEdit.propTypes = {
 		autoAdvanceAfterDuration: PropTypes.number,
 		mediaAlt: PropTypes.string,
 	} ).isRequired,
+	isSelected: PropTypes.bool.isRequired,
 	setAttributes: PropTypes.func.isRequired,
 	media: PropTypes.object,
 	allowedBlocks: PropTypes.arrayOf( PropTypes.string ).isRequired,
@@ -502,7 +509,7 @@ PageEdit.propTypes = {
 };
 
 export default compose(
-	withDispatch( () => {
+	withDispatch( ( dispatch ) => {
 		const { moveBlockToPosition } = dispatch( 'core/block-editor' );
 		return {
 			moveBlockToPosition,
@@ -510,7 +517,10 @@ export default compose(
 	} ),
 	withSelect( ( select, { clientId, attributes } ) => {
 		const { getMedia } = select( 'core' );
-		const { getBlockOrder, getBlockRootClientId } = select( 'core/block-editor' );
+		const {
+			getBlockOrder,
+			getBlockRootClientId,
+		} = select( 'core/block-editor' );
 		const { getAnimatedBlocks, getSettings } = select( 'amp/story' );
 
 		const isFirstPage = getBlockOrder().indexOf( clientId ) === 0;

@@ -33,6 +33,7 @@ const store = registerStore(
 				order: [],
 				isReordering: false,
 			},
+			copiedMarkup: '',
 		},
 	}
 );
