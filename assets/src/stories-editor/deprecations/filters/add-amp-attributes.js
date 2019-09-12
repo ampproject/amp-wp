@@ -2,11 +2,10 @@
  * Internal dependencies
  */
 import {
-	ALLOWED_MOVABLE_BLOCKS,
 	BLOCKS_WITH_RESIZING,
 	BLOCKS_WITH_TEXT_SETTINGS,
 } from '../../constants';
-import { getDefaultMinimumBlockHeight } from '../../helpers';
+import { getDefaultMinimumBlockHeight, isMovableBlock } from '../../helpers';
 
 /**
  * Export previous filter versions based on the Plugin version number.
@@ -16,7 +15,6 @@ export default {
 		const isImageBlock = 'core/image' === name;
 		const isVideoBlock = 'core/video' === name;
 
-		const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 		const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 		// Image block already has width and height.
 		const needsWidthHeight = BLOCKS_WITH_RESIZING.includes( name ) && ! isImageBlock;
@@ -76,7 +74,7 @@ export default {
 			};
 		}
 
-		if ( isMovableBlock ) {
+		if ( isMovableBlock( name ) ) {
 			addedAttributes.positionTop = {
 				default: 0,
 				type: 'number',

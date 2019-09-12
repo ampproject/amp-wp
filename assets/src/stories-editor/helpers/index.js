@@ -83,6 +83,8 @@ const {
 const { saveMedia } = dispatch( 'core' );
 const { updateBlockAttributes } = dispatch( 'core/block-editor' );
 
+export const isMovableBlock = ( name ) => ALLOWED_MOVABLE_BLOCKS.includes( name );
+
 /**
  * Adds a <link> element to the <head> for a given font in case there is none yet.
  *
@@ -210,7 +212,6 @@ export const addAMPAttributes = ( settings, name ) => {
 	const isVideoBlock = 'core/video' === name;
 	const isCTABlock = 'amp/amp-story-cta' === name;
 
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 	const needsTextSettings = BLOCKS_WITH_TEXT_SETTINGS.includes( name );
 
 	// Image block already has width and height.
@@ -268,7 +269,7 @@ export const addAMPAttributes = ( settings, name ) => {
 		};
 	}
 
-	if ( isMovableBlock ) {
+	if ( isMovableBlock( name ) ) {
 		addedAttributes.anchor = {
 			type: 'string',
 		};
@@ -373,9 +374,7 @@ export const addAMPAttributes = ( settings, name ) => {
 };
 
 export const deprecateCoreBlocks = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -407,9 +406,7 @@ export const deprecateCoreBlocks = ( settings, name ) => {
  * @return {Object} Settings.
  */
 export const filterBlockTransforms = ( settings, name ) => {
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
-
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return settings;
 	}
 
@@ -541,7 +538,7 @@ export const filterBlockAttributes = ( blockAttributes, blockType, innerHTML ) =
  * @return {ReactElement} The wrapped element.
  */
 export const wrapBlocksInGridLayer = ( element, blockType, attributes ) => {
-	if ( ! element || ! ALLOWED_MOVABLE_BLOCKS.includes( blockType.name ) ) {
+	if ( ! element || ! isMovableBlock( blockType.name ) ) {
 		return element;
 	}
 
@@ -1517,14 +1514,35 @@ export const getBlockOrderDescription = ( type, currentPosition, newPosition, is
 };
 
 /**
+ * Get block by Page ID and block name.
+ *
+ * @param {string} pageClientId Root ID.
+ * @param {string} blockName Block name.
+ * @return {Object} Found block.
+ */
+const getPageBlockByName = ( pageClientId, blockName ) => {
+	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
+	return innerBlocks.find( ( { name } ) => name === blockName );
+};
+
+/**
  * Get CTA block.
  *
  * @param {Array} pageClientId Root ID.
  * @return {Object} CTA block.
  */
 export const getCallToActionBlock = ( pageClientId ) => {
-	const innerBlocks = getBlocksByClientId( getBlockOrder( pageClientId ) );
-	return innerBlocks.find( ( { name } ) => name === 'amp/amp-story-cta' );
+	return getPageBlockByName( pageClientId, 'amp/amp-story-cta' );
+};
+
+/**
+ * Get Page Attachment block.
+ *
+ * @param {Array} pageClientId Root ID.
+ * @return {Object} Page Attachment block.
+ */
+export const getPageAttachmentBlock = ( pageClientId ) => {
+	return getPageBlockByName( pageClientId, 'amp/amp-story-page-attachment' );
 };
 
 /**
@@ -1790,16 +1808,15 @@ export const copyTextToClipBoard = ( text ) => {
  */
 export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
 	const allowedBlocks = [];
-	// @todo This will need handling for Page Attachment once it's available.
 	blocks.forEach( ( block ) => {
 		switch ( block.name ) {
 			// Skip copying Page.
 			case 'amp/amp-story-page':
 				return;
+			case 'amp/amp-story-page-attachment':
 			case 'amp/amp-story-cta':
-				// If the content has CTA block or it's the first page, don't add it.
-				const ctaBlock = getCallToActionBlock( clientId );
-				if ( ctaBlock || isFirstPage ) {
+				const currentBlock = getPageBlockByName( clientId, block.name );
+				if ( currentBlock || ( isFirstPage && block.name === 'amp/amp-story-cta' ) ) {
 					return;
 				}
 				allowedBlocks.push( block );
@@ -1841,9 +1858,8 @@ export const getBlockWrapperElement = ( block ) => {
 	}
 
 	const { name, clientId } = block;
-	const isMovableBlock = ALLOWED_MOVABLE_BLOCKS.includes( name );
 
-	if ( ! isMovableBlock ) {
+	if ( ! isMovableBlock( name ) ) {
 		return null;
 	}
 

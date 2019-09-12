@@ -29,7 +29,7 @@ import {
 	copyTextToClipBoard,
 	ensureAllowedBlocksOnPaste,
 } from '../../helpers';
-import { ALLOWED_MOVABLE_BLOCKS } from '../../constants';
+import { ALLOWED_MOVABLE_BLOCKS, DISABLE_DUPLICATE_BLOCKS } from '../../constants';
 
 const POPOVER_PROPS = {
 	className: 'amp-story-right-click-menu__popover block-editor-block-settings-menu__popover editor-block-settings-menu__popover',
@@ -91,19 +91,29 @@ const RightClickMenu = ( props ) => {
 				icon: 'clipboard',
 				className: 'right-click-cut',
 			},
-			{
-				name: __( 'Duplicate Block', 'amp' ),
-				blockAction: duplicateBlock,
-				icon: 'admin-page',
-				className: 'right-click-duplicate',
-			},
+
+		];
+
+		// Disable Duplicate Block option for cta and attachment blocks.
+		if ( block && ! DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
+			blockActions.push(
+				{
+					name: __( 'Duplicate Block', 'amp' ),
+					blockAction: duplicateBlock,
+					icon: 'admin-page',
+					className: 'right-click-duplicate',
+				},
+			);
+		}
+
+		blockActions.push(
 			{
 				name: __( 'Remove Block', 'amp' ),
 				blockAction: removeBlock,
 				icon: 'trash',
 				className: 'right-click-remove',
 			},
-		];
+		);
 	}
 
 	// If it's Page block and clipboard is empty, don't display anything.
@@ -257,7 +267,7 @@ const applyWithDispatch = withDispatch( ( dispatch, props ) => {
 		removeBlock,
 		duplicateBlock( clientId ) {
 			const block = getBlock( clientId );
-			if ( 'amp/amp-story-cta' === block.name ) {
+			if ( DISABLE_DUPLICATE_BLOCKS.includes( block.name ) ) {
 				return;
 			}
 

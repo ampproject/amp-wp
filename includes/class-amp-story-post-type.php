@@ -293,6 +293,7 @@ class AMP_Story_Post_Type {
 		add_filter( 'classic_editor_enabled_editors_for_post_type', [ __CLASS__, 'filter_enabled_editors_for_story_post_type' ], PHP_INT_MAX, 2 );
 
 		self::register_block_latest_stories();
+		self::register_block_page_attachment();
 
 		register_block_type(
 			'amp/amp-story-post-author',
@@ -999,12 +1000,30 @@ class AMP_Story_Post_Type {
 		$meta_definitions         = self::get_stories_settings_definitions();
 		$auto_advancement_options = $meta_definitions['auto_advance_after']['data']['options'];
 
+		/**
+		 * Filters the list of allowed post types for use in page attachments.
+		 *
+		 * @since 1.3
+		 *
+		 * @param array Allowed post types.
+		 */
+		$page_attachment_post_types = apply_filters( 'amp_story_allowed_page_attachment_post_types', [ 'page', 'post' ] );
+		$post_types                 = [];
+		foreach ( $page_attachment_post_types as $post_type ) {
+			$post_type_object = get_post_type_object( $post_type );
+
+			if ( $post_type_object ) {
+				$post_types[ $post_type ] = ! empty( $post_type_object->rest_base ) ? $post_type_object->rest_base : $post_type_object->name;
+			}
+		}
+
 		wp_localize_script(
 			self::AMP_STORIES_SCRIPT_HANDLE,
 			'ampStoriesEditorSettings',
 			[
-				'allowedVideoMimeTypes' => $allowed_video_mime_types,
-				'storySettings'         => [
+				'allowedVideoMimeTypes'          => $allowed_video_mime_types,
+				'allowedPageAttachmentPostTypes' => $post_types,
+				'storySettings'                  => [
 					'autoAdvanceAfterOptions' => $auto_advancement_options,
 				],
 			]
@@ -1842,6 +1861,101 @@ class AMP_Story_Post_Type {
 		}
 
 		return ob_get_clean();
+	}
+
+	/**
+	 * Registers the Page Attachment block.
+	 */
+	public static function register_block_page_attachment() {
+		register_block_type(
+			'amp/amp-story-page-attachment',
+			[
+				'attributes'      => [
+					'postId'          => [
+						'type' => 'number',
+					],
+					'title'           => [
+						'type'    => 'string',
+						'default' => '',
+					],
+					'text'            => [
+						'type'    => 'string',
+						'default' => __( 'Swipe up', 'amp' ),
+					],
+					'theme'           => [
+						'type'    => 'string',
+						'default' => 'light',
+					],
+					'wrapperStyle'    => [
+						'type'    => 'object',
+						'default' => [],
+					],
+					'attachmentClass' => [
+						'type'    => 'string',
+						'default' => 'amp-page-attachment-content',
+					],
+				],
+				'render_callback' => [ __CLASS__, 'render_block_page_attachment' ],
+			]
+		);
+	}
+
+	/**
+	 * Renders the dynamic block Page Attachment.
+	 *
+	 * @param array $attributes The block attributes.
+	 * @return string $markup The rendered block markup.
+	 */
+	public static function render_block_page_attachment( $attributes ) {
+		global $post;
+
+		if ( empty( $attributes['postId'] ) ) {
+			return null;
+		}
+
+		$content_post = get_post( absint( $attributes['postId'] ) );
+
+		if ( empty( $content_post ) ) {
+			return null;
+		}
+
+		$original_post = $post;
+		$post          = $content_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Remove filter for not adding grid layer to blocks within the attachment content.
+		remove_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10 );
+
+		setup_postdata( $content_post );
+
+		$style = '';
+		if ( isset( $attributes['wrapperStyle']['backgroundColor'] ) ) {
+			$style .= 'background-color:' . $attributes['wrapperStyle']['backgroundColor'] . ';';
+		}
+		if ( isset( $attributes['wrapperStyle']['color'] ) ) {
+			$style .= 'color:' . $attributes['wrapperStyle']['color'] . ';';
+		}
+
+		ob_start();
+		?>
+		<amp-story-page-attachment layout="nodisplay" theme="light" data-cta-text="<?php echo esc_attr( $attributes['text'] ); ?>" data-title="<?php echo esc_attr( $attributes['title'] ); ?>">
+			<div class="<?php echo esc_attr( $attributes['attachmentClass'] ); ?>" style="<?php echo esc_attr( $style ); ?>">
+				<h2><?php the_title(); ?></h2>
+				<div class="amp-page-attachment-inner-content">
+					<?php the_content(); ?>
+				</div>
+			</div>
+		</amp-story-page-attachment>
+		<?php
+		wp_reset_postdata();
+
+		// Add filter back.
+		add_filter( 'render_block', [ __CLASS__, 'render_block_with_grid_layer' ], 10, 2 );
+
+		$output = ob_get_clean();
+
+		$post = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		return $output;
 	}
 
 	/**
