@@ -11,6 +11,8 @@ import {
 	movePageToPosition,
 	saveOrder,
 	resetOrder,
+	setCopiedMarkup,
+	clearCopiedMarkup,
 	playAnimation,
 	stopAnimation,
 } from '../actions';
@@ -181,6 +183,27 @@ describe( 'actions', () => {
 			expect( result ).toStrictEqual( {
 				type: 'RESET_ORDER',
 				order: undefined,
+			} );
+		} );
+	} );
+
+	describe( 'setCopiedMarkup', () => {
+		it( 'should return the SET_COPIED_MARKUP action', () => {
+			const result = setCopiedMarkup( 'Hello' );
+
+			expect( result ).toStrictEqual( {
+				type: 'SET_COPIED_MARKUP',
+				markup: 'Hello',
+			} );
+		} );
+	} );
+
+	describe( 'clearCopiedMarkup', () => {
+		it( 'should return the CLEAR_COPIED_MARKUP action', () => {
+			const result = clearCopiedMarkup();
+
+			expect( result ).toStrictEqual( {
+				type: 'CLEAR_COPIED_MARKUP',
 			} );
 		} );
 	} );
