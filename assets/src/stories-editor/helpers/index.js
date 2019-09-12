@@ -1812,7 +1812,7 @@ export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
  */
 export const getBlockDOMNode = ( clientId, scope = document ) => {
 	return scope.querySelector( `[data-block="${ clientId }"]` );
-}
+};
 
 /**
  * Returns a movable block's wrapper element.
