@@ -1794,7 +1794,6 @@ export const copyTextToClipBoard = ( text ) => {
  */
 export const ensureAllowedBlocksOnPaste = ( blocks, clientId, isFirstPage ) => {
 	const allowedBlocks = [];
-	// @todo This will need handling for Page Attachment once it's available.
 	blocks.forEach( ( block ) => {
 		switch ( block.name ) {
 			// Skip copying Page.
